@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Domain\Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ApiContracts\Auth\" />
+    <Folder Include="ApiContracts\Delete\" />
+    <Folder Include="ApiContracts\Insert\" />
+    <Folder Include="ApiContracts\Permission\" />
+    <Folder Include="ApiContracts\Select\" />
+    <Folder Include="ApiContracts\Update\" />
+    <Folder Include="Constants\" />
+    <Folder Include="Interfaces\Repositories\Delete\" />
+    <Folder Include="Interfaces\Repositories\Insert\" />
+    <Folder Include="Interfaces\Repositories\Select\" />
+    <Folder Include="Interfaces\Repositories\Update\" />
+    <Folder Include="Interfaces\Services\Delete\" />
+    <Folder Include="Interfaces\Services\Insert\" />
+    <Folder Include="Interfaces\Services\Select\" />
+    <Folder Include="Interfaces\Services\Update\" />
+    <Folder Include="Services\" />
+    <Folder Include="ValidationAttributes\" />
+  </ItemGroup>
+
+</Project>

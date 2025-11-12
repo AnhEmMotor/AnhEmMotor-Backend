@@ -1,0 +1,482 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>OrderWebAPI.UI</name>
+    </assembly>
+    <members>
+        <member name="T:OrderWebAPI.UI.Authorization.HasPermissionAttribute">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:OrderWebAPI.UI.Authorization.HasPermissionAttribute.#ctor(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="permission"></param>
+        </member>
+        <member name="T:OrderWebAPI.UI.Authorization.PermissionHandler">
+            <summary>
+            
+            </summary>
+            <param name="dbContext"></param>
+            <param name="userManager"></param>
+            <param name="roleManager"></param>
+        </member>
+        <member name="M:OrderWebAPI.UI.Authorization.PermissionHandler.#ctor(OrderWebAPI.Infrastructure.DBContexts.ApplicationDBContext,Microsoft.AspNetCore.Identity.UserManager{OrderWebAPI.Core.Domains.IdentityEntities.ApplicationUser},Microsoft.AspNetCore.Identity.RoleManager{OrderWebAPI.Core.Domains.IdentityEntities.ApplicationRole})">
+            <summary>
+            
+            </summary>
+            <param name="dbContext"></param>
+            <param name="userManager"></param>
+            <param name="roleManager"></param>
+        </member>
+        <member name="M:OrderWebAPI.UI.Authorization.PermissionHandler.HandleRequirementAsync(Microsoft.AspNetCore.Authorization.AuthorizationHandlerContext,OrderWebAPI.UI.Authorization.PermissionRequirement)">
+            <summary>
+            
+            </summary>
+            <param name="context"></param>
+            <param name="requirement"></param>
+            <returns></returns>
+        </member>
+        <member name="T:OrderWebAPI.UI.Authorization.PermissionPolicyProvider">
+            <summary>
+            
+            </summary>
+            <param name="options"></param>
+        </member>
+        <member name="M:OrderWebAPI.UI.Authorization.PermissionPolicyProvider.#ctor(Microsoft.Extensions.Options.IOptions{Microsoft.AspNetCore.Authorization.AuthorizationOptions})">
+            <summary>
+            
+            </summary>
+            <param name="options"></param>
+        </member>
+        <member name="P:OrderWebAPI.UI.Authorization.PermissionPolicyProvider.FallbackPolicyProvider">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:OrderWebAPI.UI.Authorization.PermissionPolicyProvider.GetDefaultPolicyAsync">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:OrderWebAPI.UI.Authorization.PermissionPolicyProvider.GetFallbackPolicyAsync">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:OrderWebAPI.UI.Authorization.PermissionPolicyProvider.GetPolicyAsync(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="policyName"></param>
+            <returns></returns>
+        </member>
+        <member name="T:OrderWebAPI.UI.Authorization.PermissionRequirement">
+            <summary>
+            
+            </summary>
+            <param name="permission"></param>
+        </member>
+        <member name="M:OrderWebAPI.UI.Authorization.PermissionRequirement.#ctor(System.String)">
+            <summary>
+            
+            </summary>
+            <param name="permission"></param>
+        </member>
+        <member name="P:OrderWebAPI.UI.Authorization.PermissionRequirement.Permission">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:OrderWebAPI.UI.Controllers.v1.AuthController">
+            TODO: Điểm cải thiện: Có 2 phần sửa người dùng riêng: 1 đường cho quyền Admin (sửa được tất cả), 1 đường cho quyền User (chỉ sửa cho riêng mình). 
+            <summary>
+            Quản lý người dùng: Đăng nhập, đăng kí, lấy Refresh Token, cập nhật người dùng, xóa người dùng, khôi phục người dùng, lấy danh sách người dùng.
+            </summary>
+            <param name="userManager"></param>
+            <param name="tokenService"></param>
+            <param name="context"></param>
+        </member>
+        <member name="M:OrderWebAPI.UI.Controllers.v1.AuthController.#ctor(Microsoft.AspNetCore.Identity.UserManager{OrderWebAPI.Core.Domains.IdentityEntities.ApplicationUser},OrderWebAPI.Core.Services.TokenService,OrderWebAPI.Infrastructure.DBContexts.ApplicationDBContext)">
+            TODO: Điểm cải thiện: Có 2 phần sửa người dùng riêng: 1 đường cho quyền Admin (sửa được tất cả), 1 đường cho quyền User (chỉ sửa cho riêng mình). 
+            <summary>
+            Quản lý người dùng: Đăng nhập, đăng kí, lấy Refresh Token, cập nhật người dùng, xóa người dùng, khôi phục người dùng, lấy danh sách người dùng.
+            </summary>
+            <param name="userManager"></param>
+            <param name="tokenService"></param>
+            <param name="context"></param>
+        </member>
+        <member name="M:OrderWebAPI.UI.Controllers.v1.AuthController.Register(OrderWebAPI.Core.ApiEntities.Auth.RegisterRequest)">
+            <summary>
+            Đăng kí người dùng
+            </summary>
+            <param name="model"></param>
+            <returns></returns>
+        </member>
+        <member name="M:OrderWebAPI.UI.Controllers.v1.AuthController.Login(OrderWebAPI.Core.ApiEntities.Auth.LoginRequest)">
+            <summary>
+            Đăng nhập
+            </summary>
+            <param name="model"></param>
+            <returns></returns>
+        </member>
+        <member name="M:OrderWebAPI.UI.Controllers.v1.AuthController.RefreshToken">
+            <summary>
+            Lấy Access Token từ Refresh Token trong Cookies
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:OrderWebAPI.UI.Controllers.v1.AuthController.UpdateUser(System.Guid,OrderWebAPI.Core.ApiEntities.Auth.UpdateUserRequest)">
+            <summary>
+            Cập nhật người dùng. Người dùng chỉ có thể cập nhật thông tin của chính họ, trừ khi họ là Admin.
+            </summary>
+            <param name="id"></param>
+            <param name="model"></param>
+            <returns></returns>
+        </member>
+        <member name="M:OrderWebAPI.UI.Controllers.v1.AuthController.DeleteUser(System.Guid)">
+            <summary>
+            Xoá người dùng. Người dùng chỉ có thể xoá chính họ, trừ khi họ là Admin.
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:OrderWebAPI.UI.Controllers.v1.AuthController.RestoreUser(System.Guid)">
+            <summary>
+            Khôi phục lại người dùng đã xoá
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:OrderWebAPI.UI.Controllers.v1.AuthController.GetUsers">
+            <summary>
+            Lấy toàn bộ danh sách người dùng (chỉ dành cho quyền Admin)
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:OrderWebAPI.UI.Controllers.v1.OrderController">
+            <summary>
+            Quản lý đơn hàng trong hệ thống
+            </summary>
+            <param name="orderGetterService"></param>
+            <param name="orderInsertService"></param>
+            <param name="orderUpdateService"></param>
+            <param name="orderDeleteService"></param>
+        </member>
+        <member name="M:OrderWebAPI.UI.Controllers.v1.OrderController.#ctor(OrderWebAPI.Core.ServiceContracts.Select.IOrderGetterService,OrderWebAPI.Core.ServiceContracts.Insert.IOrderInsertService,OrderWebAPI.Core.ServiceContracts.Update.IOrderUpdateService,OrderWebAPI.Core.ServiceContracts.Delete.IOrderDeleteService)">
+            <summary>
+            Quản lý đơn hàng trong hệ thống
+            </summary>
+            <param name="orderGetterService"></param>
+            <param name="orderInsertService"></param>
+            <param name="orderUpdateService"></param>
+            <param name="orderDeleteService"></param>
+        </member>
+        <member name="M:OrderWebAPI.UI.Controllers.v1.OrderController.GetOrders(Sieve.Models.SieveModel)">
+            <summary>
+            Lấy toằn bộ Order trong hệ thống. Chỉ trả ra tổng giá trị của Order (muốn trả ra các item trong đó thì dùng api/orders/{orderId}/items)
+            </summary>
+            <param name="sieveModel"></param>
+            <returns></returns>
+        </member>
+        <member name="M:OrderWebAPI.UI.Controllers.v1.OrderController.GetOrder(System.Nullable{System.Guid})">
+            <summary>
+            Lấy toàn bộ các thông tin của 1 Order nhưng chỉ trả về tổng giá trị của Order.
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:OrderWebAPI.UI.Controllers.v1.OrderController.PutOrder(System.Nullable{System.Guid},OrderWebAPI.Core.ApiEntities.Update.OrderUpdateRequest)">
+            <summary>
+            Sửa order (chỉ sửa tên và ngày). Có API riêng dành cho việc sửa các món hàng trong Order.
+            </summary>
+            <param name="id"></param>
+            <param name="orderUpdateRequest"></param>
+            <returns></returns>
+        </member>
+        <member name="M:OrderWebAPI.UI.Controllers.v1.OrderController.PostOrder(OrderWebAPI.Core.ApiEntities.Insert.OrderInsertRequest)">
+            <summary>
+            Tạo ra Order mới (có thể gán cả Order Item luôn).
+            </summary>
+            <param name="orderInsertRequest"></param>
+            <returns></returns>
+        </member>
+        <member name="M:OrderWebAPI.UI.Controllers.v1.OrderController.DeleteOrder(System.Nullable{System.Guid})">
+            <summary>
+            Xoá toàn bộ Order (bao gồm cả các món hàng trong đó).
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="T:OrderWebAPI.UI.Controllers.v1.OrderItemController">
+            <summary>
+            Quản lý các món hàng người dùng mua hàng trong 1 đơn hàng (Order)
+            </summary>
+            <param name="orderItemGetterService"></param>
+            <param name="orderItemInsertService"></param>
+            <param name="orderItemUpdateService"></param>
+            <param name="orderItemDeleteService"></param>
+            <param name="orderGetterService"></param>
+        </member>
+        <member name="M:OrderWebAPI.UI.Controllers.v1.OrderItemController.#ctor(OrderWebAPI.Core.ServiceContracts.Select.IOrderItemGetterService,OrderWebAPI.Core.ServiceContracts.Insert.IOrderItemInsertService,OrderWebAPI.Core.ServiceContracts.Update.IOrderItemUpdateService,OrderWebAPI.Core.ServiceContracts.Delete.IOrderItemDeleteService,OrderWebAPI.Core.ServiceContracts.Select.IOrderGetterService)">
+            <summary>
+            Quản lý các món hàng người dùng mua hàng trong 1 đơn hàng (Order)
+            </summary>
+            <param name="orderItemGetterService"></param>
+            <param name="orderItemInsertService"></param>
+            <param name="orderItemUpdateService"></param>
+            <param name="orderItemDeleteService"></param>
+            <param name="orderGetterService"></param>
+        </member>
+        <member name="M:OrderWebAPI.UI.Controllers.v1.OrderItemController.GetOrderItems(System.Guid,Sieve.Models.SieveModel)">
+            <summary>
+            Lấy các món hàng được mua trong 1 đơn hàng
+            </summary>
+            <param name="orderId"></param>
+            <param name="sieveModel"></param>
+            <returns></returns>
+        </member>
+        <member name="M:OrderWebAPI.UI.Controllers.v1.OrderItemController.GetOrderItem(System.Guid,System.Nullable{System.Guid})">
+            <summary>
+            Lấy một món hàng được mua trong 1 đơn hàng
+            </summary>
+            <param name="orderId"></param>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:OrderWebAPI.UI.Controllers.v1.OrderItemController.PutOrderItem(System.Guid,System.Nullable{System.Guid},OrderWebAPI.Core.ApiEntities.Update.OrderItemUpdateRequest)">
+            <summary>
+            Sửa món hàng trong đơn hàng đó (chỉ sửa 1 món hàng)
+            </summary>
+            <param name="orderId"></param>
+            <param name="id"></param>
+            <param name="orderItemUpdateRequest"></param>
+            <returns></returns>
+        </member>
+        <member name="M:OrderWebAPI.UI.Controllers.v1.OrderItemController.PostOrderItem(System.Guid,OrderWebAPI.Core.ApiEntities.Insert.OrderItemInsertRequest)">
+            <summary>
+            Thêm món hàng vào đơn hàng
+            </summary>
+            <param name="orderId"></param>
+            <param name="orderItemInsertRequest"></param>
+            <returns></returns>
+        </member>
+        <member name="M:OrderWebAPI.UI.Controllers.v1.OrderItemController.DeleteOrderItem(System.Guid,System.Nullable{System.Guid})">
+            <summary>
+            Xoá món hàng trong 1 đơn hàng
+            </summary>
+            <param name="orderId"></param>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="T:OrderWebAPI.UI.Controllers.v1.PermissionController">
+            <summary>
+            Quản lý quyền hạn (Permission) trong hệ thống.
+            </summary>
+            <param name="userManager"></param>
+            <param name="roleManager"></param>
+            <param name="context"></param>
+            <param name="configuration"></param>
+        </member>
+        <member name="M:OrderWebAPI.UI.Controllers.v1.PermissionController.#ctor(Microsoft.AspNetCore.Identity.UserManager{OrderWebAPI.Core.Domains.IdentityEntities.ApplicationUser},Microsoft.AspNetCore.Identity.RoleManager{OrderWebAPI.Core.Domains.IdentityEntities.ApplicationRole},OrderWebAPI.Infrastructure.DBContexts.ApplicationDBContext,Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Quản lý quyền hạn (Permission) trong hệ thống.
+            </summary>
+            <param name="userManager"></param>
+            <param name="roleManager"></param>
+            <param name="context"></param>
+            <param name="configuration"></param>
+        </member>
+        <member name="M:OrderWebAPI.UI.Controllers.v1.PermissionController.AssignRole(OrderWebAPI.Core.ApiEntities.Permission.AssignRoleRequest)">
+            <summary>
+            Thực hiện gán 1 mảng role cho user.
+            </summary>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
+        <member name="M:OrderWebAPI.UI.Controllers.v1.PermissionController.AddRole(OrderWebAPI.Core.ApiEntities.Permission.AddRoleRequest)">
+            <summary>
+            Thực hiện việc thêm role vào trong cơ sở dữ liệu
+            </summary>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
+        <member name="M:OrderWebAPI.UI.Controllers.v1.PermissionController.GetAllPermissions">
+            <summary>
+            Lấy toàn bộ danh sách quyền trong hệ thống
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:OrderWebAPI.UI.Controllers.v1.PermissionController.GetRolePermissions(System.String)">
+            <summary>
+            Lấy toàn bộ quyền của 1 role
+            </summary>
+            <param name="roleName"></param>
+            <returns></returns>
+        </member>
+        <member name="M:OrderWebAPI.UI.Controllers.v1.PermissionController.UpdateRolePermissions(System.String,System.Collections.Generic.List{System.String})">
+            <summary>
+            Cập nhật quyền cho 1 role
+            </summary>
+            <param name="roleName"></param>
+            <param name="permissions"></param>
+            <returns></returns>
+        </member>
+        <member name="M:OrderWebAPI.UI.Controllers.v1.PermissionController.GetAllRoles">
+            <summary>
+            Lấy toàn bộ danh sách role trong hệ thống
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:OrderWebAPI.UI.Controllers.v1.PermissionController.UpdateRoleName(System.String,OrderWebAPI.Core.ApiEntities.Permission.UpdateRoleNameRequest)">
+            <summary>
+            Đổi tên một role
+            </summary>
+            <param name="roleName"></param>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
+        <member name="M:OrderWebAPI.UI.Controllers.v1.PermissionController.DeleteRole(System.String)">
+            <summary>
+            Xóa một role
+            </summary>
+            <param name="roleName"></param>
+            <returns></returns>
+        </member>
+        <member name="T:OrderWebAPI.UI.Controllers.v2.OrderController">
+            <summary>
+            Quản lý đơn hàng
+            </summary>
+            <param name="orderGetterService"></param>
+        </member>
+        <member name="M:OrderWebAPI.UI.Controllers.v2.OrderController.#ctor(OrderWebAPI.Core.ServiceContracts.Select.IOrderGetterService)">
+            <summary>
+            Quản lý đơn hàng
+            </summary>
+            <param name="orderGetterService"></param>
+        </member>
+        <member name="M:OrderWebAPI.UI.Controllers.v2.OrderController.GetOrders(Sieve.Models.SieveModel)">
+            <summary>
+            Lấy toằn bộ Order trong hệ thống. Trả ra các item trong đó
+            </summary>
+            <param name="sieveModel"></param>
+            <returns></returns>
+        </member>
+        <member name="T:OrderWebAPI.UI.Middleware.ErrorResponse">
+            <summary>
+            
+            </summary>
+            <param name="Message"></param>
+            <param name="Details"></param>
+        </member>
+        <member name="M:OrderWebAPI.UI.Middleware.ErrorResponse.#ctor(System.String,System.String)">
+            <summary>
+            
+            </summary>
+            <param name="Message"></param>
+            <param name="Details"></param>
+        </member>
+        <member name="P:OrderWebAPI.UI.Middleware.ErrorResponse.Message">
+            <summary></summary>
+        </member>
+        <member name="P:OrderWebAPI.UI.Middleware.ErrorResponse.Details">
+            <summary></summary>
+        </member>
+        <member name="T:OrderWebAPI.UI.Middleware.ExceptionHandlingMiddleware">
+            <summary>
+            
+            </summary>
+            <param name="next"></param>
+            <param name="logger"></param>
+            <param name="env"></param>
+        </member>
+        <member name="M:OrderWebAPI.UI.Middleware.ExceptionHandlingMiddleware.#ctor(Microsoft.AspNetCore.Http.RequestDelegate,Microsoft.Extensions.Logging.ILogger{OrderWebAPI.UI.Middleware.ExceptionHandlingMiddleware},Microsoft.Extensions.Hosting.IHostEnvironment)">
+            <summary>
+            
+            </summary>
+            <param name="next"></param>
+            <param name="logger"></param>
+            <param name="env"></param>
+        </member>
+        <member name="M:OrderWebAPI.UI.Middleware.ExceptionHandlingMiddleware.Invoke(Microsoft.AspNetCore.Http.HttpContext)">
+            <summary>
+            
+            </summary>
+            <param name="httpContext"></param>
+            <returns></returns>
+        </member>
+        <member name="T:OrderWebAPI.UI.Middleware.ExceptionHandlingMiddlewareExtensions">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:OrderWebAPI.UI.Middleware.ExceptionHandlingMiddlewareExtensions.UseExceptionHandlingMiddleware(Microsoft.AspNetCore.Builder.IApplicationBuilder)">
+            <summary>
+            
+            </summary>
+            <param name="builder"></param>
+            <returns></returns>
+        </member>
+        <member name="T:OrderWebAPI.UI.Middleware.LogEnrichingMiddleware">
+            <summary>
+            
+            </summary>
+            <param name="next"></param>
+        </member>
+        <member name="M:OrderWebAPI.UI.Middleware.LogEnrichingMiddleware.#ctor(Microsoft.AspNetCore.Http.RequestDelegate)">
+            <summary>
+            
+            </summary>
+            <param name="next"></param>
+        </member>
+        <member name="M:OrderWebAPI.UI.Middleware.LogEnrichingMiddleware.InvokeAsync(Microsoft.AspNetCore.Http.HttpContext)">
+            <summary>
+            
+            </summary>
+            <param name="context"></param>
+            <returns></returns>
+        </member>
+        <member name="T:OrderWebAPI.UI.StartupExtensions.ConfigureServicesExtension">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:OrderWebAPI.UI.StartupExtensions.ConfigureServicesExtension.ConfigureServices(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration,Microsoft.AspNetCore.Hosting.IWebHostEnvironment)">
+            <summary>
+            
+            </summary>
+            <param name="services"></param>
+            <param name="configuration"></param>
+            <param name="environment"></param>
+            <returns></returns>
+            <exception cref="T:System.InvalidOperationException"></exception>
+        </member>
+        <member name="T:OrderWebAPI.UI.StartupExtensions.ConfigureSwaggerOptions">
+            <summary>
+            
+            </summary>
+            <param name="provider"></param>
+        </member>
+        <member name="M:OrderWebAPI.UI.StartupExtensions.ConfigureSwaggerOptions.#ctor(Asp.Versioning.ApiExplorer.IApiVersionDescriptionProvider)">
+            <summary>
+            
+            </summary>
+            <param name="provider"></param>
+        </member>
+        <member name="M:OrderWebAPI.UI.StartupExtensions.ConfigureSwaggerOptions.Configure(Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenOptions)">
+            <summary>
+            
+            </summary>
+            <param name="options"></param>
+        </member>
+        <member name="T:Program">
+            <summary>
+            
+            </summary>
+        </member>
+    </members>
+</doc>
