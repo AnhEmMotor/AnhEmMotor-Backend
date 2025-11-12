@@ -1,0 +1,79 @@
+﻿using Domain.Domains.Entities;
+using Domain.Enums;
+using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
+
+namespace Infrastructure.DBContexts
+{
+    public class ApplicationDBContext(DbContextOptions<ApplicationDBContext> options) : DbContext(options)
+    {
+        public virtual DbSet<Brand> Brands { get; set; }
+        public virtual DbSet<Input> InputReceipts { get; set; }
+        public virtual DbSet<InputInfo> InputInfos { get; set; }
+        public virtual DbSet<InputStatus> InputStatuses { get; set; }
+        public virtual DbSet<OptionValue> OptionValues { get; set; }
+        public virtual DbSet<Option> Options { get; set; }
+        public virtual DbSet<Output> OutputOrders { get; set; }
+        public virtual DbSet<OutputInfo> OutputInfos { get; set; }
+        public virtual DbSet<OutputStatus> OutputStatuses { get; set; }
+        public virtual DbSet<Product> Products { get; set; }
+        public virtual DbSet<ProductCategory> ProductCategories { get; set; }
+        public virtual DbSet<ProductCollectionPhoto> ProductCollectionPhotos { get; set; }
+        public virtual DbSet<ProductStatus> ProductStatuses { get; set; }
+        public virtual DbSet<ProductVariant> ProductVariants { get; set; }
+        public virtual DbSet<Setting> Settings { get; set; }
+        public virtual DbSet<Supplier> Suppliers { get; set; }
+        public virtual DbSet<SupplierStatus> SupplierStatuses { get; set; }
+        public virtual DbSet<VariantOptionValue> VariantOptionValues { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                entityType.AddProperty(AuditingProperties.CreatedAt, typeof(DateTimeOffset?));
+                entityType.AddProperty(AuditingProperties.UpdatedAt, typeof(DateTimeOffset?));
+                entityType.AddProperty(AuditingProperties.IsDeleted, typeof(bool?));
+                entityType.AddProperty(AuditingProperties.DeletedAt, typeof(DateTimeOffset?));
+                var parameter = Expression.Parameter(entityType.ClrType, "e");
+                var property = Expression.Call(typeof(EF), nameof(EF.Property), [typeof(bool)], parameter, Expression.Constant(AuditingProperties.IsDeleted));
+                var body = Expression.Equal(property, Expression.Constant(false));
+                modelBuilder.Entity(entityType.ClrType).HasQueryFilter(Expression.Lambda(body, parameter));
+            }
+
+            modelBuilder.Entity<VariantOptionValue>(entity =>
+            {
+                entity.HasKey(e => new { e.VariantId, e.OptionValueId });
+            });
+        }
+
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            var entries = ChangeTracker.Entries();
+            foreach (var entry in entries)
+            {
+                var hasAuditingProperties = entry.Properties.Any(p => p.Metadata.Name == AuditingProperties.CreatedAt);
+                if (!hasAuditingProperties) continue;
+                switch (entry.State)
+                {
+                    case EntityState.Added:
+                        entry.Property(AuditingProperties.CreatedAt).CurrentValue = DateTimeOffset.UtcNow;
+                        entry.Property(AuditingProperties.IsDeleted).CurrentValue = false;
+                        break;
+
+                    case EntityState.Modified:
+                        entry.Property(AuditingProperties.UpdatedAt).CurrentValue = DateTimeOffset.UtcNow;
+                        break;
+
+                    case EntityState.Deleted:
+                        entry.State = EntityState.Modified;
+                        entry.Property(AuditingProperties.IsDeleted).CurrentValue = true;
+                        entry.Property(AuditingProperties.DeletedAt).CurrentValue = DateTimeOffset.UtcNow;
+                        break;
+                }
+            }
+            return base.SaveChangesAsync(cancellationToken);
+        }
+    }
+}

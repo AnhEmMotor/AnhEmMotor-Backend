@@ -1,16 +1,21 @@
 ﻿using Asp.Versioning;
+using Infrastructure.DependencyInjection;
 
 namespace WebAPI.StartupExtensions
 {
     public static class ConfigureServicesExtension
     {
-        public static IServiceCollection ConfigureServices(this IServiceCollection services, IWebHostEnvironment environment)
+        public static IServiceCollection ConfigureServices(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
         {
             services.Configure<RouteOptions>(options =>
             {
                 options.LowercaseUrls = true;
                 options.LowercaseQueryStrings = true;
             });
+            if (environment.IsEnvironment("Test") == false)
+            {
+                services.AddInfrastructureServices(configuration);
+            }
             services.AddApiVersioning(config =>
             {
                 config.DefaultApiVersion = new ApiVersion(1, 0);

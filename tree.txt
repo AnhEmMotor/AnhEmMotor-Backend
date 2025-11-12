@@ -1,0 +1,382 @@
+Folder PATH listing
+Volume serial number is EB63-6BA0
+C:.
+¦   .gitignore
+¦   AnhEmMotor-Backend.sln
+¦   database.txt
+¦   tree.txt
+¦   
++---.cr
+¦   +---personal
+¦       +---FavoritesList
+¦               List.xml
+¦               
++---Application
+¦   ¦   Application.csproj
+¦   ¦   
+¦   +---ApiContracts
+¦   ¦   +---Auth
+¦   ¦   +---Delete
+¦   ¦   +---Insert
+¦   ¦   +---Permission
+¦   ¦   +---Select
+¦   ¦   +---Update
+¦   +---bin
+¦   ¦   +---Debug
+¦   ¦       +---net9.0
+¦   ¦               Application.deps.json
+¦   ¦               Application.dll
+¦   ¦               Application.pdb
+¦   ¦               Domain.dll
+¦   ¦               Domain.pdb
+¦   ¦               
+¦   +---Constants
+¦   +---Helpers
+¦   ¦       ValidationErrorResponse.cs
+¦   ¦       
+¦   +---Interfaces
+¦   ¦   +---Repositories
+¦   ¦   ¦   +---Delete
+¦   ¦   ¦   +---Insert
+¦   ¦   ¦   +---Select
+¦   ¦   ¦   +---Update
+¦   ¦   +---Services
+¦   ¦       +---Delete
+¦   ¦       +---Insert
+¦   ¦       +---Select
+¦   ¦       +---Update
+¦   +---obj
+¦   ¦   ¦   Application.csproj.nuget.dgspec.json
+¦   ¦   ¦   Application.csproj.nuget.g.props
+¦   ¦   ¦   Application.csproj.nuget.g.targets
+¦   ¦   ¦   project.assets.json
+¦   ¦   ¦   project.nuget.cache
+¦   ¦   ¦   
+¦   ¦   +---Debug
+¦   ¦       +---net9.0
+¦   ¦           ¦   .NETCoreApp,Version=v9.0.AssemblyAttributes.cs
+¦   ¦           ¦   Applicat.44B5EDA2.Up2Date
+¦   ¦           ¦   Application.AssemblyInfo.cs
+¦   ¦           ¦   Application.AssemblyInfoInputs.cache
+¦   ¦           ¦   Application.assets.cache
+¦   ¦           ¦   Application.csproj.AssemblyReference.cache
+¦   ¦           ¦   Application.csproj.BuildWithSkipAnalyzers
+¦   ¦           ¦   Application.csproj.CoreCompileInputs.cache
+¦   ¦           ¦   Application.csproj.FileListAbsolute.txt
+¦   ¦           ¦   Application.dll
+¦   ¦           ¦   Application.GeneratedMSBuildEditorConfig.editorconfig
+¦   ¦           ¦   Application.GlobalUsings.g.cs
+¦   ¦           ¦   Application.pdb
+¦   ¦           ¦   
+¦   ¦           +---ref
+¦   ¦           ¦       Application.dll
+¦   ¦           ¦       
+¦   ¦           +---refint
+¦   ¦                   Application.dll
+¦   ¦                   
+¦   +---Services
+¦   +---ValidationAttributes
++---ControllerTests
+¦   ¦   ControllerTests.csproj
+¦   ¦   
+¦   +---bin
+¦   ¦   +---Debug
+¦   ¦       +---net9.0
+¦   ¦               .msCoverageSourceRootsMapping_ControllerTests
+¦   ¦               CoverletSourceRootsMapping_ControllerTests
+¦   ¦               
+¦   +---obj
+¦       ¦   ControllerTests.csproj.nuget.dgspec.json
+¦       ¦   ControllerTests.csproj.nuget.g.props
+¦       ¦   ControllerTests.csproj.nuget.g.targets
+¦       ¦   project.assets.json
+¦       ¦   project.nuget.cache
+¦       ¦   
+¦       +---Debug
+¦           +---net9.0
+¦               ¦   .NETCoreApp,Version=v9.0.AssemblyAttributes.cs
+¦               ¦   ControllerTests.AssemblyInfo.cs
+¦               ¦   ControllerTests.AssemblyInfoInputs.cache
+¦               ¦   ControllerTests.assets.cache
+¦               ¦   ControllerTests.csproj.AssemblyReference.cache
+¦               ¦   ControllerTests.GeneratedMSBuildEditorConfig.editorconfig
+¦               ¦   ControllerTests.GlobalUsings.g.cs
+¦               ¦   
+¦               +---ref
+¦               +---refint
++---Domain
+¦   ¦   Domain.csproj
+¦   ¦   
+¦   +---bin
+¦   ¦   +---Debug
+¦   ¦       +---net9.0
+¦   ¦               Domain.deps.json
+¦   ¦               Domain.dll
+¦   ¦               Domain.pdb
+¦   ¦               
+¦   +---Domains
+¦   ¦   +---Entities
+¦   ¦   ¦       Brand.cs
+¦   ¦   ¦       Input.cs
+¦   ¦   ¦       InputInfo.cs
+¦   ¦   ¦       InputStatus.cs
+¦   ¦   ¦       Option.cs
+¦   ¦   ¦       OptionValue.cs
+¦   ¦   ¦       Output.cs
+¦   ¦   ¦       OutputInfo.cs
+¦   ¦   ¦       OutputStatus.cs
+¦   ¦   ¦       Product.cs
+¦   ¦   ¦       ProductCategory.cs
+¦   ¦   ¦       ProductCollectionPhoto.cs
+¦   ¦   ¦       ProductStatus.cs
+¦   ¦   ¦       ProductVariant.cs
+¦   ¦   ¦       Setting.cs
+¦   ¦   ¦       Supplier.cs
+¦   ¦   ¦       SupplierStatus.cs
+¦   ¦   ¦       VariantOptionValue.cs
+¦   ¦   ¦       
+¦   ¦   +---IdentityEntities
+¦   +---Enums
+¦   ¦       AuditingProperties.cs
+¦   ¦       
+¦   +---Exceptions
+¦   +---obj
+¦       ¦   Domain.csproj.nuget.dgspec.json
+¦       ¦   Domain.csproj.nuget.g.props
+¦       ¦   Domain.csproj.nuget.g.targets
+¦       ¦   project.assets.json
+¦       ¦   project.nuget.cache
+¦       ¦   
+¦       +---Debug
+¦           +---net9.0
+¦               ¦   .NETCoreApp,Version=v9.0.AssemblyAttributes.cs
+¦               ¦   Domain.AssemblyInfo.cs
+¦               ¦   Domain.AssemblyInfoInputs.cache
+¦               ¦   Domain.assets.cache
+¦               ¦   Domain.csproj.BuildWithSkipAnalyzers
+¦               ¦   Domain.csproj.CoreCompileInputs.cache
+¦               ¦   Domain.csproj.FileListAbsolute.txt
+¦               ¦   Domain.dll
+¦               ¦   Domain.GeneratedMSBuildEditorConfig.editorconfig
+¦               ¦   Domain.GlobalUsings.g.cs
+¦               ¦   Domain.pdb
+¦               ¦   
+¦               +---ref
+¦               ¦       Domain.dll
+¦               ¦       
+¦               +---refint
+¦                       Domain.dll
+¦                       
++---Infrastructure
+¦   ¦   Infrastructure.csproj
+¦   ¦   
+¦   +---bin
+¦   ¦   +---Debug
+¦   ¦       +---net9.0
+¦   ¦               Domain.dll
+¦   ¦               Domain.pdb
+¦   ¦               Infrastructure.deps.json
+¦   ¦               Infrastructure.dll
+¦   ¦               Infrastructure.pdb
+¦   ¦               Infrastructure.runtimeconfig.json
+¦   ¦               
+¦   +---DBContexts
+¦   ¦       ApplicationDBContext.cs
+¦   ¦       
+¦   +---obj
+¦   ¦   ¦   Infrastructure.csproj.nuget.dgspec.json
+¦   ¦   ¦   Infrastructure.csproj.nuget.g.props
+¦   ¦   ¦   Infrastructure.csproj.nuget.g.targets
+¦   ¦   ¦   project.assets.json
+¦   ¦   ¦   project.nuget.cache
+¦   ¦   ¦   
+¦   ¦   +---Debug
+¦   ¦       +---net9.0
+¦   ¦           ¦   .NETCoreApp,Version=v9.0.AssemblyAttributes.cs
+¦   ¦           ¦   Infrastr.15EFFBFE.Up2Date
+¦   ¦           ¦   Infrastructure.AssemblyInfo.cs
+¦   ¦           ¦   Infrastructure.AssemblyInfoInputs.cache
+¦   ¦           ¦   Infrastructure.assets.cache
+¦   ¦           ¦   Infrastructure.csproj.AssemblyReference.cache
+¦   ¦           ¦   Infrastructure.csproj.BuildWithSkipAnalyzers
+¦   ¦           ¦   Infrastructure.csproj.CoreCompileInputs.cache
+¦   ¦           ¦   Infrastructure.csproj.FileListAbsolute.txt
+¦   ¦           ¦   Infrastructure.dll
+¦   ¦           ¦   Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+¦   ¦           ¦   Infrastructure.genruntimeconfig.cache
+¦   ¦           ¦   Infrastructure.GlobalUsings.g.cs
+¦   ¦           ¦   Infrastructure.pdb
+¦   ¦           ¦   
+¦   ¦           +---ref
+¦   ¦           ¦       Infrastructure.dll
+¦   ¦           ¦       
+¦   ¦           +---refint
+¦   ¦                   Infrastructure.dll
+¦   ¦                   
+¦   +---Repositories
+¦   ¦   +---Delete
+¦   ¦   +---Insert
+¦   ¦   +---Select
+¦   ¦   +---Update
+¦   +---Seeder
++---IntegrationTests
+¦   ¦   IntegrationTests.csproj
+¦   ¦   
+¦   +---bin
+¦   ¦   +---Debug
+¦   ¦       +---net9.0
+¦   ¦               .msCoverageSourceRootsMapping_IntegrationTests
+¦   ¦               CoverletSourceRootsMapping_IntegrationTests
+¦   ¦               
+¦   +---obj
+¦       ¦   IntegrationTests.csproj.nuget.dgspec.json
+¦       ¦   IntegrationTests.csproj.nuget.g.props
+¦       ¦   IntegrationTests.csproj.nuget.g.targets
+¦       ¦   project.assets.json
+¦       ¦   project.nuget.cache
+¦       ¦   
+¦       +---Debug
+¦           +---net9.0
+¦               ¦   .NETCoreApp,Version=v9.0.AssemblyAttributes.cs
+¦               ¦   IntegrationTests.AssemblyInfo.cs
+¦               ¦   IntegrationTests.AssemblyInfoInputs.cache
+¦               ¦   IntegrationTests.assets.cache
+¦               ¦   IntegrationTests.csproj.AssemblyReference.cache
+¦               ¦   IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig
+¦               ¦   IntegrationTests.GlobalUsings.g.cs
+¦               ¦   
+¦               +---ref
+¦               +---refint
++---ServiceTests
+¦   ¦   ServiceTests.csproj
+¦   ¦   
+¦   +---bin
+¦   ¦   +---Debug
+¦   ¦       +---net9.0
+¦   ¦               .msCoverageSourceRootsMapping_ServiceTests
+¦   ¦               CoverletSourceRootsMapping_ServiceTests
+¦   ¦               
+¦   +---obj
+¦       ¦   project.assets.json
+¦       ¦   project.nuget.cache
+¦       ¦   ServiceTests.csproj.nuget.dgspec.json
+¦       ¦   ServiceTests.csproj.nuget.g.props
+¦       ¦   ServiceTests.csproj.nuget.g.targets
+¦       ¦   
+¦       +---Debug
+¦           +---net9.0
+¦               ¦   .NETCoreApp,Version=v9.0.AssemblyAttributes.cs
+¦               ¦   ServiceTests.AssemblyInfo.cs
+¦               ¦   ServiceTests.AssemblyInfoInputs.cache
+¦               ¦   ServiceTests.assets.cache
+¦               ¦   ServiceTests.csproj.AssemblyReference.cache
+¦               ¦   ServiceTests.GeneratedMSBuildEditorConfig.editorconfig
+¦               ¦   ServiceTests.GlobalUsings.g.cs
+¦               ¦   
+¦               +---ref
+¦               +---refint
++---WebAPI
+    ¦   api.xml
+    ¦   appsettings.Development.json
+    ¦   appsettings.json
+    ¦   appsettings.Template.Development.json
+    ¦   appsettings.Template.json
+    ¦   NuGet.config
+    ¦   Program.cs
+    ¦   WebAPI.csproj
+    ¦   WebAPI.csproj.user
+    ¦   
+    +---bin
+    ¦   +---Debug
+    ¦       +---net9.0
+    ¦               Application.dll
+    ¦               Application.pdb
+    ¦               appsettings.Development.json
+    ¦               appsettings.json
+    ¦               appsettings.Template.Development.json
+    ¦               appsettings.Template.json
+    ¦               Asp.Versioning.Abstractions.dll
+    ¦               Asp.Versioning.Http.dll
+    ¦               Asp.Versioning.Mvc.ApiExplorer.dll
+    ¦               Asp.Versioning.Mvc.dll
+    ¦               Domain.dll
+    ¦               Domain.pdb
+    ¦               Microsoft.AspNetCore.Authentication.JwtBearer.dll
+    ¦               Microsoft.IdentityModel.Abstractions.dll
+    ¦               Microsoft.IdentityModel.JsonWebTokens.dll
+    ¦               Microsoft.IdentityModel.Logging.dll
+    ¦               Microsoft.IdentityModel.Protocols.dll
+    ¦               Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+    ¦               Microsoft.IdentityModel.Tokens.dll
+    ¦               Microsoft.OpenApi.dll
+    ¦               NuGet.config
+    ¦               Swashbuckle.AspNetCore.Swagger.dll
+    ¦               Swashbuckle.AspNetCore.SwaggerGen.dll
+    ¦               Swashbuckle.AspNetCore.SwaggerUI.dll
+    ¦               System.IdentityModel.Tokens.Jwt.dll
+    ¦               WebAPI.deps.json
+    ¦               WebAPI.dll
+    ¦               WebAPI.exe
+    ¦               WebAPI.pdb
+    ¦               WebAPI.runtimeconfig.json
+    ¦               WebAPI.staticwebassets.endpoints.json
+    ¦               
+    +---Controllers
+    ¦   +---v1
+    ¦           TestController.cs
+    ¦           
+    +---Middleware
+    +---obj
+    ¦   ¦   project.assets.json
+    ¦   ¦   project.nuget.cache
+    ¦   ¦   WebAPI.csproj.nuget.dgspec.json
+    ¦   ¦   WebAPI.csproj.nuget.g.props
+    ¦   ¦   WebAPI.csproj.nuget.g.targets
+    ¦   ¦   
+    ¦   +---Debug
+    ¦       +---net9.0
+    ¦           ¦   .NETCoreApp,Version=v9.0.AssemblyAttributes.cs
+    ¦           ¦   ApiEndpoints.json
+    ¦           ¦   apphost.exe
+    ¦           ¦   rjsmcshtml.dswa.cache.json
+    ¦           ¦   rjsmrazor.dswa.cache.json
+    ¦           ¦   rpswa.dswa.cache.json
+    ¦           ¦   staticwebassets.build.endpoints.json
+    ¦           ¦   staticwebassets.build.json
+    ¦           ¦   staticwebassets.build.json.cache
+    ¦           ¦   staticwebassets.references.upToDateCheck.txt
+    ¦           ¦   staticwebassets.removed.txt
+    ¦           ¦   WebAPI.AssemblyInfo.cs
+    ¦           ¦   WebAPI.AssemblyInfoInputs.cache
+    ¦           ¦   WebAPI.assets.cache
+    ¦           ¦   WebAPI.csproj.AssemblyReference.cache
+    ¦           ¦   WebAPI.csproj.BuildWithSkipAnalyzers
+    ¦           ¦   WebAPI.csproj.CoreCompileInputs.cache
+    ¦           ¦   WebAPI.csproj.FileListAbsolute.txt
+    ¦           ¦   WebAPI.csproj.Up2Date
+    ¦           ¦   WebAPI.dll
+    ¦           ¦   WebAPI.GeneratedMSBuildEditorConfig.editorconfig
+    ¦           ¦   WebAPI.genruntimeconfig.cache
+    ¦           ¦   WebAPI.GlobalUsings.g.cs
+    ¦           ¦   WebAPI.MvcApplicationPartsAssemblyInfo.cache
+    ¦           ¦   WebAPI.MvcApplicationPartsAssemblyInfo.cs
+    ¦           ¦   WebAPI.pdb
+    ¦           ¦   
+    ¦           +---EndpointInfo
+    ¦           ¦       WebAPI.json
+    ¦           ¦       WebAPI.OpenApiFiles.cache
+    ¦           ¦       
+    ¦           +---ref
+    ¦           ¦       WebAPI.dll
+    ¦           ¦       
+    ¦           +---refint
+    ¦           ¦       WebAPI.dll
+    ¦           ¦       
+    ¦           +---staticwebassets
+    +---Properties
+    ¦       launchSettings.json
+    ¦       
+    +---StartupExtensions
+            ConfigureServicesExtension.cs
+            ConfigureSwaggerOptions.cs
+            

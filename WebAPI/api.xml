@@ -130,7 +130,7 @@
             </summary>
             <returns></returns>
         </member>
-        <member name="M:OrderWebAPI.UI.Controllers.v1.AuthController.UpdateUser(System.Guid,OrderWebAPI.Core.ApiEntities.Auth.UpdateUserRequest)">
+        <member name="M:OrderWebAPI.UI.Controllers.v1.AuthController.UpdateUser(System.int,OrderWebAPI.Core.ApiEntities.Auth.UpdateUserRequest)">
             <summary>
             Cập nhật người dùng. Người dùng chỉ có thể cập nhật thông tin của chính họ, trừ khi họ là Admin.
             </summary>
@@ -138,14 +138,14 @@
             <param name="model"></param>
             <returns></returns>
         </member>
-        <member name="M:OrderWebAPI.UI.Controllers.v1.AuthController.DeleteUser(System.Guid)">
+        <member name="M:OrderWebAPI.UI.Controllers.v1.AuthController.DeleteUser(System.int)">
             <summary>
             Xoá người dùng. Người dùng chỉ có thể xoá chính họ, trừ khi họ là Admin.
             </summary>
             <param name="id"></param>
             <returns></returns>
         </member>
-        <member name="M:OrderWebAPI.UI.Controllers.v1.AuthController.RestoreUser(System.Guid)">
+        <member name="M:OrderWebAPI.UI.Controllers.v1.AuthController.RestoreUser(System.int)">
             <summary>
             Khôi phục lại người dùng đã xoá
             </summary>
@@ -183,14 +183,14 @@
             <param name="sieveModel"></param>
             <returns></returns>
         </member>
-        <member name="M:OrderWebAPI.UI.Controllers.v1.OrderController.GetOrder(System.Nullable{System.Guid})">
+        <member name="M:OrderWebAPI.UI.Controllers.v1.OrderController.GetOrder(System.Nullable{System.int})">
             <summary>
             Lấy toàn bộ các thông tin của 1 Order nhưng chỉ trả về tổng giá trị của Order.
             </summary>
             <param name="id"></param>
             <returns></returns>
         </member>
-        <member name="M:OrderWebAPI.UI.Controllers.v1.OrderController.PutOrder(System.Nullable{System.Guid},OrderWebAPI.Core.ApiEntities.Update.OrderUpdateRequest)">
+        <member name="M:OrderWebAPI.UI.Controllers.v1.OrderController.PutOrder(System.Nullable{System.int},OrderWebAPI.Core.ApiEntities.Update.OrderUpdateRequest)">
             <summary>
             Sửa order (chỉ sửa tên và ngày). Có API riêng dành cho việc sửa các món hàng trong Order.
             </summary>
@@ -205,7 +205,7 @@
             <param name="orderInsertRequest"></param>
             <returns></returns>
         </member>
-        <member name="M:OrderWebAPI.UI.Controllers.v1.OrderController.DeleteOrder(System.Nullable{System.Guid})">
+        <member name="M:OrderWebAPI.UI.Controllers.v1.OrderController.DeleteOrder(System.Nullable{System.int})">
             <summary>
             Xoá toàn bộ Order (bao gồm cả các món hàng trong đó).
             </summary>
@@ -232,7 +232,7 @@
             <param name="orderItemDeleteService"></param>
             <param name="orderGetterService"></param>
         </member>
-        <member name="M:OrderWebAPI.UI.Controllers.v1.OrderItemController.GetOrderItems(System.Guid,Sieve.Models.SieveModel)">
+        <member name="M:OrderWebAPI.UI.Controllers.v1.OrderItemController.GetOrderItems(System.int,Sieve.Models.SieveModel)">
             <summary>
             Lấy các món hàng được mua trong 1 đơn hàng
             </summary>
@@ -240,7 +240,7 @@
             <param name="sieveModel"></param>
             <returns></returns>
         </member>
-        <member name="M:OrderWebAPI.UI.Controllers.v1.OrderItemController.GetOrderItem(System.Guid,System.Nullable{System.Guid})">
+        <member name="M:OrderWebAPI.UI.Controllers.v1.OrderItemController.GetOrderItem(System.int,System.Nullable{System.int})">
             <summary>
             Lấy một món hàng được mua trong 1 đơn hàng
             </summary>
@@ -248,7 +248,7 @@
             <param name="id"></param>
             <returns></returns>
         </member>
-        <member name="M:OrderWebAPI.UI.Controllers.v1.OrderItemController.PutOrderItem(System.Guid,System.Nullable{System.Guid},OrderWebAPI.Core.ApiEntities.Update.OrderItemUpdateRequest)">
+        <member name="M:OrderWebAPI.UI.Controllers.v1.OrderItemController.PutOrderItem(System.int,System.Nullable{System.int},OrderWebAPI.Core.ApiEntities.Update.OrderItemUpdateRequest)">
             <summary>
             Sửa món hàng trong đơn hàng đó (chỉ sửa 1 món hàng)
             </summary>
@@ -257,7 +257,7 @@
             <param name="orderItemUpdateRequest"></param>
             <returns></returns>
         </member>
-        <member name="M:OrderWebAPI.UI.Controllers.v1.OrderItemController.PostOrderItem(System.Guid,OrderWebAPI.Core.ApiEntities.Insert.OrderItemInsertRequest)">
+        <member name="M:OrderWebAPI.UI.Controllers.v1.OrderItemController.PostOrderItem(System.int,OrderWebAPI.Core.ApiEntities.Insert.OrderItemInsertRequest)">
             <summary>
             Thêm món hàng vào đơn hàng
             </summary>
@@ -265,7 +265,7 @@
             <param name="orderItemInsertRequest"></param>
             <returns></returns>
         </member>
-        <member name="M:OrderWebAPI.UI.Controllers.v1.OrderItemController.DeleteOrderItem(System.Guid,System.Nullable{System.Guid})">
+        <member name="M:OrderWebAPI.UI.Controllers.v1.OrderItemController.DeleteOrderItem(System.int,System.Nullable{System.int})">
             <summary>
             Xoá món hàng trong 1 đơn hàng
             </summary>

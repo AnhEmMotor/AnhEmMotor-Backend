@@ -8,10 +8,6 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.9" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.9">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.9" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.9" />
     <PackageReference Include="Sieve" Version="2.5.5" />
@@ -20,7 +16,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="DBContexts\" />
     <Folder Include="Repositories\Delete\" />
     <Folder Include="Repositories\Insert\" />
     <Folder Include="Repositories\Select\" />

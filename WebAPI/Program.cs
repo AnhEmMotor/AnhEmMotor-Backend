@@ -1,7 +1,7 @@
 using WebAPI.StartupExtensions;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.ConfigureServices(builder.Environment);
+builder.Services.ConfigureServices(builder.Configuration, builder.Environment);
 
 var app = builder.Build();
 
