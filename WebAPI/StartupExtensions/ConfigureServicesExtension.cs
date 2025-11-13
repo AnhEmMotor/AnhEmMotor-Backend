@@ -1,9 +1,12 @@
 ﻿using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
+using Domain.Helpers;
 using Infrastructure.DependencyInjection;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using WebAPI.Middleware;
 
 namespace WebAPI.StartupExtensions
 {
@@ -21,6 +24,8 @@ namespace WebAPI.StartupExtensions
         /// <returns>Bộ sưu tập các dịch vụ đã được cấu hình (IServiceCollection).</returns>
         public static IServiceCollection ConfigureServices(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
         {
+            services.AddExceptionHandler<GlobalExceptionHandler>();
+            services.AddProblemDetails();
             services.Configure<RouteOptions>(options =>
             {
                 options.LowercaseUrls = true;
@@ -41,7 +46,24 @@ namespace WebAPI.StartupExtensions
                 options.GroupNameFormat = "'v'VVV";
                 options.SubstituteApiVersionInUrl = true;
             });
-
+            services.AddControllers().ConfigureApiBehaviorOptions(options =>
+            {
+                options.InvalidModelStateResponseFactory = context =>
+                {
+                    var errors = context.ModelState
+                        .Where(e => e.Value?.Errors.Count > 0)
+                        .ToDictionary(
+                            kvp => kvp.Key,
+                            kvp => kvp.Value!.Errors.Select(e => e.ErrorMessage).ToArray()
+                        );
+                    var errorResponse = new ValidationErrorResponse
+                    {
+                        Title = "One or more validation errors occurred.",
+                        Errors = errors
+                    };
+                    return new BadRequestObjectResult(errorResponse);
+                };
+            });
             services.AddSwaggerGen(options =>
             {
                 if (environment.IsEnvironment("Test") == false)

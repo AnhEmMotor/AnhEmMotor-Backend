@@ -1,9 +1,13 @@
 ﻿using Application.Interfaces.Repositories.Brand;
+using Application.Interfaces.Repositories.Supplier;
 using Application.Interfaces.Services.Brand;
+using Application.Interfaces.Services.Supplier;
 using Application.Services.Brand;
+using Application.Services.Supplier;
 using Application.Sieve;
 using Infrastructure.DBContexts;
 using Infrastructure.Repositories.Brand;
+using Infrastructure.Repositories.Supplier;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -38,7 +42,17 @@ namespace Infrastructure.DependencyInjection
             services.AddScoped<IBrandUpdateService, BrandUpdateService>();
             services.AddScoped<IBrandDeleteService, BrandDeleteService>();
 
-            services.AddScoped<ISieveProcessor, BrandSieveProcessor>();
+            services.AddScoped<ISupplierInsertRepository, SupplierInsertRepository>();
+            services.AddScoped<ISupplierSelectRepository, SupplierSelectRepository>();
+            services.AddScoped<ISupplierUpdateRepository, SupplierUpdateRepository>();
+            services.AddScoped<ISupplierDeleteRepository, SupplierDeleteRepository>();
+
+            services.AddScoped<ISupplierInsertService, SupplierInsertService>();
+            services.AddScoped<ISupplierSelectService, SupplierSelectService>();
+            services.AddScoped<ISupplierUpdateService, SupplierUpdateService>();
+            services.AddScoped<ISupplierDeleteService, SupplierDeleteService>();
+
+            services.AddScoped<ISieveProcessor, CustomSieveProcessor>();
 
             return services;
         }

@@ -86,6 +86,202 @@
             <param name="request">Danh sách Id thương hiệu cần khôi phục.</param>
             <returns></returns>
         </member>
+        <member name="T:WebAPI.Controllers.v1.SupplierController">
+            <summary>
+            Quản lý danh sách nhà cung cấp.
+            </summary>
+            <param name="supplierInsertService"></param>
+            <param name="supplierSelectService"></param>
+            <param name="supplierUpdateService"></param>
+            <param name="supplierDeleteService"></param>
+        </member>
+        <member name="M:WebAPI.Controllers.v1.SupplierController.#ctor(Application.Interfaces.Services.Supplier.ISupplierInsertService,Application.Interfaces.Services.Supplier.ISupplierSelectService,Application.Interfaces.Services.Supplier.ISupplierUpdateService,Application.Interfaces.Services.Supplier.ISupplierDeleteService)">
+            <summary>
+            Quản lý danh sách nhà cung cấp.
+            </summary>
+            <param name="supplierInsertService"></param>
+            <param name="supplierSelectService"></param>
+            <param name="supplierUpdateService"></param>
+            <param name="supplierDeleteService"></param>
+        </member>
+        <member name="M:WebAPI.Controllers.v1.SupplierController.GetSuppliers(Sieve.Models.SieveModel)">
+            <summary>
+            Lấy danh sách nhà cung cấp (có phân trang, lọc, sắp xếp).
+            </summary>
+            <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
+            <returns></returns>
+        </member>
+        <member name="M:WebAPI.Controllers.v1.SupplierController.GetDeletedSuppliers(Sieve.Models.SieveModel)">
+            <summary>
+            Lấy danh sách nhà cung cấp đã bị xoá (có phân trang, lọc, sắp xếp).
+            </summary>
+            <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
+            <returns></returns>
+        </member>
+        <member name="M:WebAPI.Controllers.v1.SupplierController.GetSupplierById(System.Int32)">
+            <summary>
+            Lấy thông tin của nhà cung cấp được chọn.
+            </summary>
+            <param name="id">Mã nhà cung cấp cần lấy thông tin.</param>
+            <returns></returns>
+        </member>
+        <member name="M:WebAPI.Controllers.v1.SupplierController.CreateSupplier(Application.ApiContracts.Supplier.CreateSupplierRequest)">
+            <summary>
+            Tạo nhà cung cấp mới.
+            </summary>
+            <param name="request">Thông tin nhà cung cấp cần tạo.</param>
+            <returns></returns>
+        </member>
+        <member name="M:WebAPI.Controllers.v1.SupplierController.UpdateSupplier(System.Int32,Application.ApiContracts.Supplier.UpdateSupplierRequest)">
+            <summary>
+            Cập nhật thông tin nhà cung cấp (bao gồm cả trạng thái của nó).
+            </summary>
+            <param name="id">Id nhà cung cấp cần cập nhật.</param>
+            <param name="request">Thông tin nhà cung cấp cần cập nhật.</param>
+            <returns></returns>
+        </member>
+        <member name="M:WebAPI.Controllers.v1.SupplierController.UpdateSupplierStatus(System.Int32,Application.ApiContracts.Supplier.UpdateSupplierStatusRequest)">
+            <summary>
+            Cập nhật trạng thái của nhà cung cấp.
+            </summary>
+            <param name="id">Id nhà cung cấp cần cập nhật trạng thái.</param>
+            <param name="request">Trạng thái mới.</param>
+            <returns></returns>
+        </member>
+        <member name="M:WebAPI.Controllers.v1.SupplierController.UpdateManySupplierStatus(Application.ApiContracts.Supplier.UpdateManySupplierStatusRequest)">
+            <summary>
+            Cập nhật trạng thái của nhiều nhà cung cấp cùng lúc.
+            </summary>
+            <param name="request">Danh sách Id nhà cung cấp và trạng thái mới.</param>
+            <returns></returns>
+        </member>
+        <member name="M:WebAPI.Controllers.v1.SupplierController.DeleteSupplier(System.Int32)">
+            <summary>
+            Xoá nhà cung cấp.
+            </summary>
+            <param name="id">Id của nhà cung cấp cần xoá.</param>
+            <returns></returns>
+        </member>
+        <member name="M:WebAPI.Controllers.v1.SupplierController.RestoreSupplier(System.Int32)">
+            <summary>
+            Khôi phục lại nhà cung cấp đã xoá.
+            </summary>
+            <param name="id">Id của nhà cung cấp cần khôi phục</param>
+            <returns></returns>
+        </member>
+        <member name="M:WebAPI.Controllers.v1.SupplierController.DeleteSuppliers(Application.ApiContracts.Supplier.DeleteManySuppliersRequest)">
+            <summary>
+            Xoá nhiều nhà cung cấp cùng lúc.
+            </summary>
+            <param name="request">Danh sách Id nhà cung cấp cần xoá.</param>
+            <returns></returns>
+        </member>
+        <member name="M:WebAPI.Controllers.v1.SupplierController.RestoreSuppliers(Application.ApiContracts.Supplier.RestoreManySuppliersRequest)">
+            <summary>
+            Khôi phục nhiều nhà cung cấp đã xoá cùng lúc.
+            </summary>
+            <param name="request">Danh sách Id nhà cung cấp cần khôi phục.</param>
+            <returns></returns>
+        </member>
+        <member name="T:WebAPI.Middleware.GlobalExceptionHandler">
+            <summary>
+            Xử lý các ngoại lệ chưa được xử lý một cách toàn cục cho ứng dụng.
+            Định dạng phản hồi lỗi dựa trên môi trường (Development hoặc Production).
+            </summary>
+            <param name="environment">Đối tượng môi trường web, dùng để kiểm tra môi trường (ví dụ: Development).</param>
+            <param name="logger">Đối tượng logger để ghi lại thông tin ngoại lệ.</param>
+        </member>
+        <member name="M:WebAPI.Middleware.GlobalExceptionHandler.#ctor(Microsoft.AspNetCore.Hosting.IWebHostEnvironment,Microsoft.Extensions.Logging.ILogger{WebAPI.Middleware.GlobalExceptionHandler})">
+            <summary>
+            Xử lý các ngoại lệ chưa được xử lý một cách toàn cục cho ứng dụng.
+            Định dạng phản hồi lỗi dựa trên môi trường (Development hoặc Production).
+            </summary>
+            <param name="environment">Đối tượng môi trường web, dùng để kiểm tra môi trường (ví dụ: Development).</param>
+            <param name="logger">Đối tượng logger để ghi lại thông tin ngoại lệ.</param>
+        </member>
+        <member name="M:WebAPI.Middleware.GlobalExceptionHandler.TryHandleAsync(Microsoft.AspNetCore.Http.HttpContext,System.Exception,System.Threading.CancellationToken)">
+            <summary>
+            Cố gắng xử lý ngoại lệ được cung cấp, ghi log và định dạng phản hồi JSON.
+            </summary>
+            <param name="httpContext">Bối cảnh HTTP hiện tại, được sử dụng để thiết lập phản hồi.</param>
+            <param name="exception">Ngoại lệ chưa được xử lý đã xảy ra.</param>
+            <param name="cancellationToken">Token để hủy bỏ thao tác.</param>
+            <returns>Trả về giá trị cho biết liệu ngoại lệ đã được xử lý (luôn trả về `true` trong trường hợp này).</returns>
+        </member>
+        <member name="T:WebAPI.Middleware.ProductionErrorResponse">
+            <summary>
+            Cấu trúc phản hồi lỗi đơn giản cho môi trường Production.
+            </summary>
+        </member>
+        <member name="P:WebAPI.Middleware.ProductionErrorResponse.Errors">
+            <summary>
+            Chi tiết lỗi được lồng trong đối tượng 'errors'.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Middleware.ProductionErrorResponse.#ctor(System.String)">
+            <summary>
+            Khởi tạo một phản hồi lỗi Production mới.
+            </summary>
+            <param name="message">Thông báo lỗi chung, an toàn để hiển thị cho người dùng.</param>
+        </member>
+        <member name="T:WebAPI.Middleware.ErrorDetails">
+            <summary>
+            Mô hình chi tiết lỗi cơ bản, chỉ chứa thông báo.
+            </summary>
+        </member>
+        <member name="P:WebAPI.Middleware.ErrorDetails.Message">
+            <summary>
+            Thông báo lỗi.
+            </summary>
+        </member>
+        <member name="T:WebAPI.Middleware.DevelopmentErrorResponse">
+            <summary>
+            Cấu trúc phản hồi lỗi chi tiết cho môi trường Development.
+            </summary>
+            <param name="exception">Ngoại lệ gốc được sử dụng để xây dựng phản hồi chi tiết.</param>
+        </member>
+        <member name="M:WebAPI.Middleware.DevelopmentErrorResponse.#ctor(System.Exception)">
+            <summary>
+            Cấu trúc phản hồi lỗi chi tiết cho môi trường Development.
+            </summary>
+            <param name="exception">Ngoại lệ gốc được sử dụng để xây dựng phản hồi chi tiết.</param>
+        </member>
+        <member name="P:WebAPI.Middleware.DevelopmentErrorResponse.Errors">
+            <summary>
+            Chi tiết lỗi đầy đủ, bao gồm cả stack trace và inner exception.
+            </summary>
+        </member>
+        <member name="T:WebAPI.Middleware.DevelopmentErrorDetails">
+            <summary>
+            Mô hình chi tiết lỗi đầy đủ cho mục đích debug trong môi trường Development.
+            </summary>
+        </member>
+        <member name="P:WebAPI.Middleware.DevelopmentErrorDetails.Message">
+            <summary>
+            Thông báo của ngoại lệ.
+            </summary>
+        </member>
+        <member name="P:WebAPI.Middleware.DevelopmentErrorDetails.Type">
+            <summary>
+            Loại (Type) đầy đủ của ngoại lệ.
+            </summary>
+        </member>
+        <member name="P:WebAPI.Middleware.DevelopmentErrorDetails.Details">
+            <summary>
+            Chuỗi `ToString()` đầy đủ của ngoại lệ (thường bao gồm stack trace).
+            </summary>
+        </member>
+        <member name="P:WebAPI.Middleware.DevelopmentErrorDetails.InnerException">
+            <summary>
+            Chi tiết của ngoại lệ bên trong (InnerException), nếu có.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Middleware.DevelopmentErrorDetails.#ctor(System.Exception)">
+            <summary>
+            Khởi tạo chi tiết lỗi từ một ngoại lệ.
+            </summary>
+            <param name="ex">Ngoại lệ để trích xuất thông tin.</param>
+        </member>
         <member name="T:WebAPI.StartupExtensions.ConfigureServicesExtension">
             <summary>
             Cài đặt DI cho dự án: Route luôn in thường, DB Context, bật API Versioning, tạo file api.xml để hướng dẫn route.

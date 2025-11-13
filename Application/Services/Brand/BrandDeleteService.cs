@@ -1,6 +1,7 @@
 ﻿using Application.ApiContracts.Brand;
 using Application.Interfaces.Repositories.Brand;
 using Application.Interfaces.Services.Brand;
+using Domain.Helpers;
 
 namespace Application.Services.Brand
 {
@@ -16,16 +17,51 @@ namespace Application.Services.Brand
             return true;
         }
 
-        public async Task<bool> DeleteBrandsAsync(DeleteManyBrandsRequest request)
+        public async Task<ErrorResponse?> DeleteBrandsAsync(DeleteManyBrandsRequest request)
         {
-            if (request.Ids == null || request.Ids.Count == 0) return false;
+            if (request.Ids == null || request.Ids.Count == 0)
+            {
+                return null;
+            }
 
-            var brands = await brandSelectRepository.GetActiveBrandsByIdsAsync(request.Ids);
+            var errorDetails = new List<ErrorDetail>();
+            var activeBrands = await brandSelectRepository.GetActiveBrandsByIdsAsync(request.Ids);
+            var allBrands = await brandSelectRepository.GetAllBrandsByIdsAsync(request.Ids);
 
-            if (brands.Count == 0) return false;
+            foreach (var id in request.Ids)
+            {
+                var brand = allBrands.FirstOrDefault(b => b.Id == id);
+                var activeBrand = activeBrands.FirstOrDefault(b => b.Id == id);
 
-            await brandDeleteRepository.DeleteBrandsAsync(brands);
-            return true;
+                if (brand == null)
+                {
+                    errorDetails.Add(new ErrorDetail
+                    {
+                        Message = "Brand not found",
+                        Field = "Brand ID: " + id.ToString()
+                    });
+                }
+                else if (activeBrand == null)
+                {
+                    errorDetails.Add(new ErrorDetail
+                    {
+                        Message = "Brand has already been deleted",
+                        Field = brand.Name
+                    });
+                }
+            }
+
+            if (errorDetails.Count > 0)
+            {
+                return new ErrorResponse { Errors = errorDetails };
+            }
+
+            if (activeBrands.Count > 0)
+            {
+                await brandDeleteRepository.DeleteBrandsAsync(activeBrands);
+            }
+
+            return null;
         }
     }
 }

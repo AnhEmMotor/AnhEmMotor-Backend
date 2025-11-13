@@ -16,6 +16,7 @@ app.UseSwaggerUI(options =>
 });
 
 app.UseRouting();
+app.UseExceptionHandler();
 app.MapControllers();
 app.Run();
 

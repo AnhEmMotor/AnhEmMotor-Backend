@@ -1,4 +1,5 @@
 ﻿using Application.ApiContracts.Brand;
+using Domain.Helpers;
 
 namespace Application.Interfaces.Services.Brand
 {
@@ -6,6 +7,6 @@ namespace Application.Interfaces.Services.Brand
     {
         Task<bool> UpdateBrandAsync(int id, UpdateBrandRequest request);
         Task<bool> RestoreBrandAsync(int id);
-        Task<bool> RestoreBrandsAsync(RestoreManyBrandsRequest request);
+        Task<ErrorResponse?> RestoreBrandsAsync(RestoreManyBrandsRequest request);
     }
 }

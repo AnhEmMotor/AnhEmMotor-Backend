@@ -115,8 +115,12 @@ namespace WebAPI.Controllers.v1
         [HttpPost("delete-many")]
         public async Task<IActionResult> DeleteBrands([FromBody] DeleteManyBrandsRequest request)
         {
-            var success = await brandDeleteService.DeleteBrandsAsync(request);
-            return success ? NoContent() : NotFound();
+            var results = await brandDeleteService.DeleteBrandsAsync(request);
+            if (results != null)
+            {
+                return BadRequest(results);
+            }
+            return NoContent();
         }
 
         /// <summary>
@@ -127,8 +131,12 @@ namespace WebAPI.Controllers.v1
         [HttpPost("restore-many")]
         public async Task<IActionResult> RestoreBrands([FromBody] RestoreManyBrandsRequest request)
         {
-            var success = await brandUpdateService.RestoreBrandsAsync(request);
-            return success ? NoContent() : NotFound();
+            var results = await brandUpdateService.RestoreBrandsAsync(request);
+            if (results != null)
+            {
+                return BadRequest(results);
+            }
+            return NoContent();
         }
     }
 }

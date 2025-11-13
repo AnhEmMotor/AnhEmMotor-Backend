@@ -22,6 +22,11 @@ namespace Infrastructure.Repositories.Brand
             return context.DeletedOnly<BrandEntity>().AsNoTracking();
         }
 
+        public IQueryable<BrandEntity> GetAllBrands()
+        {
+            return context.All<BrandEntity>().AsNoTracking();
+        }
+
         public async Task<List<BrandEntity>> GetActiveBrandsByIdsAsync(List<int> ids)
         {
             return await context.Brands.Where(b => b.Id.HasValue && ids.Contains(b.Id.Value)).ToListAsync();
@@ -30,6 +35,11 @@ namespace Infrastructure.Repositories.Brand
         public async Task<List<BrandEntity>> GetDeletedBrandsByIdsAsync(List<int> ids)
         {
             return await context.DeletedOnly<BrandEntity>().Where(b => b.Id.HasValue && ids.Contains(b.Id.Value)).ToListAsync();
+        }
+
+        public async Task<List<BrandEntity>> GetAllBrandsByIdsAsync(List<int> ids)
+        {
+            return await context.All<BrandEntity>().Where(b => b.Id.HasValue && ids.Contains(b.Id.Value)).ToListAsync();
         }
     }
 }

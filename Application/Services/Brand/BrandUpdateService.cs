@@ -1,6 +1,7 @@
 ﻿using Application.ApiContracts.Brand;
 using Application.Interfaces.Repositories.Brand;
 using Application.Interfaces.Services.Brand;
+using Domain.Helpers;
 
 namespace Application.Services.Brand
 {
@@ -12,8 +13,10 @@ namespace Application.Services.Brand
 
             if (brand == null) return false;
 
-            brand.Name = request.Name;
-            brand.Description = request.Description;
+            if (request.Name is not null)
+                brand.Name = request.Name;
+            if (request.Description is not null)
+                brand.Description = request.Description;
 
             await brandUpdateRepository.UpdateBrandAsync(brand);
             return true;
@@ -29,16 +32,51 @@ namespace Application.Services.Brand
             return true;
         }
 
-        public async Task<bool> RestoreBrandsAsync(RestoreManyBrandsRequest request)
+        public async Task<ErrorResponse?> RestoreBrandsAsync(RestoreManyBrandsRequest request)
         {
-            if (request.Ids == null || request.Ids.Count == 0) return false;
+            if (request.Ids == null || request.Ids.Count == 0)
+            {
+                return null;
+            }
 
-            var brands = await brandSelectRepository.GetDeletedBrandsByIdsAsync(request.Ids);
+            var errorDetails = new List<ErrorDetail>();
+            var deletedBrands = await brandSelectRepository.GetDeletedBrandsByIdsAsync(request.Ids);
+            var allBrands = await brandSelectRepository.GetAllBrandsByIdsAsync(request.Ids);
 
-            if (brands.Count == 0) return false;
+            foreach (var id in request.Ids)
+            {
+                var brand = allBrands.FirstOrDefault(b => b.Id == id);
+                var deletedBrand = deletedBrands.FirstOrDefault(b => b.Id == id);
 
-            await brandUpdateRepository.RestoreBrandsAsync(brands);
-            return true;
+                if (brand == null)
+                {
+                    errorDetails.Add(new ErrorDetail
+                    {
+                        Message = "Brand not found",
+                        Field = "Brand ID: " + id.ToString()
+                    });
+                }
+                else if (deletedBrand == null)
+                {
+                    errorDetails.Add(new ErrorDetail
+                    {
+                        Message = "Brand has already been restored",
+                        Field = brand.Name
+                    });
+                }
+            }
+
+            if (errorDetails.Count > 0)
+            {
+                return new ErrorResponse { Errors = errorDetails };
+            }
+
+            if (deletedBrands.Count > 0)
+            {
+                await brandUpdateRepository.RestoreBrandsAsync(deletedBrands);
+            }
+
+            return null;
         }
     }
 }

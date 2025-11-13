@@ -18,7 +18,6 @@
   <ItemGroup>
     <Folder Include="ApiContracts\Auth\" />
     <Folder Include="ApiContracts\Permission\" />
-    <Folder Include="ValidationAttributes\" />
   </ItemGroup>
 
 </Project>
