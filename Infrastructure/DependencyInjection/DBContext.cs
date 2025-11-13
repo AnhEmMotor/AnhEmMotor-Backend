@@ -1,7 +1,13 @@
-﻿using Infrastructure.DBContexts;
+﻿using Application.Interfaces.Repositories.Brand;
+using Application.Interfaces.Services.Brand;
+using Application.Services.Brand;
+using Application.Sieve;
+using Infrastructure.DBContexts;
+using Infrastructure.Repositories.Brand;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Sieve.Services;
 
 namespace Infrastructure.DependencyInjection
 {
@@ -22,10 +28,17 @@ namespace Infrastructure.DependencyInjection
                 });
             });
 
-            // Đăng ký các Repositories (khi bạn tạo chúng)
-            // Ví dụ:
-            // services.AddScoped<IProductRepository, ProductRepository>();
-            // services.AddScoped<IBrandRepository, BrandRepository>();
+            services.AddScoped<IBrandInsertRepository, BrandInsertRepository>();
+            services.AddScoped<IBrandSelectRepository, BrandSelectRepository>();
+            services.AddScoped<IBrandUpdateRepository, BrandUpdateRepository>();
+            services.AddScoped<IBrandDeleteRepository, BrandDeleteRepository>();
+
+            services.AddScoped<IBrandInsertService, BrandInsertService>();
+            services.AddScoped<IBrandSelectService, BrandSelectService>();
+            services.AddScoped<IBrandUpdateService, BrandUpdateService>();
+            services.AddScoped<IBrandDeleteService, BrandDeleteService>();
+
+            services.AddScoped<ISieveProcessor, BrandSieveProcessor>();
 
             return services;
         }

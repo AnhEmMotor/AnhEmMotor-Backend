@@ -1,4 +1,4 @@
-﻿using Domain.Domains.Entities;
+﻿using Domain.Entities;
 using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
@@ -34,11 +34,17 @@ namespace Infrastructure.DBContexts
             {
                 entityType.AddProperty(AuditingProperties.CreatedAt, typeof(DateTimeOffset?));
                 entityType.AddProperty(AuditingProperties.UpdatedAt, typeof(DateTimeOffset?));
-                entityType.AddProperty(AuditingProperties.IsDeleted, typeof(bool?));
                 entityType.AddProperty(AuditingProperties.DeletedAt, typeof(DateTimeOffset?));
+
                 var parameter = Expression.Parameter(entityType.ClrType, "e");
-                var property = Expression.Call(typeof(EF), nameof(EF.Property), [typeof(bool)], parameter, Expression.Constant(AuditingProperties.IsDeleted));
-                var body = Expression.Equal(property, Expression.Constant(false));
+                var property = Expression.Call(
+                    typeof(EF),
+                    nameof(EF.Property),
+                    [typeof(DateTimeOffset?)],
+                    parameter,
+                    Expression.Constant(AuditingProperties.DeletedAt));
+
+                var body = Expression.Equal(property, Expression.Constant(null, typeof(DateTimeOffset?)));
                 modelBuilder.Entity(entityType.ClrType).HasQueryFilter(Expression.Lambda(body, parameter));
             }
 
@@ -55,11 +61,11 @@ namespace Infrastructure.DBContexts
             {
                 var hasAuditingProperties = entry.Properties.Any(p => p.Metadata.Name == AuditingProperties.CreatedAt);
                 if (!hasAuditingProperties) continue;
+
                 switch (entry.State)
                 {
                     case EntityState.Added:
                         entry.Property(AuditingProperties.CreatedAt).CurrentValue = DateTimeOffset.UtcNow;
-                        entry.Property(AuditingProperties.IsDeleted).CurrentValue = false;
                         break;
 
                     case EntityState.Modified:
@@ -68,12 +74,29 @@ namespace Infrastructure.DBContexts
 
                     case EntityState.Deleted:
                         entry.State = EntityState.Modified;
-                        entry.Property(AuditingProperties.IsDeleted).CurrentValue = true;
                         entry.Property(AuditingProperties.DeletedAt).CurrentValue = DateTimeOffset.UtcNow;
                         break;
                 }
             }
             return base.SaveChangesAsync(cancellationToken);
+        }
+
+        public IQueryable<T> All<T>() where T : class
+            => Set<T>().IgnoreQueryFilters();
+
+        public IQueryable<T> DeletedOnly<T>() where T : class
+            => All<T>().Where(e => EF.Property<DateTimeOffset?>(e, AuditingProperties.DeletedAt) != null);
+
+        public void Restore(object entity)
+        {
+            var entry = Entry(entity);
+
+            var hasAuditingProperties = entry.Properties.Any(p => p.Metadata.Name == AuditingProperties.CreatedAt);
+            if (!hasAuditingProperties) return;
+
+            entry.Property(AuditingProperties.DeletedAt).CurrentValue = null;
+            entry.Property(AuditingProperties.UpdatedAt).CurrentValue = DateTimeOffset.UtcNow;
+            entry.State = EntityState.Modified;
         }
     }
 }

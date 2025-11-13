@@ -1,4 +1,4 @@
-using WebAPI.StartupExtensions;
+﻿using WebAPI.StartupExtensions;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.ConfigureServices(builder.Configuration, builder.Environment);
@@ -19,4 +19,7 @@ app.UseRouting();
 app.MapControllers();
 app.Run();
 
+/// <summary>
+/// Đầu vào của chương trình! Bạn không cần quan tâm đến đây!
+/// </summary>
 public partial class Program { }
