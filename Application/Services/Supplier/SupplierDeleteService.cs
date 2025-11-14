@@ -7,14 +7,23 @@ namespace Application.Services.Supplier
 {
     public class SupplierDeleteService(ISupplierSelectRepository supplierSelectRepository, ISupplierDeleteRepository supplierDeleteRepository) : ISupplierDeleteService
     {
-        public async Task<bool> DeleteSupplierAsync(int id)
+        public async Task<ErrorResponse?> DeleteSupplierAsync(int id)
         {
             var supplier = await supplierSelectRepository.GetSupplierByIdAsync(id);
 
-            if (supplier == null) return false;
+            if (supplier == null)
+            {
+                return new ErrorResponse
+                {
+                    Errors =
+                    [
+                        new ErrorDetail { Message = $"Supplier with Id {id} not found." }
+                    ]
+                };
+            }
 
             await supplierDeleteRepository.DeleteSupplierAsync(supplier);
-            return true;
+            return null;
         }
 
         public async Task<ErrorResponse?> DeleteSuppliersAsync(DeleteManySuppliersRequest request)

@@ -5,8 +5,8 @@ namespace Application.Interfaces.Services.Brand
 {
     public interface IBrandUpdateService
     {
-        Task<bool> UpdateBrandAsync(int id, UpdateBrandRequest request);
-        Task<bool> RestoreBrandAsync(int id);
+        Task<ErrorResponse?> RestoreBrandAsync(int id);
         Task<ErrorResponse?> RestoreBrandsAsync(RestoreManyBrandsRequest request);
+        Task<ErrorResponse?> UpdateBrandAsync(int id, UpdateBrandRequest request);
     }
 }

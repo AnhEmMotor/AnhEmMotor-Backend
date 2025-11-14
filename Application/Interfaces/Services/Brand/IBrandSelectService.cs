@@ -6,7 +6,7 @@ namespace Application.Interfaces.Services.Brand
 {
     public interface IBrandSelectService
     {
-        Task<BrandResponse?> GetBrandByIdAsync(int id);
+        Task<(BrandResponse? Data, ErrorResponse? Error)> GetBrandByIdAsync(int id);
         Task<PagedResult<BrandResponse>> GetBrandsAsync(SieveModel sieveModel);
         Task<PagedResult<BrandResponse>> GetDeletedBrandsAsync(SieveModel sieveModel);
     }

@@ -11,16 +11,26 @@ namespace Application.Services.Brand
 {
     public class BrandSelectService(IBrandSelectRepository brandSelectRepository, ISieveProcessor sieveProcessor) : IBrandSelectService
     {
-        public async Task<BrandResponse?> GetBrandByIdAsync(int id)
+        public async Task<(BrandResponse? Data, ErrorResponse? Error)> GetBrandByIdAsync(int id)
         {
             var brand = await brandSelectRepository.GetBrandByIdAsync(id);
-            if (brand == null) return null;
-            return new BrandResponse
+            if (brand == null)
+            {
+                return (
+                    null,
+                    new ErrorResponse
+                    {
+                        Errors = [new ErrorDetail { Message = $"Brand with Id {id} not found." }]
+                    }
+                );
+            }
+            var response = new BrandResponse
             {
                 Id = brand.Id,
                 Name = brand.Name,
                 Description = brand.Description
             };
+            return (response, null);
         }
 
         public async Task<PagedResult<BrandResponse>> GetBrandsAsync(SieveModel sieveModel)

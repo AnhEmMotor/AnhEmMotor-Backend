@@ -86,6 +86,25 @@
             <param name="request">Danh sách Id thương hiệu cần khôi phục.</param>
             <returns></returns>
         </member>
+        <member name="T:WebAPI.Controllers.v1.SettingController">
+            <summary>
+            Quản lý cài đặt: cập nhật số lượng cảnh báo tồn kho, 
+            </summary>
+            <param name="settingService"></param>
+        </member>
+        <member name="M:WebAPI.Controllers.v1.SettingController.#ctor(Application.Interfaces.Services.Setting.ISettingService)">
+            <summary>
+            Quản lý cài đặt: cập nhật số lượng cảnh báo tồn kho, 
+            </summary>
+            <param name="settingService"></param>
+        </member>
+        <member name="M:WebAPI.Controllers.v1.SettingController.SetSettings(System.Collections.Generic.List{Application.ApiContracts.Setting.SetSettingItemRequest})">
+            <summary>
+            
+            </summary>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
         <member name="T:WebAPI.Controllers.v1.SupplierController">
             <summary>
             Quản lý danh sách nhà cung cấp.

@@ -7,14 +7,18 @@ namespace Application.Services.Brand
 {
     public class BrandDeleteService(IBrandSelectRepository brandSelectRepository, IBrandDeleteRepository brandDeleteRepository) : IBrandDeleteService
     {
-        public async Task<bool> DeleteBrandAsync(int id)
+        public async Task<ErrorResponse?> DeleteBrandAsync(int id)
         {
             var brand = await brandSelectRepository.GetBrandByIdAsync(id);
-
-            if (brand == null) return false;
-
+            if (brand == null)
+            {
+                return new ErrorResponse
+                {
+                    Errors = [new ErrorDetail { Message = $"Brand with Id {id} not found." }]
+                };
+            }
             await brandDeleteRepository.DeleteBrandAsync(brand);
-            return true;
+            return null;
         }
 
         public async Task<ErrorResponse?> DeleteBrandsAsync(DeleteManyBrandsRequest request)

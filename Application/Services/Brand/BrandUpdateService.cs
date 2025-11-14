@@ -7,30 +7,41 @@ namespace Application.Services.Brand
 {
     public class BrandUpdateService(IBrandSelectRepository brandSelectRepository, IBrandUpdateRepository brandUpdateRepository) : IBrandUpdateService
     {
-        public async Task<bool> UpdateBrandAsync(int id, UpdateBrandRequest request)
+        public async Task<ErrorResponse?> UpdateBrandAsync(int id, UpdateBrandRequest request)
         {
             var brand = await brandSelectRepository.GetBrandByIdAsync(id);
-
-            if (brand == null) return false;
-
+            if (brand == null)
+            {
+                return new ErrorResponse
+                {
+                    Errors = [new ErrorDetail { Message = $"Brand with Id {id} not found." }]
+                };
+            }
             if (request.Name is not null)
                 brand.Name = request.Name;
             if (request.Description is not null)
                 brand.Description = request.Description;
-
             await brandUpdateRepository.UpdateBrandAsync(brand);
-            return true;
+            return null;
         }
 
-        public async Task<bool> RestoreBrandAsync(int id)
+        public async Task<ErrorResponse?> RestoreBrandAsync(int id)
         {
             var brandList = await brandSelectRepository.GetDeletedBrandsByIdsAsync([id]);
-
-            if (brandList.Count == 0) return false;
-
+            if (brandList.Count == 0)
+            {
+                return new ErrorResponse
+                {
+                    Errors =
+                    [
+                        new ErrorDetail { Message = $"Deleted brand with Id {id} not found." }
+                    ]
+                };
+            }
             await brandUpdateRepository.RestoreBrandAsync(brandList[0]);
-            return true;
+            return null;
         }
+
 
         public async Task<ErrorResponse?> RestoreBrandsAsync(RestoreManyBrandsRequest request)
         {

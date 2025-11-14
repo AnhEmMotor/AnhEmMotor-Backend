@@ -11,20 +11,35 @@ namespace Application.Services.Supplier
 {
     public class SupplierSelectService(ISupplierSelectRepository supplierSelectRepository, ISieveProcessor sieveProcessor) : ISupplierSelectService
     {
-        public async Task<SupplierResponse?> GetSupplierByIdAsync(int id)
+        public async Task<(SupplierResponse? Data, ErrorResponse? Error)> GetSupplierByIdAsync(int id)
         {
             var supplier = await supplierSelectRepository.GetSupplierByIdAsync(id);
-            if (supplier == null) return null;
-            return new SupplierResponse
+            if (supplier == null)
             {
-                Id = supplier.Id,
-                Name = supplier.Name,
-                Phone = supplier.Phone,
-                Email = supplier.Email,
-                StatusId = supplier.StatusId,
-                Notes = supplier.Notes,
-                Address = supplier.Address
-            };
+                return (
+                    null,
+                    new ErrorResponse
+                    {
+                        Errors =
+                        [
+                            new ErrorDetail { Message = $"Supplier with Id {id} not found." }
+                        ]
+                    }
+                );
+            }
+            return (
+                new SupplierResponse
+                {
+                    Id = supplier.Id,
+                    Name = supplier.Name,
+                    Phone = supplier.Phone,
+                    Email = supplier.Email,
+                    StatusId = supplier.StatusId,
+                    Notes = supplier.Notes,
+                    Address = supplier.Address
+                },
+                null
+            );
         }
 
         public async Task<PagedResult<SupplierResponse>> GetSuppliersAsync(SieveModel sieveModel)
