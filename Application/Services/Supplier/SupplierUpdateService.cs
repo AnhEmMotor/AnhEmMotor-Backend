@@ -7,11 +7,20 @@ namespace Application.Services.Supplier
 {
     public class SupplierUpdateService(ISupplierSelectRepository supplierSelectRepository, ISupplierUpdateRepository supplierUpdateRepository) : ISupplierUpdateService
     {
-        public async Task<bool> UpdateSupplierAsync(int id, UpdateSupplierRequest request)
+        public async Task<ErrorResponse?> UpdateSupplierAsync(int id, UpdateSupplierRequest request)
         {
             var supplier = await supplierSelectRepository.GetSupplierByIdAsync(id);
 
-            if (supplier == null) return false;
+            if (supplier == null)
+            {
+                return new ErrorResponse
+                {
+                    Errors =
+                    [
+                        new ErrorDetail { Message = $"Supplier with Id {id} not found." }
+                    ]
+                };
+            }
 
             if (request.Name is not null)
                 supplier.Name = request.Name;
@@ -27,19 +36,31 @@ namespace Application.Services.Supplier
                 supplier.Address = request.Address;
 
             await supplierUpdateRepository.UpdateSupplierAsync(supplier);
-            return true;
+            return null;
         }
 
-        public async Task<bool> UpdateSupplierStatusAsync(int id, UpdateSupplierStatusRequest request)
+        public async Task<ErrorResponse?> UpdateSupplierStatusAsync(
+            int id,
+            UpdateSupplierStatusRequest request
+        )
         {
             var supplier = await supplierSelectRepository.GetSupplierByIdAsync(id);
 
-            if (supplier == null) return false;
+            if (supplier == null)
+            {
+                return new ErrorResponse
+                {
+                    Errors =
+                    [
+                        new ErrorDetail { Message = $"Supplier with Id {id} not found." }
+                    ]
+                };
+            }
 
             supplier.StatusId = request.StatusId;
 
             await supplierUpdateRepository.UpdateSupplierAsync(supplier);
-            return true;
+            return null;
         }
 
         public async Task<ErrorResponse?> UpdateManySupplierStatusAsync(UpdateManySupplierStatusRequest request)
@@ -94,14 +115,23 @@ namespace Application.Services.Supplier
             return null;
         }
 
-        public async Task<bool> RestoreSupplierAsync(int id)
+        public async Task<ErrorResponse?> RestoreSupplierAsync(int id)
         {
             var supplierList = await supplierSelectRepository.GetDeletedSuppliersByIdsAsync([id]);
 
-            if (supplierList.Count == 0) return false;
+            if (supplierList.Count == 0)
+            {
+                return new ErrorResponse
+                {
+                    Errors =
+                    [
+                        new ErrorDetail { Message = $"Deleted supplier with Id {id} not found." }
+                    ]
+                };
+            }
 
             await supplierUpdateRepository.RestoreSupplierAsync(supplierList[0]);
-            return true;
+            return null;
         }
 
         public async Task<ErrorResponse?> RestoreSuppliersAsync(RestoreManySuppliersRequest request)

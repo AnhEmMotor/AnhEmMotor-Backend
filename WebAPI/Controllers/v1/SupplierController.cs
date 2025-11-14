@@ -1,6 +1,10 @@
+using Application.ApiContracts.Brand;
 using Application.ApiContracts.Supplier;
 using Application.Interfaces.Services.Supplier;
+using Application.Services.Brand;
 using Asp.Versioning;
+using Azure.Core;
+using Domain.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 
@@ -52,10 +56,16 @@ namespace WebAPI.Controllers.v1
         /// <param name="id">Mã nhà cung cấp cần lấy thông tin.</param>
         /// <returns></returns>
         [HttpGet("{id:int}")]
+        [ProducesResponseType(typeof(SupplierResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetSupplierById(int id)
         {
-            var supplierResponse = await supplierSelectService.GetSupplierByIdAsync(id);
-            return supplierResponse == null ? NotFound() : Ok(supplierResponse);
+            var (data, error) = await supplierSelectService.GetSupplierByIdAsync(id);
+            if (error != null)
+            {
+                return NotFound(error);
+            }
+            return Ok(data);
         }
 
         /// <summary>
@@ -79,8 +89,12 @@ namespace WebAPI.Controllers.v1
         [HttpPut("{id:int}")]
         public async Task<IActionResult> UpdateSupplier(int id, [FromBody] UpdateSupplierRequest request)
         {
-            var success = await supplierUpdateService.UpdateSupplierAsync(id, request);
-            return success ? NoContent() : NotFound();
+            var error = await supplierUpdateService.UpdateSupplierAsync(id, request);
+            if (error != null)
+            {
+                return NotFound(error);
+            }
+            return Ok();
         }
 
         /// <summary>
@@ -92,8 +106,12 @@ namespace WebAPI.Controllers.v1
         [HttpPatch("{id:int}/status")]
         public async Task<IActionResult> UpdateSupplierStatus(int id, [FromBody] UpdateSupplierStatusRequest request)
         {
-            var success = await supplierUpdateService.UpdateSupplierStatusAsync(id, request);
-            return success ? NoContent() : NotFound();
+            var error = await supplierUpdateService.UpdateSupplierStatusAsync(id, request);
+            if (error != null)
+            {
+                return NotFound(error);
+            }
+            return Ok();
         }
 
         /// <summary>
@@ -120,8 +138,12 @@ namespace WebAPI.Controllers.v1
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteSupplier(int id)
         {
-            var success = await supplierDeleteService.DeleteSupplierAsync(id);
-            return success ? NoContent() : NotFound();
+            var error = await supplierDeleteService.DeleteSupplierAsync(id);
+            if (error != null)
+            {
+                return NotFound(error);
+            }
+            return Ok();
         }
 
         /// <summary>
@@ -132,8 +154,12 @@ namespace WebAPI.Controllers.v1
         [HttpPost("restore/{id:int}")]
         public async Task<IActionResult> RestoreSupplier(int id)
         {
-            var success = await supplierUpdateService.RestoreSupplierAsync(id);
-            return success ? NoContent() : NotFound();
+            var error = await supplierUpdateService.RestoreSupplierAsync(id);
+            if (error != null)
+            {
+                return NotFound(error);
+            }
+            return Ok();
         }
 
         /// <summary>

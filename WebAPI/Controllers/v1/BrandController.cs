@@ -1,8 +1,11 @@
 ﻿using Application.ApiContracts.Brand;
 using Application.Interfaces.Services.Brand;
 using Asp.Versioning;
+using Azure.Core;
+using Domain.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace WebAPI.Controllers.v1
 {
@@ -52,10 +55,16 @@ namespace WebAPI.Controllers.v1
         /// <param name="id">Mã thương hiệu cần lấy thông tin.</param>
         /// <returns></returns>
         [HttpGet("{id:int}")]
+        [ProducesResponseType(typeof(BrandResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetBrandById(int id)
         {
-            var brandResponse = await brandSelectService.GetBrandByIdAsync(id);
-            return brandResponse == null ? NotFound() : Ok(brandResponse);
+            var (data, error) = await brandSelectService.GetBrandByIdAsync(id);
+            if (error != null)
+            {
+                return NotFound(error);
+            }
+            return Ok(data);
         }
 
         /// <summary>
@@ -79,8 +88,12 @@ namespace WebAPI.Controllers.v1
         [HttpPut("{id:int}")]
         public async Task<IActionResult> UpdateBrand(int id, [FromBody] UpdateBrandRequest request)
         {
-            var success = await brandUpdateService.UpdateBrandAsync(id, request);
-            return success ? NoContent() : NotFound();
+            var error = await brandUpdateService.UpdateBrandAsync(id, request);
+            if (error != null)
+            {
+                return BadRequest(error);
+            }
+            return Ok();
         }
 
         /// <summary>
@@ -91,8 +104,12 @@ namespace WebAPI.Controllers.v1
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteBrand(int id)
         {
-            var success = await brandDeleteService.DeleteBrandAsync(id);
-            return success ? NoContent() : NotFound();
+            var error = await brandDeleteService.DeleteBrandAsync(id);
+            if (error != null)
+            {
+                return NotFound(error);
+            }
+            return Ok();
         }
 
         /// <summary>
@@ -103,8 +120,12 @@ namespace WebAPI.Controllers.v1
         [HttpPost("restore/{id:int}")]
         public async Task<IActionResult> RestoreBrand(int id)
         {
-            var success = await brandUpdateService.RestoreBrandAsync(id);
-            return success ? NoContent() : NotFound();
+            var error = await brandUpdateService.RestoreBrandAsync(id);
+            if (error != null)
+            {
+                return NotFound(error);
+            }
+            return Ok();
         }
 
         /// <summary>
