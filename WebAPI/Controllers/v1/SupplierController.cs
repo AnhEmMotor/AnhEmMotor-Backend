@@ -20,6 +20,8 @@ namespace WebAPI.Controllers.v1
     [ApiVersion("1.0")]
     [ApiController]
     [Route("api/v{version:apiVersion}/[controller]")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
     public class SupplierController(
         ISupplierInsertService supplierInsertService,
         ISupplierSelectService supplierSelectService,
@@ -32,6 +34,7 @@ namespace WebAPI.Controllers.v1
         /// <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
         /// <returns></returns>
         [HttpGet]
+        [ProducesResponseType(typeof(List<SupplierResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetSuppliers([FromQuery] SieveModel sieveModel)
         {
             var pagedResult = await supplierSelectService.GetSuppliersAsync(sieveModel);
@@ -44,6 +47,7 @@ namespace WebAPI.Controllers.v1
         /// <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
         /// <returns></returns>
         [HttpGet("deleted")]
+        [ProducesResponseType(typeof(List<SupplierResponse>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetDeletedSuppliers([FromQuery] SieveModel sieveModel)
         {
             var pagedResult = await supplierSelectService.GetDeletedSuppliersAsync(sieveModel);
@@ -74,6 +78,7 @@ namespace WebAPI.Controllers.v1
         /// <param name="request">Thông tin nhà cung cấp cần tạo.</param>
         /// <returns></returns>
         [HttpPost]
+        [ProducesResponseType(typeof(SupplierResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> CreateSupplier([FromBody] CreateSupplierRequest request)
         {
             await supplierInsertService.CreateSupplierAsync(request);
@@ -87,6 +92,7 @@ namespace WebAPI.Controllers.v1
         /// <param name="request">Thông tin nhà cung cấp cần cập nhật.</param>
         /// <returns></returns>
         [HttpPut("{id:int}")]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UpdateSupplier(int id, [FromBody] UpdateSupplierRequest request)
         {
             var error = await supplierUpdateService.UpdateSupplierAsync(id, request);
@@ -104,6 +110,7 @@ namespace WebAPI.Controllers.v1
         /// <param name="request">Trạng thái mới.</param>
         /// <returns></returns>
         [HttpPatch("{id:int}/status")]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UpdateSupplierStatus(int id, [FromBody] UpdateSupplierStatusRequest request)
         {
             var error = await supplierUpdateService.UpdateSupplierStatusAsync(id, request);
@@ -120,6 +127,7 @@ namespace WebAPI.Controllers.v1
         /// <param name="request">Danh sách Id nhà cung cấp và trạng thái mới.</param>
         /// <returns></returns>
         [HttpPatch("status")]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> UpdateManySupplierStatus([FromBody] UpdateManySupplierStatusRequest request)
         {
             var results = await supplierUpdateService.UpdateManySupplierStatusAsync(request);
@@ -136,6 +144,7 @@ namespace WebAPI.Controllers.v1
         /// <param name="id">Id của nhà cung cấp cần xoá.</param>
         /// <returns></returns>
         [HttpDelete("{id:int}")]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteSupplier(int id)
         {
             var error = await supplierDeleteService.DeleteSupplierAsync(id);
@@ -152,6 +161,7 @@ namespace WebAPI.Controllers.v1
         /// <param name="id">Id của nhà cung cấp cần khôi phục</param>
         /// <returns></returns>
         [HttpPost("restore/{id:int}")]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> RestoreSupplier(int id)
         {
             var error = await supplierUpdateService.RestoreSupplierAsync(id);
@@ -168,6 +178,7 @@ namespace WebAPI.Controllers.v1
         /// <param name="request">Danh sách Id nhà cung cấp cần xoá.</param>
         /// <returns></returns>
         [HttpPost("delete-many")]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> DeleteSuppliers([FromBody] DeleteManySuppliersRequest request)
         {
             var results = await supplierDeleteService.DeleteSuppliersAsync(request);
@@ -184,6 +195,7 @@ namespace WebAPI.Controllers.v1
         /// <param name="request">Danh sách Id nhà cung cấp cần khôi phục.</param>
         /// <returns></returns>
         [HttpPost("restore-many")]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> RestoreSuppliers([FromBody] RestoreManySuppliersRequest request)
         {
             var results = await supplierUpdateService.RestoreSuppliersAsync(request);

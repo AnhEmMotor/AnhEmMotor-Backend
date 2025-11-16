@@ -1,7 +1,10 @@
-﻿namespace Application.Interfaces.Repositories.Setting
+﻿using SettingEntity = Domain.Entities.Setting;
+
+namespace Application.Interfaces.Repositories.Setting
 {
     public interface ISettingRepository
     {
-        Task UpsertBatchAsync(IEnumerable<Domain.Entities.Setting> settings);
+        Task<IEnumerable<SettingEntity>> GetAllAsync();
+        Task UpsertBatchAsync(IEnumerable<SettingEntity> settings);
     }
 }

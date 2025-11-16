@@ -1,12 +1,16 @@
 ﻿using Application.Interfaces.Repositories.Brand;
+using Application.Interfaces.Repositories.Setting;
 using Application.Interfaces.Repositories.Supplier;
 using Application.Interfaces.Services.Brand;
+using Application.Interfaces.Services.Setting;
 using Application.Interfaces.Services.Supplier;
 using Application.Services.Brand;
+using Application.Services.Setting;
 using Application.Services.Supplier;
 using Application.Sieve;
 using Infrastructure.DBContexts;
 using Infrastructure.Repositories.Brand;
+using Infrastructure.Repositories.Setting;
 using Infrastructure.Repositories.Supplier;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -51,6 +55,9 @@ namespace Infrastructure.DependencyInjection
             services.AddScoped<ISupplierSelectService, SupplierSelectService>();
             services.AddScoped<ISupplierUpdateService, SupplierUpdateService>();
             services.AddScoped<ISupplierDeleteService, SupplierDeleteService>();
+
+            services.AddScoped<ISettingRepository, SettingRepository>();
+            services.AddScoped<ISettingService, SettingService>();
 
             services.AddScoped<ISieveProcessor, CustomSieveProcessor>();
 

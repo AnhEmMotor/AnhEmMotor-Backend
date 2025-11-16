@@ -1,10 +1,10 @@
-﻿using Application.ApiContracts.Setting;
-using Domain.Helpers;
+﻿using Domain.Helpers;
 
 namespace Application.Interfaces.Services.Setting
 {
     public interface ISettingService
     {
-        Task<ErrorResponse?> SetSettingsAsync(List<SetSettingItemRequest> requests);
+        Task<Dictionary<string, long?>> GetAllSettingsAsync();
+        Task<ErrorResponse?> SetSettingsAsync(Dictionary<string, long?> requests);
     }
 }

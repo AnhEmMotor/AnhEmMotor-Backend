@@ -1,5 +1,4 @@
-﻿using Application.ApiContracts.Setting;
-using Application.Interfaces.Repositories.Setting;
+﻿using Application.Interfaces.Repositories.Setting;
 using Application.Interfaces.Services.Setting;
 using Domain.Helpers;
 
@@ -7,7 +6,23 @@ namespace Application.Services.Setting
 {
     public class SettingService(ISettingRepository settingRepository) : ISettingService
     {
-        public async Task<ErrorResponse?> SetSettingsAsync(List<SetSettingItemRequest> requests)
+        public async Task<Dictionary<string, long?>> GetAllSettingsAsync()
+        {
+            var settingsList = await settingRepository.GetAllAsync();
+
+            if (settingsList == null || !settingsList.Any())
+            {
+                return [];
+            }
+
+            var settingsDictionary = settingsList
+                .Where(s => s.Key != null)
+                .ToDictionary(s => s.Key!, s => s.Value);
+
+            return settingsDictionary;
+        }
+
+        public async Task<ErrorResponse?> SetSettingsAsync(Dictionary<string, long?> requests)
         {
             try
             {
