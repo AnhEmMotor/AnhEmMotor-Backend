@@ -7,7 +7,7 @@ namespace Application.Services.Brand
 {
     public class BrandInsertService(IBrandInsertRepository brandInsertRepository) : IBrandInsertService
     {
-        public async Task<BrandResponse> CreateBrandAsync(CreateBrandRequest request)
+        public async Task<BrandResponse> CreateBrandAsync(CreateBrandRequest request, CancellationToken cancellationToken)
         {
             var brand = new BrandEntity
             {
@@ -15,7 +15,7 @@ namespace Application.Services.Brand
                 Description = request.Description
             };
 
-            var createdBrand = await brandInsertRepository.AddBrandAsync(brand);
+            var createdBrand = await brandInsertRepository.AddBrandAsync(brand, cancellationToken).ConfigureAwait(false);
 
             return new BrandResponse
             {

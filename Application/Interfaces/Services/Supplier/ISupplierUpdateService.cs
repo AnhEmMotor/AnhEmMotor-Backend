@@ -5,13 +5,14 @@ namespace Application.Interfaces.Services.Supplier
 {
     public interface ISupplierUpdateService
     {
-        Task<ErrorResponse?> UpdateSupplierAsync(int id, UpdateSupplierRequest request);
+        Task<ErrorResponse?> UpdateSupplierAsync(int id, UpdateSupplierRequest request, CancellationToken cancellationToken);
         Task<ErrorResponse?> UpdateSupplierStatusAsync(
             int id,
-            UpdateSupplierStatusRequest request
+            UpdateSupplierStatusRequest request,
+            CancellationToken cancellationToken
         );
-        Task<ErrorResponse?> RestoreSupplierAsync(int id);
-        Task<ErrorResponse?> UpdateManySupplierStatusAsync(UpdateManySupplierStatusRequest request);
-        Task<ErrorResponse?> RestoreSuppliersAsync(RestoreManySuppliersRequest request);
+        Task<ErrorResponse?> RestoreSupplierAsync(int id, CancellationToken cancellationToken);
+        Task<ErrorResponse?> UpdateManySupplierStatusAsync(UpdateManySupplierStatusRequest request, CancellationToken cancellationToken);
+        Task<ErrorResponse?> RestoreSuppliersAsync(RestoreManySuppliersRequest request, CancellationToken cancellationToken);
     }
 }

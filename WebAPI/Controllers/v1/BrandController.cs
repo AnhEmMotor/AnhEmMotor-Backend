@@ -29,12 +29,13 @@ namespace WebAPI.Controllers.v1
         /// Lấy danh sách thương hiệu (có phân trang, lọc, sắp xếp).
         /// </summary>
         /// <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpGet]
         [ProducesResponseType(typeof(List<BrandResponse>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetBrands([FromQuery] SieveModel sieveModel)
+        public async Task<IActionResult> GetBrands([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
         {
-            var pagedResult = await brandSelectService.GetBrandsAsync(sieveModel);
+            var pagedResult = await brandSelectService.GetBrandsAsync(sieveModel, cancellationToken).ConfigureAwait(true);
             return Ok(pagedResult);
         }
 
@@ -42,12 +43,13 @@ namespace WebAPI.Controllers.v1
         /// Lấy danh sách thương hiệu đã bị xoá (có phân trang, lọc, sắp xếp).
         /// </summary>
         /// <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpGet("deleted")]
         [ProducesResponseType(typeof(List<BrandResponse>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetDeletedBrands([FromQuery] SieveModel sieveModel)
+        public async Task<IActionResult> GetDeletedBrands([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
         {
-            var pagedResult = await brandSelectService.GetDeletedBrandsAsync(sieveModel);
+            var pagedResult = await brandSelectService.GetDeletedBrandsAsync(sieveModel, cancellationToken).ConfigureAwait(true);
             return Ok(pagedResult);
         }
 
@@ -55,13 +57,14 @@ namespace WebAPI.Controllers.v1
         /// Lấy thông tin của thương hiệu được chọn.
         /// </summary>
         /// <param name="id">Mã thương hiệu cần lấy thông tin.</param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpGet("{id:int}")]
         [ProducesResponseType(typeof(BrandResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetBrandById(int id)
+        public async Task<IActionResult> GetBrandById(int id, CancellationToken cancellationToken)
         {
-            var (data, error) = await brandSelectService.GetBrandByIdAsync(id);
+            var (data, error) = await brandSelectService.GetBrandByIdAsync(id, cancellationToken).ConfigureAwait(true);
             if (error != null)
             {
                 return NotFound(error);
@@ -73,12 +76,13 @@ namespace WebAPI.Controllers.v1
         /// Tạo thương hiệu mới.
         /// </summary>
         /// <param name="request">Truyền tên và mô tả cho thương hiệu đó. Cả 2 đều là 1 chuỗi.</param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpPost]
         [ProducesResponseType(typeof(BrandResponse), StatusCodes.Status200OK)]
-        public async Task<IActionResult> CreateBrand([FromBody] CreateBrandRequest request)
+        public async Task<IActionResult> CreateBrand([FromBody] CreateBrandRequest request, CancellationToken cancellationToken)
         {
-            await brandInsertService.CreateBrandAsync(request);
+            await brandInsertService.CreateBrandAsync(request, cancellationToken).ConfigureAwait(true);
             return Ok();
         }
 
@@ -87,12 +91,13 @@ namespace WebAPI.Controllers.v1
         /// </summary>
         /// <param name="id">Id thương hiệu cần cập nhật.</param>
         /// <param name="request">Tên thương hiệu và mô tả cho thương hiệu đó, tất cả đều là 1 chuỗi.</param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpPut("{id:int}")]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UpdateBrand(int id, [FromBody] UpdateBrandRequest request)
+        public async Task<IActionResult> UpdateBrand(int id, [FromBody] UpdateBrandRequest request, CancellationToken cancellationToken)
         {
-            var error = await brandUpdateService.UpdateBrandAsync(id, request);
+            var error = await brandUpdateService.UpdateBrandAsync(id, request, cancellationToken).ConfigureAwait(true);
             if (error != null)
             {
                 return BadRequest(error);
@@ -104,12 +109,13 @@ namespace WebAPI.Controllers.v1
         /// Xoá thương hiệu.
         /// </summary>
         /// <param name="id">Id của thương hiệu cần xoá.</param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpDelete("{id:int}")]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> DeleteBrand(int id)
+        public async Task<IActionResult> DeleteBrand(int id, CancellationToken cancellationToken)
         {
-            var error = await brandDeleteService.DeleteBrandAsync(id);
+            var error = await brandDeleteService.DeleteBrandAsync(id, cancellationToken).ConfigureAwait(true);
             if (error != null)
             {
                 return NotFound(error);
@@ -121,12 +127,13 @@ namespace WebAPI.Controllers.v1
         /// Khôi phục lại thương hiệu đã xoá.
         /// </summary>
         /// <param name="id">Id của thương hiệu cần khôi phục</param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpPost("restore/{id:int}")]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> RestoreBrand(int id)
+        public async Task<IActionResult> RestoreBrand(int id, CancellationToken cancellationToken)
         {
-            var error = await brandUpdateService.RestoreBrandAsync(id);
+            var error = await brandUpdateService.RestoreBrandAsync(id, cancellationToken).ConfigureAwait(true);
             if (error != null)
             {
                 return NotFound(error);
@@ -138,12 +145,13 @@ namespace WebAPI.Controllers.v1
         /// Xoá nhiều thương hiệu cùng lúc.
         /// </summary>
         /// <param name="request">Danh sách Id thương hiệu cần xoá.</param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpPost("delete-many")]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> DeleteBrands([FromBody] DeleteManyBrandsRequest request)
+        public async Task<IActionResult> DeleteBrands([FromBody] DeleteManyBrandsRequest request, CancellationToken cancellationToken)
         {
-            var results = await brandDeleteService.DeleteBrandsAsync(request);
+            var results = await brandDeleteService.DeleteBrandsAsync(request, cancellationToken).ConfigureAwait(true);
             if (results != null)
             {
                 return BadRequest(results);
@@ -155,12 +163,13 @@ namespace WebAPI.Controllers.v1
         /// Khôi phục nhiều thương hiệu đã xoá cùng lúc.
         /// </summary>
         /// <param name="request">Danh sách Id thương hiệu cần khôi phục.</param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpPost("restore-many")]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> RestoreBrands([FromBody] RestoreManyBrandsRequest request)
+        public async Task<IActionResult> RestoreBrands([FromBody] RestoreManyBrandsRequest request, CancellationToken cancellationToken)
         {
-            var results = await brandUpdateService.RestoreBrandsAsync(request);
+            var results = await brandUpdateService.RestoreBrandsAsync(request, cancellationToken).ConfigureAwait(true);
             if (results != null)
             {
                 return BadRequest(results);

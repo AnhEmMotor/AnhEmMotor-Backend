@@ -4,6 +4,6 @@ namespace Application.Interfaces.Repositories.Brand
 {
     public interface IBrandInsertRepository
     {
-        Task<BrandEntity> AddBrandAsync(BrandEntity brand);
+        Task<BrandEntity> AddBrandAsync(BrandEntity brand, CancellationToken cancellationToken);
     }
 }

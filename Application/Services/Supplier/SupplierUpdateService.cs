@@ -7,9 +7,9 @@ namespace Application.Services.Supplier
 {
     public class SupplierUpdateService(ISupplierSelectRepository supplierSelectRepository, ISupplierUpdateRepository supplierUpdateRepository) : ISupplierUpdateService
     {
-        public async Task<ErrorResponse?> UpdateSupplierAsync(int id, UpdateSupplierRequest request)
+        public async Task<ErrorResponse?> UpdateSupplierAsync(int id, UpdateSupplierRequest request, CancellationToken cancellationToken)
         {
-            var supplier = await supplierSelectRepository.GetSupplierByIdAsync(id);
+            var supplier = await supplierSelectRepository.GetSupplierByIdAsync(id, cancellationToken).ConfigureAwait(false);
 
             if (supplier == null)
             {
@@ -35,16 +35,17 @@ namespace Application.Services.Supplier
             if (request.Address is not null)
                 supplier.Address = request.Address;
 
-            await supplierUpdateRepository.UpdateSupplierAsync(supplier);
+            await supplierUpdateRepository.UpdateSupplierAsync(supplier, cancellationToken).ConfigureAwait(false);
             return null;
         }
 
         public async Task<ErrorResponse?> UpdateSupplierStatusAsync(
             int id,
-            UpdateSupplierStatusRequest request
+            UpdateSupplierStatusRequest request,
+            CancellationToken cancellationToken
         )
         {
-            var supplier = await supplierSelectRepository.GetSupplierByIdAsync(id);
+            var supplier = await supplierSelectRepository.GetSupplierByIdAsync(id, cancellationToken).ConfigureAwait(false);
 
             if (supplier == null)
             {
@@ -59,11 +60,11 @@ namespace Application.Services.Supplier
 
             supplier.StatusId = request.StatusId;
 
-            await supplierUpdateRepository.UpdateSupplierAsync(supplier);
+            await supplierUpdateRepository.UpdateSupplierAsync(supplier, cancellationToken).ConfigureAwait(false);
             return null;
         }
 
-        public async Task<ErrorResponse?> UpdateManySupplierStatusAsync(UpdateManySupplierStatusRequest request)
+        public async Task<ErrorResponse?> UpdateManySupplierStatusAsync(UpdateManySupplierStatusRequest request, CancellationToken cancellationToken)
         {
             if (request.Ids == null || request.Ids.Count == 0)
             {
@@ -71,8 +72,8 @@ namespace Application.Services.Supplier
             }
 
             var errorDetails = new List<ErrorDetail>();
-            var activeSuppliers = await supplierSelectRepository.GetActiveSuppliersByIdsAsync(request.Ids);
-            var allSuppliers = await supplierSelectRepository.GetAllSuppliersByIdsAsync(request.Ids);
+            var activeSuppliers = await supplierSelectRepository.GetActiveSuppliersByIdsAsync(request.Ids, cancellationToken).ConfigureAwait(false);
+            var allSuppliers = await supplierSelectRepository.GetAllSuppliersByIdsAsync(request.Ids, cancellationToken).ConfigureAwait(false);
 
             foreach (var id in request.Ids)
             {
@@ -84,7 +85,7 @@ namespace Application.Services.Supplier
                     errorDetails.Add(new ErrorDetail
                     {
                         Message = "Supplier not found",
-                        Field = "Supplier ID: " + id.ToString()
+                        Field = $"Supplier ID: {id}",
                     });
                 }
                 else if (activeSupplier is null)
@@ -109,15 +110,15 @@ namespace Application.Services.Supplier
 
             if (activeSuppliers.Count > 0)
             {
-                await supplierUpdateRepository.UpdateSuppliersAsync(activeSuppliers);
+                await supplierUpdateRepository.UpdateSuppliersAsync(activeSuppliers, cancellationToken).ConfigureAwait(false);
             }
 
             return null;
         }
 
-        public async Task<ErrorResponse?> RestoreSupplierAsync(int id)
+        public async Task<ErrorResponse?> RestoreSupplierAsync(int id, CancellationToken cancellationToken)
         {
-            var supplierList = await supplierSelectRepository.GetDeletedSuppliersByIdsAsync([id]);
+            var supplierList = await supplierSelectRepository.GetDeletedSuppliersByIdsAsync([id], cancellationToken).ConfigureAwait(false);
 
             if (supplierList.Count == 0)
             {
@@ -130,11 +131,11 @@ namespace Application.Services.Supplier
                 };
             }
 
-            await supplierUpdateRepository.RestoreSupplierAsync(supplierList[0]);
+            await supplierUpdateRepository.RestoreSupplierAsync(supplierList[0], cancellationToken).ConfigureAwait(false);
             return null;
         }
 
-        public async Task<ErrorResponse?> RestoreSuppliersAsync(RestoreManySuppliersRequest request)
+        public async Task<ErrorResponse?> RestoreSuppliersAsync(RestoreManySuppliersRequest request, CancellationToken cancellationToken)
         {
             if (request.Ids == null || request.Ids.Count == 0)
             {
@@ -142,8 +143,8 @@ namespace Application.Services.Supplier
             }
 
             var errorDetails = new List<ErrorDetail>();
-            var deletedSuppliers = await supplierSelectRepository.GetDeletedSuppliersByIdsAsync(request.Ids);
-            var allSuppliers = await supplierSelectRepository.GetAllSuppliersByIdsAsync(request.Ids);
+            var deletedSuppliers = await supplierSelectRepository.GetDeletedSuppliersByIdsAsync(request.Ids, cancellationToken).ConfigureAwait(false);
+            var allSuppliers = await supplierSelectRepository.GetAllSuppliersByIdsAsync(request.Ids, cancellationToken).ConfigureAwait(false);
 
             foreach (var id in request.Ids)
             {
@@ -155,7 +156,7 @@ namespace Application.Services.Supplier
                     errorDetails.Add(new ErrorDetail
                     {
                         Message = "Supplier not found",
-                        Field = "Supplier ID: " + id.ToString()
+                        Field = $"Supplier ID: {id}"
                     });
                 }
                 else if (deletedSupplier == null)
@@ -175,7 +176,7 @@ namespace Application.Services.Supplier
 
             if (deletedSuppliers.Count > 0)
             {
-                await supplierUpdateRepository.RestoreSuppliersAsync(deletedSuppliers);
+                await supplierUpdateRepository.RestoreSuppliersAsync(deletedSuppliers, cancellationToken).ConfigureAwait(false);
             }
 
             return null;

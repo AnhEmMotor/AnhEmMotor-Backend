@@ -7,9 +7,9 @@ namespace Application.Services.Brand
 {
     public class BrandUpdateService(IBrandSelectRepository brandSelectRepository, IBrandUpdateRepository brandUpdateRepository) : IBrandUpdateService
     {
-        public async Task<ErrorResponse?> UpdateBrandAsync(int id, UpdateBrandRequest request)
+        public async Task<ErrorResponse?> UpdateBrandAsync(int id, UpdateBrandRequest request, CancellationToken cancellationToken)
         {
-            var brand = await brandSelectRepository.GetBrandByIdAsync(id);
+            var brand = await brandSelectRepository.GetBrandByIdAsync(id, cancellationToken).ConfigureAwait(false);
             if (brand == null)
             {
                 return new ErrorResponse
@@ -21,13 +21,13 @@ namespace Application.Services.Brand
                 brand.Name = request.Name;
             if (request.Description is not null)
                 brand.Description = request.Description;
-            await brandUpdateRepository.UpdateBrandAsync(brand);
+            await brandUpdateRepository.UpdateBrandAsync(brand, cancellationToken).ConfigureAwait(false);
             return null;
         }
 
-        public async Task<ErrorResponse?> RestoreBrandAsync(int id)
+        public async Task<ErrorResponse?> RestoreBrandAsync(int id, CancellationToken cancellationToken)
         {
-            var brandList = await brandSelectRepository.GetDeletedBrandsByIdsAsync([id]);
+            var brandList = await brandSelectRepository.GetDeletedBrandsByIdsAsync([id], cancellationToken).ConfigureAwait(false);
             if (brandList.Count == 0)
             {
                 return new ErrorResponse
@@ -38,12 +38,12 @@ namespace Application.Services.Brand
                     ]
                 };
             }
-            await brandUpdateRepository.RestoreBrandAsync(brandList[0]);
+            await brandUpdateRepository.RestoreBrandAsync(brandList[0], cancellationToken).ConfigureAwait(false);
             return null;
         }
 
 
-        public async Task<ErrorResponse?> RestoreBrandsAsync(RestoreManyBrandsRequest request)
+        public async Task<ErrorResponse?> RestoreBrandsAsync(RestoreManyBrandsRequest request, CancellationToken cancellationToken)
         {
             if (request.Ids == null || request.Ids.Count == 0)
             {
@@ -51,8 +51,8 @@ namespace Application.Services.Brand
             }
 
             var errorDetails = new List<ErrorDetail>();
-            var deletedBrands = await brandSelectRepository.GetDeletedBrandsByIdsAsync(request.Ids);
-            var allBrands = await brandSelectRepository.GetAllBrandsByIdsAsync(request.Ids);
+            var deletedBrands = await brandSelectRepository.GetDeletedBrandsByIdsAsync(request.Ids, cancellationToken).ConfigureAwait(false);
+            var allBrands = await brandSelectRepository.GetAllBrandsByIdsAsync(request.Ids, cancellationToken).ConfigureAwait(false);
 
             foreach (var id in request.Ids)
             {
@@ -64,7 +64,7 @@ namespace Application.Services.Brand
                     errorDetails.Add(new ErrorDetail
                     {
                         Message = "Brand not found",
-                        Field = "Brand ID: " + id.ToString()
+                        Field = $"Brand ID: {id}"
                     });
                 }
                 else if (deletedBrand == null)
@@ -84,7 +84,7 @@ namespace Application.Services.Brand
 
             if (deletedBrands.Count > 0)
             {
-                await brandUpdateRepository.RestoreBrandsAsync(deletedBrands);
+                await brandUpdateRepository.RestoreBrandsAsync(deletedBrands, cancellationToken).ConfigureAwait(false);
             }
 
             return null;

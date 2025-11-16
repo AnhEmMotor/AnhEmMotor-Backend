@@ -7,9 +7,9 @@ namespace Infrastructure.Repositories.Brand
 {
     public class BrandSelectRepository(ApplicationDBContext context) : IBrandSelectRepository
     {
-        public async Task<BrandEntity?> GetBrandByIdAsync(int id)
+        public ValueTask<BrandEntity?> GetBrandByIdAsync(int id, CancellationToken cancellationToken)
         {
-            return await context.Brands.FindAsync(id);
+            return context.Brands.FindAsync([id, cancellationToken], cancellationToken: cancellationToken);
         }
 
         public IQueryable<BrandEntity> GetBrands()
@@ -27,19 +27,19 @@ namespace Infrastructure.Repositories.Brand
             return context.All<BrandEntity>().AsNoTracking();
         }
 
-        public async Task<List<BrandEntity>> GetActiveBrandsByIdsAsync(List<int> ids)
+        public Task<List<BrandEntity>> GetActiveBrandsByIdsAsync(List<int> ids, CancellationToken cancellationToken)
         {
-            return await context.Brands.Where(b => b.Id.HasValue && ids.Contains(b.Id.Value)).ToListAsync();
+            return context.Brands.Where(b => b.Id.HasValue && ids.Contains(b.Id.Value)).ToListAsync(cancellationToken);
         }
 
-        public async Task<List<BrandEntity>> GetDeletedBrandsByIdsAsync(List<int> ids)
+        public Task<List<BrandEntity>> GetDeletedBrandsByIdsAsync(List<int> ids, CancellationToken cancellationToken)
         {
-            return await context.DeletedOnly<BrandEntity>().Where(b => b.Id.HasValue && ids.Contains(b.Id.Value)).ToListAsync();
+            return context.DeletedOnly<BrandEntity>().Where(b => b.Id.HasValue && ids.Contains(b.Id.Value)).ToListAsync(cancellationToken);
         }
 
-        public async Task<List<BrandEntity>> GetAllBrandsByIdsAsync(List<int> ids)
+        public Task<List<BrandEntity>> GetAllBrandsByIdsAsync(List<int> ids, CancellationToken cancellationToken)
         {
-            return await context.All<BrandEntity>().Where(b => b.Id.HasValue && ids.Contains(b.Id.Value)).ToListAsync();
+            return context.All<BrandEntity>().Where(b => b.Id.HasValue && ids.Contains(b.Id.Value)).ToListAsync(cancellationToken);
         }
     }
 }

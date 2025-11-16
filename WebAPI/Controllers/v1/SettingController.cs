@@ -21,12 +21,13 @@ namespace WebAPI.Controllers.v1
         /// Sửa các cài đặt hệ thống (cập nhật số lượng cảnh báo tồn kho, số lượng mua tối đa, ...)
         /// </summary>
         /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpPut]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> SetSettings([FromBody][ValidSettingKeys] Dictionary<string, long?> request)
+        public async Task<IActionResult> SetSettings([FromBody][ValidSettingKeys] Dictionary<string, long?> request, CancellationToken cancellationToken)
         {
-            var errorResponse = await settingService.SetSettingsAsync(request);
+            var errorResponse = await settingService.SetSettingsAsync(request, cancellationToken).ConfigureAwait(true);
             if (errorResponse != null)
             {
                 return BadRequest(errorResponse);
@@ -37,12 +38,13 @@ namespace WebAPI.Controllers.v1
         /// <summary>
         /// Lấy các thông số cài đặt hệ thống (số lượng cảnh báo tồn kho, số lượng mua tối đa, ...)
         /// </summary>
+        /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpGet]
         [ProducesResponseType(typeof(Dictionary<string, long?>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetAllSettings()
+        public async Task<IActionResult> GetAllSettings(CancellationToken cancellationToken)
         {
-            var settings = await settingService.GetAllSettingsAsync();
+            var settings = await settingService.GetAllSettingsAsync(cancellationToken).ConfigureAwait(true);
             return Ok(settings);
         }
     }

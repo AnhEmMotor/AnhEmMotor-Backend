@@ -59,7 +59,7 @@ namespace Infrastructure.DBContexts
             var entries = ChangeTracker.Entries();
             foreach (var entry in entries)
             {
-                var hasAuditingProperties = entry.Properties.Any(p => p.Metadata.Name == AuditingProperties.CreatedAt);
+                var hasAuditingProperties = entry.Properties.Any(p => string.Compare(p.Metadata.Name, AuditingProperties.CreatedAt) == 0);
                 if (!hasAuditingProperties) continue;
 
                 switch (entry.State)
@@ -91,7 +91,7 @@ namespace Infrastructure.DBContexts
         {
             var entry = Entry(entity);
 
-            var hasAuditingProperties = entry.Properties.Any(p => p.Metadata.Name == AuditingProperties.CreatedAt);
+            var hasAuditingProperties = entry.Properties.Any(p => string.Compare(p.Metadata.Name, AuditingProperties.CreatedAt) == 0);
             if (!hasAuditingProperties) return;
 
             entry.Property(AuditingProperties.DeletedAt).CurrentValue = null;

@@ -4,6 +4,6 @@ namespace Application.Interfaces.Services.Supplier
 {
     public interface ISupplierInsertService
     {
-        Task<SupplierResponse> CreateSupplierAsync(CreateSupplierRequest request);
+        Task<SupplierResponse> CreateSupplierAsync(CreateSupplierRequest request, CancellationToken cancellationToken);
     }
 }

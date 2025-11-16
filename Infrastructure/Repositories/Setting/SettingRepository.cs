@@ -7,16 +7,21 @@ namespace Infrastructure.Repositories.Setting
 {
     public class SettingRepository(ApplicationDBContext context) : ISettingRepository
     {
-        public async Task<IEnumerable<SettingEntity>> GetAllAsync()
+        public Task<IEnumerable<SettingEntity>> GetAllAsync(CancellationToken cancellationToken)
         {
-            return await context.Settings.AsNoTracking().ToListAsync();
+            return context.Settings.AsNoTracking().ToListAsync(cancellationToken).ContinueWith(
+                t => t.Result as IEnumerable<SettingEntity>,
+                cancellationToken,
+                TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default
+            );
         }
 
-        public async Task UpsertBatchAsync(IEnumerable<SettingEntity> settings)
+        public async Task UpsertBatchAsync(IEnumerable<SettingEntity> settings, CancellationToken cancellationToken)
         {
             foreach (var setting in settings)
             {
-                var existingSetting = await context.Settings.FirstOrDefaultAsync(s => s.Key == setting.Key);
+                var existingSetting = await context.Settings.FirstOrDefaultAsync(s => string.Compare(s.Key, setting.Key) == 0, cancellationToken).ConfigureAwait(false);
                 if (existingSetting != null)
                 {
                     existingSetting.Value = setting.Value;
@@ -27,7 +32,7 @@ namespace Infrastructure.Repositories.Setting
                     context.Settings.Add(setting);
                 }
             }
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }

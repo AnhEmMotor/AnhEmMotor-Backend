@@ -22,68 +22,77 @@
             <param name="brandUpdateService"></param>
             <param name="brandDeleteService"></param>
         </member>
-        <member name="M:WebAPI.Controllers.v1.BrandController.GetBrands(Sieve.Models.SieveModel)">
+        <member name="M:WebAPI.Controllers.v1.BrandController.GetBrands(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách thương hiệu (có phân trang, lọc, sắp xếp).
             </summary>
             <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
+            <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.BrandController.GetDeletedBrands(Sieve.Models.SieveModel)">
+        <member name="M:WebAPI.Controllers.v1.BrandController.GetDeletedBrands(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách thương hiệu đã bị xoá (có phân trang, lọc, sắp xếp).
             </summary>
             <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
+            <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.BrandController.GetBrandById(System.Int32)">
+        <member name="M:WebAPI.Controllers.v1.BrandController.GetBrandById(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Lấy thông tin của thương hiệu được chọn.
             </summary>
             <param name="id">Mã thương hiệu cần lấy thông tin.</param>
+            <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.BrandController.CreateBrand(Application.ApiContracts.Brand.CreateBrandRequest)">
+        <member name="M:WebAPI.Controllers.v1.BrandController.CreateBrand(Application.ApiContracts.Brand.CreateBrandRequest,System.Threading.CancellationToken)">
             <summary>
             Tạo thương hiệu mới.
             </summary>
             <param name="request">Truyền tên và mô tả cho thương hiệu đó. Cả 2 đều là 1 chuỗi.</param>
+            <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.BrandController.UpdateBrand(System.Int32,Application.ApiContracts.Brand.UpdateBrandRequest)">
+        <member name="M:WebAPI.Controllers.v1.BrandController.UpdateBrand(System.Int32,Application.ApiContracts.Brand.UpdateBrandRequest,System.Threading.CancellationToken)">
             <summary>
             Cập nhật thông tin thương hiệu.
             </summary>
             <param name="id">Id thương hiệu cần cập nhật.</param>
             <param name="request">Tên thương hiệu và mô tả cho thương hiệu đó, tất cả đều là 1 chuỗi.</param>
+            <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.BrandController.DeleteBrand(System.Int32)">
+        <member name="M:WebAPI.Controllers.v1.BrandController.DeleteBrand(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Xoá thương hiệu.
             </summary>
             <param name="id">Id của thương hiệu cần xoá.</param>
+            <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.BrandController.RestoreBrand(System.Int32)">
+        <member name="M:WebAPI.Controllers.v1.BrandController.RestoreBrand(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Khôi phục lại thương hiệu đã xoá.
             </summary>
             <param name="id">Id của thương hiệu cần khôi phục</param>
+            <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.BrandController.DeleteBrands(Application.ApiContracts.Brand.DeleteManyBrandsRequest)">
+        <member name="M:WebAPI.Controllers.v1.BrandController.DeleteBrands(Application.ApiContracts.Brand.DeleteManyBrandsRequest,System.Threading.CancellationToken)">
             <summary>
             Xoá nhiều thương hiệu cùng lúc.
             </summary>
             <param name="request">Danh sách Id thương hiệu cần xoá.</param>
+            <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.BrandController.RestoreBrands(Application.ApiContracts.Brand.RestoreManyBrandsRequest)">
+        <member name="M:WebAPI.Controllers.v1.BrandController.RestoreBrands(Application.ApiContracts.Brand.RestoreManyBrandsRequest,System.Threading.CancellationToken)">
             <summary>
             Khôi phục nhiều thương hiệu đã xoá cùng lúc.
             </summary>
             <param name="request">Danh sách Id thương hiệu cần khôi phục.</param>
+            <param name="cancellationToken"></param>
             <returns></returns>
         </member>
         <member name="T:WebAPI.Controllers.v1.SettingController">
@@ -98,17 +107,19 @@
             </summary>
             <param name="settingService"></param>
         </member>
-        <member name="M:WebAPI.Controllers.v1.SettingController.SetSettings(System.Collections.Generic.Dictionary{System.String,System.Nullable{System.Int64}})">
+        <member name="M:WebAPI.Controllers.v1.SettingController.SetSettings(System.Collections.Generic.Dictionary{System.String,System.Nullable{System.Int64}},System.Threading.CancellationToken)">
             <summary>
             Sửa các cài đặt hệ thống (cập nhật số lượng cảnh báo tồn kho, số lượng mua tối đa, ...)
             </summary>
             <param name="request"></param>
+            <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.SettingController.GetAllSettings">
+        <member name="M:WebAPI.Controllers.v1.SettingController.GetAllSettings(System.Threading.CancellationToken)">
             <summary>
             Lấy các thông số cài đặt hệ thống (số lượng cảnh báo tồn kho, số lượng mua tối đa, ...)
             </summary>
+            <param name="cancellationToken"></param>
             <returns></returns>
         </member>
         <member name="T:WebAPI.Controllers.v1.SupplierController">
@@ -129,84 +140,153 @@
             <param name="supplierUpdateService"></param>
             <param name="supplierDeleteService"></param>
         </member>
-        <member name="M:WebAPI.Controllers.v1.SupplierController.GetSuppliers(Sieve.Models.SieveModel)">
+        <member name="M:WebAPI.Controllers.v1.SupplierController.GetSuppliers(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách nhà cung cấp (có phân trang, lọc, sắp xếp).
             </summary>
             <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
+            <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.SupplierController.GetDeletedSuppliers(Sieve.Models.SieveModel)">
+        <member name="M:WebAPI.Controllers.v1.SupplierController.GetDeletedSuppliers(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách nhà cung cấp đã bị xoá (có phân trang, lọc, sắp xếp).
             </summary>
             <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
+            <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.SupplierController.GetSupplierById(System.Int32)">
+        <member name="M:WebAPI.Controllers.v1.SupplierController.GetSupplierById(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Lấy thông tin của nhà cung cấp được chọn.
             </summary>
             <param name="id">Mã nhà cung cấp cần lấy thông tin.</param>
+            <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.SupplierController.CreateSupplier(Application.ApiContracts.Supplier.CreateSupplierRequest)">
+        <member name="M:WebAPI.Controllers.v1.SupplierController.CreateSupplier(Application.ApiContracts.Supplier.CreateSupplierRequest,System.Threading.CancellationToken)">
             <summary>
             Tạo nhà cung cấp mới.
             </summary>
             <param name="request">Thông tin nhà cung cấp cần tạo.</param>
+            <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.SupplierController.UpdateSupplier(System.Int32,Application.ApiContracts.Supplier.UpdateSupplierRequest)">
+        <member name="M:WebAPI.Controllers.v1.SupplierController.UpdateSupplier(System.Int32,Application.ApiContracts.Supplier.UpdateSupplierRequest,System.Threading.CancellationToken)">
             <summary>
             Cập nhật thông tin nhà cung cấp (bao gồm cả trạng thái của nó).
             </summary>
             <param name="id">Id nhà cung cấp cần cập nhật.</param>
             <param name="request">Thông tin nhà cung cấp cần cập nhật.</param>
+            <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.SupplierController.UpdateSupplierStatus(System.Int32,Application.ApiContracts.Supplier.UpdateSupplierStatusRequest)">
+        <member name="M:WebAPI.Controllers.v1.SupplierController.UpdateSupplierStatus(System.Int32,Application.ApiContracts.Supplier.UpdateSupplierStatusRequest,System.Threading.CancellationToken)">
             <summary>
             Cập nhật trạng thái của nhà cung cấp.
             </summary>
             <param name="id">Id nhà cung cấp cần cập nhật trạng thái.</param>
             <param name="request">Trạng thái mới.</param>
+            <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.SupplierController.UpdateManySupplierStatus(Application.ApiContracts.Supplier.UpdateManySupplierStatusRequest)">
+        <member name="M:WebAPI.Controllers.v1.SupplierController.UpdateManySupplierStatus(Application.ApiContracts.Supplier.UpdateManySupplierStatusRequest,System.Threading.CancellationToken)">
             <summary>
             Cập nhật trạng thái của nhiều nhà cung cấp cùng lúc.
             </summary>
             <param name="request">Danh sách Id nhà cung cấp và trạng thái mới.</param>
+            <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.SupplierController.DeleteSupplier(System.Int32)">
+        <member name="M:WebAPI.Controllers.v1.SupplierController.DeleteSupplier(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Xoá nhà cung cấp.
             </summary>
             <param name="id">Id của nhà cung cấp cần xoá.</param>
+            <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.SupplierController.RestoreSupplier(System.Int32)">
+        <member name="M:WebAPI.Controllers.v1.SupplierController.RestoreSupplier(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Khôi phục lại nhà cung cấp đã xoá.
             </summary>
             <param name="id">Id của nhà cung cấp cần khôi phục</param>
+            <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.SupplierController.DeleteSuppliers(Application.ApiContracts.Supplier.DeleteManySuppliersRequest)">
+        <member name="M:WebAPI.Controllers.v1.SupplierController.DeleteSuppliers(Application.ApiContracts.Supplier.DeleteManySuppliersRequest,System.Threading.CancellationToken)">
             <summary>
             Xoá nhiều nhà cung cấp cùng lúc.
             </summary>
             <param name="request">Danh sách Id nhà cung cấp cần xoá.</param>
+            <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.SupplierController.RestoreSuppliers(Application.ApiContracts.Supplier.RestoreManySuppliersRequest)">
+        <member name="M:WebAPI.Controllers.v1.SupplierController.RestoreSuppliers(Application.ApiContracts.Supplier.RestoreManySuppliersRequest,System.Threading.CancellationToken)">
             <summary>
             Khôi phục nhiều nhà cung cấp đã xoá cùng lúc.
             </summary>
             <param name="request">Danh sách Id nhà cung cấp cần khôi phục.</param>
+            <param name="cancellationToken"></param>
             <returns></returns>
+        </member>
+        <member name="T:WebAPI.Middleware.DevelopmentErrorDetails">
+            <summary>
+            Mô hình chi tiết lỗi đầy đủ cho mục đích debug trong môi trường Development.
+            </summary>
+        </member>
+        <member name="P:WebAPI.Middleware.DevelopmentErrorDetails.Message">
+            <summary>
+            Thông báo của ngoại lệ.
+            </summary>
+        </member>
+        <member name="P:WebAPI.Middleware.DevelopmentErrorDetails.Type">
+            <summary>
+            Loại (Type) đầy đủ của ngoại lệ.
+            </summary>
+        </member>
+        <member name="P:WebAPI.Middleware.DevelopmentErrorDetails.Details">
+            <summary>
+            Chuỗi `ToString()` đầy đủ của ngoại lệ (thường bao gồm stack trace).
+            </summary>
+        </member>
+        <member name="P:WebAPI.Middleware.DevelopmentErrorDetails.InnerException">
+            <summary>
+            Chi tiết của ngoại lệ bên trong (InnerException), nếu có.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Middleware.DevelopmentErrorDetails.#ctor(System.Exception)">
+            <summary>
+            Khởi tạo chi tiết lỗi từ một ngoại lệ.
+            </summary>
+            <param name="ex">Ngoại lệ để trích xuất thông tin.</param>
+        </member>
+        <member name="T:WebAPI.Middleware.DevelopmentErrorResponse">
+            <summary>
+            Cấu trúc phản hồi lỗi chi tiết cho môi trường Development.
+            </summary>
+            <param name="exception">Ngoại lệ gốc được sử dụng để xây dựng phản hồi chi tiết.</param>
+        </member>
+        <member name="M:WebAPI.Middleware.DevelopmentErrorResponse.#ctor(System.Exception)">
+            <summary>
+            Cấu trúc phản hồi lỗi chi tiết cho môi trường Development.
+            </summary>
+            <param name="exception">Ngoại lệ gốc được sử dụng để xây dựng phản hồi chi tiết.</param>
+        </member>
+        <member name="P:WebAPI.Middleware.DevelopmentErrorResponse.Errors">
+            <summary>
+            Chi tiết lỗi đầy đủ, bao gồm cả stack trace và inner exception.
+            </summary>
+        </member>
+        <member name="T:WebAPI.Middleware.ErrorDetails">
+            <summary>
+            Mô hình chi tiết lỗi cơ bản, chỉ chứa thông báo.
+            </summary>
+        </member>
+        <member name="P:WebAPI.Middleware.ErrorDetails.Message">
+            <summary>
+            Thông báo lỗi.
+            </summary>
         </member>
         <member name="T:WebAPI.Middleware.GlobalExceptionHandler">
             <summary>
@@ -249,64 +329,6 @@
             </summary>
             <param name="message">Thông báo lỗi chung, an toàn để hiển thị cho người dùng.</param>
         </member>
-        <member name="T:WebAPI.Middleware.ErrorDetails">
-            <summary>
-            Mô hình chi tiết lỗi cơ bản, chỉ chứa thông báo.
-            </summary>
-        </member>
-        <member name="P:WebAPI.Middleware.ErrorDetails.Message">
-            <summary>
-            Thông báo lỗi.
-            </summary>
-        </member>
-        <member name="T:WebAPI.Middleware.DevelopmentErrorResponse">
-            <summary>
-            Cấu trúc phản hồi lỗi chi tiết cho môi trường Development.
-            </summary>
-            <param name="exception">Ngoại lệ gốc được sử dụng để xây dựng phản hồi chi tiết.</param>
-        </member>
-        <member name="M:WebAPI.Middleware.DevelopmentErrorResponse.#ctor(System.Exception)">
-            <summary>
-            Cấu trúc phản hồi lỗi chi tiết cho môi trường Development.
-            </summary>
-            <param name="exception">Ngoại lệ gốc được sử dụng để xây dựng phản hồi chi tiết.</param>
-        </member>
-        <member name="P:WebAPI.Middleware.DevelopmentErrorResponse.Errors">
-            <summary>
-            Chi tiết lỗi đầy đủ, bao gồm cả stack trace và inner exception.
-            </summary>
-        </member>
-        <member name="T:WebAPI.Middleware.DevelopmentErrorDetails">
-            <summary>
-            Mô hình chi tiết lỗi đầy đủ cho mục đích debug trong môi trường Development.
-            </summary>
-        </member>
-        <member name="P:WebAPI.Middleware.DevelopmentErrorDetails.Message">
-            <summary>
-            Thông báo của ngoại lệ.
-            </summary>
-        </member>
-        <member name="P:WebAPI.Middleware.DevelopmentErrorDetails.Type">
-            <summary>
-            Loại (Type) đầy đủ của ngoại lệ.
-            </summary>
-        </member>
-        <member name="P:WebAPI.Middleware.DevelopmentErrorDetails.Details">
-            <summary>
-            Chuỗi `ToString()` đầy đủ của ngoại lệ (thường bao gồm stack trace).
-            </summary>
-        </member>
-        <member name="P:WebAPI.Middleware.DevelopmentErrorDetails.InnerException">
-            <summary>
-            Chi tiết của ngoại lệ bên trong (InnerException), nếu có.
-            </summary>
-        </member>
-        <member name="M:WebAPI.Middleware.DevelopmentErrorDetails.#ctor(System.Exception)">
-            <summary>
-            Khởi tạo chi tiết lỗi từ một ngoại lệ.
-            </summary>
-            <param name="ex">Ngoại lệ để trích xuất thông tin.</param>
-        </member>
         <member name="T:WebAPI.StartupExtensions.ConfigureServicesExtension">
             <summary>
             Cài đặt DI cho dự án: Route luôn in thường, DB Context, bật API Versioning, tạo file api.xml để hướng dẫn route.
@@ -343,6 +365,50 @@
             <summary>
             Đầu vào của chương trình! Bạn không cần quan tâm đến đây!
             </summary>
+        </member>
+        <member name="M:Microsoft.AspNetCore.OpenApi.Generated.DocumentationCommentIdHelper.CreateDocumentationId(System.Type)">
+            <summary>
+            Generates a documentation comment ID for a type.
+            Example: T:Namespace.Outer+Inner`1 becomes T:Namespace.Outer.Inner`1
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNetCore.OpenApi.Generated.DocumentationCommentIdHelper.CreateDocumentationId(System.Reflection.PropertyInfo)">
+            <summary>
+            Generates a documentation comment ID for a property.
+            Example: P:Namespace.ContainingType.PropertyName or for an indexer P:Namespace.ContainingType.Item(System.Int32)
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNetCore.OpenApi.Generated.DocumentationCommentIdHelper.CreateDocumentationId(System.Type,System.String)">
+            <summary>
+            Generates a documentation comment ID for a property given its container type and property name.
+            Example: P:Namespace.ContainingType.PropertyName
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNetCore.OpenApi.Generated.DocumentationCommentIdHelper.CreateDocumentationId(System.Reflection.MethodInfo)">
+            <summary>
+            Generates a documentation comment ID for a method (or constructor).
+            For example:
+              M:Namespace.ContainingType.MethodName(ParamType1,ParamType2)~ReturnType
+              M:Namespace.ContainingType.#ctor(ParamType)
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNetCore.OpenApi.Generated.DocumentationCommentIdHelper.GetTypeDocId(System.Type,System.Boolean,System.Boolean)">
+            <summary>
+            Generates a documentation ID string for a type.
+            This method handles nested types (replacing '+' with '.'),
+            generic types, arrays, pointers, by-ref types, and generic parameters.
+            The <paramref name="includeGenericArguments"/> flag controls whether
+            constructed generic type arguments are emitted, while <paramref name="omitGenericArity"/>
+            controls whether the generic arity marker (e.g. "`1") is appended.
+            </summary>
+        </member>
+        <member name="M:Microsoft.AspNetCore.OpenApi.Generated.DocumentationCommentIdHelper.NormalizeDocId(System.String)">
+            <summary>
+            Normalizes a documentation comment ID to match the compiler-style format.
+            Strips the return type suffix for ordinary methods but retains it for conversion operators.
+            </summary>
+            <param name="docId">The documentation comment ID to normalize.</param>
+            <returns>The normalized documentation comment ID.</returns>
         </member>
     </members>
 </doc>

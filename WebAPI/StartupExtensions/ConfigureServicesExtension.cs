@@ -1,15 +1,11 @@
 ﻿using Asp.Versioning;
-using Asp.Versioning.ApiExplorer;
 using Domain.Helpers;
 using Infrastructure.DependencyInjection;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using Microsoft.OpenApi.Models;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using Swashbuckle.AspNetCore.SwaggerGen;
 using WebAPI.Middleware;
 
 namespace WebAPI.StartupExtensions
@@ -117,29 +113,6 @@ namespace WebAPI.StartupExtensions
             services.ConfigureOptions<ConfigureSwaggerOptions>();
             services.AddControllers();
             return services;
-        }
-    }
-
-    /// <summary>
-    /// Cấu hình các tài liệu Swagger cho từng phiên bản API.
-    /// </summary>
-    /// <param name="provider">Cung cấp mô tả về các phiên bản API đã khám phá.</param>
-    public class ConfigureSwaggerOptions(IApiVersionDescriptionProvider provider) : IConfigureOptions<SwaggerGenOptions>
-    {
-        /// <summary>
-        /// Cấu hình các tùy chọn SwaggerGen.
-        /// </summary>
-        /// <param name="options">Các tùy chọn cho SwaggerGen.</param>
-        public void Configure(SwaggerGenOptions options)
-        {
-            foreach (var description in provider.ApiVersionDescriptions)
-            {
-                options.SwaggerDoc(description.GroupName, new OpenApiInfo
-                {
-                    Title = "Order Web API",
-                    Version = description.ApiVersion.ToString(),
-                });
-            }
         }
     }
 }

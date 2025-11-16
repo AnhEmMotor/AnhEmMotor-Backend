@@ -4,6 +4,6 @@ namespace Application.Interfaces.Repositories.Supplier
 {
     public interface ISupplierInsertRepository
     {
-        Task<SupplierEntity> AddSupplierAsync(SupplierEntity supplier);
+        Task<SupplierEntity> AddSupplierAsync(SupplierEntity supplier, CancellationToken cancellationToken);
     }
 }

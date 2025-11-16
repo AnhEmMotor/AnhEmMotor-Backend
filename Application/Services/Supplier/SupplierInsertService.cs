@@ -7,7 +7,7 @@ namespace Application.Services.Supplier
 {
     public class SupplierInsertService(ISupplierInsertRepository supplierInsertRepository) : ISupplierInsertService
     {
-        public async Task<SupplierResponse> CreateSupplierAsync(CreateSupplierRequest request)
+        public async Task<SupplierResponse> CreateSupplierAsync(CreateSupplierRequest request, CancellationToken cancellationToken)
         {
             var supplier = new SupplierEntity
             {
@@ -19,7 +19,7 @@ namespace Application.Services.Supplier
                 Address = request.Address
             };
 
-            var createdSupplier = await supplierInsertRepository.AddSupplierAsync(supplier);
+            var createdSupplier = await supplierInsertRepository.AddSupplierAsync(supplier, cancellationToken).ConfigureAwait(false);
 
             return new SupplierResponse
             {

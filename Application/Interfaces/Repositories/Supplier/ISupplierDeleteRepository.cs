@@ -4,7 +4,7 @@ namespace Application.Interfaces.Repositories.Supplier
 {
     public interface ISupplierDeleteRepository
     {
-        Task DeleteSupplierAsync(SupplierEntity supplier);
-        Task DeleteSuppliersAsync(List<SupplierEntity> suppliers);
+        Task DeleteSupplierAsync(SupplierEntity supplier, CancellationToken cancellationToken);
+        Task DeleteSuppliersAsync(List<SupplierEntity> suppliers, CancellationToken cancellationToken);
     }
 }

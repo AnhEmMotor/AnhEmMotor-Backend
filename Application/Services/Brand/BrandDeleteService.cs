@@ -7,9 +7,10 @@ namespace Application.Services.Brand
 {
     public class BrandDeleteService(IBrandSelectRepository brandSelectRepository, IBrandDeleteRepository brandDeleteRepository) : IBrandDeleteService
     {
-        public async Task<ErrorResponse?> DeleteBrandAsync(int id)
+        public async Task<ErrorResponse?> DeleteBrandAsync(int id, CancellationToken cancellationToken)
         {
-            var brand = await brandSelectRepository.GetBrandByIdAsync(id);
+            var brand = await brandSelectRepository.GetBrandByIdAsync(id, cancellationToken).ConfigureAwait(false);
+
             if (brand == null)
             {
                 return new ErrorResponse
@@ -17,11 +18,13 @@ namespace Application.Services.Brand
                     Errors = [new ErrorDetail { Message = $"Brand with Id {id} not found." }]
                 };
             }
-            await brandDeleteRepository.DeleteBrandAsync(brand);
+
+            await brandDeleteRepository.DeleteBrandAsync(brand, cancellationToken).ConfigureAwait(false);
+
             return null;
         }
 
-        public async Task<ErrorResponse?> DeleteBrandsAsync(DeleteManyBrandsRequest request)
+        public async Task<ErrorResponse?> DeleteBrandsAsync(DeleteManyBrandsRequest request, CancellationToken cancellationToken)
         {
             if (request.Ids == null || request.Ids.Count == 0)
             {
@@ -29,8 +32,12 @@ namespace Application.Services.Brand
             }
 
             var errorDetails = new List<ErrorDetail>();
-            var activeBrands = await brandSelectRepository.GetActiveBrandsByIdsAsync(request.Ids);
-            var allBrands = await brandSelectRepository.GetAllBrandsByIdsAsync(request.Ids);
+
+            var activeBrands = await brandSelectRepository.GetActiveBrandsByIdsAsync(request.Ids, cancellationToken)
+                .ConfigureAwait(false);
+
+            var allBrands = await brandSelectRepository.GetAllBrandsByIdsAsync(request.Ids, cancellationToken)
+                .ConfigureAwait(false);
 
             foreach (var id in request.Ids)
             {
@@ -42,7 +49,7 @@ namespace Application.Services.Brand
                     errorDetails.Add(new ErrorDetail
                     {
                         Message = "Brand not found",
-                        Field = "Brand ID: " + id.ToString()
+                        Field = $"Brand ID: {id}"
                     });
                 }
                 else if (activeBrand == null)
@@ -62,7 +69,7 @@ namespace Application.Services.Brand
 
             if (activeBrands.Count > 0)
             {
-                await brandDeleteRepository.DeleteBrandsAsync(activeBrands);
+                await brandDeleteRepository.DeleteBrandsAsync(activeBrands, cancellationToken).ConfigureAwait(false);
             }
 
             return null;

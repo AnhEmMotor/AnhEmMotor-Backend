@@ -6,10 +6,10 @@ namespace Infrastructure.Repositories.Brand
 {
     public class BrandInsertRepository(ApplicationDBContext context) : IBrandInsertRepository
     {
-        public async Task<BrandEntity> AddBrandAsync(BrandEntity brand)
+        public async Task<BrandEntity> AddBrandAsync(BrandEntity brand, CancellationToken cancellationToken)
         {
             context.Brands.Add(brand);
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return brand;
         }
     }

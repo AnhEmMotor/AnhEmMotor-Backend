@@ -7,9 +7,9 @@ namespace Application.Services.Supplier
 {
     public class SupplierDeleteService(ISupplierSelectRepository supplierSelectRepository, ISupplierDeleteRepository supplierDeleteRepository) : ISupplierDeleteService
     {
-        public async Task<ErrorResponse?> DeleteSupplierAsync(int id)
+        public async Task<ErrorResponse?> DeleteSupplierAsync(int id, CancellationToken cancellationToken)
         {
-            var supplier = await supplierSelectRepository.GetSupplierByIdAsync(id);
+            var supplier = await supplierSelectRepository.GetSupplierByIdAsync(id, cancellationToken).ConfigureAwait(false);
 
             if (supplier == null)
             {
@@ -22,11 +22,11 @@ namespace Application.Services.Supplier
                 };
             }
 
-            await supplierDeleteRepository.DeleteSupplierAsync(supplier);
+            await supplierDeleteRepository.DeleteSupplierAsync(supplier, cancellationToken).ConfigureAwait(false);
             return null;
         }
 
-        public async Task<ErrorResponse?> DeleteSuppliersAsync(DeleteManySuppliersRequest request)
+        public async Task<ErrorResponse?> DeleteSuppliersAsync(DeleteManySuppliersRequest request, CancellationToken cancellationToken)
         {
             if (request.Ids == null || request.Ids.Count == 0)
             {
@@ -34,8 +34,8 @@ namespace Application.Services.Supplier
             }
 
             var errorDetails = new List<ErrorDetail>();
-            var activeSuppliers = await supplierSelectRepository.GetActiveSuppliersByIdsAsync(request.Ids);
-            var allSuppliers = await supplierSelectRepository.GetAllSuppliersByIdsAsync(request.Ids);
+            var activeSuppliers = await supplierSelectRepository.GetActiveSuppliersByIdsAsync(request.Ids, cancellationToken).ConfigureAwait(false);
+            var allSuppliers = await supplierSelectRepository.GetAllSuppliersByIdsAsync(request.Ids, cancellationToken).ConfigureAwait(false);
 
             foreach (var id in request.Ids)
             {
@@ -47,7 +47,7 @@ namespace Application.Services.Supplier
                     errorDetails.Add(new ErrorDetail
                     {
                         Message = "Supplier not found",
-                        Field = "Supplier ID: " + id.ToString()
+                        Field = $"Supplier ID: {id}",
                     });
                 }
                 else if (activeSupplier == null)
@@ -67,7 +67,7 @@ namespace Application.Services.Supplier
 
             if (activeSuppliers.Count > 0)
             {
-                await supplierDeleteRepository.DeleteSuppliersAsync(activeSuppliers);
+                await supplierDeleteRepository.DeleteSuppliersAsync(activeSuppliers, cancellationToken).ConfigureAwait(false);
             }
 
             return null;

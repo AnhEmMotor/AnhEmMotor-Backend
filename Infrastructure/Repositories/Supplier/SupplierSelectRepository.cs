@@ -7,9 +7,9 @@ namespace Infrastructure.Repositories.Supplier
 {
     public class SupplierSelectRepository(ApplicationDBContext context) : ISupplierSelectRepository
     {
-        public async Task<SupplierEntity?> GetSupplierByIdAsync(int id)
+        public ValueTask<SupplierEntity?> GetSupplierByIdAsync(int id, CancellationToken cancellationToken)
         {
-            return await context.Suppliers.FindAsync(id);
+            return context.Suppliers.FindAsync([id, cancellationToken], cancellationToken: cancellationToken);
         }
 
         public IQueryable<SupplierEntity> GetSuppliers()
@@ -27,19 +27,19 @@ namespace Infrastructure.Repositories.Supplier
             return context.All<SupplierEntity>().AsNoTracking();
         }
 
-        public async Task<List<SupplierEntity>> GetActiveSuppliersByIdsAsync(List<int> ids)
+        public Task<List<SupplierEntity>> GetActiveSuppliersByIdsAsync(List<int> ids, CancellationToken cancellationToken)
         {
-            return await context.Suppliers.Where(s => s.Id.HasValue && ids.Contains(s.Id.Value)).ToListAsync();
+            return context.Suppliers.Where(s => s.Id.HasValue && ids.Contains(s.Id.Value)).ToListAsync(cancellationToken);
         }
 
-        public async Task<List<SupplierEntity>> GetDeletedSuppliersByIdsAsync(List<int> ids)
+        public Task<List<SupplierEntity>> GetDeletedSuppliersByIdsAsync(List<int> ids, CancellationToken cancellationToken)
         {
-            return await context.DeletedOnly<SupplierEntity>().Where(s => s.Id.HasValue && ids.Contains(s.Id.Value)).ToListAsync();
+            return context.DeletedOnly<SupplierEntity>().Where(s => s.Id.HasValue && ids.Contains(s.Id.Value)).ToListAsync(cancellationToken);
         }
 
-        public async Task<List<SupplierEntity>> GetAllSuppliersByIdsAsync(List<int> ids)
+        public Task<List<SupplierEntity>> GetAllSuppliersByIdsAsync(List<int> ids, CancellationToken cancellationToken)
         {
-            return await context.All<SupplierEntity>().Where(s => s.Id.HasValue && ids.Contains(s.Id.Value)).ToListAsync();
+            return context.All<SupplierEntity>().Where(s => s.Id.HasValue && ids.Contains(s.Id.Value)).ToListAsync(cancellationToken);
         }
     }
 }

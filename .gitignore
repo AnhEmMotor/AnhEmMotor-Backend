@@ -55,3 +55,5 @@ appsettings.*.json
 
 **/Logs/*
 **/Log/*
+
+*BuildHost*

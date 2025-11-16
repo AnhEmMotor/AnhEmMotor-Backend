@@ -11,9 +11,9 @@ namespace Application.Services.Supplier
 {
     public class SupplierSelectService(ISupplierSelectRepository supplierSelectRepository, ISieveProcessor sieveProcessor) : ISupplierSelectService
     {
-        public async Task<(SupplierResponse? Data, ErrorResponse? Error)> GetSupplierByIdAsync(int id)
+        public async Task<(SupplierResponse? Data, ErrorResponse? Error)> GetSupplierByIdAsync(int id, CancellationToken cancellationToken)
         {
-            var supplier = await supplierSelectRepository.GetSupplierByIdAsync(id);
+            var supplier = await supplierSelectRepository.GetSupplierByIdAsync(id, cancellationToken).ConfigureAwait(false);
             if (supplier == null)
             {
                 return (
@@ -42,7 +42,7 @@ namespace Application.Services.Supplier
             );
         }
 
-        public async Task<PagedResult<SupplierResponse>> GetSuppliersAsync(SieveModel sieveModel)
+        public async Task<PagedResult<SupplierResponse>> GetSuppliersAsync(SieveModel sieveModel, CancellationToken cancellationToken)
         {
             var query = supplierSelectRepository.GetSuppliers();
             ApplyDefaultsToSieveModel(sieveModel);
@@ -58,8 +58,8 @@ namespace Application.Services.Supplier
                 );
             }
             var suppliersQuery = sieveProcessor.Apply(sieveModel, query);
-            var suppliers = await suppliersQuery.ToListAsync();
-            var totalCount = await sieveProcessor.Apply(sieveModel, query, applyPagination: false).CountAsync();
+            var suppliers = await suppliersQuery.ToListAsync(cancellationToken).ConfigureAwait(false);
+            var totalCount = await sieveProcessor.Apply(sieveModel, query, applyPagination: false).CountAsync(cancellationToken).ConfigureAwait(false);
             var supplierResponses = suppliers.Select(supplier => new SupplierResponse
             {
                 Id = supplier.Id,
@@ -78,7 +78,7 @@ namespace Application.Services.Supplier
             );
         }
 
-        public async Task<PagedResult<SupplierResponse>> GetDeletedSuppliersAsync(SieveModel sieveModel)
+        public async Task<PagedResult<SupplierResponse>> GetDeletedSuppliersAsync(SieveModel sieveModel, CancellationToken cancellationToken)
         {
             var query = supplierSelectRepository.GetDeletedSuppliers();
             ApplyDefaultsToSieveModel(sieveModel);
@@ -94,8 +94,8 @@ namespace Application.Services.Supplier
                 );
             }
             var suppliersQuery = sieveProcessor.Apply(sieveModel, query);
-            var suppliers = await suppliersQuery.ToListAsync();
-            var totalCount = await sieveProcessor.Apply(sieveModel, query, applyPagination: false).CountAsync();
+            var suppliers = await suppliersQuery.ToListAsync(cancellationToken).ConfigureAwait(false);
+            var totalCount = await sieveProcessor.Apply(sieveModel, query, applyPagination: false).CountAsync(cancellationToken).ConfigureAwait(false);
             var supplierResponses = suppliers.Select(supplier => new SupplierResponse
             {
                 Id = supplier.Id,

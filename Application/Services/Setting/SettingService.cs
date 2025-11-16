@@ -6,9 +6,9 @@ namespace Application.Services.Setting
 {
     public class SettingService(ISettingRepository settingRepository) : ISettingService
     {
-        public async Task<Dictionary<string, long?>> GetAllSettingsAsync()
+        public async Task<Dictionary<string, long?>> GetAllSettingsAsync(CancellationToken cancellationToken)
         {
-            var settingsList = await settingRepository.GetAllAsync();
+            var settingsList = await settingRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
 
             if (settingsList == null || !settingsList.Any())
             {
@@ -22,7 +22,7 @@ namespace Application.Services.Setting
             return settingsDictionary;
         }
 
-        public async Task<ErrorResponse?> SetSettingsAsync(Dictionary<string, long?> requests)
+        public async Task<ErrorResponse?> SetSettingsAsync(Dictionary<string, long?> requests, CancellationToken cancellationToken)
         {
             try
             {
@@ -32,7 +32,7 @@ namespace Application.Services.Setting
                     Value = req.Value
                 });
 
-                await settingRepository.UpsertBatchAsync(settingsToUpsert);
+                await settingRepository.UpsertBatchAsync(settingsToUpsert, cancellationToken).ConfigureAwait(false);
 
                 return null;
             }

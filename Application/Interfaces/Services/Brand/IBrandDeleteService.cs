@@ -5,7 +5,7 @@ namespace Application.Interfaces.Services.Brand
 {
     public interface IBrandDeleteService
     {
-        Task<ErrorResponse?> DeleteBrandAsync(int id);
-        Task<ErrorResponse?> DeleteBrandsAsync(DeleteManyBrandsRequest request);
+        Task<ErrorResponse?> DeleteBrandAsync(int id, CancellationToken cancellationToken);
+        Task<ErrorResponse?> DeleteBrandsAsync(DeleteManyBrandsRequest request, CancellationToken cancellationToken);
     }
 }

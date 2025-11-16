@@ -6,8 +6,8 @@ namespace Application.Interfaces.Services.Supplier
 {
     public interface ISupplierSelectService
     {
-        Task<(SupplierResponse? Data, ErrorResponse? Error)> GetSupplierByIdAsync(int id);
-        Task<PagedResult<SupplierResponse>> GetSuppliersAsync(SieveModel sieveModel);
-        Task<PagedResult<SupplierResponse>> GetDeletedSuppliersAsync(SieveModel sieveModel);
+        Task<(SupplierResponse? Data, ErrorResponse? Error)> GetSupplierByIdAsync(int id, CancellationToken cancellationToken);
+        Task<PagedResult<SupplierResponse>> GetSuppliersAsync(SieveModel sieveModel, CancellationToken cancellationToken);
+        Task<PagedResult<SupplierResponse>> GetDeletedSuppliersAsync(SieveModel sieveModel, CancellationToken cancellationToken);
     }
 }

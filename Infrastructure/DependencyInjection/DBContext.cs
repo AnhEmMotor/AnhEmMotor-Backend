@@ -25,8 +25,6 @@ namespace Infrastructure.DependencyInjection
             this IServiceCollection services,
             IConfiguration configuration)
         {
-            var connectionString = configuration.GetConnectionString("DefaultConnection");
-
             services.AddDbContext<ApplicationDBContext>(options =>
             {
                 options.UseSqlServer(configuration.GetConnectionString("StringConnection"), b =>
