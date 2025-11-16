@@ -25,6 +25,7 @@ namespace Infrastructure.DBContexts
         public virtual DbSet<Supplier> Suppliers { get; set; }
         public virtual DbSet<SupplierStatus> SupplierStatuses { get; set; }
         public virtual DbSet<VariantOptionValue> VariantOptionValues { get; set; }
+        public virtual DbSet<MediaFile> MediaFiles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -1,0 +1,49 @@
+﻿using Application.Interfaces.Repositories.File;
+using Microsoft.AspNetCore.Hosting;
+
+namespace Infrastructure.Repositories.File
+{
+    public class FileRepository(IWebHostEnvironment webHostEnvironment) : IFileRepository
+    {
+        private readonly string _webRootPath = webHostEnvironment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+
+        private string GetFullPath(string relativePath)
+        {
+            return Path.Combine(_webRootPath, relativePath);
+        }
+
+        public bool FileExists(string relativePath)
+        {
+            var fullPath = GetFullPath(relativePath);
+            return System.IO.File.Exists(fullPath);
+        }
+
+        public async Task<Stream?> ReadFileAsync(string relativePath, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var fullPath = GetFullPath(relativePath);
+
+            if (!System.IO.File.Exists(fullPath))
+            {
+                return null;
+            }
+
+            return new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, useAsync: true);
+        }
+
+        public async Task SaveFileAsync(Stream stream, string relativePath, CancellationToken cancellationToken)
+        {
+            var fullPath = GetFullPath(relativePath);
+            var directory = Path.GetDirectoryName(fullPath);
+            if (directory != null && !Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            stream.Position = 0;
+            using var fileStream = new FileStream(fullPath, FileMode.Create, FileAccess.Write);
+            await stream.CopyToAsync(fileStream, cancellationToken).ConfigureAwait(false);
+        }
+    }
+}
