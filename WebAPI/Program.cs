@@ -15,6 +15,7 @@ app.UseSwaggerUI(options =>
     }
 });
 
+app.UseOpenTelemetryPrometheusScrapingEndpoint();
 app.UseRouting();
 app.UseExceptionHandler();
 app.MapControllers();
