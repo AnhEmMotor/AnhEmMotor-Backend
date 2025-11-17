@@ -61,9 +61,20 @@ namespace Infrastructure.DependencyInjection
             services.AddScoped<ISettingRepository, SettingRepository>();
             services.AddScoped<ISettingService, SettingService>();
 
+            // File storage repository
             services.AddScoped<IFileRepository, FileRepository>();
-            services.AddScoped<IMediaFileRepository, MediaFileRepository>();
-            services.AddScoped<IFileService, FileService>();
+
+            // Split media file repositories (insert/select/delete/restore)
+            services.AddScoped<IMediaFileInsertRepository, MediaFileInsertRepository>();
+            services.AddScoped<IMediaFileSelectRepository, MediaFileSelectRepository>();
+            services.AddScoped<IMediaFileDeleteRepository, MediaFileDeleteRepository>();
+            services.AddScoped<IMediaFileRestoreRepository, MediaFileRestoreRepository>();
+
+            // Split file services by responsibility
+            services.AddScoped<IFileInsertService, FileInsertService>();
+            services.AddScoped<IFileSelectService, FileSelectService>();
+            services.AddScoped<IFileDeleteService, FileDeleteService>();
+            services.AddScoped<IFileUpdateService, FileUpdateService>();
 
             services.AddScoped<ISieveProcessor, CustomSieveProcessor>();
 

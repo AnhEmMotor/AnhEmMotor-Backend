@@ -97,21 +97,27 @@
         </member>
         <member name="T:WebAPI.Controllers.v1.FileController">
             <summary>
-            Quản lý file
+            Quản lý file ảnh trong hệ thống
             </summary>
-            <param name="fileService"></param>
+            <param name="insertService"></param>
+            <param name="selectService"></param>
+            <param name="deleteService"></param>
+            <param name="updateService"></param>
         </member>
-        <member name="M:WebAPI.Controllers.v1.FileController.#ctor(Application.Interfaces.Services.File.IFileService)">
+        <member name="M:WebAPI.Controllers.v1.FileController.#ctor(Application.Interfaces.Services.File.IFileInsertService,Application.Interfaces.Services.File.IFileSelectService,Application.Interfaces.Services.File.IFileDeleteService,Application.Interfaces.Services.File.IFileUpdateService)">
             <summary>
-            Quản lý file
+            Quản lý file ảnh trong hệ thống
             </summary>
-            <param name="fileService"></param>
+            <param name="insertService"></param>
+            <param name="selectService"></param>
+            <param name="deleteService"></param>
+            <param name="updateService"></param>
         </member>
         <member name="M:WebAPI.Controllers.v1.FileController.UploadSingleImage(Microsoft.AspNetCore.Http.IFormFile,System.Threading.CancellationToken)">
             <summary>
             Up 1 ảnh lên hệ thống
             </summary>
-            <param name="file">File ảnh up lên</param>
+            <param name="file"></param>
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>

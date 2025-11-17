@@ -7,20 +7,27 @@ using Microsoft.AspNetCore.Mvc;
 namespace WebAPI.Controllers.v1
 {
     /// <summary>
-    /// Quản lý file
+    /// Quản lý file ảnh trong hệ thống
     /// </summary>
-    /// <param name="fileService"></param>
+    /// <param name="insertService"></param>
+    /// <param name="selectService"></param>
+    /// <param name="deleteService"></param>
+    /// <param name="updateService"></param>
     [ApiVersion("1.0")]
     [ApiController]
     [Route("api/v{version:apiVersion}/[controller]")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
-    public class FileController(IFileService fileService) : ControllerBase
+    public class FileController(
+        IFileInsertService insertService,
+        IFileSelectService selectService,
+        IFileDeleteService deleteService,
+        IFileUpdateService updateService) : ControllerBase
     {
         /// <summary>
         /// Up 1 ảnh lên hệ thống
         /// </summary>
-        /// <param name="file">File ảnh up lên</param>
+        /// <param name="file"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpPost("upload-single")]
@@ -34,7 +41,7 @@ namespace WebAPI.Controllers.v1
             }
 
             var baseUrl = $"{Request.Scheme}://{Request.Host}";
-            var (data, error) = await fileService.UploadSingleFileAsync(file, baseUrl, cancellationToken).ConfigureAwait(true);
+            var (data, error) = await insertService.UploadSingleFileAsync(file, baseUrl, cancellationToken).ConfigureAwait(true);
 
             if (error is not null)
             {
@@ -61,7 +68,7 @@ namespace WebAPI.Controllers.v1
             }
 
             var baseUrl = $"{Request.Scheme}://{Request.Host}";
-            var (data, error) = await fileService.UploadMultipleFilesAsync(files, baseUrl, cancellationToken).ConfigureAwait(true);
+            var (data, error) = await insertService.UploadMultipleFilesAsync(files, baseUrl, cancellationToken).ConfigureAwait(true);
             if (error is not null)
             {
                 return BadRequest(error);
@@ -85,7 +92,7 @@ namespace WebAPI.Controllers.v1
                 return BadRequest(new ErrorResponse { Errors = [new ErrorDetail { Message = "File name is required." }] });
             }
 
-            var error = await fileService.DeleteFileAsync(fileName, cancellationToken).ConfigureAwait(true);
+            var error = await deleteService.DeleteFileAsync(fileName, cancellationToken).ConfigureAwait(true);
             if (error is not null)
             {
                 return BadRequest(error);
@@ -109,7 +116,7 @@ namespace WebAPI.Controllers.v1
                 return BadRequest(new ErrorResponse { Errors = [new ErrorDetail { Message = "File name is required." }] });
             }
 
-            var error = await fileService.RestoreFileAsync(fileName, cancellationToken).ConfigureAwait(true);
+            var error = await updateService.RestoreFileAsync(fileName, cancellationToken).ConfigureAwait(true);
             if (error is not null)
             {
                 return BadRequest(error);
@@ -133,7 +140,7 @@ namespace WebAPI.Controllers.v1
                 return BadRequest(new ErrorResponse { Errors = [new ErrorDetail { Message = "No file names provided." }] });
             }
 
-            var error = await fileService.DeleteMultipleFilesAsync(fileNames, cancellationToken).ConfigureAwait(true);
+            var error = await deleteService.DeleteMultipleFilesAsync(fileNames, cancellationToken).ConfigureAwait(true);
             if (error is not null)
             {
                 return BadRequest(error);
@@ -158,7 +165,7 @@ namespace WebAPI.Controllers.v1
                 return BadRequest(new ErrorResponse { Errors = [new ErrorDetail { Message = "No file names provided." }] });
             }
 
-            var error = await fileService.RestoreMultipleFilesAsync(fileNames, cancellationToken).ConfigureAwait(true);
+            var error = await updateService.RestoreMultipleFilesAsync(fileNames, cancellationToken).ConfigureAwait(true);
             if (error is not null)
             {
                 return BadRequest(error);
@@ -191,7 +198,7 @@ namespace WebAPI.Controllers.v1
                 return BadRequest(new ErrorResponse() { Errors = [new ErrorDetail { Message = errorMessage }] });
             }
 
-            var (imageResult, imageError) = await fileService.GetImageAsync(fileName, w, cancellationToken).ConfigureAwait(true);
+            var (imageResult, imageError) = await selectService.GetImageAsync(fileName, w, cancellationToken).ConfigureAwait(true);
 
             if (imageError is not null)
             {
