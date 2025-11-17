@@ -9,5 +9,7 @@ namespace Application.Interfaces.Services.File
         Task<(UploadResponse? Data, ErrorResponse? Error)> UploadSingleFileAsync(IFormFile file, string baseUrl, CancellationToken cancellationToken);
         Task<(List<UploadResponse>? Data, ErrorResponse? Error)> UploadMultipleFilesAsync(List<IFormFile> files, string baseUrl, CancellationToken cancellationToken);
         Task<((Stream fileStream, string contentType)? Data, ErrorResponse? Error)> GetImageAsync(string fileName, int? width, CancellationToken cancellationToken);
+        Task<ErrorResponse?> DeleteFileAsync(string fileName, CancellationToken cancellationToken);
+        Task<ErrorResponse?> DeleteMultipleFilesAsync(List<string> fileNames, CancellationToken cancellationToken);
     }
 }

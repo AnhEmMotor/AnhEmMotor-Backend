@@ -29,7 +29,10 @@ namespace Application.Services.File
             {
                 return (null, null, new ErrorResponse
                 {
-                    Errors = [new ErrorDetail { Message = validationError }]
+                    Errors =
+                    [
+                        new ErrorDetail { Message = validationError }
+                    ]
                 });
             }
 
@@ -166,15 +169,6 @@ namespace Application.Services.File
                 return ( (originalStream!, "image/webp"), null );
             }
 
-            var cachedFileName = $"{Path.GetFileNameWithoutExtension(fileName)}_w{width}.webp";
-            var cachedRelativePath = Path.Combine("uploads", "cache", cachedFileName);
-
-            if (fileRepository.FileExists(cachedRelativePath))
-            {
-                var cachedStream = await fileRepository.ReadFileAsync(cachedRelativePath, cancellationToken).ConfigureAwait(false);
-                return ( (cachedStream!, "image/webp"), null );
-            }
-
             try
             {
                 using var originalStream = await fileRepository.ReadFileAsync(originalRelativePath, cancellationToken).ConfigureAwait(false);
@@ -189,8 +183,6 @@ namespace Application.Services.File
 
                 var outputStream = new MemoryStream();
                 await image.SaveAsWebpAsync(outputStream, new WebpEncoder { Quality = 75 }, cancellationToken).ConfigureAwait(false);
-
-                await fileRepository.SaveFileAsync(outputStream, cachedRelativePath, cancellationToken).ConfigureAwait(false);
 
                 outputStream.Position = 0;
                 return ( (outputStream, "image/webp"), null );
@@ -239,6 +231,78 @@ namespace Application.Services.File
             }
 
             return (true, string.Empty);
+        }
+
+        public async Task<ErrorResponse?> DeleteFileAsync(string fileName, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrEmpty(fileName))
+            {
+                return new ErrorResponse { Errors = [ new ErrorDetail { Message = "File name is required." } ] };
+            }
+
+            var originalRelativePath = Path.Combine("uploads", fileName);
+            if (!fileRepository.FileExists(originalRelativePath))
+            {
+                return new ErrorResponse { Errors = [ new ErrorDetail { Message = "File not found." } ] };
+            }
+
+            try
+            {
+                var media = await mediaFileRepository.GetByStoredFileNameAsync(fileName, cancellationToken).ConfigureAwait(false);
+                if (media is not null)
+                {
+                    await mediaFileRepository.DeleteAndSaveAsync(media, cancellationToken).ConfigureAwait(false);
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                return new ErrorResponse { Errors = [ new ErrorDetail { Message = $"Delete failed: {ex.Message}" } ] };
+            }
+        }
+
+        public async Task<ErrorResponse?> DeleteMultipleFilesAsync(List<string> fileNames, CancellationToken cancellationToken)
+        {
+            if (fileNames == null || fileNames.Count == 0)
+            {
+                return new ErrorResponse { Errors = [ new ErrorDetail { Message = "No file names provided." } ] };
+            }
+
+            var deleted = new List<string>();
+            var notFound = new List<string>();
+
+            foreach (var f in fileNames)
+            {
+                var originalRelativePath = Path.Combine("uploads", f);
+                if (!fileRepository.FileExists(originalRelativePath))
+                {
+                    notFound.Add(f);
+                    continue;
+                }
+
+                try
+                {
+                    var media = await mediaFileRepository.GetByStoredFileNameAsync(f, cancellationToken).ConfigureAwait(false);
+                    if (media is not null)
+                    {
+                        await mediaFileRepository.DeleteAndSaveAsync(media, cancellationToken).ConfigureAwait(false);
+                    }
+
+                    deleted.Add(f);
+                }
+                catch
+                {
+                    notFound.Add(f);
+                }
+            }
+
+            if (notFound.Count > 0)
+            {
+                return new ErrorResponse { Errors = [.. notFound.Select(n => new ErrorDetail { Message = $"File '{n}' not found or failed to delete." })] };
+            }
+
+            return null;
         }
     }
 }

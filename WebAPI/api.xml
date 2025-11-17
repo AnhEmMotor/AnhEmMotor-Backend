@@ -123,6 +123,22 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
+        <member name="M:WebAPI.Controllers.v1.FileController.DeleteFile(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Xoá 1 file theo tên file đã lưu (stored file name)
+            </summary>
+            <param name="fileName">Tên file đã lưu (ví dụ: guid.webp)</param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WebAPI.Controllers.v1.FileController.DeleteMultipleFiles(System.Collections.Generic.List{System.String},System.Threading.CancellationToken)">
+            <summary>
+            Xoá nhiều file cùng lúc theo danh sách tên file đã lưu
+            </summary>
+            <param name="fileNames">Danh sách tên file đã lưu (stored file names)</param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
         <member name="M:WebAPI.Controllers.v1.FileController.GetImage(System.String,System.Nullable{System.Int32},System.Threading.CancellationToken)">
             <summary>
             Xuất ảnh dựa vào tên file, có thể thay đổi kích thước ảnh bằng tham số w (width)
