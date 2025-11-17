@@ -25,23 +25,23 @@ namespace WebAPI.Controllers.v1
         /// <returns></returns>
         [HttpPost("upload-single")]
         [ProducesResponseType(typeof(UploadResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(UploadResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> UploadSingleImage(IFormFile file, CancellationToken cancellationToken)
         {
             if (file == null || file.Length == 0)
             {
-                return BadRequest(new UploadResponse { IsSuccess = false, Error = "No file uploaded." });
+                return BadRequest(new ErrorResponse() { Errors = [new ErrorDetail { Message = "No file uploaded." }] });
             }
 
             var baseUrl = $"{Request.Scheme}://{Request.Host}";
-            var result = await fileService.UploadSingleFileAsync(file, baseUrl, cancellationToken).ConfigureAwait(true);
+            var (data, error) = await fileService.UploadSingleFileAsync(file, baseUrl, cancellationToken).ConfigureAwait(true);
 
-            if (!result.IsSuccess)
+            if (error is not null)
             {
-                return BadRequest(result);
+                return BadRequest(error);
             }
 
-            return Ok(result);
+            return Ok(data);
         }
 
         /// <summary>
@@ -52,17 +52,22 @@ namespace WebAPI.Controllers.v1
         /// <returns></returns>
         [HttpPost("upload-multiple")]
         [ProducesResponseType(typeof(List<UploadResponse>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(UploadResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> UploadMultipleImages(List<IFormFile> files, CancellationToken cancellationToken)
         {
             if (files == null || files.Count == 0)
             {
-                return BadRequest(new UploadResponse { IsSuccess = false, Error = "No files uploaded." });
+                return BadRequest(new ErrorResponse() { Errors = [new ErrorDetail { Message = "No files uploaded." }] });
             }
 
             var baseUrl = $"{Request.Scheme}://{Request.Host}";
-            var results = await fileService.UploadMultipleFilesAsync(files, baseUrl, cancellationToken).ConfigureAwait(true);
-            return Ok(results);
+            var (data, error) = await fileService.UploadMultipleFilesAsync(files, baseUrl, cancellationToken).ConfigureAwait(true);
+            if (error is not null)
+            {
+                return BadRequest(error);
+            }
+
+            return Ok(data);
         }
 
         /// <summary>
@@ -73,23 +78,35 @@ namespace WebAPI.Controllers.v1
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpGet("{fileName}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetImage(string fileName, [FromQuery] int? w, CancellationToken cancellationToken)
         {
+            const int MAX_WIDTH = 2400;
             if (string.IsNullOrEmpty(fileName))
             {
-                return BadRequest("File name is required.");
+                return BadRequest(new ErrorResponse() { Errors = [new ErrorDetail { Message = "File name is required." }] });
             }
 
-            var result = await fileService.GetImageAsync(fileName, w, cancellationToken).ConfigureAwait(true);
+            if (w.HasValue && w.Value > MAX_WIDTH)
+            {
+                var errorMessage = $"Width 'w' cannot exceed {MAX_WIDTH} pixels.";
+                return BadRequest(new ErrorResponse() { Errors = [new ErrorDetail { Message = errorMessage }] });
+            }
 
-            if (result == null)
+            var (imageResult, imageError) = await fileService.GetImageAsync(fileName, w, cancellationToken).ConfigureAwait(true);
+
+            if (imageError is not null)
+            {
+                return NotFound(imageError);
+            }
+
+            if (imageResult == null)
             {
                 return NotFound();
             }
 
-            return File(result.Value.fileStream, result.Value.contentType);
+            return File(imageResult.Value.fileStream, imageResult.Value.contentType);
         }
     }
 }
