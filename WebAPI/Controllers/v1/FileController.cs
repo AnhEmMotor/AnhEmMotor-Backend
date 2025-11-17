@@ -82,10 +82,34 @@ namespace WebAPI.Controllers.v1
         {
             if (string.IsNullOrEmpty(fileName))
             {
-                return BadRequest(new ErrorResponse { Errors = [ new ErrorDetail { Message = "File name is required." } ] });
+                return BadRequest(new ErrorResponse { Errors = [new ErrorDetail { Message = "File name is required." }] });
             }
 
             var error = await fileService.DeleteFileAsync(fileName, cancellationToken).ConfigureAwait(true);
+            if (error is not null)
+            {
+                return BadRequest(error);
+            }
+
+            return Ok();
+        }
+
+        /// <summary>
+        /// Khôi phục 1 file theo tên file đã lưu
+        /// </summary>
+        /// <param name="fileName">Tên file đã lưu</param>
+        /// <param name="cancellationToken"></param>
+        [HttpPost("restore/{fileName}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> RestoreFile(string fileName, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrEmpty(fileName))
+            {
+                return BadRequest(new ErrorResponse { Errors = [new ErrorDetail { Message = "File name is required." }] });
+            }
+
+            var error = await fileService.RestoreFileAsync(fileName, cancellationToken).ConfigureAwait(true);
             if (error is not null)
             {
                 return BadRequest(error);
@@ -106,10 +130,35 @@ namespace WebAPI.Controllers.v1
         {
             if (fileNames == null || fileNames.Count == 0)
             {
-                return BadRequest(new ErrorResponse { Errors = [ new ErrorDetail { Message = "No file names provided." } ] });
+                return BadRequest(new ErrorResponse { Errors = [new ErrorDetail { Message = "No file names provided." }] });
             }
 
             var error = await fileService.DeleteMultipleFilesAsync(fileNames, cancellationToken).ConfigureAwait(true);
+            if (error is not null)
+            {
+                return BadRequest(error);
+            }
+
+            return Ok();
+        }
+
+        /// <summary>
+        /// Khôi phục nhiều file cùng lúc theo danh sách tên file đã lưu
+        /// </summary>
+        /// <param name="fileNames">Tên file cần khôi phục</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [HttpPost("restore-multiple")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> RestoreMultipleFiles([FromBody] List<string> fileNames, CancellationToken cancellationToken)
+        {
+            if (fileNames == null || fileNames.Count == 0)
+            {
+                return BadRequest(new ErrorResponse { Errors = [new ErrorDetail { Message = "No file names provided." }] });
+            }
+
+            var error = await fileService.RestoreMultipleFilesAsync(fileNames, cancellationToken).ConfigureAwait(true);
             if (error is not null)
             {
                 return BadRequest(error);

@@ -21,7 +21,7 @@ namespace WebAPI.StartupExtensions
             {
                 options.SwaggerDoc(description.GroupName, new OpenApiInfo
                 {
-                    Title = "Order Web API",
+                    Title = "AnhEmMotor Web API",
                     Version = description.ApiVersion.ToString(),
                 });
             }
