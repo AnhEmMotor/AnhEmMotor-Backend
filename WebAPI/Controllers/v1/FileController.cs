@@ -71,6 +71,54 @@ namespace WebAPI.Controllers.v1
         }
 
         /// <summary>
+        /// Xoá 1 file theo tên file đã lưu (stored file name)
+        /// </summary>
+        /// <param name="fileName">Tên file đã lưu (ví dụ: guid.webp)</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [HttpDelete("delete/{fileName}")]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> DeleteFile(string fileName, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrEmpty(fileName))
+            {
+                return BadRequest(new ErrorResponse { Errors = [ new ErrorDetail { Message = "File name is required." } ] });
+            }
+
+            var error = await fileService.DeleteFileAsync(fileName, cancellationToken).ConfigureAwait(true);
+            if (error is not null)
+            {
+                return BadRequest(error);
+            }
+
+            return Ok();
+        }
+
+        /// <summary>
+        /// Xoá nhiều file cùng lúc theo danh sách tên file đã lưu
+        /// </summary>
+        /// <param name="fileNames">Danh sách tên file đã lưu (stored file names)</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [HttpDelete("delete-multiple")]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> DeleteMultipleFiles([FromBody] List<string> fileNames, CancellationToken cancellationToken)
+        {
+            if (fileNames == null || fileNames.Count == 0)
+            {
+                return BadRequest(new ErrorResponse { Errors = [ new ErrorDetail { Message = "No file names provided." } ] });
+            }
+
+            var error = await fileService.DeleteMultipleFilesAsync(fileNames, cancellationToken).ConfigureAwait(true);
+            if (error is not null)
+            {
+                return BadRequest(error);
+            }
+
+            return Ok();
+        }
+
+        /// <summary>
         /// Xuất ảnh dựa vào tên file, có thể thay đổi kích thước ảnh bằng tham số w (width)
         /// </summary>
         /// <param name="fileName">Tên file cần lấy</param>

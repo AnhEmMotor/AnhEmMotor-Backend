@@ -45,5 +45,55 @@ namespace Infrastructure.Repositories.File
             using var fileStream = new FileStream(fullPath, FileMode.Create, FileAccess.Write);
             await stream.CopyToAsync(fileStream, cancellationToken).ConfigureAwait(false);
         }
+
+        public async Task DeleteFileAsync(string relativePath, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var fullPath = GetFullPath(relativePath);
+            if (System.IO.File.Exists(fullPath))
+            {
+                try
+                {
+                    System.IO.File.Delete(fullPath);
+                }
+                catch
+                {
+                }
+            }
+
+            await Task.CompletedTask;
+        }
+
+        public async Task DeleteFilesByPrefixAsync(string directoryRelativePath, string prefix, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var dirFullPath = GetFullPath(directoryRelativePath);
+            if (!Directory.Exists(dirFullPath))
+            {
+                return;
+            }
+
+            try
+            {
+                var files = Directory.GetFiles(dirFullPath).Where(f => Path.GetFileName(f).StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
+                foreach (var f in files)
+                {
+                    try
+                    {
+                        System.IO.File.Delete(f);
+                    }
+                    catch
+                    {
+                    }
+                }
+            }
+            catch
+            {
+            }
+
+            await Task.CompletedTask;
+        }
     }
 }
