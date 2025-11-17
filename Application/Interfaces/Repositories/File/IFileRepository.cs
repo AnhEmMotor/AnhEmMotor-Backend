@@ -1,4 +1,3 @@
-
 namespace Application.Interfaces.Repositories.File
 {
     public interface IFileRepository

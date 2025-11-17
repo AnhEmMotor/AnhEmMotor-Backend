@@ -19,6 +19,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Sieve.Services;
+using Application.Services.File;
 
 namespace Infrastructure.DependencyInjection
 {
@@ -62,7 +63,7 @@ namespace Infrastructure.DependencyInjection
 
             services.AddScoped<IFileRepository, FileRepository>();
             services.AddScoped<IMediaFileRepository, MediaFileRepository>();
-            services.AddScoped<IFileService, Application.Services.File.FileService>();
+            services.AddScoped<IFileService, FileService>();
 
             services.AddScoped<ISieveProcessor, CustomSieveProcessor>();
 

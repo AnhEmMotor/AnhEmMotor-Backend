@@ -1,12 +1,13 @@
 ﻿using Application.ApiContracts.File;
+using Domain.Helpers;
 using Microsoft.AspNetCore.Http;
 
 namespace Application.Interfaces.Services.File
 {
     public interface IFileService
     {
-        Task<UploadResponse> UploadSingleFileAsync(IFormFile file, string baseUrl, CancellationToken cancellationToken);
-        Task<List<UploadResponse>> UploadMultipleFilesAsync(List<IFormFile> files, string baseUrl, CancellationToken cancellationToken);
-        Task<(Stream fileStream, string contentType)?> GetImageAsync(string fileName, int? width, CancellationToken cancellationToken);
+        Task<(UploadResponse? Data, ErrorResponse? Error)> UploadSingleFileAsync(IFormFile file, string baseUrl, CancellationToken cancellationToken);
+        Task<(List<UploadResponse>? Data, ErrorResponse? Error)> UploadMultipleFilesAsync(List<IFormFile> files, string baseUrl, CancellationToken cancellationToken);
+        Task<((Stream fileStream, string contentType)? Data, ErrorResponse? Error)> GetImageAsync(string fileName, int? width, CancellationToken cancellationToken);
     }
 }
