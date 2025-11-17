@@ -7,10 +7,16 @@ using SixLabors.ImageSharp.Processing;
 
 namespace Application.Services.File
 {
-    public class FileSelectService(IFileRepository fileRepository) : IFileSelectService
+    public class FileSelectService(IFileRepository fileRepository, IMediaFileSelectRepository mediaFileSelectRepository) : IFileSelectService
     {
         public async Task<((Stream fileStream, string contentType)? Data, ErrorResponse? Error)> GetImageAsync(string fileName, int? width, CancellationToken cancellationToken)
         {
+            var media = await mediaFileSelectRepository.GetByStoredFileNameAsync(fileName, cancellationToken).ConfigureAwait(false);
+            if (media is null)
+            {
+                return (null, new ErrorResponse { Errors = [new ErrorDetail { Message = "File not found." }] });
+            }
+
             var originalRelativePath = Path.Combine("uploads", fileName);
             if (!fileRepository.FileExists(originalRelativePath))
             {
