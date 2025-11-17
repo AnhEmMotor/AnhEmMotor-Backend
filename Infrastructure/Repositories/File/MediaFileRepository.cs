@@ -17,15 +17,27 @@ namespace Infrastructure.Repositories.File
             return new ValueTask<int>(context.SaveChangesAsync(cancellationToken));
         }
 
-        public ValueTask<MediaFile?> GetByStoredFileNameAsync(string storedFileName, CancellationToken cancellationToken)
+        public ValueTask<MediaFile?> GetByStoredFileNameAsync(string storedFileName, CancellationToken cancellationToken, bool includeDeleted = false)
         {
-            var task = context.MediaFiles.FirstOrDefaultAsync(m => m.StoredFileName == storedFileName, cancellationToken);
-            return new ValueTask<MediaFile?>(task);
+            if (includeDeleted)
+            {
+                var task = context.All<MediaFile>().FirstOrDefaultAsync(m => string.Compare(m.StoredFileName, storedFileName) == 0, cancellationToken);
+                return new ValueTask<MediaFile?>(task);
+            }
+
+            var normalTask = context.MediaFiles.FirstOrDefaultAsync(m => string.Compare(m.StoredFileName, storedFileName) == 0, cancellationToken);
+            return new ValueTask<MediaFile?>(normalTask);
         }
 
         public async Task DeleteAndSaveAsync(MediaFile mediaFile, CancellationToken cancellationToken)
         {
             context.MediaFiles.Remove(mediaFile);
+            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        public async Task RestoreAndSaveAsync(MediaFile mediaFile, CancellationToken cancellationToken)
+        {
+            context.Restore(mediaFile);
             await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
     }

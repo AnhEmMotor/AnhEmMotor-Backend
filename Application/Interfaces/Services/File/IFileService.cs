@@ -11,5 +11,7 @@ namespace Application.Interfaces.Services.File
         Task<((Stream fileStream, string contentType)? Data, ErrorResponse? Error)> GetImageAsync(string fileName, int? width, CancellationToken cancellationToken);
         Task<ErrorResponse?> DeleteFileAsync(string fileName, CancellationToken cancellationToken);
         Task<ErrorResponse?> DeleteMultipleFilesAsync(List<string> fileNames, CancellationToken cancellationToken);
+        Task<ErrorResponse?> RestoreFileAsync(string fileName, CancellationToken cancellationToken);
+        Task<ErrorResponse?> RestoreMultipleFilesAsync(List<string> fileNames, CancellationToken cancellationToken);
     }
 }

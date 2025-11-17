@@ -131,11 +131,26 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
+        <member name="M:WebAPI.Controllers.v1.FileController.RestoreFile(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Khôi phục 1 file theo tên file đã lưu
+            </summary>
+            <param name="fileName">Tên file đã lưu</param>
+            <param name="cancellationToken"></param>
+        </member>
         <member name="M:WebAPI.Controllers.v1.FileController.DeleteMultipleFiles(System.Collections.Generic.List{System.String},System.Threading.CancellationToken)">
             <summary>
             Xoá nhiều file cùng lúc theo danh sách tên file đã lưu
             </summary>
             <param name="fileNames">Danh sách tên file đã lưu (stored file names)</param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WebAPI.Controllers.v1.FileController.RestoreMultipleFiles(System.Collections.Generic.List{System.String},System.Threading.CancellationToken)">
+            <summary>
+            Khôi phục nhiều file cùng lúc theo danh sách tên file đã lưu
+            </summary>
+            <param name="fileNames">Tên file cần khôi phục</param>
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>

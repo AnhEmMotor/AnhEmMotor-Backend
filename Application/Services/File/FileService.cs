@@ -123,7 +123,7 @@ namespace Application.Services.File
             var data = new List<UploadResponse>();
             var mediaFilesToAdd = new List<MediaFile>();
 
-            foreach (var (FileData, Response, Error) in results)
+            foreach (var (FileData, Response, _) in results)
             {
                 if (FileData is not null && Response is not null)
                 {
@@ -166,7 +166,7 @@ namespace Application.Services.File
             if (width == null)
             {
                 var originalStream = await fileRepository.ReadFileAsync(originalRelativePath, cancellationToken).ConfigureAwait(false);
-                return ( (originalStream!, "image/webp"), null );
+                return ((originalStream!, "image/webp"), null);
             }
 
             try
@@ -185,7 +185,7 @@ namespace Application.Services.File
                 await image.SaveAsWebpAsync(outputStream, new WebpEncoder { Quality = 75 }, cancellationToken).ConfigureAwait(false);
 
                 outputStream.Position = 0;
-                return ( (outputStream, "image/webp"), null );
+                return ((outputStream, "image/webp"), null);
             }
             catch (Exception)
             {
@@ -237,28 +237,29 @@ namespace Application.Services.File
         {
             if (string.IsNullOrEmpty(fileName))
             {
-                return new ErrorResponse { Errors = [ new ErrorDetail { Message = "File name is required." } ] };
+                return new ErrorResponse { Errors = [new ErrorDetail { Message = "File name is required." }] };
             }
-
-            var originalRelativePath = Path.Combine("uploads", fileName);
-            if (!fileRepository.FileExists(originalRelativePath))
-            {
-                return new ErrorResponse { Errors = [ new ErrorDetail { Message = "File not found." } ] };
-            }
-
             try
             {
-                var media = await mediaFileRepository.GetByStoredFileNameAsync(fileName, cancellationToken).ConfigureAwait(false);
-                if (media is not null)
+                var media = await mediaFileRepository.GetByStoredFileNameAsync(fileName, cancellationToken, includeDeleted: false).ConfigureAwait(false);
+
+                if (media is null)
                 {
-                    await mediaFileRepository.DeleteAndSaveAsync(media, cancellationToken).ConfigureAwait(false);
+                    var existed = await mediaFileRepository.GetByStoredFileNameAsync(fileName, cancellationToken, includeDeleted: true).ConfigureAwait(false);
+                    if (existed is not null)
+                    {
+                        return new ErrorResponse { Errors = [new ErrorDetail { Message = "File already deleted." }] };
+                    }
+
+                    return new ErrorResponse { Errors = [new ErrorDetail { Message = "File not found in database." }] };
                 }
 
+                await mediaFileRepository.DeleteAndSaveAsync(media, cancellationToken).ConfigureAwait(false);
                 return null;
             }
             catch (Exception ex)
             {
-                return new ErrorResponse { Errors = [ new ErrorDetail { Message = $"Delete failed: {ex.Message}" } ] };
+                return new ErrorResponse { Errors = [new ErrorDetail { Message = $"Delete failed: {ex.Message}" }] };
             }
         }
 
@@ -266,7 +267,7 @@ namespace Application.Services.File
         {
             if (fileNames == null || fileNames.Count == 0)
             {
-                return new ErrorResponse { Errors = [ new ErrorDetail { Message = "No file names provided." } ] };
+                return new ErrorResponse { Errors = [new ErrorDetail { Message = "No file names provided." }] };
             }
 
             var deleted = new List<string>();
@@ -274,21 +275,23 @@ namespace Application.Services.File
 
             foreach (var f in fileNames)
             {
-                var originalRelativePath = Path.Combine("uploads", f);
-                if (!fileRepository.FileExists(originalRelativePath))
-                {
-                    notFound.Add(f);
-                    continue;
-                }
-
                 try
                 {
-                    var media = await mediaFileRepository.GetByStoredFileNameAsync(f, cancellationToken).ConfigureAwait(false);
-                    if (media is not null)
+                    var media = await mediaFileRepository.GetByStoredFileNameAsync(f, cancellationToken, includeDeleted: false).ConfigureAwait(false);
+                    if (media is null)
                     {
-                        await mediaFileRepository.DeleteAndSaveAsync(media, cancellationToken).ConfigureAwait(false);
+                        var existed = await mediaFileRepository.GetByStoredFileNameAsync(f, cancellationToken, includeDeleted: true).ConfigureAwait(false);
+                        if (existed is not null)
+                        {
+                            notFound.Add(f);
+                            continue;
+                        }
+
+                        notFound.Add(f);
+                        continue;
                     }
 
+                    await mediaFileRepository.DeleteAndSaveAsync(media, cancellationToken).ConfigureAwait(false);
                     deleted.Add(f);
                 }
                 catch
@@ -300,6 +303,81 @@ namespace Application.Services.File
             if (notFound.Count > 0)
             {
                 return new ErrorResponse { Errors = [.. notFound.Select(n => new ErrorDetail { Message = $"File '{n}' not found or failed to delete." })] };
+            }
+
+            return null;
+        }
+
+        public async Task<ErrorResponse?> RestoreFileAsync(string fileName, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrEmpty(fileName))
+            {
+                return new ErrorResponse { Errors = [new ErrorDetail { Message = "File name is required." }] };
+            }
+
+            try
+            {
+                var media = await mediaFileRepository.GetByStoredFileNameAsync(fileName, cancellationToken, includeDeleted: true).ConfigureAwait(false);
+                if (media is null)
+                {
+                    return new ErrorResponse { Errors = [new ErrorDetail { Message = "File not found in database." }] };
+                }
+
+                var checkActive = await mediaFileRepository.GetByStoredFileNameAsync(fileName, cancellationToken, includeDeleted: false).ConfigureAwait(false);
+                if (checkActive is not null)
+                {
+                    return new ErrorResponse { Errors = [new ErrorDetail { Message = "File is not deleted." }] };
+                }
+
+                await mediaFileRepository.RestoreAndSaveAsync(media, cancellationToken).ConfigureAwait(false);
+                return null;
+            }
+            catch (Exception ex)
+            {
+                return new ErrorResponse { Errors = [new ErrorDetail { Message = $"Restore failed: {ex.Message}" }] };
+            }
+        }
+
+        public async Task<ErrorResponse?> RestoreMultipleFilesAsync(List<string> fileNames, CancellationToken cancellationToken)
+        {
+            if (fileNames == null || fileNames.Count == 0)
+            {
+                return new ErrorResponse { Errors = [new ErrorDetail { Message = "No file names provided." }] };
+            }
+
+            var restored = new List<string>();
+            var notFound = new List<string>();
+
+            foreach (var f in fileNames)
+            {
+                try
+                {
+                    var media = await mediaFileRepository.GetByStoredFileNameAsync(f, cancellationToken, includeDeleted: true).ConfigureAwait(false);
+                    if (media is null)
+                    {
+                        notFound.Add(f);
+                        continue;
+                    }
+
+                    var isActive = await mediaFileRepository.GetByStoredFileNameAsync(f, cancellationToken, includeDeleted: false).ConfigureAwait(false);
+                    if (isActive is not null)
+                    {
+                        notFound.Add(f);
+                        continue;
+                    }
+
+                    await mediaFileRepository.RestoreAndSaveAsync(media, cancellationToken).ConfigureAwait(false);
+                    restored.Add(f);
+                }
+                catch
+                {
+                    notFound.Add(f);
+                }
+            }
+
+            if (notFound.Count > 0)
+            {
+                return new ErrorResponse { Errors = [.. notFound.Select(n => new ErrorDetail { Message = $"File '{n}' not found or failed to restore." })] };
             }
 
             return null;

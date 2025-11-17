@@ -7,6 +7,7 @@ using Application.Interfaces.Services.File;
 using Application.Interfaces.Services.Setting;
 using Application.Interfaces.Services.Supplier;
 using Application.Services.Brand;
+using Application.Services.File;
 using Application.Services.Setting;
 using Application.Services.Supplier;
 using Application.Sieve;
@@ -19,7 +20,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Sieve.Services;
-using Application.Services.File;
 
 namespace Infrastructure.DependencyInjection
 {
