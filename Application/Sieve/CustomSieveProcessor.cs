@@ -19,6 +19,16 @@ namespace Application.Sieve
             mapper.Property<Brand>(b => b.Description)
                 .CanFilter();
 
+            mapper.Property<ProductCategory>(c => c.Id)
+                .CanSort();
+
+            mapper.Property<ProductCategory>(c => c.Name)
+                .CanSort()
+                .CanFilter();
+
+            mapper.Property<ProductCategory>(c => c.Description)
+                .CanFilter();
+
             mapper.Property<Supplier>(s => s.Id)
                .CanSort();
 

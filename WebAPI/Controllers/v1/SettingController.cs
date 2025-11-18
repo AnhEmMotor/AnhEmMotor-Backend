@@ -4,7 +4,7 @@ using Asp.Versioning;
 using Domain.Helpers;
 using Microsoft.AspNetCore.Mvc;
 
-namespace WebAPI.Controllers.v1
+namespace WebAPI.Controllers.V1
 {
     /// <summary>
     /// Quản lý cài đặt hệ thống: cập nhật số lượng cảnh báo tồn kho, số lượng mua tối đa
