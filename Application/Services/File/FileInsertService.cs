@@ -11,8 +11,8 @@ namespace Application.Services.File
 {
     public class FileInsertService(IFileRepository fileRepository, IMediaFileInsertRepository mediaFileInsertRepository) : IFileInsertService
     {
-        private readonly string[] _permittedExtensions = [".jpg", ".jpeg", ".png", ".gif"];
-        private readonly Dictionary<string, string> _mimeTypeMappings = new()
+        private readonly string[] _PermittedExtensions = [".jpg", ".jpeg", ".png", ".gif"];
+        private readonly Dictionary<string, string> _MimeTypeMappings = new()
         {
             { ".jpg", "image/jpeg" },
             { ".jpeg", "image/jpeg" },
@@ -167,12 +167,12 @@ namespace Application.Services.File
             }
 
             var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
-            if (string.IsNullOrEmpty(ext) || !_permittedExtensions.Contains(ext))
+            if (string.IsNullOrEmpty(ext) || !_PermittedExtensions.Contains(ext))
             {
                 return (false, "Invalid file type. Only JPG, PNG, GIF are allowed.");
             }
 
-            if (!_mimeTypeMappings.ContainsValue(file.ContentType.ToLowerInvariant()))
+            if (!_MimeTypeMappings.ContainsValue(file.ContentType.ToLowerInvariant()))
             {
                 return (false, "Invalid MIME type.");
             }

@@ -4,7 +4,7 @@ using Asp.Versioning;
 using Domain.Helpers;
 using Microsoft.AspNetCore.Mvc;
 
-namespace WebAPI.Controllers.v1
+namespace WebAPI.Controllers.V1
 {
     /// <summary>
     /// Quản lý file ảnh trong hệ thống
@@ -186,15 +186,15 @@ namespace WebAPI.Controllers.v1
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetImage(string fileName, [FromQuery] int? w, CancellationToken cancellationToken)
         {
-            const int MAX_WIDTH = 2400;
+            const int maxWidth = 2400;
             if (string.IsNullOrEmpty(fileName))
             {
                 return BadRequest(new ErrorResponse() { Errors = [new ErrorDetail { Message = "File name is required." }] });
             }
 
-            if (w.HasValue && w.Value > MAX_WIDTH)
+            if (w.HasValue && w.Value > maxWidth)
             {
-                var errorMessage = $"Width 'w' cannot exceed {MAX_WIDTH} pixels.";
+                var errorMessage = $"Width 'w' cannot exceed {maxWidth} pixels.";
                 return BadRequest(new ErrorResponse() { Errors = [new ErrorDetail { Message = errorMessage }] });
             }
 

@@ -4,7 +4,7 @@ namespace Application.ValidationAttributes
 {
     public class ValidSettingKeysAttribute : ValidationAttribute
     {
-        private readonly HashSet<string> _validKeys =
+        private readonly HashSet<string> _ValidKeys =
         [
             "deposit_ratio",
             "inventory_alert_level",
@@ -19,7 +19,7 @@ namespace Application.ValidationAttributes
                 return ValidationResult.Success;
             }
 
-            var invalidKeys = dictionary.Keys.Where(k => !string.IsNullOrEmpty(k) && !_validKeys.Contains(k)).ToList();
+            var invalidKeys = dictionary.Keys.Where(k => !string.IsNullOrEmpty(k) && !_ValidKeys.Contains(k)).ToList();
 
             if (invalidKeys.Count != 0)
             {

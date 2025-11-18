@@ -5,7 +5,7 @@ using Domain.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 
-namespace WebAPI.Controllers.v1
+namespace WebAPI.Controllers.V1
 {
     /// <summary>
     /// Quản lý danh sách các thương hiệu sản phẩm (ví dụ: Honda, Yamaha, Suzuki).

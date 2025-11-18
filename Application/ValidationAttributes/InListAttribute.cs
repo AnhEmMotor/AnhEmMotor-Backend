@@ -4,7 +4,7 @@ namespace Application.ValidationAttributes;
 
 public sealed class InListAttribute(string allowedValues) : ValidationAttribute
 {
-    private readonly string[] _allowedValues = [.. allowedValues
+    private readonly string[] _AllowedValues = [.. allowedValues
             .Split(',')
             .Select(s => s.Trim())];
 
@@ -15,9 +15,9 @@ public sealed class InListAttribute(string allowedValues) : ValidationAttribute
             return ValidationResult.Success;
         }
         var stringValue = value.ToString();
-        if (!_allowedValues.Contains(stringValue, StringComparer.OrdinalIgnoreCase))
+        if (!_AllowedValues.Contains(stringValue, StringComparer.OrdinalIgnoreCase))
         {
-            var allowedList = string.Join(", ", _allowedValues);
+            var allowedList = string.Join(", ", _AllowedValues);
             var error = string.IsNullOrEmpty(ErrorMessage)
                 ? $"{validationContext.DisplayName} phải là một trong các giá trị: {allowedList}."
                 : ErrorMessage;

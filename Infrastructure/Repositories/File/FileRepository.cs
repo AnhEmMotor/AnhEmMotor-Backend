@@ -5,11 +5,11 @@ namespace Infrastructure.Repositories.File
 {
     public class FileRepository(IWebHostEnvironment webHostEnvironment) : IFileRepository
     {
-        private readonly string _webRootPath = webHostEnvironment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+        private readonly string _WebRootPath = webHostEnvironment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
 
         private string GetFullPath(string relativePath)
         {
-            return Path.Combine(_webRootPath, relativePath);
+            return Path.Combine(_WebRootPath, relativePath);
         }
 
         public bool FileExists(string relativePath)

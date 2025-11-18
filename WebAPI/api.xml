@@ -4,7 +4,7 @@
         <name>WebAPI</name>
     </assembly>
     <members>
-        <member name="T:WebAPI.Controllers.v1.BrandController">
+        <member name="T:WebAPI.Controllers.V1.BrandController">
             <summary>
             Quản lý danh sách các thương hiệu sản phẩm (ví dụ: Honda, Yamaha, Suzuki).
             </summary>
@@ -13,7 +13,7 @@
             <param name="brandUpdateService"></param>
             <param name="brandDeleteService"></param>
         </member>
-        <member name="M:WebAPI.Controllers.v1.BrandController.#ctor(Application.Interfaces.Services.Brand.IBrandInsertService,Application.Interfaces.Services.Brand.IBrandSelectService,Application.Interfaces.Services.Brand.IBrandUpdateService,Application.Interfaces.Services.Brand.IBrandDeleteService)">
+        <member name="M:WebAPI.Controllers.V1.BrandController.#ctor(Application.Interfaces.Services.Brand.IBrandInsertService,Application.Interfaces.Services.Brand.IBrandSelectService,Application.Interfaces.Services.Brand.IBrandUpdateService,Application.Interfaces.Services.Brand.IBrandDeleteService)">
             <summary>
             Quản lý danh sách các thương hiệu sản phẩm (ví dụ: Honda, Yamaha, Suzuki).
             </summary>
@@ -22,7 +22,7 @@
             <param name="brandUpdateService"></param>
             <param name="brandDeleteService"></param>
         </member>
-        <member name="M:WebAPI.Controllers.v1.BrandController.GetBrands(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.BrandController.GetBrands(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách thương hiệu (có phân trang, lọc, sắp xếp).
             </summary>
@@ -30,7 +30,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.BrandController.GetDeletedBrands(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.BrandController.GetDeletedBrands(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách thương hiệu đã bị xoá (có phân trang, lọc, sắp xếp).
             </summary>
@@ -38,7 +38,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.BrandController.GetBrandById(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.BrandController.GetBrandById(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Lấy thông tin của thương hiệu được chọn.
             </summary>
@@ -46,7 +46,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.BrandController.CreateBrand(Application.ApiContracts.Brand.CreateBrandRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.BrandController.CreateBrand(Application.ApiContracts.Brand.CreateBrandRequest,System.Threading.CancellationToken)">
             <summary>
             Tạo thương hiệu mới.
             </summary>
@@ -54,7 +54,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.BrandController.UpdateBrand(System.Int32,Application.ApiContracts.Brand.UpdateBrandRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.BrandController.UpdateBrand(System.Int32,Application.ApiContracts.Brand.UpdateBrandRequest,System.Threading.CancellationToken)">
             <summary>
             Cập nhật thông tin thương hiệu.
             </summary>
@@ -63,7 +63,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.BrandController.DeleteBrand(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.BrandController.DeleteBrand(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Xoá thương hiệu.
             </summary>
@@ -71,7 +71,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.BrandController.RestoreBrand(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.BrandController.RestoreBrand(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Khôi phục lại thương hiệu đã xoá.
             </summary>
@@ -79,7 +79,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.BrandController.DeleteBrands(Application.ApiContracts.Brand.DeleteManyBrandsRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.BrandController.DeleteBrands(Application.ApiContracts.Brand.DeleteManyBrandsRequest,System.Threading.CancellationToken)">
             <summary>
             Xoá nhiều thương hiệu cùng lúc.
             </summary>
@@ -87,7 +87,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.BrandController.RestoreBrands(Application.ApiContracts.Brand.RestoreManyBrandsRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.BrandController.RestoreBrands(Application.ApiContracts.Brand.RestoreManyBrandsRequest,System.Threading.CancellationToken)">
             <summary>
             Khôi phục nhiều thương hiệu đã xoá cùng lúc.
             </summary>
@@ -95,7 +95,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="T:WebAPI.Controllers.v1.FileController">
+        <member name="T:WebAPI.Controllers.V1.FileController">
             <summary>
             Quản lý file ảnh trong hệ thống
             </summary>
@@ -104,7 +104,7 @@
             <param name="deleteService"></param>
             <param name="updateService"></param>
         </member>
-        <member name="M:WebAPI.Controllers.v1.FileController.#ctor(Application.Interfaces.Services.File.IFileInsertService,Application.Interfaces.Services.File.IFileSelectService,Application.Interfaces.Services.File.IFileDeleteService,Application.Interfaces.Services.File.IFileUpdateService)">
+        <member name="M:WebAPI.Controllers.V1.FileController.#ctor(Application.Interfaces.Services.File.IFileInsertService,Application.Interfaces.Services.File.IFileSelectService,Application.Interfaces.Services.File.IFileDeleteService,Application.Interfaces.Services.File.IFileUpdateService)">
             <summary>
             Quản lý file ảnh trong hệ thống
             </summary>
@@ -113,7 +113,7 @@
             <param name="deleteService"></param>
             <param name="updateService"></param>
         </member>
-        <member name="M:WebAPI.Controllers.v1.FileController.UploadSingleImage(Microsoft.AspNetCore.Http.IFormFile,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.FileController.UploadSingleImage(Microsoft.AspNetCore.Http.IFormFile,System.Threading.CancellationToken)">
             <summary>
             Up 1 ảnh lên hệ thống
             </summary>
@@ -121,7 +121,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.FileController.UploadMultipleImages(System.Collections.Generic.List{Microsoft.AspNetCore.Http.IFormFile},System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.FileController.UploadMultipleImages(System.Collections.Generic.List{Microsoft.AspNetCore.Http.IFormFile},System.Threading.CancellationToken)">
             <summary>
             Up nhiều ảnh lên hệ thống
             </summary>
@@ -129,7 +129,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.FileController.DeleteFile(System.String,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.FileController.DeleteFile(System.String,System.Threading.CancellationToken)">
             <summary>
             Xoá 1 file theo tên file đã lưu (stored file name)
             </summary>
@@ -137,14 +137,14 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.FileController.RestoreFile(System.String,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.FileController.RestoreFile(System.String,System.Threading.CancellationToken)">
             <summary>
             Khôi phục 1 file theo tên file đã lưu
             </summary>
             <param name="fileName">Tên file đã lưu</param>
             <param name="cancellationToken"></param>
         </member>
-        <member name="M:WebAPI.Controllers.v1.FileController.DeleteMultipleFiles(System.Collections.Generic.List{System.String},System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.FileController.DeleteMultipleFiles(System.Collections.Generic.List{System.String},System.Threading.CancellationToken)">
             <summary>
             Xoá nhiều file cùng lúc theo danh sách tên file đã lưu
             </summary>
@@ -152,7 +152,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.FileController.RestoreMultipleFiles(System.Collections.Generic.List{System.String},System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.FileController.RestoreMultipleFiles(System.Collections.Generic.List{System.String},System.Threading.CancellationToken)">
             <summary>
             Khôi phục nhiều file cùng lúc theo danh sách tên file đã lưu
             </summary>
@@ -160,7 +160,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.FileController.GetImage(System.String,System.Nullable{System.Int32},System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.FileController.GetImage(System.String,System.Nullable{System.Int32},System.Threading.CancellationToken)">
             <summary>
             Xuất ảnh dựa vào tên file, có thể thay đổi kích thước ảnh bằng tham số w (width)
             </summary>
@@ -169,19 +169,187 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="T:WebAPI.Controllers.v1.SettingController">
+        <member name="T:WebAPI.Controllers.V1.ProductCategoryController">
+            <summary>
+            Quản lý danh mục sản phẩm.
+            </summary>
+            <param name="insertService"></param>
+            <param name="selectService"></param>
+            <param name="updateService"></param>
+            <param name="deleteService"></param>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductCategoryController.#ctor(Application.Interfaces.Services.ProductCategory.IProductCategoryInsertService,Application.Interfaces.Services.ProductCategory.IProductCategorySelectService,Application.Interfaces.Services.ProductCategory.IProductCategoryUpdateService,Application.Interfaces.Services.ProductCategory.IProductCategoryDeleteService)">
+            <summary>
+            Quản lý danh mục sản phẩm.
+            </summary>
+            <param name="insertService"></param>
+            <param name="selectService"></param>
+            <param name="updateService"></param>
+            <param name="deleteService"></param>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductCategoryController.GetProductCategories(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+            <summary>
+            Lấy danh sách danh mục sản phẩm (có phân trang, lọc, sắp xếp). Nếu không truyền tham số phân trang sẽ trả về tất cả.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductCategoryController.GetDeletedProductCategories(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+            <summary>
+            Lấy danh sách danh mục sản phẩm đã bị xoá (có phân trang, lọc, sắp xếp).
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductCategoryController.GetProductCategoryById(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Lấy thông tin danh mục sản phẩm theo Id.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductCategoryController.CreateProductCategory(Application.ApiContracts.ProductCategory.CreateProductCategoryRequest,System.Threading.CancellationToken)">
+            <summary>
+            Tạo mới danh mục sản phẩm.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductCategoryController.UpdateProductCategory(System.Int32,Application.ApiContracts.ProductCategory.UpdateProductCategoryRequest,System.Threading.CancellationToken)">
+            <summary>
+            Cập nhật danh mục sản phẩm.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductCategoryController.DeleteProductCategory(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Xoá danh mục sản phẩm (soft delete).
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductCategoryController.DeleteProductCategories(Application.ApiContracts.ProductCategory.DeleteManyProductCategoriesRequest,System.Threading.CancellationToken)">
+            <summary>
+            Xoá nhiều danh mục sản phẩm cùng lúc.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductCategoryController.RestoreProductCategory(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Khôi phục danh mục sản phẩm đã bị xoá.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductCategoryController.RestoreProductCategories(Application.ApiContracts.ProductCategory.RestoreManyProductCategoriesRequest,System.Threading.CancellationToken)">
+            <summary>
+            Khôi phục nhiều danh mục sản phẩm cùng lúc.
+            </summary>
+        </member>
+        <member name="T:WebAPI.Controllers.V1.ProductController">
+            <summary>
+            Quản lý sản phẩm.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.#ctor(Application.Interfaces.Services.Product.IProductSelectService,Application.Interfaces.Services.Product.IProductInsertService,Application.Interfaces.Services.Product.IProductUpdateService,Application.Interfaces.Services.Product.IProductDeleteService)">
+            <summary>
+            Quản lý sản phẩm.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetProducts(Application.ApiContracts.Product.Get.ProductListRequest,System.Threading.CancellationToken)">
+            <summary>
+            Lấy danh sách sản phẩm đầy đủ (có phân trang, lọc, tìm kiếm). Mặc định page=1, pageSize=5.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetDeletedProducts(Application.ApiContracts.Product.Get.ProductListRequest,System.Threading.CancellationToken)">
+            <summary>
+            Lấy danh sách sản phẩm đã bị xoá (có phân trang, lọc, tìm kiếm). Mặc định page=1, pageSize=5.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetActiveVariantLiteProducts(Application.ApiContracts.Product.Get.ProductListRequest,System.Threading.CancellationToken)">
+            <summary>
+            Lấy danh sách biến thể sản phẩm (lite) chưa xoá, mặc định page=1, pageSize=5.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetDeletedVariantLiteProducts(Application.ApiContracts.Product.Get.ProductListRequest,System.Threading.CancellationToken)">
+            <summary>
+            Lấy danh sách biến thể sản phẩm (lite) đã xoá, mặc định page=1, pageSize=5.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetProductById(System.Int32,System.Boolean,System.Threading.CancellationToken)">
+            <summary>
+            Lấy thông tin chi tiết sản phẩm theo Id.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetVariantLiteByProductIdActive(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Lấy danh sách biến thể (lite) chưa xoá theo Id sản phẩm.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetVariantLiteByProductIdDeleted(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Lấy danh sách biến thể (lite) đã xoá theo Id sản phẩm.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.CheckSlugAvailability(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Kiểm tra slug có sẵn sàng sử dụng hay không.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.CreateProduct(Application.ApiContracts.Product.Create.CreateProductRequest,System.Threading.CancellationToken)">
+            <summary>
+            Tạo mới sản phẩm với các biến thể.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.UpsertProduct(Application.ApiContracts.Product.Create.UpsertProductRequest,System.Threading.CancellationToken)">
+            <summary>
+            Upsert sản phẩm (tạo mới hoặc cập nhật nếu Id có giá trị).
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateProduct(System.Int32,Application.ApiContracts.Product.Update.UpdateProductRequest,System.Threading.CancellationToken)">
+            <summary>
+            Cập nhật sản phẩm theo Id.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.DeleteProduct(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Xoá sản phẩm (soft delete) và cascade xoá ảnh của các biến thể.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.DeleteProducts(Application.ApiContracts.Product.Delete.DeleteManyProductsRequest,System.Threading.CancellationToken)">
+            <summary>
+            Xoá nhiều sản phẩm cùng lúc (soft delete) và cascade xoá ảnh.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.RestoreProduct(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Khôi phục sản phẩm đã bị xoá.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.RestoreProducts(Application.ApiContracts.Product.Delete.RestoreManyProductsRequest,System.Threading.CancellationToken)">
+            <summary>
+            Khôi phục nhiều sản phẩm cùng lúc.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateProductPrice(System.Int32,Application.ApiContracts.Product.ManagePrices.UpdateProductPriceRequest,System.Threading.CancellationToken)">
+            <summary>
+            Chỉnh giá cho tất cả các biến thể của 1 sản phẩm.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateManyProductPrices(Application.ApiContracts.Product.ManagePrices.UpdateManyProductPricesRequest,System.Threading.CancellationToken)">
+            <summary>
+            Chỉnh giá cho nhiều sản phẩm cùng lúc. Truyền dạng: {"tên sản phẩm 1": giá, "tên sản phẩm 2": giá}.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateProductStatus(System.Int32,Application.ApiContracts.Product.ManageStatus.UpdateProductStatusRequest,System.Threading.CancellationToken)">
+            <summary>
+            Chỉnh trạng thái của 1 sản phẩm (for-sale hoặc out-of-business).
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateManyProductStatuses(Application.ApiContracts.Product.ManageStatus.UpdateManyProductStatusesRequest,System.Threading.CancellationToken)">
+            <summary>
+            Chỉnh trạng thái nhiều sản phẩm cùng lúc. Truyền dạng: {"ids": [1, 2, 3], "statusId": "for-sale"}.
+            </summary>
+        </member>
+        <member name="T:WebAPI.Controllers.V1.SettingController">
             <summary>
             Quản lý cài đặt hệ thống: cập nhật số lượng cảnh báo tồn kho, số lượng mua tối đa
             </summary>
             <param name="settingService"></param>
         </member>
-        <member name="M:WebAPI.Controllers.v1.SettingController.#ctor(Application.Interfaces.Services.Setting.ISettingService)">
+        <member name="M:WebAPI.Controllers.V1.SettingController.#ctor(Application.Interfaces.Services.Setting.ISettingService)">
             <summary>
             Quản lý cài đặt hệ thống: cập nhật số lượng cảnh báo tồn kho, số lượng mua tối đa
             </summary>
             <param name="settingService"></param>
         </member>
-        <member name="M:WebAPI.Controllers.v1.SettingController.SetSettings(System.Collections.Generic.Dictionary{System.String,System.Nullable{System.Int64}},System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SettingController.SetSettings(System.Collections.Generic.Dictionary{System.String,System.Nullable{System.Int64}},System.Threading.CancellationToken)">
             <summary>
             Sửa các cài đặt hệ thống (cập nhật số lượng cảnh báo tồn kho, số lượng mua tối đa, ...)
             </summary>
@@ -189,14 +357,14 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.SettingController.GetAllSettings(System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SettingController.GetAllSettings(System.Threading.CancellationToken)">
             <summary>
             Lấy các thông số cài đặt hệ thống (số lượng cảnh báo tồn kho, số lượng mua tối đa, ...)
             </summary>
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="T:WebAPI.Controllers.v1.SupplierController">
+        <member name="T:WebAPI.Controllers.V1.SupplierController">
             <summary>
             Quản lý danh sách nhà cung cấp.
             </summary>
@@ -205,7 +373,7 @@
             <param name="supplierUpdateService"></param>
             <param name="supplierDeleteService"></param>
         </member>
-        <member name="M:WebAPI.Controllers.v1.SupplierController.#ctor(Application.Interfaces.Services.Supplier.ISupplierInsertService,Application.Interfaces.Services.Supplier.ISupplierSelectService,Application.Interfaces.Services.Supplier.ISupplierUpdateService,Application.Interfaces.Services.Supplier.ISupplierDeleteService)">
+        <member name="M:WebAPI.Controllers.V1.SupplierController.#ctor(Application.Interfaces.Services.Supplier.ISupplierInsertService,Application.Interfaces.Services.Supplier.ISupplierSelectService,Application.Interfaces.Services.Supplier.ISupplierUpdateService,Application.Interfaces.Services.Supplier.ISupplierDeleteService)">
             <summary>
             Quản lý danh sách nhà cung cấp.
             </summary>
@@ -214,7 +382,7 @@
             <param name="supplierUpdateService"></param>
             <param name="supplierDeleteService"></param>
         </member>
-        <member name="M:WebAPI.Controllers.v1.SupplierController.GetSuppliers(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SupplierController.GetSuppliers(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách nhà cung cấp (có phân trang, lọc, sắp xếp).
             </summary>
@@ -222,7 +390,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.SupplierController.GetDeletedSuppliers(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SupplierController.GetDeletedSuppliers(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách nhà cung cấp đã bị xoá (có phân trang, lọc, sắp xếp).
             </summary>
@@ -230,7 +398,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.SupplierController.GetSupplierById(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SupplierController.GetSupplierById(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Lấy thông tin của nhà cung cấp được chọn.
             </summary>
@@ -238,7 +406,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.SupplierController.CreateSupplier(Application.ApiContracts.Supplier.CreateSupplierRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SupplierController.CreateSupplier(Application.ApiContracts.Supplier.CreateSupplierRequest,System.Threading.CancellationToken)">
             <summary>
             Tạo nhà cung cấp mới.
             </summary>
@@ -246,7 +414,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.SupplierController.UpdateSupplier(System.Int32,Application.ApiContracts.Supplier.UpdateSupplierRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SupplierController.UpdateSupplier(System.Int32,Application.ApiContracts.Supplier.UpdateSupplierRequest,System.Threading.CancellationToken)">
             <summary>
             Cập nhật thông tin nhà cung cấp (bao gồm cả trạng thái của nó).
             </summary>
@@ -255,7 +423,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.SupplierController.UpdateSupplierStatus(System.Int32,Application.ApiContracts.Supplier.UpdateSupplierStatusRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SupplierController.UpdateSupplierStatus(System.Int32,Application.ApiContracts.Supplier.UpdateSupplierStatusRequest,System.Threading.CancellationToken)">
             <summary>
             Cập nhật trạng thái của nhà cung cấp.
             </summary>
@@ -264,7 +432,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.SupplierController.UpdateManySupplierStatus(Application.ApiContracts.Supplier.UpdateManySupplierStatusRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SupplierController.UpdateManySupplierStatus(Application.ApiContracts.Supplier.UpdateManySupplierStatusRequest,System.Threading.CancellationToken)">
             <summary>
             Cập nhật trạng thái của nhiều nhà cung cấp cùng lúc.
             </summary>
@@ -272,7 +440,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.SupplierController.DeleteSupplier(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SupplierController.DeleteSupplier(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Xoá nhà cung cấp.
             </summary>
@@ -280,7 +448,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.SupplierController.RestoreSupplier(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SupplierController.RestoreSupplier(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Khôi phục lại nhà cung cấp đã xoá.
             </summary>
@@ -288,7 +456,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.SupplierController.DeleteSuppliers(Application.ApiContracts.Supplier.DeleteManySuppliersRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SupplierController.DeleteSuppliers(Application.ApiContracts.Supplier.DeleteManySuppliersRequest,System.Threading.CancellationToken)">
             <summary>
             Xoá nhiều nhà cung cấp cùng lúc.
             </summary>
@@ -296,7 +464,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.v1.SupplierController.RestoreSuppliers(Application.ApiContracts.Supplier.RestoreManySuppliersRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SupplierController.RestoreSuppliers(Application.ApiContracts.Supplier.RestoreManySuppliersRequest,System.Threading.CancellationToken)">
             <summary>
             Khôi phục nhiều nhà cung cấp đã xoá cùng lúc.
             </summary>
