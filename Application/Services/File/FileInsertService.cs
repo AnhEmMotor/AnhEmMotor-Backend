@@ -1,4 +1,5 @@
 using Application.ApiContracts.File;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.File;
 using Application.Interfaces.Services.File;
 using Domain.Entities;
@@ -9,7 +10,7 @@ using SixLabors.ImageSharp.Formats.Webp;
 
 namespace Application.Services.File
 {
-    public class FileInsertService(IFileRepository fileRepository, IMediaFileInsertRepository mediaFileInsertRepository) : IFileInsertService
+    public class FileInsertService(IFileRepository fileRepository, IMediaFileInsertRepository mediaFileInsertRepository, IUnitOfWork unitOfWork) : IFileInsertService
     {
         private readonly string[] _PermittedExtensions = [".jpg", ".jpeg", ".png", ".gif"];
         private readonly Dictionary<string, string> _MimeTypeMappings = new()
@@ -20,7 +21,7 @@ namespace Application.Services.File
             { ".gif", "image/gif" }
         };
 
-        private async Task<(MediaFile? FileData, UploadResponse? Response, ErrorResponse? Error)> ProcessAndSaveFileToDiskAsync(
+        private async Task<(MediaFile? FileData, FileResponse? Response, ErrorResponse? Error)> ProcessAndSaveFileToDiskAsync(
             IFormFile file, string baseUrl, CancellationToken cancellationToken)
         {
             var (isValid, validationError) = await ValidateFileAsync(file, cancellationToken).ConfigureAwait(false);
@@ -70,7 +71,7 @@ namespace Application.Services.File
                 FileSize = fileSize,
             };
 
-            var uploadResponse = new UploadResponse
+            var uploadResponse = new FileResponse
             {
                 IsSuccess = true,
                 FileName = storedFileName,
@@ -80,7 +81,7 @@ namespace Application.Services.File
             return (mediaFile, uploadResponse, null);
         }
 
-        public async Task<(UploadResponse? Data, ErrorResponse? Error)> UploadSingleFileAsync(
+        public async Task<(FileResponse? Data, ErrorResponse? Error)> UploadSingleFileAsync(
             IFormFile file, string baseUrl, CancellationToken cancellationToken)
         {
             var (mediaFile, responseData, error) = await ProcessAndSaveFileToDiskAsync(file, baseUrl, cancellationToken).ConfigureAwait(false);
@@ -93,7 +94,7 @@ namespace Application.Services.File
             try
             {
                 await mediaFileInsertRepository.AddAsync(mediaFile, cancellationToken).ConfigureAwait(false);
-                await mediaFileInsertRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -106,7 +107,7 @@ namespace Application.Services.File
             return (responseData, null);
         }
 
-        public async Task<(List<UploadResponse>? Data, ErrorResponse? Error)> UploadMultipleFilesAsync(
+        public async Task<(List<FileResponse>? Data, ErrorResponse? Error)> UploadMultipleFilesAsync(
             List<IFormFile> files, string baseUrl, CancellationToken cancellationToken)
         {
             var tasks = files.Select(file => ProcessAndSaveFileToDiskAsync(file, baseUrl, cancellationToken));
@@ -119,7 +120,7 @@ namespace Application.Services.File
                 return (null, new ErrorResponse { Errors = errorDetails });
             }
 
-            var data = new List<UploadResponse>();
+            var data = new List<FileResponse>();
             var mediaFilesToAdd = new List<MediaFile>();
 
             foreach (var (FileData, Response, _) in results)
@@ -140,7 +141,7 @@ namespace Application.Services.File
                         await mediaFileInsertRepository.AddAsync(mediaFile, cancellationToken).ConfigureAwait(false);
                     }
 
-                    await mediaFileInsertRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {

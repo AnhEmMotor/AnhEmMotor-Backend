@@ -8,7 +8,7 @@ namespace Domain.Entities
     {
         [Key]
         [Column("Key")]
-        public string? Key { get; set; }
+        public string Key { get; set; } = string.Empty;
 
         public ICollection<Output> OutputOrders { get; set; } = [];
     }

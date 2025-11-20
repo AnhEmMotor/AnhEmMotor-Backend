@@ -2,20 +2,17 @@ using Application.Interfaces.Repositories.ProductCategory;
 using Infrastructure.DBContexts;
 using CategoryEntity = Domain.Entities.ProductCategory;
 
-namespace Infrastructure.Repositories.ProductCategory
-{
-    public class ProductCategoryDeleteRepository(ApplicationDBContext context) : IProductCategoryDeleteRepository
-    {
-        public async Task DeleteAsync(CategoryEntity category, CancellationToken cancellationToken)
-        {
-            context.ProductCategories.Remove(category);
-            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        }
+namespace Infrastructure.Repositories.ProductCategory;
 
-        public async Task DeleteAsync(List<CategoryEntity> categories, CancellationToken cancellationToken)
-        {
-            context.ProductCategories.RemoveRange(categories);
-            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        }
+public class ProductCategoryDeleteRepository(ApplicationDBContext context) : IProductCategoryDeleteRepository
+{
+    public void Delete(CategoryEntity category)
+    {
+        context.ProductCategories.Remove(category);
+    }
+
+    public void Delete(List<CategoryEntity> categories)
+    {
+        context.ProductCategories.RemoveRange(categories);
     }
 }

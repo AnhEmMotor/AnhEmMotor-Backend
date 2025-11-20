@@ -15,21 +15,4 @@ public class ProductDeleteRepository(ApplicationDBContext context) : IProductDel
     {
         context.Products.RemoveRange(products);
     }
-
-    public async Task DeleteProductAsync(ProductEntity product, CancellationToken cancellationToken)
-    {
-        context.Products.Remove(product);
-        await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-    }
-
-    public async Task DeleteProductsAsync(List<ProductEntity> products, CancellationToken cancellationToken)
-    {
-        context.Products.RemoveRange(products);
-        await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-    }
-
-    public async Task SaveChangesAsync(CancellationToken cancellationToken)
-    {
-        await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-    }
 }

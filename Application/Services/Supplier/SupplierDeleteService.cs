@@ -1,77 +1,85 @@
 ﻿using Application.ApiContracts.Supplier;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Supplier;
 using Application.Interfaces.Services.Supplier;
 using Domain.Helpers;
 
-namespace Application.Services.Supplier
+namespace Application.Services.Supplier;
+
+public class SupplierDeleteService(
+    ISupplierSelectRepository supplierSelectRepository,
+    ISupplierDeleteRepository supplierDeleteRepository,
+    IUnitOfWork unitOfWork) : ISupplierDeleteService
 {
-    public class SupplierDeleteService(ISupplierSelectRepository supplierSelectRepository, ISupplierDeleteRepository supplierDeleteRepository) : ISupplierDeleteService
+    public async Task<ErrorResponse?> DeleteSupplierAsync(int id, CancellationToken cancellationToken)
     {
-        public async Task<ErrorResponse?> DeleteSupplierAsync(int id, CancellationToken cancellationToken)
+        var supplier = await supplierSelectRepository.GetByIdAsync(id, cancellationToken).ConfigureAwait(false);
+
+        if (supplier == null)
         {
-            var supplier = await supplierSelectRepository.GetSupplierByIdAsync(id, cancellationToken).ConfigureAwait(false);
-
-            if (supplier == null)
+            return new ErrorResponse
             {
-                return new ErrorResponse
-                {
-                    Errors =
-                    [
-                        new ErrorDetail { Message = $"Supplier with Id {id} not found." }
-                    ]
-                };
-            }
+                Errors = [new ErrorDetail { Message = $"Supplier with Id {id} not found." }]
+            };
+        }
 
-            await supplierDeleteRepository.DeleteSupplierAsync(supplier, cancellationToken).ConfigureAwait(false);
+        supplierDeleteRepository.Delete(supplier);
+        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        return null;
+    }
+
+    public async Task<ErrorResponse?> DeleteSuppliersAsync(DeleteManySuppliersRequest request, CancellationToken cancellationToken)
+    {
+        if (request.Ids == null || request.Ids.Count == 0)
+        {
             return null;
         }
 
-        public async Task<ErrorResponse?> DeleteSuppliersAsync(DeleteManySuppliersRequest request, CancellationToken cancellationToken)
+        var uniqueIds = request.Ids.Distinct().ToList();
+
+        var activeSuppliers = await supplierSelectRepository.GetActiveSuppliersByIdsAsync(uniqueIds, cancellationToken).ConfigureAwait(false);
+        var allSuppliers = await supplierSelectRepository.GetAllSuppliersByIdsAsync(uniqueIds, cancellationToken).ConfigureAwait(false);
+
+        var allSuppliersMap = allSuppliers.ToDictionary(s => s.Id);
+        var activeSuppliersSet = activeSuppliers.Select(s => s.Id).ToHashSet();
+
+        var errorDetails = new List<ErrorDetail>();
+
+        foreach (var id in uniqueIds)
         {
-            if (request.Ids == null || request.Ids.Count == 0)
+            if (!allSuppliersMap.ContainsKey(id))
             {
-                return null;
-            }
-
-            var errorDetails = new List<ErrorDetail>();
-            var activeSuppliers = await supplierSelectRepository.GetActiveSuppliersByIdsAsync(request.Ids, cancellationToken).ConfigureAwait(false);
-            var allSuppliers = await supplierSelectRepository.GetAllSuppliersByIdsAsync(request.Ids, cancellationToken).ConfigureAwait(false);
-
-            foreach (var id in request.Ids)
-            {
-                var supplier = allSuppliers.FirstOrDefault(s => s.Id == id);
-                var activeSupplier = activeSuppliers.FirstOrDefault(s => s.Id == id);
-
-                if (supplier == null)
+                errorDetails.Add(new ErrorDetail
                 {
-                    errorDetails.Add(new ErrorDetail
-                    {
-                        Message = "Supplier not found",
-                        Field = $"Supplier ID: {id}",
-                    });
-                }
-                else if (activeSupplier == null)
+                    Message = "Supplier not found",
+                    Field = $"Supplier ID: {id}"
+                });
+                continue;
+            }
+
+            if (!activeSuppliersSet.Contains(id))
+            {
+                var supplierName = allSuppliersMap[id].Name;
+                errorDetails.Add(new ErrorDetail
                 {
-                    errorDetails.Add(new ErrorDetail
-                    {
-                        Message = "Supplier has already been deleted",
-                        Field = supplier.Name
-                    });
-                }
+                    Message = "Supplier has already been deleted",
+                    Field = supplierName
+                });
             }
-
-            if (errorDetails.Count > 0)
-            {
-                return new ErrorResponse { Errors = errorDetails };
-            }
-
-            if (activeSuppliers.Count > 0)
-            {
-                await supplierDeleteRepository.DeleteSuppliersAsync(activeSuppliers, cancellationToken).ConfigureAwait(false);
-            }
-
-            return null;
         }
 
+        if (errorDetails.Count > 0)
+        {
+            return new ErrorResponse { Errors = errorDetails };
+        }
+
+        if (activeSuppliers.Count > 0)
+        {
+            supplierDeleteRepository.Delete(activeSuppliers);
+            await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        return null;
     }
 }

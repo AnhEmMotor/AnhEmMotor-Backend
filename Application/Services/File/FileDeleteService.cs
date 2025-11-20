@@ -1,10 +1,12 @@
+﻿using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.File;
 using Application.Interfaces.Services.File;
+using Domain.Entities;
 using Domain.Helpers;
 
 namespace Application.Services.File
 {
-    public class FileDeleteService(IMediaFileSelectRepository mediaFileSelectRepository, IMediaFileDeleteRepository mediaFileDeleteRepository) : IFileDeleteService
+    public class FileDeleteService(IMediaFileSelectRepository mediaFileSelectRepository, IMediaFileDeleteRepository mediaFileDeleteRepository, IUnitOfWork unitOfWork) : IFileDeleteService
     {
         public async Task<ErrorResponse?> DeleteFileAsync(string fileName, CancellationToken cancellationToken)
         {
@@ -27,7 +29,8 @@ namespace Application.Services.File
                     return new ErrorResponse { Errors = [new ErrorDetail { Message = "File not found in database." }] };
                 }
 
-                await mediaFileDeleteRepository.DeleteAndSaveAsync(media, cancellationToken).ConfigureAwait(false);
+                mediaFileDeleteRepository.Delete(media);
+                await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 return null;
             }
             catch (Exception ex)
@@ -36,46 +39,51 @@ namespace Application.Services.File
             }
         }
 
-        public async Task<ErrorResponse?> DeleteMultipleFilesAsync(List<string> fileNames, CancellationToken cancellationToken)
+        public async Task<ErrorResponse?> DeleteMultipleFilesAsync(List<string?> fileNames, CancellationToken cancellationToken)
         {
             if (fileNames == null || fileNames.Count == 0)
             {
-                return new ErrorResponse { Errors = [new ErrorDetail { Message = "No file names provided." }] };
+                return null;
             }
 
-            var deleted = new List<string>();
-            var notFound = new List<string>();
+            var uniqueFileNames = fileNames.Distinct().ToList();
+            var errorDetails = new List<ErrorDetail>();
 
-            foreach (var f in fileNames)
+            List<MediaFile>? allMediaFile = await mediaFileSelectRepository.GetByStoredFileNamesAsync(fileNames, cancellationToken, true).ConfigureAwait(false);
+            List<MediaFile>? activeMediaFile = await mediaFileSelectRepository.GetByStoredFileNamesAsync(fileNames, cancellationToken, false).ConfigureAwait(false);
+
+            var allMediaFileMap = allMediaFile!.ToDictionary(b => b.StoredFileName!);
+            var activeMediaFileSet = activeMediaFile!.Select(b => b.StoredFileName!).ToHashSet();
+
+            foreach (var fileName in uniqueFileNames)
             {
-                try
+                if (!allMediaFileMap.ContainsKey(fileName!))
                 {
-                    var media = await mediaFileSelectRepository.GetByStoredFileNameAsync(f, cancellationToken, includeDeleted: false).ConfigureAwait(false);
-                    if (media is null)
+                    errorDetails.Add(new ErrorDetail
                     {
-                        var existed = await mediaFileSelectRepository.GetByStoredFileNameAsync(f, cancellationToken, includeDeleted: true).ConfigureAwait(false);
-                        if (existed is not null)
-                        {
-                            notFound.Add(f);
-                            continue;
-                        }
-
-                        notFound.Add(f);
-                        continue;
-                    }
-
-                    await mediaFileDeleteRepository.DeleteAndSaveAsync(media, cancellationToken).ConfigureAwait(false);
-                    deleted.Add(f);
+                        Message = $"File '{fileName}' not found."
+                    });
                 }
-                catch
+
+                if (!activeMediaFileSet.Contains(fileName!))
                 {
-                    notFound.Add(f);
+                    errorDetails.Add(new ErrorDetail
+                    {
+                        Field = "Id",
+                        Message = $"File '{fileName}' has already been deleted"
+                    });
                 }
             }
 
-            if (notFound.Count > 0)
+            if (errorDetails.Count > 0)
             {
-                return new ErrorResponse { Errors = [.. notFound.Select(n => new ErrorDetail { Message = $"File '{n}' not found or failed to delete." })] };
+                return new ErrorResponse { Errors = errorDetails };
+            }
+
+            if (uniqueFileNames.Count > 0)
+            {
+                mediaFileDeleteRepository.DeleteRange(allMediaFile!);
+                await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
             return null;

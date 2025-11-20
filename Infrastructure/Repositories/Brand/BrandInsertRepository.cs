@@ -2,15 +2,12 @@
 using Infrastructure.DBContexts;
 using BrandEntity = Domain.Entities.Brand;
 
-namespace Infrastructure.Repositories.Brand
+namespace Infrastructure.Repositories.Brand;
+
+public class BrandInsertRepository(ApplicationDBContext context) : IBrandInsertRepository
 {
-    public class BrandInsertRepository(ApplicationDBContext context) : IBrandInsertRepository
+    public async Task AddAsync(BrandEntity brand, CancellationToken cancellationToken)
     {
-        public async Task<BrandEntity> AddBrandAsync(BrandEntity brand, CancellationToken cancellationToken)
-        {
-            context.Brands.Add(brand);
-            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-            return brand;
-        }
+        await context.Brands.AddAsync(brand, cancellationToken).ConfigureAwait(false);
     }
 }

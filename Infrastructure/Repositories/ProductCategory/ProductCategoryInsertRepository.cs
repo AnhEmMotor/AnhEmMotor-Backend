@@ -6,11 +6,9 @@ namespace Infrastructure.Repositories.ProductCategory
 {
     public class ProductCategoryInsertRepository(ApplicationDBContext context) : IProductCategoryInsertRepository
     {
-        public async Task<CategoryEntity> AddAsync(CategoryEntity category, CancellationToken cancellationToken)
+        public async Task AddAsync(CategoryEntity category, CancellationToken cancellationToken)
         {
-            context.ProductCategories.Add(category);
-            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-            return category;
+            await context.ProductCategories.AddAsync(category, cancellationToken).ConfigureAwait(false);
         }
     }
 }

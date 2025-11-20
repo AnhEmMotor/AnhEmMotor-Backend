@@ -4,7 +4,7 @@ namespace Application.Interfaces.Repositories.Brand
 {
     public interface IBrandSelectRepository
     {
-        ValueTask<BrandEntity?> GetBrandByIdAsync(int id, CancellationToken cancellationToken);
+        Task<BrandEntity?> GetBrandByIdAsync(int id, CancellationToken cancellationToken);
         IQueryable<BrandEntity> GetBrands();
         IQueryable<BrandEntity> GetDeletedBrands();
         IQueryable<BrandEntity> GetAllBrands();

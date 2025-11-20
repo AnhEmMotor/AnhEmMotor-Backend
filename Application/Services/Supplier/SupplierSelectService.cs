@@ -13,7 +13,7 @@ namespace Application.Services.Supplier
     {
         public async Task<(SupplierResponse? Data, ErrorResponse? Error)> GetSupplierByIdAsync(int id, CancellationToken cancellationToken)
         {
-            var supplier = await supplierSelectRepository.GetSupplierByIdAsync(id, cancellationToken).ConfigureAwait(false);
+            var supplier = await supplierSelectRepository.GetByIdAsync(id, cancellationToken).ConfigureAwait(false);
             if (supplier == null)
             {
                 return (

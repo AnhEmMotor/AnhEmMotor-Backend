@@ -1,51 +1,39 @@
-﻿using Application.Interfaces.Repositories.Setting;
+﻿using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.Setting;
 using Application.Interfaces.Services.Setting;
 using Domain.Helpers;
 
-namespace Application.Services.Setting
+namespace Application.Services.Setting;
+
+public class SettingService(
+    ISettingRepository settingRepository,
+    IUnitOfWork unitOfWork) : ISettingService
 {
-    public class SettingService(ISettingRepository settingRepository) : ISettingService
+    public async Task<Dictionary<string, long?>> GetAllSettingsAsync(CancellationToken cancellationToken)
     {
-        public async Task<Dictionary<string, long?>> GetAllSettingsAsync(CancellationToken cancellationToken)
+        var settingsList = await settingRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
+
+        if (settingsList == null || !settingsList.Any())
         {
-            var settingsList = await settingRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
-
-            if (settingsList == null || !settingsList.Any())
-            {
-                return [];
-            }
-
-            var settingsDictionary = settingsList
-                .Where(s => s.Key != null)
-                .ToDictionary(s => s.Key!, s => s.Value);
-
-            return settingsDictionary;
+            return [];
         }
 
-        public async Task<ErrorResponse?> SetSettingsAsync(Dictionary<string, long?> requests, CancellationToken cancellationToken)
+        return settingsList
+            .Where(s => s.Key != null)
+            .ToDictionary(s => s.Key!, s => s.Value);
+    }
+
+    public async Task<(Dictionary<string, long?>? Data, ErrorResponse? Error)> SetSettingsAsync(Dictionary<string, long?> requests, CancellationToken cancellationToken)
+    {
+        var settingsToUpsert = requests.Select(req => new Domain.Entities.Setting
         {
-            try
-            {
-                var settingsToUpsert = requests.Select(req => new Domain.Entities.Setting
-                {
-                    Key = req.Key,
-                    Value = req.Value
-                });
+            Key = req.Key,
+            Value = req.Value
+        });
 
-                await settingRepository.UpsertBatchAsync(settingsToUpsert, cancellationToken).ConfigureAwait(false);
+        await settingRepository.UpsertBatchAsync(settingsToUpsert, cancellationToken).ConfigureAwait(false);
+        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-                return null;
-            }
-            catch (Exception ex)
-            {
-                return new ErrorResponse
-                {
-                    Errors =
-                    [
-                        new ErrorDetail { Message = ex.Message }
-                    ]
-                };
-            }
-        }
+        return (requests, null);
     }
 }

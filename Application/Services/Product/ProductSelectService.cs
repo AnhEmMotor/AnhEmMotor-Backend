@@ -1,11 +1,12 @@
 using Application.ApiContracts.Product.Common;
-using Application.ApiContracts.Product.Get;
+using Application.ApiContracts.Product.Select;
 using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Services.Product;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Helpers;
 using Microsoft.EntityFrameworkCore;
+using ProductEntity = Domain.Entities.Product;
 
 namespace Application.Services.Product;
 
@@ -14,11 +15,11 @@ public class ProductSelectService(IProductSelectRepository selectRepository) : I
     private static readonly string[] BookingStatuses =
     [
         "confirmed_cod",
-            "paid_processing",
-            "waiting_deposit",
-            "deposit_paid",
-            "delivering",
-            "waiting_pickup"
+        "paid_processing",
+        "waiting_deposit",
+        "deposit_paid",
+        "delivering",
+        "waiting_pickup"
     ];
 
     public Task<PagedResult<ProductDetailResponse>> GetProductsAsync(ProductListRequest request, CancellationToken cancellationToken)
@@ -133,8 +134,7 @@ public class ProductSelectService(IProductSelectRepository selectRepository) : I
             return (null, new ErrorResponse { Errors = [new ErrorDetail { Message = $"Product with Id {id} not found." }] });
         }
 
-        var inventoryAlertLevel = await selectRepository.GetInventoryAlertLevelAsync(cancellationToken).ConfigureAwait(false);
-        var response = BuildProductDetailResponse(product, inventoryAlertLevel);
+        var response = BuildProductDetailResponse(product);
         return (response, null);
     }
 
@@ -186,8 +186,8 @@ public class ProductSelectService(IProductSelectRepository selectRepository) : I
         };
     }
 
-    private async Task<PagedResult<ProductDetailResponse>> BuildProductPagedResultAsync(
-        IQueryable<Domain.Entities.Product> productSource,
+    private static async Task<PagedResult<ProductDetailResponse>> BuildProductPagedResultAsync(
+        IQueryable<ProductEntity> productSource,
         IQueryable<ProductVariant> variantSource,
         ProductListRequest request,
         CancellationToken cancellationToken)
@@ -219,7 +219,7 @@ public class ProductSelectService(IProductSelectRepository selectRepository) : I
 
         var projection = query.Select(p => new ProductListRow
         {
-            Id = p.Id ?? 0,
+            Id = p.Id,
             Name = p.Name,
             CategoryId = p.CategoryId,
             CategoryName = p.ProductCategory != null ? p.ProductCategory.Name : null,
@@ -270,7 +270,7 @@ public class ProductSelectService(IProductSelectRepository selectRepository) : I
             .Include("OutputInfos.OutputOrder")
             .Select(v => new VariantRow
             {
-                Id = v.Id ?? 0,
+                Id = v.Id,
                 ProductId = v.ProductId ?? 0,
                 UrlSlug = v.UrlSlug,
                 Price = v.Price,
@@ -288,23 +288,22 @@ public class ProductSelectService(IProductSelectRepository selectRepository) : I
             .ConfigureAwait(false);
 
         var variantLookup = variantRows.GroupBy(row => row.ProductId).ToDictionary(group => group.Key, group => group.ToList());
-        var inventoryAlertLevel = await selectRepository.GetInventoryAlertLevelAsync(cancellationToken).ConfigureAwait(false);
         var responses = new List<ProductDetailResponse>(items.Count);
         foreach (var item in items)
         {
             var variants = variantLookup.TryGetValue(item.Id, out var rows) ? rows : [];
-            responses.Add(BuildProductDetailResponse(item, variants, inventoryAlertLevel));
+            responses.Add(BuildProductDetailResponse(item, variants));
         }
 
         return new PagedResult<ProductDetailResponse>(responses, totalCount, page, pageSize);
     }
 
-    private static ProductDetailResponse BuildProductDetailResponse(Domain.Entities.Product product, long inventoryAlertLevel)
+    private static ProductDetailResponse BuildProductDetailResponse(ProductEntity product)
     {
         var variantRows = product.ProductVariants.Select(variant => new VariantRow
         {
-            Id = variant.Id ?? 0,
-            ProductId = product.Id ?? 0,
+            Id = variant.Id,
+            ProductId = product.Id,
             UrlSlug = variant.UrlSlug,
             Price = variant.Price,
             CoverImageUrl = variant.CoverImageUrl,
@@ -320,7 +319,7 @@ public class ProductSelectService(IProductSelectRepository selectRepository) : I
 
         var summary = new ProductListRow
         {
-            Id = product.Id ?? 0,
+            Id = product.Id,
             Name = product.Name,
             CategoryId = product.CategoryId,
             CategoryName = product.ProductCategory?.Name,
@@ -351,10 +350,10 @@ public class ProductSelectService(IProductSelectRepository selectRepository) : I
             TotalBooked = variantRows.Sum(v => v.HasBeenBooked)
         };
 
-        return BuildProductDetailResponse(summary, variantRows, inventoryAlertLevel);
+        return BuildProductDetailResponse(summary, variantRows);
     }
 
-    private static ProductDetailResponse BuildProductDetailResponse(ProductListRow summary, List<VariantRow> variants, long inventoryAlertLevel)
+    private static ProductDetailResponse BuildProductDetailResponse(ProductListRow summary, List<VariantRow> variants)
     {
         var variantResponses = variants.Select(variant => new ProductVariantDetailResponse
         {
@@ -369,7 +368,7 @@ public class ProductSelectService(IProductSelectRepository selectRepository) : I
             PhotoCollection = variant.Photos,
             Stock = variant.Stock,
             HasBeenBooked = variant.HasBeenBooked,
-            StatusStockId = GetStockStatus(variant.Stock - variant.HasBeenBooked, inventoryAlertLevel)
+            StatusStockId = GetStockStatus(variant.Stock - variant.HasBeenBooked)
         })
         .OrderBy(v => v.Stock - v.HasBeenBooked)
         .ThenBy(v => v.UrlSlug)
@@ -419,7 +418,7 @@ public class ProductSelectService(IProductSelectRepository selectRepository) : I
             CoverImageUrl = variantResponses.FirstOrDefault()?.CoverImageUrl,
             Stock = summary.TotalStock,
             HasBeenBooked = summary.TotalBooked,
-            StatusStockId = GetStockStatus(availableStock, inventoryAlertLevel),
+            StatusStockId = GetStockStatus(availableStock),
             Options = options,
             Variants = variantResponses
         };
@@ -449,66 +448,12 @@ public class ProductSelectService(IProductSelectRepository selectRepository) : I
         return stock - booked;
     }
 
-    private static string GetStockStatus(long availableStock, long inventoryAlertLevel)
+    private static string GetStockStatus(long availableStock)
     {
         if (availableStock <= 0)
         {
             return "out_of_stock";
         }
-
-        return availableStock <= inventoryAlertLevel ? "low_in_stock" : "in_stock";
-    }
-
-    private sealed class ProductListRow
-    {
-        public int Id { get; set; }
-        public string? Name { get; set; }
-        public int? CategoryId { get; set; }
-        public string? CategoryName { get; set; }
-        public int? BrandId { get; set; }
-        public string? BrandName { get; set; }
-        public string? Description { get; set; }
-        public decimal? Weight { get; set; }
-        public string? Dimensions { get; set; }
-        public string? Wheelbase { get; set; }
-        public decimal? SeatHeight { get; set; }
-        public decimal? GroundClearance { get; set; }
-        public decimal? FuelCapacity { get; set; }
-        public string? TireSize { get; set; }
-        public string? FrontSuspension { get; set; }
-        public string? RearSuspension { get; set; }
-        public string? EngineType { get; set; }
-        public string? MaxPower { get; set; }
-        public decimal? OilCapacity { get; set; }
-        public string? FuelConsumption { get; set; }
-        public string? TransmissionType { get; set; }
-        public string? StarterSystem { get; set; }
-        public string? MaxTorque { get; set; }
-        public decimal? Displacement { get; set; }
-        public string? BoreStroke { get; set; }
-        public string? CompressionRatio { get; set; }
-        public string? StatusId { get; set; }
-        public DateTimeOffset? CreatedAt { get; set; }
-        public long TotalStock { get; set; }
-        public long TotalBooked { get; set; }
-    }
-
-    private sealed class VariantRow
-    {
-        public int Id { get; set; }
-        public int ProductId { get; set; }
-        public string? UrlSlug { get; set; }
-        public long? Price { get; set; }
-        public string? CoverImageUrl { get; set; }
-        public List<string> Photos { get; set; } = [];
-        public List<OptionPair> OptionPairs { get; set; } = [];
-        public long Stock { get; set; }
-        public long HasBeenBooked { get; set; }
-    }
-
-    private sealed class OptionPair
-    {
-        public string? OptionName { get; set; }
-        public string? OptionValue { get; set; }
+        return "in_stock";
     }
 }

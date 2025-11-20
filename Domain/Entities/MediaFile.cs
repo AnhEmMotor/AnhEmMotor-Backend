@@ -7,7 +7,7 @@ namespace Domain.Entities
     public class MediaFile
     {
         [Key]
-        public int? Id { get; set; }
+        public int Id { get; set; }
 
         [Required]
         [StringLength(255)]

@@ -1,7 +1,6 @@
 using Application.Interfaces.Repositories.Product;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 using BrandEntity = Domain.Entities.Brand;
 using CategoryEntity = Domain.Entities.ProductCategory;
 using OptionEntity = Domain.Entities.Option;
@@ -13,9 +12,9 @@ namespace Infrastructure.Repositories.Product;
 
 public class ProductSelectRepository(ApplicationDBContext context) : IProductSelectRepository
 {
-    public ValueTask<ProductEntity?> GetByIdAsync(int id, CancellationToken cancellationToken)
+    public Task<ProductEntity?> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
-        return context.Products.FindAsync([id], cancellationToken: cancellationToken);
+        return context.Products.FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
     }
 
     public Task<ProductEntity?> GetByIdWithDetailsAsync(int id, CancellationToken cancellationToken)
@@ -58,7 +57,6 @@ public class ProductSelectRepository(ApplicationDBContext context) : IProductSel
     public Task<ProductVariantEntity?> GetVariantBySlugAsync(string slug, bool includeDeleted, CancellationToken cancellationToken)
     {
         var query = includeDeleted ? context.All<ProductVariantEntity>() : context.ProductVariants.AsQueryable();
-
         return query.FirstOrDefaultAsync(v => string.Compare(v.UrlSlug, slug) == 0, cancellationToken);
     }
 
@@ -108,21 +106,21 @@ public class ProductSelectRepository(ApplicationDBContext context) : IProductSel
     public Task<List<ProductEntity>> GetActiveProductsByIdsAsync(List<int> ids, CancellationToken cancellationToken)
     {
         return context.Products
-            .Where(p => p.Id.HasValue && ids.Contains(p.Id.Value))
+            .Where(p => ids.Contains(p.Id))
             .ToListAsync(cancellationToken);
     }
 
     public Task<List<ProductEntity>> GetDeletedProductsByIdsAsync(List<int> ids, CancellationToken cancellationToken)
     {
         return context.DeletedOnly<ProductEntity>()
-            .Where(p => p.Id.HasValue && ids.Contains(p.Id.Value))
+            .Where(p => ids.Contains(p.Id))
             .ToListAsync(cancellationToken);
     }
 
     public Task<List<ProductEntity>> GetAllProductsByIdsAsync(List<int> ids, CancellationToken cancellationToken)
     {
         return context.All<ProductEntity>()
-            .Where(p => p.Id.HasValue && ids.Contains(p.Id.Value))
+            .Where(p => ids.Contains(p.Id))
             .ToListAsync(cancellationToken);
     }
 
@@ -136,20 +134,20 @@ public class ProductSelectRepository(ApplicationDBContext context) : IProductSel
             .ToListAsync(cancellationToken);
     }
 
-    public ValueTask<CategoryEntity?> GetCategoryByIdAsync(int categoryId, CancellationToken cancellationToken)
+    public Task<CategoryEntity?> GetCategoryByIdAsync(int categoryId, CancellationToken cancellationToken)
     {
-        return context.ProductCategories.FindAsync([categoryId], cancellationToken: cancellationToken);
+        return context.ProductCategories.FirstOrDefaultAsync(c => c.Id == categoryId, cancellationToken);
     }
 
-    public ValueTask<BrandEntity?> GetBrandByIdAsync(int brandId, CancellationToken cancellationToken)
+    public Task<BrandEntity?> GetBrandByIdAsync(int brandId, CancellationToken cancellationToken)
     {
-        return context.Brands.FindAsync([brandId], cancellationToken: cancellationToken);
+        return context.Brands.FirstOrDefaultAsync(b => b.Id == brandId, cancellationToken);
     }
 
     public Task<List<OptionEntity>> GetOptionsByIdsAsync(List<int> optionIds, CancellationToken cancellationToken)
     {
         return context.Options
-            .Where(o => o.Id.HasValue && optionIds.Contains(o.Id.Value))
+            .Where(o => optionIds.Contains(o.Id))
             .ToListAsync(cancellationToken);
     }
 
@@ -157,7 +155,7 @@ public class ProductSelectRepository(ApplicationDBContext context) : IProductSel
     {
         return context.OptionValues
             .Include(ov => ov.Option)
-            .Where(ov => ov.Id.HasValue && optionValueIds.Contains(ov.Id.Value))
+            .Where(ov => optionValueIds.Contains(ov.Id))
             .ToListAsync(cancellationToken);
     }
 
@@ -167,19 +165,11 @@ public class ProductSelectRepository(ApplicationDBContext context) : IProductSel
         CancellationToken cancellationToken)
     {
         var optionValues = await context.OptionValues
-            .Where(ov => ov.Id.HasValue && optionValueIds.Contains(ov.Id.Value))
+            .Where(ov => optionValueIds.Contains(ov.Id))
+            .Select(ov => ov.OptionId)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
 
-        return optionValues.All(ov => ov.OptionId.HasValue && optionIds.Contains(ov.OptionId.Value));
-    }
-
-    public async Task<long> GetInventoryAlertLevelAsync(CancellationToken cancellationToken)
-    {
-        var setting = await context.Settings
-            .FirstOrDefaultAsync(s => string.Compare(s.Key, "inventory_alert_level") == 0, cancellationToken)
-            .ConfigureAwait(false);
-
-        return setting?.Value ?? 10;
+        return optionValues.All(oid => oid.HasValue && optionIds.Contains(oid.Value));
     }
 }

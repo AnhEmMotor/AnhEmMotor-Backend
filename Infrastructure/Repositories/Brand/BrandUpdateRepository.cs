@@ -2,29 +2,25 @@
 using Infrastructure.DBContexts;
 using BrandEntity = Domain.Entities.Brand;
 
-namespace Infrastructure.Repositories.Brand
-{
-    public class BrandUpdateRepository(ApplicationDBContext context) : IBrandUpdateRepository
-    {
-        public async Task UpdateBrandAsync(BrandEntity brand, CancellationToken cancellationToken)
-        {
-            context.Brands.Update(brand);
-            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        }
+namespace Infrastructure.Repositories.Brand;
 
-        public async Task RestoreBrandAsync(BrandEntity brand, CancellationToken cancellationToken)
+public class BrandUpdateRepository(ApplicationDBContext context) : IBrandUpdateRepository
+{
+    public void UpdateBrand(BrandEntity brand)
+    {
+        context.Brands.Update(brand);
+    }
+
+    public void RestoreBrand(BrandEntity brand)
+    {
+        context.Restore(brand);
+    }
+
+    public void RestoreBrands(List<BrandEntity> brands)
+    {
+        foreach (var brand in brands)
         {
             context.Restore(brand);
-            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        }
-
-        public async Task RestoreBrandsAsync(List<BrandEntity> brands, CancellationToken cancellationToken)
-        {
-            foreach (var brand in brands)
-            {
-                context.Restore(brand);
-            }
-            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }

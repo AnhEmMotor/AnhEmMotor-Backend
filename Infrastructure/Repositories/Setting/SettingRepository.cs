@@ -3,36 +3,38 @@ using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using SettingEntity = Domain.Entities.Setting;
 
-namespace Infrastructure.Repositories.Setting
-{
-    public class SettingRepository(ApplicationDBContext context) : ISettingRepository
-    {
-        public Task<IEnumerable<SettingEntity>> GetAllAsync(CancellationToken cancellationToken)
-        {
-            return context.Settings.AsNoTracking().ToListAsync(cancellationToken).ContinueWith(
-                t => t.Result as IEnumerable<SettingEntity>,
-                cancellationToken,
-                TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously,
-                TaskScheduler.Default
-            );
-        }
+namespace Infrastructure.Repositories.Setting;
 
-        public async Task UpsertBatchAsync(IEnumerable<SettingEntity> settings, CancellationToken cancellationToken)
+public class SettingRepository(ApplicationDBContext context) : ISettingRepository
+{
+    public Task<IEnumerable<SettingEntity>> GetAllAsync(CancellationToken cancellationToken)
+    {
+        return context.Settings.AsNoTracking()
+            .ToListAsync(cancellationToken)
+            .ContinueWith<IEnumerable<SettingEntity>>(t => t.Result, cancellationToken);
+    }
+
+    public async Task UpsertBatchAsync(IEnumerable<SettingEntity> settings, CancellationToken cancellationToken)
+    {
+        var settingKeys = settings.Select(s => s.Key).ToList();
+
+        var existingSettings = await context.Settings
+            .Where(s => settingKeys.Contains(s.Key))
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+
+        foreach (var setting in settings)
         {
-            foreach (var setting in settings)
+            var existingSetting = existingSettings.FirstOrDefault(s => string.Compare(s.Key, setting.Key) == 0);
+
+            if (existingSetting != null)
             {
-                var existingSetting = await context.Settings.FirstOrDefaultAsync(s => string.Compare(s.Key, setting.Key) == 0, cancellationToken).ConfigureAwait(false);
-                if (existingSetting != null)
-                {
-                    existingSetting.Value = setting.Value;
-                    context.Settings.Update(existingSetting);
-                }
-                else
-                {
-                    context.Settings.Add(setting);
-                }
+                existingSetting.Value = setting.Value;
+                context.Settings.Update(existingSetting);
             }
-            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            else
+            {
+                await context.Settings.AddAsync(setting, cancellationToken).ConfigureAwait(false);
+            }
         }
     }
 }
