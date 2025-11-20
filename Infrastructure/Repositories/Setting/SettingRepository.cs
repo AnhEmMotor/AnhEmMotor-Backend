@@ -14,13 +14,11 @@ public class SettingRepository(ApplicationDBContext context) : ISettingRepositor
             .ContinueWith<IEnumerable<SettingEntity>>(t => t.Result, cancellationToken);
     }
 
-    public async Task UpsertBatchAsync(IEnumerable<SettingEntity> settings, CancellationToken cancellationToken)
+    public void UpsertBatch(IEnumerable<SettingEntity> settings)
     {
         var settingKeys = settings.Select(s => s.Key).ToList();
 
-        var existingSettings = await context.Settings
-            .Where(s => settingKeys.Contains(s.Key))
-            .ToListAsync(cancellationToken).ConfigureAwait(false);
+        var existingSettings = context.Settings.Where(s => settingKeys.Contains(s.Key)).ToList();
 
         foreach (var setting in settings)
         {
@@ -33,7 +31,7 @@ public class SettingRepository(ApplicationDBContext context) : ISettingRepositor
             }
             else
             {
-                await context.Settings.AddAsync(setting, cancellationToken).ConfigureAwait(false);
+                context.Settings.Add(setting);
             }
         }
     }

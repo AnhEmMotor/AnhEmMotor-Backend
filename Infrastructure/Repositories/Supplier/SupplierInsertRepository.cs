@@ -6,8 +6,8 @@ namespace Infrastructure.Repositories.Supplier;
 
 public class SupplierInsertRepository(ApplicationDBContext context) : ISupplierInsertRepository
 {
-    public async Task AddAsync(SupplierEntity supplier, CancellationToken cancellationToken)
+    public void Add(SupplierEntity supplier)
     {
-        await context.Suppliers.AddAsync(supplier, cancellationToken).ConfigureAwait(false);
+        context.Suppliers.Add(supplier);
     }
 }

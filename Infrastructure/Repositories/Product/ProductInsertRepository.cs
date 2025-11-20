@@ -6,8 +6,8 @@ namespace Infrastructure.Repositories.Product;
 
 public class ProductInsertRepository(ApplicationDBContext context) : IProductInsertRepository
 {
-    public async Task AddAsync(ProductEntity product, CancellationToken cancellationToken)
+    public void Add(ProductEntity product)
     {
-        await context.Products.AddAsync(product, cancellationToken).ConfigureAwait(false);
+        context.Products.Add(product);
     }
 }

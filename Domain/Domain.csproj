@@ -10,5 +10,5 @@
     <Folder Include="Exceptions\" />
     <Folder Include="IdentityEntities\" />
   </ItemGroup>
-
+  
 </Project>

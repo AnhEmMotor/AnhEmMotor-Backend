@@ -1,0 +1,60 @@
+using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.Brand;
+using Domain.Helpers;
+using MediatR;
+
+namespace Application.Features.Brands.Commands.DeleteManyBrands;
+
+public sealed class DeleteManyBrandsCommandHandler(IBrandSelectRepository selectRepository, IBrandDeleteRepository deleteRepository, IUnitOfWork unitOfWork)
+    : IRequestHandler<DeleteManyBrandsCommand, ErrorResponse?>
+{
+    public async Task<ErrorResponse?> Handle(DeleteManyBrandsCommand request, CancellationToken cancellationToken)
+    {
+        if (request.Ids == null || request.Ids.Count == 0)
+        {
+            return null;
+        }
+
+        var uniqueIds = request.Ids.Distinct().ToList();
+        var errorDetails = new List<ErrorDetail>();
+
+        var allBrands = await selectRepository.GetAllBrandsByIdsAsync(uniqueIds, cancellationToken).ConfigureAwait(false);
+        var activeBrands = await selectRepository.GetActiveBrandsByIdsAsync(uniqueIds, cancellationToken).ConfigureAwait(false);
+
+        var allBrandMap = allBrands.ToDictionary(b => b.Id);
+        var activeBrandSet = activeBrands.Select(b => b.Id).ToHashSet();
+
+        foreach (var id in uniqueIds)
+        {
+            if (!allBrandMap.ContainsKey(id))
+            {
+                errorDetails.Add(new ErrorDetail
+                {
+                    Field = "Id",
+                    Message = $"Brand with Id {id} not found."
+                });
+            }
+            else if (!activeBrandSet.Contains(id))
+            {
+                errorDetails.Add(new ErrorDetail
+                {
+                    Field = "Id",
+                    Message = $"Brand with Id {id} has already been deleted."
+                });
+            }
+        }
+
+        if (errorDetails.Count > 0)
+        {
+            return new ErrorResponse { Errors = errorDetails };
+        }
+
+        if (activeBrands.Count > 0)
+        {
+            deleteRepository.DeleteBrands(activeBrands);
+            await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        return null;
+    }
+}

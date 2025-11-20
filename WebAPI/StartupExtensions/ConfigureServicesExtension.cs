@@ -1,11 +1,14 @@
 ﻿using Asp.Versioning;
 using Domain.Helpers;
+using FluentValidation;
 using Infrastructure.DependencyInjection;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using System.Reflection;
 using WebAPI.Middleware;
 
 namespace WebAPI.StartupExtensions
@@ -26,6 +29,13 @@ namespace WebAPI.StartupExtensions
         /// <returns>Bộ sưu tập các dịch vụ đã được cấu hình (IServiceCollection).</returns>
         public static IServiceCollection ConfigureServices(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
         {
+            var assembly = Assembly.GetExecutingAssembly();
+            services.AddMediatR(cfg =>
+            {
+                cfg.RegisterServicesFromAssembly(assembly);
+            });
+            services.AddValidatorsFromAssembly(assembly);
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(Application.Behaviors.ValidationBehavior<,>));
             services.AddExceptionHandler<GlobalExceptionHandler>();
             services.AddProblemDetails();
             var resourceBuilder = ResourceBuilder.CreateDefault().AddService(serviceName, serviceVersion);

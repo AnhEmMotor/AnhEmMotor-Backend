@@ -25,11 +25,6 @@ public class ProductUpdateRepository(ApplicationDBContext context) : IProductUpd
         }
     }
 
-    public async Task AddVariantAsync(ProductVariantEntity variant, CancellationToken cancellationToken)
-    {
-        await context.ProductVariants.AddAsync(variant, cancellationToken).ConfigureAwait(false);
-    }
-
     public void UpdateVariant(ProductVariantEntity variant)
     {
         context.ProductVariants.Update(variant);

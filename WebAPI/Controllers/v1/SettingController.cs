@@ -1,7 +1,9 @@
-﻿using Application.Interfaces.Services.Setting;
+﻿using Application.Features.Settings.Commands.SetSettings;
+using Application.Features.Settings.Queries.GetAllSettings;
 using Application.ValidationAttributes;
 using Asp.Versioning;
 using Domain.Helpers;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers.V1;
@@ -9,13 +11,13 @@ namespace WebAPI.Controllers.V1;
 /// <summary>
 /// Quản lý cài đặt hệ thống: cập nhật số lượng cảnh báo tồn kho, số lượng mua tối đa, ...
 /// </summary>
-/// <param name="settingService"></param>
+/// <param name="mediator"></param>
 [ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(StatusCodes.Status200OK)]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
-public class SettingController(ISettingService settingService) : ControllerBase
+public class SettingController(IMediator mediator) : ControllerBase
 {
     /// <summary>
     /// Sửa các cài đặt hệ thống (cập nhật số lượng cảnh báo tồn kho, số lượng mua tối đa, ...)
@@ -28,7 +30,8 @@ public class SettingController(ISettingService settingService) : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> SetSettings([FromBody][ValidSettingKeys] Dictionary<string, long?> request, CancellationToken cancellationToken)
     {
-        var (data, errorResponse) = await settingService.SetSettingsAsync(request, cancellationToken).ConfigureAwait(true);
+        var command = new SetSettingsCommand(request);
+        var (data, errorResponse) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         if (errorResponse != null)
         {
             return BadRequest(errorResponse);
@@ -45,7 +48,8 @@ public class SettingController(ISettingService settingService) : ControllerBase
     [ProducesResponseType(typeof(Dictionary<string, long?>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllSettings(CancellationToken cancellationToken)
     {
-        var settings = await settingService.GetAllSettingsAsync(cancellationToken).ConfigureAwait(true);
+        var query = new GetAllSettingsQuery();
+        var settings = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return Ok(settings);
     }
 }

@@ -6,8 +6,8 @@ namespace Infrastructure.Repositories.Brand;
 
 public class BrandInsertRepository(ApplicationDBContext context) : IBrandInsertRepository
 {
-    public async Task AddAsync(BrandEntity brand, CancellationToken cancellationToken)
+    public void Add(BrandEntity brand)
     {
-        await context.Brands.AddAsync(brand, cancellationToken).ConfigureAwait(false);
+        context.Brands.Add(brand);
     }
 }

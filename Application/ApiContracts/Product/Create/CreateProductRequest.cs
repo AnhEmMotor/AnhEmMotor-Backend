@@ -1,4 +1,4 @@
-using Application.ApiContracts.Product.Common;
+﻿using Application.ApiContracts.Product.Common;
 using System.ComponentModel.DataAnnotations;
 
 namespace Application.ApiContracts.Product.Create;
