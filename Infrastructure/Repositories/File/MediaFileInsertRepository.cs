@@ -6,8 +6,8 @@ namespace Infrastructure.Repositories.File;
 
 public class MediaFileInsertRepository(ApplicationDBContext context) : IMediaFileInsertRepository
 {
-    public async Task AddAsync(MediaFile mediaFile, CancellationToken cancellationToken)
+    public void Add(MediaFile mediaFile)
     {
-        await context.MediaFiles.AddAsync(mediaFile, cancellationToken).ConfigureAwait(false);
+        context.MediaFiles.Add(mediaFile);
     }
 }

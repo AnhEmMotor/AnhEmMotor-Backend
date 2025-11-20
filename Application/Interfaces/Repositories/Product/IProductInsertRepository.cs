@@ -4,5 +4,5 @@ namespace Application.Interfaces.Repositories.Product;
 
 public interface IProductInsertRepository
 {
-    Task AddAsync(ProductEntity product, CancellationToken cancellationToken);
+    void Add(ProductEntity product);
 }

@@ -1,10 +1,28 @@
 ﻿using Application.ApiContracts.Product.Common;
 using Application.ApiContracts.Product.Create;
 using Application.ApiContracts.Product.Delete;
+using Application.ApiContracts.Product.Select;
 using Application.ApiContracts.Product.Update;
-using Application.Interfaces.Services.Product;
+using Application.Features.Products.Commands.CreateProduct;
+using Application.Features.Products.Commands.DeleteManyProducts;
+using Application.Features.Products.Commands.DeleteProduct;
+using Application.Features.Products.Commands.RestoreManyProducts;
+using Application.Features.Products.Commands.RestoreProduct;
+using Application.Features.Products.Commands.UpdateManyProductPrices;
+using Application.Features.Products.Commands.UpdateManyProductStatuses;
+using Application.Features.Products.Commands.UpdateProduct;
+using Application.Features.Products.Commands.UpdateProductPrice;
+using Application.Features.Products.Commands.UpdateProductStatus;
+using Application.Features.Products.Queries.CheckSlugAvailability;
+using Application.Features.Products.Queries.GetActiveVariantLiteList;
+using Application.Features.Products.Queries.GetDeletedProductsList;
+using Application.Features.Products.Queries.GetDeletedVariantLiteList;
+using Application.Features.Products.Queries.GetProductById;
+using Application.Features.Products.Queries.GetProductsList;
+using Application.Features.Products.Queries.GetVariantLiteByProductId;
 using Asp.Versioning;
 using Domain.Helpers;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers.V1;
@@ -17,20 +35,17 @@ namespace WebAPI.Controllers.V1;
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(StatusCodes.Status200OK)]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
-public class ProductController(
-    IProductSelectService selectService,
-    IProductInsertService insertService,
-    IProductUpdateService updateService,
-    IProductDeleteService deleteService) : ControllerBase
+public class ProductController(ISender sender) : ControllerBase
 {
     /// <summary>
     /// Lấy danh sách sản phẩm đầy đủ (có phân trang, lọc, tìm kiếm).
     /// </summary>
     [HttpGet]
-    [ProducesResponseType(typeof(PagedResult<Application.ApiContracts.Product.Select.ProductDetailResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetProducts([FromQuery] Application.ApiContracts.Product.Select.ProductListRequest request, CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(PagedResult<ProductDetailResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetProducts([FromQuery] ProductListRequest request, CancellationToken cancellationToken)
     {
-        var result = await selectService.GetProductsAsync(request, cancellationToken).ConfigureAwait(true);
+        var query = GetProductsListQuery.FromRequest(request);
+        var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
         return Ok(result);
     }
 
@@ -38,32 +53,35 @@ public class ProductController(
     /// Lấy danh sách sản phẩm đã bị xoá (có phân trang, lọc, tìm kiếm).
     /// </summary>
     [HttpGet("deleted")]
-    [ProducesResponseType(typeof(PagedResult<Application.ApiContracts.Product.Select.ProductDetailResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetDeletedProducts([FromQuery] Application.ApiContracts.Product.Select.ProductListRequest request, CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(PagedResult<ProductDetailResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetDeletedProducts([FromQuery] ProductListRequest request, CancellationToken cancellationToken)
     {
-        var result = await selectService.GetDeletedProductsAsync(request, cancellationToken).ConfigureAwait(true);
+        var query = new GetDeletedProductsListQuery(request);
+        var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
         return Ok(result);
     }
 
     /// <summary>
-    /// Lấy danh sách biến thể sản phẩm của tất cả sản phẩm chưa xoá.
+    /// Lấy danh sách biến thể sản phẩm của tất cả sản phẩm chưa xoá (có phân trang, lọc, tìm kiếm).
     /// </summary>
     [HttpGet("variants-lite/active")]
     [ProducesResponseType(typeof(PagedResult<ProductVariantLiteResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetActiveVariantLiteProducts([FromQuery] Application.ApiContracts.Product.Select.ProductListRequest request, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetActiveVariantLiteProducts([FromQuery] ProductListRequest request, CancellationToken cancellationToken = default)
     {
-        var result = await selectService.GetActiveVariantLiteProductsAsync(request, cancellationToken).ConfigureAwait(true);
+        var query = new GetActiveVariantLiteListQuery(request);
+        var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
         return Ok(result);
     }
 
     /// <summary>
-    /// Lấy danh sách biến thể sản phẩm của tất cả sản phẩm đã xoá.
+    /// Lấy danh sách biến thể sản phẩm của tất cả sản phẩm đã xoá (có phân trang, lọc, tìm kiếm).
     /// </summary>
     [HttpGet("variants-lite/deleted")]
     [ProducesResponseType(typeof(PagedResult<ProductVariantLiteResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetDeletedVariantLiteProducts([FromQuery] Application.ApiContracts.Product.Select.ProductListRequest request, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetDeletedVariantLiteProducts([FromQuery] ProductListRequest request, CancellationToken cancellationToken = default)
     {
-        var result = await selectService.GetDeletedVariantLiteProductsAsync(request, cancellationToken).ConfigureAwait(true);
+        var query = new GetDeletedVariantLiteListQuery(request);
+        var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
         return Ok(result);
     }
 
@@ -71,11 +89,11 @@ public class ProductController(
     /// Lấy thông tin chi tiết sản phẩm theo Id.
     /// </summary>
     [HttpGet("{id:int}")]
-    [ProducesResponseType(typeof(Application.ApiContracts.Product.Select.ProductDetailResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProductDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetProductById(int id, [FromQuery] bool includeDeleted = false, CancellationToken cancellationToken = default)
     {
-        var (data, error) = await selectService.GetProductDetailsByIdAsync(id, includeDeleted, cancellationToken).ConfigureAwait(true);
+        var (data, error) = await sender.Send(new GetProductByIdQuery(id, includeDeleted), cancellationToken).ConfigureAwait(true);
         if (error != null)
         {
             return NotFound(error);
@@ -92,7 +110,7 @@ public class ProductController(
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetVariantLiteByProductIdActive(int id, CancellationToken cancellationToken = default)
     {
-        var (variants, error) = await selectService.GetVariantLiteByProductIdAsync(id, includeDeleted: false, cancellationToken).ConfigureAwait(true);
+        var (variants, error) = await sender.Send(new GetVariantLiteByProductIdQuery(id, IncludeDeleted: false), cancellationToken).ConfigureAwait(true);
         if (error != null)
         {
             return NotFound(error);
@@ -109,7 +127,7 @@ public class ProductController(
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetVariantLiteByProductIdDeleted(int id, CancellationToken cancellationToken = default)
     {
-        var (variants, error) = await selectService.GetVariantLiteByProductIdAsync(id, includeDeleted: true, cancellationToken).ConfigureAwait(true);
+        var (variants, error) = await sender.Send(new GetVariantLiteByProductIdQuery(id, IncludeDeleted: true), cancellationToken).ConfigureAwait(true);
         if (error != null)
         {
             return NotFound(error);
@@ -125,7 +143,7 @@ public class ProductController(
     [ProducesResponseType(typeof(SlugAvailabilityResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> CheckSlugAvailability([FromQuery] string slug, CancellationToken cancellationToken)
     {
-        var result = await selectService.CheckSlugAvailabilityAsync(slug, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(new CheckSlugAvailabilityQuery(slug), cancellationToken).ConfigureAwait(true);
         return Ok(result);
     }
 
@@ -133,11 +151,12 @@ public class ProductController(
     /// Tạo mới sản phẩm với các biến thể.
     /// </summary>
     [HttpPost]
-    [ProducesResponseType(typeof(Application.ApiContracts.Product.Select.ProductDetailResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ProductDetailResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateProduct([FromBody] CreateProductRequest request, CancellationToken cancellationToken)
     {
-        var (data, error) = await insertService.CreateProductAsync(request, cancellationToken).ConfigureAwait(true);
+        var command = CreateProductCommand.FromRequest(request);
+        var (data, error) = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         if (error != null)
         {
             return BadRequest(error);
@@ -150,12 +169,12 @@ public class ProductController(
     /// Cập nhật sản phẩm theo Id.
     /// </summary>
     [HttpPut("{id:int}")]
-    [ProducesResponseType(typeof(Application.ApiContracts.Product.Select.ProductDetailResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProductDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateProduct(int id, [FromBody] UpdateProductRequest request, CancellationToken cancellationToken)
     {
-        var (data, error) = await updateService.UpdateProductAsync(id, request, cancellationToken).ConfigureAwait(true);
+        var (data, error) = await sender.Send(new UpdateProductCommand(id, request), cancellationToken).ConfigureAwait(true);
         if (error != null)
         {
             return BadRequest(error);
@@ -172,7 +191,7 @@ public class ProductController(
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteProduct(int id, CancellationToken cancellationToken)
     {
-        var error = await deleteService.DeleteProductAsync(id, cancellationToken).ConfigureAwait(true);
+        var error = await sender.Send(new DeleteProductCommand(id), cancellationToken).ConfigureAwait(true);
         if (error != null)
         {
             return NotFound(error);
@@ -189,7 +208,7 @@ public class ProductController(
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteProducts([FromBody] DeleteManyProductsRequest request, CancellationToken cancellationToken)
     {
-        var error = await deleteService.DeleteProductsAsync(request, cancellationToken).ConfigureAwait(true);
+        var error = await sender.Send(new DeleteManyProductsCommand(request.Ids!), cancellationToken).ConfigureAwait(true);
         if (error != null)
         {
             return BadRequest(error);
@@ -202,11 +221,11 @@ public class ProductController(
     /// Khôi phục sản phẩm đã bị xoá.
     /// </summary>
     [HttpPost("restore/{id:int}")]
-    [ProducesResponseType(typeof(Application.ApiContracts.Product.Select.ProductDetailResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProductDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RestoreProduct(int id, CancellationToken cancellationToken)
     {
-        var (data, error) = await updateService.RestoreProductAsync(id, cancellationToken).ConfigureAwait(true);
+        var (data, error) = await sender.Send(new RestoreProductCommand(id), cancellationToken).ConfigureAwait(true);
         if (error != null)
         {
             return NotFound(error);
@@ -223,7 +242,7 @@ public class ProductController(
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RestoreProducts([FromBody] RestoreManyProductsRequest request, CancellationToken cancellationToken)
     {
-        var (data, error) = await updateService.RestoreProductsAsync(request, cancellationToken).ConfigureAwait(true);
+        var (data, error) = await sender.Send(new RestoreManyProductsCommand(request.Ids!), cancellationToken).ConfigureAwait(true);
         if (error != null)
         {
             return BadRequest(error);
@@ -236,12 +255,12 @@ public class ProductController(
     /// Chỉnh giá cho tất cả các biến thể của 1 sản phẩm.
     /// </summary>
     [HttpPatch("{id:int}/price")]
-    [ProducesResponseType(typeof(Application.ApiContracts.Product.Select.ProductDetailResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProductDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateProductPrice(int id, [FromBody] UpdateProductPriceRequest request, CancellationToken cancellationToken)
     {
-        var (data, error) = await updateService.UpdateProductPriceAsync(id, request, cancellationToken).ConfigureAwait(true);
+        var (data, error) = await sender.Send(new UpdateProductPriceCommand(id, request.Price ?? 0), cancellationToken).ConfigureAwait(true);
         if (error != null)
         {
             return NotFound(error);
@@ -258,7 +277,8 @@ public class ProductController(
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateManyProductPrices([FromBody] UpdateManyProductPricesRequest request, CancellationToken cancellationToken)
     {
-        var (data, error) = await updateService.UpdateManyProductPricesAsync(request, cancellationToken).ConfigureAwait(true);
+        var pricesWithNullable = request.ProductPrices?.ToDictionary(kv => kv.Key, kv => (long?)kv.Value) ?? [];
+        var (data, error) = await sender.Send(new UpdateManyProductPricesCommand(pricesWithNullable), cancellationToken).ConfigureAwait(true);
         if (error != null)
         {
             return BadRequest(error);
@@ -271,12 +291,12 @@ public class ProductController(
     /// Chỉnh trạng thái của 1 sản phẩm.
     /// </summary>
     [HttpPatch("{id:int}/status")]
-    [ProducesResponseType(typeof(Application.ApiContracts.Product.Select.ProductDetailResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProductDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateProductStatus(int id, [FromBody] UpdateProductStatusRequest request, CancellationToken cancellationToken)
     {
-        var (data, error) = await updateService.UpdateProductStatusAsync(id, request, cancellationToken).ConfigureAwait(true);
+        var (data, error) = await sender.Send(new UpdateProductStatusCommand(id, request.StatusId!), cancellationToken).ConfigureAwait(true);
         if (error != null)
         {
             return NotFound(error);
@@ -293,7 +313,7 @@ public class ProductController(
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateManyProductStatuses([FromBody] UpdateManyProductStatusesRequest request, CancellationToken cancellationToken)
     {
-        var (data, error) = await updateService.UpdateManyProductStatusesAsync(request, cancellationToken).ConfigureAwait(true);
+        var (data, error) = await sender.Send(new UpdateManyProductStatusesCommand(request.Ids!, request.StatusId!), cancellationToken).ConfigureAwait(true);
         if (error != null)
         {
             return BadRequest(error);

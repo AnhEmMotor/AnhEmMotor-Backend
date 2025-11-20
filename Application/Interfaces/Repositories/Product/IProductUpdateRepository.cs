@@ -8,7 +8,6 @@ public interface IProductUpdateRepository
     void Update(ProductEntity product);
     void Restore(ProductEntity product);
     void Restore(List<ProductEntity> products);
-    Task AddVariantAsync(ProductVariantEntity variant, CancellationToken cancellationToken);
     void UpdateVariant(ProductVariantEntity variant);
     void DeleteVariant(ProductVariantEntity variant);
 }
