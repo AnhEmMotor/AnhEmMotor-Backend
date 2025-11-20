@@ -4,7 +4,7 @@ namespace Application.Interfaces.Repositories.Supplier
 {
     public interface ISupplierSelectRepository
     {
-        ValueTask<SupplierEntity?> GetSupplierByIdAsync(int id, CancellationToken cancellationToken);
+        Task<SupplierEntity?> GetByIdAsync(int id, CancellationToken cancellationToken);
         IQueryable<SupplierEntity> GetSuppliers();
         IQueryable<SupplierEntity> GetDeletedSuppliers();
         IQueryable<SupplierEntity> GetAllSuppliers();

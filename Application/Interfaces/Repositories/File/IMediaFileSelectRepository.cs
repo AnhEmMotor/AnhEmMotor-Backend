@@ -4,10 +4,7 @@ namespace Application.Interfaces.Repositories.File
 {
     public interface IMediaFileSelectRepository
     {
-        /// <summary>
-        /// Get media file by stored file name. By default only returns not-deleted records.
-        /// Set includeDeleted = true to search including soft-deleted entries.
-        /// </summary>
-        ValueTask<MediaFile?> GetByStoredFileNameAsync(string storedFileName, CancellationToken cancellationToken, bool includeDeleted = false);
+        Task<MediaFile?> GetByStoredFileNameAsync(string storedFileName, CancellationToken cancellationToken, bool includeDeleted = false);
+        Task<List<MediaFile>?> GetByStoredFileNamesAsync(List<string?> storedFileNames, CancellationToken cancellationToken, bool includeDeleted = false);
     }
 }

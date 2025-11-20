@@ -1,7 +1,7 @@
 using Application.ValidationAttributes;
 using System.ComponentModel.DataAnnotations;
 
-namespace Application.ApiContracts.Product.ManageStatus;
+namespace Application.ApiContracts.Product.Update;
 
 public class UpdateProductStatusRequest
 {

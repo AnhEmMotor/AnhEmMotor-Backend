@@ -14,49 +14,50 @@ namespace Application.Services.Brand
         public async Task<(BrandResponse? Data, ErrorResponse? Error)> GetBrandByIdAsync(int id, CancellationToken cancellationToken)
         {
             var brand = await brandSelectRepository.GetBrandByIdAsync(id, cancellationToken).ConfigureAwait(false);
+
             if (brand == null)
             {
                 return (
                     null,
                     new ErrorResponse
                     {
-                        Errors = [new ErrorDetail { Message = $"Brand with Id {id} not found." }]
+                        Errors = [new ErrorDetail { Field = "Id", Message = $"Brand with Id {id} not found." }]
                     }
                 );
             }
+
             var response = new BrandResponse
             {
                 Id = brand.Id,
                 Name = brand.Name,
                 Description = brand.Description
             };
+
             return (response, null);
         }
 
         public async Task<PagedResult<BrandResponse>> GetBrandsAsync(SieveModel sieveModel, CancellationToken cancellationToken)
         {
             var query = brandSelectRepository.GetBrands();
+
             ApplyDefaultsToSieveModel(sieveModel);
+
             if (sieveModel.Page == null || sieveModel.PageSize == null)
             {
-                int pageNumber = sieveModel.Page ?? 1;
-                int pageSize = sieveModel.PageSize ?? 1;
-                return new PagedResult<BrandResponse>(
-                    [],
-                    0,
-                    pageNumber,
-                    pageSize
-                );
+                return new PagedResult<BrandResponse>([], 0, 1, 1);
             }
+
             var brandsQuery = sieveProcessor.Apply(sieveModel, query);
             var brands = await brandsQuery.ToListAsync(cancellationToken).ConfigureAwait(false);
             var totalCount = await sieveProcessor.Apply(sieveModel, query, applyPagination: false).CountAsync(cancellationToken).ConfigureAwait(false);
+
             var brandResponses = brands.Select(brand => new BrandResponse
             {
                 Id = brand.Id,
                 Name = brand.Name,
                 Description = brand.Description
             }).ToList();
+
             return new PagedResult<BrandResponse>(
                 brandResponses,
                 totalCount,
@@ -68,27 +69,25 @@ namespace Application.Services.Brand
         public async Task<PagedResult<BrandResponse>> GetDeletedBrandsAsync(SieveModel sieveModel, CancellationToken cancellationToken)
         {
             var query = brandSelectRepository.GetDeletedBrands();
+
             ApplyDefaultsToSieveModel(sieveModel);
+
             if (sieveModel.Page == null || sieveModel.PageSize == null)
             {
-                int pageNumber = sieveModel.Page ?? 1;
-                int pageSize = sieveModel.PageSize ?? 1;
-                return new PagedResult<BrandResponse>(
-                    [],
-                    0,
-                    pageNumber,
-                    pageSize
-                );
+                return new PagedResult<BrandResponse>([], 0, 1, 1);
             }
+
             var brandsQuery = sieveProcessor.Apply(sieveModel, query);
             var brands = await brandsQuery.ToListAsync(cancellationToken).ConfigureAwait(false);
             var totalCount = await sieveProcessor.Apply(sieveModel, query, applyPagination: false).CountAsync(cancellationToken).ConfigureAwait(false);
+
             var brandResponses = brands.Select(brand => new BrandResponse
             {
                 Id = brand.Id,
                 Name = brand.Name,
                 Description = brand.Description
             }).ToList();
+
             return new PagedResult<BrandResponse>(
                 brandResponses,
                 totalCount,

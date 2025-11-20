@@ -2,14 +2,17 @@ using Application.Interfaces.Repositories.File;
 using Domain.Entities;
 using Infrastructure.DBContexts;
 
-namespace Infrastructure.Repositories.File
+namespace Infrastructure.Repositories.File;
+
+public class MediaFileDeleteRepository(ApplicationDBContext context) : IMediaFileDeleteRepository
 {
-    public class MediaFileDeleteRepository(ApplicationDBContext context) : IMediaFileDeleteRepository
+    public void Delete(MediaFile mediaFile)
     {
-        public async Task DeleteAndSaveAsync(MediaFile mediaFile, CancellationToken cancellationToken)
-        {
-            context.MediaFiles.Remove(mediaFile);
-            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        }
+        context.MediaFiles.Remove(mediaFile);
+    }
+
+    public void DeleteRange(IEnumerable<MediaFile> mediaFiles)
+    {
+        context.MediaFiles.RemoveRange(mediaFiles);
     }
 }

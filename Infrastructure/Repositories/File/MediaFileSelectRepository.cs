@@ -1,23 +1,28 @@
-using Application.Interfaces.Repositories.File;
+﻿using Application.Interfaces.Repositories.File;
 using Domain.Entities;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
-using System;
 
-namespace Infrastructure.Repositories.File
+namespace Infrastructure.Repositories.File;
+
+public class MediaFileSelectRepository(ApplicationDBContext context) : IMediaFileSelectRepository
 {
-    public class MediaFileSelectRepository(ApplicationDBContext context) : IMediaFileSelectRepository
+    public Task<MediaFile?> GetByStoredFileNameAsync(string storedFileName, CancellationToken cancellationToken, bool includeDeleted = false)
     {
-        public ValueTask<MediaFile?> GetByStoredFileNameAsync(string storedFileName, CancellationToken cancellationToken, bool includeDeleted = false)
-        {
-            if (includeDeleted)
-            {
-                var task = context.All<MediaFile>().FirstOrDefaultAsync(m => string.Compare(m.StoredFileName, storedFileName) == 0, cancellationToken);
-                return new ValueTask<MediaFile?>(task);
-            }
+        var query = includeDeleted ? context.All<MediaFile>() : context.MediaFiles.AsQueryable();
 
-            var normalTask = context.MediaFiles.FirstOrDefaultAsync(m => string.Compare(m.StoredFileName, storedFileName) == 0, cancellationToken);
-            return new ValueTask<MediaFile?>(normalTask);
-        }
+        return query.FirstOrDefaultAsync(m => string.Compare(m.StoredFileName, storedFileName) == 0, cancellationToken);
     }
+
+    public async Task<List<MediaFile>?> GetByStoredFileNamesAsync(List<string?> storedFileNames, CancellationToken cancellationToken, bool includeDeleted = false)
+    {
+        if (storedFileNames == null || storedFileNames.Count == 0)
+        {
+            return [];
+        }
+        var query = includeDeleted ? context.All<MediaFile>() : context.MediaFiles.AsQueryable();
+        var result = await query.Where(m => storedFileNames.Contains(m.StoredFileName)).ToListAsync(cancellationToken).ConfigureAwait(false);
+        return result;
+    }
+
 }

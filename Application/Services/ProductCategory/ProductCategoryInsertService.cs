@@ -1,11 +1,12 @@
 using Application.ApiContracts.ProductCategory;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductCategory;
 using Application.Interfaces.Services.ProductCategory;
 using CategoryEntity = Domain.Entities.ProductCategory;
 
 namespace Application.Services.ProductCategory
 {
-    public class ProductCategoryInsertService(IProductCategoryInsertRepository insertRepository) : IProductCategoryInsertService
+    public class ProductCategoryInsertService(IProductCategoryInsertRepository insertRepository, IUnitOfWork unitOfWork) : IProductCategoryInsertService
     {
         public async Task<ProductCategoryResponse> CreateAsync(CreateProductCategoryRequest request, CancellationToken cancellationToken)
         {
@@ -15,13 +16,15 @@ namespace Application.Services.ProductCategory
                 Description = request.Description
             };
 
-            var created = await insertRepository.AddAsync(category, cancellationToken).ConfigureAwait(false);
+            await insertRepository.AddAsync(category, cancellationToken).ConfigureAwait(false);
+            await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
 
             return new ProductCategoryResponse
             {
-                Id = created.Id,
-                Name = created.Name,
-                Description = created.Description
+                Id = category.Id,
+                Name = category.Name,
+                Description = category.Description
             };
         }
     }

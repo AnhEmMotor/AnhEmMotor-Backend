@@ -4,6 +4,7 @@ namespace Application.Interfaces.Repositories.File
 {
     public interface IMediaFileRestoreRepository
     {
-        Task RestoreAndSaveAsync(MediaFile mediaFile, CancellationToken cancellationToken);
+        void Restore(MediaFile mediaFile);
+        void Restores(List<MediaFile> mediaFiles);
     }
 }

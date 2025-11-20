@@ -2,20 +2,17 @@
 using Infrastructure.DBContexts;
 using BrandEntity = Domain.Entities.Brand;
 
-namespace Infrastructure.Repositories.Brand
-{
-    public class BrandDeleteRepository(ApplicationDBContext context) : IBrandDeleteRepository
-    {
-        public async Task DeleteBrandAsync(BrandEntity brand, CancellationToken cancellationToken)
-        {
-            context.Brands.Remove(brand);
-            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        }
+namespace Infrastructure.Repositories.Brand;
 
-        public async Task DeleteBrandsAsync(List<BrandEntity> brands, CancellationToken cancellationToken)
-        {
-            context.Brands.RemoveRange(brands);
-            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        }
+public class BrandDeleteRepository(ApplicationDBContext context) : IBrandDeleteRepository
+{
+    public void DeleteBrand(BrandEntity brand)
+    {
+        context.Brands.Remove(brand);
+    }
+
+    public void DeleteBrands(List<BrandEntity> brands)
+    {
+        context.Brands.RemoveRange(brands);
     }
 }

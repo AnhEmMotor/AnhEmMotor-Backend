@@ -6,26 +6,22 @@ namespace Infrastructure.Repositories.ProductCategory
 {
     public class ProductCategoryUpdateRepository(ApplicationDBContext context) : IProductCategoryUpdateRepository
     {
-        public async Task UpdateAsync(CategoryEntity category, CancellationToken cancellationToken)
+        public void Update(CategoryEntity category)
         {
             context.ProductCategories.Update(category);
-            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task RestoreAsync(CategoryEntity category, CancellationToken cancellationToken)
+        public void Restore(CategoryEntity category)
         {
             context.Restore(category);
-            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task RestoreAsync(List<CategoryEntity> categories, CancellationToken cancellationToken)
+        public void Restore(List<CategoryEntity> categories)
         {
             foreach (var category in categories)
             {
                 context.Restore(category);
             }
-
-            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }

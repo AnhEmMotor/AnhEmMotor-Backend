@@ -8,7 +8,7 @@ namespace Domain.Entities
     {
         [Key]
         [Column("Id")]
-        public int? Id { get; set; }
+        public int Id { get; set; }
 
         [Column("ProductId")]
         [ForeignKey("Product")]

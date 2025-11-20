@@ -7,7 +7,5 @@ namespace Application.Interfaces.Services.Product
     {
         Task<ErrorResponse?> DeleteProductAsync(int id, CancellationToken cancellationToken);
         Task<ErrorResponse?> DeleteProductsAsync(DeleteManyProductsRequest request, CancellationToken cancellationToken);
-        Task<ErrorResponse?> RestoreProductAsync(int id, CancellationToken cancellationToken);
-        Task<ErrorResponse?> RestoreProductsAsync(RestoreManyProductsRequest request, CancellationToken cancellationToken);
     }
 }

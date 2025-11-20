@@ -4,6 +4,7 @@ namespace Application.Interfaces.Repositories.File
 {
     public interface IMediaFileDeleteRepository
     {
-        Task DeleteAndSaveAsync(MediaFile mediaFile, CancellationToken cancellationToken);
+        void Delete(MediaFile mediaFile);
+        void DeleteRange(IEnumerable<MediaFile> mediaFiles);
     }
 }

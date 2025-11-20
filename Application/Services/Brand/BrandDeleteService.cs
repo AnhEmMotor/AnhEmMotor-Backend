@@ -1,11 +1,12 @@
 ﻿using Application.ApiContracts.Brand;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
 using Application.Interfaces.Services.Brand;
 using Domain.Helpers;
 
 namespace Application.Services.Brand
 {
-    public class BrandDeleteService(IBrandSelectRepository brandSelectRepository, IBrandDeleteRepository brandDeleteRepository) : IBrandDeleteService
+    public class BrandDeleteService(IBrandSelectRepository brandSelectRepository, IBrandDeleteRepository brandDeleteRepository, IUnitOfWork unitOfWork) : IBrandDeleteService
     {
         public async Task<ErrorResponse?> DeleteBrandAsync(int id, CancellationToken cancellationToken)
         {
@@ -15,11 +16,12 @@ namespace Application.Services.Brand
             {
                 return new ErrorResponse
                 {
-                    Errors = [new ErrorDetail { Message = $"Brand with Id {id} not found." }]
+                    Errors = [new ErrorDetail { Field = "Id", Message = $"Brand with Id {id} not found." }]
                 };
             }
 
-            await brandDeleteRepository.DeleteBrandAsync(brand, cancellationToken).ConfigureAwait(false);
+            brandDeleteRepository.DeleteBrand(brand);
+            await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
             return null;
         }
@@ -31,33 +33,35 @@ namespace Application.Services.Brand
                 return null;
             }
 
+            var uniqueIds = request.Ids.Distinct().ToList();
+
+            var allBrands = await brandSelectRepository.GetAllBrandsByIdsAsync(uniqueIds, cancellationToken).ConfigureAwait(false);
+            var activeBrands = await brandSelectRepository.GetActiveBrandsByIdsAsync(uniqueIds, cancellationToken).ConfigureAwait(false);
+
+            var allBrandsMap = allBrands.ToDictionary(b => b.Id!);
+            var activeBrandsSet = activeBrands.Select(b => b.Id!).ToHashSet();
+
             var errorDetails = new List<ErrorDetail>();
 
-            var activeBrands = await brandSelectRepository.GetActiveBrandsByIdsAsync(request.Ids, cancellationToken)
-                .ConfigureAwait(false);
-
-            var allBrands = await brandSelectRepository.GetAllBrandsByIdsAsync(request.Ids, cancellationToken)
-                .ConfigureAwait(false);
-
-            foreach (var id in request.Ids)
+            foreach (var id in uniqueIds)
             {
-                var brand = allBrands.FirstOrDefault(b => b.Id == id);
-                var activeBrand = activeBrands.FirstOrDefault(b => b.Id == id);
-
-                if (brand == null)
+                if (!allBrandsMap.ContainsKey(id))
                 {
                     errorDetails.Add(new ErrorDetail
                     {
-                        Message = "Brand not found",
-                        Field = $"Brand ID: {id}"
+                        Field = "Id",
+                        Message = $"Brand with Id {id} not found"
                     });
+                    continue;
                 }
-                else if (activeBrand == null)
+
+                if (!activeBrandsSet.Contains(id))
                 {
+                    var brandName = allBrandsMap[id].Name;
                     errorDetails.Add(new ErrorDetail
                     {
-                        Message = "Brand has already been deleted",
-                        Field = brand.Name
+                        Field = "Id",
+                        Message = $"Brand '{brandName}' (Id: {id}) has already been deleted"
                     });
                 }
             }
@@ -69,7 +73,8 @@ namespace Application.Services.Brand
 
             if (activeBrands.Count > 0)
             {
-                await brandDeleteRepository.DeleteBrandsAsync(activeBrands, cancellationToken).ConfigureAwait(false);
+                brandDeleteRepository.DeleteBrands(activeBrands);
+                await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
             return null;

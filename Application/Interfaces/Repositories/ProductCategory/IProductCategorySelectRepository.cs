@@ -1,11 +1,10 @@
-using System.Linq;
 using CategoryEntity = Domain.Entities.ProductCategory;
 
 namespace Application.Interfaces.Repositories.ProductCategory
 {
     public interface IProductCategorySelectRepository
     {
-        ValueTask<CategoryEntity?> GetByIdAsync(int id, CancellationToken cancellationToken);
+        Task<CategoryEntity?> GetByIdAsync(int id, CancellationToken cancellationToken);
         IQueryable<CategoryEntity> GetProductCategories();
         IQueryable<CategoryEntity> GetDeletedProductCategories();
         IQueryable<CategoryEntity> GetAllProductCategories();

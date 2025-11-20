@@ -5,8 +5,8 @@ namespace Application.Interfaces.Services.ProductCategory
 {
     public interface IProductCategoryUpdateService
     {
-        Task<ErrorResponse?> UpdateAsync(int id, UpdateProductCategoryRequest request, CancellationToken cancellationToken);
-        Task<ErrorResponse?> RestoreAsync(int id, CancellationToken cancellationToken);
-        Task<ErrorResponse?> RestoreManyAsync(RestoreManyProductCategoriesRequest request, CancellationToken cancellationToken);
+        Task<(ProductCategoryResponse? Data, ErrorResponse? Error)> UpdateAsync(int id, UpdateProductCategoryRequest request, CancellationToken cancellationToken);
+        Task<(ProductCategoryResponse? Data, ErrorResponse? Error)> RestoreAsync(int id, CancellationToken cancellationToken);
+        Task<(List<int>? Data, ErrorResponse? Error)> RestoreManyAsync(RestoreManyProductCategoriesRequest request, CancellationToken cancellationToken);
     }
 }

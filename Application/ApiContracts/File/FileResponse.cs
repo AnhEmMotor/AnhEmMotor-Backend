@@ -1,6 +1,6 @@
 ﻿namespace Application.ApiContracts.File;
 
-public class UploadResponse
+public class FileResponse
 {
     public bool IsSuccess { get; set; }
     public string? FileName { get; set; }

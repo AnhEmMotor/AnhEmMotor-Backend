@@ -4,6 +4,6 @@ namespace Application.Interfaces.Repositories.ProductCategory
 {
     public interface IProductCategoryInsertRepository
     {
-        Task<CategoryEntity> AddAsync(CategoryEntity category, CancellationToken cancellationToken);
+        Task AddAsync(CategoryEntity category, CancellationToken cancellationToken);
     }
 }

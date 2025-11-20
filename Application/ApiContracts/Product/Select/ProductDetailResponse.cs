@@ -1,6 +1,6 @@
 using Application.ApiContracts.Product.Common;
 
-namespace Application.ApiContracts.Product.Get;
+namespace Application.ApiContracts.Product.Select;
 
 public class ProductDetailResponse
 {

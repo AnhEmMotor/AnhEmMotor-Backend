@@ -4,7 +4,7 @@ namespace Application.Interfaces.Repositories.ProductCategory
 {
     public interface IProductCategoryDeleteRepository
     {
-        Task DeleteAsync(CategoryEntity category, CancellationToken cancellationToken);
-        Task DeleteAsync(List<CategoryEntity> categories, CancellationToken cancellationToken);
+        void Delete(CategoryEntity category);
+        void Delete(List<CategoryEntity> categories);
     }
 }

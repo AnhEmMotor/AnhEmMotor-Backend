@@ -1,47 +1,36 @@
-using Application.ApiContracts.Product.Delete;
+﻿using Application.ApiContracts.Product.Delete;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Services.File;
 using Application.Interfaces.Services.Product;
 using Domain.Helpers;
+using ProductEntity = Domain.Entities.Product;
 
 namespace Application.Services.Product;
 
 public class ProductDeleteService(
     IProductSelectRepository selectRepository,
-    IProductUpdateRepository updateRepository,
     IProductDeleteRepository deleteRepository,
-    IFileDeleteService fileDeleteService) : IProductDeleteService
+    IFileDeleteService fileDeleteService,
+    IUnitOfWork unitOfWork) : IProductDeleteService
 {
     public async Task<ErrorResponse?> DeleteProductAsync(int id, CancellationToken cancellationToken)
     {
         var product = await selectRepository.GetProductWithDetailsByIdAsync(id, includeDeleted: false, cancellationToken).ConfigureAwait(false);
+
         if (product == null)
         {
             return new ErrorResponse { Errors = [new ErrorDetail { Message = $"Product with Id {id} not found." }] };
         }
 
-        var imageUrls = new List<string>();
-        foreach (var variant in product.ProductVariants)
+        var imageUrls = CollectImageUrls([product]);
+
+        deleteRepository.Delete(product);
+        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        if (imageUrls != null && imageUrls.Count > 0)
         {
-            if (!string.IsNullOrWhiteSpace(variant.CoverImageUrl))
-            {
-                imageUrls.Add(variant.CoverImageUrl);
-            }
-
-            foreach (var photo in variant.ProductCollectionPhotos)
-            {
-                if (!string.IsNullOrWhiteSpace(photo.ImageUrl))
-                {
-                    imageUrls.Add(photo.ImageUrl);
-                }
-            }
-        }
-
-        await deleteRepository.DeleteProductAsync(product, cancellationToken).ConfigureAwait(false);
-
-        foreach (var imageUrl in imageUrls.Distinct())
-        {
-            await fileDeleteService.DeleteFileAsync(imageUrl, cancellationToken).ConfigureAwait(false);
+            await fileDeleteService.DeleteMultipleFilesAsync(imageUrls, cancellationToken).ConfigureAwait(false);
         }
 
         return null;
@@ -54,112 +43,80 @@ public class ProductDeleteService(
             return null;
         }
 
+        var uniqueIds = request.Ids.Distinct().ToList();
+
+        var activeProducts = await selectRepository.GetActiveProductsByIdsAsync(uniqueIds, cancellationToken).ConfigureAwait(false);
+        var allProducts = await selectRepository.GetAllProductsByIdsAsync(uniqueIds, cancellationToken).ConfigureAwait(false);
+
+        var allProductsMap = allProducts.ToDictionary(p => p.Id!);
+        var activeProductsSet = activeProducts.Select(p => p.Id!).ToHashSet();
+
         var errorDetails = new List<ErrorDetail>();
-        var activeProducts = await selectRepository.GetActiveProductsByIdsAsync(request.Ids, cancellationToken).ConfigureAwait(false);
-        var allProducts = await selectRepository.GetAllProductsByIdsAsync(request.Ids, cancellationToken).ConfigureAwait(false);
 
-        foreach (var id in request.Ids)
+        foreach (var id in uniqueIds)
         {
-            var product = allProducts.FirstOrDefault(p => p.Id == id);
-            var activeProduct = activeProducts.FirstOrDefault(p => p.Id == id);
-
-            if (product == null)
+            if (!allProductsMap.ContainsKey(id))
             {
                 errorDetails.Add(new ErrorDetail { Message = "Product not found", Field = $"Product ID: {id}" });
+                continue;
             }
-            else if (activeProduct == null)
+
+            if (!activeProductsSet.Contains(id))
             {
-                errorDetails.Add(new ErrorDetail { Message = "Product has already been deleted", Field = product.Name });
+                var productName = allProductsMap[id].Name;
+                errorDetails.Add(new ErrorDetail { Message = "Product has already been deleted", Field = productName });
             }
         }
 
         if (errorDetails.Count > 0)
         {
             return new ErrorResponse { Errors = errorDetails };
-        }
-
-        var imageUrls = new List<string>();
-        foreach (var product in activeProducts)
-        {
-            foreach (var variant in product.ProductVariants)
-            {
-                if (!string.IsNullOrWhiteSpace(variant.CoverImageUrl))
-                {
-                    imageUrls.Add(variant.CoverImageUrl);
-                }
-
-                foreach (var photo in variant.ProductCollectionPhotos)
-                {
-                    if (!string.IsNullOrWhiteSpace(photo.ImageUrl))
-                    {
-                        imageUrls.Add(photo.ImageUrl);
-                    }
-                }
-            }
         }
 
         if (activeProducts.Count > 0)
         {
-            await deleteRepository.DeleteProductsAsync(activeProducts, cancellationToken).ConfigureAwait(false);
-        }
+            var imageUrls = CollectImageUrls(activeProducts);
 
-        foreach (var imageUrl in imageUrls.Distinct())
-        {
-            await fileDeleteService.DeleteFileAsync(imageUrl, cancellationToken).ConfigureAwait(false);
+            deleteRepository.Delete(activeProducts);
+
+            await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+            if (imageUrls != null && imageUrls.Count > 0)
+            {
+                await fileDeleteService.DeleteMultipleFilesAsync(imageUrls, cancellationToken).ConfigureAwait(false);
+            }
         }
 
         return null;
     }
 
-    public async Task<ErrorResponse?> RestoreProductAsync(int id, CancellationToken cancellationToken)
+    private static List<string?>? CollectImageUrls(List<ProductEntity> products)
     {
-        var deletedProducts = await selectRepository.GetDeletedProductsByIdsAsync([id], cancellationToken).ConfigureAwait(false);
-        if (deletedProducts.Count == 0)
+        var urls = new HashSet<string>();
+
+        foreach (var product in products)
         {
-            return new ErrorResponse { Errors = [new ErrorDetail { Message = $"Deleted product with Id {id} not found." }] };
-        }
+            if (product.ProductVariants == null) continue;
 
-        await updateRepository.RestoreAsync(deletedProducts[0], cancellationToken).ConfigureAwait(false);
-
-        return null;
-    }
-
-    public async Task<ErrorResponse?> RestoreProductsAsync(RestoreManyProductsRequest request, CancellationToken cancellationToken)
-    {
-        if (request.Ids == null || request.Ids.Count == 0)
-        {
-            return null;
-        }
-
-        var errorDetails = new List<ErrorDetail>();
-        var deletedProducts = await selectRepository.GetDeletedProductsByIdsAsync(request.Ids, cancellationToken).ConfigureAwait(false);
-        var allProducts = await selectRepository.GetAllProductsByIdsAsync(request.Ids, cancellationToken).ConfigureAwait(false);
-
-        foreach (var id in request.Ids)
-        {
-            var product = allProducts.FirstOrDefault(p => p.Id == id);
-            var deletedProduct = deletedProducts.FirstOrDefault(p => p.Id == id);
-
-            if (product == null)
+            foreach (var variant in product.ProductVariants)
             {
-                errorDetails.Add(new ErrorDetail { Message = "Product not found", Field = $"Product ID: {id}" });
-            }
-            else if (deletedProduct == null)
-            {
-                errorDetails.Add(new ErrorDetail { Message = "Product is not deleted", Field = product.Name });
+                if (!string.IsNullOrWhiteSpace(variant.CoverImageUrl))
+                {
+                    urls.Add(variant.CoverImageUrl);
+                }
+
+                if (variant.ProductCollectionPhotos != null)
+                {
+                    foreach (var photo in variant.ProductCollectionPhotos)
+                    {
+                        if (!string.IsNullOrWhiteSpace(photo.ImageUrl))
+                        {
+                            urls.Add(photo.ImageUrl);
+                        }
+                    }
+                }
             }
         }
-
-        if (errorDetails.Count > 0)
-        {
-            return new ErrorResponse { Errors = errorDetails };
-        }
-
-        if (deletedProducts.Count > 0)
-        {
-            await updateRepository.RestoreAsync(deletedProducts, cancellationToken).ConfigureAwait(false);
-        }
-
-        return null;
+        return [.. urls];
     }
 }

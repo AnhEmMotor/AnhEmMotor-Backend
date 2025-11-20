@@ -1,4 +1,5 @@
-﻿using Application.Interfaces.Repositories.Brand;
+﻿using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.Brand;
 using Application.Interfaces.Repositories.File;
 using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.ProductCategory;
@@ -45,6 +46,8 @@ public static class DBContext
                 b.CommandTimeout(2);
             });
         });
+
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         services.AddScoped<IBrandInsertRepository, BrandInsertRepository>();
         services.AddScoped<IBrandSelectRepository, BrandSelectRepository>();
