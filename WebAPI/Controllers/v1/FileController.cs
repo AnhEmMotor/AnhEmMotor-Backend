@@ -166,7 +166,7 @@ public class FileController(IMediator mediator, IFileSelectService fileSelectSer
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpPatch("restore/{fileName}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(FileResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RestoreFile(string fileName, CancellationToken cancellationToken)
     {
@@ -176,13 +176,13 @@ public class FileController(IMediator mediator, IFileSelectService fileSelectSer
         }
 
         var command = new RestoreFileCommand(fileName);
-        var error = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var (fileResponse, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         if (error is not null)
         {
             return BadRequest(error);
         }
 
-        return NoContent();
+        return Ok(fileResponse);
     }
 
     /// <summary>
@@ -192,7 +192,7 @@ public class FileController(IMediator mediator, IFileSelectService fileSelectSer
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpPatch("restore-multiple")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(List<FileResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RestoreMultipleFiles([FromBody] List<string> fileNames, CancellationToken cancellationToken)
     {
@@ -202,12 +202,12 @@ public class FileController(IMediator mediator, IFileSelectService fileSelectSer
         }
 
         var command = new RestoreMultipleFilesCommand(fileNames);
-        var error = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var (fileResponses, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         if (error is not null)
         {
             return BadRequest(error);
         }
 
-        return NoContent();
+        return Ok(fileResponses);
     }
 }

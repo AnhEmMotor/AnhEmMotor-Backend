@@ -19,13 +19,14 @@ public sealed class UpdateManyProductStatusesCommandHandler(
 
         var products = await selectRepository.GetActiveProducts()
             .Where(p => ids.Contains(p.Id))
+            .Select(p => new { p.Id, p.Name, p.StatusId, p.BrandId, p.CategoryId })
             .ToListAsync(cancellationToken).ConfigureAwait(false);
 
-        var productMap = products.ToDictionary(p => p.Id);
+        var productIds = products.Select(p => p.Id).ToHashSet();
 
         foreach (var id in ids)
         {
-            if (!productMap.ContainsKey(id))
+            if (!productIds.Contains(id))
             {
                 errors.Add(new ErrorDetail
                 {
@@ -40,7 +41,13 @@ public sealed class UpdateManyProductStatusesCommandHandler(
             return (null, new ErrorResponse { Errors = errors });
         }
 
-        foreach (var product in products)
+        // Fetch entities without navigation properties to avoid tracking conflicts
+        var productEntities = await selectRepository.GetActiveProducts()
+            .Where(p => ids.Contains(p.Id))
+            .AsNoTracking()
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
+
+        foreach (var product in productEntities)
         {
             product.StatusId = command.StatusId;
             updateRepository.Update(product);

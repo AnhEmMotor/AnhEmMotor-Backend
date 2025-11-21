@@ -15,30 +15,36 @@ public sealed class UpdateManyProductPricesCommandHandler(
     public async Task<(List<int>? Data, ErrorResponse? Error)> Handle(UpdateManyProductPricesCommand command, CancellationToken cancellationToken)
     {
         var errors = new List<ErrorDetail>();
-        var productNames = command.ProductPrices.Keys.ToList();
+        var productIds = command.Ids;
+        var newPrice = command.Price;
 
         var allProducts = await selectRepository.GetActiveProducts()
-            .Where(p => p.Name != null && productNames.Contains(p.Name))
+            .Where(p => productIds.Contains(p.Id))
             .Include(p => p.ProductVariants)
             .ToListAsync(cancellationToken).ConfigureAwait(false);
 
-        var productMap = allProducts.ToDictionary(p => p.Name!, StringComparer.OrdinalIgnoreCase);
-
-        foreach (var kvp in command.ProductPrices)
+        if (allProducts.Count != productIds.Count)
         {
-            var productName = kvp.Key;
-
-            if (!productMap.TryGetValue(productName, out var product))
+            var foundIds = allProducts.Select(p => p.Id).ToHashSet();
+            var missingIds = productIds.Where(id => !foundIds.Contains(id)).ToList();
+            
+            foreach (var missingId in missingIds)
             {
                 errors.Add(new ErrorDetail
                 {
-                    Field = productName,
-                    Message = $"Sản phẩm '{productName}' không tồn tại."
+                    Field = missingId.ToString(),
+                    Message = $"Sản phẩm với Id {missingId} không tồn tại."
                 });
-                continue;
             }
+        }
 
-            var newPrice = kvp.Value;
+        if (errors.Count > 0)
+        {
+            return (null, new ErrorResponse { Errors = errors });
+        }
+
+        foreach (var product in allProducts)
+        {
             if (product.ProductVariants != null)
             {
                 foreach (var variant in product.ProductVariants)
@@ -48,11 +54,6 @@ public sealed class UpdateManyProductPricesCommandHandler(
             }
 
             updateRepository.Update(product);
-        }
-
-        if (errors.Count > 0)
-        {
-            return (null, new ErrorResponse { Errors = errors });
         }
 
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

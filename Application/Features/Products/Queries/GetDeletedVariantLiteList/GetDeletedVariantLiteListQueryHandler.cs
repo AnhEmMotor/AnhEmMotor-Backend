@@ -2,6 +2,7 @@ using Application.ApiContracts.Product.Common;
 using Application.ApiContracts.Product.Select;
 using Application.Features.Products.Common;
 using Application.Interfaces.Repositories.Product;
+using Domain.Enums;
 using Domain.Helpers;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -14,7 +15,7 @@ public sealed class GetDeletedVariantLiteListQueryHandler(IProductSelectReposito
     public async Task<PagedResult<ProductVariantLiteResponse>> Handle(GetDeletedVariantLiteListQuery request, CancellationToken cancellationToken)
     {
         var query = repository.GetDeletedVariants()
-            .Where(v => v.ProductId != null)
+            .Where(v => v.ProductId != null && v.Product != null && EF.Property<DateTimeOffset?>(v.Product, AuditingProperties.DeletedAt) == null)
             .Include(v => v.Product)
                 .ThenInclude(p => p!.ProductCategory)
             .Include(v => v.Product)
