@@ -13,7 +13,7 @@ public sealed class RestoreSupplierCommandHandler(ISupplierSelectRepository sele
     {
         var supplier = await selectRepository.GetDeletedSuppliersByIdsAsync([request.Id], cancellationToken).ConfigureAwait(false);
 
-        if (supplier == null)
+        if (supplier.Count == 0)
         {
             return (null, new ErrorResponse
             {

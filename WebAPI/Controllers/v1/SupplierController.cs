@@ -25,7 +25,6 @@ namespace WebAPI.Controllers.V1;
 [ApiVersion("1.0")]
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
-[ProducesResponseType(StatusCodes.Status200OK)]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
 public class SupplierController(IMediator mediator) : ControllerBase
 {
@@ -188,7 +187,7 @@ public class SupplierController(IMediator mediator) : ControllerBase
     /// <param name="request">Danh sách Id nhà cung cấp cần xoá.</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    [HttpPost("delete-many")]
+    [HttpDelete("delete-many")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteSuppliers([FromBody] DeleteManySuppliersRequest request, CancellationToken cancellationToken)

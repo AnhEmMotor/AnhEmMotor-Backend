@@ -28,13 +28,13 @@ public sealed class GetDeletedProductsListQueryHandler(IProductSelectRepository 
 
         var totalCount = await query.CountAsync(cancellationToken).ConfigureAwait(false);
         var products = await query
-            .Skip(((request.Request.Page ?? 1) - 1) * (request.Request.PageSize ?? 10))
-            .Take(request.Request.PageSize ?? 10)
+            .Skip((request.Page - 1) * request.PageSize)
+            .Take(request.PageSize)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
 
         var responses = products.Select(ProductResponseMapper.BuildProductDetailResponse).ToList();
 
-        return new PagedResult<ProductDetailResponse>(responses, totalCount, request.Request.Page ?? 1, request.Request.PageSize ?? 10);
+        return new PagedResult<ProductDetailResponse>(responses, totalCount, request.Page, request.PageSize);
     }
 }

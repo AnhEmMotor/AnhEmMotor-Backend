@@ -27,8 +27,8 @@ public sealed class GetActiveVariantLiteListQueryHandler(IProductSelectRepositor
 
         var totalCount = await query.CountAsync(cancellationToken).ConfigureAwait(false);
         var variants = await query
-            .Skip(((request.Request.Page ?? 1) - 1) * (request.Request.PageSize ?? 10))
-            .Take(request.Request.PageSize ?? 10)
+            .Skip((request.Page - 1) * request.PageSize)
+            .Take(request.PageSize)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
 
@@ -55,6 +55,6 @@ public sealed class GetActiveVariantLiteListQueryHandler(IProductSelectRepositor
             );
         }).ToList();
 
-        return new PagedResult<ProductVariantLiteResponse>(responses, totalCount, request.Request.Page ?? 1, request.Request.PageSize ?? 10);
+        return new PagedResult<ProductVariantLiteResponse>(responses, totalCount, request.Page, request.PageSize);
     }
 }

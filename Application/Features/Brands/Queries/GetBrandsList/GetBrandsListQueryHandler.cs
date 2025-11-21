@@ -17,11 +17,6 @@ public sealed class GetBrandsListQueryHandler(IBrandSelectRepository repository,
         var query = repository.GetBrands();
         ApplyDefaults(request.SieveModel);
 
-        if (request.SieveModel.Page == null || request.SieveModel.PageSize == null)
-        {
-            return new PagedResult<BrandResponse>([], 0, 1, 1);
-        }
-
         var filteredQuery = sieveProcessor.Apply(request.SieveModel, query);
         var brands = await filteredQuery.ToListAsync(cancellationToken).ConfigureAwait(false);
         var totalCount = await sieveProcessor.Apply(request.SieveModel, query, applyPagination: false).CountAsync(cancellationToken).ConfigureAwait(false);
@@ -33,7 +28,7 @@ public sealed class GetBrandsListQueryHandler(IBrandSelectRepository repository,
             Description = b.Description
         }).ToList();
 
-        return new PagedResult<BrandResponse>(responses, totalCount, request.SieveModel.Page.Value, request.SieveModel.PageSize.Value);
+        return new PagedResult<BrandResponse>(responses, totalCount, request.SieveModel.Page!.Value, request.SieveModel.PageSize!.Value);
     }
 
     private static void ApplyDefaults(SieveModel sieveModel)

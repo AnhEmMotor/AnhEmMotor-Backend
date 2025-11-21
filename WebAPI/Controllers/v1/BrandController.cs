@@ -162,7 +162,7 @@ public class BrandController(IMediator mediator) : ControllerBase
     /// <param name="request">Danh sách Id thương hiệu cần xoá.</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    [HttpPost("delete-many")]
+    [HttpDelete("delete-many")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteBrands([FromBody] DeleteManyBrandsRequest request, CancellationToken cancellationToken)
