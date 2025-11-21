@@ -15,30 +15,27 @@ public sealed class UpdateManyVariantPricesCommandHandler(
     public async Task<(List<int>? Data, ErrorResponse? Error)> Handle(UpdateManyVariantPricesCommand command, CancellationToken cancellationToken)
     {
         var errors = new List<ErrorDetail>();
-        var variantIds = command.VariantPrices.Keys.ToList();
+        var variantIds = command.Ids;
+        var newPrice = command.Price;
 
         var allVariants = await selectRepository.GetActiveVariants()
             .Where(v => variantIds.Contains(v.Id))
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
 
-        var variantMap = allVariants.ToDictionary(v => v.Id);
-
-        foreach (var kvp in command.VariantPrices)
+        if (allVariants.Count != variantIds.Count)
         {
-            var variantId = kvp.Key;
-
-            if (!variantMap.TryGetValue(variantId, out var variant))
+            var foundIds = allVariants.Select(v => v.Id).ToHashSet();
+            var missingIds = variantIds.Where(id => !foundIds.Contains(id)).ToList();
+            
+            foreach (var missingId in missingIds)
             {
                 errors.Add(new ErrorDetail
                 {
-                    Field = variantId.ToString(),
-                    Message = $"Biến thể với Id {variantId} không tồn tại."
+                    Field = missingId.ToString(),
+                    Message = $"Biến thể với Id {missingId} không tồn tại."
                 });
-                continue;
             }
-
-            variant.Price = kvp.Value;
         }
 
         if (errors.Count > 0)
@@ -48,6 +45,7 @@ public sealed class UpdateManyVariantPricesCommandHandler(
 
         foreach (var variant in allVariants)
         {
+            variant.Price = newPrice;
             updateRepository.UpdateVariant(variant);
         }
 

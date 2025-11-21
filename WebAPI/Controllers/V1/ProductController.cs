@@ -295,8 +295,7 @@ public class ProductController(ISender sender) : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateManyProductPrices([FromBody] UpdateManyProductPricesRequest request, CancellationToken cancellationToken)
     {
-        var pricesWithNullable = request.ProductPrices?.ToDictionary(kv => kv.Key, kv => (long?)kv.Value) ?? [];
-        var (data, error) = await sender.Send(new UpdateManyProductPricesCommand(pricesWithNullable), cancellationToken).ConfigureAwait(true);
+        var (data, error) = await sender.Send(new UpdateManyProductPricesCommand(request.Ids!, request.Price), cancellationToken).ConfigureAwait(true);
         if (error != null)
         {
             return BadRequest(error);
@@ -331,7 +330,7 @@ public class ProductController(ISender sender) : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateManyVariantPrices([FromBody] UpdateManyVariantPricesRequest request, CancellationToken cancellationToken)
     {
-        var (data, error) = await sender.Send(new UpdateManyVariantPricesCommand(request.VariantPrices), cancellationToken).ConfigureAwait(true);
+        var (data, error) = await sender.Send(new UpdateManyVariantPricesCommand(request.Ids!, request.Price), cancellationToken).ConfigureAwait(true);
         if (error != null)
         {
             return BadRequest(error);

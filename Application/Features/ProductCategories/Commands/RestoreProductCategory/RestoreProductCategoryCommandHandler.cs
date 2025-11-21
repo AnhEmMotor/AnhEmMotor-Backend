@@ -8,7 +8,7 @@ namespace Application.Features.ProductCategories.Commands.RestoreProductCategory
 
 public sealed class RestoreProductCategoryCommandHandler(
     IProductCategorySelectRepository selectRepository,
-    IProductCategoryUpdateRepository updateRepository,
+    IProductCategoryRestoreRepository restoreRepository,
     IUnitOfWork unitOfWork)
     : IRequestHandler<RestoreProductCategoryCommand, (ProductCategoryResponse? Data, ErrorResponse? Error)>
 {
@@ -34,7 +34,7 @@ public sealed class RestoreProductCategoryCommandHandler(
         }
 
         var categoryToRestore = deletedCategories[0];
-        updateRepository.Update(categoryToRestore);
+        restoreRepository.Restore(categoryToRestore);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         var response = new ProductCategoryResponse

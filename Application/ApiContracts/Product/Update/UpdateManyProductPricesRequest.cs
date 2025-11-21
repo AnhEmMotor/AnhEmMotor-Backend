@@ -6,5 +6,9 @@ public class UpdateManyProductPricesRequest
 {
     [Required]
     [MinLength(1, ErrorMessage = "Phải có ít nhất 1 sản phẩm.")]
-    public Dictionary<string, long>? ProductPrices { get; set; }
+    public List<int>? Ids { get; set; }
+
+    [Required]
+    [Range(0, long.MaxValue, ErrorMessage = "Giá phải lớn hơn hoặc bằng 0.")]
+    public long Price { get; set; }
 }

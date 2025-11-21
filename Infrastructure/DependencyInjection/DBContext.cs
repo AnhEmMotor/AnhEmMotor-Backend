@@ -53,6 +53,7 @@ public static class DBContext
         services.AddScoped<IProductCategoryInsertRepository, ProductCategoryInsertRepository>();
         services.AddScoped<IProductCategoryUpdateRepository, ProductCategoryUpdateRepository>();
         services.AddScoped<IProductCategoryDeleteRepository, ProductCategoryDeleteRepository>();
+        services.AddScoped<IProductCategoryRestoreRepository, ProductCategoryRestoreRepository>();
 
         services.AddScoped<IProductSelectRepository, ProductSelectRepository>();
         services.AddScoped<IProductInsertRepository, ProductInsertRepository>();

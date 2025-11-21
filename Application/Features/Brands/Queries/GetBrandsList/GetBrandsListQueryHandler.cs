@@ -34,7 +34,7 @@ public sealed class GetBrandsListQueryHandler(IBrandSelectRepository repository,
     private static void ApplyDefaults(SieveModel sieveModel)
     {
         sieveModel.Page ??= 1;
-        sieveModel.PageSize ??= int.MaxValue;
+        sieveModel.PageSize ??= 10;
         if (string.IsNullOrWhiteSpace(sieveModel.Sorts))
         {
             sieveModel.Sorts = $"-{AuditingProperties.CreatedAt}";
