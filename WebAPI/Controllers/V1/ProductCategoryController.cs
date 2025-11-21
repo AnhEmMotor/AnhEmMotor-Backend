@@ -3,7 +3,9 @@ using Application.Features.ProductCategories.Commands.CreateProductCategory;
 using Application.Features.ProductCategories.Commands.DeleteManyProductCategories;
 using Application.Features.ProductCategories.Commands.DeleteProductCategory;
 using Application.Features.ProductCategories.Commands.RestoreManyProductCategories;
+using Application.Features.ProductCategories.Commands.RestoreProductCategory;
 using Application.Features.ProductCategories.Commands.UpdateProductCategory;
+using Application.Features.ProductCategories.Queries.GetDeletedProductCategoriesList;
 using Application.Features.ProductCategories.Queries.GetProductCategoriesList;
 using Application.Features.ProductCategories.Queries.GetProductCategoryById;
 using Asp.Versioning;
@@ -21,7 +23,6 @@ namespace WebAPI.Controllers.V1;
 [ApiVersion("1.0")]
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
-[ProducesResponseType(StatusCodes.Status200OK)]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
 public class ProductCategoryController(IMediator mediator) : ControllerBase
 {
@@ -33,6 +34,18 @@ public class ProductCategoryController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetProductCategories([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
     {
         var query = new GetProductCategoriesListQuery(sieveModel);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Lấy danh sách danh mục sản phẩm đã bị xoá (có phân trang, lọc, sắp xếp). Nếu không truyền tham số phân trang sẽ trả về tất cả.
+    /// </summary>
+    [HttpGet("deleted")]
+    [ProducesResponseType(typeof(PagedResult<ProductCategoryResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetDeletedProductCategories([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
+    {
+        var query = new GetDeletedProductCategoriesListQuery(sieveModel);
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return Ok(result);
     }
@@ -109,7 +122,7 @@ public class ProductCategoryController(IMediator mediator) : ControllerBase
     /// <summary>
     /// Xoá nhiều danh mục sản phẩm cùng lúc.
     /// </summary>
-    [HttpPost("delete-many")]
+    [HttpDelete("delete-many")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteProductCategories([FromBody] DeleteManyProductCategoriesRequest request, CancellationToken cancellationToken)
@@ -123,6 +136,26 @@ public class ProductCategoryController(IMediator mediator) : ControllerBase
         }
 
         return NoContent();
+    }
+
+    /// <summary>
+    /// Khôi phục 1 danh mục sản phẩm đã bị xoá.
+    /// </summary>
+    [HttpPatch("restore/{id:int}")]
+    [ProducesResponseType(typeof(ProductCategoryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> RestoreProductCategory(int id, CancellationToken cancellationToken)
+    {
+        var command = new RestoreProductCategoryCommand(id);
+        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+
+        if (error != null)
+        {
+            return NotFound(error);
+        }
+
+        return Ok(data);
     }
 
     /// <summary>

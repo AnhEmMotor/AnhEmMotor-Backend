@@ -94,12 +94,23 @@
             Quản lý file ảnh trong hệ thống
             </summary>
             <param name="mediator"></param>
+            <param name="fileSelectService"></param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.FileController.#ctor(MediatR.IMediator)">
+        <member name="M:WebAPI.Controllers.V1.FileController.#ctor(MediatR.IMediator,Application.Interfaces.Services.IFileSelectService)">
             <summary>
             Quản lý file ảnh trong hệ thống
             </summary>
             <param name="mediator"></param>
+            <param name="fileSelectService"></param>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.FileController.ViewImage(System.String,System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Xem ảnh theo tên file, có thể truyền Width để resize
+            </summary>
+            <param name="fileName">Tên file đã lưu (ví dụ: guid.webp)</param>
+            <param name="width">Chiều rộng mong muốn (optional, nếu không truyền sẽ trả về ảnh gốc)</param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
         </member>
         <member name="M:WebAPI.Controllers.V1.FileController.UploadSingleImage(Microsoft.AspNetCore.Http.IFormFile,System.Threading.CancellationToken)">
             <summary>
@@ -133,6 +144,22 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
+        <member name="M:WebAPI.Controllers.V1.FileController.RestoreFile(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Khôi phục 1 file theo tên file đã lưu (stored file name)
+            </summary>
+            <param name="fileName">Tên file đã lưu (ví dụ: guid.webp)</param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.FileController.RestoreMultipleFiles(System.Collections.Generic.List{System.String},System.Threading.CancellationToken)">
+            <summary>
+            Khôi phục nhiều file cùng lúc theo danh sách tên file đã lưu
+            </summary>
+            <param name="fileNames">Danh sách tên file đã lưu (stored file names)</param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
         <member name="T:WebAPI.Controllers.V1.ProductCategoryController">
             <summary>
             Quản lý danh mục sản phẩm.
@@ -148,6 +175,11 @@
         <member name="M:WebAPI.Controllers.V1.ProductCategoryController.GetProductCategories(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách danh mục sản phẩm (có phân trang, lọc, sắp xếp). Nếu không truyền tham số phân trang sẽ trả về tất cả.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductCategoryController.GetDeletedProductCategories(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+            <summary>
+            Lấy danh sách danh mục sản phẩm đã bị xoá (có phân trang, lọc, sắp xếp). Nếu không truyền tham số phân trang sẽ trả về tất cả.
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.ProductCategoryController.GetProductCategoryById(System.Int32,System.Threading.CancellationToken)">
@@ -178,6 +210,11 @@
             Xoá nhiều danh mục sản phẩm cùng lúc.
             </summary>
         </member>
+        <member name="M:WebAPI.Controllers.V1.ProductCategoryController.RestoreProductCategory(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Khôi phục 1 danh mục sản phẩm đã bị xoá.
+            </summary>
+        </member>
         <member name="M:WebAPI.Controllers.V1.ProductCategoryController.RestoreProductCategories(Application.ApiContracts.ProductCategory.RestoreManyProductCategoriesRequest,System.Threading.CancellationToken)">
             <summary>
             Khôi phục nhiều danh mục sản phẩm cùng lúc.
@@ -193,25 +230,41 @@
             Quản lý sản phẩm.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.GetProducts(Application.ApiContracts.Product.Select.ProductListRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetProducts(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách sản phẩm đầy đủ (có phân trang, lọc, tìm kiếm).
             </summary>
+            <remarks>
+            Filters hỗ trợ: search (tìm kiếm), statusIds (danh sách trạng thái phân cách bởi dấu phẩy)
+            Ví dụ: ?Filters=search@Honda,statusIds@active,out-of-business
+            </remarks>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.GetDeletedProducts(Application.ApiContracts.Product.Select.ProductListRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetDeletedProducts(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách sản phẩm đã bị xoá (có phân trang, lọc, tìm kiếm).
             </summary>
+            <remarks>
+            Filters hỗ trợ: search (tìm kiếm), statusIds (danh sách trạng thái phân cách bởi dấu phẩy)
+            Ví dụ: ?Filters=search@Honda,statusIds@active,out-of-business
+            </remarks>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.GetActiveVariantLiteProducts(Application.ApiContracts.Product.Select.ProductListRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetActiveVariantLiteProducts(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách biến thể sản phẩm của tất cả sản phẩm chưa xoá (có phân trang, lọc, tìm kiếm).
             </summary>
+            <remarks>
+            Filters hỗ trợ: search (tìm kiếm), statusIds (danh sách trạng thái phân cách bởi dấu phẩy)
+            Ví dụ: ?Filters=search@Honda,statusIds@active
+            </remarks>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.GetDeletedVariantLiteProducts(Application.ApiContracts.Product.Select.ProductListRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetDeletedVariantLiteProducts(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách biến thể sản phẩm của tất cả sản phẩm đã xoá (có phân trang, lọc, tìm kiếm).
             </summary>
+            <remarks>
+            Filters hỗ trợ: search (tìm kiếm), statusIds (danh sách trạng thái phân cách bởi dấu phẩy)
+            Ví dụ: ?Filters=search@Honda,statusIds@active
+            </remarks>
         </member>
         <member name="M:WebAPI.Controllers.V1.ProductController.GetProductById(System.Int32,System.Boolean,System.Threading.CancellationToken)">
             <summary>
@@ -271,6 +324,16 @@
         <member name="M:WebAPI.Controllers.V1.ProductController.UpdateManyProductPrices(Application.ApiContracts.Product.Update.UpdateManyProductPricesRequest,System.Threading.CancellationToken)">
             <summary>
             Chỉnh giá cho nhiều sản phẩm cùng lúc.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateVariantPrice(System.Int32,Application.ApiContracts.Product.Update.UpdateVariantPriceRequest,System.Threading.CancellationToken)">
+            <summary>
+            Chỉnh giá cho 1 biến thể sản phẩm.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateManyVariantPrices(Application.ApiContracts.Product.Update.UpdateManyVariantPricesRequest,System.Threading.CancellationToken)">
+            <summary>
+            Chỉnh giá cho nhiều biến thể sản phẩm cùng lúc.
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.ProductController.UpdateProductStatus(System.Int32,Application.ApiContracts.Product.Update.UpdateProductStatusRequest,System.Threading.CancellationToken)">

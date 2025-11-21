@@ -14,6 +14,7 @@ public sealed class GetDeletedVariantLiteListQueryHandler(IProductSelectReposito
     public async Task<PagedResult<ProductVariantLiteResponse>> Handle(GetDeletedVariantLiteListQuery request, CancellationToken cancellationToken)
     {
         var query = repository.GetDeletedVariants()
+            .Where(v => v.ProductId != null)
             .Include(v => v.Product)
                 .ThenInclude(p => p!.ProductCategory)
             .Include(v => v.Product)
@@ -27,8 +28,8 @@ public sealed class GetDeletedVariantLiteListQueryHandler(IProductSelectReposito
 
         var totalCount = await query.CountAsync(cancellationToken).ConfigureAwait(false);
         var variants = await query
-            .Skip(((request.Request.Page ?? 1) - 1) * (request.Request.PageSize ?? 10))
-            .Take(request.Request.PageSize ?? 10)
+            .Skip((request.Page - 1) * request.PageSize)
+            .Take(request.PageSize)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
 
@@ -55,6 +56,6 @@ public sealed class GetDeletedVariantLiteListQueryHandler(IProductSelectReposito
             );
         }).ToList();
 
-        return new PagedResult<ProductVariantLiteResponse>(responses, totalCount, request.Request.Page ?? 1, request.Request.PageSize ?? 10);
+        return new PagedResult<ProductVariantLiteResponse>(responses, totalCount, request.Page, request.PageSize);
     }
 }
