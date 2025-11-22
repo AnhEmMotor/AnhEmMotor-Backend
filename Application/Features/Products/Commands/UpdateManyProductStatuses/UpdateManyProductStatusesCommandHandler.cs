@@ -17,16 +17,15 @@ public sealed class UpdateManyProductStatusesCommandHandler(
         var errors = new List<ErrorDetail>();
         var ids = command.Ids.Distinct().ToList();
 
-        var products = await selectRepository.GetActiveProducts()
+        // First query to check which IDs exist
+        var existingIds = await selectRepository.GetActiveProducts()
             .Where(p => ids.Contains(p.Id))
-            .Select(p => new { p.Id, p.Name, p.StatusId, p.BrandId, p.CategoryId })
+            .Select(p => p.Id)
             .ToListAsync(cancellationToken).ConfigureAwait(false);
-
-        var productIds = products.Select(p => p.Id).ToHashSet();
 
         foreach (var id in ids)
         {
-            if (!productIds.Contains(id))
+            if (!existingIds.Contains(id))
             {
                 errors.Add(new ErrorDetail
                 {
@@ -41,9 +40,37 @@ public sealed class UpdateManyProductStatusesCommandHandler(
             return (null, new ErrorResponse { Errors = errors });
         }
 
-        // Fetch entities without navigation properties to avoid tracking conflicts
+        // Fetch entities WITHOUT navigation properties and with AsNoTracking to avoid tracking conflicts
         var productEntities = await selectRepository.GetActiveProducts()
             .Where(p => ids.Contains(p.Id))
+            .Select(p => new Domain.Entities.Product
+            {
+                Id = p.Id,
+                Name = p.Name,
+                CategoryId = p.CategoryId,
+                BrandId = p.BrandId,
+                StatusId = p.StatusId,
+                Weight = p.Weight,
+                Dimensions = p.Dimensions,
+                Wheelbase = p.Wheelbase,
+                SeatHeight = p.SeatHeight,
+                GroundClearance = p.GroundClearance,
+                FuelCapacity = p.FuelCapacity,
+                TireSize = p.TireSize,
+                FrontSuspension = p.FrontSuspension,
+                RearSuspension = p.RearSuspension,
+                EngineType = p.EngineType,
+                MaxPower = p.MaxPower,
+                OilCapacity = p.OilCapacity,
+                FuelConsumption = p.FuelConsumption,
+                TransmissionType = p.TransmissionType,
+                StarterSystem = p.StarterSystem,
+                MaxTorque = p.MaxTorque,
+                Displacement = p.Displacement,
+                BoreStroke = p.BoreStroke,
+                CompressionRatio = p.CompressionRatio,
+                Description = p.Description
+            })
             .AsNoTracking()
             .ToListAsync(cancellationToken).ConfigureAwait(false);
 

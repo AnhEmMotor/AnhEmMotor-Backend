@@ -14,8 +14,9 @@ public sealed class GetDeletedVariantLiteListQueryHandler(IProductSelectReposito
 {
     public async Task<PagedResult<ProductVariantLiteResponse>> Handle(GetDeletedVariantLiteListQuery request, CancellationToken cancellationToken)
     {
+        // Get ONLY deleted variants where the Product is NOT deleted (Product.DeletedAt == null)
         var query = repository.GetDeletedVariants()
-            .Where(v => v.ProductId != null && v.Product != null && EF.Property<DateTimeOffset?>(v.Product, AuditingProperties.DeletedAt) == null)
+            .Where(v => v.ProductId != null)
             .Include(v => v.Product)
                 .ThenInclude(p => p!.ProductCategory)
             .Include(v => v.Product)
@@ -25,7 +26,8 @@ public sealed class GetDeletedVariantLiteListQueryHandler(IProductSelectReposito
                     .ThenInclude(ov => ov!.Option)
             .Include(v => v.InputInfos)
             .Include(v => v.OutputInfos)
-                .ThenInclude(oi => oi.OutputOrder);
+                .ThenInclude(oi => oi.OutputOrder)
+            .Where(v => v.Product != null && EF.Property<DateTimeOffset?>(v.Product, AuditingProperties.DeletedAt) == null);
 
         var totalCount = await query.CountAsync(cancellationToken).ConfigureAwait(false);
         var variants = await query

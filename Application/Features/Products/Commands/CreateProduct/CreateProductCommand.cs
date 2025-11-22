@@ -31,6 +31,7 @@ public sealed record CreateProductCommand : IRequest<(ProductDetailResponse? Dat
     public decimal? Displacement { get; init; }
     public string? BoreStroke { get; init; }
     public string? CompressionRatio { get; init; }
+    public List<ProductOptionRequest>? Options { get; init; }
     public List<ProductVariantWriteRequest> Variants { get; init; } = [];
 
     public static CreateProductCommand FromRequest(CreateProductRequest request)
@@ -61,6 +62,7 @@ public sealed record CreateProductCommand : IRequest<(ProductDetailResponse? Dat
             Displacement = request.Displacement,
             BoreStroke = request.BoreStroke,
             CompressionRatio = request.CompressionRatio,
+            Options = request.Options,
             Variants = request.Variants ?? []
         };
     }

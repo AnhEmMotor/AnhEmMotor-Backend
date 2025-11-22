@@ -1,5 +1,3 @@
-using Application.Interfaces.Services;
-using Application.Services.File;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
@@ -28,8 +26,6 @@ public static class ApplicationServices
         services.AddValidatorsFromAssembly(assembly);
 
         services.AddTransient(typeof(MediatR.IPipelineBehavior<,>), typeof(Behaviors.ValidationBehavior<,>));
-
-        services.AddScoped<IFileSelectService, FileSelectService>();
 
         return services;
     }

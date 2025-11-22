@@ -94,14 +94,12 @@
             Quản lý file ảnh trong hệ thống
             </summary>
             <param name="mediator"></param>
-            <param name="fileSelectService"></param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.FileController.#ctor(MediatR.IMediator,Application.Interfaces.Services.IFileSelectService)">
+        <member name="M:WebAPI.Controllers.V1.FileController.#ctor(MediatR.IMediator)">
             <summary>
             Quản lý file ảnh trong hệ thống
             </summary>
             <param name="mediator"></param>
-            <param name="fileSelectService"></param>
         </member>
         <member name="M:WebAPI.Controllers.V1.FileController.ViewImage(System.String,System.Nullable{System.Int32},System.Threading.CancellationToken)">
             <summary>

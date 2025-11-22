@@ -5,7 +5,7 @@ using Application.Features.Files.Commands.RestoreFile;
 using Application.Features.Files.Commands.RestoreMultipleFiles;
 using Application.Features.Files.Commands.UploadFile;
 using Application.Features.Files.Commands.UploadMultipleFiles;
-using Application.Interfaces.Services;
+using Application.Features.Files.Queries.ViewImage;
 using Asp.Versioning;
 using Domain.Helpers;
 using MediatR;
@@ -17,12 +17,11 @@ namespace WebAPI.Controllers.V1;
 /// Quản lý file ảnh trong hệ thống
 /// </summary>
 /// <param name="mediator"></param>
-/// <param name="fileSelectService"></param>
 [ApiVersion("1.0")]
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
-public class FileController(IMediator mediator, IFileSelectService fileSelectService) : ControllerBase
+public class FileController(IMediator mediator) : ControllerBase
 {
     /// <summary>
     /// Xem ảnh theo tên file, có thể truyền Width để resize
@@ -36,7 +35,8 @@ public class FileController(IMediator mediator, IFileSelectService fileSelectSer
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ViewImage(string fileName, [FromQuery] int? width, CancellationToken cancellationToken)
     {
-        var (data, error) = await fileSelectService.GetImageAsync(fileName, width, cancellationToken).ConfigureAwait(true);
+        var query = new ViewImageQuery(fileName, width);
+        var (data, error) = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         
         if (error is not null)
         {

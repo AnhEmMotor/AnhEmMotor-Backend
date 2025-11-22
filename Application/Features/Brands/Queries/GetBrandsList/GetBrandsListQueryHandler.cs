@@ -37,11 +37,11 @@ public sealed class GetBrandsListQueryHandler(IBrandSelectRepository repository,
         sieveModel.PageSize ??= 10;
         if (string.IsNullOrWhiteSpace(sieveModel.Sorts))
         {
-            sieveModel.Sorts = $"-{AuditingProperties.CreatedAt}";
+            sieveModel.Sorts = $"-id";
         }
         else if (!sieveModel.Sorts.Contains(AuditingProperties.CreatedAt, StringComparison.OrdinalIgnoreCase))
         {
-            sieveModel.Sorts = $"{sieveModel.Sorts},-{AuditingProperties.CreatedAt}";
+            sieveModel.Sorts = $"{sieveModel.Sorts},-id";
         }
     }
 }

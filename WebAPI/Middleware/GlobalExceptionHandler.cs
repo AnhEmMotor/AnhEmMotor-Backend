@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Diagnostics;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Diagnostics;
 using System.Net;
 
 namespace WebAPI.Middleware
@@ -19,23 +20,43 @@ namespace WebAPI.Middleware
         /// <param name="cancellationToken">Token để hủy bỏ thao tác.</param>
         /// <returns>Trả về giá trị cho biết liệu ngoại lệ đã được xử lý (luôn trả về `true` trong trường hợp này).</returns>
         public async ValueTask<bool> TryHandleAsync(
-            HttpContext httpContext,
-            Exception exception,
-            CancellationToken cancellationToken)
+        HttpContext httpContext,
+        Exception exception,
+        CancellationToken cancellationToken)
         {
-            logger.LogError(exception, "Unhandled exception occurred: {Message}", exception.Message);
-            httpContext.Response.ContentType = "application/json";
-            httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
             object errorResponse;
-            if (environment.IsDevelopment())
+            int statusCode;
+            if (exception is ValidationException validationException)
             {
-                errorResponse = new DevelopmentErrorResponse(exception);
+                statusCode = (int)HttpStatusCode.BadRequest;
+                errorResponse = new
+                {
+                    StatusCode = statusCode,
+                    Message = "Validation failed",
+                    Errors = validationException.Errors.Select(e => new
+                    {
+                        Field = e.PropertyName,
+                        Message = e.ErrorMessage
+                    })
+                };
+                logger.LogWarning("Validation failed: {Message}", exception.Message);
             }
             else
             {
-                errorResponse = new ProductionErrorResponse("Something went wrong in system. Please try again.");
+                statusCode = (int)HttpStatusCode.InternalServerError;
+                logger.LogError(exception, "Unhandled exception occurred: {Message}", exception.Message);
+                if (environment.IsDevelopment())
+                {
+                    errorResponse = new DevelopmentErrorResponse(exception);
+                }
+                else
+                {
+                    errorResponse = new ProductionErrorResponse("Something went wrong in system. Please try again.");
+                }
             }
-            await httpContext.Response.WriteAsJsonAsync(errorResponse, cancellationToken).ConfigureAwait(true);
+            httpContext.Response.ContentType = "application/json";
+            httpContext.Response.StatusCode = statusCode;
+            await httpContext.Response.WriteAsJsonAsync(errorResponse, cancellationToken).ConfigureAwait(false);
             return true;
         }
     }

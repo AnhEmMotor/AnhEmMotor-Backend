@@ -9,8 +9,7 @@ using Sieve.Services;
 
 namespace Application.Features.Brands.Queries.GetDeletedBrandsList;
 
-public sealed class GetDeletedBrandsListQueryHandler(IBrandSelectRepository repository, ISieveProcessor sieveProcessor)
-    : IRequestHandler<GetDeletedBrandsListQuery, PagedResult<BrandResponse>>
+public sealed class GetDeletedBrandsListQueryHandler(IBrandSelectRepository repository, ISieveProcessor sieveProcessor): IRequestHandler<GetDeletedBrandsListQuery, PagedResult<BrandResponse>>
 {
     public async Task<PagedResult<BrandResponse>> Handle(GetDeletedBrandsListQuery request, CancellationToken cancellationToken)
     {
@@ -34,14 +33,14 @@ public sealed class GetDeletedBrandsListQueryHandler(IBrandSelectRepository repo
     private static void ApplyDefaults(SieveModel sieveModel)
     {
         sieveModel.Page ??= 1;
-        sieveModel.PageSize ??= int.MaxValue;
+        sieveModel.PageSize ??= 10;
         if (string.IsNullOrWhiteSpace(sieveModel.Sorts))
         {
-            sieveModel.Sorts = $"-{AuditingProperties.CreatedAt}";
+            sieveModel.Sorts = $"-id";
         }
         else if (!sieveModel.Sorts.Contains(AuditingProperties.CreatedAt, StringComparison.OrdinalIgnoreCase))
         {
-            sieveModel.Sorts = $"{sieveModel.Sorts},-{AuditingProperties.CreatedAt}";
+            sieveModel.Sorts = $"{sieveModel.Sorts},-id";
         }
     }
 }
