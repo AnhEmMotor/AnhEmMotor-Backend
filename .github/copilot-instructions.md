@@ -40,3 +40,13 @@
   - On Linux/Mac: `source activate.sh` (from repository root)
 - If not in the repository root, navigate there first or use the full path to the activation script.
 - This ensures that the correct version of .NET SDK is used for the repository.
+
+## Commit
+Use conventional commit format: type: description.
+Use imperative mood: 'Add feature' not 'Added feature'.
+Keep subject line under 20 characters.
+Each point only one sentence to be one idea and start with a hyphen (-)
+Use types: feat, fix, docs, style, refactor, perf, test, chore, ci.
+Include scope when relevant (e.g., api, ui, auth).
+For additional details, use a well-structured body section.
+Use bullet points for clarity.

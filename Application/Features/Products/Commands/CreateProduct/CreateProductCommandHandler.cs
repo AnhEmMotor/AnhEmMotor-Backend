@@ -3,6 +3,7 @@ using Application.Features.Products.Common;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Product;
 using Domain.Entities;
+using Domain.Enums;
 using Domain.Helpers;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -21,20 +22,20 @@ public sealed class CreateProductCommandHandler(
     {
         var errors = new List<ErrorDetail>();
 
-        // Validate Category
+        // Validate Category (must exist and not soft-deleted)
         var category = await selectRepository.GetCategoryByIdAsync(request.CategoryId!.Value, cancellationToken).ConfigureAwait(false);
         if (category == null)
         {
-            errors.Add(new ErrorDetail { Field = nameof(request.CategoryId), Message = $"Product category with Id {request.CategoryId} not found." });
+            errors.Add(new ErrorDetail { Field = nameof(request.CategoryId), Message = $"Product category with Id {request.CategoryId} not found or has been deleted." });
         }
 
-        // Validate Brand
+        // Validate Brand (must exist and not soft-deleted)
         if (request.BrandId.HasValue)
         {
             var brand = await selectRepository.GetBrandByIdAsync(request.BrandId.Value, cancellationToken).ConfigureAwait(false);
             if (brand == null)
             {
-                errors.Add(new ErrorDetail { Field = nameof(request.BrandId), Message = $"Brand with Id {request.BrandId} not found." });
+                errors.Add(new ErrorDetail { Field = nameof(request.BrandId), Message = $"Brand with Id {request.BrandId} not found or has been deleted." });
             }
         }
 
@@ -57,96 +58,77 @@ public sealed class CreateProductCommandHandler(
             }
         }
 
-        // **CRITICAL: Process Options and create/fetch OptionValues**
+        // **CRITICAL: Process OptionValues from Variants**
         var optionIdToValueMap = new Dictionary<int, Dictionary<string, int>>(); // optionId -> (valueName -> valueId)
 
-        if (request.Options?.Count > 0)
+        if (request.Variants?.Count > 0)
         {
-            foreach (var optReq in request.Options)
-            {
-                // Validate Option exists
-                var option = await selectRepository.GetOptionByIdAsync(optReq.Id, cancellationToken).ConfigureAwait(false);
-                if (option == null)
-                {
-                    errors.Add(new ErrorDetail { Field = "Options", Message = $"Option with Id {optReq.Id} not found." });
-                    continue;
-                }
-
-                // Parse value names from comma-separated string: "Đỏ, Xanh, Cam"
-                var valueNames = optReq.Values?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
-                var valueMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-
-                foreach (var valueName in valueNames)
-                {
-                    if (string.IsNullOrWhiteSpace(valueName))
-                    {
-                        continue;
-                    }
-
-                    // Try to find existing OptionValue
-                    var existingValue = await selectRepository.GetOptionValueByNameAsync(optReq.Id, valueName.Trim(), cancellationToken).ConfigureAwait(false);
-                    
-                    if (existingValue != null)
-                    {
-                        valueMap[valueName.Trim()] = existingValue.Id;
-                    }
-                    else
-                    {
-                        // Create new OptionValue
-                        var newValue = new OptionValueEntity
-                        {
-                            OptionId = optReq.Id,
-                            Name = valueName.Trim()
-                        };
-                        insertRepository.AddOptionValue(newValue);
-                        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                        
-                        valueMap[valueName.Trim()] = newValue.Id;
-                    }
-                }
-
-                optionIdToValueMap[optReq.Id] = valueMap;
-            }
-        }
-
-        // **CRITICAL: Validate Variants' optionValues match Options**
-        if (request.Variants?.Count > 0 && optionIdToValueMap.Count > 0)
-        {
+            // Collect all unique option IDs and value names from all variants
+            var allOptionValues = new Dictionary<int, HashSet<string>>();
+            
             foreach (var variantReq in request.Variants)
             {
                 if (variantReq.OptionValues?.Count > 0)
                 {
                     foreach (var kvp in variantReq.OptionValues)
                     {
-                        // Key is string (option ID as string from JSON)
-                        if (!int.TryParse(kvp.Key, out var optionId))
+                        if (int.TryParse(kvp.Key, out var optionId))
                         {
-                            errors.Add(new ErrorDetail { Field = "Variants.OptionValues", Message = $"Invalid option ID '{kvp.Key}' in variant." });
-                            continue;
-                        }
-
-                        // Value is the NAME of the option value (e.g., "Đỏ", "Thể Thao")
-                        var valueName = kvp.Value?.Trim();
-                        if (string.IsNullOrWhiteSpace(valueName))
-                        {
-                            errors.Add(new ErrorDetail { Field = "Variants.OptionValues", Message = $"Empty value name for option {optionId} in variant." });
-                            continue;
-                        }
-
-                        // Verify option exists in Options list
-                        if (!optionIdToValueMap.ContainsKey(optionId))
-                        {
-                            errors.Add(new ErrorDetail { Field = "Variants.OptionValues", Message = $"Option {optionId} not found in product Options." });
-                            continue;
-                        }
-
-                        // Verify value name exists in Option's values
-                        if (!optionIdToValueMap[optionId].ContainsKey(valueName))
-                        {
-                            errors.Add(new ErrorDetail { Field = "Variants.OptionValues", Message = $"Value '{valueName}' not found in Option {optionId}'s values list." });
+                            var valueName = kvp.Value?.Trim();
+                            if (!string.IsNullOrWhiteSpace(valueName))
+                            {
+                                if (!allOptionValues.ContainsKey(optionId))
+                                {
+                                    allOptionValues[optionId] = [];
+                                }
+                                allOptionValues[optionId].Add(valueName);
+                            }
                         }
                     }
                 }
+            }
+
+            // Process each option and its values
+            foreach (var optionKvp in allOptionValues)
+            {
+                var optionId = optionKvp.Key;
+                var valueNames = optionKvp.Value;
+
+                // Validate Option exists
+                var option = await selectRepository.GetOptionByIdAsync(optionId, cancellationToken).ConfigureAwait(false);
+                if (option == null)
+                {
+                    errors.Add(new ErrorDetail { Field = "Variants.OptionValues", Message = $"Option with Id {optionId} not found." });
+                    continue;
+                }
+
+                var valueMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+                foreach (var valueName in valueNames)
+                {
+                    // Try to find existing OptionValue
+                    var existingValue = await selectRepository.GetOptionValueByNameAsync(optionId, valueName, cancellationToken).ConfigureAwait(false);
+                    
+                    if (existingValue != null)
+                    {
+                        valueMap[valueName] = existingValue.Id;
+                    }
+                    else
+                    {
+                        // Create new OptionValue
+                        var newValue = new OptionValueEntity
+                        {
+                            OptionId = optionId,
+                            Name = valueName
+                        };
+                        insertRepository.AddOptionValue(newValue);
+                        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                        
+                        valueMap[valueName] = newValue.Id;
+                    }
+                }
+
+                optionIdToValueMap[optionId] = valueMap;
             }
         }
 
