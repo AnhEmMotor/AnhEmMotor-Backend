@@ -5,23 +5,30 @@ using Application.Interfaces.Repositories.Product;
 using Domain.Entities;
 using Domain.Helpers;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
+using OptionValueEntity = Domain.Entities.OptionValue;
 using ProductEntity = Domain.Entities.Product;
 
 namespace Application.Features.Products.Commands.CreateProduct;
 
-public sealed class CreateProductCommandHandler(IProductSelectRepository selectRepository, IProductInsertRepository insertRepository, IUnitOfWork unitOfWork)
+public sealed class CreateProductCommandHandler(
+    IProductSelectRepository selectRepository,
+    IProductInsertRepository insertRepository,
+    IUnitOfWork unitOfWork)
     : IRequestHandler<CreateProductCommand, (ProductDetailResponse? Data, ErrorResponse? Error)>
 {
     public async Task<(ProductDetailResponse? Data, ErrorResponse? Error)> Handle(CreateProductCommand request, CancellationToken cancellationToken)
     {
         var errors = new List<ErrorDetail>();
 
+        // Validate Category
         var category = await selectRepository.GetCategoryByIdAsync(request.CategoryId!.Value, cancellationToken).ConfigureAwait(false);
         if (category == null)
         {
             errors.Add(new ErrorDetail { Field = nameof(request.CategoryId), Message = $"Product category with Id {request.CategoryId} not found." });
         }
 
+        // Validate Brand
         if (request.BrandId.HasValue)
         {
             var brand = await selectRepository.GetBrandByIdAsync(request.BrandId.Value, cancellationToken).ConfigureAwait(false);
@@ -31,6 +38,7 @@ public sealed class CreateProductCommandHandler(IProductSelectRepository selectR
             }
         }
 
+        // Validate unique slugs
         if (request.Variants?.Count > 0)
         {
             var slugs = request.Variants.Select(v => v.UrlSlug?.Trim()).Where(s => !string.IsNullOrWhiteSpace(s)).ToList();
@@ -49,28 +57,95 @@ public sealed class CreateProductCommandHandler(IProductSelectRepository selectR
             }
         }
 
-        var optionValueMap = new Dictionary<int, OptionValue>();
-        if (request.Variants?.Count > 0)
-        {
-            var allOptionValueIds = request.Variants
-                .Where(v => v.OptionValueIds?.Count > 0)
-                .SelectMany(v => v.OptionValueIds!)
-                .Distinct()
-                .ToList();
+        // **CRITICAL: Process Options and create/fetch OptionValues**
+        var optionIdToValueMap = new Dictionary<int, Dictionary<string, int>>(); // optionId -> (valueName -> valueId)
 
-            if (allOptionValueIds.Count > 0)
+        if (request.Options?.Count > 0)
+        {
+            foreach (var optReq in request.Options)
             {
-                var optionValues = await selectRepository.GetOptionValuesByIdsAsync(allOptionValueIds, cancellationToken).ConfigureAwait(false);
-                var foundIds = optionValues.Select(ov => ov.Id).ToHashSet();
-                var missingIds = allOptionValueIds.Except(foundIds).ToList();
-                if (missingIds.Count > 0)
+                // Validate Option exists
+                var option = await selectRepository.GetOptionByIdAsync(optReq.Id, cancellationToken).ConfigureAwait(false);
+                if (option == null)
                 {
-                    errors.Add(new ErrorDetail { Field = "Variants.OptionValueIds", Message = $"Option values not found: {string.Join(", ", missingIds)}." });
+                    errors.Add(new ErrorDetail { Field = "Options", Message = $"Option with Id {optReq.Id} not found." });
+                    continue;
                 }
 
-                foreach (var ov in optionValues)
+                // Parse value names from comma-separated string: "Đỏ, Xanh, Cam"
+                var valueNames = optReq.Values?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
+                var valueMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+                foreach (var valueName in valueNames)
                 {
-                    optionValueMap[ov.Id] = ov;
+                    if (string.IsNullOrWhiteSpace(valueName))
+                    {
+                        continue;
+                    }
+
+                    // Try to find existing OptionValue
+                    var existingValue = await selectRepository.GetOptionValueByNameAsync(optReq.Id, valueName.Trim(), cancellationToken).ConfigureAwait(false);
+                    
+                    if (existingValue != null)
+                    {
+                        valueMap[valueName.Trim()] = existingValue.Id;
+                    }
+                    else
+                    {
+                        // Create new OptionValue
+                        var newValue = new OptionValueEntity
+                        {
+                            OptionId = optReq.Id,
+                            Name = valueName.Trim()
+                        };
+                        insertRepository.AddOptionValue(newValue);
+                        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                        
+                        valueMap[valueName.Trim()] = newValue.Id;
+                    }
+                }
+
+                optionIdToValueMap[optReq.Id] = valueMap;
+            }
+        }
+
+        // **CRITICAL: Validate Variants' optionValues match Options**
+        if (request.Variants?.Count > 0 && optionIdToValueMap.Count > 0)
+        {
+            foreach (var variantReq in request.Variants)
+            {
+                if (variantReq.OptionValues?.Count > 0)
+                {
+                    foreach (var kvp in variantReq.OptionValues)
+                    {
+                        // Key is string (option ID as string from JSON)
+                        if (!int.TryParse(kvp.Key, out var optionId))
+                        {
+                            errors.Add(new ErrorDetail { Field = "Variants.OptionValues", Message = $"Invalid option ID '{kvp.Key}' in variant." });
+                            continue;
+                        }
+
+                        // Value is the NAME of the option value (e.g., "Đỏ", "Thể Thao")
+                        var valueName = kvp.Value?.Trim();
+                        if (string.IsNullOrWhiteSpace(valueName))
+                        {
+                            errors.Add(new ErrorDetail { Field = "Variants.OptionValues", Message = $"Empty value name for option {optionId} in variant." });
+                            continue;
+                        }
+
+                        // Verify option exists in Options list
+                        if (!optionIdToValueMap.ContainsKey(optionId))
+                        {
+                            errors.Add(new ErrorDetail { Field = "Variants.OptionValues", Message = $"Option {optionId} not found in product Options." });
+                            continue;
+                        }
+
+                        // Verify value name exists in Option's values
+                        if (!optionIdToValueMap[optionId].ContainsKey(valueName))
+                        {
+                            errors.Add(new ErrorDetail { Field = "Variants.OptionValues", Message = $"Value '{valueName}' not found in Option {optionId}'s values list." });
+                        }
+                    }
                 }
             }
         }
@@ -80,6 +155,7 @@ public sealed class CreateProductCommandHandler(IProductSelectRepository selectR
             return (null, new ErrorResponse { Errors = errors });
         }
 
+        // Create Product entity
         var product = new ProductEntity
         {
             Name = request.Name?.Trim(),
@@ -109,6 +185,7 @@ public sealed class CreateProductCommandHandler(IProductSelectRepository selectR
             ProductVariants = []
         };
 
+        // Create Variants
         if (request.Variants?.Count > 0)
         {
             foreach (var variantReq in request.Variants)
@@ -122,6 +199,7 @@ public sealed class CreateProductCommandHandler(IProductSelectRepository selectR
                     VariantOptionValues = []
                 };
 
+                // Add photos
                 if (variantReq.PhotoCollection?.Count > 0)
                 {
                     foreach (var photoUrl in variantReq.PhotoCollection.Where(p => !string.IsNullOrWhiteSpace(p)))
@@ -130,17 +208,23 @@ public sealed class CreateProductCommandHandler(IProductSelectRepository selectR
                     }
                 }
 
-                if (variantReq.OptionValueIds?.Count > 0)
+                // **CRITICAL: Save VariantOptionValues correctly using value NAMES**
+                if (variantReq.OptionValues?.Count > 0)
                 {
-                    foreach (var ovId in variantReq.OptionValueIds)
+                    foreach (var kvp in variantReq.OptionValues)
                     {
-                        if (optionValueMap.TryGetValue(ovId, out var optionValue))
+                        if (int.TryParse(kvp.Key, out var optionId))
                         {
-                            variant.VariantOptionValues.Add(new VariantOptionValue
+                            var valueName = kvp.Value?.Trim();
+                            if (!string.IsNullOrWhiteSpace(valueName) && 
+                                optionIdToValueMap.ContainsKey(optionId) &&
+                                optionIdToValueMap[optionId].TryGetValue(valueName, out var valueId))
                             {
-                                OptionValueId = ovId,
-                                OptionValue = optionValue
-                            });
+                                variant.VariantOptionValues.Add(new VariantOptionValue
+                                {
+                                    OptionValueId = valueId
+                                });
+                            }
                         }
                     }
                 }
@@ -152,6 +236,7 @@ public sealed class CreateProductCommandHandler(IProductSelectRepository selectR
         insertRepository.Add(product);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
+        // Retrieve created product with all details
         var created = await selectRepository.GetProductWithDetailsByIdAsync(product.Id, includeDeleted: false, cancellationToken).ConfigureAwait(false);
         if (created == null)
         {

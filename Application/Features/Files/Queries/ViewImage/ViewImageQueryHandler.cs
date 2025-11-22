@@ -1,29 +1,30 @@
 using Application.Interfaces.Repositories.File;
-using Application.Interfaces.Services;
 using Domain.Helpers;
+using MediatR;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Webp;
 using SixLabors.ImageSharp.Processing;
 
-namespace Application.Services.File;
+namespace Application.Features.Files.Queries.ViewImage;
 
-public class FileSelectService(IFileRepository fileRepository, IMediaFileSelectRepository mediaFileSelectRepository) : IFileSelectService
+public sealed class ViewImageQueryHandler(IMediaFileSelectRepository mediaFileSelectRepository, IFileRepository fileRepository)
+    : IRequestHandler<ViewImageQuery, ((Stream fileStream, string contentType)? Data, ErrorResponse? Error)>
 {
-    public async Task<((Stream fileStream, string contentType)? Data, ErrorResponse? Error)> GetImageAsync(string fileName, int? width, CancellationToken cancellationToken)
+    public async Task<((Stream fileStream, string contentType)? Data, ErrorResponse? Error)> Handle(ViewImageQuery request, CancellationToken cancellationToken)
     {
-        var media = await mediaFileSelectRepository.GetByStoredFileNameAsync(fileName, cancellationToken).ConfigureAwait(false);
+        var media = await mediaFileSelectRepository.GetByStoredFileNameAsync(request.FileName, cancellationToken).ConfigureAwait(false);
         if (media is null)
         {
             return (null, new ErrorResponse { Errors = [new ErrorDetail { Message = "File not found." }] });
         }
 
-        var originalRelativePath = Path.Combine("uploads", fileName);
+        var originalRelativePath = Path.Combine("uploads", request.FileName);
         if (!fileRepository.FileExists(originalRelativePath))
         {
             return (null, new ErrorResponse { Errors = [new ErrorDetail { Message = "File not found." }] });
         }
 
-        if (width == null)
+        if (request.Width == null)
         {
             var originalStream = await fileRepository.ReadFileAsync(originalRelativePath, cancellationToken).ConfigureAwait(false);
             return ((originalStream!, "image/webp"), null);
@@ -39,7 +40,7 @@ public class FileSelectService(IFileRepository fileRepository, IMediaFileSelectR
 
             using var image = await Image.LoadAsync(originalStream, cancellationToken).ConfigureAwait(false);
 
-            var newWidth = width.Value;
+            var newWidth = request.Width.Value;
             var newHeight = (int)((double)image.Height / image.Width * newWidth);
 
             image.Mutate(x => x.Resize(newWidth, newHeight));
@@ -54,5 +55,6 @@ public class FileSelectService(IFileRepository fileRepository, IMediaFileSelectR
         {
             return (null, new ErrorResponse { Errors = [new ErrorDetail { Message = "Image processing failed." }] });
         }
+        
     }
 }

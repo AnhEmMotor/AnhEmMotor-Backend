@@ -26,7 +26,9 @@ public interface IProductSelectRepository
     Task<List<ProductVariantEntity>> GetVariantsByProductIdAsync(int productId, CancellationToken cancellationToken);
     Task<CategoryEntity?> GetCategoryByIdAsync(int categoryId, CancellationToken cancellationToken);
     Task<BrandEntity?> GetBrandByIdAsync(int brandId, CancellationToken cancellationToken);
+    Task<OptionEntity?> GetOptionByIdAsync(int optionId, CancellationToken cancellationToken);
     Task<List<OptionEntity>> GetOptionsByIdsAsync(List<int> optionIds, CancellationToken cancellationToken);
     Task<List<OptionValueEntity>> GetOptionValuesByIdsAsync(List<int> optionValueIds, CancellationToken cancellationToken);
+    Task<OptionValueEntity?> GetOptionValueByNameAsync(int optionId, string name, CancellationToken cancellationToken);
     Task<bool> OptionValuesBelongToOptionsAsync(List<int> optionValueIds, List<int> optionIds, CancellationToken cancellationToken);
 }

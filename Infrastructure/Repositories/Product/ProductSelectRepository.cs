@@ -144,6 +144,11 @@ public class ProductSelectRepository(ApplicationDBContext context) : IProductSel
         return context.Brands.FirstOrDefaultAsync(b => b.Id == brandId, cancellationToken);
     }
 
+    public Task<OptionEntity?> GetOptionByIdAsync(int optionId, CancellationToken cancellationToken)
+    {
+        return context.Options.FirstOrDefaultAsync(o => o.Id == optionId, cancellationToken);
+    }
+
     public Task<List<OptionEntity>> GetOptionsByIdsAsync(List<int> optionIds, CancellationToken cancellationToken)
     {
         return context.Options
@@ -157,6 +162,12 @@ public class ProductSelectRepository(ApplicationDBContext context) : IProductSel
             .Include(ov => ov.Option)
             .Where(ov => optionValueIds.Contains(ov.Id))
             .ToListAsync(cancellationToken);
+    }
+
+    public Task<OptionValueEntity?> GetOptionValueByNameAsync(int optionId, string name, CancellationToken cancellationToken)
+    {
+        return context.OptionValues
+            .FirstOrDefaultAsync(ov => ov.OptionId == optionId && ov.Name == name, cancellationToken);
     }
 
     public async Task<bool> OptionValuesBelongToOptionsAsync(
