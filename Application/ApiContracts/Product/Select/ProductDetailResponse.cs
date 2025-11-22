@@ -86,7 +86,6 @@ public class ProductDetailResponse
     [JsonPropertyName("status_stock_id")]
     public string StatusStockId { get; set; } = string.Empty;
 
-    public List<ProductOptionDetailResponse> Options { get; set; } = [];
     public List<ProductVariantDetailResponse> Variants { get; set; } = [];
 }
 

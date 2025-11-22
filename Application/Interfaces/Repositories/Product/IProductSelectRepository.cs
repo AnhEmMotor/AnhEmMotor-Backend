@@ -24,6 +24,7 @@ public interface IProductSelectRepository
     Task<List<ProductEntity>> GetDeletedProductsByIdsAsync(List<int> ids, CancellationToken cancellationToken);
     Task<List<ProductEntity>> GetAllProductsByIdsAsync(List<int> ids, CancellationToken cancellationToken);
     Task<List<ProductVariantEntity>> GetVariantsByProductIdAsync(int productId, CancellationToken cancellationToken);
+    Task<ProductVariantEntity?> GetVariantByIdWithOptionsAsync(int variantId, CancellationToken cancellationToken);
     Task<CategoryEntity?> GetCategoryByIdAsync(int categoryId, CancellationToken cancellationToken);
     Task<BrandEntity?> GetBrandByIdAsync(int brandId, CancellationToken cancellationToken);
     Task<OptionEntity?> GetOptionByIdAsync(int optionId, CancellationToken cancellationToken);

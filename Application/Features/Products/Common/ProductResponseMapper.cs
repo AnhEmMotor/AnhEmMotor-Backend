@@ -131,7 +131,6 @@ public static class ProductResponseMapper
             Stock = summary.TotalStock,
             HasBeenBooked = summary.TotalBooked,
             StatusStockId = GetStockStatus(availableStock),
-            Options = options,
             Variants = variantResponses
         };
     }

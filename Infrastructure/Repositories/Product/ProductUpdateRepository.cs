@@ -2,6 +2,7 @@ using Application.Interfaces.Repositories.Product;
 using Infrastructure.DBContexts;
 using ProductEntity = Domain.Entities.Product;
 using ProductVariantEntity = Domain.Entities.ProductVariant;
+using VariantOptionValueEntity = Domain.Entities.VariantOptionValue;
 
 namespace Infrastructure.Repositories.Product;
 
@@ -33,5 +34,10 @@ public class ProductUpdateRepository(ApplicationDBContext context) : IProductUpd
     public void DeleteVariant(ProductVariantEntity variant)
     {
         context.ProductVariants.Remove(variant);
+    }
+
+    public void DeleteVariantOptionValue(VariantOptionValueEntity variantOptionValue)
+    {
+        context.VariantOptionValues.Remove(variantOptionValue);
     }
 }

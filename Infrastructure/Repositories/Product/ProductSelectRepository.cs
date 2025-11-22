@@ -134,14 +134,26 @@ public class ProductSelectRepository(ApplicationDBContext context) : IProductSel
             .ToListAsync(cancellationToken);
     }
 
+    public Task<ProductVariantEntity?> GetVariantByIdWithOptionsAsync(int variantId, CancellationToken cancellationToken)
+    {
+        return context.ProductVariants
+            .Include(v => v.VariantOptionValues)
+                .ThenInclude(vov => vov.OptionValue)
+            .FirstOrDefaultAsync(v => v.Id == variantId, cancellationToken);
+    }
+
     public Task<CategoryEntity?> GetCategoryByIdAsync(int categoryId, CancellationToken cancellationToken)
     {
-        return context.ProductCategories.FirstOrDefaultAsync(c => c.Id == categoryId, cancellationToken);
+        return context.ProductCategories
+            .Where(c => c.Id == categoryId && EF.Property<DateTimeOffset?>(c, "DeletedAt") == null)
+            .FirstOrDefaultAsync(cancellationToken);
     }
 
     public Task<BrandEntity?> GetBrandByIdAsync(int brandId, CancellationToken cancellationToken)
     {
-        return context.Brands.FirstOrDefaultAsync(b => b.Id == brandId, cancellationToken);
+        return context.Brands
+            .Where(b => b.Id == brandId && EF.Property<DateTimeOffset?>(b, "DeletedAt") == null)
+            .FirstOrDefaultAsync(cancellationToken);
     }
 
     public Task<OptionEntity?> GetOptionByIdAsync(int optionId, CancellationToken cancellationToken)
