@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20251116151056_ImageFileImplement")]
-    partial class ImageFileImplement
+    [Migration("20251123033111_FirstMigration")]
+    partial class FirstMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -610,7 +610,7 @@ namespace Infrastructure.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("Price");
 
-                    b.Property<int?>("ProductId")
+                    b.Property<int>("ProductId")
                         .HasColumnType("int")
                         .HasColumnName("ProductId");
 
@@ -723,13 +723,12 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.VariantOptionValue", b =>
                 {
-                    b.Property<int>("VariantId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int")
-                        .HasColumnName("VariantId");
+                        .HasColumnName("Id");
 
-                    b.Property<int>("OptionValueId")
-                        .HasColumnType("int")
-                        .HasColumnName("OptionValueId");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTimeOffset?>("CreatedAt")
                         .HasColumnType("datetimeoffset");
@@ -737,12 +736,22 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<int?>("OptionValueId")
+                        .HasColumnType("int")
+                        .HasColumnName("OptionValueId");
+
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.HasKey("VariantId", "OptionValueId");
+                    b.Property<int>("VariantId")
+                        .HasColumnType("int")
+                        .HasColumnName("VariantId");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("OptionValueId");
+
+                    b.HasIndex("VariantId");
 
                     b.ToTable("VariantOptionValue");
                 });
@@ -844,7 +853,9 @@ namespace Infrastructure.Migrations
                 {
                     b.HasOne("Domain.Entities.Product", "Product")
                         .WithMany("ProductVariants")
-                        .HasForeignKey("ProductId");
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Product");
                 });
@@ -862,14 +873,12 @@ namespace Infrastructure.Migrations
                 {
                     b.HasOne("Domain.Entities.OptionValue", "OptionValue")
                         .WithMany("VariantOptionValues")
-                        .HasForeignKey("OptionValueId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("OptionValueId");
 
                     b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
                         .WithMany("VariantOptionValues")
                         .HasForeignKey("VariantId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("OptionValue");

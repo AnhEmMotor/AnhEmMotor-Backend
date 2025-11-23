@@ -1,5 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
-using System;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -40,6 +40,26 @@ namespace Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_InputStatus", x => x.Key);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MediaFile",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    OriginalFileName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    StoredFileName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    ContentType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    PublicUrl = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: true),
+                    FileSize = table.Column<long>(type: "bigint", nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MediaFile", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -264,7 +284,7 @@ namespace Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ProductId = table.Column<int>(type: "int", nullable: true),
+                    ProductId = table.Column<int>(type: "int", nullable: false),
                     UrlSlug = table.Column<string>(type: "nvarchar(50)", nullable: true),
                     Price = table.Column<long>(type: "bigint", nullable: true),
                     CoverImageUrl = table.Column<string>(type: "nvarchar(100)", nullable: true),
@@ -279,7 +299,8 @@ namespace Infrastructure.Migrations
                         name: "FK_ProductVariant_Product_ProductId",
                         column: x => x.ProductId,
                         principalTable: "Product",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -367,27 +388,28 @@ namespace Infrastructure.Migrations
                 name: "VariantOptionValue",
                 columns: table => new
                 {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     VariantId = table.Column<int>(type: "int", nullable: false),
-                    OptionValueId = table.Column<int>(type: "int", nullable: false),
+                    OptionValueId = table.Column<int>(type: "int", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_VariantOptionValue", x => new { x.VariantId, x.OptionValueId });
+                    table.PrimaryKey("PK_VariantOptionValue", x => x.Id);
                     table.ForeignKey(
                         name: "FK_VariantOptionValue_OptionValue_OptionValueId",
                         column: x => x.OptionValueId,
                         principalTable: "OptionValue",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_VariantOptionValue_ProductVariant_VariantId",
                         column: x => x.VariantId,
                         principalTable: "ProductVariant",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -494,6 +516,11 @@ namespace Infrastructure.Migrations
                 name: "IX_VariantOptionValue_OptionValueId",
                 table: "VariantOptionValue",
                 column: "OptionValueId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_VariantOptionValue_VariantId",
+                table: "VariantOptionValue",
+                column: "VariantId");
         }
 
         /// <inheritdoc />
@@ -501,6 +528,9 @@ namespace Infrastructure.Migrations
         {
             migrationBuilder.DropTable(
                 name: "InputInfo");
+
+            migrationBuilder.DropTable(
+                name: "MediaFile");
 
             migrationBuilder.DropTable(
                 name: "OutputInfo");

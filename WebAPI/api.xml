@@ -232,51 +232,25 @@
             <summary>
             Lấy danh sách sản phẩm đầy đủ (có phân trang, lọc, tìm kiếm).
             </summary>
-            <remarks>
-            Filters hỗ trợ: search (tìm kiếm), statusIds (danh sách trạng thái phân cách bởi dấu phẩy)
-            Ví dụ: ?Filters=search@Honda,statusIds@active,out-of-business
-            </remarks>
         </member>
         <member name="M:WebAPI.Controllers.V1.ProductController.GetDeletedProducts(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách sản phẩm đã bị xoá (có phân trang, lọc, tìm kiếm).
             </summary>
-            <remarks>
-            Filters hỗ trợ: search (tìm kiếm), statusIds (danh sách trạng thái phân cách bởi dấu phẩy)
-            Ví dụ: ?Filters=search@Honda,statusIds@active,out-of-business
-            </remarks>
         </member>
         <member name="M:WebAPI.Controllers.V1.ProductController.GetActiveVariantLiteProducts(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
-            Lấy danh sách biến thể sản phẩm của tất cả sản phẩm chưa xoá (có phân trang, lọc, tìm kiếm).
+            Lấy danh sách biến thể sản phẩm của tất cả sản phẩm (chưa xoá - có phân trang, lọc, tìm kiếm).
             </summary>
-            <remarks>
-            Filters hỗ trợ: search (tìm kiếm), statusIds (danh sách trạng thái phân cách bởi dấu phẩy)
-            Ví dụ: ?Filters=search@Honda,statusIds@active
-            </remarks>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.GetDeletedVariantLiteProducts(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
-            <summary>
-            Lấy danh sách biến thể sản phẩm của tất cả sản phẩm đã xoá (có phân trang, lọc, tìm kiếm).
-            </summary>
-            <remarks>
-            Filters hỗ trợ: search (tìm kiếm), statusIds (danh sách trạng thái phân cách bởi dấu phẩy)
-            Ví dụ: ?Filters=search@Honda,statusIds@active
-            </remarks>
-        </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.GetProductById(System.Int32,System.Boolean,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetVarientById(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Lấy thông tin chi tiết sản phẩm theo Id.
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.ProductController.GetVariantLiteByProductIdActive(System.Int32,System.Threading.CancellationToken)">
             <summary>
-            Lấy danh sách biến thể chưa xoá theo Id sản phẩm.
-            </summary>
-        </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.GetVariantLiteByProductIdDeleted(System.Int32,System.Threading.CancellationToken)">
-            <summary>
-            Lấy danh sách biến thể đã xoá theo Id sản phẩm.
+            Lấy danh sách biến thể theo Id sản phẩm.
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.ProductController.CheckSlugAvailability(System.String,System.Threading.CancellationToken)">

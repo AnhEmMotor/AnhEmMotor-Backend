@@ -1,9 +1,8 @@
-using Application.Interfaces.Repositories;
+﻿using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.File;
 using Application.Interfaces.Repositories.Product;
 using Domain.Helpers;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Products.Commands.DeleteProduct;
 
@@ -45,7 +44,6 @@ public sealed class DeleteProductCommandHandler(
             }
         }
 
-        // Delete product first
         deleteRepository.Delete(product);
 
         // Cascade delete associated MediaFile records (soft delete)

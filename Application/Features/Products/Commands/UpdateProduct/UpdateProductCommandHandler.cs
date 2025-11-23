@@ -147,6 +147,7 @@ public sealed class UpdateProductCommandHandler(
         {
             var variantToDelete = currentVariants.First(v => v.Id == variantId);
             updateRepository.DeleteVariant(variantToDelete);
+            product.ProductVariants.Remove(variantToDelete);
         }
 
         // INSERT new variants
@@ -202,15 +203,8 @@ public sealed class UpdateProductCommandHandler(
             existingVariant.Price = variantReq.Price;
             existingVariant.CoverImageUrl = variantReq.CoverImageUrl?.Trim();
 
-            // Update photos (replace all)
-            existingVariant.ProductCollectionPhotos.Clear();
-            if (variantReq.PhotoCollection?.Count > 0)
-            {
-                foreach (var photoUrl in variantReq.PhotoCollection.Where(p => !string.IsNullOrWhiteSpace(p)))
-                {
-                    existingVariant.ProductCollectionPhotos.Add(new ProductCollectionPhoto { ImageUrl = photoUrl.Trim() });
-                }
-            }
+            // Update photos (smart update like OptionValues)
+            UpdateVariantPhotos(existingVariant, variantReq.PhotoCollection);
 
             // Process OptionValues (smart update)
             await UpdateVariantOptionValuesAsync(existingVariant, variantReq.OptionValues, cancellationToken).ConfigureAwait(false);
@@ -223,17 +217,7 @@ public sealed class UpdateProductCommandHandler(
 
         updateRepository.Update(product);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-        var updated = await selectRepository.GetProductWithDetailsByIdAsync(command.Id, includeDeleted: false, cancellationToken).ConfigureAwait(false);
-        if (updated == null)
-        {
-            return (null, new ErrorResponse
-            {
-                Errors = [new ErrorDetail { Message = "Failed to retrieve updated product." }]
-            });
-        }
-
-        var response = ProductResponseMapper.BuildProductDetailResponse(updated);
+        var response = ProductResponseMapper.BuildProductDetailResponse(product);
         return (response, null);
     }
 
@@ -365,5 +349,40 @@ public sealed class UpdateProductCommandHandler(
         }
 
         // toKeep: Do nothing - already exists
+    }
+
+    /// <summary>
+    /// Smart update photos - add new, remove old, keep existing
+    /// </summary>
+    private void UpdateVariantPhotos(ProductVariant existingVariant, List<string>? newPhotoUrls)
+    {
+        var targetPhotos = (newPhotoUrls ?? [])
+            .Where(p => !string.IsNullOrWhiteSpace(p))
+            .Select(p => p.Trim())
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        var currentPhotos = existingVariant.ProductCollectionPhotos
+            .Select(p => p.ImageUrl?.Trim() ?? string.Empty)
+            .Where(p => !string.IsNullOrWhiteSpace(p))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        // Delete photos not in new list
+        var toDelete = currentPhotos.Except(targetPhotos, StringComparer.OrdinalIgnoreCase).ToList();
+        foreach (var photoUrl in toDelete)
+        {
+            var photoToRemove = existingVariant.ProductCollectionPhotos
+                .FirstOrDefault(p => string.Equals(p.ImageUrl?.Trim(), photoUrl, StringComparison.OrdinalIgnoreCase));
+            if (photoToRemove != null)
+            {
+                existingVariant.ProductCollectionPhotos.Remove(photoToRemove);
+            }
+        }
+
+        // Add new photos
+        var toAdd = targetPhotos.Except(currentPhotos, StringComparer.OrdinalIgnoreCase).ToList();
+        foreach (var photoUrl in toAdd)
+        {
+            existingVariant.ProductCollectionPhotos.Add(new ProductCollectionPhoto { ImageUrl = photoUrl });
+        }
     }
 }

@@ -100,7 +100,7 @@ public sealed class GetProductsListQueryHandler(IProductSelectRepository selectR
 
         var productIds = items.Select(item => item.Id).ToList();
         var variantRows = await variantSource.AsNoTracking()
-            .Where(v => v.ProductId.HasValue && productIds.Contains(v.ProductId.Value))
+            //.Where(v => v.ProductId.HasValue && productIds.Contains(v.ProductId.Value))
             .Include(v => v.ProductCollectionPhotos)
             .Include("VariantOptionValues.OptionValue.Option")
             .Include(v => v.InputInfos)
@@ -108,7 +108,8 @@ public sealed class GetProductsListQueryHandler(IProductSelectRepository selectR
             .Select(v => new VariantRow
             {
                 Id = v.Id,
-                ProductId = v.ProductId ?? 0,
+                //ProductId = v.ProductId ?? 0,
+                ProductId = v.ProductId,
                 UrlSlug = v.UrlSlug,
                 Price = v.Price,
                 CoverImageUrl = v.CoverImageUrl,

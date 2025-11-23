@@ -9,6 +9,7 @@ public interface IProductUpdateRepository
     void Update(ProductEntity product);
     void Restore(ProductEntity product);
     void Restore(List<ProductEntity> products);
+    void RestoreVariant(ProductVariantEntity variant);
     void UpdateVariant(ProductVariantEntity variant);
     void DeleteVariant(ProductVariantEntity variant);
     void DeleteVariantOptionValue(VariantOptionValueEntity variantOptionValue);

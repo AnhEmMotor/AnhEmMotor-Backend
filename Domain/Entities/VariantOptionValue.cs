@@ -7,11 +7,13 @@ namespace Domain.Entities
     public class VariantOptionValue
     {
         [Key]
+        [Column("Id")]
+        public int Id { get; set; }
+
         [Column("VariantId")]
         [ForeignKey("ProductVariant")]
         public int VariantId { get; set; }
 
-        [Key]
         [Column("OptionValueId")]
         [ForeignKey("OptionValue")]
         public int? OptionValueId { get; set; }

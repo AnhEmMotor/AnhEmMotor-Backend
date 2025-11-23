@@ -42,10 +42,6 @@ public class ProductController(ISender sender) : ControllerBase
     /// <summary>
     /// Lấy danh sách sản phẩm đầy đủ (có phân trang, lọc, tìm kiếm).
     /// </summary>
-    /// <remarks>
-    /// Filters hỗ trợ: search (tìm kiếm), statusIds (danh sách trạng thái phân cách bởi dấu phẩy)
-    /// Ví dụ: ?Filters=search@Honda,statusIds@active,out-of-business
-    /// </remarks>
     [HttpGet]
     [ProducesResponseType(typeof(PagedResult<ProductDetailResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetProducts([FromQuery] SieveModel request, CancellationToken cancellationToken)
@@ -58,10 +54,6 @@ public class ProductController(ISender sender) : ControllerBase
     /// <summary>
     /// Lấy danh sách sản phẩm đã bị xoá (có phân trang, lọc, tìm kiếm).
     /// </summary>
-    /// <remarks>
-    /// Filters hỗ trợ: search (tìm kiếm), statusIds (danh sách trạng thái phân cách bởi dấu phẩy)
-    /// Ví dụ: ?Filters=search@Honda,statusIds@active,out-of-business
-    /// </remarks>
     [HttpGet("deleted")]
     [ProducesResponseType(typeof(PagedResult<ProductDetailResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetDeletedProducts([FromQuery] SieveModel request, CancellationToken cancellationToken)
@@ -72,33 +64,13 @@ public class ProductController(ISender sender) : ControllerBase
     }
 
     /// <summary>
-    /// Lấy danh sách biến thể sản phẩm của tất cả sản phẩm chưa xoá (có phân trang, lọc, tìm kiếm).
+    /// Lấy danh sách biến thể sản phẩm của tất cả sản phẩm (chưa xoá - có phân trang, lọc, tìm kiếm).
     /// </summary>
-    /// <remarks>
-    /// Filters hỗ trợ: search (tìm kiếm), statusIds (danh sách trạng thái phân cách bởi dấu phẩy)
-    /// Ví dụ: ?Filters=search@Honda,statusIds@active
-    /// </remarks>
-    [HttpGet("variants-lite/active")]
+    [HttpGet("variants-lite")]
     [ProducesResponseType(typeof(PagedResult<ProductVariantLiteResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetActiveVariantLiteProducts([FromQuery] SieveModel request, CancellationToken cancellationToken = default)
     {
         var query = GetActiveVariantLiteListQuery.FromRequest(request);
-        var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
-        return Ok(result);
-    }
-
-    /// <summary>
-    /// Lấy danh sách biến thể sản phẩm của tất cả sản phẩm đã xoá (có phân trang, lọc, tìm kiếm).
-    /// </summary>
-    /// <remarks>
-    /// Filters hỗ trợ: search (tìm kiếm), statusIds (danh sách trạng thái phân cách bởi dấu phẩy)
-    /// Ví dụ: ?Filters=search@Honda,statusIds@active
-    /// </remarks>
-    [HttpGet("variants-lite/deleted")]
-    [ProducesResponseType(typeof(PagedResult<ProductVariantLiteResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetDeletedVariantLiteProducts([FromQuery] SieveModel request, CancellationToken cancellationToken = default)
-    {
-        var query = GetDeletedVariantLiteListQuery.FromRequest(request);
         var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
         return Ok(result);
     }
@@ -109,43 +81,25 @@ public class ProductController(ISender sender) : ControllerBase
     [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(ProductDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetProductById(int id, [FromQuery] bool includeDeleted = false, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetVarientById(int id, CancellationToken cancellationToken = default)
     {
-        var (data, error) = await sender.Send(new GetProductByIdQuery(id, includeDeleted), cancellationToken).ConfigureAwait(true);
+        var (data, error) = await sender.Send(new GetProductByIdQuery(id, false), cancellationToken).ConfigureAwait(true);
         if (error != null)
         {
             return NotFound(error);
         }
-
         return Ok(data);
     }
 
     /// <summary>
-    /// Lấy danh sách biến thể chưa xoá theo Id sản phẩm.
+    /// Lấy danh sách biến thể theo Id sản phẩm.
     /// </summary>
-    [HttpGet("{id:int}/variants-lite/active")]
+    [HttpGet("{id:int}/variants-lite")]
     [ProducesResponseType(typeof(List<ProductVariantLiteResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetVariantLiteByProductIdActive(int id, CancellationToken cancellationToken = default)
     {
         var (variants, error) = await sender.Send(new GetVariantLiteByProductIdQuery(id, IncludeDeleted: false), cancellationToken).ConfigureAwait(true);
-        if (error != null)
-        {
-            return NotFound(error);
-        }
-
-        return Ok(variants);
-    }
-
-    /// <summary>
-    /// Lấy danh sách biến thể đã xoá theo Id sản phẩm.
-    /// </summary>
-    [HttpGet("{id:int}/variants-lite/deleted")]
-    [ProducesResponseType(typeof(List<ProductVariantLiteResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetVariantLiteByProductIdDeleted(int id, CancellationToken cancellationToken = default)
-    {
-        var (variants, error) = await sender.Send(new GetVariantLiteByProductIdQuery(id, IncludeDeleted: true), cancellationToken).ConfigureAwait(true);
         if (error != null)
         {
             return NotFound(error);
@@ -180,7 +134,7 @@ public class ProductController(ISender sender) : ControllerBase
             return BadRequest(error);
         }
 
-        return CreatedAtAction(nameof(GetProductById), new { id = data!.Id }, data);
+        return CreatedAtAction(nameof(GetVarientById), new { id = data!.Id }, data);
     }
 
     /// <summary>

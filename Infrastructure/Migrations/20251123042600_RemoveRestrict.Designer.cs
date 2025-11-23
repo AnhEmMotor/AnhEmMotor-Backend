@@ -12,15 +12,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20251113033608_FirstMigration")]
-    partial class FirstMigration
+    [Migration("20251123042600_RemoveRestrict")]
+    partial class RemoveRestrict
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.9")
+                .HasAnnotation("ProductVersion", "10.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -164,6 +164,50 @@ namespace Infrastructure.Migrations
                     b.HasKey("Key");
 
                     b.ToTable("InputStatus");
+                });
+
+            modelBuilder.Entity("Domain.Entities.MediaFile", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTimeOffset?>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<long?>("FileSize")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("OriginalFileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("PublicUrl")
+                        .HasMaxLength(1024)
+                        .HasColumnType("nvarchar(1024)");
+
+                    b.Property<string>("StoredFileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MediaFile");
                 });
 
             modelBuilder.Entity("Domain.Entities.Option", b =>
@@ -566,7 +610,7 @@ namespace Infrastructure.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("Price");
 
-                    b.Property<int?>("ProductId")
+                    b.Property<int>("ProductId")
                         .HasColumnType("int")
                         .HasColumnName("ProductId");
 
@@ -679,13 +723,12 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.VariantOptionValue", b =>
                 {
-                    b.Property<int>("VariantId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int")
-                        .HasColumnName("VariantId");
+                        .HasColumnName("Id");
 
-                    b.Property<int>("OptionValueId")
-                        .HasColumnType("int")
-                        .HasColumnName("OptionValueId");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTimeOffset?>("CreatedAt")
                         .HasColumnType("datetimeoffset");
@@ -693,12 +736,22 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<int?>("OptionValueId")
+                        .HasColumnType("int")
+                        .HasColumnName("OptionValueId");
+
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.HasKey("VariantId", "OptionValueId");
+                    b.Property<int>("VariantId")
+                        .HasColumnType("int")
+                        .HasColumnName("VariantId");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("OptionValueId");
+
+                    b.HasIndex("VariantId");
 
                     b.ToTable("VariantOptionValue");
                 });
@@ -800,7 +853,9 @@ namespace Infrastructure.Migrations
                 {
                     b.HasOne("Domain.Entities.Product", "Product")
                         .WithMany("ProductVariants")
-                        .HasForeignKey("ProductId");
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Product");
                 });
@@ -818,9 +873,7 @@ namespace Infrastructure.Migrations
                 {
                     b.HasOne("Domain.Entities.OptionValue", "OptionValue")
                         .WithMany("VariantOptionValues")
-                        .HasForeignKey("OptionValueId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("OptionValueId");
 
                     b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
                         .WithMany("VariantOptionValues")
