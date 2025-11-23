@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Application.ValidationAttributes
+namespace Application.Common.Attributes
 {
     public class ValidSettingKeysAttribute : ValidationAttribute
     {

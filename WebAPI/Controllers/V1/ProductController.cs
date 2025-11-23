@@ -24,6 +24,7 @@ using Application.Features.Products.Queries.GetProductsList;
 using Application.Features.Products.Queries.GetVariantLiteByProductId;
 using Asp.Versioning;
 using Domain.Helpers;
+using Domain.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;

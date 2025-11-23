@@ -1,5 +1,5 @@
 using Application.ApiContracts.Product.Select;
-using Domain.Helpers;
+using Domain.Shared;
 using MediatR;
 using Sieve.Models;
 

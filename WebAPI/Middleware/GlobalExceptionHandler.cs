@@ -1,63 +1,63 @@
 ﻿using FluentValidation;
-using Microsoft.AspNetCore.Diagnostics;
 using System.Net;
+using WebAPI.Contracts.Errors;
+using Microsoft.AspNetCore.Diagnostics;
 
-namespace WebAPI.Middleware
+namespace WebAPI.Middleware;
+
+/// <summary>
+/// Provides a centralized exception handler for HTTP requests, generating standardized API error responses and logging
+/// exceptions.
+/// </summary>
+/// <remarks>This handler formats error responses as JSON and distinguishes between validation errors and
+/// unhandled exceptions. In development environments, detailed exception information is included in the response; in
+/// production, a generic error message is returned. All exceptions are logged appropriately based on their
+/// type.</remarks>
+/// <param name="environment">The hosting environment used to determine whether detailed error information should be included in responses.</param>
+/// <param name="logger">The logger used to record exception details and validation failures.</param>
+public class GlobalExceptionHandler(IWebHostEnvironment environment, ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
 {
     /// <summary>
-    /// Xử lý các ngoại lệ chưa được xử lý một cách toàn cục cho ứng dụng.
-    /// Định dạng phản hồi lỗi dựa trên môi trường (Development hoặc Production).
+    /// Attempts to handle the specified exception by writing an appropriate error response to the HTTP context
+    /// asynchronously.
     /// </summary>
-    /// <param name="environment">Đối tượng môi trường web, dùng để kiểm tra môi trường (ví dụ: Development).</param>
-    /// <param name="logger">Đối tượng logger để ghi lại thông tin ngoại lệ.</param>
-    public class GlobalExceptionHandler(IWebHostEnvironment environment, ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
-    {
-        /// <summary>
-        /// Cố gắng xử lý ngoại lệ được cung cấp, ghi log và định dạng phản hồi JSON.
-        /// </summary>
-        /// <param name="httpContext">Bối cảnh HTTP hiện tại, được sử dụng để thiết lập phản hồi.</param>
-        /// <param name="exception">Ngoại lệ chưa được xử lý đã xảy ra.</param>
-        /// <param name="cancellationToken">Token để hủy bỏ thao tác.</param>
-        /// <returns>Trả về giá trị cho biết liệu ngoại lệ đã được xử lý (luôn trả về `true` trong trường hợp này).</returns>
-        public async ValueTask<bool> TryHandleAsync(
+    /// <remarks>If the exception is a validation error, a detailed validation error response is returned with
+    /// status code 400 (Bad Request). For other exceptions, a generic error response is returned with status code 500
+    /// (Internal Server Error). The response format and content type are set to JSON. The method does not propagate the
+    /// exception further.</remarks>
+    /// <param name="httpContext">The HTTP context to which the error response will be written. Must not be null.</param>
+    /// <param name="exception">The exception to handle and convert into an error response. Must not be null.</param>
+    /// <param name="cancellationToken">A cancellation token that can be used to cancel the asynchronous operation.</param>
+    /// <returns>A value indicating whether the exception was handled and an error response was written. Always returns <see
+    /// langword="true"/>.</returns>
+    public async ValueTask<bool> TryHandleAsync(
         HttpContext httpContext,
         Exception exception,
         CancellationToken cancellationToken)
+    {
+        ApiErrorResponse errorResponse;
+        int statusCode;
+
+        if (exception is ValidationException validationException)
         {
-            object errorResponse;
-            int statusCode;
-            if (exception is ValidationException validationException)
-            {
-                statusCode = (int)HttpStatusCode.BadRequest;
-                errorResponse = new
-                {
-                    StatusCode = statusCode,
-                    Message = "Validation failed",
-                    Errors = validationException.Errors.Select(e => new
-                    {
-                        Field = e.PropertyName,
-                        Message = e.ErrorMessage
-                    })
-                };
-                logger.LogWarning("Validation failed: {Message}", exception.Message);
-            }
-            else
-            {
-                statusCode = (int)HttpStatusCode.InternalServerError;
-                logger.LogError(exception, "Unhandled exception occurred: {Message}", exception.Message);
-                if (environment.IsDevelopment())
-                {
-                    errorResponse = new DevelopmentErrorResponse(exception);
-                }
-                else
-                {
-                    errorResponse = new ProductionErrorResponse("Something went wrong in system. Please try again.");
-                }
-            }
-            httpContext.Response.ContentType = "application/json";
-            httpContext.Response.StatusCode = statusCode;
-            await httpContext.Response.WriteAsJsonAsync(errorResponse, cancellationToken).ConfigureAwait(false);
-            return true;
+            statusCode = (int)HttpStatusCode.BadRequest;
+            errorResponse = ApiErrorResponse.CreateValidationError(validationException.Errors);
+            logger.LogWarning("Validation failed: {Message}", exception.Message);
         }
+        else
+        {
+            statusCode = (int)HttpStatusCode.InternalServerError;
+            logger.LogError(exception, "Unhandled exception: {Message}", exception.Message);
+
+            errorResponse = environment.IsDevelopment()
+                ? ApiErrorResponse.CreateDevelopmentError(exception)
+                : ApiErrorResponse.CreateProductionError("An unexpected error occurred. Please try again later.");
+        }
+
+        httpContext.Response.ContentType = "application/json";
+        httpContext.Response.StatusCode = statusCode;
+
+        await httpContext.Response.WriteAsJsonAsync(errorResponse, cancellationToken).ConfigureAwait(false);
+        return true;
     }
 }

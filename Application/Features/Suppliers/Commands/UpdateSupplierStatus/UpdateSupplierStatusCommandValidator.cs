@@ -1,4 +1,4 @@
-using Application.ValidationAttributes;
+using Domain.Constants;
 using FluentValidation;
 
 namespace Application.Features.Suppliers.Commands.UpdateSupplierStatus;
@@ -9,7 +9,7 @@ public sealed class UpdateSupplierStatusCommandValidator : AbstractValidator<Upd
     {
         RuleFor(x => x.Status)
             .NotEmpty()
-            .Must(status => StatusConstants.SupplierStatus.IsValid(status))
-            .WithMessage($"Status must be one of: {string.Join(", ", StatusConstants.SupplierStatus.AllowedValues)}");
+            .Must(status => SupplierStatus.IsValid(status))
+            .WithMessage($"Status must be one of: {string.Join(", ", SupplierStatus.AllowedValues)}");
     }
 }

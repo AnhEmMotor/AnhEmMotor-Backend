@@ -1,6 +1,6 @@
-﻿using Application.Features.Settings.Commands.SetSettings;
+﻿using Application.Common.Attributes;
+using Application.Features.Settings.Commands.SetSettings;
 using Application.Features.Settings.Queries.GetAllSettings;
-using Application.ValidationAttributes;
 using Asp.Versioning;
 using Domain.Helpers;
 using MediatR;

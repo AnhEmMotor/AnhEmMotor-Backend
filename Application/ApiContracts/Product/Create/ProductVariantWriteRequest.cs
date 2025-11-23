@@ -16,17 +16,9 @@ public class ProductVariantWriteRequest
     [JsonPropertyName("photo_collection")]
     public List<string> PhotoCollection { get; set; } = [];
 
-    /// <summary>
-    /// Dictionary mapping option names to their values (e.g., {"Color": "Red", "Size": "Large"})
-    /// Used when creating products with string-based option values
-    /// </summary>
     [JsonPropertyName("optionValues")]
     public Dictionary<string, string> OptionValues { get; set; } = [];
 
-    /// <summary>
-    /// List of option value IDs for backward compatibility
-    /// Used internally for database lookups
-    /// </summary>
     [JsonIgnore]
     public List<int> OptionValueIds { get; set; } = [];
 }

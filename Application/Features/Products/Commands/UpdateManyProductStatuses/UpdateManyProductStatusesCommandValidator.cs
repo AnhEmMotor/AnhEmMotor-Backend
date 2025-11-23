@@ -1,3 +1,4 @@
+using Domain.Constants;
 using FluentValidation;
 
 namespace Application.Features.Products.Commands.UpdateManyProductStatuses;
@@ -14,7 +15,7 @@ public sealed class UpdateManyProductStatusesCommandValidator : AbstractValidato
 
         RuleFor(x => x.StatusId)
             .NotEmpty().WithMessage("Status is required.")
-            .Must(status => ValidationAttributes.StatusConstants.ProductStatus.IsValid(status))
-            .WithMessage($"Status must be one of: {string.Join(", ", ValidationAttributes.StatusConstants.ProductStatus.AllowedValues)}.");
+            .Must(status => ProductStatus.IsValid(status))
+            .WithMessage($"Status must be one of: {string.Join(", ", ProductStatus.AllowedValues)}.");
     }
 }

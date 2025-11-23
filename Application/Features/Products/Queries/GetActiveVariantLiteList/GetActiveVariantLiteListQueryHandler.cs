@@ -3,7 +3,7 @@ using Application.ApiContracts.Product.Select;
 using Application.Features.Products.Common;
 using Application.Interfaces.Repositories.Product;
 using Domain.Enums;
-using Domain.Helpers;
+using Domain.Shared;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 

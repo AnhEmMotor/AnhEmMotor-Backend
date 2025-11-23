@@ -7,10 +7,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="13.0.1" />
-    <PackageReference Include="FluentValidation" Version="11.11.0" />
-    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
-    <PackageReference Include="MediatR" Version="12.4.1" />
+    <Compile Remove="ApiContracts\Auth\**" />
+    <Compile Remove="ApiContracts\Permission\**" />
+    <EmbeddedResource Remove="ApiContracts\Auth\**" />
+    <EmbeddedResource Remove="ApiContracts\Permission\**" />
+    <None Remove="ApiContracts\Auth\**" />
+    <None Remove="ApiContracts\Permission\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="12.1.0" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.0" />
+    <PackageReference Include="MediatR" Version="13.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.3.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.0" />
     <PackageReference Include="Sieve" Version="2.5.5" />
@@ -22,8 +30,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="ApiContracts\Auth\" />
-    <Folder Include="ApiContracts\Permission\" />
     <Folder Include="Interfaces\Repositories\File\" />
     <Folder Include="DependencyInjection\" />
   </ItemGroup>
