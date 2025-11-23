@@ -40,7 +40,7 @@ public static class DBContext
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         services.AddScoped<IBrandInsertRepository, BrandInsertRepository>();
-        services.AddScoped<IBrandSelectRepository, BrandSelectRepository>();
+        services.AddScoped<IBrandReadRepository, BrandReadRepository>();
         services.AddScoped<IBrandUpdateRepository, BrandUpdateRepository>();
         services.AddScoped<IBrandDeleteRepository, BrandDeleteRepository>();
 
@@ -68,8 +68,6 @@ public static class DBContext
         services.AddScoped<IMediaFileSelectRepository, MediaFileSelectRepository>();
         services.AddScoped<IMediaFileDeleteRepository, MediaFileDeleteRepository>();
         services.AddScoped<IMediaFileRestoreRepository, MediaFileRestoreRepository>();
-
-        services.AddScoped<ISieveProcessor, CustomSieveProcessor>();
 
         services.AddScoped<IProductVariantUpdateRepository, ProductVariantUpdateRepository>();
 

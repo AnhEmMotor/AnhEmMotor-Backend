@@ -1,0 +1,996 @@
+Folder PATH listing
+Volume serial number is EB63-6BA0
+C:.
+¦   .gitignore
+¦   AnhEmMotor-Backend.sln
+¦   tree.txt
+¦   
++---.cr
+¦   +---personal
+¦       +---FavoritesList
+¦               List.xml
+¦               
++---.github
+¦       copilot-instructions.md
+¦       
++---.vscode
+¦       launch.json
+¦       tasks.json
+¦       
++---Application
+¦   ¦   Application.csproj
+¦   ¦   
+¦   +---ApiContracts
+¦   ¦   +---Brand
+¦   ¦   ¦       BrandResponse.cs
+¦   ¦   ¦       CreateBrandRequest.cs
+¦   ¦   ¦       DeleteManyBrandsRequest.cs
+¦   ¦   ¦       RestoreManyBrandsRequest.cs
+¦   ¦   ¦       UpdateBrandRequest.cs
+¦   ¦   ¦       
+¦   ¦   +---File
+¦   ¦   ¦       FileResponse.cs
+¦   ¦   ¦       
+¦   ¦   +---Product
+¦   ¦   ¦   +---Common
+¦   ¦   ¦   ¦       ProductOptionDetailResponse.cs
+¦   ¦   ¦   ¦       ProductVariantDetailResponse.cs
+¦   ¦   ¦   ¦       ProductVariantLiteResponse.cs
+¦   ¦   ¦   ¦       ProductWriteRequestBase.cs
+¦   ¦   ¦   ¦       SlugAvailabilityResponse.cs
+¦   ¦   ¦   ¦       
+¦   ¦   ¦   +---Create
+¦   ¦   ¦   ¦       CreateProductRequest.cs
+¦   ¦   ¦   ¦       CreateProductRequestWrapper.cs
+¦   ¦   ¦   ¦       ProductOptionRequest.cs
+¦   ¦   ¦   ¦       ProductVariantWriteRequest.cs
+¦   ¦   ¦   ¦       UpsertProductRequest.cs
+¦   ¦   ¦   ¦       
+¦   ¦   ¦   +---Delete
+¦   ¦   ¦   ¦       DeleteManyProductsRequest.cs
+¦   ¦   ¦   ¦       RestoreManyProductsRequest.cs
+¦   ¦   ¦   ¦       
+¦   ¦   ¦   +---Select
+¦   ¦   ¦   ¦       OptionPair.cs
+¦   ¦   ¦   ¦       ProductDetailResponse.cs
+¦   ¦   ¦   ¦       ProductListRequest.cs
+¦   ¦   ¦   ¦       ProductListRow.cs
+¦   ¦   ¦   ¦       VariantRow.cs
+¦   ¦   ¦   ¦       
+¦   ¦   ¦   +---Update
+¦   ¦   ¦           UpdateManyProductPricesRequest.cs
+¦   ¦   ¦           UpdateManyProductStatusesRequest.cs
+¦   ¦   ¦           UpdateManyVariantPricesRequest.cs
+¦   ¦   ¦           UpdateProductPriceRequest.cs
+¦   ¦   ¦           UpdateProductRequest.cs
+¦   ¦   ¦           UpdateProductStatusRequest.cs
+¦   ¦   ¦           UpdateVariantPriceRequest.cs
+¦   ¦   ¦           
+¦   ¦   +---ProductCategory
+¦   ¦   ¦       CreateProductCategoryRequest.cs
+¦   ¦   ¦       DeleteManyProductCategoriesRequest.cs
+¦   ¦   ¦       ProductCategoryResponse.cs
+¦   ¦   ¦       RestoreManyProductCategoriesRequest.cs
+¦   ¦   ¦       UpdateProductCategoryRequest.cs
+¦   ¦   ¦       
+¦   ¦   +---Supplier
+¦   ¦           CreateSupplierRequest.cs
+¦   ¦           DeleteManySuppliersRequest.cs
+¦   ¦           RestoreManySuppliersRequest.cs
+¦   ¦           SupplierResponse.cs
+¦   ¦           UpdateManySupplierStatusRequest.cs
+¦   ¦           UpdateSupplierRequest.cs
+¦   ¦           UpdateSupplierStatusRequest.cs
+¦   ¦           
+¦   +---Behaviors
+¦   ¦       ValidationBehavior.cs
+¦   ¦       
+¦   +---bin
+¦   ¦   +---Debug
+¦   ¦       +---net10.0
+¦   +---DependencyInjection
+¦   ¦       ApplicationServices.cs
+¦   ¦       
+¦   +---Features
+¦   ¦   +---Brands
+¦   ¦   ¦   +---Commands
+¦   ¦   ¦   ¦   +---CreateBrand
+¦   ¦   ¦   ¦   ¦       CreateBrandCommand.cs
+¦   ¦   ¦   ¦   ¦       CreateBrandCommandHandler.cs
+¦   ¦   ¦   ¦   ¦       CreateBrandCommandValidator.cs
+¦   ¦   ¦   ¦   ¦       
+¦   ¦   ¦   ¦   +---DeleteBrand
+¦   ¦   ¦   ¦   ¦       DeleteBrandCommand.cs
+¦   ¦   ¦   ¦   ¦       DeleteBrandCommandHandler.cs
+¦   ¦   ¦   ¦   ¦       
+¦   ¦   ¦   ¦   +---DeleteManyBrands
+¦   ¦   ¦   ¦   ¦       DeleteManyBrandsCommand.cs
+¦   ¦   ¦   ¦   ¦       DeleteManyBrandsCommandHandler.cs
+¦   ¦   ¦   ¦   ¦       
+¦   ¦   ¦   ¦   +---RestoreBrand
+¦   ¦   ¦   ¦   ¦       RestoreBrandCommand.cs
+¦   ¦   ¦   ¦   ¦       RestoreBrandCommandHandler.cs
+¦   ¦   ¦   ¦   ¦       
+¦   ¦   ¦   ¦   +---RestoreManyBrands
+¦   ¦   ¦   ¦   ¦       RestoreManyBrandsCommand.cs
+¦   ¦   ¦   ¦   ¦       RestoreManyBrandsCommandHandler.cs
+¦   ¦   ¦   ¦   ¦       
+¦   ¦   ¦   ¦   +---UpdateBrand
+¦   ¦   ¦   ¦           UpdateBrandCommand.cs
+¦   ¦   ¦   ¦           UpdateBrandCommandHandler.cs
+¦   ¦   ¦   ¦           
+¦   ¦   ¦   +---Queries
+¦   ¦   ¦       +---GetBrandById
+¦   ¦   ¦       ¦       GetBrandByIdQuery.cs
+¦   ¦   ¦       ¦       GetBrandByIdQueryHandler.cs
+¦   ¦   ¦       ¦       
+¦   ¦   ¦       +---GetBrandsList
+¦   ¦   ¦       ¦       GetBrandsListQuery.cs
+¦   ¦   ¦       ¦       GetBrandsListQueryHandler.cs
+¦   ¦   ¦       ¦       
+¦   ¦   ¦       +---GetDeletedBrandsList
+¦   ¦   ¦               GetDeletedBrandsListQuery.cs
+¦   ¦   ¦               GetDeletedBrandsListQueryHandler.cs
+¦   ¦   ¦               
+¦   ¦   +---Files
+¦   ¦   ¦   +---Commands
+¦   ¦   ¦   ¦   +---DeleteFile
+¦   ¦   ¦   ¦   ¦       DeleteFileCommand.cs
+¦   ¦   ¦   ¦   ¦       DeleteFileCommandHandler.cs
+¦   ¦   ¦   ¦   ¦       
+¦   ¦   ¦   ¦   +---DeleteMultipleFiles
+¦   ¦   ¦   ¦   ¦       DeleteMultipleFilesCommand.cs
+¦   ¦   ¦   ¦   ¦       DeleteMultipleFilesCommandHandler.cs
+¦   ¦   ¦   ¦   ¦       
+¦   ¦   ¦   ¦   +---RestoreFile
+¦   ¦   ¦   ¦   ¦       RestoreFileCommand.cs
+¦   ¦   ¦   ¦   ¦       RestoreFileCommandHandler.cs
+¦   ¦   ¦   ¦   ¦       
+¦   ¦   ¦   ¦   +---RestoreMultipleFiles
+¦   ¦   ¦   ¦   ¦       RestoreMultipleFilesCommand.cs
+¦   ¦   ¦   ¦   ¦       RestoreMultipleFilesCommandHandler.cs
+¦   ¦   ¦   ¦   ¦       
+¦   ¦   ¦   ¦   +---UploadFile
+¦   ¦   ¦   ¦   ¦       UploadFileCommand.cs
+¦   ¦   ¦   ¦   ¦       UploadFileCommandHandler.cs
+¦   ¦   ¦   ¦   ¦       
+¦   ¦   ¦   ¦   +---UploadMultipleFiles
+¦   ¦   ¦   ¦           UploadMultipleFilesCommand.cs
+¦   ¦   ¦   ¦           UploadMultipleFilesCommandHandler.cs
+¦   ¦   ¦   ¦           
+¦   ¦   ¦   +---Queries
+¦   ¦   ¦       +---ViewImage
+¦   ¦   ¦               ViewImageQuery.cs
+¦   ¦   ¦               ViewImageQueryHandler.cs
+¦   ¦   ¦               
+¦   ¦   +---ProductCategories
+¦   ¦   ¦   +---Commands
+¦   ¦   ¦   ¦   +---CreateProductCategory
+¦   ¦   ¦   ¦   ¦       CreateProductCategoryCommand.cs
+¦   ¦   ¦   ¦   ¦       CreateProductCategoryCommandHandler.cs
+¦   ¦   ¦   ¦   ¦       CreateProductCategoryCommandValidator.cs
+¦   ¦   ¦   ¦   ¦       
+¦   ¦   ¦   ¦   +---DeleteManyProductCategories
+¦   ¦   ¦   ¦   ¦       DeleteManyProductCategoriesCommand.cs
+¦   ¦   ¦   ¦   ¦       DeleteManyProductCategoriesCommandHandler.cs
+¦   ¦   ¦   ¦   ¦       
+¦   ¦   ¦   ¦   +---DeleteProductCategory
+¦   ¦   ¦   ¦   ¦       DeleteProductCategoryCommand.cs
+¦   ¦   ¦   ¦   ¦       DeleteProductCategoryCommandHandler.cs
+¦   ¦   ¦   ¦   ¦       
+¦   ¦   ¦   ¦   +---RestoreManyProductCategories
+¦   ¦   ¦   ¦   ¦       RestoreManyProductCategoriesCommand.cs
+¦   ¦   ¦   ¦   ¦       RestoreManyProductCategoriesCommandHandler.cs
+¦   ¦   ¦   ¦   ¦       
+¦   ¦   ¦   ¦   +---RestoreProductCategory
+¦   ¦   ¦   ¦   ¦       RestoreProductCategoryCommand.cs
+¦   ¦   ¦   ¦   ¦       RestoreProductCategoryCommandHandler.cs
+¦   ¦   ¦   ¦   ¦       
+¦   ¦   ¦   ¦   +---UpdateProductCategory
+¦   ¦   ¦   ¦           UpdateProductCategoryCommand.cs
+¦   ¦   ¦   ¦           UpdateProductCategoryCommandHandler.cs
+¦   ¦   ¦   ¦           
+¦   ¦   ¦   +---Queries
+¦   ¦   ¦       +---GetDeletedProductCategoriesList
+¦   ¦   ¦       ¦       GetDeletedProductCategoriesListQuery.cs
+¦   ¦   ¦       ¦       GetDeletedProductCategoriesListQueryHandler.cs
+¦   ¦   ¦       ¦       
+¦   ¦   ¦       +---GetProductCategoriesList
+¦   ¦   ¦       ¦       GetProductCategoriesListQuery.cs
+¦   ¦   ¦       ¦       GetProductCategoriesListQueryHandler.cs
+¦   ¦   ¦       ¦       
+¦   ¦   ¦       +---GetProductCategoryById
+¦   ¦   ¦               GetProductCategoryByIdQuery.cs
+¦   ¦   ¦               GetProductCategoryByIdQueryHandler.cs
+¦   ¦   ¦               
+¦   ¦   +---Products
+¦   ¦   ¦   +---Commands
+¦   ¦   ¦   ¦   +---CreateProduct
+¦   ¦   ¦   ¦   ¦       CreateProductCommand.cs
+¦   ¦   ¦   ¦   ¦       CreateProductCommandHandler.cs
+¦   ¦   ¦   ¦   ¦       CreateProductCommandValidator.cs
+¦   ¦   ¦   ¦   ¦       CreateProductVariantValidator.cs
+¦   ¦   ¦   ¦   ¦       
+¦   ¦   ¦   ¦   +---DeleteManyProducts
+¦   ¦   ¦   ¦   ¦       DeleteManyProductsCommand.cs
+¦   ¦   ¦   ¦   ¦       DeleteManyProductsCommandHandler.cs
+¦   ¦   ¦   ¦   ¦       
+¦   ¦   ¦   ¦   +---DeleteProduct
+¦   ¦   ¦   ¦   ¦       DeleteProductCommand.cs
+¦   ¦   ¦   ¦   ¦       DeleteProductCommandHandler.cs
+¦   ¦   ¦   ¦   ¦       
+¦   ¦   ¦   ¦   +---RestoreManyProducts
+¦   ¦   ¦   ¦   ¦       RestoreManyProductsCommand.cs
+¦   ¦   ¦   ¦   ¦       RestoreManyProductsCommandHandler.cs
+¦   ¦   ¦   ¦   ¦       
+¦   ¦   ¦   ¦   +---RestoreProduct
+¦   ¦   ¦   ¦   ¦       RestoreProductCommand.cs
+¦   ¦   ¦   ¦   ¦       RestoreProductCommandHandler.cs
+¦   ¦   ¦   ¦   ¦       
+¦   ¦   ¦   ¦   +---UpdateManyProductPrices
+¦   ¦   ¦   ¦   ¦       UpdateManyProductPricesCommand.cs
+¦   ¦   ¦   ¦   ¦       UpdateManyProductPricesCommandHandler.cs
+¦   ¦   ¦   ¦   ¦       UpdateManyProductPricesCommandValidator.cs
+¦   ¦   ¦   ¦   ¦       
+¦   ¦   ¦   ¦   +---UpdateManyProductStatuses
+¦   ¦   ¦   ¦   ¦       UpdateManyProductStatusesCommand.cs
+¦   ¦   ¦   ¦   ¦       UpdateManyProductStatusesCommandHandler.cs
+¦   ¦   ¦   ¦   ¦       UpdateManyProductStatusesCommandValidator.cs
+¦   ¦   ¦   ¦   ¦       
+¦   ¦   ¦   ¦   +---UpdateManyVariantPrices
+¦   ¦   ¦   ¦   ¦       UpdateManyVariantPricesCommand.cs
+¦   ¦   ¦   ¦   ¦       UpdateManyVariantPricesCommandHandler.cs
+¦   ¦   ¦   ¦   ¦       
+¦   ¦   ¦   ¦   +---UpdateProduct
+¦   ¦   ¦   ¦   ¦       UpdateProductCommand.cs
+¦   ¦   ¦   ¦   ¦       UpdateProductCommandHandler.cs
+¦   ¦   ¦   ¦   ¦       UpdateProductCommandValidator.cs
+¦   ¦   ¦   ¦   ¦       
+¦   ¦   ¦   ¦   +---UpdateProductPrice
+¦   ¦   ¦   ¦   ¦       UpdateProductPriceCommand.cs
+¦   ¦   ¦   ¦   ¦       UpdateProductPriceCommandHandler.cs
+¦   ¦   ¦   ¦   ¦       UpdateProductPriceCommandValidator.cs
+¦   ¦   ¦   ¦   ¦       
+¦   ¦   ¦   ¦   +---UpdateProductStatus
+¦   ¦   ¦   ¦   ¦       UpdateProductStatusCommand.cs
+¦   ¦   ¦   ¦   ¦       UpdateProductStatusCommandHandler.cs
+¦   ¦   ¦   ¦   ¦       UpdateProductStatusCommandValidator.cs
+¦   ¦   ¦   ¦   ¦       
+¦   ¦   ¦   ¦   +---UpdateVariantPrice
+¦   ¦   ¦   ¦           UpdateVariantPriceCommand.cs
+¦   ¦   ¦   ¦           UpdateVariantPriceCommandHandler.cs
+¦   ¦   ¦   ¦           
+¦   ¦   ¦   +---Common
+¦   ¦   ¦   ¦       ProductResponseMapper.cs
+¦   ¦   ¦   ¦       
+¦   ¦   ¦   +---Queries
+¦   ¦   ¦       +---CheckSlugAvailability
+¦   ¦   ¦       ¦       CheckSlugAvailabilityQuery.cs
+¦   ¦   ¦       ¦       CheckSlugAvailabilityQueryHandler.cs
+¦   ¦   ¦       ¦       CheckSlugAvailabilityQueryValidator.cs
+¦   ¦   ¦       ¦       
+¦   ¦   ¦       +---GetActiveVariantLiteList
+¦   ¦   ¦       ¦       GetActiveVariantLiteListQuery.cs
+¦   ¦   ¦       ¦       GetActiveVariantLiteListQueryHandler.cs
+¦   ¦   ¦       ¦       
+¦   ¦   ¦       +---GetDeletedProductsList
+¦   ¦   ¦       ¦       GetDeletedProductsListQuery.cs
+¦   ¦   ¦       ¦       GetDeletedProductsListQueryHandler.cs
+¦   ¦   ¦       ¦       
+¦   ¦   ¦       +---GetDeletedVariantLiteList
+¦   ¦   ¦       ¦       GetDeletedVariantLiteListQuery.cs
+¦   ¦   ¦       ¦       GetDeletedVariantLiteListQueryHandler.cs
+¦   ¦   ¦       ¦       
+¦   ¦   ¦       +---GetProductById
+¦   ¦   ¦       ¦       GetProductByIdQuery.cs
+¦   ¦   ¦       ¦       GetProductByIdQueryHandler.cs
+¦   ¦   ¦       ¦       GetProductByIdQueryValidator.cs
+¦   ¦   ¦       ¦       
+¦   ¦   ¦       +---GetProductsList
+¦   ¦   ¦       ¦       GetProductsListQuery.cs
+¦   ¦   ¦       ¦       GetProductsListQueryHandler.cs
+¦   ¦   ¦       ¦       
+¦   ¦   ¦       +---GetVariantLiteByProductId
+¦   ¦   ¦               GetVariantLiteByProductIdQuery.cs
+¦   ¦   ¦               GetVariantLiteByProductIdQueryHandler.cs
+¦   ¦   ¦               
+¦   ¦   +---Settings
+¦   ¦   ¦   +---Commands
+¦   ¦   ¦   ¦   +---SetSettings
+¦   ¦   ¦   ¦           SetSettingsCommand.cs
+¦   ¦   ¦   ¦           SetSettingsCommandHandler.cs
+¦   ¦   ¦   ¦           
+¦   ¦   ¦   +---Queries
+¦   ¦   ¦       +---GetAllSettings
+¦   ¦   ¦               GetAllSettingsQuery.cs
+¦   ¦   ¦               GetAllSettingsQueryHandler.cs
+¦   ¦   ¦               
+¦   ¦   +---Suppliers
+¦   ¦       +---Commands
+¦   ¦       ¦   +---CreateSupplier
+¦   ¦       ¦   ¦       CreateSupplierCommand.cs
+¦   ¦       ¦   ¦       CreateSupplierCommandHandler.cs
+¦   ¦       ¦   ¦       CreateSupplierCommandValidator.cs
+¦   ¦       ¦   ¦       
+¦   ¦       ¦   +---DeleteManySuppliers
+¦   ¦       ¦   ¦       DeleteManySuppliersCommand.cs
+¦   ¦       ¦   ¦       DeleteManySuppliersCommandHandler.cs
+¦   ¦       ¦   ¦       
+¦   ¦       ¦   +---DeleteSupplier
+¦   ¦       ¦   ¦       DeleteSupplierCommand.cs
+¦   ¦       ¦   ¦       DeleteSupplierCommandHandler.cs
+¦   ¦       ¦   ¦       
+¦   ¦       ¦   +---RestoreManySuppliers
+¦   ¦       ¦   ¦       RestoreManySuppliersCommand.cs
+¦   ¦       ¦   ¦       RestoreManySuppliersCommandHandler.cs
+¦   ¦       ¦   ¦       
+¦   ¦       ¦   +---RestoreSupplier
+¦   ¦       ¦   ¦       RestoreSupplierCommand.cs
+¦   ¦       ¦   ¦       RestoreSupplierCommandHandler.cs
+¦   ¦       ¦   ¦       
+¦   ¦       ¦   +---UpdateManySupplierStatus
+¦   ¦       ¦   ¦       UpdateManySupplierStatusCommand.cs
+¦   ¦       ¦   ¦       UpdateManySupplierStatusCommandHandler.cs
+¦   ¦       ¦   ¦       
+¦   ¦       ¦   +---UpdateSupplier
+¦   ¦       ¦   ¦       UpdateSupplierCommand.cs
+¦   ¦       ¦   ¦       UpdateSupplierCommandHandler.cs
+¦   ¦       ¦   ¦       
+¦   ¦       ¦   +---UpdateSupplierStatus
+¦   ¦       ¦           UpdateSupplierStatusCommand.cs
+¦   ¦       ¦           UpdateSupplierStatusCommandHandler.cs
+¦   ¦       ¦           UpdateSupplierStatusCommandValidator.cs
+¦   ¦       ¦           
+¦   ¦       +---Queries
+¦   ¦           +---GetDeletedSuppliersList
+¦   ¦           ¦       GetDeletedSuppliersListQuery.cs
+¦   ¦           ¦       GetDeletedSuppliersListQueryHandler.cs
+¦   ¦           ¦       
+¦   ¦           +---GetSupplierById
+¦   ¦           ¦       GetSupplierByIdQuery.cs
+¦   ¦           ¦       GetSupplierByIdQueryHandler.cs
+¦   ¦           ¦       
+¦   ¦           +---GetSuppliersList
+¦   ¦                   GetSuppliersListQuery.cs
+¦   ¦                   GetSuppliersListQueryHandler.cs
+¦   ¦                   
+¦   +---Interfaces
+¦   ¦   +---Repositories
+¦   ¦       ¦   IUnitOfWork.cs
+¦   ¦       ¦   
+¦   ¦       +---Brand
+¦   ¦       ¦       IBrandDeleteRepository.cs
+¦   ¦       ¦       IBrandInsertRepository.cs
+¦   ¦       ¦       IBrandReadRepository.cs
+¦   ¦       ¦       IBrandUpdateRepository.cs
+¦   ¦       ¦       
+¦   ¦       +---File
+¦   ¦       ¦       IFileRepository.cs
+¦   ¦       ¦       IMediaFileDeleteRepository.cs
+¦   ¦       ¦       IMediaFileInsertRepository.cs
+¦   ¦       ¦       IMediaFileRestoreRepository.cs
+¦   ¦       ¦       IMediaFileSelectRepository.cs
+¦   ¦       ¦       
+¦   ¦       +---Product
+¦   ¦       ¦       IProductDeleteRepository.cs
+¦   ¦       ¦       IProductInsertRepository.cs
+¦   ¦       ¦       IProductSelectRepository.cs
+¦   ¦       ¦       IProductUpdateRepository.cs
+¦   ¦       ¦       
+¦   ¦       +---ProductCategory
+¦   ¦       ¦       IProductCategoryDeleteRepository.cs
+¦   ¦       ¦       IProductCategoryInsertRepository.cs
+¦   ¦       ¦       IProductCategoryRestoreRepository.cs
+¦   ¦       ¦       IProductCategorySelectRepository.cs
+¦   ¦       ¦       IProductCategoryUpdateRepository.cs
+¦   ¦       ¦       
+¦   ¦       +---ProductVariant
+¦   ¦       ¦       IProductVariantUpdateRepository.cs
+¦   ¦       ¦       
+¦   ¦       +---Setting
+¦   ¦       ¦       ISettingRepository.cs
+¦   ¦       ¦       
+¦   ¦       +---Supplier
+¦   ¦               ISupplierDeleteRepository.cs
+¦   ¦               ISupplierInsertRepository.cs
+¦   ¦               ISupplierSelectRepository.cs
+¦   ¦               ISupplierUpdateRepository.cs
+¦   ¦               
+¦   +---obj
+¦   ¦   ¦   Application.csproj.nuget.dgspec.json
+¦   ¦   ¦   Application.csproj.nuget.g.props
+¦   ¦   ¦   Application.csproj.nuget.g.targets
+¦   ¦   ¦   project.assets.json
+¦   ¦   ¦   
+¦   ¦   +---Debug
+¦   ¦       +---net10.0
+¦   ¦           ¦   .NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+¦   ¦           ¦   Application.assets.cache
+¦   ¦           ¦   Application.csproj.BuildWithSkipAnalyzers
+¦   ¦           ¦   Application.csproj.FileListAbsolute.txt
+¦   ¦           ¦   Application.GlobalUsings.g.cs
+¦   ¦           ¦   
+¦   ¦           +---ref
+¦   ¦           +---refint
+¦   +---Sieve
+¦   ¦       CustomSieveProcessor.cs
+¦   ¦       
+¦   +---ValidationAttributes
+¦           InListAttribute.cs
+¦           StatusConstants.cs
+¦           ValidSettingKeysAttribute.cs
+¦           
++---ControllerTests
+¦   ¦   ControllerTests.csproj
+¦   ¦   
+¦   +---bin
+¦   ¦   +---Debug
+¦   ¦       +---net10.0
+¦   ¦           ¦   api.xml
+¦   ¦           ¦   
+¦   ¦           +---cs
+¦   ¦           +---de
+¦   ¦           +---es
+¦   ¦           +---fr
+¦   ¦           +---it
+¦   ¦           +---ja
+¦   ¦           +---ko
+¦   ¦           +---pl
+¦   ¦           +---pt-BR
+¦   ¦           +---ru
+¦   ¦           +---runtimes
+¦   ¦           ¦   +---unix
+¦   ¦           ¦   ¦   +---lib
+¦   ¦           ¦   ¦       +---net9.0
+¦   ¦           ¦   +---win
+¦   ¦           ¦   ¦   +---lib
+¦   ¦           ¦   ¦       +---net9.0
+¦   ¦           ¦   +---win-arm64
+¦   ¦           ¦   ¦   +---native
+¦   ¦           ¦   +---win-x64
+¦   ¦           ¦   ¦   +---native
+¦   ¦           ¦   +---win-x86
+¦   ¦           ¦       +---native
+¦   ¦           +---tr
+¦   ¦           +---zh-Hans
+¦   ¦           +---zh-Hant
+¦   +---obj
+¦       ¦   ControllerTests.csproj.nuget.dgspec.json
+¦       ¦   ControllerTests.csproj.nuget.g.props
+¦       ¦   ControllerTests.csproj.nuget.g.targets
+¦       ¦   project.assets.json
+¦       ¦   
+¦       +---Debug
+¦       ¦   +---net10.0
+¦       ¦   ¦   ¦   .NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+¦       ¦   ¦   ¦   ControllerTests.assets.cache
+¦       ¦   ¦   ¦   ControllerTests.csproj.FileListAbsolute.txt
+¦       ¦   ¦   ¦   ControllerTests.GlobalUsings.g.cs
+¦       ¦   ¦   ¦   
+¦       ¦   ¦   +---ref
+¦       ¦   ¦   +---refint
+¦       ¦   +---net9.0
+¦       ¦       ¦   .NETCoreApp,Version=v9.0.AssemblyAttributes.cs
+¦       ¦       ¦   ControllerTests.AssemblyInfo.cs
+¦       ¦       ¦   ControllerTests.AssemblyInfoInputs.cache
+¦       ¦       ¦   ControllerTests.assets.cache
+¦       ¦       ¦   ControllerTests.csproj.AssemblyReference.cache
+¦       ¦       ¦   ControllerTests.csproj.FileListAbsolute.txt
+¦       ¦       ¦   ControllerTests.GeneratedMSBuildEditorConfig.editorconfig
+¦       ¦       ¦   ControllerTests.GlobalUsings.g.cs
+¦       ¦       ¦   
+¦       ¦       +---ref
+¦       ¦       +---refint
+¦       +---Release
+¦           +---net9.0
+¦               ¦   .NETCoreApp,Version=v9.0.AssemblyAttributes.cs
+¦               ¦   ControllerTests.AssemblyInfo.cs
+¦               ¦   ControllerTests.AssemblyInfoInputs.cache
+¦               ¦   ControllerTests.assets.cache
+¦               ¦   ControllerTests.csproj.AssemblyReference.cache
+¦               ¦   ControllerTests.GeneratedMSBuildEditorConfig.editorconfig
+¦               ¦   ControllerTests.GlobalUsings.g.cs
+¦               ¦   
+¦               +---ref
+¦               +---refint
++---Domain
+¦   ¦   Domain.csproj
+¦   ¦   
+¦   +---bin
+¦   ¦   +---Debug
+¦   ¦       +---net10.0
+¦   +---Constants
+¦   ¦       OrderBookingStatuses.cs
+¦   ¦       
+¦   +---Entities
+¦   ¦       Brand.cs
+¦   ¦       Input.cs
+¦   ¦       InputInfo.cs
+¦   ¦       InputStatus.cs
+¦   ¦       MediaFile.cs
+¦   ¦       Option.cs
+¦   ¦       OptionValue.cs
+¦   ¦       Output.cs
+¦   ¦       OutputInfo.cs
+¦   ¦       OutputStatus.cs
+¦   ¦       Product.cs
+¦   ¦       ProductCategory.cs
+¦   ¦       ProductCollectionPhoto.cs
+¦   ¦       ProductStatus.cs
+¦   ¦       ProductVariant.cs
+¦   ¦       Setting.cs
+¦   ¦       Supplier.cs
+¦   ¦       SupplierStatus.cs
+¦   ¦       VariantOptionValue.cs
+¦   ¦       
+¦   +---Enums
+¦   ¦       AuditingProperties.cs
+¦   ¦       DataFetchMode.cs
+¦   ¦       
+¦   +---Helpers
+¦   ¦       ErrorDetail.cs
+¦   ¦       ErrorResponse.cs
+¦   ¦       PagedResult.cs
+¦   ¦       ValidationErrorResponse.cs
+¦   ¦       
+¦   +---obj
+¦   ¦   ¦   Domain.csproj.nuget.dgspec.json
+¦   ¦   ¦   Domain.csproj.nuget.g.props
+¦   ¦   ¦   Domain.csproj.nuget.g.targets
+¦   ¦   ¦   project.assets.json
+¦   ¦   ¦   
+¦   ¦   +---Debug
+¦   ¦   ¦   +---net10.0
+¦   ¦   ¦   ¦   ¦   .NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+¦   ¦   ¦   ¦   ¦   Domain.assets.cache
+¦   ¦   ¦   ¦   ¦   Domain.csproj.BuildWithSkipAnalyzers
+¦   ¦   ¦   ¦   ¦   Domain.csproj.FileListAbsolute.txt
+¦   ¦   ¦   ¦   ¦   Domain.GlobalUsings.g.cs
+¦   ¦   ¦   ¦   ¦   
+¦   ¦   ¦   ¦   +---ref
+¦   ¦   ¦   ¦   +---refint
+¦   ¦   ¦   +---net9.0
+¦   ¦   ¦       ¦   .NETCoreApp,Version=v9.0.AssemblyAttributes.cs
+¦   ¦   ¦       ¦   Domain.AssemblyInfo.cs
+¦   ¦   ¦       ¦   Domain.AssemblyInfoInputs.cache
+¦   ¦   ¦       ¦   Domain.assets.cache
+¦   ¦   ¦       ¦   Domain.csproj.BuildWithSkipAnalyzers
+¦   ¦   ¦       ¦   Domain.csproj.FileListAbsolute.txt
+¦   ¦   ¦       ¦   Domain.GeneratedMSBuildEditorConfig.editorconfig
+¦   ¦   ¦       ¦   Domain.GlobalUsings.g.cs
+¦   ¦   ¦       ¦   
+¦   ¦   ¦       +---ref
+¦   ¦   ¦       +---refint
+¦   ¦   +---Release
+¦   ¦       +---net9.0
+¦   ¦           ¦   .NETCoreApp,Version=v9.0.AssemblyAttributes.cs
+¦   ¦           ¦   Domain.AssemblyInfo.cs
+¦   ¦           ¦   Domain.AssemblyInfoInputs.cache
+¦   ¦           ¦   Domain.assets.cache
+¦   ¦           ¦   Domain.csproj.BuildWithSkipAnalyzers
+¦   ¦           ¦   Domain.csproj.CoreCompileInputs.cache
+¦   ¦           ¦   Domain.csproj.FileListAbsolute.txt
+¦   ¦           ¦   Domain.dll
+¦   ¦           ¦   Domain.GeneratedMSBuildEditorConfig.editorconfig
+¦   ¦           ¦   Domain.GlobalUsings.g.cs
+¦   ¦           ¦   Domain.pdb
+¦   ¦           ¦   Domain.sourcelink.json
+¦   ¦           ¦   
+¦   ¦           +---ref
+¦   ¦           ¦       Domain.dll
+¦   ¦           ¦       
+¦   ¦           +---refint
+¦   ¦                   Domain.dll
+¦   ¦                   
+¦   +---ValueObjects
+¦           StockInfo.cs
+¦           
++---Infrastructure
+¦   ¦   Infrastructure.csproj
+¦   ¦   
+¦   +---bin
+¦   ¦   +---Debug
+¦   ¦       +---net10.0
+¦   +---DBContexts
+¦   ¦       ApplicationDBContext.cs
+¦   ¦       UnitOfWork.cs
+¦   ¦       
+¦   +---DependencyInjection
+¦   ¦       DBContext.cs
+¦   ¦       
+¦   +---Migrations
+¦   ¦       20251123033111_FirstMigration.cs
+¦   ¦       20251123033111_FirstMigration.Designer.cs
+¦   ¦       20251123042600_RemoveRestrict.cs
+¦   ¦       20251123042600_RemoveRestrict.Designer.cs
+¦   ¦       ApplicationDBContextModelSnapshot.cs
+¦   ¦       
+¦   +---obj
+¦   ¦   ¦   Infrastructure.csproj.EntityFrameworkCore.targets
+¦   ¦   ¦   Infrastructure.csproj.nuget.dgspec.json
+¦   ¦   ¦   Infrastructure.csproj.nuget.g.props
+¦   ¦   ¦   Infrastructure.csproj.nuget.g.targets
+¦   ¦   ¦   project.assets.json
+¦   ¦   ¦   
+¦   ¦   +---Debug
+¦   ¦   ¦   +---net10.0
+¦   ¦   ¦   ¦   ¦   .NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+¦   ¦   ¦   ¦   ¦   Infrastructure.assets.cache
+¦   ¦   ¦   ¦   ¦   Infrastructure.csproj.BuildWithSkipAnalyzers
+¦   ¦   ¦   ¦   ¦   Infrastructure.csproj.FileListAbsolute.txt
+¦   ¦   ¦   ¦   ¦   Infrastructure.GlobalUsings.g.cs
+¦   ¦   ¦   ¦   ¦   
+¦   ¦   ¦   ¦   +---ref
+¦   ¦   ¦   ¦   +---refint
+¦   ¦   ¦   +---net9.0
+¦   ¦   ¦       ¦   .NETCoreApp,Version=v9.0.AssemblyAttributes.cs
+¦   ¦   ¦       ¦   Infrastructure.AssemblyInfo.cs
+¦   ¦   ¦       ¦   Infrastructure.AssemblyInfoInputs.cache
+¦   ¦   ¦       ¦   Infrastructure.assets.cache
+¦   ¦   ¦       ¦   Infrastructure.csproj.AssemblyReference.cache
+¦   ¦   ¦       ¦   Infrastructure.csproj.BuildWithSkipAnalyzers
+¦   ¦   ¦       ¦   Infrastructure.csproj.FileListAbsolute.txt
+¦   ¦   ¦       ¦   Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+¦   ¦   ¦       ¦   Infrastructure.GlobalUsings.g.cs
+¦   ¦   ¦       ¦   
+¦   ¦   ¦       +---ref
+¦   ¦   ¦       +---refint
+¦   ¦   +---Release
+¦   ¦       +---net9.0
+¦   ¦           ¦   .NETCoreApp,Version=v9.0.AssemblyAttributes.cs
+¦   ¦           ¦   Infrastr.15EFFBFE.Up2Date
+¦   ¦           ¦   Infrastructure.AssemblyInfo.cs
+¦   ¦           ¦   Infrastructure.AssemblyInfoInputs.cache
+¦   ¦           ¦   Infrastructure.assets.cache
+¦   ¦           ¦   Infrastructure.csproj.AssemblyReference.cache
+¦   ¦           ¦   Infrastructure.csproj.BuildWithSkipAnalyzers
+¦   ¦           ¦   Infrastructure.csproj.CoreCompileInputs.cache
+¦   ¦           ¦   Infrastructure.csproj.FileListAbsolute.txt
+¦   ¦           ¦   Infrastructure.dll
+¦   ¦           ¦   Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+¦   ¦           ¦   Infrastructure.GlobalUsings.g.cs
+¦   ¦           ¦   Infrastructure.pdb
+¦   ¦           ¦   Infrastructure.sourcelink.json
+¦   ¦           ¦   
+¦   ¦           +---ref
+¦   ¦           ¦       Infrastructure.dll
+¦   ¦           ¦       
+¦   ¦           +---refint
+¦   ¦                   Infrastructure.dll
+¦   ¦                   
+¦   +---Repositories
+¦       +---Brand
+¦       ¦       BrandDeleteRepository.cs
+¦       ¦       BrandInsertRepository.cs
+¦       ¦       BrandReadRepository.cs
+¦       ¦       BrandUpdateRepository.cs
+¦       ¦       
+¦       +---File
+¦       ¦       FileRepository.cs
+¦       ¦       MediaFileDeleteRepository.cs
+¦       ¦       MediaFileInsertRepository.cs
+¦       ¦       MediaFileRestoreRepository.cs
+¦       ¦       MediaFileSelectRepository.cs
+¦       ¦       
+¦       +---Product
+¦       ¦       ProductDeleteRepository.cs
+¦       ¦       ProductInsertRepository.cs
+¦       ¦       ProductSelectRepository.cs
+¦       ¦       ProductUpdateRepository.cs
+¦       ¦       
+¦       +---ProductCategory
+¦       ¦       ProductCategoryDeleteRepository.cs
+¦       ¦       ProductCategoryInsertRepository.cs
+¦       ¦       ProductCategoryRestoreRepository.cs
+¦       ¦       ProductCategorySelectRepository.cs
+¦       ¦       ProductCategoryUpdateRepository.cs
+¦       ¦       
+¦       +---ProductVariant
+¦       ¦       ProductVariantUpdateRepository.cs
+¦       ¦       
+¦       +---Setting
+¦       ¦       SettingRepository.cs
+¦       ¦       
+¦       +---Supplier
+¦               SupplierDeleteRepository.cs
+¦               SupplierInsertRepository.cs
+¦               SupplierSelectRepository.cs
+¦               SupplierUpdateRepository.cs
+¦               
++---IntegrationTests
+¦   ¦   IntegrationTests.csproj
+¦   ¦   
+¦   +---bin
+¦   ¦   +---Debug
+¦   ¦       +---net10.0
+¦   ¦           ¦   api.xml
+¦   ¦           ¦   Application.deps.json
+¦   ¦           ¦   Domain.deps.json
+¦   ¦           ¦   Infrastructure.deps.json
+¦   ¦           ¦   
+¦   ¦           +---cs
+¦   ¦           +---de
+¦   ¦           +---es
+¦   ¦           +---fr
+¦   ¦           +---it
+¦   ¦           +---ja
+¦   ¦           +---ko
+¦   ¦           +---pl
+¦   ¦           +---pt-BR
+¦   ¦           +---refs
+¦   ¦           +---ru
+¦   ¦           +---runtimes
+¦   ¦           ¦   +---unix
+¦   ¦           ¦   ¦   +---lib
+¦   ¦           ¦   ¦       +---net9.0
+¦   ¦           ¦   +---win
+¦   ¦           ¦   ¦   +---lib
+¦   ¦           ¦   ¦       +---net9.0
+¦   ¦           ¦   +---win-arm64
+¦   ¦           ¦   ¦   +---native
+¦   ¦           ¦   +---win-x64
+¦   ¦           ¦   ¦   +---native
+¦   ¦           ¦   +---win-x86
+¦   ¦           ¦       +---native
+¦   ¦           +---tr
+¦   ¦           +---zh-Hans
+¦   ¦           +---zh-Hant
+¦   +---obj
+¦       ¦   IntegrationTests.csproj.nuget.dgspec.json
+¦       ¦   IntegrationTests.csproj.nuget.g.props
+¦       ¦   IntegrationTests.csproj.nuget.g.targets
+¦       ¦   project.assets.json
+¦       ¦   
+¦       +---Debug
+¦       ¦   +---net10.0
+¦       ¦   ¦   ¦   .NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+¦       ¦   ¦   ¦   IntegrationTests.assets.cache
+¦       ¦   ¦   ¦   IntegrationTests.csproj.FileListAbsolute.txt
+¦       ¦   ¦   ¦   IntegrationTests.GlobalUsings.g.cs
+¦       ¦   ¦   ¦   
+¦       ¦   ¦   +---ref
+¦       ¦   ¦   +---refint
+¦       ¦   +---net9.0
+¦       ¦       ¦   .NETCoreApp,Version=v9.0.AssemblyAttributes.cs
+¦       ¦       ¦   IntegrationTests.AssemblyInfo.cs
+¦       ¦       ¦   IntegrationTests.AssemblyInfoInputs.cache
+¦       ¦       ¦   IntegrationTests.assets.cache
+¦       ¦       ¦   IntegrationTests.csproj.AssemblyReference.cache
+¦       ¦       ¦   IntegrationTests.csproj.FileListAbsolute.txt
+¦       ¦       ¦   IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig
+¦       ¦       ¦   IntegrationTests.GlobalUsings.g.cs
+¦       ¦       ¦   
+¦       ¦       +---ref
+¦       ¦       +---refint
+¦       +---Release
+¦           +---net9.0
+¦               ¦   .NETCoreApp,Version=v9.0.AssemblyAttributes.cs
+¦               ¦   IntegrationTests.AssemblyInfo.cs
+¦               ¦   IntegrationTests.AssemblyInfoInputs.cache
+¦               ¦   IntegrationTests.assets.cache
+¦               ¦   IntegrationTests.csproj.AssemblyReference.cache
+¦               ¦   IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig
+¦               ¦   IntegrationTests.GlobalUsings.g.cs
+¦               ¦   
+¦               +---ref
+¦               +---refint
++---ServiceTests
+¦   ¦   ServiceTests.csproj
+¦   ¦   
+¦   +---bin
+¦   ¦   +---Debug
+¦   ¦       +---net10.0
+¦   ¦           +---cs
+¦   ¦           +---de
+¦   ¦           +---es
+¦   ¦           +---fr
+¦   ¦           +---it
+¦   ¦           +---ja
+¦   ¦           +---ko
+¦   ¦           +---pl
+¦   ¦           +---pt-BR
+¦   ¦           +---ru
+¦   ¦           +---runtimes
+¦   ¦           ¦   +---win
+¦   ¦           ¦       +---lib
+¦   ¦           ¦           +---net6.0
+¦   ¦           +---tr
+¦   ¦           +---zh-Hans
+¦   ¦           +---zh-Hant
+¦   +---obj
+¦       ¦   project.assets.json
+¦       ¦   ServiceTests.csproj.nuget.dgspec.json
+¦       ¦   ServiceTests.csproj.nuget.g.props
+¦       ¦   ServiceTests.csproj.nuget.g.targets
+¦       ¦   
+¦       +---Debug
+¦       ¦   +---net10.0
+¦       ¦   ¦   ¦   .NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+¦       ¦   ¦   ¦   ServiceTests.assets.cache
+¦       ¦   ¦   ¦   ServiceTests.csproj.FileListAbsolute.txt
+¦       ¦   ¦   ¦   ServiceTests.GlobalUsings.g.cs
+¦       ¦   ¦   ¦   
+¦       ¦   ¦   +---ref
+¦       ¦   ¦   +---refint
+¦       ¦   +---net9.0
+¦       ¦       ¦   .NETCoreApp,Version=v9.0.AssemblyAttributes.cs
+¦       ¦       ¦   ServiceTests.AssemblyInfo.cs
+¦       ¦       ¦   ServiceTests.AssemblyInfoInputs.cache
+¦       ¦       ¦   ServiceTests.assets.cache
+¦       ¦       ¦   ServiceTests.csproj.AssemblyReference.cache
+¦       ¦       ¦   ServiceTests.csproj.FileListAbsolute.txt
+¦       ¦       ¦   ServiceTests.GeneratedMSBuildEditorConfig.editorconfig
+¦       ¦       ¦   ServiceTests.GlobalUsings.g.cs
+¦       ¦       ¦   
+¦       ¦       +---ref
+¦       ¦       +---refint
+¦       +---Release
+¦           +---net9.0
+¦               ¦   .NETCoreApp,Version=v9.0.AssemblyAttributes.cs
+¦               ¦   ServiceTests.AssemblyInfo.cs
+¦               ¦   ServiceTests.AssemblyInfoInputs.cache
+¦               ¦   ServiceTests.assets.cache
+¦               ¦   ServiceTests.csproj.AssemblyReference.cache
+¦               ¦   ServiceTests.GeneratedMSBuildEditorConfig.editorconfig
+¦               ¦   ServiceTests.GlobalUsings.g.cs
+¦               ¦   
+¦               +---ref
+¦               +---refint
++---WebAPI
+    ¦   api.xml
+    ¦   appsettings.Development.json
+    ¦   appsettings.json
+    ¦   appsettings.Template.Development.json
+    ¦   appsettings.Template.json
+    ¦   Program.cs
+    ¦   WebAPI.csproj
+    ¦   WebAPI.csproj.user
+    ¦   
+    +---bin
+    ¦   +---Debug
+    ¦       +---net10.0
+    ¦           +---cs
+    ¦           +---de
+    ¦           +---es
+    ¦           +---fr
+    ¦           +---it
+    ¦           +---ja
+    ¦           +---ko
+    ¦           +---pl
+    ¦           +---pt-BR
+    ¦           +---ru
+    ¦           +---runtimes
+    ¦           ¦   +---unix
+    ¦           ¦   ¦   +---lib
+    ¦           ¦   ¦       +---net9.0
+    ¦           ¦   +---win
+    ¦           ¦   ¦   +---lib
+    ¦           ¦   ¦       +---net9.0
+    ¦           ¦   +---win-arm64
+    ¦           ¦   ¦   +---native
+    ¦           ¦   +---win-x64
+    ¦           ¦   ¦   +---native
+    ¦           ¦   +---win-x86
+    ¦           ¦       +---native
+    ¦           +---tr
+    ¦           +---zh-Hans
+    ¦           +---zh-Hant
+    +---Controllers
+    ¦   +---V1
+    ¦           BrandController.cs
+    ¦           FileController.cs
+    ¦           ProductCategoryController.cs
+    ¦           ProductController.cs
+    ¦           SettingController.cs
+    ¦           SupplierController.cs
+    ¦           
+    +---Middleware
+    ¦       DevelopmentErrorDetails.cs
+    ¦       DevelopmentErrorResponse.cs
+    ¦       ErrorDetails.cs
+    ¦       GlobalExceptionHandler.cs
+    ¦       ProductionErrorResponse.cs
+    ¦       
+    +---obj
+    ¦   ¦   project.assets.json
+    ¦   ¦   WebAPI.csproj.EntityFrameworkCore.targets
+    ¦   ¦   WebAPI.csproj.nuget.dgspec.json
+    ¦   ¦   WebAPI.csproj.nuget.g.props
+    ¦   ¦   WebAPI.csproj.nuget.g.targets
+    ¦   ¦   
+    ¦   +---Debug
+    ¦   ¦   +---net10.0
+    ¦   ¦   ¦   ¦   .NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+    ¦   ¦   ¦   ¦   ApiEndpoints.json
+    ¦   ¦   ¦   ¦   apphost.exe
+    ¦   ¦   ¦   ¦   staticwebassets.references.upToDateCheck.txt
+    ¦   ¦   ¦   ¦   staticwebassets.removed.txt
+    ¦   ¦   ¦   ¦   WebAPI.assets.cache
+    ¦   ¦   ¦   ¦   WebAPI.csproj.BuildWithSkipAnalyzers
+    ¦   ¦   ¦   ¦   WebAPI.csproj.FileListAbsolute.txt
+    ¦   ¦   ¦   ¦   WebAPI.GlobalUsings.g.cs
+    ¦   ¦   ¦   ¦   
+    ¦   ¦   ¦   +---EndpointInfo
+    ¦   ¦   ¦   ¦       WebAPI.json
+    ¦   ¦   ¦   ¦       WebAPI.OpenApiFiles.cache
+    ¦   ¦   ¦   ¦       
+    ¦   ¦   ¦   +---ref
+    ¦   ¦   ¦   +---refint
+    ¦   ¦   ¦   +---staticwebassets
+    ¦   ¦   +---net9.0
+    ¦   ¦       ¦   .NETCoreApp,Version=v9.0.AssemblyAttributes.cs
+    ¦   ¦       ¦   ApiEndpoints.json
+    ¦   ¦       ¦   apphost.exe
+    ¦   ¦       ¦   rpswa.dswa.cache.json
+    ¦   ¦       ¦   staticwebassets.references.upToDateCheck.txt
+    ¦   ¦       ¦   staticwebassets.removed.txt
+    ¦   ¦       ¦   WebAPI.AssemblyInfo.cs
+    ¦   ¦       ¦   WebAPI.AssemblyInfoInputs.cache
+    ¦   ¦       ¦   WebAPI.assets.cache
+    ¦   ¦       ¦   WebAPI.csproj.AssemblyReference.cache
+    ¦   ¦       ¦   WebAPI.csproj.BuildWithSkipAnalyzers
+    ¦   ¦       ¦   WebAPI.csproj.FileListAbsolute.txt
+    ¦   ¦       ¦   WebAPI.GeneratedMSBuildEditorConfig.editorconfig
+    ¦   ¦       ¦   WebAPI.GlobalUsings.g.cs
+    ¦   ¦       ¦   
+    ¦   ¦       +---EndpointInfo
+    ¦   ¦       ¦       WebAPI.json
+    ¦   ¦       ¦       WebAPI.OpenApiFiles.cache
+    ¦   ¦       ¦       
+    ¦   ¦       +---ref
+    ¦   ¦       +---refint
+    ¦   ¦       +---staticwebassets
+    ¦   +---Release
+    ¦       +---net9.0
+    ¦           ¦   .NETCoreApp,Version=v9.0.AssemblyAttributes.cs
+    ¦           ¦   ApiEndpoints.json
+    ¦           ¦   apphost.exe
+    ¦           ¦   rjsmcshtml.dswa.cache.json
+    ¦           ¦   rjsmrazor.dswa.cache.json
+    ¦           ¦   rpswa.dswa.cache.json
+    ¦           ¦   staticwebassets.build.endpoints.json
+    ¦           ¦   staticwebassets.build.json
+    ¦           ¦   staticwebassets.build.json.cache
+    ¦           ¦   staticwebassets.references.upToDateCheck.txt
+    ¦           ¦   staticwebassets.removed.txt
+    ¦           ¦   WebAPI.AssemblyInfo.cs
+    ¦           ¦   WebAPI.AssemblyInfoInputs.cache
+    ¦           ¦   WebAPI.assets.cache
+    ¦           ¦   WebAPI.csproj.AssemblyReference.cache
+    ¦           ¦   WebAPI.csproj.BuildWithSkipAnalyzers
+    ¦           ¦   WebAPI.csproj.CoreCompileInputs.cache
+    ¦           ¦   WebAPI.csproj.FileListAbsolute.txt
+    ¦           ¦   WebAPI.csproj.Up2Date
+    ¦           ¦   WebAPI.dll
+    ¦           ¦   WebAPI.GeneratedMSBuildEditorConfig.editorconfig
+    ¦           ¦   WebAPI.genruntimeconfig.cache
+    ¦           ¦   WebAPI.GlobalUsings.g.cs
+    ¦           ¦   WebAPI.MvcApplicationPartsAssemblyInfo.cache
+    ¦           ¦   WebAPI.MvcApplicationPartsAssemblyInfo.cs
+    ¦           ¦   WebAPI.pdb
+    ¦           ¦   WebAPI.sourcelink.json
+    ¦           ¦   
+    ¦           +---EndpointInfo
+    ¦           ¦       WebAPI.json
+    ¦           ¦       WebAPI.OpenApiFiles.cache
+    ¦           ¦       
+    ¦           +---ref
+    ¦           ¦       WebAPI.dll
+    ¦           ¦       
+    ¦           +---refint
+    ¦           ¦       WebAPI.dll
+    ¦           ¦       
+    ¦           +---staticwebassets
+    +---Properties
+    ¦       launchSettings.json
+    ¦       
+    +---StartupExtensions
+    ¦       ConfigureServicesExtension.cs
+    ¦       ConfigureSwaggerOptions.cs
+    ¦       
+    +---wwwroot
+        +---uploads
+                2ae30fb3-55d6-4a78-8c5b-b84ff72df420.webp
+                73178f74-383c-408c-a548-d26ad6a93cce.webp
+                c9b30fb3-e24d-40db-b644-f83dc6e7e180.webp
+                

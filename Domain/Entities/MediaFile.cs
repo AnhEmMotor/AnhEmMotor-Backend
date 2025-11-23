@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Domain.Entities
 {
     [Table("MediaFile")]
-    public class MediaFile
+    public class MediaFile : BaseEntity
     {
         [Key]
         public int Id { get; set; }

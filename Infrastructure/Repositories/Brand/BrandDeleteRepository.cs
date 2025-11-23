@@ -6,12 +6,12 @@ namespace Infrastructure.Repositories.Brand;
 
 public class BrandDeleteRepository(ApplicationDBContext context) : IBrandDeleteRepository
 {
-    public void DeleteBrand(BrandEntity brand)
+    public void Delete(BrandEntity brand)
     {
         context.Brands.Remove(brand);
     }
 
-    public void DeleteBrands(List<BrandEntity> brands)
+    public void Delete(IEnumerable<BrandEntity> brands)
     {
         context.Brands.RemoveRange(brands);
     }

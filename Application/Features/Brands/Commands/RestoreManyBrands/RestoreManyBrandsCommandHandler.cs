@@ -3,10 +3,11 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
 using Domain.Helpers;
 using MediatR;
+using Domain.Enums;
 
 namespace Application.Features.Brands.Commands.RestoreManyBrands;
 
-public sealed class RestoreManyBrandsCommandHandler(IBrandSelectRepository selectRepository, IBrandUpdateRepository updateRepository, IUnitOfWork unitOfWork)
+public sealed class RestoreManyBrandsCommandHandler(IBrandReadRepository readRepository, IBrandUpdateRepository updateRepository, IUnitOfWork unitOfWork)
     : IRequestHandler<RestoreManyBrandsCommand, (List<BrandResponse>? Data, ErrorResponse? Error)>
 {
     public async Task<(List<BrandResponse>? Data, ErrorResponse? Error)> Handle(RestoreManyBrandsCommand request, CancellationToken cancellationToken)
@@ -19,8 +20,8 @@ public sealed class RestoreManyBrandsCommandHandler(IBrandSelectRepository selec
         var uniqueIds = request.Ids.Distinct().ToList();
         var errorDetails = new List<ErrorDetail>();
 
-        var allBrands = await selectRepository.GetAllBrandsByIdsAsync(uniqueIds, cancellationToken).ConfigureAwait(false);
-        var deletedBrands = await selectRepository.GetDeletedBrandsByIdsAsync(uniqueIds, cancellationToken).ConfigureAwait(false);
+        var allBrands = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.All).ConfigureAwait(false);
+        var deletedBrands = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.DeletedOnly).ConfigureAwait(false);
 
         var allBrandMap = allBrands.ToDictionary(b => b.Id);
         var deletedBrandSet = deletedBrands.Select(b => b.Id).ToHashSet();
@@ -50,9 +51,9 @@ public sealed class RestoreManyBrandsCommandHandler(IBrandSelectRepository selec
             return (null, new ErrorResponse { Errors = errorDetails });
         }
 
-        if (deletedBrands.Count > 0)
+        if (deletedBrands.ToList().Count > 0)
         {
-            updateRepository.RestoreBrands(deletedBrands);
+            updateRepository.Restore(deletedBrands);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 

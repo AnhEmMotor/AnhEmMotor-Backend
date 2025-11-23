@@ -4,7 +4,7 @@ namespace Application.Interfaces.Repositories.Brand
 {
     public interface IBrandDeleteRepository
     {
-        void DeleteBrand(BrandEntity brand);
-        void DeleteBrands(List<BrandEntity> brands);
+        void Delete(BrandEntity brand);
+        void Delete(IEnumerable<BrandEntity> brands);
     }
 }

@@ -1,11 +1,12 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
+using Domain.Enums;
 using Domain.Helpers;
 using MediatR;
 
 namespace Application.Features.Brands.Commands.DeleteManyBrands;
 
-public sealed class DeleteManyBrandsCommandHandler(IBrandSelectRepository selectRepository, IBrandDeleteRepository deleteRepository, IUnitOfWork unitOfWork)
+public sealed class DeleteManyBrandsCommandHandler(IBrandReadRepository readRepository, IBrandDeleteRepository deleteRepository, IUnitOfWork unitOfWork)
     : IRequestHandler<DeleteManyBrandsCommand, ErrorResponse?>
 {
     public async Task<ErrorResponse?> Handle(DeleteManyBrandsCommand request, CancellationToken cancellationToken)
@@ -18,8 +19,8 @@ public sealed class DeleteManyBrandsCommandHandler(IBrandSelectRepository select
         var uniqueIds = request.Ids.Distinct().ToList();
         var errorDetails = new List<ErrorDetail>();
 
-        var allBrands = await selectRepository.GetAllBrandsByIdsAsync(uniqueIds, cancellationToken).ConfigureAwait(false);
-        var activeBrands = await selectRepository.GetActiveBrandsByIdsAsync(uniqueIds, cancellationToken).ConfigureAwait(false);
+        var allBrands = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.All).ConfigureAwait(false);
+        var activeBrands = await readRepository.GetByIdAsync(uniqueIds, cancellationToken).ConfigureAwait(false);
 
         var allBrandMap = allBrands.ToDictionary(b => b.Id);
         var activeBrandSet = activeBrands.Select(b => b.Id).ToHashSet();
@@ -49,9 +50,9 @@ public sealed class DeleteManyBrandsCommandHandler(IBrandSelectRepository select
             return new ErrorResponse { Errors = errorDetails };
         }
 
-        if (activeBrands.Count > 0)
+        if (activeBrands.ToList().Count > 0)
         {
-            deleteRepository.DeleteBrands(activeBrands);
+            deleteRepository.Delete(activeBrands);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
