@@ -16,7 +16,7 @@ public sealed class GetDeletedVariantLiteListQueryHandler(IProductSelectReposito
     {
         // Get ONLY deleted variants where the Product is NOT deleted (Product.DeletedAt == null)
         var query = repository.GetDeletedVariants()
-            .Where(v => v.ProductId != null)
+            //.Where(v => v.ProductId != null)
             .Include(v => v.Product)
                 .ThenInclude(p => p!.ProductCategory)
             .Include(v => v.Product)

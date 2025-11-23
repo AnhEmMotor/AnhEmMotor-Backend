@@ -47,7 +47,7 @@ public sealed class RestoreProductCommandHandler(
             }
         }
 
-        // Restore product first
+        // Restore product and cascade restore all variants
         updateRepository.Restore(product);
 
         // Cascade restore associated MediaFile records

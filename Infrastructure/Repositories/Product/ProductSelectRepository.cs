@@ -1,6 +1,8 @@
-using Application.Interfaces.Repositories.Product;
+﻿using Application.Interfaces.Repositories.Product;
+using Domain.Enums;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using BrandEntity = Domain.Entities.Brand;
 using CategoryEntity = Domain.Entities.ProductCategory;
 using OptionEntity = Domain.Entities.Option;
@@ -112,8 +114,24 @@ public class ProductSelectRepository(ApplicationDBContext context) : IProductSel
 
     public Task<List<ProductEntity>> GetDeletedProductsByIdsAsync(List<int> ids, CancellationToken cancellationToken)
     {
-        return context.DeletedOnly<ProductEntity>()
-            .Where(p => ids.Contains(p.Id))
+        var query = context.DeletedOnly<ProductEntity>()
+            .Where(p => ids.Contains(p.Id));
+        string deletedAtProp = AuditingProperties.DeletedAt;
+        return query
+            .Include(p => p.ProductCategory)
+            .Include(p => p.Brand)
+            .Include(p => p.ProductVariants.Where(v => EF.Property<DateTimeOffset?>(v, deletedAtProp) == null))
+                .ThenInclude(v => v.VariantOptionValues)
+                    .ThenInclude(vov => vov.OptionValue)
+                        .ThenInclude(ov => ov!.Option)
+            .Include(p => p.ProductVariants.Where(v => EF.Property<DateTimeOffset?>(v, deletedAtProp) == null))
+                .ThenInclude(v => v.ProductCollectionPhotos)
+            .Include(p => p.ProductVariants.Where(v => EF.Property<DateTimeOffset?>(v, deletedAtProp) == null))
+                .ThenInclude(v => v.InputInfos)
+            .Include(p => p.ProductVariants.Where(v => EF.Property<DateTimeOffset?>(v, deletedAtProp) == null))
+                .ThenInclude(v => v.OutputInfos)
+                    .ThenInclude(oi => oi.OutputOrder)
+            .AsSplitQuery()
             .ToListAsync(cancellationToken);
     }
 

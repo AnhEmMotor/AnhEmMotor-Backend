@@ -48,11 +48,6 @@ namespace Infrastructure.DBContexts
                 var body = Expression.Equal(property, Expression.Constant(null, typeof(DateTimeOffset?)));
                 modelBuilder.Entity(entityType.ClrType).HasQueryFilter(Expression.Lambda(body, parameter));
             }
-
-            modelBuilder.Entity<VariantOptionValue>(entity =>
-            {
-                entity.HasKey(e => new { e.VariantId, e.OptionValueId });
-            });
         }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -99,5 +94,53 @@ namespace Infrastructure.DBContexts
             entry.Property(AuditingProperties.UpdatedAt).CurrentValue = DateTimeOffset.UtcNow;
             entry.State = EntityState.Modified;
         }
-    }
+
+        public void SoftDeleteUsingSetColumn<T>(T entity) where T : class
+        {
+            var entry = Entry(entity);
+            var hasDeletedAt = entry.Properties.Any(p => p.Metadata.Name == AuditingProperties.DeletedAt);
+            if (!hasDeletedAt)
+            {
+                throw new InvalidOperationException($"Entity {typeof(T).Name} does not support Soft Delete (missing DeletedAt shadow property).");
+            }
+            entry.Property(AuditingProperties.DeletedAt).CurrentValue = DateTimeOffset.UtcNow;
+            entry.State = EntityState.Modified;
+        }
+
+        public void RestoreSoftDeleteUsingSetColumn<T>(T entity) where T : class
+        {
+            var entry = Entry(entity);
+            var hasDeletedAt = entry.Properties.Any(p => p.Metadata.Name == AuditingProperties.DeletedAt);
+            if (!hasDeletedAt)
+            {
+                throw new InvalidOperationException($"Entity {typeof(T).Name} does not support Soft Delete (missing DeletedAt shadow property).");
+            }
+            entry.Property(AuditingProperties.DeletedAt).CurrentValue = null;
+            entry.State = EntityState.Modified;
+        }
+
+        public void SoftDeleteUsingSetColumnRange<T>(IEnumerable<T> entities) where T : class
+        {
+            var entityType = Model.FindEntityType(typeof(T));
+            _ = (entityType?.FindProperty(AuditingProperties.DeletedAt)) ?? throw new InvalidOperationException($"Entity {typeof(T).Name} does not support Soft Delete (missing DeletedAt shadow property).");
+            foreach (var entity in entities)
+            {
+                var entry = Entry(entity);
+                entry.Property(AuditingProperties.DeletedAt).CurrentValue = DateTimeOffset.UtcNow;
+                entry.State = EntityState.Modified;
+            }
+        }
+
+        public void RestoreSoftDeleteUsingSetColumnRange<T>(IEnumerable<T> entities) where T : class
+        {
+            var entityType = Model.FindEntityType(typeof(T));
+            _ = (entityType?.FindProperty(AuditingProperties.DeletedAt)) ?? throw new InvalidOperationException($"Entity {typeof(T).Name} does not support Soft Delete (missing DeletedAt shadow property).");
+            foreach (var entity in entities)
+            {
+                var entry = Entry(entity);
+                entry.Property(AuditingProperties.DeletedAt).CurrentValue = null;
+                entry.State = EntityState.Modified;
+            }
+        }
+    } 
 }

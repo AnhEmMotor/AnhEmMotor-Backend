@@ -12,7 +12,7 @@ namespace Domain.Entities
 
         [Column("ProductId")]
         [ForeignKey("Product")]
-        public int? ProductId { get; set; }
+        public int ProductId { get; set; }
 
         [Column("UrlSlug", TypeName = "nvarchar(50)")]
         public string? UrlSlug { get; set; }

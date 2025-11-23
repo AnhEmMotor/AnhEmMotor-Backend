@@ -75,7 +75,8 @@ public static class ProductResponseMapper
             CoverImageUrl = variant.CoverImageUrl,
             OptionValues = variant.OptionPairs
                 .Where(pair => !string.IsNullOrWhiteSpace(pair.OptionName) && !string.IsNullOrWhiteSpace(pair.OptionValue))
-                .ToDictionary(pair => pair.OptionName!, pair => pair.OptionValue!, StringComparer.OrdinalIgnoreCase),
+                .GroupBy(pair => pair.OptionName!, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.First().OptionValue!, StringComparer.OrdinalIgnoreCase),
             PhotoCollection = variant.Photos,
             Stock = variant.Stock,
             HasBeenBooked = variant.HasBeenBooked,

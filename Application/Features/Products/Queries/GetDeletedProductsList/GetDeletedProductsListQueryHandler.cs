@@ -1,6 +1,7 @@
 using Application.ApiContracts.Product.Select;
 using Application.Features.Products.Common;
 using Application.Interfaces.Repositories.Product;
+using Domain.Enums;
 using Domain.Helpers;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -11,18 +12,19 @@ public sealed class GetDeletedProductsListQueryHandler(IProductSelectRepository 
 {
     public async Task<PagedResult<ProductDetailResponse>> Handle(GetDeletedProductsListQuery request, CancellationToken cancellationToken)
     {
+        string deletedAtProp = AuditingProperties.DeletedAt;
         var query = repository.GetDeletedProducts()
             .Include(p => p.ProductCategory)
             .Include(p => p.Brand)
             .Include(p => p.ProductVariants)
-                .ThenInclude(v => v.VariantOptionValues)
+                .ThenInclude(v => v.VariantOptionValues.Where(v => EF.Property<DateTimeOffset?>(v, deletedAtProp) == null))
                     .ThenInclude(vov => vov.OptionValue)
                         .ThenInclude(ov => ov!.Option)
-            .Include(p => p.ProductVariants)
+            .Include(p => p.ProductVariants.Where(v => EF.Property<DateTimeOffset?>(v, deletedAtProp) == null))
                 .ThenInclude(v => v.ProductCollectionPhotos)
-            .Include(p => p.ProductVariants)
+            .Include(p => p.ProductVariants.Where(v => EF.Property<DateTimeOffset?>(v, deletedAtProp) == null))
                 .ThenInclude(v => v.InputInfos)
-            .Include(p => p.ProductVariants)
+            .Include(p => p.ProductVariants.Where(v => EF.Property<DateTimeOffset?>(v, deletedAtProp) == null))
                 .ThenInclude(v => v.OutputInfos)
                     .ThenInclude(oi => oi.OutputOrder);
 
