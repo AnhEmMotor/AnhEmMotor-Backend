@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Domain.Entities
 {
     [Table("ProductVariant")]
-    public class ProductVariant
+    public class ProductVariant : BaseEntity
     {
         [Key]
         [Column("Id")]

@@ -3,17 +3,18 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
 using Domain.Helpers;
 using MediatR;
+using Domain.Enums;
 
 namespace Application.Features.Brands.Commands.RestoreBrand;
 
-public sealed class RestoreBrandCommandHandler(IBrandSelectRepository selectRepository, IBrandUpdateRepository updateRepository, IUnitOfWork unitOfWork)
+public sealed class RestoreBrandCommandHandler(IBrandReadRepository readRepository, IBrandUpdateRepository updateRepository, IUnitOfWork unitOfWork)
     : IRequestHandler<RestoreBrandCommand, (BrandResponse? Data, ErrorResponse? Error)>
 {
     public async Task<(BrandResponse? Data, ErrorResponse? Error)> Handle(RestoreBrandCommand request, CancellationToken cancellationToken)
     {
-        var brandList = await selectRepository.GetDeletedBrandsByIdsAsync([request.Id], cancellationToken).ConfigureAwait(false);
+        var brand = await readRepository.GetByIdAsync(request.Id, cancellationToken, DataFetchMode.DeletedOnly).ConfigureAwait(false);
 
-        if (brandList.Count == 0)
+        if (brand == null)
         {
             return (null, new ErrorResponse
             {
@@ -21,8 +22,7 @@ public sealed class RestoreBrandCommandHandler(IBrandSelectRepository selectRepo
             });
         }
 
-        var brand = brandList[0];
-        updateRepository.RestoreBrand(brand);
+        updateRepository.Restore(brand);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         return (new BrandResponse

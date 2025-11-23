@@ -68,16 +68,16 @@
             public static readonly string[] AllowedValues =
             [
                 Completed,
-            ConfirmedCod,
-            Delivering,
-            DepositPaid,
-            PaidProcessing,
-            Pending,
-            Refunded,
-            Refunding,
-            WaitingDeposit,
-            WaitingPickup,
-            Cancelled
+                ConfirmedCod,
+                Delivering,
+                DepositPaid,
+                PaidProcessing,
+                Pending,
+                Refunded,
+                Refunding,
+                WaitingDeposit,
+                WaitingPickup,
+                Cancelled
             ];
 
 

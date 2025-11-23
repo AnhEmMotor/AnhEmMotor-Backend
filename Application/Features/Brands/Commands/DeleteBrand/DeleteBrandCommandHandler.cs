@@ -5,12 +5,12 @@ using MediatR;
 
 namespace Application.Features.Brands.Commands.DeleteBrand;
 
-public sealed class DeleteBrandCommandHandler(IBrandSelectRepository selectRepository, IBrandDeleteRepository deleteRepository, IUnitOfWork unitOfWork)
+public sealed class DeleteBrandCommandHandler(IBrandReadRepository readRepository, IBrandDeleteRepository deleteRepository, IUnitOfWork unitOfWork)
     : IRequestHandler<DeleteBrandCommand, ErrorResponse?>
 {
     public async Task<ErrorResponse?> Handle(DeleteBrandCommand request, CancellationToken cancellationToken)
     {
-        var brand = await selectRepository.GetBrandByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
+        var brand = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
 
         if (brand == null)
         {
@@ -20,7 +20,7 @@ public sealed class DeleteBrandCommandHandler(IBrandSelectRepository selectRepos
             };
         }
 
-        deleteRepository.DeleteBrand(brand);
+        deleteRepository.Delete(brand);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         return null;

@@ -5,12 +5,12 @@ using MediatR;
 
 namespace Application.Features.Brands.Queries.GetBrandById;
 
-public sealed class GetBrandByIdQueryHandler(IBrandSelectRepository repository)
+public sealed class GetBrandByIdQueryHandler(IBrandReadRepository repository)
     : IRequestHandler<GetBrandByIdQuery, (BrandResponse? Data, ErrorResponse? Error)>
 {
     public async Task<(BrandResponse? Data, ErrorResponse? Error)> Handle(GetBrandByIdQuery request, CancellationToken cancellationToken)
     {
-        var brand = await repository.GetBrandByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
+        var brand = await repository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
 
         if (brand == null)
         {

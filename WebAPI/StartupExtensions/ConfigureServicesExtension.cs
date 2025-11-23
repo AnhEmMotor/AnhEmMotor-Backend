@@ -7,6 +7,7 @@ using OpenTelemetry.Exporter;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Sieve.Models;
 using WebAPI.Middleware;
 
 namespace WebAPI.StartupExtensions
@@ -28,7 +29,7 @@ namespace WebAPI.StartupExtensions
         public static IServiceCollection ConfigureServices(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
         {
             services.AddApplicationServices();
-
+            services.Configure<SieveOptions>(configuration.GetSection("Sieve"));
             services.AddExceptionHandler<GlobalExceptionHandler>();
             services.AddProblemDetails();
             var resourceBuilder = ResourceBuilder.CreateDefault().AddService(serviceName, serviceVersion);

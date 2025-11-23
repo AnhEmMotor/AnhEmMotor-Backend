@@ -4,8 +4,8 @@ namespace Application.Interfaces.Repositories.Brand
 {
     public interface IBrandUpdateRepository
     {
-        void UpdateBrand(BrandEntity brand);
-        void RestoreBrand(BrandEntity brand);
-        void RestoreBrands(List<BrandEntity> brands);
+        void Update(BrandEntity brand);
+        void Restore(BrandEntity brand);
+        void Restore(IEnumerable<BrandEntity> brands);
     }
 }

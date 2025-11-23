@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Domain.Entities;
 
 [Table("SupplierStatus")]
-public class SupplierStatus
+public class SupplierStatus : BaseEntity
 {
     [Key]
     [Column("Key")]

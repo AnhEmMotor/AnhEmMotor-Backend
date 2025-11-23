@@ -15,12 +15,12 @@ public class ProductUpdateRepository(ApplicationDBContext context) : IProductUpd
 
     public void Restore(ProductEntity product)
     {
-        context.RestoreSoftDeleteUsingSetColumn(product);
+        context.RestoreDeleteUsingSetColumn(product);
     }
 
     public void Restore(List<ProductEntity> products)
     {
-        context.RestoreSoftDeleteUsingSetColumnRange(products);
+        context.RestoreDeleteUsingSetColumnRange(products);
     }
 
     public void RestoreVariant(ProductVariantEntity variant)

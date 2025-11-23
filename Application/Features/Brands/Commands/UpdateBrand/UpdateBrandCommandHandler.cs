@@ -6,12 +6,12 @@ using MediatR;
 
 namespace Application.Features.Brands.Commands.UpdateBrand;
 
-public sealed class UpdateBrandCommandHandler(IBrandSelectRepository selectRepository, IBrandUpdateRepository updateRepository, IUnitOfWork unitOfWork)
+public sealed class UpdateBrandCommandHandler(IBrandReadRepository readRepository, IBrandUpdateRepository updateRepository, IUnitOfWork unitOfWork)
     : IRequestHandler<UpdateBrandCommand, (BrandResponse? Data, ErrorResponse? Error)>
 {
     public async Task<(BrandResponse? Data, ErrorResponse? Error)> Handle(UpdateBrandCommand request, CancellationToken cancellationToken)
     {
-        var brand = await selectRepository.GetBrandByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
+        var brand = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
 
         if (brand == null)
         {
@@ -27,7 +27,7 @@ public sealed class UpdateBrandCommandHandler(IBrandSelectRepository selectRepos
         if (request.Description is not null)
             brand.Description = request.Description;
 
-        updateRepository.UpdateBrand(brand);
+        updateRepository.Update(brand);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         return (new BrandResponse
