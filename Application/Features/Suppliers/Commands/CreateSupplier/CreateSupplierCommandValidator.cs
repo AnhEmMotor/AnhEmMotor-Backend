@@ -1,4 +1,4 @@
-using Application.ValidationAttributes;
+using Domain.Constants;
 using FluentValidation;
 
 namespace Application.Features.Suppliers.Commands.CreateSupplier;
@@ -25,7 +25,7 @@ public sealed class CreateSupplierCommandValidator : AbstractValidator<CreateSup
             .When(x => !string.IsNullOrWhiteSpace(x.Email));
 
         RuleFor(x => x.Status)
-            .Must(status => string.IsNullOrWhiteSpace(status) || StatusConstants.SupplierStatus.IsValid(status))
-            .WithMessage($"Status must be one of: {string.Join(", ", StatusConstants.SupplierStatus.AllowedValues)}");
+            .Must(status => string.IsNullOrWhiteSpace(status) || SupplierStatus.IsValid(status))
+            .WithMessage($"Status must be one of: {string.Join(", ", SupplierStatus.AllowedValues)}");
     }
 }

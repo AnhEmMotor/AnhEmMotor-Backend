@@ -2,7 +2,7 @@ using Application.ApiContracts.Brand;
 using Application.Interfaces.Repositories.Brand;
 using Application.Sieve;
 using Domain.Enums;
-using Domain.Helpers;
+using Domain.Shared;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;

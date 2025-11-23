@@ -1,3 +1,4 @@
+using Domain.Constants;
 using FluentValidation;
 
 namespace Application.Features.Products.Commands.UpdateProduct;
@@ -14,8 +15,8 @@ public sealed class UpdateProductCommandValidator : AbstractValidator<UpdateProd
             .MaximumLength(255).WithMessage("Product name must not exceed 255 characters.");
 
         RuleFor(x => x.Request.StatusId)
-            .Must(status => ValidationAttributes.StatusConstants.ProductStatus.IsValid(status))
-            .WithMessage($"Status must be one of: {string.Join(", ", ValidationAttributes.StatusConstants.ProductStatus.AllowedValues)}.");
+            .Must(status => ProductStatus.IsValid(status))
+            .WithMessage($"Status must be one of: {string.Join(", ", ProductStatus.AllowedValues)}.");
 
         RuleFor(x => x.Request.BrandId)
             .GreaterThan(0).When(x => x.Request.BrandId.HasValue)

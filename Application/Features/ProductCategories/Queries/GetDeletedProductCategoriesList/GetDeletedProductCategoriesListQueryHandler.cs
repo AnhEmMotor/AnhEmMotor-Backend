@@ -1,7 +1,7 @@
 using Application.ApiContracts.ProductCategory;
 using Application.Interfaces.Repositories.ProductCategory;
 using Domain.Enums;
-using Domain.Helpers;
+using Domain.Shared;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;

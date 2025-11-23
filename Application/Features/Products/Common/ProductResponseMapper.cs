@@ -24,7 +24,7 @@ public static class ProductResponseMapper
             })],
             Stock = variant.InputInfos.Sum(ii => ii.RemainingCount) ?? 0,
             HasBeenBooked = variant.OutputInfos
-                .Where(oi => oi.OutputOrder != null && OrderBookingStatuses.IsBookingStatus(oi.OutputOrder.StatusId))
+                .Where(oi => oi.OutputOrder != null && OrderStatus.IsBookingStatus(oi.OutputOrder.StatusId))
                 .Sum(oi => (long?)oi.Count) ?? 0
         }).ToList();
 

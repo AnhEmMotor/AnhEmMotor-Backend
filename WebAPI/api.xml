@@ -4,6 +4,108 @@
         <name>WebAPI</name>
     </assembly>
     <members>
+        <member name="T:WebAPI.Contracts.Errors.ApiErrorResponse">
+            <summary>
+            Represents a standardized error response returned by an API, including error message, type, details, validation
+            errors, and optional inner exception information.
+            </summary>
+            <remarks>Use this class to provide structured error information in API responses, enabling clients to handle
+            errors consistently. The class supports representing general errors, validation errors, and nested exceptions for
+            detailed diagnostics. Validation errors are included when input validation fails, and inner exceptions can be used
+            to convey exception chains for debugging purposes.</remarks>
+            <remarks>
+            Initializes a new instance of the ApiErrorResponse class with the specified error message.
+            </remarks>
+            <param name="message">The error message that describes the API error. Cannot be null.</param>
+        </member>
+        <member name="M:WebAPI.Contracts.Errors.ApiErrorResponse.#ctor(System.String)">
+            <summary>
+            Represents a standardized error response returned by an API, including error message, type, details, validation
+            errors, and optional inner exception information.
+            </summary>
+            <remarks>Use this class to provide structured error information in API responses, enabling clients to handle
+            errors consistently. The class supports representing general errors, validation errors, and nested exceptions for
+            detailed diagnostics. Validation errors are included when input validation fails, and inner exceptions can be used
+            to convey exception chains for debugging purposes.</remarks>
+            <remarks>
+            Initializes a new instance of the ApiErrorResponse class with the specified error message.
+            </remarks>
+            <param name="message">The error message that describes the API error. Cannot be null.</param>
+        </member>
+        <member name="P:WebAPI.Contracts.Errors.ApiErrorResponse.Message">
+            <summary>
+            Gets or sets the message associated with this instance.
+            </summary>
+        </member>
+        <member name="P:WebAPI.Contracts.Errors.ApiErrorResponse.Type">
+            <summary>
+            Gets or sets the type identifier associated with the object.
+            </summary>
+        </member>
+        <member name="P:WebAPI.Contracts.Errors.ApiErrorResponse.Details">
+            <summary>
+            Gets or sets the detailed description or additional information associated with the object.
+            </summary>
+        </member>
+        <member name="P:WebAPI.Contracts.Errors.ApiErrorResponse.ValidationErrors">
+            <summary>
+            Gets or sets the collection of validation errors associated with the current operation.
+            </summary>
+            <remarks>The list contains details for each validation error encountered. If no errors are present,
+            the property may be null or an empty list.</remarks>
+        </member>
+        <member name="P:WebAPI.Contracts.Errors.ApiErrorResponse.InnerException">
+            <summary>
+            Gets or sets the underlying API error response that caused the current error, if any.
+            </summary>
+            <remarks>Use this property to access additional details about the original error when handling nested
+            or chained API exceptions. This can be useful for debugging or for providing more informative error messages to
+            users.</remarks>
+        </member>
+        <member name="M:WebAPI.Contracts.Errors.ApiErrorResponse.CreateProductionError(System.String)">
+            <summary>
+            Creates a new API error response representing a production error with the specified message.
+            </summary>
+            <param name="message">The error message to include in the response. Cannot be null.</param>
+            <returns>An <see cref="T:WebAPI.Contracts.Errors.ApiErrorResponse"/> containing the provided error message.</returns>
+        </member>
+        <member name="M:WebAPI.Contracts.Errors.ApiErrorResponse.CreateDevelopmentError(System.Exception)">
+            <summary>
+            Creates an <see cref="T:WebAPI.Contracts.Errors.ApiErrorResponse"/> containing detailed information about the specified exception for
+            development and debugging purposes.
+            </summary>
+            <remarks>This method is intended for use in development environments where exposing detailed exception
+            information is useful for debugging. It recursively includes inner exception details, which may reveal sensitive
+            information. Avoid using this method in production scenarios.</remarks>
+            <param name="ex">The exception to include in the error response. Cannot be null.</param>
+            <returns>An <see cref="T:WebAPI.Contracts.Errors.ApiErrorResponse"/> populated with the exception's message, type, stack trace, and any inner
+            exceptions.</returns>
+        </member>
+        <member name="M:WebAPI.Contracts.Errors.ApiErrorResponse.CreateValidationError(System.Collections.Generic.IEnumerable{FluentValidation.Results.ValidationFailure})">
+            <summary>
+            Creates an API error response representing one or more validation failures.
+            </summary>
+            <param name="failures">A collection of validation failures to include in the error response. Each failure should specify the property
+            name and the associated error message.</param>
+            <returns>An <see cref="T:WebAPI.Contracts.Errors.ApiErrorResponse"/> containing a summary message and details for each validation failure provided.</returns>
+        </member>
+        <member name="T:WebAPI.Contracts.Errors.ValidationErrorDetail">
+            <summary>
+            Represents details about a validation error for a specific field.
+            </summary>
+            <remarks>Use this class to convey information about which field failed validation and the associated error
+            message. This is typically used in validation result collections to provide structured error feedback.</remarks>
+        </member>
+        <member name="P:WebAPI.Contracts.Errors.ValidationErrorDetail.Field">
+            <summary>
+            Gets or sets the value of the field.
+            </summary>
+        </member>
+        <member name="P:WebAPI.Contracts.Errors.ValidationErrorDetail.Error">
+            <summary>
+            Gets or sets the error message associated with the current operation.
+            </summary>
+        </member>
         <member name="T:WebAPI.Controllers.V1.BrandController">
             <summary>
             Quản lý danh sách các thương hiệu sản phẩm (ví dụ: Honda, Yamaha, Suzuki).
@@ -447,104 +549,44 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="T:WebAPI.Middleware.DevelopmentErrorDetails">
-            <summary>
-            Mô hình chi tiết lỗi đầy đủ cho mục đích debug trong môi trường Development.
-            </summary>
-        </member>
-        <member name="P:WebAPI.Middleware.DevelopmentErrorDetails.Message">
-            <summary>
-            Thông báo của ngoại lệ.
-            </summary>
-        </member>
-        <member name="P:WebAPI.Middleware.DevelopmentErrorDetails.Type">
-            <summary>
-            Loại (Type) đầy đủ của ngoại lệ.
-            </summary>
-        </member>
-        <member name="P:WebAPI.Middleware.DevelopmentErrorDetails.Details">
-            <summary>
-            Chuỗi `ToString()` đầy đủ của ngoại lệ (thường bao gồm stack trace).
-            </summary>
-        </member>
-        <member name="P:WebAPI.Middleware.DevelopmentErrorDetails.InnerException">
-            <summary>
-            Chi tiết của ngoại lệ bên trong (InnerException), nếu có.
-            </summary>
-        </member>
-        <member name="M:WebAPI.Middleware.DevelopmentErrorDetails.#ctor(System.Exception)">
-            <summary>
-            Khởi tạo chi tiết lỗi từ một ngoại lệ.
-            </summary>
-            <param name="ex">Ngoại lệ để trích xuất thông tin.</param>
-        </member>
-        <member name="T:WebAPI.Middleware.DevelopmentErrorResponse">
-            <summary>
-            Cấu trúc phản hồi lỗi chi tiết cho môi trường Development.
-            </summary>
-            <param name="exception">Ngoại lệ gốc được sử dụng để xây dựng phản hồi chi tiết.</param>
-        </member>
-        <member name="M:WebAPI.Middleware.DevelopmentErrorResponse.#ctor(System.Exception)">
-            <summary>
-            Cấu trúc phản hồi lỗi chi tiết cho môi trường Development.
-            </summary>
-            <param name="exception">Ngoại lệ gốc được sử dụng để xây dựng phản hồi chi tiết.</param>
-        </member>
-        <member name="P:WebAPI.Middleware.DevelopmentErrorResponse.Errors">
-            <summary>
-            Chi tiết lỗi đầy đủ, bao gồm cả stack trace và inner exception.
-            </summary>
-        </member>
-        <member name="T:WebAPI.Middleware.ErrorDetails">
-            <summary>
-            Mô hình chi tiết lỗi cơ bản, chỉ chứa thông báo.
-            </summary>
-        </member>
-        <member name="P:WebAPI.Middleware.ErrorDetails.Message">
-            <summary>
-            Thông báo lỗi.
-            </summary>
-        </member>
         <member name="T:WebAPI.Middleware.GlobalExceptionHandler">
             <summary>
-            Xử lý các ngoại lệ chưa được xử lý một cách toàn cục cho ứng dụng.
-            Định dạng phản hồi lỗi dựa trên môi trường (Development hoặc Production).
+            Provides a centralized exception handler for HTTP requests, generating standardized API error responses and logging
+            exceptions.
             </summary>
-            <param name="environment">Đối tượng môi trường web, dùng để kiểm tra môi trường (ví dụ: Development).</param>
-            <param name="logger">Đối tượng logger để ghi lại thông tin ngoại lệ.</param>
+            <remarks>This handler formats error responses as JSON and distinguishes between validation errors and
+            unhandled exceptions. In development environments, detailed exception information is included in the response; in
+            production, a generic error message is returned. All exceptions are logged appropriately based on their
+            type.</remarks>
+            <param name="environment">The hosting environment used to determine whether detailed error information should be included in responses.</param>
+            <param name="logger">The logger used to record exception details and validation failures.</param>
         </member>
         <member name="M:WebAPI.Middleware.GlobalExceptionHandler.#ctor(Microsoft.AspNetCore.Hosting.IWebHostEnvironment,Microsoft.Extensions.Logging.ILogger{WebAPI.Middleware.GlobalExceptionHandler})">
             <summary>
-            Xử lý các ngoại lệ chưa được xử lý một cách toàn cục cho ứng dụng.
-            Định dạng phản hồi lỗi dựa trên môi trường (Development hoặc Production).
+            Provides a centralized exception handler for HTTP requests, generating standardized API error responses and logging
+            exceptions.
             </summary>
-            <param name="environment">Đối tượng môi trường web, dùng để kiểm tra môi trường (ví dụ: Development).</param>
-            <param name="logger">Đối tượng logger để ghi lại thông tin ngoại lệ.</param>
+            <remarks>This handler formats error responses as JSON and distinguishes between validation errors and
+            unhandled exceptions. In development environments, detailed exception information is included in the response; in
+            production, a generic error message is returned. All exceptions are logged appropriately based on their
+            type.</remarks>
+            <param name="environment">The hosting environment used to determine whether detailed error information should be included in responses.</param>
+            <param name="logger">The logger used to record exception details and validation failures.</param>
         </member>
         <member name="M:WebAPI.Middleware.GlobalExceptionHandler.TryHandleAsync(Microsoft.AspNetCore.Http.HttpContext,System.Exception,System.Threading.CancellationToken)">
             <summary>
-            Cố gắng xử lý ngoại lệ được cung cấp, ghi log và định dạng phản hồi JSON.
+            Attempts to handle the specified exception by writing an appropriate error response to the HTTP context
+            asynchronously.
             </summary>
-            <param name="httpContext">Bối cảnh HTTP hiện tại, được sử dụng để thiết lập phản hồi.</param>
-            <param name="exception">Ngoại lệ chưa được xử lý đã xảy ra.</param>
-            <param name="cancellationToken">Token để hủy bỏ thao tác.</param>
-            <returns>Trả về giá trị cho biết liệu ngoại lệ đã được xử lý (luôn trả về `true` trong trường hợp này).</returns>
-        </member>
-        <member name="T:WebAPI.Middleware.ProductionErrorResponse">
-            <summary>
-            Cấu trúc phản hồi lỗi đơn giản cho môi trường Production.
-            </summary>
-        </member>
-        <member name="P:WebAPI.Middleware.ProductionErrorResponse.Errors">
-            <summary>
-            Chi tiết lỗi được lồng trong đối tượng 'errors'.
-            </summary>
-        </member>
-        <member name="M:WebAPI.Middleware.ProductionErrorResponse.#ctor(System.String)">
-            <summary>
-            Khởi tạo một phản hồi lỗi Production mới.
-            </summary>
-            <param name="message">Thông báo lỗi chung, an toàn để hiển thị cho người dùng.</param>
+            <remarks>If the exception is a validation error, a detailed validation error response is returned with
+            status code 400 (Bad Request). For other exceptions, a generic error response is returned with status code 500
+            (Internal Server Error). The response format and content type are set to JSON. The method does not propagate the
+            exception further.</remarks>
+            <param name="httpContext">The HTTP context to which the error response will be written. Must not be null.</param>
+            <param name="exception">The exception to handle and convert into an error response. Must not be null.</param>
+            <param name="cancellationToken">A cancellation token that can be used to cancel the asynchronous operation.</param>
+            <returns>A value indicating whether the exception was handled and an error response was written. Always returns <see
+            langword="true"/>.</returns>
         </member>
         <member name="T:WebAPI.StartupExtensions.ConfigureServicesExtension">
             <summary>

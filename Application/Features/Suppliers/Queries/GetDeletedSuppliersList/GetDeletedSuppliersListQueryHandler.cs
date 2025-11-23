@@ -1,7 +1,7 @@
 using Application.ApiContracts.Supplier;
 using Application.Interfaces.Repositories.Supplier;
 using Domain.Enums;
-using Domain.Helpers;
+using Domain.Shared;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;

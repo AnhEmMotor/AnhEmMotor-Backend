@@ -1,4 +1,4 @@
-﻿namespace Domain.Helpers
+﻿namespace Domain.Shared
 {
     public class PagedResult<T>(List<T>? items, long? totalCount, int? pageNumber, int? pageSize)
     {

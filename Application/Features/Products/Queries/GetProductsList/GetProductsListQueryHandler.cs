@@ -4,7 +4,7 @@ using Application.Interfaces.Repositories.Product;
 using Domain.Constants;
 using Domain.Entities;
 using Domain.Enums;
-using Domain.Helpers;
+using Domain.Shared;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using ProductEntity = Domain.Entities.Product;
@@ -84,7 +84,7 @@ public sealed class GetProductsListQueryHandler(IProductSelectRepository selectR
             CreatedAt = EF.Property<DateTimeOffset?>(p, AuditingProperties.CreatedAt),
             TotalStock = p.ProductVariants.SelectMany(v => v.InputInfos).Sum(ii => ii.RemainingCount) ?? 0,
             TotalBooked = p.ProductVariants.SelectMany(v => v.OutputInfos)
-                .Where(oi => oi.OutputOrder != null && OrderBookingStatuses.All.Contains(oi.OutputOrder.StatusId ?? string.Empty))
+                .Where(oi => oi.OutputOrder != null && OrderStatus.All.Contains(oi.OutputOrder.StatusId ?? string.Empty))
                 .Sum(oi => (long?)oi.Count) ?? 0
         });
 
@@ -121,7 +121,7 @@ public sealed class GetProductsListQueryHandler(IProductSelectRepository selectR
                 }).ToList(),
                 Stock = v.InputInfos.Sum(ii => ii.RemainingCount) ?? 0,
                 HasBeenBooked = v.OutputInfos
-                    .Where(oi => oi.OutputOrder != null && OrderBookingStatuses.All.Contains(oi.OutputOrder.StatusId ?? string.Empty))
+                    .Where(oi => oi.OutputOrder != null && OrderStatus.All.Contains(oi.OutputOrder.StatusId ?? string.Empty))
                     .Sum(oi => (long?)oi.Count) ?? 0
             })
             .ToListAsync(cancellationToken)

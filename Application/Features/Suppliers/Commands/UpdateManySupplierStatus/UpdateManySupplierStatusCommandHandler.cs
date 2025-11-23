@@ -1,7 +1,7 @@
 using Application.ApiContracts.Supplier;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Supplier;
-using Application.ValidationAttributes;
+using Domain.Constants;
 using Domain.Helpers;
 using MediatR;
 
@@ -22,12 +22,12 @@ public sealed class UpdateManySupplierStatusCommandHandler(ISupplierSelectReposi
 
         foreach (var (id, status) in request.Updates)
         {
-            if (!StatusConstants.SupplierStatus.IsValid(status))
+            if (!SupplierStatus.IsValid(status))
             {
                 errorDetails.Add(new ErrorDetail
                 {
                     Field = $"Updates[{id}]",
-                    Message = $"Invalid status '{status}'. Must be one of: {string.Join(", ", StatusConstants.SupplierStatus.AllowedValues)}"
+                    Message = $"Invalid status '{status}'. Must be one of: {string.Join(", ", SupplierStatus.AllowedValues)}"
                 });
             }
         }

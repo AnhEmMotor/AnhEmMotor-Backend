@@ -41,7 +41,6 @@ public class ApplicationDBContext(DbContextOptions<ApplicationDBContext> options
                 modelBuilder.Entity(entityType.ClrType).HasQueryFilter(Expression.Lambda(body, parameter));
             }
         }
-
     }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
