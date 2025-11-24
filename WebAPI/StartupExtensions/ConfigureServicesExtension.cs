@@ -10,6 +10,7 @@ using OpenTelemetry.Trace;
 using Sieve.Models;
 using WebAPI.Converters;
 using WebAPI.Middleware;
+using Application.DependencyInjection;
 
 namespace WebAPI.StartupExtensions
 {
@@ -29,7 +30,8 @@ namespace WebAPI.StartupExtensions
         /// <returns>Bộ sưu tập các dịch vụ đã được cấu hình (IServiceCollection).</returns>
         public static IServiceCollection ConfigureServices(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
         {
-            services.AddMapsterConfiguration(typeof(Application.DependencyInjection.ApplicationServices).Assembly);
+            services.AddHttpContextAccessor();
+            services.AddMapsterConfiguration(typeof(ApplicationServices).Assembly);
             services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options =>
             {
                 options.SerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;

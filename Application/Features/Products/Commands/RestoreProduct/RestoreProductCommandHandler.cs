@@ -1,7 +1,7 @@
 using Application.ApiContracts.Product.Select;
 using Application.Features.Products.Common;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.File;
+using Application.Interfaces.Repositories.MediaFile;
 using Application.Interfaces.Repositories.Product;
 using Domain.Helpers;
 using MediatR;
@@ -11,8 +11,6 @@ namespace Application.Features.Products.Commands.RestoreProduct;
 public sealed class RestoreProductCommandHandler(
     IProductSelectRepository selectRepository,
     IProductUpdateRepository updateRepository,
-    IMediaFileSelectRepository mediaFileSelectRepository,
-    IMediaFileRestoreRepository mediaFileRestoreRepository,
     IUnitOfWork unitOfWork)
     : IRequestHandler<RestoreProductCommand, (ProductDetailResponse? Data, ErrorResponse? Error)>
 {
@@ -51,19 +49,8 @@ public sealed class RestoreProductCommandHandler(
         updateRepository.Restore(product);
 
         // Cascade restore associated MediaFile records
-        if (imageFileNames.Count > 0)
-        {
-            var distinctFileNames = imageFileNames.Distinct().ToList();
-            var mediaFiles = await mediaFileSelectRepository.GetByStoredFileNamesAsync(distinctFileNames.ConvertAll<string?>(x => x), cancellationToken, includeDeleted: true).ConfigureAwait(false);
-            
-            if (mediaFiles != null && mediaFiles.Count > 0)
-            {
-                foreach (var mediaFile in mediaFiles)
-                {
-                    mediaFileRestoreRepository.Restore(mediaFile);
-                }
-            }
-        }
+        // Note: This functionality needs to be implemented when MediaFile filtering by StoragePath is added
+        // For now, files will remain in their current state when products are restored
 
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 

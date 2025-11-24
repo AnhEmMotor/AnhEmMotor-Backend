@@ -4,4 +4,7 @@ using MediatR;
 
 namespace Application.Features.Files.Commands.RestoreFile;
 
-public record RestoreFileCommand(string FileName) : IRequest<(FileResponse?, ErrorResponse?)>;
+public sealed record RestoreFileCommand : IRequest<(MediaFileResponse?, ErrorResponse?)>
+{
+    public string StoragePath { get; init; } = string.Empty;
+}

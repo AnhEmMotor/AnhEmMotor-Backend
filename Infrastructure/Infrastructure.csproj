@@ -7,8 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Repositories\File\**" />
     <Compile Remove="Seeder\**" />
+    <EmbeddedResource Remove="Repositories\File\**" />
     <EmbeddedResource Remove="Seeder\**" />
+    <None Remove="Repositories\File\**" />
     <None Remove="Seeder\**" />
   </ItemGroup>
 
@@ -16,10 +19,6 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Repositories\File\" />
   </ItemGroup>
 
   <ItemGroup>

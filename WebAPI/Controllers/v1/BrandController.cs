@@ -90,7 +90,7 @@ public class BrandController(IMediator mediator) : ControllerBase
     {
         var command = request.Adapt<CreateBrandCommand>();
         var response = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return CreatedAtAction(nameof(GetBrandById), new { id = response.Id }, response);
+        return StatusCode(StatusCodes.Status201Created, response);
     }
 
     /// <summary>

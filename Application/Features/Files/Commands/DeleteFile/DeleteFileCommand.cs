@@ -3,4 +3,7 @@ using MediatR;
 
 namespace Application.Features.Files.Commands.DeleteFile;
 
-public sealed record DeleteFileCommand(string FileName) : IRequest<ErrorResponse?>;
+public sealed record DeleteFileCommand : IRequest<ErrorResponse?>
+{
+    public string StoragePath { get; init; } = string.Empty;
+}

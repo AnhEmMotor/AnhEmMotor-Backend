@@ -1,29 +1,29 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Domain.Entities
+namespace Domain.Entities;
+
+[Table("MediaFiles")]
+public class MediaFile : BaseEntity
 {
-    [Table("MediaFile")]
-    public class MediaFile : BaseEntity
-    {
-        [Key]
-        public int Id { get; set; }
+    [Key]
+    public int Id { get; set; }
 
-        [Required]
-        [StringLength(255)]
-        public string? OriginalFileName { get; set; }
+    [Required]
+    [StringLength(50)]
+    public string? StorageType { get; set; } = "local";
 
-        [Required]
-        [StringLength(255)]
-        public string? StoredFileName { get; set; }
+    [StringLength(500)]
+    public string? StoragePath { get; set; }
 
-        [Required]
-        [StringLength(100)]
-        public string? ContentType { get; set; }
+    [StringLength(255)]
+    public string? OriginalFileName { get; set; }
 
-        [StringLength(1024)]
-        public string? PublicUrl { get; set; }
+    [StringLength(100)]
+    public string? ContentType { get; set; }
 
-        public long? FileSize { get; set; }
-    }
+    [StringLength(100)]
+    public string? FileExtension { get; set; }
+
+    public long? FileSize { get; set; }
 }

@@ -134,8 +134,7 @@ public class ProductController(ISender sender) : ControllerBase
         {
             return BadRequest(error);
         }
-
-        return CreatedAtAction(nameof(GetVarientById), new { id = data!.Id }, data);
+        return StatusCode(StatusCodes.Status201Created, data);
     }
 
     /// <summary>
