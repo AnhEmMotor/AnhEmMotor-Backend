@@ -14,7 +14,7 @@ public class SettingRepository(ApplicationDBContext context) : ISettingRepositor
             .ContinueWith<IEnumerable<SettingEntity>>(t => t.Result, cancellationToken);
     }
 
-    public void UpsertBatch(IEnumerable<SettingEntity> settings)
+    public void Update(IEnumerable<SettingEntity> settings)
     {
         var settingKeys = settings.Select(s => s.Key).ToList();
 
