@@ -5,7 +5,7 @@ using MediatR;
 
 namespace Application.Features.Suppliers.Commands.DeleteSupplier;
 
-public sealed class DeleteSupplierCommandHandler(ISupplierSelectRepository selectRepository, ISupplierDeleteRepository deleteRepository, IUnitOfWork unitOfWork)
+public sealed class DeleteSupplierCommandHandler(ISupplierReadRepository selectRepository, ISupplierDeleteRepository deleteRepository, IUnitOfWork unitOfWork)
     : IRequestHandler<DeleteSupplierCommand, ErrorResponse?>
 {
     public async Task<ErrorResponse?> Handle(DeleteSupplierCommand request, CancellationToken cancellationToken)

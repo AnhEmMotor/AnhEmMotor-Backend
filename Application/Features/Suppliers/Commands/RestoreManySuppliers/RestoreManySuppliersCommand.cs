@@ -4,4 +4,7 @@ using MediatR;
 
 namespace Application.Features.Suppliers.Commands.RestoreManySuppliers;
 
-public sealed record RestoreManySuppliersCommand(List<int> Ids) : IRequest<(List<SupplierResponse>? Data, ErrorResponse? Error)>;
+public sealed record RestoreManySuppliersCommand : IRequest<(List<SupplierResponse>? Data, ErrorResponse? Error)>
+{
+    public List<int> Ids { get; init; } = [];
+}

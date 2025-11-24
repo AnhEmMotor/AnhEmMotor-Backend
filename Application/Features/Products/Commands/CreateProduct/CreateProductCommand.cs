@@ -10,7 +10,7 @@ public sealed record CreateProductCommand : IRequest<(ProductDetailResponse? Dat
     public string? Name { get; init; }
     public int? CategoryId { get; init; }
     public int? BrandId { get; init; }
-    public string? StatusId { get; init; }
+    public string? StatusId { get; init; } = "for-sale";
     public string? Description { get; init; }
     public decimal? Weight { get; init; }
     public string? Dimensions { get; init; }

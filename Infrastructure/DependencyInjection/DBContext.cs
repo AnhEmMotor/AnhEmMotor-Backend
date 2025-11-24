@@ -45,7 +45,7 @@ public static class DBContext
         services.AddScoped<IBrandDeleteRepository, BrandDeleteRepository>();
 
         services.AddScoped<ISupplierInsertRepository, SupplierInsertRepository>();
-        services.AddScoped<ISupplierSelectRepository, SupplierSelectRepository>();
+        services.AddScoped<ISupplierReadRepository, SupplierReadRepository>();
         services.AddScoped<ISupplierUpdateRepository, SupplierUpdateRepository>();
         services.AddScoped<ISupplierDeleteRepository, SupplierDeleteRepository>();
 

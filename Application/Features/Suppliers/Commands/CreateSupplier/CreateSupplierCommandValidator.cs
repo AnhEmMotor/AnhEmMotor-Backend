@@ -15,17 +15,13 @@ public sealed class CreateSupplierCommandValidator : AbstractValidator<CreateSup
             .MaximumLength(300)
             .When(x => !string.IsNullOrWhiteSpace(x.Address));
 
-        RuleFor(x => x.PhoneNumber)
+        RuleFor(x => x.Phone)
             .MaximumLength(20)
-            .When(x => !string.IsNullOrWhiteSpace(x.PhoneNumber));
+            .When(x => !string.IsNullOrWhiteSpace(x.Phone));
 
         RuleFor(x => x.Email)
             .EmailAddress()
             .MaximumLength(100)
             .When(x => !string.IsNullOrWhiteSpace(x.Email));
-
-        RuleFor(x => x.Status)
-            .Must(status => string.IsNullOrWhiteSpace(status) || SupplierStatus.IsValid(status))
-            .WithMessage($"Status must be one of: {string.Join(", ", SupplierStatus.AllowedValues)}");
     }
 }

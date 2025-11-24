@@ -11,7 +11,7 @@ public class SupplierDeleteRepository(ApplicationDBContext context) : ISupplierD
         context.Suppliers.Remove(supplier);
     }
 
-    public void Delete(List<SupplierEntity> suppliers)
+    public void Delete(IEnumerable<SupplierEntity> suppliers)
     {
         context.Suppliers.RemoveRange(suppliers);
     }

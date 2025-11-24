@@ -24,40 +24,23 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         }
 
         mapper.Property<Brand>(p => p.Id).CanSort();
+        mapper.Property<Input>(p => p.Id).CanSort();
+        mapper.Property<Output>(p => p.Id).CanSort();
+        mapper.Property<Product>(p => p.Id).CanSort();
+        mapper.Property<ProductVariant>(p => p.Id).CanSort();
+        mapper.Property<Supplier>(p => p.Id).CanSort();
 
-        mapper.Property<Product>(p => p.Id)
-            .CanSort();
+        mapper.Property<Brand>(b => b.Name).CanSort().CanFilter();
+        mapper.Property<Brand>(b => b.Description).CanFilter();
 
-        mapper.Property<Brand>(b => b.Name)
-            .CanSort()
-            .CanFilter();
+        mapper.Property<ProductCategory>(c => c.Name).CanSort().CanFilter();
+        mapper.Property<ProductCategory>(c => c.Description).CanFilter();
 
-        mapper.Property<Brand>(b => b.Description)
-            .CanFilter();
-
-        mapper.Property<ProductCategory>(c => c.Name)
-            .CanSort()
-            .CanFilter();
-
-        mapper.Property<ProductCategory>(c => c.Description)
-            .CanFilter();
-
-        mapper.Property<Supplier>(s => s.Name)
-            .CanSort()
-            .CanFilter();
-
-        mapper.Property<Supplier>(s => s.Phone)
-            .CanFilter();
-
-        mapper.Property<Supplier>(s => s.Email)
-            .CanFilter();
-
-        mapper.Property<Supplier>(s => s.StatusId)
-            .CanSort()
-            .CanFilter();
-
-        mapper.Property<Supplier>(s => s.Address)
-            .CanFilter();
+        mapper.Property<Supplier>(s => s.Name).CanSort().CanFilter();
+        mapper.Property<Supplier>(s => s.Phone).CanFilter();
+        mapper.Property<Supplier>(s => s.Email).CanFilter();
+        mapper.Property<Supplier>(s => s.StatusId).CanSort().CanFilter();
+        mapper.Property<Supplier>(s => s.Address).CanFilter();
 
         return mapper;
     }
@@ -65,9 +48,7 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
     private static void MapBaseProperties<T>(SievePropertyMapper mapper) where T : BaseEntity
     {
         mapper.Property<T>(x => x.CreatedAt).CanSort().HasName("createdAt");
-
         mapper.Property<T>(x => x.UpdatedAt).CanSort().HasName("updatedAt");
-
         mapper.Property<T>(x => x.DeletedAt).CanSort().HasName("deletedAt");
 
     }

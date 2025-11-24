@@ -1,16 +1,20 @@
+using MediatR;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Supplier;
 using Domain.Helpers;
-using MediatR;
+using Domain.Enums;
 
 namespace Application.Features.Suppliers.Commands.DeleteManySuppliers;
 
-public sealed class DeleteManySuppliersCommandHandler(ISupplierSelectRepository selectRepository, ISupplierDeleteRepository deleteRepository, IUnitOfWork unitOfWork)
+public sealed class DeleteManySuppliersCommandHandler(
+    ISupplierReadRepository selectRepository,
+    ISupplierDeleteRepository deleteRepository,
+    IUnitOfWork unitOfWork)
     : IRequestHandler<DeleteManySuppliersCommand, ErrorResponse?>
 {
     public async Task<ErrorResponse?> Handle(DeleteManySuppliersCommand request, CancellationToken cancellationToken)
     {
-        if (request.Ids == null || request.Ids.Count == 0)
+        if (request.Ids.Count == 0)
         {
             return null;
         }
@@ -18,8 +22,8 @@ public sealed class DeleteManySuppliersCommandHandler(ISupplierSelectRepository 
         var uniqueIds = request.Ids.Distinct().ToList();
         var errorDetails = new List<ErrorDetail>();
 
-        var allSuppliers = await selectRepository.GetAllSuppliersByIdsAsync(uniqueIds, cancellationToken).ConfigureAwait(false);
-        var activeSuppliers = await selectRepository.GetActiveSuppliersByIdsAsync(uniqueIds, cancellationToken).ConfigureAwait(false);
+        var allSuppliers = await selectRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.All).ConfigureAwait(false);
+        var activeSuppliers = await selectRepository.GetByIdAsync(uniqueIds, cancellationToken).ConfigureAwait(false);
 
         var allSupplierMap = allSuppliers.ToDictionary(s => s.Id);
         var activeSupplierSet = activeSuppliers.Select(s => s.Id).ToHashSet();
@@ -49,7 +53,7 @@ public sealed class DeleteManySuppliersCommandHandler(ISupplierSelectRepository 
             return new ErrorResponse { Errors = errorDetails };
         }
 
-        if (activeSuppliers.Count > 0)
+        if (activeSuppliers.ToList().Count > 0)
         {
             deleteRepository.Delete(activeSuppliers);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

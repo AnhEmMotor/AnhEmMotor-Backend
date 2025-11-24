@@ -7,7 +7,7 @@ public sealed class UpdateSupplierStatusCommandValidator : AbstractValidator<Upd
 {
     public UpdateSupplierStatusCommandValidator()
     {
-        RuleFor(x => x.Status)
+        RuleFor(x => x.StatusId)
             .NotEmpty()
             .Must(status => SupplierStatus.IsValid(status))
             .WithMessage($"Status must be one of: {string.Join(", ", SupplierStatus.AllowedValues)}");

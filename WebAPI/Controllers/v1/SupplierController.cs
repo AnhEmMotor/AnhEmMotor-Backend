@@ -13,6 +13,7 @@ using Application.Features.Suppliers.Queries.GetSuppliersList;
 using Asp.Versioning;
 using Domain.Helpers;
 using Domain.Shared;
+using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
@@ -89,13 +90,13 @@ public class SupplierController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(SupplierResponse), StatusCodes.Status201Created)]
     public async Task<IActionResult> CreateSupplier([FromBody] CreateSupplierRequest request, CancellationToken cancellationToken)
     {
-        var command = new CreateSupplierCommand(request.Name, request.Address, request.Phone, request.Email, request.StatusId);
+        var command = request.Adapt<CreateSupplierCommand>();
         var response = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return CreatedAtAction(nameof(GetSupplierById), new { id = response.Id }, response);
     }
 
     /// <summary>
-    /// Cập nhật thông tin nhà cung cấp (bao gồm cả trạng thái của nó).
+    /// Cập nhật thông tin nhà cung cấp.
     /// </summary>
     /// <param name="id">Id nhà cung cấp cần cập nhật.</param>
     /// <param name="request">Thông tin nhà cung cấp cần cập nhật.</param>
@@ -106,7 +107,7 @@ public class SupplierController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateSupplier(int id, [FromBody] UpdateSupplierRequest request, CancellationToken cancellationToken)
     {
-        var command = new UpdateSupplierCommand(id, request.Name, request.Address, request.Phone, request.Email);
+        var command = request.Adapt<UpdateSupplierCommand>() with { Id = id };
         var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
 
         if (error != null)
@@ -129,8 +130,9 @@ public class SupplierController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateSupplierStatus(int id, [FromBody] UpdateSupplierStatusRequest request, CancellationToken cancellationToken)
     {
-        var command = new UpdateSupplierStatusCommand(id, request.StatusId);
-        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var command = request.Adapt<UpdateSupplierStatusCommand>() with { Id = id };
+
+        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
 
         if (error != null)
         {
@@ -151,7 +153,7 @@ public class SupplierController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteSupplier(int id, CancellationToken cancellationToken)
     {
-        var command = new DeleteSupplierCommand(id);
+        var command = new DeleteSupplierCommand() with { Id = id };
         var error = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         if (error != null)
         {
@@ -171,7 +173,7 @@ public class SupplierController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RestoreSupplier(int id, CancellationToken cancellationToken)
     {
-        var command = new RestoreSupplierCommand(id);
+        var command = new RestoreSupplierCommand() with { Id = id };
         var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
 
         if (error != null)
@@ -193,8 +195,8 @@ public class SupplierController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteSuppliers([FromBody] DeleteManySuppliersRequest request, CancellationToken cancellationToken)
     {
-        var command = new DeleteManySuppliersCommand(request.Ids);
-        var error = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var command = request.Adapt<DeleteManySuppliersCommand>();
+        var error = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
 
         if (error != null)
         {
@@ -215,8 +217,8 @@ public class SupplierController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RestoreSuppliers([FromBody] RestoreManySuppliersRequest request, CancellationToken cancellationToken)
     {
-        var command = new RestoreManySuppliersCommand(request.Ids);
-        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var command = request.Adapt<RestoreManySuppliersCommand>();
+        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
 
         if (error != null)
         {
@@ -237,9 +239,8 @@ public class SupplierController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateManySupplierStatus([FromBody] UpdateManySupplierStatusRequest request, CancellationToken cancellationToken)
     {
-        var updates = request.Ids.ToDictionary(id => id, _ => request.StatusId!);
-        var command = new UpdateManySupplierStatusCommand(updates);
-        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var command = request.Adapt<UpdateManySupplierStatusCommand>();
+        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
 
         if (error != null)
         {
