@@ -1,6 +1,7 @@
 using Application.ApiContracts.Brand;
 using Application.Interfaces.Repositories.Brand;
 using Domain.Helpers;
+using Mapster;
 using MediatR;
 
 namespace Application.Features.Brands.Queries.GetBrandById;
@@ -20,11 +21,6 @@ public sealed class GetBrandByIdQueryHandler(IBrandReadRepository repository)
             });
         }
 
-        return (new BrandResponse
-        {
-            Id = brand.Id,
-            Name = brand.Name,
-            Description = brand.Description
-        }, null);
+        return (brand.Adapt<BrandResponse>(), null);
     }
 }

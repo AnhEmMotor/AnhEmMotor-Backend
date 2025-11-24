@@ -4,4 +4,7 @@ using MediatR;
 
 namespace Application.Features.Brands.Commands.RestoreBrand;
 
-public sealed record RestoreBrandCommand(int Id) : IRequest<(BrandResponse? Data, ErrorResponse? Error)>;
+public sealed record RestoreBrandCommand : IRequest<(BrandResponse? Data, ErrorResponse? Error)>
+{
+    public int Id { get; init; }
+}

@@ -2,6 +2,7 @@ using Application.ApiContracts.Brand;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
 using Domain.Helpers;
+using Mapster;
 using MediatR;
 using Domain.Enums;
 
@@ -57,13 +58,6 @@ public sealed class RestoreManyBrandsCommandHandler(IBrandReadRepository readRep
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        var responses = deletedBrands.Select(b => new BrandResponse
-        {
-            Id = b.Id,
-            Name = b.Name,
-            Description = b.Description
-        }).ToList();
-
-        return (responses, null);
+        return (deletedBrands.Adapt<List<BrandResponse>>(), null);
     }
 }

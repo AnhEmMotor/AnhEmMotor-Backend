@@ -2,6 +2,7 @@ using Application.ApiContracts.Brand;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
 using Domain.Helpers;
+using Mapster;
 using MediatR;
 
 namespace Application.Features.Brands.Commands.UpdateBrand;
@@ -21,20 +22,11 @@ public sealed class UpdateBrandCommandHandler(IBrandReadRepository readRepositor
             });
         }
 
-        if (request.Name is not null)
-            brand.Name = request.Name;
-
-        if (request.Description is not null)
-            brand.Description = request.Description;
+        request.Adapt(brand);
 
         updateRepository.Update(brand);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return (new BrandResponse
-        {
-            Id = brand.Id,
-            Name = brand.Name,
-            Description = brand.Description
-        }, null);
+        return (brand.Adapt<BrandResponse>(), null);
     }
 }
