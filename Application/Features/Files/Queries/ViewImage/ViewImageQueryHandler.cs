@@ -1,4 +1,4 @@
-using Application.Interfaces.Repositories.File;
+using Application.Interfaces.Services;
 using Domain.Helpers;
 using MediatR;
 using SixLabors.ImageSharp;
@@ -7,43 +7,38 @@ using SixLabors.ImageSharp.Processing;
 
 namespace Application.Features.Files.Queries.ViewImage;
 
-public sealed class ViewImageQueryHandler(IMediaFileSelectRepository mediaFileSelectRepository, IFileRepository fileRepository)
-    : IRequestHandler<ViewImageQuery, ((Stream fileStream, string contentType)? Data, ErrorResponse? Error)>
+public sealed class ViewImageQueryHandler(IFileStorageService fileStorageService)
+    : IRequestHandler<ViewImageQuery, ((Stream FileStream, string ContentType)? Data, ErrorResponse? Error)>
 {
-    public async Task<((Stream fileStream, string contentType)? Data, ErrorResponse? Error)> Handle(ViewImageQuery request, CancellationToken cancellationToken)
+    public async Task<((Stream FileStream, string ContentType)? Data, ErrorResponse? Error)> Handle(ViewImageQuery request, CancellationToken cancellationToken)
     {
-        var media = await mediaFileSelectRepository.GetByStoredFileNameAsync(request.FileName, cancellationToken).ConfigureAwait(false);
-        if (media is null)
+        var maxWidth = 1200;
+
+        if (request.Width > maxWidth)
         {
-            return (null, new ErrorResponse { Errors = [new ErrorDetail { Message = "File not found." }] });
+            return (null, new ErrorResponse { Errors = [new ErrorDetail { Message = $"Width exceeds maximum allowed size of {maxWidth} pixels." }] });
         }
 
-        var originalRelativePath = Path.Combine("uploads", request.FileName);
-        if (!fileRepository.FileExists(originalRelativePath))
+        var fileResult = await fileStorageService.GetFileAsync(request.StoragePath, cancellationToken).ConfigureAwait(false);
+        if (fileResult == null)
         {
-            return (null, new ErrorResponse { Errors = [new ErrorDetail { Message = "File not found." }] });
+            return (null, new ErrorResponse { Errors = [new ErrorDetail { Message = "Image not found." }] });
         }
 
-        if (request.Width == null)
-        {
-            var originalStream = await fileRepository.ReadFileAsync(originalRelativePath, cancellationToken).ConfigureAwait(false);
-            return ((originalStream!, "image/webp"), null);
-        }
+        var (fileBytes, contentType) = fileResult.Value;
 
         try
         {
-            using var originalStream = await fileRepository.ReadFileAsync(originalRelativePath, cancellationToken).ConfigureAwait(false);
-            if (originalStream == null)
+            using var inputStream = new MemoryStream(fileBytes);
+            using var image = await Image.LoadAsync(inputStream, cancellationToken).ConfigureAwait(false);
+
+            var targetWidth = request.Width ?? maxWidth;
+
+            if (image.Width > targetWidth)
             {
-                return (null, null);
+                var newHeight = (int)((double)targetWidth / image.Width * image.Height);
+                image.Mutate(x => x.Resize(targetWidth, newHeight));
             }
-
-            using var image = await Image.LoadAsync(originalStream, cancellationToken).ConfigureAwait(false);
-
-            var newWidth = request.Width.Value;
-            var newHeight = (int)((double)image.Height / image.Width * newWidth);
-
-            image.Mutate(x => x.Resize(newWidth, newHeight));
 
             var outputStream = new MemoryStream();
             await image.SaveAsWebpAsync(outputStream, new WebpEncoder { Quality = 75 }, cancellationToken).ConfigureAwait(false);
@@ -51,10 +46,9 @@ public sealed class ViewImageQueryHandler(IMediaFileSelectRepository mediaFileSe
             outputStream.Position = 0;
             return ((outputStream, "image/webp"), null);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return (null, new ErrorResponse { Errors = [new ErrorDetail { Message = "Image processing failed." }] });
+            return (null, new ErrorResponse { Errors = [new ErrorDetail { Message = $"Image processing failed: {ex.Message}" }] });
         }
-        
     }
 }

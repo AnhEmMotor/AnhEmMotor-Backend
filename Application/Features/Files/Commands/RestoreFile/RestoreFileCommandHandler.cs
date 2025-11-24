@@ -1,47 +1,41 @@
 using Application.ApiContracts.File;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.File;
+using Application.Interfaces.Repositories.MediaFile;
+using Application.Interfaces.Services;
+using Domain.Enums;
 using Domain.Helpers;
+using Mapster;
 using MediatR;
+using MediaFileEntity = Domain.Entities.MediaFile;
 
 namespace Application.Features.Files.Commands.RestoreFile;
 
 public sealed class RestoreFileCommandHandler(
-    IMediaFileSelectRepository selectRepository,
-    IMediaFileRestoreRepository restoreRepository,
+    IMediaFileReadRepository readRepository,
+    IMediaFileUpdateRepository updateRepository,
+    IFileStorageService fileStorageService,
     IUnitOfWork unitOfWork)
-    : IRequestHandler<RestoreFileCommand, (FileResponse?, ErrorResponse?)>
+    : IRequestHandler<RestoreFileCommand, (MediaFileResponse?, ErrorResponse?)>
 {
-    public async Task<(FileResponse?, ErrorResponse?)> Handle(RestoreFileCommand request, CancellationToken cancellationToken)
+    public async Task<(MediaFileResponse?, ErrorResponse?)> Handle(RestoreFileCommand request, CancellationToken cancellationToken)
     {
-        var mediaFile = await selectRepository.GetByStoredFileNameAsync(request.FileName, cancellationToken, includeDeleted: true).ConfigureAwait(false);
-        
-        if (mediaFile == null)
+        var mediaFile = await readRepository.GetByStoragePathAsync(request.StoragePath, cancellationToken, DataFetchMode.DeletedOnly).ConfigureAwait(false);
+
+        if (mediaFile is null)
         {
             return (null, new ErrorResponse
             {
-                Errors = [new ErrorDetail { Message = $"File '{request.FileName}' không tồn tại trong hệ thống." }]
+                Errors = [new ErrorDetail { Message = "File not found or not deleted." }]
             });
         }
 
-        // Check if file is already active (not deleted)
-        var activeFile = await selectRepository.GetByStoredFileNameAsync(request.FileName, cancellationToken, includeDeleted: false).ConfigureAwait(false);
-        if (activeFile is not null)
-        {
-            return (null, new ErrorResponse
-            {
-                Errors = [new ErrorDetail { Message = $"File '{request.FileName}' đã được khôi phục trước đó." }]
-            });
-        }
-
-        restoreRepository.Restore(mediaFile);
+        // Restore in database
+        updateRepository.Restore(mediaFile);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return (new FileResponse
-        {
-            IsSuccess = true,
-            FileName = mediaFile.OriginalFileName,
-            Url = mediaFile.PublicUrl
-        }, null);
+        var response = mediaFile.Adapt<MediaFileResponse>();
+        response.PublicUrl = fileStorageService.GetPublicUrl(mediaFile.StoragePath);
+
+        return (response, null);
     }
 }

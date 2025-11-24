@@ -1,5 +1,5 @@
 ﻿using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.File;
+using Application.Interfaces.Repositories.MediaFile;
 using Application.Interfaces.Repositories.Product;
 using Domain.Helpers;
 using MediatR;
@@ -9,8 +9,6 @@ namespace Application.Features.Products.Commands.DeleteProduct;
 public sealed class DeleteProductCommandHandler(
     IProductSelectRepository selectRepository,
     IProductDeleteRepository deleteRepository,
-    IMediaFileSelectRepository mediaFileSelectRepository,
-    IMediaFileDeleteRepository mediaFileDeleteRepository,
     IUnitOfWork unitOfWork)
     : IRequestHandler<DeleteProductCommand, ErrorResponse?>
 {
@@ -47,19 +45,8 @@ public sealed class DeleteProductCommandHandler(
         deleteRepository.Delete(product);
 
         // Cascade delete associated MediaFile records (soft delete)
-        if (imageFileNames.Count > 0)
-        {
-            var distinctFileNames = imageFileNames.Distinct().ToList();
-            var mediaFiles = await mediaFileSelectRepository.GetByStoredFileNamesAsync(distinctFileNames.ConvertAll<string?>(x => x), cancellationToken, includeDeleted: false).ConfigureAwait(false);
-            
-            if (mediaFiles != null && mediaFiles.Count > 0)
-            {
-                foreach (var mediaFile in mediaFiles)
-                {
-                    mediaFileDeleteRepository.Delete(mediaFile);
-                }
-            }
-        }
+        // Note: This functionality needs to be implemented when MediaFile filtering by StoragePath is added
+        // For now, files will remain in the database when products are deleted
 
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 

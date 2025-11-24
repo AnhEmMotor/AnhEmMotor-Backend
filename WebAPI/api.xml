@@ -191,72 +191,113 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="T:WebAPI.Controllers.V1.FileController">
+        <member name="T:WebAPI.Controllers.V1.MediaFileController">
             <summary>
-            Quản lý file ảnh trong hệ thống
+            Quản lý tệp media (ảnh, video, tài liệu).
             </summary>
             <param name="mediator"></param>
+            <param name="fileStorageService"></param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.FileController.#ctor(MediatR.IMediator)">
+        <member name="M:WebAPI.Controllers.V1.MediaFileController.#ctor(MediatR.IMediator,Application.Interfaces.Services.IFileStorageService)">
             <summary>
-            Quản lý file ảnh trong hệ thống
+            Quản lý tệp media (ảnh, video, tài liệu).
             </summary>
             <param name="mediator"></param>
+            <param name="fileStorageService"></param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.FileController.ViewImage(System.String,System.Nullable{System.Int32},System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.MediaFileController.GetFiles(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
-            Xem ảnh theo tên file, có thể truyền Width để resize
+            Lấy danh sách tệp media (có phân trang, lọc, sắp xếp).
             </summary>
-            <param name="fileName">Tên file đã lưu (ví dụ: guid.webp)</param>
-            <param name="width">Chiều rộng mong muốn (optional, nếu không truyền sẽ trả về ảnh gốc)</param>
+            <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.FileController.UploadSingleImage(Microsoft.AspNetCore.Http.IFormFile,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.MediaFileController.GetDeletedFiles(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
-            Up 1 ảnh lên hệ thống
+            Lấy danh sách tệp media đã bị xoá (có phân trang, lọc, sắp xếp).
             </summary>
-            <param name="file"></param>
+            <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.FileController.UploadMultipleImages(System.Collections.Generic.List{Microsoft.AspNetCore.Http.IFormFile},System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.MediaFileController.GetFileById(System.Int32,System.Threading.CancellationToken)">
             <summary>
-            Up nhiều ảnh lên hệ thống
+            Lấy thông tin của tệp media được chọn.
             </summary>
-            <param name="files"></param>
+            <param name="id">Mã tệp media cần lấy thông tin.</param>
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.FileController.DeleteFile(System.String,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.MediaFileController.UploadImage(Microsoft.AspNetCore.Http.IFormFile,System.Threading.CancellationToken)">
             <summary>
-            Xoá 1 file theo tên file đã lưu (stored file name)
+            Tải lên một tệp media (ảnh).
             </summary>
-            <param name="fileName">Tên file đã lưu (ví dụ: guid.webp)</param>
+            <param name="file">Tệp ảnh cần upload.</param>
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.FileController.DeleteMultipleFiles(System.Collections.Generic.List{System.String},System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.MediaFileController.UploadManyImages(System.Collections.Generic.List{Microsoft.AspNetCore.Http.IFormFile},System.Threading.CancellationToken)">
             <summary>
-            Xoá nhiều file cùng lúc theo danh sách tên file đã lưu
+            Tải lên nhiều tệp media (ảnh) cùng lúc.
             </summary>
-            <param name="fileNames">Danh sách tên file đã lưu (stored file names)</param>
+            <param name="files">Danh sách tệp ảnh cần upload.</param>
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.FileController.RestoreFile(System.String,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.MediaFileController.DeleteFile(System.String,System.Threading.CancellationToken)">
             <summary>
-            Khôi phục 1 file theo tên file đã lưu (stored file name)
+            Xoá tệp media theo tên file.
             </summary>
-            <param name="fileName">Tên file đã lưu (ví dụ: guid.webp)</param>
+            <param name="storagePath">Tên file đã lưu (GUID.webp).</param>
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.FileController.RestoreMultipleFiles(System.Collections.Generic.List{System.String},System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.MediaFileController.DeleteFiles(Application.ApiContracts.File.DeleteManyMediaFilesRequest,System.Threading.CancellationToken)">
             <summary>
-            Khôi phục nhiều file cùng lúc theo danh sách tên file đã lưu
+            Xoá nhiều tệp media cùng lúc.
             </summary>
-            <param name="fileNames">Danh sách tên file đã lưu (stored file names)</param>
+            <param name="request">Danh sách Id tệp media cần xoá.</param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.MediaFileController.RestoreFile(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Khôi phục lại tệp media đã xoá theo tên file.
+            </summary>
+            <param name="storagePath">Tên file đã lưu (GUID.webp).</param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.MediaFileController.RestoreFiles(Application.ApiContracts.File.RestoreManyMediaFilesRequest,System.Threading.CancellationToken)">
+            <summary>
+            Khôi phục nhiều tệp media đã xoá cùng lúc.
+            </summary>
+            <param name="request">Danh sách Id tệp media cần khôi phục.</param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.MediaFileController.DownloadFile(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Tải xuống tệp media.
+            </summary>
+            <param name="storagePath">Đường dẫn lưu trữ của tệp.</param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.MediaFileController.GetPublicUrl(System.String)">
+            <summary>
+            Lấy Public URL của tệp media để xem trực tiếp.
+            </summary>
+            <param name="storagePath">Đường dẫn lưu trữ của tệp.</param>
+            <returns></returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.MediaFileController.ViewImageWithResize(System.String,System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Xem ảnh với khả năng resize theo kích thước mong muốn.
+            </summary>
+            <param name="storagePath">Đường dẫn lưu trữ của ảnh.</param>
+            <param name="width">Chiều rộng mong muốn (pixel). Nếu không truyền sẽ trả về ảnh gốc.</param>
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>

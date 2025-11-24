@@ -1,20 +1,22 @@
 ﻿using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
-using Application.Interfaces.Repositories.File;
+using Application.Interfaces.Repositories.MediaFile;
 using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.ProductCategory;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Setting;
 using Application.Interfaces.Repositories.Supplier;
+using Application.Interfaces.Services;
 using Application.Sieve;
 using Infrastructure.DBContexts;
 using Infrastructure.Repositories.Brand;
-using Infrastructure.Repositories.File;
+using Infrastructure.Repositories.MediaFile;
 using Infrastructure.Repositories.Product;
 using Infrastructure.Repositories.ProductCategory;
 using Infrastructure.Repositories.ProductVariant;
 using Infrastructure.Repositories.Setting;
 using Infrastructure.Repositories.Supplier;
+using Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -61,12 +63,12 @@ public static class DBContext
 
         services.AddScoped<ISettingRepository, SettingRepository>();
 
-        services.AddScoped<IFileRepository, FileRepository>();
-
+        services.AddScoped<IMediaFileReadRepository, MediaFileReadRepository>();
         services.AddScoped<IMediaFileInsertRepository, MediaFileInsertRepository>();
-        services.AddScoped<IMediaFileSelectRepository, MediaFileSelectRepository>();
+        services.AddScoped<IMediaFileUpdateRepository, MediaFileUpdateRepository>();
         services.AddScoped<IMediaFileDeleteRepository, MediaFileDeleteRepository>();
-        services.AddScoped<IMediaFileRestoreRepository, MediaFileRestoreRepository>();
+
+        services.AddScoped<IFileStorageService, LocalFileStorageService>();
 
         services.AddScoped<IProductVariantUpdateRepository, ProductVariantUpdateRepository>();
 

@@ -92,7 +92,7 @@ public class SupplierController(IMediator mediator) : ControllerBase
     {
         var command = request.Adapt<CreateSupplierCommand>();
         var response = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return CreatedAtAction(nameof(GetSupplierById), new { id = response.Id }, response);
+        return StatusCode(StatusCodes.Status201Created, response);
     }
 
     /// <summary>

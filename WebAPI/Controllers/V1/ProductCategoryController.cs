@@ -82,7 +82,7 @@ public class ProductCategoryController(IMediator mediator) : ControllerBase
     {
         var command = request.Adapt<CreateProductCategoryCommand>();
         var response = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return CreatedAtAction(nameof(GetProductCategoryById), new { id = response.Id }, response);
+        return StatusCode(StatusCodes.Status201Created, response);
     }
 
     /// <summary>

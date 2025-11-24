@@ -3,4 +3,8 @@ using MediatR;
 
 namespace Application.Features.Files.Queries.ViewImage;
 
-public record ViewImageQuery(string FileName, int? Width) : IRequest<((Stream fileStream, string contentType)? Data, ErrorResponse? Error)>;
+public sealed record ViewImageQuery : IRequest<((Stream FileStream, string ContentType)? Data, ErrorResponse? Error)>
+{
+    public string StoragePath { get; init; } = string.Empty;
+    public int? Width { get; init; }
+}
