@@ -1,19 +1,24 @@
 using Application.ApiContracts.Supplier;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Supplier;
+using Domain.Enums;
 using Domain.Helpers;
+using Mapster;
 using MediatR;
 
 namespace Application.Features.Suppliers.Commands.RestoreSupplier;
 
-public sealed class RestoreSupplierCommandHandler(ISupplierSelectRepository selectRepository, ISupplierUpdateRepository updateRepository, IUnitOfWork unitOfWork)
+public sealed class RestoreSupplierCommandHandler(
+    ISupplierReadRepository selectRepository,
+    ISupplierUpdateRepository updateRepository,
+    IUnitOfWork unitOfWork)
     : IRequestHandler<RestoreSupplierCommand, (SupplierResponse? Data, ErrorResponse? Error)>
 {
     public async Task<(SupplierResponse? Data, ErrorResponse? Error)> Handle(RestoreSupplierCommand request, CancellationToken cancellationToken)
     {
-        var supplier = await selectRepository.GetDeletedSuppliersByIdsAsync([request.Id], cancellationToken).ConfigureAwait(false);
+        var supplier = await selectRepository.GetByIdAsync(request.Id, cancellationToken, DataFetchMode.DeletedOnly).ConfigureAwait(false);
 
-        if (supplier.Count == 0)
+        if (supplier == null)
         {
             return (null, new ErrorResponse
             {
@@ -24,14 +29,6 @@ public sealed class RestoreSupplierCommandHandler(ISupplierSelectRepository sele
         updateRepository.Restore(supplier);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return (new SupplierResponse
-        {
-            Id = supplier[0].Id,
-            Name = supplier[0].Name,
-            Address = supplier[0].Address,
-            Phone = supplier[0].Phone,
-            Email = supplier[0].Email,
-            StatusId = supplier[0].StatusId
-        }, null);
+        return (supplier.Adapt<SupplierResponse>(), null);
     }
 }

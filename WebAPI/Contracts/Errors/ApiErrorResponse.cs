@@ -33,7 +33,7 @@ public class ApiErrorResponse(string message)
     /// </summary>
     /// <remarks>The list contains details for each validation error encountered. If no errors are present,
     /// the property may be null or an empty list.</remarks>
-    public List<ValidationErrorDetail>? ValidationErrors { get; set; }
+    public List<ValidationErrorDetail>? Errors { get; set; }
     /// <summary>
     /// Gets or sets the underlying API error response that caused the current error, if any.
     /// </summary>
@@ -88,7 +88,7 @@ public class ApiErrorResponse(string message)
     {
         return new ApiErrorResponse("One or more validation errors occurred.")
         {
-            ValidationErrors = [.. failures.Select(f => new ValidationErrorDetail
+            Errors = [.. failures.Select(f => new ValidationErrorDetail
             {
                 Field = f.PropertyName,
                 Error = f.ErrorMessage

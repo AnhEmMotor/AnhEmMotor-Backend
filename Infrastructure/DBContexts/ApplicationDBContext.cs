@@ -1,4 +1,5 @@
 ﻿using Domain.Entities;
+using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -108,5 +109,16 @@ public class ApplicationDBContext(DbContextOptions<ApplicationDBContext> options
             entity.DeletedAt = null;
             Entry(entity).State = EntityState.Modified;
         }
+    }
+
+    public IQueryable<T> GetQuery<T>(DataFetchMode mode) where T : BaseEntity
+    {
+        return mode switch
+        {
+            DataFetchMode.ActiveOnly => Set<T>(),
+            DataFetchMode.DeletedOnly => DeletedOnly<T>(),
+            DataFetchMode.All => All<T>(),
+            _ => Set<T>()
+        };
     }
 }

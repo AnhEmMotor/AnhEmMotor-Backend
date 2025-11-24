@@ -1,11 +1,12 @@
 using Application.ApiContracts.Supplier;
 using Application.Interfaces.Repositories.Supplier;
 using Domain.Helpers;
+using Mapster;
 using MediatR;
 
 namespace Application.Features.Suppliers.Queries.GetSupplierById;
 
-public sealed class GetSupplierByIdQueryHandler(ISupplierSelectRepository repository)
+public sealed class GetSupplierByIdQueryHandler(ISupplierReadRepository repository)
     : IRequestHandler<GetSupplierByIdQuery, (SupplierResponse? Data, ErrorResponse? Error)>
 {
     public async Task<(SupplierResponse? Data, ErrorResponse? Error)> Handle(GetSupplierByIdQuery request, CancellationToken cancellationToken)
@@ -20,14 +21,6 @@ public sealed class GetSupplierByIdQueryHandler(ISupplierSelectRepository reposi
             });
         }
 
-        return (new SupplierResponse
-        {
-            Id = supplier.Id,
-            Name = supplier.Name,
-            Address = supplier.Address,
-            Phone = supplier.Phone,
-            Email = supplier.Email,
-            StatusId = supplier.StatusId
-        }, null);
+        return (supplier.Adapt<SupplierResponse>(), null);
     }
 }

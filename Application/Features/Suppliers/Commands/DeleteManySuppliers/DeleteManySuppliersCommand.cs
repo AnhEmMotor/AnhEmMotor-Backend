@@ -3,4 +3,7 @@ using MediatR;
 
 namespace Application.Features.Suppliers.Commands.DeleteManySuppliers;
 
-public sealed record DeleteManySuppliersCommand(List<int> Ids) : IRequest<ErrorResponse?>;
+public sealed record DeleteManySuppliersCommand : IRequest<ErrorResponse?>
+{
+    public List<int> Ids { get; init; } = [];
+}

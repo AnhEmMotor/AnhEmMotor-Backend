@@ -11,7 +11,7 @@ public class SupplierUpdateRepository(ApplicationDBContext context) : ISupplierU
         context.Suppliers.Update(supplier);
     }
 
-    public void Update(List<SupplierEntity> suppliers)
+    public void Update(IEnumerable<SupplierEntity> suppliers)
     {
         context.Suppliers.UpdateRange(suppliers);
     }
@@ -21,7 +21,7 @@ public class SupplierUpdateRepository(ApplicationDBContext context) : ISupplierU
         context.Restore(supplier);
     }
 
-    public void Restore(List<SupplierEntity> suppliers)
+    public void Restore(IEnumerable<SupplierEntity> suppliers)
     {
         foreach (var supplier in suppliers)
         {

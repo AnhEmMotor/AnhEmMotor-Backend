@@ -1,12 +1,16 @@
+using Mapster;
+using MediatR;
 using Application.ApiContracts.Supplier;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Supplier;
 using Domain.Helpers;
-using MediatR;
 
 namespace Application.Features.Suppliers.Commands.UpdateSupplierStatus;
 
-public sealed class UpdateSupplierStatusCommandHandler(ISupplierSelectRepository selectRepository, ISupplierUpdateRepository updateRepository, IUnitOfWork unitOfWork)
+public sealed class UpdateSupplierStatusCommandHandler(
+    ISupplierReadRepository selectRepository,
+    ISupplierUpdateRepository updateRepository,
+    IUnitOfWork unitOfWork)
     : IRequestHandler<UpdateSupplierStatusCommand, (SupplierResponse? Data, ErrorResponse? Error)>
 {
     public async Task<(SupplierResponse? Data, ErrorResponse? Error)> Handle(UpdateSupplierStatusCommand request, CancellationToken cancellationToken)
@@ -21,22 +25,11 @@ public sealed class UpdateSupplierStatusCommandHandler(ISupplierSelectRepository
             });
         }
 
-        if (request.Status is not null)
-        {
-            supplier.StatusId = request.Status;
-        }
+        request.Adapt(supplier);
 
         updateRepository.Update(supplier);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return (new SupplierResponse
-        {
-            Id = supplier.Id,
-            Name = supplier.Name,
-            Address = supplier.Address,
-            Phone = supplier.Phone,
-            Email = supplier.Email,
-            StatusId = supplier.StatusId
-        }, null);
+        return (supplier.Adapt<SupplierResponse>(), null);
     }
 }
