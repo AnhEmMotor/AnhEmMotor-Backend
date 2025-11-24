@@ -5,6 +5,6 @@ namespace Application.Interfaces.Repositories.Setting
     public interface ISettingRepository
     {
         Task<IEnumerable<SettingEntity>> GetAllAsync(CancellationToken cancellationToken);
-        void UpsertBatch(IEnumerable<SettingEntity> settings);
+        void Update(IEnumerable<SettingEntity> settings);
     }
 }
