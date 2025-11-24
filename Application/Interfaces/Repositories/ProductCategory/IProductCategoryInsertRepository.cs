@@ -1,9 +1,8 @@
 using CategoryEntity = Domain.Entities.ProductCategory;
 
-namespace Application.Interfaces.Repositories.ProductCategory
+namespace Application.Interfaces.Repositories.ProductCategory;
+
+public interface IProductCategoryInsertRepository
 {
-    public interface IProductCategoryInsertRepository
-    {
-        void Add(CategoryEntity category);
-    }
+    void Add(CategoryEntity category);
 }

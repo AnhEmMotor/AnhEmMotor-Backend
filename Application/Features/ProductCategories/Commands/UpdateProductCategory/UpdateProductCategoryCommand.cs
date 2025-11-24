@@ -4,4 +4,9 @@ using MediatR;
 
 namespace Application.Features.ProductCategories.Commands.UpdateProductCategory;
 
-public sealed record UpdateProductCategoryCommand(int Id, string? Name, string? Description) : IRequest<(ProductCategoryResponse? Data, ErrorResponse? Error)>;
+public sealed record UpdateProductCategoryCommand : IRequest<(ProductCategoryResponse? Data, ErrorResponse? Error)>
+{
+    public int Id { get; init; }
+    public string? Name { get; init; }
+    public string? Description { get; init; }
+}

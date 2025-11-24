@@ -1,11 +1,12 @@
 using Application.ApiContracts.ProductCategory;
 using Application.Interfaces.Repositories.ProductCategory;
 using Domain.Helpers;
+using Mapster;
 using MediatR;
 
 namespace Application.Features.ProductCategories.Queries.GetProductCategoryById;
 
-public sealed class GetProductCategoryByIdQueryHandler(IProductCategorySelectRepository repository)
+public sealed class GetProductCategoryByIdQueryHandler(IProductCategoryReadRepository repository)
     : IRequestHandler<GetProductCategoryByIdQuery, (ProductCategoryResponse? Data, ErrorResponse? Error)>
 {
     public async Task<(ProductCategoryResponse? Data, ErrorResponse? Error)> Handle(GetProductCategoryByIdQuery request, CancellationToken cancellationToken)
@@ -20,11 +21,6 @@ public sealed class GetProductCategoryByIdQueryHandler(IProductCategorySelectRep
             });
         }
 
-        return (new ProductCategoryResponse
-        {
-            Id = category.Id,
-            Name = category.Name,
-            Description = category.Description
-        }, null);
+        return (category.Adapt<ProductCategoryResponse>(), null);
     }
 }

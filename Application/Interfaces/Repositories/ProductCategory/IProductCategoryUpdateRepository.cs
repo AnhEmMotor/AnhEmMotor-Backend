@@ -1,11 +1,10 @@
 using CategoryEntity = Domain.Entities.ProductCategory;
 
-namespace Application.Interfaces.Repositories.ProductCategory
+namespace Application.Interfaces.Repositories.ProductCategory;
+
+public interface IProductCategoryUpdateRepository
 {
-    public interface IProductCategoryUpdateRepository
-    {
-        void Update(CategoryEntity category);
-        void Restore(CategoryEntity category);
-        void Restore(List<CategoryEntity> categories);
-    }
+    void Update(CategoryEntity category);
+    void Restore(CategoryEntity category);
+    void Restore(IEnumerable<CategoryEntity> categories);
 }

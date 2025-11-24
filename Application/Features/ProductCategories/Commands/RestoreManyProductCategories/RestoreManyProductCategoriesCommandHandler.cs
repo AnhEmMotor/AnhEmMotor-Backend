@@ -1,12 +1,14 @@
 using Application.ApiContracts.ProductCategory;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductCategory;
+using Domain.Enums;
 using Domain.Helpers;
+using Mapster;
 using MediatR;
 
 namespace Application.Features.ProductCategories.Commands.RestoreManyProductCategories;
 
-public sealed class RestoreManyProductCategoriesCommandHandler(IProductCategorySelectRepository selectRepository, IProductCategoryUpdateRepository updateRepository, IUnitOfWork unitOfWork)
+public sealed class RestoreManyProductCategoriesCommandHandler(IProductCategoryReadRepository readRepository, IProductCategoryUpdateRepository updateRepository, IUnitOfWork unitOfWork)
     : IRequestHandler<RestoreManyProductCategoriesCommand, (List<ProductCategoryResponse>? Data, ErrorResponse? Error)>
 {
     public async Task<(List<ProductCategoryResponse>? Data, ErrorResponse? Error)> Handle(RestoreManyProductCategoriesCommand request, CancellationToken cancellationToken)
@@ -19,8 +21,8 @@ public sealed class RestoreManyProductCategoriesCommandHandler(IProductCategoryS
         var uniqueIds = request.Ids.Distinct().ToList();
         var errorDetails = new List<ErrorDetail>();
 
-        var allCategories = await selectRepository.GetAllCategoriesByIdsAsync(uniqueIds, cancellationToken).ConfigureAwait(false);
-        var deletedCategories = await selectRepository.GetDeletedCategoriesByIdsAsync(uniqueIds, cancellationToken).ConfigureAwait(false);
+        var allCategories = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.All).ConfigureAwait(false);
+        var deletedCategories = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.DeletedOnly).ConfigureAwait(false);
 
         var allCategoryMap = allCategories.ToDictionary(c => c.Id);
         var deletedCategorySet = deletedCategories.Select(c => c.Id).ToHashSet();
@@ -50,19 +52,12 @@ public sealed class RestoreManyProductCategoriesCommandHandler(IProductCategoryS
             return (null, new ErrorResponse { Errors = errorDetails });
         }
 
-        if (deletedCategories.Count > 0)
+        if (deletedCategories.ToList().Count > 0)
         {
             updateRepository.Restore(deletedCategories);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        var responses = deletedCategories.Select(c => new ProductCategoryResponse
-        {
-            Id = c.Id,
-            Name = c.Name,
-            Description = c.Description
-        }).ToList();
-
-        return (responses, null);
+        return (deletedCategories.Adapt<List<ProductCategoryResponse>>(), null);
     }
 }
