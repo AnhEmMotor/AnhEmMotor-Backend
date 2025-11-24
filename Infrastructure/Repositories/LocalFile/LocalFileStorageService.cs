@@ -3,11 +3,14 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Webp;
+using SixLabors.ImageSharp.Processing;
+using System.IO;
 
-namespace Infrastructure.Services;
+namespace Infrastructure.Repositories.LocalFile;
 
 public class LocalFileStorageService(IWebHostEnvironment environment, IHttpContextAccessor httpContextAccessor) : IFileStorageService
 {
+    private const int DefaultMaxWidth = 1200;
     private readonly string _uploadFolder = Path.Combine(environment.WebRootPath, "uploads");
     private readonly string[] _permittedImageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp"];
     private readonly Dictionary<string, string> _mimeTypeMappings = new()
@@ -149,5 +152,24 @@ public class LocalFileStorageService(IWebHostEnvironment environment, IHttpConte
         {
             throw new ArgumentException("File is corrupted or not a valid image.");
         }
+    }
+
+    public async Task<Stream> ReadImageAsync(Stream inputStream, int? width, CancellationToken cancellationToken)
+    {
+        using var image = await Image.LoadAsync(inputStream, cancellationToken).ConfigureAwait(false);
+
+        var targetWidth = width ?? DefaultMaxWidth;
+
+        if (image.Width > targetWidth)
+        {
+            var newHeight = (int)((double)targetWidth / image.Width * image.Height);
+            image.Mutate(x => x.Resize(targetWidth, newHeight));
+        }
+
+        var outputStream = new MemoryStream();
+        await image.SaveAsWebpAsync(outputStream, new WebpEncoder { Quality = 75 }, cancellationToken).ConfigureAwait(false);
+
+        outputStream.Position = 0;
+        return outputStream;
     }
 }

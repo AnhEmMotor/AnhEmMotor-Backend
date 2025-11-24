@@ -6,7 +6,6 @@ using Domain.Enums;
 using Domain.Helpers;
 using Mapster;
 using MediatR;
-using MediaFileEntity = Domain.Entities.MediaFile;
 
 namespace Application.Features.Files.Commands.RestoreFile;
 
@@ -34,7 +33,7 @@ public sealed class RestoreFileCommandHandler(
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         var response = mediaFile.Adapt<MediaFileResponse>();
-        response.PublicUrl = fileStorageService.GetPublicUrl(mediaFile.StoragePath);
+        response.PublicUrl = fileStorageService.GetPublicUrl(mediaFile.StoragePath!);
 
         return (response, null);
     }
