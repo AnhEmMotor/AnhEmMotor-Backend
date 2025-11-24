@@ -10,4 +10,5 @@ public interface IFileStorageService
     Task<bool> DeleteFilesAsync(IEnumerable<string> storagePaths, CancellationToken cancellationToken);
     string GetPublicUrl(string storagePath);
     Task<(byte[] FileBytes, string ContentType)?> GetFileAsync(string storagePath, CancellationToken cancellationToken);
+    Task<Stream> ReadImageAsync(Stream inputStream, int? width, CancellationToken cancellationToken);
 }

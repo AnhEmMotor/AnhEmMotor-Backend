@@ -10,7 +10,6 @@ using OpenTelemetry.Trace;
 using Sieve.Models;
 using WebAPI.Converters;
 using WebAPI.Middleware;
-using Application.DependencyInjection;
 
 namespace WebAPI.StartupExtensions
 {

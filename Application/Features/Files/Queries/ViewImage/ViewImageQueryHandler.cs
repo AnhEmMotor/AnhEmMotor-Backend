@@ -1,9 +1,6 @@
 using Application.Interfaces.Services;
 using Domain.Helpers;
 using MediatR;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats.Webp;
-using SixLabors.ImageSharp.Processing;
 
 namespace Application.Features.Files.Queries.ViewImage;
 
@@ -12,11 +9,9 @@ public sealed class ViewImageQueryHandler(IFileStorageService fileStorageService
 {
     public async Task<((Stream FileStream, string ContentType)? Data, ErrorResponse? Error)> Handle(ViewImageQuery request, CancellationToken cancellationToken)
     {
-        var maxWidth = 1200;
-
-        if (request.Width > maxWidth)
+        if (request.Width > 1200)
         {
-            return (null, new ErrorResponse { Errors = [new ErrorDetail { Message = $"Width exceeds maximum allowed size of {maxWidth} pixels." }] });
+            return (null, new ErrorResponse { Errors = [new ErrorDetail { Message = "Width exceeds maximum allowed size of 1200 pixels." }] });
         }
 
         var fileResult = await fileStorageService.GetFileAsync(request.StoragePath, cancellationToken).ConfigureAwait(false);
@@ -25,26 +20,14 @@ public sealed class ViewImageQueryHandler(IFileStorageService fileStorageService
             return (null, new ErrorResponse { Errors = [new ErrorDetail { Message = "Image not found." }] });
         }
 
-        var (fileBytes, contentType) = fileResult.Value;
+        var (fileBytes, _) = fileResult.Value;
 
         try
         {
             using var inputStream = new MemoryStream(fileBytes);
-            using var image = await Image.LoadAsync(inputStream, cancellationToken).ConfigureAwait(false);
+            var processedStream = await fileStorageService.ReadImageAsync(inputStream, request.Width, cancellationToken).ConfigureAwait(false);
 
-            var targetWidth = request.Width ?? maxWidth;
-
-            if (image.Width > targetWidth)
-            {
-                var newHeight = (int)((double)targetWidth / image.Width * image.Height);
-                image.Mutate(x => x.Resize(targetWidth, newHeight));
-            }
-
-            var outputStream = new MemoryStream();
-            await image.SaveAsWebpAsync(outputStream, new WebpEncoder { Quality = 75 }, cancellationToken).ConfigureAwait(false);
-
-            outputStream.Position = 0;
-            return ((outputStream, "image/webp"), null);
+            return ((processedStream, "image/webp"), null);
         }
         catch (Exception ex)
         {

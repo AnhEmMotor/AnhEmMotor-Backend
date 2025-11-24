@@ -24,12 +24,11 @@ namespace WebAPI.Controllers.V1;
 /// Quản lý tệp media (ảnh, video, tài liệu).
 /// </summary>
 /// <param name="mediator"></param>
-/// <param name="fileStorageService"></param>
 [ApiVersion("1.0")]
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
-public class MediaFileController(IMediator mediator, IFileStorageService fileStorageService) : ControllerBase
+public class MediaFileController(IMediator mediator) : ControllerBase
 {
     /// <summary>
     /// Lấy danh sách tệp media (có phân trang, lọc, sắp xếp).
@@ -197,41 +196,6 @@ public class MediaFileController(IMediator mediator, IFileStorageService fileSto
         }
 
         return Ok(data);
-    }
-
-    /// <summary>
-    /// Tải xuống tệp media.
-    /// </summary>
-    /// <param name="storagePath">Đường dẫn lưu trữ của tệp.</param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    [NonAction]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> DownloadFile(string storagePath, CancellationToken cancellationToken)
-    {
-        var result = await fileStorageService.GetFileAsync(storagePath, cancellationToken).ConfigureAwait(true);
-
-        if (result == null)
-        {
-            return NotFound();
-        }
-
-        var (fileBytes, contentType) = result.Value;
-        return File(fileBytes, contentType, storagePath);
-    }
-
-    /// <summary>
-    /// Lấy Public URL của tệp media để xem trực tiếp.
-    /// </summary>
-    /// <param name="storagePath">Đường dẫn lưu trữ của tệp.</param>
-    /// <returns></returns>
-    [NonAction]
-    [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
-    public IActionResult GetPublicUrl(string storagePath)
-    {
-        var publicUrl = fileStorageService.GetPublicUrl(storagePath);
-        return Ok(new { PublicUrl = publicUrl });
     }
 
     /// <summary>

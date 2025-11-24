@@ -196,14 +196,12 @@
             Quản lý tệp media (ảnh, video, tài liệu).
             </summary>
             <param name="mediator"></param>
-            <param name="fileStorageService"></param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.MediaFileController.#ctor(MediatR.IMediator,Application.Interfaces.Services.IFileStorageService)">
+        <member name="M:WebAPI.Controllers.V1.MediaFileController.#ctor(MediatR.IMediator)">
             <summary>
             Quản lý tệp media (ảnh, video, tài liệu).
             </summary>
             <param name="mediator"></param>
-            <param name="fileStorageService"></param>
         </member>
         <member name="M:WebAPI.Controllers.V1.MediaFileController.GetFiles(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
@@ -275,21 +273,6 @@
             </summary>
             <param name="request">Danh sách Id tệp media cần khôi phục.</param>
             <param name="cancellationToken"></param>
-            <returns></returns>
-        </member>
-        <member name="M:WebAPI.Controllers.V1.MediaFileController.DownloadFile(System.String,System.Threading.CancellationToken)">
-            <summary>
-            Tải xuống tệp media.
-            </summary>
-            <param name="storagePath">Đường dẫn lưu trữ của tệp.</param>
-            <param name="cancellationToken"></param>
-            <returns></returns>
-        </member>
-        <member name="M:WebAPI.Controllers.V1.MediaFileController.GetPublicUrl(System.String)">
-            <summary>
-            Lấy Public URL của tệp media để xem trực tiếp.
-            </summary>
-            <param name="storagePath">Đường dẫn lưu trữ của tệp.</param>
             <returns></returns>
         </member>
         <member name="M:WebAPI.Controllers.V1.MediaFileController.ViewImageWithResize(System.String,System.Nullable{System.Int32},System.Threading.CancellationToken)">
