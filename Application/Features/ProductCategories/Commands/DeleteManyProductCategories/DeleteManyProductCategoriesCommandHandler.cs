@@ -1,11 +1,12 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductCategory;
+using Domain.Enums;
 using Domain.Helpers;
 using MediatR;
 
 namespace Application.Features.ProductCategories.Commands.DeleteManyProductCategories;
 
-public sealed class DeleteManyProductCategoriesCommandHandler(IProductCategorySelectRepository selectRepository, IProductCategoryDeleteRepository deleteRepository, IUnitOfWork unitOfWork)
+public sealed class DeleteManyProductCategoriesCommandHandler(IProductCategoryReadRepository readRepository, IProductCategoryDeleteRepository deleteRepository, IUnitOfWork unitOfWork)
     : IRequestHandler<DeleteManyProductCategoriesCommand, ErrorResponse?>
 {
     public async Task<ErrorResponse?> Handle(DeleteManyProductCategoriesCommand request, CancellationToken cancellationToken)
@@ -18,8 +19,8 @@ public sealed class DeleteManyProductCategoriesCommandHandler(IProductCategorySe
         var uniqueIds = request.Ids.Distinct().ToList();
         var errorDetails = new List<ErrorDetail>();
 
-        var allCategories = await selectRepository.GetAllCategoriesByIdsAsync(uniqueIds, cancellationToken).ConfigureAwait(false);
-        var activeCategories = await selectRepository.GetActiveCategoriesByIdsAsync(uniqueIds, cancellationToken).ConfigureAwait(false);
+        var allCategories = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.All).ConfigureAwait(false);
+        var activeCategories = await readRepository.GetByIdAsync(uniqueIds, cancellationToken).ConfigureAwait(false);
 
         var allCategoryMap = allCategories.ToDictionary(c => c.Id);
         var activeCategorySet = activeCategories.Select(c => c.Id).ToHashSet();
@@ -49,7 +50,7 @@ public sealed class DeleteManyProductCategoriesCommandHandler(IProductCategorySe
             return new ErrorResponse { Errors = errorDetails };
         }
 
-        if (activeCategories.Count > 0)
+        if (activeCategories.ToList().Count > 0)
         {
             deleteRepository.Delete(activeCategories);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

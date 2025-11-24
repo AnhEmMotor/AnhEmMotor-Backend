@@ -3,4 +3,7 @@ using MediatR;
 
 namespace Application.Features.ProductCategories.Commands.DeleteProductCategory;
 
-public sealed record DeleteProductCategoryCommand(int Id) : IRequest<ErrorResponse?>;
+public sealed record DeleteProductCategoryCommand : IRequest<ErrorResponse?>
+{
+    public int Id { get; init; }
+}

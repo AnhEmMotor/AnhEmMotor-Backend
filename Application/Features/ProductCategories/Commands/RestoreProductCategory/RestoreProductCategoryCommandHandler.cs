@@ -1,49 +1,34 @@
 using Application.ApiContracts.ProductCategory;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductCategory;
+using Domain.Enums;
 using Domain.Helpers;
+using Mapster;
 using MediatR;
 
 namespace Application.Features.ProductCategories.Commands.RestoreProductCategory;
 
 public sealed class RestoreProductCategoryCommandHandler(
-    IProductCategorySelectRepository selectRepository,
-    IProductCategoryRestoreRepository restoreRepository,
+    IProductCategoryReadRepository readRepository,
+    IProductCategoryUpdateRepository updateRepository,
     IUnitOfWork unitOfWork)
     : IRequestHandler<RestoreProductCategoryCommand, (ProductCategoryResponse? Data, ErrorResponse? Error)>
 {
     public async Task<(ProductCategoryResponse? Data, ErrorResponse? Error)> Handle(RestoreProductCategoryCommand request, CancellationToken cancellationToken)
     {
-        var deletedCategories = await selectRepository.GetDeletedCategoriesByIdsAsync([request.Id], cancellationToken).ConfigureAwait(false);
+        var category = await readRepository.GetByIdAsync(request.Id, cancellationToken, DataFetchMode.DeletedOnly).ConfigureAwait(false);
         
-        if (deletedCategories.Count == 0)
+        if (category == null)
         {
-            var category = await selectRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
-            if (category == null)
-            {
-                return (null, new ErrorResponse
-                {
-                    Errors = [new ErrorDetail { Message = $"Danh mục sản phẩm với Id {request.Id} không tồn tại." }]
-                });
-            }
-            
             return (null, new ErrorResponse
             {
-                Errors = [new ErrorDetail { Message = $"Danh mục sản phẩm với Id {request.Id} chưa bị xoá." }]
+                Errors = [new ErrorDetail { Message = $"Product category with Id {request.Id} not found in deleted categories." }]
             });
         }
 
-        var categoryToRestore = deletedCategories[0];
-        restoreRepository.Restore(categoryToRestore);
+        updateRepository.Restore(category);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        var response = new ProductCategoryResponse
-        {
-            Id = categoryToRestore.Id,
-            Name = categoryToRestore.Name,
-            Description = categoryToRestore.Description
-        };
-
-        return (response, null);
+        return (category.Adapt<ProductCategoryResponse>(), null);
     }
 }

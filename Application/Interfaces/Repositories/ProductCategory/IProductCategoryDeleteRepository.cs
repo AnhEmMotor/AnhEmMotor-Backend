@@ -1,10 +1,9 @@
 using CategoryEntity = Domain.Entities.ProductCategory;
 
-namespace Application.Interfaces.Repositories.ProductCategory
+namespace Application.Interfaces.Repositories.ProductCategory;
+
+public interface IProductCategoryDeleteRepository
 {
-    public interface IProductCategoryDeleteRepository
-    {
-        void Delete(CategoryEntity category);
-        void Delete(List<CategoryEntity> categories);
-    }
+    void Delete(CategoryEntity category);
+    void Delete(IEnumerable<CategoryEntity> categories);
 }

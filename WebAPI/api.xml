@@ -274,12 +274,12 @@
         </member>
         <member name="M:WebAPI.Controllers.V1.ProductCategoryController.GetProductCategories(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
-            Lấy danh sách danh mục sản phẩm (có phân trang, lọc, sắp xếp). Nếu không truyền tham số phân trang sẽ trả về tất cả.
+            Lấy danh sách danh mục sản phẩm (có phân trang, lọc, sắp xếp).
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.ProductCategoryController.GetDeletedProductCategories(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
-            Lấy danh sách danh mục sản phẩm đã bị xoá (có phân trang, lọc, sắp xếp). Nếu không truyền tham số phân trang sẽ trả về tất cả.
+            Lấy danh sách danh mục sản phẩm đã bị xoá (có phân trang, lọc, sắp xếp).
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.ProductCategoryController.GetProductCategoryById(System.Int32,System.Threading.CancellationToken)">

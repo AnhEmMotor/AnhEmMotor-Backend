@@ -5,10 +5,18 @@ namespace Application.Sieve
 {
     public static class SieveHelper
     {
-        public static void ApplyDefaultSorting(SieveModel sieveModel, DataFetchMode mode = DataFetchMode.ActiveOnly)
+        public static void ApplyDefaultSorting(SieveModel sieveModel, DataFetchMode mode = DataFetchMode.ActiveOnly, bool isApplyDefaultPageAndPageSize = true)
         {
-            sieveModel.Page ??= 1;
-            sieveModel.PageSize ??= 10;
+            if (isApplyDefaultPageAndPageSize)
+            {
+                sieveModel.Page ??= 1;
+                sieveModel.PageSize ??= 10;
+            }
+            else
+            {
+                sieveModel.Page ??= 1;
+                sieveModel.PageSize ??= int.MaxValue;
+            }
 
             if (!string.IsNullOrWhiteSpace(sieveModel.Sorts))
             {

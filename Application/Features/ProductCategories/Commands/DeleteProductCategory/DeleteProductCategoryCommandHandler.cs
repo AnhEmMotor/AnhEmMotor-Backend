@@ -5,12 +5,12 @@ using MediatR;
 
 namespace Application.Features.ProductCategories.Commands.DeleteProductCategory;
 
-public sealed class DeleteProductCategoryCommandHandler(IProductCategorySelectRepository selectRepository, IProductCategoryDeleteRepository deleteRepository, IUnitOfWork unitOfWork)
+public sealed class DeleteProductCategoryCommandHandler(IProductCategoryReadRepository readRepository, IProductCategoryDeleteRepository deleteRepository, IUnitOfWork unitOfWork)
     : IRequestHandler<DeleteProductCategoryCommand, ErrorResponse?>
 {
     public async Task<ErrorResponse?> Handle(DeleteProductCategoryCommand request, CancellationToken cancellationToken)
     {
-        var category = await selectRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
+        var category = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
 
         if (category == null)
         {

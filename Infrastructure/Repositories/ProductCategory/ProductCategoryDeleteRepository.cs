@@ -11,7 +11,7 @@ public class ProductCategoryDeleteRepository(ApplicationDBContext context) : IPr
         context.ProductCategories.Remove(category);
     }
 
-    public void Delete(List<CategoryEntity> categories)
+    public void Delete(IEnumerable<CategoryEntity> categories)
     {
         context.ProductCategories.RemoveRange(categories);
     }

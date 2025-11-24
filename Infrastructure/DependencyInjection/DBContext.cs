@@ -49,11 +49,10 @@ public static class DBContext
         services.AddScoped<ISupplierUpdateRepository, SupplierUpdateRepository>();
         services.AddScoped<ISupplierDeleteRepository, SupplierDeleteRepository>();
 
-        services.AddScoped<IProductCategorySelectRepository, ProductCategorySelectRepository>();
+        services.AddScoped<IProductCategoryReadRepository, ProductCategoryReadRepository>();
         services.AddScoped<IProductCategoryInsertRepository, ProductCategoryInsertRepository>();
         services.AddScoped<IProductCategoryUpdateRepository, ProductCategoryUpdateRepository>();
         services.AddScoped<IProductCategoryDeleteRepository, ProductCategoryDeleteRepository>();
-        services.AddScoped<IProductCategoryRestoreRepository, ProductCategoryRestoreRepository>();
 
         services.AddScoped<IProductSelectRepository, ProductSelectRepository>();
         services.AddScoped<IProductInsertRepository, ProductInsertRepository>();
