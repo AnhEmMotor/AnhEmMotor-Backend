@@ -3,4 +3,8 @@ using MediatR;
 
 namespace Application.Features.Brands.Commands.CreateBrand;
 
-public sealed record CreateBrandCommand(string? Name, string? Description) : IRequest<BrandResponse>;
+public sealed record CreateBrandCommand : IRequest<BrandResponse>
+{
+    public string? Name { get; init; }
+    public string? Description { get; init; }
+}

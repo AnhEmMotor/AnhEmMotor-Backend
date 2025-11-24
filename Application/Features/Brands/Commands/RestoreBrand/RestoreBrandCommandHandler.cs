@@ -2,6 +2,7 @@ using Application.ApiContracts.Brand;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
 using Domain.Helpers;
+using Mapster;
 using MediatR;
 using Domain.Enums;
 
@@ -25,11 +26,6 @@ public sealed class RestoreBrandCommandHandler(IBrandReadRepository readReposito
         updateRepository.Restore(brand);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return (new BrandResponse
-        {
-            Id = brand.Id,
-            Name = brand.Name,
-            Description = brand.Description
-        }, null);
+        return (brand.Adapt<BrandResponse>(), null);
     }
 }

@@ -1,6 +1,7 @@
 using Application.ApiContracts.Brand;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
+using Mapster;
 using MediatR;
 using BrandEntity = Domain.Entities.Brand;
 
@@ -10,20 +11,11 @@ public sealed class CreateBrandCommandHandler(IBrandInsertRepository repository,
 {
     public async Task<BrandResponse> Handle(CreateBrandCommand request, CancellationToken cancellationToken)
     {
-        var brand = new BrandEntity
-        {
-            Name = request.Name,
-            Description = request.Description
-        };
+        var brand = request.Adapt<BrandEntity>();
 
         repository.Add(brand);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return new BrandResponse
-        {
-            Id = brand.Id,
-            Name = brand.Name,
-            Description = brand.Description
-        };
+        return brand.Adapt<BrandResponse>();
     }
 }
