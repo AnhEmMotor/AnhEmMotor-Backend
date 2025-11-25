@@ -6,10 +6,8 @@ public sealed class UpdateManyProductPricesCommandValidator : AbstractValidator<
 {
     public UpdateManyProductPricesCommandValidator()
     {
-        RuleFor(x => x.Ids)
-            .NotEmpty().WithMessage("Product IDs list cannot be empty.");
+        RuleFor(x => x.Ids).NotEmpty().WithMessage("Product IDs list cannot be empty.");
 
-        RuleFor(x => x.Price)
-            .GreaterThanOrEqualTo(0).WithMessage("Price must be non-negative.");
+        RuleFor(x => x.Price).GreaterThanOrEqualTo(0).WithMessage("Price must be non-negative.");
     }
 }

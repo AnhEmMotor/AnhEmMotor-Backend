@@ -9,12 +9,11 @@ namespace Application.Features.Files.Commands.DeleteManyFiles;
 public sealed class DeleteManyFilesCommandHandler(
     IMediaFileReadRepository readRepository,
     IMediaFileDeleteRepository deleteRepository,
-    IUnitOfWork unitOfWork)
-    : IRequestHandler<DeleteManyFilesCommand, ErrorResponse?>
+    IUnitOfWork unitOfWork) : IRequestHandler<DeleteManyFilesCommand, ErrorResponse?>
 {
     public async Task<ErrorResponse?> Handle(DeleteManyFilesCommand request, CancellationToken cancellationToken)
     {
-        if (request.StoragePaths == null || request.StoragePaths.Count == 0)
+        if(request.StoragePaths == null || request.StoragePaths.Count == 0)
         {
             return null;
         }
@@ -22,41 +21,36 @@ public sealed class DeleteManyFilesCommandHandler(
         var uniquePaths = request.StoragePaths.Distinct().ToList();
         var errorDetails = new List<ErrorDetail>();
 
-        var allFiles = await readRepository.GetByStoragePathsAsync(uniquePaths, cancellationToken, DataFetchMode.All).ConfigureAwait(false);
-        var activeFiles = await readRepository.GetByStoragePathsAsync(uniquePaths, cancellationToken).ConfigureAwait(false);
+        var allFiles = await readRepository.GetByStoragePathsAsync(uniquePaths, cancellationToken, DataFetchMode.All)
+            .ConfigureAwait(false);
+        var activeFiles = await readRepository.GetByStoragePathsAsync(uniquePaths, cancellationToken)
+            .ConfigureAwait(false);
 
         var allFileMap = allFiles.ToDictionary(f => f.StoragePath!);
         var activeFileSet = activeFiles.Select(f => f.StoragePath).ToHashSet();
 
-        foreach (var path in uniquePaths)
+        foreach(var path in uniquePaths)
         {
-            if (!allFileMap.ContainsKey(path))
+            if(!allFileMap.ContainsKey(path))
             {
-                errorDetails.Add(new ErrorDetail
-                {
-                    Field = "StoragePath",
-                    Message = $"File '{path}' not found."
-                });
-            }
-            else if (!activeFileSet.Contains(path))
+                errorDetails.Add(new ErrorDetail { Field = "StoragePath", Message = $"File '{path}' not found." });
+            } else if(!activeFileSet.Contains(path))
             {
-                errorDetails.Add(new ErrorDetail
-                {
-                    Field = "StoragePath",
-                    Message = $"File '{path}' has already been deleted."
-                });
+                errorDetails.Add(
+                    new ErrorDetail { Field = "StoragePath", Message = $"File '{path}' has already been deleted." });
             }
         }
 
-        if (errorDetails.Count > 0)
+        if(errorDetails.Count > 0)
         {
             return new ErrorResponse { Errors = errorDetails };
         }
 
         var storagePaths = activeFiles.Where(f => !string.IsNullOrEmpty(f.StoragePath))
-            .Select(f => f.StoragePath!).ToList();
+            .Select(f => f.StoragePath!)
+            .ToList();
 
-        if (activeFiles.ToList().Count > 0)
+        if(activeFiles.ToList().Count > 0)
         {
             deleteRepository.Delete(activeFiles);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

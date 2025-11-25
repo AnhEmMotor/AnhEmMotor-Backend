@@ -6,10 +6,8 @@ public sealed class UpdateProductPriceCommandValidator : AbstractValidator<Updat
 {
     public UpdateProductPriceCommandValidator()
     {
-        RuleFor(x => x.Id)
-            .GreaterThan(0).WithMessage("Product Id must be greater than 0.");
+        RuleFor(x => x.Id).GreaterThan(0).WithMessage("Product Id must be greater than 0.");
 
-        RuleFor(x => x.Price)
-            .GreaterThanOrEqualTo(0).WithMessage("Price must be non-negative.");
+        RuleFor(x => x.Price).GreaterThanOrEqualTo(0).WithMessage("Price must be non-negative.");
     }
 }

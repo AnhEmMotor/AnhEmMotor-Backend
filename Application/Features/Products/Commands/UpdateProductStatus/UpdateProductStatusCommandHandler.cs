@@ -2,7 +2,6 @@ using Application.ApiContracts.Product;
 using Application.Features.Products.Common;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Product;
-using Application.Interfaces.Repositories.VariantOptionValue;
 using Domain.Helpers;
 using MediatR;
 
@@ -11,17 +10,18 @@ namespace Application.Features.Products.Commands.UpdateProductStatus;
 public sealed class UpdateProductStatusCommandHandler(
     IProductReadRepository readRepository,
     IProductUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork)
-    : IRequestHandler<UpdateProductStatusCommand, (ProductDetailResponse? Data, ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateProductStatusCommand, (ProductDetailResponse? Data, ErrorResponse? Error)>
 {
-    public async Task<(ProductDetailResponse? Data, ErrorResponse? Error)> Handle(UpdateProductStatusCommand command, CancellationToken cancellationToken)
+    public async Task<(ProductDetailResponse? Data, ErrorResponse? Error)> Handle(
+        UpdateProductStatusCommand command,
+        CancellationToken cancellationToken)
     {
         var product = await readRepository.GetByIdWithDetailsAsync(command.Id, cancellationToken).ConfigureAwait(false);
-        if (product == null)
+        if(product == null)
         {
             return (null, new ErrorResponse
             {
-                Errors = [new ErrorDetail { Message = $"Sản phẩm với Id {command.Id} không tồn tại." }]
+                Errors = [ new ErrorDetail { Message = $"Sản phẩm với Id {command.Id} không tồn tại." } ]
             });
         }
 

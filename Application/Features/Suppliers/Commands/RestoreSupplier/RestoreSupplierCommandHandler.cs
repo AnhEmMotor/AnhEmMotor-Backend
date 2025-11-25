@@ -11,18 +11,20 @@ namespace Application.Features.Suppliers.Commands.RestoreSupplier;
 public sealed class RestoreSupplierCommandHandler(
     ISupplierReadRepository readRepository,
     ISupplierUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork)
-    : IRequestHandler<RestoreSupplierCommand, (SupplierResponse? Data, ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<RestoreSupplierCommand, (SupplierResponse? Data, ErrorResponse? Error)>
 {
-    public async Task<(SupplierResponse? Data, ErrorResponse? Error)> Handle(RestoreSupplierCommand request, CancellationToken cancellationToken)
+    public async Task<(SupplierResponse? Data, ErrorResponse? Error)> Handle(
+        RestoreSupplierCommand request,
+        CancellationToken cancellationToken)
     {
-        var supplier = await readRepository.GetByIdAsync(request.Id, cancellationToken, DataFetchMode.DeletedOnly).ConfigureAwait(false);
+        var supplier = await readRepository.GetByIdAsync(request.Id, cancellationToken, DataFetchMode.DeletedOnly)
+            .ConfigureAwait(false);
 
-        if (supplier == null)
+        if(supplier == null)
         {
             return (null, new ErrorResponse
             {
-                Errors = [new ErrorDetail { Message = $"Deleted supplier with Id {request.Id} not found." }]
+                Errors = [ new ErrorDetail { Message = $"Deleted supplier with Id {request.Id} not found." } ]
             });
         }
 

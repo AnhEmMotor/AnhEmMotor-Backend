@@ -7,18 +7,22 @@ using MediatR;
 
 namespace Application.Features.Brands.Commands.UpdateBrand;
 
-public sealed class UpdateBrandCommandHandler(IBrandReadRepository readRepository, IBrandUpdateRepository updateRepository, IUnitOfWork unitOfWork)
-    : IRequestHandler<UpdateBrandCommand, (BrandResponse? Data, ErrorResponse? Error)>
+public sealed class UpdateBrandCommandHandler(
+    IBrandReadRepository readRepository,
+    IBrandUpdateRepository updateRepository,
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateBrandCommand, (BrandResponse? Data, ErrorResponse? Error)>
 {
-    public async Task<(BrandResponse? Data, ErrorResponse? Error)> Handle(UpdateBrandCommand request, CancellationToken cancellationToken)
+    public async Task<(BrandResponse? Data, ErrorResponse? Error)> Handle(
+        UpdateBrandCommand request,
+        CancellationToken cancellationToken)
     {
         var brand = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
 
-        if (brand == null)
+        if(brand == null)
         {
             return (null, new ErrorResponse
             {
-                Errors = [new ErrorDetail { Field = "Id", Message = $"Brand with Id {request.Id} not found." }]
+                Errors = [ new ErrorDetail { Field = "Id", Message = $"Brand with Id {request.Id} not found." } ]
             });
         }
 

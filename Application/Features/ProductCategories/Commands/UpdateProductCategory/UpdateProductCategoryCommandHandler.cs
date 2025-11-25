@@ -7,18 +7,22 @@ using MediatR;
 
 namespace Application.Features.ProductCategories.Commands.UpdateProductCategory;
 
-public sealed class UpdateProductCategoryCommandHandler(IProductCategoryReadRepository readRepository, IProductCategoryUpdateRepository updateRepository, IUnitOfWork unitOfWork)
-    : IRequestHandler<UpdateProductCategoryCommand, (ProductCategoryResponse? Data, ErrorResponse? Error)>
+public sealed class UpdateProductCategoryCommandHandler(
+    IProductCategoryReadRepository readRepository,
+    IProductCategoryUpdateRepository updateRepository,
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateProductCategoryCommand, (ProductCategoryResponse? Data, ErrorResponse? Error)>
 {
-    public async Task<(ProductCategoryResponse? Data, ErrorResponse? Error)> Handle(UpdateProductCategoryCommand request, CancellationToken cancellationToken)
+    public async Task<(ProductCategoryResponse? Data, ErrorResponse? Error)> Handle(
+        UpdateProductCategoryCommand request,
+        CancellationToken cancellationToken)
     {
         var category = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
 
-        if (category == null)
+        if(category == null)
         {
             return (null, new ErrorResponse
             {
-                Errors = [new ErrorDetail { Message = $"Product category with Id {request.Id} not found." }]
+                Errors = [ new ErrorDetail { Message = $"Product category with Id {request.Id} not found." } ]
             });
         }
 

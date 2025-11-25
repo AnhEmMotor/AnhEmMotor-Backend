@@ -1,27 +1,28 @@
-using Mapster;
-using MediatR;
 using Application.ApiContracts.Supplier;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Supplier;
 using Domain.Helpers;
+using Mapster;
+using MediatR;
 
 namespace Application.Features.Suppliers.Commands.UpdateSupplier;
 
 public sealed class UpdateSupplierCommandHandler(
     ISupplierReadRepository readRepository,
     ISupplierUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork)
-    : IRequestHandler<UpdateSupplierCommand, (SupplierResponse? Data, ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateSupplierCommand, (SupplierResponse? Data, ErrorResponse? Error)>
 {
-    public async Task<(SupplierResponse? Data, ErrorResponse? Error)> Handle(UpdateSupplierCommand request, CancellationToken cancellationToken)
+    public async Task<(SupplierResponse? Data, ErrorResponse? Error)> Handle(
+        UpdateSupplierCommand request,
+        CancellationToken cancellationToken)
     {
         var supplier = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
 
-        if (supplier == null)
+        if(supplier == null)
         {
             return (null, new ErrorResponse
             {
-                Errors = [new ErrorDetail { Message = $"Supplier with Id {request.Id} not found." }]
+                Errors = [ new ErrorDetail { Message = $"Supplier with Id {request.Id} not found." } ]
             });
         }
 

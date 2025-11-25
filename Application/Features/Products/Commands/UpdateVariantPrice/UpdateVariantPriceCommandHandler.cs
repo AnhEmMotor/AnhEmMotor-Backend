@@ -11,18 +11,19 @@ namespace Application.Features.Products.Commands.UpdateVariantPrice;
 public sealed class UpdateVariantPriceCommandHandler(
     IProductVariantReadRepository variantReadRepository,
     IProductVariantUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork)
-    : IRequestHandler<UpdateVariantPriceCommand, (ProductVariantLiteResponse? Data, ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateVariantPriceCommand, (ProductVariantLiteResponse? Data, ErrorResponse? Error)>
 {
-    public async Task<(ProductVariantLiteResponse? Data, ErrorResponse? Error)> Handle(UpdateVariantPriceCommand command, CancellationToken cancellationToken)
+    public async Task<(ProductVariantLiteResponse? Data, ErrorResponse? Error)> Handle(
+        UpdateVariantPriceCommand command,
+        CancellationToken cancellationToken)
     {
         var variant = await variantReadRepository.GetByIdWithDetailsAsync(command.VariantId, cancellationToken);
 
-        if (variant == null)
+        if(variant == null)
         {
             return (null, new ErrorResponse
             {
-                Errors = [new ErrorDetail { Message = $"Biến thể với Id {command.VariantId} không tồn tại." }]
+                Errors = [ new ErrorDetail { Message = $"Biến thể với Id {command.VariantId} không tồn tại." } ]
             });
         }
 
@@ -31,11 +32,12 @@ public sealed class UpdateVariantPriceCommandHandler(
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         var optionPairs = variant.VariantOptionValues
-            .Select(vov => new OptionPair
-            {
-                OptionName = vov.OptionValue?.Option?.Name,
-                OptionValue = vov.OptionValue?.Name
-            })
+            .Select(
+                vov => new OptionPair
+                {
+                    OptionName = vov.OptionValue?.Option?.Name,
+                    OptionValue = vov.OptionValue?.Name
+                })
             .ToList();
 
         var stock = variant.InputInfos?.Sum(ii => ii.RemainingCount) ?? 0;
@@ -47,8 +49,7 @@ public sealed class UpdateVariantPriceCommandHandler(
             optionPairs,
             variant.Price,
             variant.CoverImageUrl,
-            stock
-        );
+            stock);
 
         return (response, null);
     }
