@@ -107,8 +107,8 @@
             Represents details about a validation error for a specific field.
             </summary>
             <remarks>
-            Use this class to convey information about which field failed validation and the associated error message. This is
-            typically used in validation result collections to provide structured error feedback.
+            Use this class to convey information about which field failed validation and the associated error message. This
+            is typically used in validation result collections to provide structured error feedback.
             </remarks>
         </member>
         <member name="P:WebAPI.Contracts.Errors.ValidationErrorDetail.Field">
@@ -244,7 +244,7 @@
         </member>
         <member name="M:WebAPI.Controllers.V1.MediaFileController.UploadImage(Microsoft.AspNetCore.Http.IFormFile,System.Threading.CancellationToken)">
             <summary>
-            Tải lên một tệp media (ảnh).
+            Tải lên một tệp ảnh.
             </summary>
             <param name="file">Tệp ảnh cần upload.</param>
             <param name="cancellationToken"></param>
@@ -252,7 +252,7 @@
         </member>
         <member name="M:WebAPI.Controllers.V1.MediaFileController.UploadManyImages(System.Collections.Generic.List{Microsoft.AspNetCore.Http.IFormFile},System.Threading.CancellationToken)">
             <summary>
-            Tải lên nhiều tệp media (ảnh) cùng lúc.
+            Tải lên nhiều ảnh cùng lúc.
             </summary>
             <param name="files">Danh sách tệp ảnh cần upload.</param>
             <param name="cancellationToken"></param>

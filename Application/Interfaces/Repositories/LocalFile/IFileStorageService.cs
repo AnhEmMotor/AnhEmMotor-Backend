@@ -1,13 +1,11 @@
-using Microsoft.AspNetCore.Http;
-
 namespace Application.Interfaces.Repositories.LocalFile;
 
 public interface IFileStorageService
 {
-    Task<(string StoragePath, string FileExtension)> SaveFileAsync(IFormFile file, CancellationToken cancellationToken);
+    Task<(string StoragePath, string FileExtension)> SaveFileAsync(Stream file, CancellationToken cancellationToken);
 
     Task<List<(string StoragePath, string FileExtension)>> SaveFilesAsync(
-        IEnumerable<IFormFile> files,
+        IEnumerable<Stream> files,
         CancellationToken cancellationToken);
 
     bool DeleteFile(string storagePath);

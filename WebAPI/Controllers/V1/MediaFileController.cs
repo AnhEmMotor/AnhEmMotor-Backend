@@ -3,6 +3,8 @@ using Application.Features.Files.Commands.DeleteFile;
 using Application.Features.Files.Commands.DeleteManyFiles;
 using Application.Features.Files.Commands.RestoreFile;
 using Application.Features.Files.Commands.RestoreManyFiles;
+using Application.Features.Files.Commands.UploadImage;
+using Application.Features.Files.Commands.UploadManyImage;
 using Application.Features.Files.Queries.GetDeletedFilesList;
 using Application.Features.Files.Queries.GetFileById;
 using Application.Features.Files.Queries.GetFilesList;
@@ -82,7 +84,7 @@ public class MediaFileController(IMediator mediator) : ControllerBase
     }
 
     /// <summary>
-    /// Tải lên một tệp media (ảnh).
+    /// Tải lên một tệp ảnh.
     /// </summary>
     /// <param name="file">Tệp ảnh cần upload.</param>
     /// <param name="cancellationToken"></param>
@@ -92,13 +94,15 @@ public class MediaFileController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UploadImage(IFormFile file, CancellationToken cancellationToken)
     {
-        var command = new Application.Features.Files.Commands.UploadImage.UploadImageCommand() { File = file };
+        if(file == null)
+            return BadRequest();
+        var command = new UploadImageCommand { FileContent = file.OpenReadStream(), FileName = file.FileName };
         var response = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return StatusCode(StatusCodes.Status201Created, response);
     }
 
     /// <summary>
-    /// Tải lên nhiều tệp media (ảnh) cùng lúc.
+    /// Tải lên nhiều ảnh cùng lúc.
     /// </summary>
     /// <param name="files">Danh sách tệp ảnh cần upload.</param>
     /// <param name="cancellationToken"></param>
@@ -108,7 +112,18 @@ public class MediaFileController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UploadManyImages(List<IFormFile> files, CancellationToken cancellationToken)
     {
-        var command = new Application.Features.Files.Commands.UploadManyImage.UploadManyImageCommand { Files = files };
+        var fileDtos = new List<FileUploadDto>();
+
+        foreach(var file in files)
+        {
+            if(file.Length > 0)
+            {
+                fileDtos.Add(new FileUploadDto(file.OpenReadStream(), file.FileName));
+            }
+        }
+
+        var command = new UploadManyImageCommand { Files = fileDtos };
+
         var responses = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return Ok(responses);
     }

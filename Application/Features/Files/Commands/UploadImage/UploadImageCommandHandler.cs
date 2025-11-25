@@ -14,12 +14,14 @@ public sealed class UploadImageCommandHandler(
 {
     public async Task<MediaFileResponse> Handle(UploadImageCommand request, CancellationToken cancellationToken)
     {
-        if(request.File == null || request.File.Length == 0)
+        if(request.FileContent == null || request.FileContent.Length == 0)
         {
             throw new ArgumentException("File is required");
         }
 
-        var (storagePath, fileExtension) = await fileStorageService.SaveFileAsync(request.File, cancellationToken)
+        var (storagePath, fileExtension) = await fileStorageService.SaveFileAsync(
+            request.FileContent,
+            cancellationToken)
             .ConfigureAwait(false);
 
         var compressedFileResult = await fileStorageService.GetFileAsync(storagePath, cancellationToken)
@@ -30,7 +32,7 @@ public sealed class UploadImageCommandHandler(
         {
             StorageType = "local",
             StoragePath = storagePath,
-            OriginalFileName = request.File.FileName,
+            OriginalFileName = request.FileName,
             ContentType = "image/webp",
             FileExtension = fileExtension,
             FileSize = actualFileSize
