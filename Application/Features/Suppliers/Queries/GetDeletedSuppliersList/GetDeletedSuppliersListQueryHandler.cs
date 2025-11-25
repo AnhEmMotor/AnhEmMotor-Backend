@@ -10,7 +10,7 @@ namespace Application.Features.Suppliers.Queries.GetDeletedSuppliersList;
 
 public sealed class GetDeletedSuppliersListQueryHandler(
     ISupplierReadRepository repository,
-    ICustomSievePaginator paginator) : IRequestHandler<GetDeletedSuppliersListQuery, PagedResult<SupplierResponse>>
+    IPaginator paginator) : IRequestHandler<GetDeletedSuppliersListQuery, PagedResult<SupplierResponse>>
 {
     public async Task<PagedResult<SupplierResponse>> Handle(
         GetDeletedSuppliersListQuery request,

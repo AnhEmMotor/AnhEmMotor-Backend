@@ -11,6 +11,7 @@ using Application.Interfaces.Repositories.Setting;
 using Application.Interfaces.Repositories.Supplier;
 using Application.Interfaces.Repositories.VariantOptionValue;
 using Infrastructure.DBContexts;
+using Infrastructure.Repositories;
 using Infrastructure.Repositories.Brand;
 using Infrastructure.Repositories.LocalFile;
 using Infrastructure.Repositories.MediaFile;
@@ -86,6 +87,8 @@ public static class DBContext
         services.AddScoped<IMediaFileDeleteRepository, MediaFileDeleteRepository>();
 
         services.AddScoped<IFileStorageService, LocalFileStorageService>();
+
+        services.AddScoped<IPaginator, SievePaginator>();
 
         return services;
     }

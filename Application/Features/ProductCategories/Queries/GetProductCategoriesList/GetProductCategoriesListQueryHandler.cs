@@ -9,7 +9,7 @@ namespace Application.Features.ProductCategories.Queries.GetProductCategoriesLis
 
 public sealed class GetProductCategoriesListQueryHandler(
     IProductCategoryReadRepository repository,
-    ICustomSievePaginator paginator) : IRequestHandler<GetProductCategoriesListQuery, PagedResult<ProductCategoryResponse>>
+    IPaginator paginator) : IRequestHandler<GetProductCategoriesListQuery, PagedResult<ProductCategoryResponse>>
 {
     public async Task<PagedResult<ProductCategoryResponse>> Handle(
         GetProductCategoriesListQuery request,

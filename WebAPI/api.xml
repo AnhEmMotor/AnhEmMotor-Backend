@@ -675,7 +675,7 @@
         </member>
         <member name="T:Program">
             <summary>
-            Đầu vào của chương trình! Bạn không cần quan tâm đến đây!
+            Auto-generated public partial Program class for top-level statement apps.
             </summary>
         </member>
         <member name="M:Microsoft.AspNetCore.OpenApi.Generated.DocumentationCommentIdHelper.CreateDocumentationId(System.Type)">
