@@ -1,7 +1,7 @@
 using Application.ApiContracts.Product;
-using Application.Features.Products.Common;
 using Application.Interfaces.Repositories.Product;
 using Domain.Shared;
+using Mapster;
 using MediatR;
 
 namespace Application.Features.Products.Queries.GetDeletedProductsList;
@@ -17,7 +17,7 @@ public sealed class GetDeletedProductsListQueryHandler(IProductReadRepository re
 
         var (products, totalCount) = await repository.GetPagedDeletedProductsAsync(page, pageSize, cancellationToken);
 
-        var responses = products.Select(ProductResponseMapper.BuildProductDetailResponse).ToList();
+        var responses = products.Select(p => p.Adapt<ProductDetailResponse>()).ToList();
 
         return new PagedResult<ProductDetailResponse>(responses, totalCount, page, pageSize);
     }

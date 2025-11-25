@@ -1,8 +1,7 @@
-﻿using Application.ApiContracts.Product;
-using Application.ApiContracts.Product.Common;
-using Application.Features.Products.Common;
+﻿using Application.ApiContracts.Product.Common;
 using Application.Interfaces.Repositories.ProductVariant;
 using Domain.Shared;
+using Mapster;
 using MediatR;
 
 namespace Application.Features.Products.Queries.GetActiveVariantLiteList;
@@ -18,30 +17,7 @@ public sealed class GetActiveVariantLiteListQueryHandler(IProductVariantReadRepo
 
         var (variants, totalCount) = await repository.GetPagedVariantsAsync(page, pageSize, cancellationToken);
 
-        var responses = variants.Select(
-            v =>
-            {
-                var optionPairs = v.VariantOptionValues
-                    .Select(
-                        vov => new OptionPair
-                            {
-                                OptionName = vov.OptionValue?.Option?.Name,
-                                OptionValue = vov.OptionValue?.Name
-                            })
-                    .ToList();
-
-                var stock = v.InputInfos?.Sum(ii => ii.RemainingCount) ?? 0;
-
-                return ProductResponseMapper.BuildVariantLiteResponse(
-                    v.Id,
-                    v.Product?.Id,
-                    v.Product?.Name,
-                    optionPairs,
-                    v.Price,
-                    v.CoverImageUrl,
-                    stock);
-            })
-            .ToList();
+        var responses = variants.Select(v => v.Adapt<ProductVariantLiteResponse>()).ToList();
 
         return new PagedResult<ProductVariantLiteResponse>(responses, totalCount, page, pageSize);
     }

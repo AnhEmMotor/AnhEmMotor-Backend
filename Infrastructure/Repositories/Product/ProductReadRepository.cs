@@ -1,6 +1,4 @@
-﻿using Application.ApiContracts.Product;
-using Application.Features.Products.Common;
-using Application.Interfaces.Repositories.Product;
+﻿using Application.Interfaces.Repositories.Product;
 using Domain.Enums;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
@@ -113,13 +111,16 @@ public class ProductReadRepository(ApplicationDBContext context) : IProductReadR
         return (items, totalCount);
     }
 
-    public async Task<(List<ProductDetailResponse> Items, int TotalCount)> GetPagedProductDetailsAsync(
-        ProductFilter filter,
+    public async Task<(List<ProductEntity> Items, int TotalCount)> GetPagedProductsAsync(
+        string? search,
+        List<string> statusIds,
+        int page,
+        int pageSize,
         CancellationToken cancellationToken)
     {
-        var page = Math.Max(filter.Page, 1);
-        var pageSize = Math.Max(filter.PageSize, 1);
-        var searchPattern = string.IsNullOrWhiteSpace(filter.Search) ? null : $"%{filter.Search.Trim()}%";
+        var normalizedPage = Math.Max(page, 1);
+        var normalizedPageSize = Math.Max(pageSize, 1);
+        var searchPattern = string.IsNullOrWhiteSpace(search) ? null : $"%{search.Trim()}%";
 
         // 1. Base Query
         var query = context.GetQuery<ProductEntity>(DataFetchMode.ActiveOnly)
@@ -136,19 +137,15 @@ public class ProductReadRepository(ApplicationDBContext context) : IProductReadR
         }
 
         // 3. Filter (Status)
-        if (filter.StatusIds != null && filter.StatusIds.Count > 0)
+        if (statusIds != null && statusIds.Count > 0)
         {
-            query = query.Where(p => p.StatusId != null && filter.StatusIds.Contains(p.StatusId));
+            query = query.Where(p => p.StatusId != null && statusIds.Contains(p.StatusId));
         }
 
         // 4. Count Total
         var totalCount = await query.CountAsync(cancellationToken);
 
-        // 5. Fetch Data (Projection)
-        // Ở đây tôi dùng chiến lược: Fetch Entity + Include rồi Map Memory.
-        // Lý do: Map thẳng ra DTO phức tạp (VariantRow) bằng LINQ to SQL đôi khi bị hạn chế hoặc lỗi dịch SQL.
-        // Fetch Entity + SplitQuery là an toàn và hiệu năng đủ tốt.
-
+        // 5. Fetch Data
         var entities = await query
             .Include(p => p.ProductCategory)
             .Include(p => p.Brand)
@@ -164,15 +161,11 @@ public class ProductReadRepository(ApplicationDBContext context) : IProductReadR
                     .ThenInclude(vov => vov.OptionValue)
                         .ThenInclude(ov => ov!.Option)
             .OrderByDescending(p => p.CreatedAt)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
+            .Skip((normalizedPage - 1) * normalizedPageSize)
+            .Take(normalizedPageSize)
             .AsSplitQuery()
             .ToListAsync(cancellationToken);
 
-        // 6. Map to DTO (In-Memory)
-        // Logic tính Stock/Booked nằm trong Mapper hoặc Helper
-        var items = entities.Select(p => ProductResponseMapper.BuildProductDetailResponse(p)).ToList();
-
-        return (items, totalCount);
+        return (entities, totalCount);
     }
 }

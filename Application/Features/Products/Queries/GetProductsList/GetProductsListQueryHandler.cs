@@ -1,7 +1,7 @@
 using Application.ApiContracts.Product;
-using Application.Features.Products.Common;
 using Application.Interfaces.Repositories.Product;
 using Domain.Shared;
+using Mapster;
 using MediatR;
 
 namespace Application.Features.Products.Queries.GetProductsList;
@@ -12,16 +12,21 @@ public sealed class GetProductsListQueryHandler(IProductReadRepository readRepos
         GetProductsListQuery request,
         CancellationToken cancellationToken)
     {
-        var filter = new ProductFilter
-        {
-            Page = request.Page,
-            PageSize = request.PageSize,
-            Search = request.Search,
-            StatusIds = ProductResponseMapper.NormalizeStatuses(request.StatusIds)
-        };
+        var normalizedStatusIds = request.StatusIds
+            .Where(s => !string.IsNullOrWhiteSpace(s))
+            .Select(s => s.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
 
-        var (items, totalCount) = await readRepository.GetPagedProductDetailsAsync(filter, cancellationToken);
+        var (entities, totalCount) = await readRepository.GetPagedProductsAsync(
+            request.Search,
+            normalizedStatusIds,
+            request.Page,
+            request.PageSize,
+            cancellationToken);
 
-        return new PagedResult<ProductDetailResponse>(items, totalCount, filter.Page, filter.PageSize);
+        var items = entities.Select(e => e.Adapt<ProductDetailResponse>()).ToList();
+
+        return new PagedResult<ProductDetailResponse>(items, totalCount, request.Page, request.PageSize);
     }
 }

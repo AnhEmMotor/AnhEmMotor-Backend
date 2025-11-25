@@ -55,36 +55,4 @@ public sealed record CreateProductCommand : IRequest<(ProductDetailResponse? Dat
     public string? CompressionRatio { get; init; }
 
     public List<ProductVariantWriteRequest> Variants { get; init; } = [];
-
-    public static CreateProductCommand FromRequest(CreateProductRequest request)
-    {
-        return new CreateProductCommand
-        {
-            Name = request.Name,
-            CategoryId = request.CategoryId,
-            BrandId = request.BrandId,
-            StatusId = request.StatusId,
-            Description = request.Description,
-            Weight = request.Weight,
-            Dimensions = request.Dimensions,
-            Wheelbase = request.Wheelbase,
-            SeatHeight = request.SeatHeight,
-            GroundClearance = request.GroundClearance,
-            FuelCapacity = request.FuelCapacity,
-            TireSize = request.TireSize,
-            FrontSuspension = request.FrontSuspension,
-            RearSuspension = request.RearSuspension,
-            EngineType = request.EngineType,
-            MaxPower = request.MaxPower,
-            OilCapacity = request.OilCapacity,
-            FuelConsumption = request.FuelConsumption,
-            TransmissionType = request.TransmissionType,
-            StarterSystem = request.StarterSystem,
-            MaxTorque = request.MaxTorque,
-            Displacement = request.Displacement,
-            BoreStroke = request.BoreStroke,
-            CompressionRatio = request.CompressionRatio,
-            Variants = request.Variants ?? []
-        };
-    }
 }
