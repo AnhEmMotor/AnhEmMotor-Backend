@@ -1,4 +1,3 @@
-using Application.ApiContracts.Product;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
 using Application.Interfaces.Repositories.OptionValue;
@@ -23,16 +22,17 @@ public sealed class UpdateProductCommandHandler(
     IOptionValueInsertRepository optionValueInsertRepository,
     IProductUpdateRepository updateRepository,
     IProductVarientDeleteRepository productVarientDeleteRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateProductCommand, (ProductDetailResponse? Data, ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateProductCommand, (ApiContracts.Product.Responses.ProductDetailResponse? Data, ErrorResponse? Error)>
 {
-    public async Task<(ProductDetailResponse? Data, ErrorResponse? Error)> Handle(
+    public async Task<(ApiContracts.Product.Responses.ProductDetailResponse? Data, ErrorResponse? Error)> Handle(
         UpdateProductCommand command,
         CancellationToken cancellationToken)
     {
         var errors = new List<ErrorDetail>();
         var request = command.Request;
 
-        var product = await productReadRepository.GetByIdWithDetailsAsync(command.Id, cancellationToken);
+        var product = await productReadRepository.GetByIdWithDetailsAsync(command.Id, cancellationToken)
+            .ConfigureAwait(false);
 
         if(product == null)
         {
@@ -44,7 +44,8 @@ public sealed class UpdateProductCommandHandler(
 
         if(request.CategoryId.HasValue)
         {
-            var category = await productCategoryReadRepository.GetByIdAsync(request.CategoryId.Value, cancellationToken);
+            var category = await productCategoryReadRepository.GetByIdAsync(request.CategoryId.Value, cancellationToken)
+                .ConfigureAwait(false);
             if(category == null)
             {
                 errors.Add(
@@ -152,7 +153,8 @@ public sealed class UpdateProductCommandHandler(
         var existingOptionValues = await optionValueReadRepository.GetByIdAndNameAsync(
             optionIdsToFetch,
             namesToFetch,
-            cancellationToken);
+            cancellationToken)
+            .ConfigureAwait(false);
 
         var inputVariants = request.Variants ?? [];
         var currentVariants = product.ProductVariants.ToList();
@@ -193,13 +195,14 @@ public sealed class UpdateProductCommandHandler(
                 existingOptionValues,
                 optionValueInsertRepository,
                 unitOfWork,
-                cancellationToken);
+                cancellationToken)
+                .ConfigureAwait(false);
         }
 
         updateRepository.Update(product);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        var response = product.Adapt<ProductDetailResponse>();
+        var response = product.Adapt<ApiContracts.Product.Responses.ProductDetailResponse>();
         return (response, null);
     }
 
@@ -234,7 +237,7 @@ public sealed class UpdateProductCommandHandler(
             {
                 var newOv = new OptionValueEntity { OptionId = optionId, Name = name };
                 insertRepo.Add(newOv);
-                await uow.SaveChangesAsync(ct);
+                await uow.SaveChangesAsync(ct).ConfigureAwait(false);
 
                 targetOptionValueIds.Add(newOv.Id);
                 preLoadedOptionValues.Add(newOv);

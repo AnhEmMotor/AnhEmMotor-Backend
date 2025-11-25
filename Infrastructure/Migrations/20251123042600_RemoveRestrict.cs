@@ -4,15 +4,13 @@
 
 namespace Infrastructure.Migrations
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public partial class RemoveRestrict : Migration
     {
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_ProductVariant_Product_ProductId",
-                table: "ProductVariant");
+            migrationBuilder.DropForeignKey(name: "FK_ProductVariant_Product_ProductId", table: "ProductVariant");
 
             migrationBuilder.DropForeignKey(
                 name: "FK_VariantOptionValue_ProductVariant_VariantId",
@@ -35,12 +33,10 @@ namespace Infrastructure.Migrations
                 onDelete: ReferentialAction.Cascade);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_ProductVariant_Product_ProductId",
-                table: "ProductVariant");
+            migrationBuilder.DropForeignKey(name: "FK_ProductVariant_Product_ProductId", table: "ProductVariant");
 
             migrationBuilder.DropForeignKey(
                 name: "FK_VariantOptionValue_ProductVariant_VariantId",

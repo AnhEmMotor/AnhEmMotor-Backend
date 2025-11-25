@@ -16,8 +16,11 @@ public abstract class ProductWriteRequestBase
     public string? StatusId { get; set; }
 
     public string? Description { get; set; }
+
     public decimal? Weight { get; set; }
+
     public string? Dimensions { get; set; }
+
     public string? Wheelbase { get; set; }
 
     [JsonPropertyName("seat_height")]

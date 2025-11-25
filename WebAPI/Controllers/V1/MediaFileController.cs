@@ -3,8 +3,6 @@ using Application.Features.Files.Commands.DeleteFile;
 using Application.Features.Files.Commands.DeleteManyFiles;
 using Application.Features.Files.Commands.RestoreFile;
 using Application.Features.Files.Commands.RestoreManyFiles;
-using Application.Features.Files.Commands.UploadFile;
-using Application.Features.Files.Commands.UploadManyFiles;
 using Application.Features.Files.Queries.GetDeletedFilesList;
 using Application.Features.Files.Queries.GetFileById;
 using Application.Features.Files.Queries.GetFilesList;
@@ -37,7 +35,9 @@ public class MediaFileController(IMediator mediator) : ControllerBase
     /// <returns></returns>
     [NonAction]
     [ProducesResponseType(typeof(PagedResult<MediaFileResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetFiles([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetFilesAsync(
+        [FromQuery] SieveModel sieveModel,
+        CancellationToken cancellationToken)
     {
         var query = new GetFilesListQuery(sieveModel);
         var pagedResult = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
@@ -52,7 +52,9 @@ public class MediaFileController(IMediator mediator) : ControllerBase
     /// <returns></returns>
     [NonAction]
     [ProducesResponseType(typeof(PagedResult<MediaFileResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetDeletedFiles([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetDeletedFilesAsync(
+        [FromQuery] SieveModel sieveModel,
+        CancellationToken cancellationToken)
     {
         var query = new GetDeletedFilesListQuery(sieveModel);
         var pagedResult = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
@@ -68,11 +70,11 @@ public class MediaFileController(IMediator mediator) : ControllerBase
     [NonAction]
     [ProducesResponseType(typeof(MediaFileResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetFileById(int id, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetFileByIdAsync(int id, CancellationToken cancellationToken)
     {
         var query = new GetFileByIdQuery(id);
         var (data, error) = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-        if (error != null)
+        if(error != null)
         {
             return NotFound(error);
         }
@@ -90,7 +92,7 @@ public class MediaFileController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UploadImage(IFormFile file, CancellationToken cancellationToken)
     {
-        var command = new UploadImageCommand() { File = file };
+        var command = new Application.Features.Files.Commands.UploadImage.UploadImageCommand() { File = file };
         var response = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return StatusCode(StatusCodes.Status201Created, response);
     }
@@ -106,7 +108,7 @@ public class MediaFileController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UploadManyImages(List<IFormFile> files, CancellationToken cancellationToken)
     {
-        var command = new UploadManyImageCommand { Files = files };
+        var command = new Application.Features.Files.Commands.UploadManyImage.UploadManyImageCommand { Files = files };
         var responses = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return Ok(responses);
     }
@@ -124,7 +126,7 @@ public class MediaFileController(IMediator mediator) : ControllerBase
     {
         var command = new DeleteFileCommand() with { StoragePath = storagePath };
         var error = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if (error != null)
+        if(error != null)
         {
             return NotFound(error);
         }
@@ -140,12 +142,14 @@ public class MediaFileController(IMediator mediator) : ControllerBase
     [HttpDelete("delete-many")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> DeleteFiles([FromBody] DeleteManyMediaFilesRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> DeleteFiles(
+        [FromBody] DeleteManyMediaFilesRequest request,
+        CancellationToken cancellationToken)
     {
         var command = request.Adapt<DeleteManyFilesCommand>();
         var error = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
 
-        if (error != null)
+        if(error != null)
         {
             return BadRequest(error);
         }
@@ -167,7 +171,7 @@ public class MediaFileController(IMediator mediator) : ControllerBase
         var command = new RestoreFileCommand() with { StoragePath = storagePath };
         var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
 
-        if (error != null)
+        if(error != null)
         {
             return NotFound(error);
         }
@@ -184,12 +188,14 @@ public class MediaFileController(IMediator mediator) : ControllerBase
     [HttpPost("restore-many")]
     [ProducesResponseType(typeof(List<MediaFileResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> RestoreFiles([FromBody] RestoreManyMediaFilesRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> RestoreFiles(
+        [FromBody] RestoreManyMediaFilesRequest request,
+        CancellationToken cancellationToken)
     {
         var command = request.Adapt<RestoreManyFilesCommand>();
         var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
 
-        if (error != null)
+        if(error != null)
         {
             return BadRequest(error);
         }
@@ -208,24 +214,23 @@ public class MediaFileController(IMediator mediator) : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> ViewImageWithResize(string storagePath, [FromQuery] int? width, CancellationToken cancellationToken)
+    public async Task<IActionResult> ViewImageWithResize(
+        string storagePath,
+        [FromQuery] int? width,
+        CancellationToken cancellationToken)
     {
-        var query = new ViewImageQuery
-        {
-            StoragePath = storagePath,
-            Width = width
-        };
+        var query = new ViewImageQuery { StoragePath = storagePath, Width = width };
 
         var (data, error) = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
 
-        if (error != null)
+        if(error != null)
         {
             return NotFound(error);
         }
 
-        if (data == null)
+        if(data == null)
         {
-            return NotFound(new ErrorResponse { Errors = [new ErrorDetail { Message = "Image not found." }] });
+            return NotFound(new ErrorResponse { Errors = [ new ErrorDetail { Message = "Image not found." } ] });
         }
 
         var (fileStream, contentType) = data.Value;

@@ -2,7 +2,7 @@ using Application.ApiContracts.File;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
-namespace Application.Features.Files.Commands.UploadManyFiles;
+namespace Application.Features.Files.Commands.UploadManyImage;
 
 public sealed record UploadManyImageCommand : IRequest<List<MediaFileResponse>>
 {

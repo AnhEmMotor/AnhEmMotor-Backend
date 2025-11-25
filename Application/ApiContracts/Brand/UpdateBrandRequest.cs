@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Application.ApiContracts.Brand
+﻿namespace Application.ApiContracts.Brand
 {
     public class UpdateBrandRequest
     {

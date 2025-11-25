@@ -1,10 +1,11 @@
 using System.Text.Json.Serialization;
 
-namespace Application.ApiContracts.Product;
+namespace Application.ApiContracts.Product.Common;
 
 public class ProductVariantWriteRequest
 {
     public int? Id { get; set; }
+
     public long? Price { get; set; }
 
     [JsonPropertyName("url")]

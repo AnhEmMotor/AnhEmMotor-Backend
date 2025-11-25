@@ -21,7 +21,8 @@ public sealed class GetFilesListQueryHandler(
         var result = await paginator.ApplyAsync<MediaFileEntity, MediaFileResponse>(
             query,
             request.SieveModel,
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
 
         if(result.Items == null || result.Items.Count == 0)
         {

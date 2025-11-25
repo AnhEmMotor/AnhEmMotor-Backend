@@ -5,14 +5,5 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Remove="Exceptions\**" />
-    <Compile Remove="IdentityEntities\**" />
-    <EmbeddedResource Remove="Exceptions\**" />
-    <EmbeddedResource Remove="IdentityEntities\**" />
-    <None Remove="Exceptions\**" />
-    <None Remove="IdentityEntities\**" />
-  </ItemGroup>
   
 </Project>

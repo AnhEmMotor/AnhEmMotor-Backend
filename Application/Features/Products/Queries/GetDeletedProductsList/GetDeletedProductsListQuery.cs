@@ -1,11 +1,10 @@
-using Application.ApiContracts.Product;
 using Domain.Shared;
 using MediatR;
 using Sieve.Models;
 
 namespace Application.Features.Products.Queries.GetDeletedProductsList;
 
-public sealed record GetDeletedProductsListQuery : IRequest<PagedResult<ProductDetailResponse>>
+public sealed record GetDeletedProductsListQuery : IRequest<PagedResult<ApiContracts.Product.Responses.ProductDetailResponse>>
 {
     public int Page { get; init; } = 1;
 

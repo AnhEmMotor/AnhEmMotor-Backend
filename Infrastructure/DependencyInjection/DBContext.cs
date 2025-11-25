@@ -35,14 +35,17 @@ public static class DBContext
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddDbContext<ApplicationDBContext>(options =>
-        {
-            options.UseSqlServer(configuration.GetConnectionString("StringConnection"), b =>
+        services.AddDbContext<ApplicationDBContext>(
+            options =>
             {
-                b.MigrationsAssembly("Infrastructure");
-                b.CommandTimeout(2);
+                options.UseSqlServer(
+                    configuration.GetConnectionString("StringConnection"),
+                    b =>
+                    {
+                        b.MigrationsAssembly("Infrastructure");
+                        b.CommandTimeout(2);
+                    });
             });
-        });
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 

@@ -46,10 +46,6 @@ public sealed class DeleteManyFilesCommandHandler(
             return new ErrorResponse { Errors = errorDetails };
         }
 
-        var storagePaths = activeFiles.Where(f => !string.IsNullOrEmpty(f.StoragePath))
-            .Select(f => f.StoragePath!)
-            .ToList();
-
         if(activeFiles.ToList().Count > 0)
         {
             deleteRepository.Delete(activeFiles);

@@ -23,7 +23,8 @@ public sealed class GetDeletedFilesListQueryHandler(
             query,
             request.SieveModel,
             DataFetchMode.DeletedOnly,
-            cancellationToken);
+            cancellationToken)
+            .ConfigureAwait(false);
 
         if(result.Items == null || result.Items.Count == 0)
         {

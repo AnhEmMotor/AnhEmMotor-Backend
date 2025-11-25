@@ -16,7 +16,8 @@ public sealed class GetVariantLiteByProductIdQueryHandler(
         GetVariantLiteByProductIdQuery request,
         CancellationToken cancellationToken)
     {
-        var product = await productReadRepository.GetByIdAsync(request.ProductId, cancellationToken);
+        var product = await productReadRepository.GetByIdAsync(request.ProductId, cancellationToken)
+            .ConfigureAwait(false);
 
         if(product == null)
         {
@@ -28,7 +29,8 @@ public sealed class GetVariantLiteByProductIdQueryHandler(
 
         var mode = request.IncludeDeleted ? DataFetchMode.All : DataFetchMode.ActiveOnly;
 
-        var variants = await variantReadRepository.GetByProductIdAsync(request.ProductId, cancellationToken, mode);
+        var variants = await variantReadRepository.GetByProductIdAsync(request.ProductId, cancellationToken, mode)
+            .ConfigureAwait(false);
 
         var responses = variants.Select(v => v.Adapt<ProductVariantLiteResponse>()).ToList();
 

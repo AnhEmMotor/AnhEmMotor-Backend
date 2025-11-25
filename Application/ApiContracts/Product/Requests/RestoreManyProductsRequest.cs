@@ -1,6 +1,4 @@
-using System.ComponentModel.DataAnnotations;
-
-namespace Application.ApiContracts.Product;
+namespace Application.ApiContracts.Product.Requests;
 
 public class RestoreManyProductsRequest
 {

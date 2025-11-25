@@ -9,13 +9,13 @@ namespace Application.Features.Suppliers.Queries.GetSuppliersList;
 
 public sealed class GetSuppliersListQueryHandler(ISupplierReadRepository repository, IPaginator paginator) : IRequestHandler<GetSuppliersListQuery, PagedResult<SupplierResponse>>
 {
-    public async Task<PagedResult<SupplierResponse>> Handle(
+    public Task<PagedResult<SupplierResponse>> Handle(
         GetSuppliersListQuery request,
         CancellationToken cancellationToken)
     {
         var query = repository.GetQueryable();
 
-        return await paginator.ApplyAsync<SupplierEntity, SupplierResponse>(
+        return paginator.ApplyAsync<SupplierEntity, SupplierResponse>(
             query,
             request.SieveModel,
             cancellationToken: cancellationToken);

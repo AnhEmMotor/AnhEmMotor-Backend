@@ -26,8 +26,11 @@ namespace Domain.Entities
         public Product? Product { get; set; }
 
         public ICollection<InputInfo> InputInfos { get; set; } = [];
+
         public ICollection<OutputInfo> OutputInfos { get; set; } = [];
+
         public ICollection<ProductCollectionPhoto> ProductCollectionPhotos { get; set; } = [];
+
         public ICollection<VariantOptionValue> VariantOptionValues { get; set; } = [];
     }
 }

@@ -1,4 +1,3 @@
-using Application.ApiContracts.Product;
 using Application.ApiContracts.Product.Common;
 using Domain.Shared;
 using MediatR;

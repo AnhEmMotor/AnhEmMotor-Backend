@@ -1,22 +1,21 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 #nullable disable
 
 namespace Infrastructure.Migrations
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public partial class FirstMigration : Migration
     {
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
                 name: "Brand",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(100)", nullable: true),
                     Description = table.Column<string>(type: "nvarchar(MAX)", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
@@ -46,8 +45,7 @@ namespace Infrastructure.Migrations
                 name: "MediaFile",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     OriginalFileName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     StoredFileName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     ContentType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
@@ -66,8 +64,7 @@ namespace Infrastructure.Migrations
                 name: "Option",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(100)", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
@@ -96,8 +93,7 @@ namespace Infrastructure.Migrations
                 name: "ProductCategory",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
@@ -156,8 +152,7 @@ namespace Infrastructure.Migrations
                 name: "OptionValue",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     OptionId = table.Column<int>(type: "int", nullable: true),
                     Name = table.Column<string>(type: "nvarchar(100)", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
@@ -178,8 +173,7 @@ namespace Infrastructure.Migrations
                 name: "Output",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     CustomerName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     EmpCode = table.Column<int>(type: "int", nullable: true),
                     StatusId = table.Column<string>(type: "nvarchar(450)", nullable: true),
@@ -202,8 +196,7 @@ namespace Infrastructure.Migrations
                 name: "Product",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(100)", nullable: true),
                     CategoryId = table.Column<int>(type: "int", nullable: true),
                     StatusId = table.Column<string>(type: "nvarchar(450)", nullable: true),
@@ -256,8 +249,7 @@ namespace Infrastructure.Migrations
                 name: "Supplier",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(100)", nullable: true),
                     Phone = table.Column<string>(type: "nvarchar(15)", nullable: true),
                     Email = table.Column<string>(type: "nvarchar(50)", nullable: true),
@@ -282,8 +274,7 @@ namespace Infrastructure.Migrations
                 name: "ProductVariant",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     ProductId = table.Column<int>(type: "int", nullable: false),
                     UrlSlug = table.Column<string>(type: "nvarchar(50)", nullable: true),
                     Price = table.Column<long>(type: "bigint", nullable: true),
@@ -307,8 +298,7 @@ namespace Infrastructure.Migrations
                 name: "Input",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     InputDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     Notes = table.Column<string>(type: "nvarchar(MAX)", nullable: true),
                     StatusId = table.Column<string>(type: "nvarchar(450)", nullable: true),
@@ -336,8 +326,7 @@ namespace Infrastructure.Migrations
                 name: "OutputInfo",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     ProductId = table.Column<int>(type: "int", nullable: true),
                     Count = table.Column<short>(type: "smallint", nullable: true),
                     OutputId = table.Column<int>(type: "int", nullable: true),
@@ -366,8 +355,7 @@ namespace Infrastructure.Migrations
                 name: "ProductCollectionPhoto",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     ProductVariantId = table.Column<int>(type: "int", nullable: true),
                     ImageUrl = table.Column<string>(type: "nvarchar(100)", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
@@ -388,8 +376,7 @@ namespace Infrastructure.Migrations
                 name: "VariantOptionValue",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     VariantId = table.Column<int>(type: "int", nullable: false),
                     OptionValueId = table.Column<int>(type: "int", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
@@ -416,8 +403,7 @@ namespace Infrastructure.Migrations
                 name: "InputInfo",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     InputId = table.Column<int>(type: "int", nullable: true),
                     ProductId = table.Column<int>(type: "int", nullable: true),
                     Count = table.Column<short>(type: "smallint", nullable: true),
@@ -442,60 +428,27 @@ namespace Infrastructure.Migrations
                         principalColumn: "Id");
                 });
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Input_StatusId",
-                table: "Input",
-                column: "StatusId");
+            migrationBuilder.CreateIndex(name: "IX_Input_StatusId", table: "Input", column: "StatusId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Input_SupplierId",
-                table: "Input",
-                column: "SupplierId");
+            migrationBuilder.CreateIndex(name: "IX_Input_SupplierId", table: "Input", column: "SupplierId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_InputInfo_InputId",
-                table: "InputInfo",
-                column: "InputId");
+            migrationBuilder.CreateIndex(name: "IX_InputInfo_InputId", table: "InputInfo", column: "InputId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_InputInfo_ProductId",
-                table: "InputInfo",
-                column: "ProductId");
+            migrationBuilder.CreateIndex(name: "IX_InputInfo_ProductId", table: "InputInfo", column: "ProductId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_OptionValue_OptionId",
-                table: "OptionValue",
-                column: "OptionId");
+            migrationBuilder.CreateIndex(name: "IX_OptionValue_OptionId", table: "OptionValue", column: "OptionId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Output_StatusId",
-                table: "Output",
-                column: "StatusId");
+            migrationBuilder.CreateIndex(name: "IX_Output_StatusId", table: "Output", column: "StatusId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_OutputInfo_OutputId",
-                table: "OutputInfo",
-                column: "OutputId");
+            migrationBuilder.CreateIndex(name: "IX_OutputInfo_OutputId", table: "OutputInfo", column: "OutputId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_OutputInfo_ProductId",
-                table: "OutputInfo",
-                column: "ProductId");
+            migrationBuilder.CreateIndex(name: "IX_OutputInfo_ProductId", table: "OutputInfo", column: "ProductId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Product_BrandId",
-                table: "Product",
-                column: "BrandId");
+            migrationBuilder.CreateIndex(name: "IX_Product_BrandId", table: "Product", column: "BrandId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Product_CategoryId",
-                table: "Product",
-                column: "CategoryId");
+            migrationBuilder.CreateIndex(name: "IX_Product_CategoryId", table: "Product", column: "CategoryId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Product_StatusId",
-                table: "Product",
-                column: "StatusId");
+            migrationBuilder.CreateIndex(name: "IX_Product_StatusId", table: "Product", column: "StatusId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProductCollectionPhoto_ProductVariantId",
@@ -507,10 +460,7 @@ namespace Infrastructure.Migrations
                 table: "ProductVariant",
                 column: "ProductId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Supplier_StatusId",
-                table: "Supplier",
-                column: "StatusId");
+            migrationBuilder.CreateIndex(name: "IX_Supplier_StatusId", table: "Supplier", column: "StatusId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_VariantOptionValue_OptionValueId",
@@ -523,65 +473,46 @@ namespace Infrastructure.Migrations
                 column: "VariantId");
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "InputInfo");
+            migrationBuilder.DropTable(name: "InputInfo");
 
-            migrationBuilder.DropTable(
-                name: "MediaFile");
+            migrationBuilder.DropTable(name: "MediaFile");
 
-            migrationBuilder.DropTable(
-                name: "OutputInfo");
+            migrationBuilder.DropTable(name: "OutputInfo");
 
-            migrationBuilder.DropTable(
-                name: "ProductCollectionPhoto");
+            migrationBuilder.DropTable(name: "ProductCollectionPhoto");
 
-            migrationBuilder.DropTable(
-                name: "Setting");
+            migrationBuilder.DropTable(name: "Setting");
 
-            migrationBuilder.DropTable(
-                name: "VariantOptionValue");
+            migrationBuilder.DropTable(name: "VariantOptionValue");
 
-            migrationBuilder.DropTable(
-                name: "Input");
+            migrationBuilder.DropTable(name: "Input");
 
-            migrationBuilder.DropTable(
-                name: "Output");
+            migrationBuilder.DropTable(name: "Output");
 
-            migrationBuilder.DropTable(
-                name: "OptionValue");
+            migrationBuilder.DropTable(name: "OptionValue");
 
-            migrationBuilder.DropTable(
-                name: "ProductVariant");
+            migrationBuilder.DropTable(name: "ProductVariant");
 
-            migrationBuilder.DropTable(
-                name: "InputStatus");
+            migrationBuilder.DropTable(name: "InputStatus");
 
-            migrationBuilder.DropTable(
-                name: "Supplier");
+            migrationBuilder.DropTable(name: "Supplier");
 
-            migrationBuilder.DropTable(
-                name: "OutputStatus");
+            migrationBuilder.DropTable(name: "OutputStatus");
 
-            migrationBuilder.DropTable(
-                name: "Option");
+            migrationBuilder.DropTable(name: "Option");
 
-            migrationBuilder.DropTable(
-                name: "Product");
+            migrationBuilder.DropTable(name: "Product");
 
-            migrationBuilder.DropTable(
-                name: "SupplierStatus");
+            migrationBuilder.DropTable(name: "SupplierStatus");
 
-            migrationBuilder.DropTable(
-                name: "Brand");
+            migrationBuilder.DropTable(name: "Brand");
 
-            migrationBuilder.DropTable(
-                name: "ProductCategory");
+            migrationBuilder.DropTable(name: "ProductCategory");
 
-            migrationBuilder.DropTable(
-                name: "ProductStatus");
+            migrationBuilder.DropTable(name: "ProductStatus");
         }
     }
 }

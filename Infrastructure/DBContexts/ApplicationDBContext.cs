@@ -8,32 +8,50 @@ namespace Infrastructure.DBContexts;
 public class ApplicationDBContext(DbContextOptions<ApplicationDBContext> options) : DbContext(options)
 {
     public virtual DbSet<Brand> Brands { get; set; }
+
     public virtual DbSet<Input> InputReceipts { get; set; }
+
     public virtual DbSet<InputInfo> InputInfos { get; set; }
+
     public virtual DbSet<InputStatus> InputStatuses { get; set; }
+
     public virtual DbSet<OptionValue> OptionValues { get; set; }
+
     public virtual DbSet<Option> Options { get; set; }
+
     public virtual DbSet<Output> OutputOrders { get; set; }
+
     public virtual DbSet<OutputInfo> OutputInfos { get; set; }
+
     public virtual DbSet<OutputStatus> OutputStatuses { get; set; }
+
     public virtual DbSet<Product> Products { get; set; }
+
     public virtual DbSet<ProductCategory> ProductCategories { get; set; }
+
     public virtual DbSet<ProductCollectionPhoto> ProductCollectionPhotos { get; set; }
+
     public virtual DbSet<ProductStatus> ProductStatuses { get; set; }
+
     public virtual DbSet<ProductVariant> ProductVariants { get; set; }
+
     public virtual DbSet<Setting> Settings { get; set; }
+
     public virtual DbSet<Supplier> Suppliers { get; set; }
+
     public virtual DbSet<SupplierStatus> SupplierStatuses { get; set; }
+
     public virtual DbSet<VariantOptionValue> VariantOptionValues { get; set; }
+
     public virtual DbSet<MediaFile> MediaFiles { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        foreach(var entityType in modelBuilder.Model.GetEntityTypes())
         {
-            if (typeof(BaseEntity).IsAssignableFrom(entityType.ClrType))
+            if(typeof(BaseEntity).IsAssignableFrom(entityType.ClrType))
             {
                 var parameter = Expression.Parameter(entityType.ClrType, "e");
                 var deletedAtProperty = Expression.Property(parameter, nameof(BaseEntity.DeletedAt));
@@ -46,11 +64,11 @@ public class ApplicationDBContext(DbContextOptions<ApplicationDBContext> options
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        var entries = ChangeTracker.Entries<BaseEntity>(); 
+        var entries = ChangeTracker.Entries<BaseEntity>();
 
-        foreach (var entry in entries)
+        foreach(var entry in entries)
         {
-            switch (entry.State)
+            switch(entry.State)
             {
                 case EntityState.Added:
                     entry.Entity.CreatedAt = DateTimeOffset.UtcNow;
@@ -95,7 +113,7 @@ public class ApplicationDBContext(DbContextOptions<ApplicationDBContext> options
 
     public void SoftDeleteUsingSetColumnRange<T>(IEnumerable<T> entities) where T : BaseEntity
     {
-        foreach (var entity in entities)
+        foreach(var entity in entities)
         {
             entity.DeletedAt = DateTimeOffset.UtcNow;
             Entry(entity).State = EntityState.Modified;
@@ -104,7 +122,7 @@ public class ApplicationDBContext(DbContextOptions<ApplicationDBContext> options
 
     public void RestoreDeleteUsingSetColumnRange<T>(IEnumerable<T> entities) where T : BaseEntity
     {
-        foreach (var entity in entities)
+        foreach(var entity in entities)
         {
             entity.DeletedAt = null;
             Entry(entity).State = EntityState.Modified;

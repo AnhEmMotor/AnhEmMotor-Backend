@@ -1,11 +1,11 @@
-using Application.ApiContracts.Product.Common;
 using System.Text.Json.Serialization;
 
-namespace Application.ApiContracts.Product;
+namespace Application.ApiContracts.Product.Responses;
 
 public class ProductDetailResponse
 {
     public int? Id { get; set; }
+
     public string? Name { get; set; }
 
     [JsonPropertyName("category_id")]
@@ -21,8 +21,11 @@ public class ProductDetailResponse
     public string? BrandName { get; set; }
 
     public string? Description { get; set; }
+
     public decimal? Weight { get; set; }
+
     public string? Dimensions { get; set; }
+
     public string? Wheelbase { get; set; }
 
     [JsonPropertyName("seat_height")]

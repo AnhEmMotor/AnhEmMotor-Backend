@@ -18,7 +18,7 @@ public sealed class UpdateManyVariantPricesCommandHandler(
         var variantIds = command.Ids;
         var newPrice = command.Price;
 
-        var allVariants = await readRepository.GetByIdAsync(variantIds, cancellationToken);
+        var allVariants = await readRepository.GetByIdAsync(variantIds, cancellationToken).ConfigureAwait(false);
 
         if(allVariants.ToList().Count != variantIds.Count)
         {

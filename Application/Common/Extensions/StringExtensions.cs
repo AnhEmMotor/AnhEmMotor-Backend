@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Application.Common.Extensions
 {
@@ -8,14 +6,14 @@ namespace Application.Common.Extensions
     {
         public static string ExtractFileName(this string urlOrFileName)
         {
-            if (string.IsNullOrWhiteSpace(urlOrFileName))
+            if(string.IsNullOrWhiteSpace(urlOrFileName))
             {
                 return string.Empty;
             }
 
             var fileName = urlOrFileName.Trim();
 
-            if (fileName.Contains('/'))
+            if(fileName.Contains('/'))
             {
                 fileName = fileName.Split('/').Last();
             }

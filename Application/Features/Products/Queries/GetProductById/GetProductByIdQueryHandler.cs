@@ -1,4 +1,3 @@
-using Application.ApiContracts.Product;
 using Application.Interfaces.Repositories.Product;
 using Domain.Helpers;
 using Mapster;
@@ -6,9 +5,9 @@ using MediatR;
 
 namespace Application.Features.Products.Queries.GetProductById;
 
-public sealed class GetProductByIdQueryHandler(IProductReadRepository readRepository) : IRequestHandler<GetProductByIdQuery, (ProductDetailResponse? Data, ErrorResponse? Error)>
+public sealed class GetProductByIdQueryHandler(IProductReadRepository readRepository) : IRequestHandler<GetProductByIdQuery, (ApiContracts.Product.Responses.ProductDetailResponse? Data, ErrorResponse? Error)>
 {
-    public async Task<(ProductDetailResponse? Data, ErrorResponse? Error)> Handle(
+    public async Task<(ApiContracts.Product.Responses.ProductDetailResponse? Data, ErrorResponse? Error)> Handle(
         GetProductByIdQuery request,
         CancellationToken cancellationToken)
     {
@@ -22,7 +21,7 @@ public sealed class GetProductByIdQueryHandler(IProductReadRepository readReposi
             });
         }
 
-        var response = product.Adapt<ProductDetailResponse>();
+        var response = product.Adapt<ApiContracts.Product.Responses.ProductDetailResponse>();
         return (response, null);
     }
 }

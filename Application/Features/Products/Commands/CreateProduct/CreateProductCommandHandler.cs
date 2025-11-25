@@ -1,4 +1,3 @@
-using Application.ApiContracts.Product;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
 using Application.Interfaces.Repositories.Option;
@@ -23,9 +22,9 @@ public sealed class CreateProductCommandHandler(
     IOptionReadRepository optionReadRepository,
     IProductInsertRepository productInsertRepository,
     IOptionValueInsertRepository optionValueInsertRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateProductCommand, (ProductDetailResponse? Data, ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<CreateProductCommand, (ApiContracts.Product.Responses.ProductDetailResponse? Data, ErrorResponse? Error)>
 {
-    public async Task<(ProductDetailResponse? Data, ErrorResponse? Error)> Handle(
+    public async Task<(ApiContracts.Product.Responses.ProductDetailResponse? Data, ErrorResponse? Error)> Handle(
         CreateProductCommand request,
         CancellationToken cancellationToken)
     {
@@ -235,7 +234,7 @@ public sealed class CreateProductCommandHandler(
         productInsertRepository.Add(product);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        var response = product.Adapt<ProductDetailResponse>();
+        var response = product.Adapt<ApiContracts.Product.Responses.ProductDetailResponse>();
         return (response, null);
     }
 }

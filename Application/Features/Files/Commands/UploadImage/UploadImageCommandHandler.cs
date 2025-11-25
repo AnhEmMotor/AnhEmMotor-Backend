@@ -5,7 +5,7 @@ using Mapster;
 using MediatR;
 using MediaFileEntity = Domain.Entities.MediaFile;
 
-namespace Application.Features.Files.Commands.UploadFile;
+namespace Application.Features.Files.Commands.UploadImage;
 
 public sealed class UploadImageCommandHandler(
     Interfaces.Repositories.LocalFile.IFileStorageService fileStorageService,

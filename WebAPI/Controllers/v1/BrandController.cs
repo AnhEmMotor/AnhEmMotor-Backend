@@ -51,7 +51,9 @@ public class BrandController(IMediator mediator) : ControllerBase
     /// <returns></returns>
     [HttpGet("deleted")]
     [ProducesResponseType(typeof(PagedResult<BrandResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetDeletedBrands([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetDeletedBrands(
+        [FromQuery] SieveModel sieveModel,
+        CancellationToken cancellationToken)
     {
         var query = new GetDeletedBrandsListQuery(sieveModel);
         var pagedResult = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
@@ -71,7 +73,7 @@ public class BrandController(IMediator mediator) : ControllerBase
     {
         var query = new GetBrandByIdQuery(id);
         var (data, error) = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-        if (error != null)
+        if(error != null)
         {
             return NotFound(error);
         }
@@ -86,7 +88,9 @@ public class BrandController(IMediator mediator) : ControllerBase
     /// <returns></returns>
     [HttpPost]
     [ProducesResponseType(typeof(BrandResponse), StatusCodes.Status201Created)]
-    public async Task<IActionResult> CreateBrand([FromBody] CreateBrandRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateBrand(
+        [FromBody] CreateBrandRequest request,
+        CancellationToken cancellationToken)
     {
         var command = request.Adapt<CreateBrandCommand>();
         var response = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
@@ -103,12 +107,15 @@ public class BrandController(IMediator mediator) : ControllerBase
     [HttpPut("{id:int}")]
     [ProducesResponseType(typeof(BrandResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UpdateBrand(int id, [FromBody] UpdateBrandRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateBrand(
+        int id,
+        [FromBody] UpdateBrandRequest request,
+        CancellationToken cancellationToken)
     {
         var command = request.Adapt<UpdateBrandCommand>() with { Id = id };
         var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
 
-        if (error != null)
+        if(error != null)
         {
             return NotFound(error);
         }
@@ -129,7 +136,7 @@ public class BrandController(IMediator mediator) : ControllerBase
     {
         var command = new DeleteBrandCommand() with { Id = id };
         var error = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if (error != null)
+        if(error != null)
         {
             return NotFound(error);
         }
@@ -150,7 +157,7 @@ public class BrandController(IMediator mediator) : ControllerBase
         var command = new RestoreBrandCommand() with { Id = id };
         var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
 
-        if (error != null)
+        if(error != null)
         {
             return NotFound(error);
         }
@@ -167,12 +174,14 @@ public class BrandController(IMediator mediator) : ControllerBase
     [HttpDelete("delete-many")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> DeleteBrands([FromBody] DeleteManyBrandsRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> DeleteBrands(
+        [FromBody] DeleteManyBrandsRequest request,
+        CancellationToken cancellationToken)
     {
         var command = request.Adapt<DeleteManyBrandsCommand>();
         var error = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
 
-        if (error != null)
+        if(error != null)
         {
             return BadRequest(error);
         }
@@ -189,12 +198,14 @@ public class BrandController(IMediator mediator) : ControllerBase
     [HttpPost("restore-many")]
     [ProducesResponseType(typeof(List<BrandResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> RestoreBrands([FromBody] RestoreManyBrandsRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> RestoreBrands(
+        [FromBody] RestoreManyBrandsRequest request,
+        CancellationToken cancellationToken)
     {
         var command = request.Adapt<RestoreManyBrandsCommand>();
         var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
 
-        if (error != null)
+        if(error != null)
         {
             return BadRequest(error);
         }

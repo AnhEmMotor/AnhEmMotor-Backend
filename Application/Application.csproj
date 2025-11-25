@@ -7,15 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="ApiContracts\Auth\**" />
-    <Compile Remove="ApiContracts\Permission\**" />
-    <EmbeddedResource Remove="ApiContracts\Auth\**" />
-    <EmbeddedResource Remove="ApiContracts\Permission\**" />
-    <None Remove="ApiContracts\Auth\**" />
-    <None Remove="ApiContracts\Permission\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="FluentValidation" Version="12.1.0" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.0" />
     <PackageReference Include="Mapster" Version="7.4.0" />
