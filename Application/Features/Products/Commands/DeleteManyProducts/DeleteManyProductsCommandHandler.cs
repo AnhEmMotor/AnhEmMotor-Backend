@@ -2,11 +2,12 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Product;
 using Domain.Helpers;
 using MediatR;
+using Domain.Enums;
 
 namespace Application.Features.Products.Commands.DeleteManyProducts;
 
 public sealed class DeleteManyProductsCommandHandler(
-    IProductSelectRepository selectRepository,
+    IProductReadRepository readRepository,
     IProductDeleteRepository deleteRepository,
     IUnitOfWork unitOfWork)
     : IRequestHandler<DeleteManyProductsCommand, ErrorResponse?>
@@ -20,8 +21,8 @@ public sealed class DeleteManyProductsCommandHandler(
 
         var uniqueIds = command.Ids.Distinct().ToList();
 
-        var activeProducts = await selectRepository.GetActiveProductsByIdsAsync(uniqueIds, cancellationToken).ConfigureAwait(false);
-        var allProducts = await selectRepository.GetAllProductsByIdsAsync(uniqueIds, cancellationToken).ConfigureAwait(false);
+        var activeProducts = await readRepository.GetByIdAsync(uniqueIds, cancellationToken).ConfigureAwait(false);
+        var allProducts = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.ActiveOnly).ConfigureAwait(false);
 
         var allProductsMap = allProducts.ToDictionary(p => p.Id!);
         var activeProductsSet = activeProducts.Select(p => p.Id!).ToHashSet();
@@ -56,7 +57,7 @@ public sealed class DeleteManyProductsCommandHandler(
             return new ErrorResponse { Errors = errorDetails };
         }
 
-        if (activeProducts.Count > 0)
+        if (activeProducts.ToList().Count > 0)
         {
             deleteRepository.Delete(activeProducts);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

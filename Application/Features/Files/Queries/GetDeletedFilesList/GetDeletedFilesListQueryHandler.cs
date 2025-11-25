@@ -1,6 +1,5 @@
 using Application.ApiContracts.File;
 using Application.Interfaces.Repositories.MediaFile;
-using Application.Interfaces.Services;
 using Application.Sieve;
 using Domain.Enums;
 using Domain.Shared;
@@ -13,7 +12,7 @@ namespace Application.Features.Files.Queries.GetDeletedFilesList;
 
 public sealed class GetDeletedFilesListQueryHandler(
     IMediaFileReadRepository repository,
-    IFileStorageService fileStorageService,
+    Interfaces.Repositories.LocalFile.IFileStorageService fileStorageService,
     ISieveProcessor sieveProcessor)
     : IRequestHandler<GetDeletedFilesListQuery, PagedResult<MediaFileResponse>>
 {

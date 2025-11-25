@@ -2,20 +2,21 @@ using Application.ApiContracts.Product.Select;
 using Application.Features.Products.Common;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Product;
+using Application.Interfaces.Repositories.VariantOptionValue;
 using Domain.Helpers;
 using MediatR;
 
 namespace Application.Features.Products.Commands.UpdateProductPrice;
 
 public sealed class UpdateProductPriceCommandHandler(
-    IProductSelectRepository selectRepository,
+    IProductReadRepository readRepository,
     IProductUpdateRepository updateRepository,
     IUnitOfWork unitOfWork)
     : IRequestHandler<UpdateProductPriceCommand, (ProductDetailResponse? Data, ErrorResponse? Error)>
 {
     public async Task<(ProductDetailResponse? Data, ErrorResponse? Error)> Handle(UpdateProductPriceCommand command, CancellationToken cancellationToken)
     {
-        var product = await selectRepository.GetProductWithDetailsByIdAsync(command.Id, includeDeleted: false, cancellationToken).ConfigureAwait(false);
+        var product = await readRepository.GetByIdWithDetailsAsync(command.Id, cancellationToken).ConfigureAwait(false);
         if (product == null)
         {
             return (null, new ErrorResponse

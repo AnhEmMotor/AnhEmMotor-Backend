@@ -1,5 +1,4 @@
 using ProductEntity = Domain.Entities.Product;
-using ProductVariantEntity = Domain.Entities.ProductVariant;
 using VariantOptionValueEntity = Domain.Entities.VariantOptionValue;
 
 namespace Application.Interfaces.Repositories.Product;
@@ -8,9 +7,5 @@ public interface IProductUpdateRepository
 {
     void Update(ProductEntity product);
     void Restore(ProductEntity product);
-    void Restore(List<ProductEntity> products);
-    void RestoreVariant(ProductVariantEntity variant);
-    void UpdateVariant(ProductVariantEntity variant);
-    void DeleteVariant(ProductVariantEntity variant);
-    void DeleteVariantOptionValue(VariantOptionValueEntity variantOptionValue);
+    void Restore(IEnumerable<ProductEntity> products);
 }

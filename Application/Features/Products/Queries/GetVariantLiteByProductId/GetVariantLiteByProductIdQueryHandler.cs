@@ -1,19 +1,24 @@
-using Application.ApiContracts.Product.Common;
+﻿using Application.ApiContracts.Product.Common;
 using Application.ApiContracts.Product.Select;
 using Application.Features.Products.Common;
 using Application.Interfaces.Repositories.Product;
-using Domain.Entities;
+using Application.Interfaces.Repositories.ProductVariant;
+using Domain.Enums;
 using Domain.Helpers;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Products.Queries.GetVariantLiteByProductId;
 
-public sealed class GetVariantLiteByProductIdQueryHandler(IProductSelectRepository repository) : IRequestHandler<GetVariantLiteByProductIdQuery, (List<ProductVariantLiteResponse>? Data, ErrorResponse? Error)>
+public sealed class GetVariantLiteByProductIdQueryHandler(
+    IProductReadRepository productReadRepository,
+    IProductVariantReadRepository variantReadRepository)
+    : IRequestHandler<GetVariantLiteByProductIdQuery, (List<ProductVariantLiteResponse>? Data, ErrorResponse? Error)>
 {
     public async Task<(List<ProductVariantLiteResponse>? Data, ErrorResponse? Error)> Handle(GetVariantLiteByProductIdQuery request, CancellationToken cancellationToken)
     {
-        var product = await repository.GetProductWithDetailsByIdAsync(request.ProductId, includeDeleted: true, cancellationToken).ConfigureAwait(false);
+        // 1. Check Product exists (Cheap check)
+        // Chỉ dùng hàm GetByIdAsync đơn giản, không load quan hệ, tiết kiệm bộ nhớ
+        var product = await productReadRepository.GetByIdAsync(request.ProductId, cancellationToken);
 
         if (product == null)
         {
@@ -23,28 +28,13 @@ public sealed class GetVariantLiteByProductIdQueryHandler(IProductSelectReposito
             });
         }
 
-        IQueryable<ProductVariant> variantQuery = request.IncludeDeleted
-            ? repository.GetAllProducts()
-                .Where(p => p.Id == request.ProductId)
-                .SelectMany(p => p.ProductVariants)
-            : repository.GetActiveProducts()
-                .Where(p => p.Id == request.ProductId)
-                .SelectMany(p => p.ProductVariants);
+        // 2. Determine Fetch Mode
+        var mode = request.IncludeDeleted ? DataFetchMode.All : DataFetchMode.ActiveOnly;
 
-        var variants = await variantQuery
-            .Include(v => v.Product)
-                .ThenInclude(p => p!.ProductCategory)
-            .Include(v => v.Product)
-                .ThenInclude(p => p!.Brand)
-            .Include(v => v.VariantOptionValues)
-                .ThenInclude(vov => vov.OptionValue)
-                    .ThenInclude(ov => ov!.Option)
-            .Include(v => v.InputInfos)
-            .Include(v => v.OutputInfos)
-                .ThenInclude(oi => oi.OutputOrder)
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
+        // 3. Fetch Variants via Repository
+        var variants = await variantReadRepository.GetByProductIdAsync(request.ProductId, cancellationToken, mode);
 
+        // 4. Map to Response
         var responses = variants.Select(v =>
         {
             var optionPairs = v.VariantOptionValues

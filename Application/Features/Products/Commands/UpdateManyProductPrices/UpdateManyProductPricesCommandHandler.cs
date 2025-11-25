@@ -1,5 +1,6 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Product;
+using Application.Interfaces.Repositories.VariantOptionValue;
 using Domain.Helpers;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Application.Features.Products.Commands.UpdateManyProductPrices;
 
 public sealed class UpdateManyProductPricesCommandHandler(
-    IProductSelectRepository selectRepository,
+    IProductReadRepository readRepository,
     IProductUpdateRepository updateRepository,
     IUnitOfWork unitOfWork)
     : IRequestHandler<UpdateManyProductPricesCommand, (List<int>? Data, ErrorResponse? Error)>
@@ -18,14 +19,11 @@ public sealed class UpdateManyProductPricesCommandHandler(
         var productIds = command.Ids;
         var newPrice = command.Price;
 
-        var allProducts = await selectRepository.GetActiveProducts()
-            .Where(p => productIds.Contains(p.Id))
-            .Include(p => p.ProductVariants)
-            .ToListAsync(cancellationToken).ConfigureAwait(false);
+        var productsWithVarients = await readRepository.GetByIdWithVariantsAsync(productIds, cancellationToken);
 
-        if (allProducts.Count != productIds.Count)
+        if (productsWithVarients.ToList().Count != productIds.Count)
         {
-            var foundIds = allProducts.Select(p => p.Id).ToHashSet();
+            var foundIds = productsWithVarients.Select(p => p.Id).ToHashSet();
             var missingIds = productIds.Where(id => !foundIds.Contains(id)).ToList();
             
             foreach (var missingId in missingIds)
@@ -43,7 +41,7 @@ public sealed class UpdateManyProductPricesCommandHandler(
             return (null, new ErrorResponse { Errors = errors });
         }
 
-        foreach (var product in allProducts)
+        foreach (var product in productsWithVarients)
         {
             if (product.ProductVariants != null)
             {
@@ -58,6 +56,7 @@ public sealed class UpdateManyProductPricesCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return ([.. allProducts.Select(p => p.Id)], null);
+        //Chổ này, phải trả về danh sách sản phẩm chứ không phải danh sách ID!
+        return ([.. productsWithVarients.Select(p => p.Id)], null);
     }
 }

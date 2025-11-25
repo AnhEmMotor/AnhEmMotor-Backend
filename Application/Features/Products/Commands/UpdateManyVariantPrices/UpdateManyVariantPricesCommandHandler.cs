@@ -1,14 +1,13 @@
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.Product;
+using Application.Interfaces.Repositories.ProductVariant;
 using Domain.Helpers;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Products.Commands.UpdateManyVariantPrices;
 
 public sealed class UpdateManyVariantPricesCommandHandler(
-    IProductSelectRepository selectRepository,
-    IProductUpdateRepository updateRepository,
+    IProductVariantReadRepository readRepository,
+    IProductVariantUpdateRepository updateRepository,
     IUnitOfWork unitOfWork)
     : IRequestHandler<UpdateManyVariantPricesCommand, (List<int>? Data, ErrorResponse? Error)>
 {
@@ -18,12 +17,9 @@ public sealed class UpdateManyVariantPricesCommandHandler(
         var variantIds = command.Ids;
         var newPrice = command.Price;
 
-        var allVariants = await selectRepository.GetActiveVariants()
-            .Where(v => variantIds.Contains(v.Id))
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
+        var allVariants = await readRepository.GetByIdAsync(variantIds, cancellationToken);
 
-        if (allVariants.Count != variantIds.Count)
+        if (allVariants.ToList().Count != variantIds.Count)
         {
             var foundIds = allVariants.Select(v => v.Id).ToHashSet();
             var missingIds = variantIds.Where(id => !foundIds.Contains(id)).ToList();
@@ -46,7 +42,7 @@ public sealed class UpdateManyVariantPricesCommandHandler(
         foreach (var variant in allVariants)
         {
             variant.Price = newPrice;
-            updateRepository.UpdateVariant(variant);
+            updateRepository.Update(variant);
         }
 
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

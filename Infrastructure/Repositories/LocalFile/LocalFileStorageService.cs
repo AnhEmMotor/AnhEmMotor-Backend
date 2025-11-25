@@ -1,4 +1,3 @@
-using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using SixLabors.ImageSharp;
@@ -8,7 +7,7 @@ using System.IO;
 
 namespace Infrastructure.Repositories.LocalFile;
 
-public class LocalFileStorageService(IWebHostEnvironment environment, IHttpContextAccessor httpContextAccessor) : IFileStorageService
+public class LocalFileStorageService(IWebHostEnvironment environment, IHttpContextAccessor httpContextAccessor) : Application.Interfaces.Repositories.LocalFile.IFileStorageService
 {
     private const int DefaultMaxWidth = 1200;
     private readonly string _uploadFolder = Path.Combine(environment.WebRootPath, "uploads");

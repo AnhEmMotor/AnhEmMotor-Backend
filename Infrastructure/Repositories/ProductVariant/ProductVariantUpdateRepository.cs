@@ -1,14 +1,19 @@
 ﻿using Application.Interfaces.Repositories.ProductVariant;
 using Infrastructure.DBContexts;
-using ProductVariantEntites = Domain.Entities.ProductVariant;
+using ProductVariantEntity = Domain.Entities.ProductVariant;
 
 namespace Infrastructure.Repositories.ProductVariant
 {
     public class ProductVariantUpdateRepository(ApplicationDBContext context) : IProductVariantUpdateRepository
     {
-        public void Add(ProductVariantEntites variant)
+        public void Restore(ProductVariantEntity variant)
         {
-            context.ProductVariants.Add(variant);
+            context.Restore(variant);
+        }
+
+        public void Update(ProductVariantEntity variant)
+        {
+            context.ProductVariants.Update(variant);
         }
     }
 }

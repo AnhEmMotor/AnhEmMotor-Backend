@@ -1,7 +1,6 @@
 using Application.ApiContracts.File;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.MediaFile;
-using Application.Interfaces.Services;
 using Mapster;
 using MediatR;
 using MediaFileEntity = Domain.Entities.MediaFile;
@@ -9,7 +8,7 @@ using MediaFileEntity = Domain.Entities.MediaFile;
 namespace Application.Features.Files.Commands.UploadFile;
 
 public sealed class UploadImageCommandHandler(
-    IFileStorageService fileStorageService,
+    Interfaces.Repositories.LocalFile.IFileStorageService fileStorageService,
     IMediaFileInsertRepository insertRepository,
     IUnitOfWork unitOfWork)
     : IRequestHandler<UploadImageCommand, MediaFileResponse>

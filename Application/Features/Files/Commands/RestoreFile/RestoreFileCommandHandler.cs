@@ -1,7 +1,6 @@
 using Application.ApiContracts.File;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.MediaFile;
-using Application.Interfaces.Services;
 using Domain.Enums;
 using Domain.Helpers;
 using Mapster;
@@ -12,7 +11,7 @@ namespace Application.Features.Files.Commands.RestoreFile;
 public sealed class RestoreFileCommandHandler(
     IMediaFileReadRepository readRepository,
     IMediaFileUpdateRepository updateRepository,
-    IFileStorageService fileStorageService,
+    Interfaces.Repositories.LocalFile.IFileStorageService fileStorageService,
     IUnitOfWork unitOfWork)
     : IRequestHandler<RestoreFileCommand, (MediaFileResponse?, ErrorResponse?)>
 {

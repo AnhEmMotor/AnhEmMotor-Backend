@@ -7,7 +7,7 @@ using Domain.Enums;
 namespace Application.Features.Suppliers.Commands.DeleteManySuppliers;
 
 public sealed class DeleteManySuppliersCommandHandler(
-    ISupplierReadRepository selectRepository,
+    ISupplierReadRepository readRepository,
     ISupplierDeleteRepository deleteRepository,
     IUnitOfWork unitOfWork)
     : IRequestHandler<DeleteManySuppliersCommand, ErrorResponse?>
@@ -22,8 +22,8 @@ public sealed class DeleteManySuppliersCommandHandler(
         var uniqueIds = request.Ids.Distinct().ToList();
         var errorDetails = new List<ErrorDetail>();
 
-        var allSuppliers = await selectRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.All).ConfigureAwait(false);
-        var activeSuppliers = await selectRepository.GetByIdAsync(uniqueIds, cancellationToken).ConfigureAwait(false);
+        var allSuppliers = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.All).ConfigureAwait(false);
+        var activeSuppliers = await readRepository.GetByIdAsync(uniqueIds, cancellationToken).ConfigureAwait(false);
 
         var allSupplierMap = allSuppliers.ToDictionary(s => s.Id);
         var activeSupplierSet = activeSuppliers.Select(s => s.Id).ToHashSet();

@@ -1,6 +1,5 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.MediaFile;
-using Application.Interfaces.Services;
 using Domain.Enums;
 using Domain.Helpers;
 using Mapster;

@@ -5,12 +5,12 @@ using MediatR;
 
 namespace Application.Features.Suppliers.Commands.DeleteSupplier;
 
-public sealed class DeleteSupplierCommandHandler(ISupplierReadRepository selectRepository, ISupplierDeleteRepository deleteRepository, IUnitOfWork unitOfWork)
+public sealed class DeleteSupplierCommandHandler(ISupplierReadRepository readRepository, ISupplierDeleteRepository deleteRepository, IUnitOfWork unitOfWork)
     : IRequestHandler<DeleteSupplierCommand, ErrorResponse?>
 {
     public async Task<ErrorResponse?> Handle(DeleteSupplierCommand request, CancellationToken cancellationToken)
     {
-        var supplier = await selectRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
+        var supplier = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
 
         if (supplier == null)
         {
