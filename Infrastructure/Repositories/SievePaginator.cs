@@ -15,10 +15,10 @@ namespace Infrastructure.Repositories
             IQueryable<TEntity> query,
             SieveModel sieveModel,
             DataFetchMode? defaultSortMode = DataFetchMode.ActiveOnly,
-            CancellationToken cancellationToken = default)  
+            CancellationToken cancellationToken = default)
             where TEntity : class
         {
-            if (defaultSortMode.HasValue)
+            if(defaultSortMode.HasValue)
             {
                 SieveHelper.ApplyDefaultSorting(sieveModel, defaultSortMode.Value);
             }
@@ -36,11 +36,7 @@ namespace Infrastructure.Repositories
 
             var responses = entities.Adapt<List<TResponse>>();
 
-            return new PagedResult<TResponse>(
-                responses,
-                totalCount,
-                sieveModel.Page ?? 1,
-                sieveModel.PageSize ?? 10);
+            return new PagedResult<TResponse>(responses, totalCount, sieveModel.Page ?? 1, sieveModel.PageSize ?? 10);
         }
     }
 }

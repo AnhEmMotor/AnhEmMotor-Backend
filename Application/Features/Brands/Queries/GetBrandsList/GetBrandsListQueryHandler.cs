@@ -9,13 +9,11 @@ namespace Application.Features.Brands.Queries.GetBrandsList;
 
 public sealed class GetBrandsListQueryHandler(IBrandReadRepository repository, IPaginator paginator) : IRequestHandler<GetBrandsListQuery, PagedResult<BrandResponse>>
 {
-    public async Task<PagedResult<BrandResponse>> Handle(
-        GetBrandsListQuery request,
-        CancellationToken cancellationToken)
+    public Task<PagedResult<BrandResponse>> Handle(GetBrandsListQuery request, CancellationToken cancellationToken)
     {
         var query = repository.GetQueryable();
 
-        return await paginator.ApplyAsync<BrandEntity, BrandResponse>(
+        return paginator.ApplyAsync<BrandEntity, BrandResponse>(
             query,
             request.SieveModel,
             cancellationToken: cancellationToken);

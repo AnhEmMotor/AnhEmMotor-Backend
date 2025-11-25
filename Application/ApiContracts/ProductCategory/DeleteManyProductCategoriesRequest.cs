@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace Application.ApiContracts.ProductCategory
 {
     public class DeleteManyProductCategoriesRequest

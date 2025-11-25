@@ -8,27 +8,36 @@ namespace Infrastructure.Repositories.Brand;
 
 public class BrandReadRepository(ApplicationDBContext context) : IBrandReadRepository
 {
-    public async Task<IEnumerable<BrandEntity>> GetAllAsync(CancellationToken cancellationToken, DataFetchMode mode = DataFetchMode.ActiveOnly)
+    public Task<IEnumerable<BrandEntity>> GetAllAsync(
+        CancellationToken cancellationToken,
+        DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return await context.GetQuery<BrandEntity>(mode)
-            .ToListAsync(cancellationToken);
+        return context.GetQuery<BrandEntity>(mode)
+            .ToListAsync(cancellationToken)
+            .ContinueWith<IEnumerable<BrandEntity>>(t => t.Result, cancellationToken);
     }
 
-    public async Task<BrandEntity?> GetByIdAsync(int id, CancellationToken cancellationToken, DataFetchMode mode = DataFetchMode.ActiveOnly)
+    public Task<BrandEntity?> GetByIdAsync(
+        int id,
+        CancellationToken cancellationToken,
+        DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return await context.GetQuery<BrandEntity>(mode)
-            .FirstOrDefaultAsync(b => b.Id == id, cancellationToken);
+        return context.GetQuery<BrandEntity>(mode)
+            .FirstOrDefaultAsync(b => b.Id == id, cancellationToken)
+            .ContinueWith(t => t.Result, cancellationToken);
     }
 
-    public async Task<IEnumerable<BrandEntity>> GetByIdAsync(IEnumerable<int> ids, CancellationToken cancellationToken, DataFetchMode mode = DataFetchMode.ActiveOnly)
+    public Task<IEnumerable<BrandEntity>> GetByIdAsync(
+        IEnumerable<int> ids,
+        CancellationToken cancellationToken,
+        DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return await context.GetQuery<BrandEntity>(mode)
+        return context.GetQuery<BrandEntity>(mode)
             .Where(b => ids.Contains(b.Id))
-            .ToListAsync(cancellationToken);
+            .ToListAsync(cancellationToken)
+            .ContinueWith<IEnumerable<BrandEntity>>(t => t.Result, cancellationToken);
     }
 
     public IQueryable<BrandEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
-    {
-        return context.GetQuery<BrandEntity>(mode);
-    }
+    { return context.GetQuery<BrandEntity>(mode); }
 }

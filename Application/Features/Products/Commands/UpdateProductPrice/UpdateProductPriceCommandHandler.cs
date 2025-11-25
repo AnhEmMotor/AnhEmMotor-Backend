@@ -1,4 +1,3 @@
-using Application.ApiContracts.Product;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Product;
 using Domain.Helpers;
@@ -10,9 +9,9 @@ namespace Application.Features.Products.Commands.UpdateProductPrice;
 public sealed class UpdateProductPriceCommandHandler(
     IProductReadRepository readRepository,
     IProductUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateProductPriceCommand, (ProductDetailResponse? Data, ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateProductPriceCommand, (ApiContracts.Product.Responses.ProductDetailResponse? Data, ErrorResponse? Error)>
 {
-    public async Task<(ProductDetailResponse? Data, ErrorResponse? Error)> Handle(
+    public async Task<(ApiContracts.Product.Responses.ProductDetailResponse? Data, ErrorResponse? Error)> Handle(
         UpdateProductPriceCommand command,
         CancellationToken cancellationToken)
     {
@@ -36,7 +35,7 @@ public sealed class UpdateProductPriceCommandHandler(
         updateRepository.Update(product);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        var response = product.Adapt<ProductDetailResponse>();
+        var response = product.Adapt<ApiContracts.Product.Responses.ProductDetailResponse>();
         return (response, null);
     }
 }

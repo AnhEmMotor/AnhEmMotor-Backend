@@ -5,20 +5,22 @@ namespace Application.Sieve
 {
     public static class SieveHelper
     {
-        public static void ApplyDefaultSorting(SieveModel sieveModel, DataFetchMode mode = DataFetchMode.ActiveOnly, bool isApplyDefaultPageAndPageSize = true)
+        public static void ApplyDefaultSorting(
+            SieveModel sieveModel,
+            DataFetchMode mode = DataFetchMode.ActiveOnly,
+            bool isApplyDefaultPageAndPageSize = true)
         {
-            if (isApplyDefaultPageAndPageSize)
+            if(isApplyDefaultPageAndPageSize)
             {
                 sieveModel.Page ??= 1;
                 sieveModel.PageSize ??= 10;
-            }
-            else
+            } else
             {
                 sieveModel.Page ??= 1;
                 sieveModel.PageSize ??= int.MaxValue;
             }
 
-            if (!string.IsNullOrWhiteSpace(sieveModel.Sorts))
+            if(!string.IsNullOrWhiteSpace(sieveModel.Sorts))
             {
                 return;
             }

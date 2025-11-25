@@ -4,27 +4,19 @@
 
 namespace Infrastructure.Migrations
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public partial class EditMediaFileTable : Migration
     {
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_MediaFile",
-                table: "MediaFile");
+            migrationBuilder.DropPrimaryKey(name: "PK_MediaFile", table: "MediaFile");
 
-            migrationBuilder.DropColumn(
-                name: "PublicUrl",
-                table: "MediaFile");
+            migrationBuilder.DropColumn(name: "PublicUrl", table: "MediaFile");
 
-            migrationBuilder.DropColumn(
-                name: "StoredFileName",
-                table: "MediaFile");
+            migrationBuilder.DropColumn(name: "StoredFileName", table: "MediaFile");
 
-            migrationBuilder.RenameTable(
-                name: "MediaFile",
-                newName: "MediaFiles");
+            migrationBuilder.RenameTable(name: "MediaFile", newName: "MediaFiles");
 
             migrationBuilder.AlterColumn<string>(
                 name: "OriginalFileName",
@@ -66,36 +58,23 @@ namespace Infrastructure.Migrations
                 type: "nvarchar(50)",
                 maxLength: 50,
                 nullable: false,
-                defaultValue: "");
+                defaultValue: string.Empty);
 
-            migrationBuilder.AddPrimaryKey(
-                name: "PK_MediaFiles",
-                table: "MediaFiles",
-                column: "Id");
+            migrationBuilder.AddPrimaryKey(name: "PK_MediaFiles", table: "MediaFiles", column: "Id");
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_MediaFiles",
-                table: "MediaFiles");
+            migrationBuilder.DropPrimaryKey(name: "PK_MediaFiles", table: "MediaFiles");
 
-            migrationBuilder.DropColumn(
-                name: "FileExtension",
-                table: "MediaFiles");
+            migrationBuilder.DropColumn(name: "FileExtension", table: "MediaFiles");
 
-            migrationBuilder.DropColumn(
-                name: "StoragePath",
-                table: "MediaFiles");
+            migrationBuilder.DropColumn(name: "StoragePath", table: "MediaFiles");
 
-            migrationBuilder.DropColumn(
-                name: "StorageType",
-                table: "MediaFiles");
+            migrationBuilder.DropColumn(name: "StorageType", table: "MediaFiles");
 
-            migrationBuilder.RenameTable(
-                name: "MediaFiles",
-                newName: "MediaFile");
+            migrationBuilder.RenameTable(name: "MediaFiles", newName: "MediaFile");
 
             migrationBuilder.AlterColumn<string>(
                 name: "OriginalFileName",
@@ -103,7 +82,7 @@ namespace Infrastructure.Migrations
                 type: "nvarchar(255)",
                 maxLength: 255,
                 nullable: false,
-                defaultValue: "",
+                defaultValue: string.Empty,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(255)",
                 oldMaxLength: 255,
@@ -115,7 +94,7 @@ namespace Infrastructure.Migrations
                 type: "nvarchar(100)",
                 maxLength: 100,
                 nullable: false,
-                defaultValue: "",
+                defaultValue: string.Empty,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(100)",
                 oldMaxLength: 100,
@@ -134,12 +113,9 @@ namespace Infrastructure.Migrations
                 type: "nvarchar(255)",
                 maxLength: 255,
                 nullable: false,
-                defaultValue: "");
+                defaultValue: string.Empty);
 
-            migrationBuilder.AddPrimaryKey(
-                name: "PK_MediaFile",
-                table: "MediaFile",
-                column: "Id");
+            migrationBuilder.AddPrimaryKey(name: "PK_MediaFile", table: "MediaFile", column: "Id");
         }
     }
 }

@@ -1,4 +1,3 @@
-using Application.ApiContracts.Product;
 using Application.ApiContracts.Product.Common;
 using Domain.Constants;
 using Mapster;
@@ -11,86 +10,80 @@ public class ProductMappingConfig : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {
-        // CreateProductRequest → CreateProductCommand
-        config.NewConfig<CreateProductRequest, Commands.CreateProduct.CreateProductCommand>()
+        config.NewConfig<ApiContracts.Product.Requests.CreateProductRequest, Commands.CreateProduct.CreateProductCommand>(
+            )
             .Map(dest => dest.Variants, src => src.Variants ?? new List<ProductVariantWriteRequest>());
 
-        // UpdateProductRequest → UpdateProductCommand (properties only)
-        config.NewConfig<UpdateProductRequest, Commands.UpdateProduct.UpdateProductCommand>()
-            .MapWith(src => new Commands.UpdateProduct.UpdateProductCommand(
-                0, // Id will be set separately
-                src
-            ));
+        config.NewConfig<ApiContracts.Product.Requests.UpdateProductRequest, Commands.UpdateProduct.UpdateProductCommand>(
+            )
+            .MapWith(src => new Commands.UpdateProduct.UpdateProductCommand(0, src));
 
-        // ProductEntity → ProductDetailResponse (complex mapping)
-        config.NewConfig<ProductEntity, ProductDetailResponse>()
+        config.NewConfig<ProductEntity, ApiContracts.Product.Responses.ProductDetailResponse>()
             .MapWith(src => MapProductToDetailResponse(src));
 
-        // ProductEntity → ProductListRow
         config.NewConfig<ProductEntity, ProductListRow>()
             .Map(dest => dest.CategoryName, src => src.ProductCategory != null ? src.ProductCategory.Name : null)
             .Map(dest => dest.BrandName, src => src.Brand != null ? src.Brand.Name : null)
             .Map(dest => dest.TotalStock, src => CalculateTotalStock(src))
             .Map(dest => dest.TotalBooked, src => CalculateTotalBooked(src));
 
-        // ProductVariant → VariantRow
         config.NewConfig<ProductVariantEntity, VariantRow>()
-            .Map(dest => dest.Photos, src => src.ProductCollectionPhotos.Select(p => p.ImageUrl ?? string.Empty).ToList())
-            .Map(dest => dest.OptionPairs, src => src.VariantOptionValues.Select(vov => new OptionPair
-            {
-                OptionName = vov.OptionValue != null && vov.OptionValue.Option != null ? vov.OptionValue.Option.Name : null,
-                OptionValue = vov.OptionValue != null ? vov.OptionValue.Name : null
-            }).ToList())
+            .Map(
+                dest => dest.Photos,
+                src => src.ProductCollectionPhotos.Select(p => p.ImageUrl ?? string.Empty).ToList())
+            .Map(
+                dest => dest.OptionPairs,
+                src => src.VariantOptionValues
+                    .Select(
+                        vov => new OptionPair
+                            {
+                                OptionName =
+                                    vov.OptionValue != null && vov.OptionValue.Option != null
+                                                ? vov.OptionValue.Option.Name
+                                                : null,
+                                OptionValue = vov.OptionValue != null ? vov.OptionValue.Name : null
+                            })
+                    .ToList())
             .Map(dest => dest.Stock, src => src.InputInfos.Sum(ii => ii.RemainingCount) ?? 0)
-            .Map(dest => dest.HasBeenBooked, src => src.OutputInfos
-                .Where(oi => oi.OutputOrder != null && OrderStatus.IsBookingStatus(oi.OutputOrder.StatusId))
-                .Sum(oi => (long?)oi.Count) ?? 0);
+            .Map(
+                dest => dest.HasBeenBooked,
+                src => src.OutputInfos
+                        .Where(oi => oi.OutputOrder != null && OrderStatus.IsBookingStatus(oi.OutputOrder.StatusId))
+                        .Sum(oi => (long?)oi.Count) ??
+                    0);
 
-        // VariantRow → ProductVariantDetailResponse
-        config.NewConfig<VariantRow, ProductVariantDetailResponse>()
-            .Map(dest => dest.OptionValues, src => src.OptionPairs
-                .Where(pair => !string.IsNullOrWhiteSpace(pair.OptionName) && !string.IsNullOrWhiteSpace(pair.OptionValue))
-                .GroupBy(pair => pair.OptionName!, StringComparer.OrdinalIgnoreCase)
-                .ToDictionary(g => g.Key, g => g.First().OptionValue!, StringComparer.OrdinalIgnoreCase))
+        config.NewConfig<VariantRow, ApiContracts.Product.Responses.ProductVariantDetailResponse>()
+            .Map(
+                dest => dest.OptionValues,
+                src => src.OptionPairs
+                    .Where(
+                        pair => !string.IsNullOrWhiteSpace(pair.OptionName) &&
+                                !string.IsNullOrWhiteSpace(pair.OptionValue))
+                    .GroupBy(pair => pair.OptionName!, StringComparer.OrdinalIgnoreCase)
+                    .ToDictionary(g => g.Key, g => g.First().OptionValue!, StringComparer.OrdinalIgnoreCase))
             .Map(dest => dest.PhotoCollection, src => src.Photos)
             .Map(dest => dest.StatusStockId, src => GetStockStatus(src.Stock - src.HasBeenBooked));
 
-        // ProductVariant → ProductVariantLiteResponse (with custom logic)
         config.NewConfig<ProductVariantEntity, ProductVariantLiteResponse>()
             .MapWith(src => BuildVariantLiteResponse(src));
     }
 
-    private static ProductDetailResponse MapProductToDetailResponse(ProductEntity product)
+    private static ApiContracts.Product.Responses.ProductDetailResponse MapProductToDetailResponse(
+        ProductEntity product)
     {
-        var variantRows = product.ProductVariants
-            .Select(variant => variant.Adapt<VariantRow>())
-            .ToList();
+        var variantRows = product.ProductVariants.Select(variant => variant.Adapt<VariantRow>()).ToList();
 
         var variantResponses = variantRows
-            .Select(variant => variant.Adapt<ProductVariantDetailResponse>())
+            .Select(variant => variant.Adapt<ApiContracts.Product.Responses.ProductVariantDetailResponse>())
             .OrderBy(v => v.Stock - v.HasBeenBooked)
             .ThenBy(v => v.UrlSlug)
-            .ToList();
-
-        var options = variantResponses
-            .SelectMany(variant => variant.OptionValues)
-            .GroupBy(pair => pair.Key, StringComparer.OrdinalIgnoreCase)
-            .Select(group => new ProductOptionDetailResponse
-            {
-                Name = group.Key,
-                Values = group.Select(item => item.Value)
-                    .Distinct(StringComparer.OrdinalIgnoreCase)
-                    .OrderBy(v => v)
-                    .ToList()
-            })
-            .OrderBy(option => option.Name)
             .ToList();
 
         var totalStock = variantRows.Sum(v => v.Stock);
         var totalBooked = variantRows.Sum(v => v.HasBeenBooked);
         var availableStock = totalStock - totalBooked;
 
-        return new ProductDetailResponse
+        return new ApiContracts.Product.Responses.ProductDetailResponse
         {
             Id = product.Id,
             Name = product.Name,
@@ -130,11 +123,12 @@ public class ProductMappingConfig : IRegister
     private static ProductVariantLiteResponse BuildVariantLiteResponse(ProductVariantEntity variant)
     {
         var optionPairs = variant.VariantOptionValues
-            .Select(vov => new OptionPair
-            {
-                OptionName = vov.OptionValue?.Option?.Name,
-                OptionValue = vov.OptionValue?.Name
-            })
+            .Select(
+                vov => new OptionPair
+                {
+                    OptionName = vov.OptionValue?.Option?.Name,
+                    OptionValue = vov.OptionValue?.Name
+                })
             .ToList();
 
         var variantName = BuildVariantName(optionPairs);
@@ -160,7 +154,7 @@ public class ProductMappingConfig : IRegister
 
     private static string BuildVariantName(List<OptionPair> optionPairs)
     {
-        if (optionPairs.Count == 0)
+        if(optionPairs.Count == 0)
         {
             return string.Empty;
         }
@@ -174,21 +168,16 @@ public class ProductMappingConfig : IRegister
     }
 
     private static string GetStockStatus(long availableStock)
-    {
-        return availableStock > 0 ? "in_stock" : "out_of_stock";
-    }
+    { return availableStock > 0 ? "in_stock" : "out_of_stock"; }
 
     private static long CalculateTotalStock(ProductEntity product)
-    {
-        return product.ProductVariants
-            .Sum(v => v.InputInfos.Sum(ii => ii.RemainingCount) ?? 0);
-    }
+    { return product.ProductVariants.SelectMany(variant => variant.InputInfos).Sum(info => info.RemainingCount ?? 0); }
 
     private static long CalculateTotalBooked(ProductEntity product)
     {
         return product.ProductVariants
-            .Sum(v => v.OutputInfos
-                .Where(oi => oi.OutputOrder != null && OrderStatus.IsBookingStatus(oi.OutputOrder.StatusId))
-                .Sum(oi => (long?)oi.Count) ?? 0);
+            .SelectMany(variant => variant.OutputInfos)
+            .Where(info => info.OutputOrder != null && OrderStatus.IsBookingStatus(info.OutputOrder.StatusId))
+            .Sum(info => (long)(info.Count ?? 0));
     }
 }

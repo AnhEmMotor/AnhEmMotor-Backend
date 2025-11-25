@@ -1,8 +1,7 @@
 ﻿using Application.ApiContracts.Product.Common;
-using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace Application.ApiContracts.Product;
+namespace Application.ApiContracts.Product.Requests;
 
 public class CreateProductRequest : ProductWriteRequestBase
 {

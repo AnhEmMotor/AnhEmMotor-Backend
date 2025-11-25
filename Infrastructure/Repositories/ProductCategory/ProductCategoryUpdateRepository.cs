@@ -6,19 +6,13 @@ namespace Infrastructure.Repositories.ProductCategory;
 
 public class ProductCategoryUpdateRepository(ApplicationDBContext context) : IProductCategoryUpdateRepository
 {
-    public void Update(CategoryEntity category)
-    {
-        context.ProductCategories.Update(category);
-    }
+    public void Update(CategoryEntity category) { context.ProductCategories.Update(category); }
 
-    public void Restore(CategoryEntity category)
-    {
-        context.Restore(category);
-    }
+    public void Restore(CategoryEntity category) { context.Restore(category); }
 
     public void Restore(IEnumerable<CategoryEntity> categories)
     {
-        foreach (var category in categories)
+        foreach(var category in categories)
         {
             context.Restore(category);
         }

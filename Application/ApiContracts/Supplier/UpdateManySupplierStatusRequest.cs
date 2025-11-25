@@ -1,6 +1,3 @@
-using Application.Common.Attributes;
-using System.ComponentModel.DataAnnotations;
-
 namespace Application.ApiContracts.Supplier
 {
     public class UpdateManySupplierStatusRequest

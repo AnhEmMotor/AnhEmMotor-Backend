@@ -2,8 +2,6 @@
 using Domain.Shared;
 using Sieve.Models;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Application.Interfaces.Repositories
 {
@@ -14,6 +12,6 @@ namespace Application.Interfaces.Repositories
             SieveModel sieveModel,
             DataFetchMode? defaultSortMode = DataFetchMode.ActiveOnly,
             CancellationToken cancellationToken = default)
-        where TEntity : class;
+            where TEntity : class;
     }
 }

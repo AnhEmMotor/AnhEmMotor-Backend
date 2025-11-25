@@ -20,7 +20,8 @@ public sealed class GetDeletedVariantLiteListQueryHandler(IProductVariantReadRep
             page,
             pageSize,
             cancellationToken,
-            DataFetchMode.DeletedOnly);
+            DataFetchMode.DeletedOnly)
+            .ConfigureAwait(false);
 
         var responses = variants.Select(v => v.Adapt<ProductVariantLiteResponse>()).ToList();
 

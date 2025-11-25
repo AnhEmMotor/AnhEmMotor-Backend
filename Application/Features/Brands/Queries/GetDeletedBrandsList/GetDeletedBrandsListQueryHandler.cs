@@ -10,13 +10,13 @@ namespace Application.Features.Brands.Queries.GetDeletedBrandsList;
 
 public sealed class GetDeletedBrandsListQueryHandler(IBrandReadRepository repository, IPaginator paginator) : IRequestHandler<GetDeletedBrandsListQuery, PagedResult<BrandResponse>>
 {
-    public async Task<PagedResult<BrandResponse>> Handle(
+    public Task<PagedResult<BrandResponse>> Handle(
         GetDeletedBrandsListQuery request,
         CancellationToken cancellationToken)
     {
         var query = repository.GetQueryable(DataFetchMode.DeletedOnly);
 
-        return await paginator.ApplyAsync<BrandEntity, BrandResponse>(
+        return paginator.ApplyAsync<BrandEntity, BrandResponse>(
             query,
             request.SieveModel,
             DataFetchMode.DeletedOnly,

@@ -1,9 +1,8 @@
-using Application.ApiContracts.Product;
 using FluentValidation;
 
 namespace Application.Features.Products.Commands.CreateProduct
 {
-    public sealed class CreateProductVariantValidator : AbstractValidator<ProductVariantWriteRequest>
+    public sealed class CreateProductVariantValidator : AbstractValidator<ApiContracts.Product.Common.ProductVariantWriteRequest>
     {
         public CreateProductVariantValidator()
         {

@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Application.ApiContracts.Product.Common;
+namespace Application.ApiContracts.Product.Responses;
 
 public class ProductVariantDetailResponse
 {

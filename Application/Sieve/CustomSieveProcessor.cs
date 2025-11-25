@@ -10,17 +10,18 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
 {
     protected override SievePropertyMapper MapProperties(SievePropertyMapper mapper)
     {
-        var entityTypes = typeof(BaseEntity).Assembly.GetTypes()
+        var entityTypes = typeof(BaseEntity).Assembly
+            .GetTypes()
             .Where(t => t.IsClass && !t.IsAbstract && t.IsSubclassOf(typeof(BaseEntity)));
 
         var method = typeof(CustomSieveProcessor).GetMethod(
             nameof(MapBaseProperties),
             BindingFlags.NonPublic | BindingFlags.Static);
 
-        foreach (var type in entityTypes)
+        foreach(var type in entityTypes)
         {
             var genericMethod = method!.MakeGenericMethod(type);
-            genericMethod.Invoke(null, [mapper]);
+            genericMethod.Invoke(null, [ mapper ]);
         }
 
         mapper.Property<Brand>(p => p.Id).CanSort();
@@ -50,6 +51,5 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<T>(x => x.CreatedAt).CanSort().HasName("createdAt");
         mapper.Property<T>(x => x.UpdatedAt).CanSort().HasName("updatedAt");
         mapper.Property<T>(x => x.DeletedAt).CanSort().HasName("deletedAt");
-
     }
 }

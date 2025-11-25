@@ -27,11 +27,13 @@ public class SettingController(IMediator mediator) : ControllerBase
     [HttpPut]
     [ProducesResponseType(typeof(Dictionary<string, long?>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> SetSettings([FromBody][ValidSettingKeys] Dictionary<string, long?> request, CancellationToken cancellationToken)
+    public async Task<IActionResult> SetSettings(
+        [FromBody][ValidSettingKeys] Dictionary<string, long?> request,
+        CancellationToken cancellationToken)
     {
         var command = new SetSettingsCommand(request);
         var (data, errorResponse) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if (errorResponse != null)
+        if(errorResponse != null)
         {
             return BadRequest(errorResponse);
         }

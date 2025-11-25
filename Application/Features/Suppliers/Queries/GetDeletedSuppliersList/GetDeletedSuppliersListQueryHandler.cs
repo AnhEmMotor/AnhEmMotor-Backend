@@ -8,17 +8,15 @@ using SupplierEntity = Domain.Entities.Supplier;
 
 namespace Application.Features.Suppliers.Queries.GetDeletedSuppliersList;
 
-public sealed class GetDeletedSuppliersListQueryHandler(
-    ISupplierReadRepository repository,
-    IPaginator paginator) : IRequestHandler<GetDeletedSuppliersListQuery, PagedResult<SupplierResponse>>
+public sealed class GetDeletedSuppliersListQueryHandler(ISupplierReadRepository repository, IPaginator paginator) : IRequestHandler<GetDeletedSuppliersListQuery, PagedResult<SupplierResponse>>
 {
-    public async Task<PagedResult<SupplierResponse>> Handle(
+    public Task<PagedResult<SupplierResponse>> Handle(
         GetDeletedSuppliersListQuery request,
         CancellationToken cancellationToken)
     {
         var query = repository.GetQueryable(DataFetchMode.DeletedOnly);
 
-        return await paginator.ApplyAsync<SupplierEntity, SupplierResponse>(
+        return paginator.ApplyAsync<SupplierEntity, SupplierResponse>(
             query,
             request.SieveModel,
             DataFetchMode.DeletedOnly,

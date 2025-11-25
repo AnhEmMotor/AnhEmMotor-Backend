@@ -6,8 +6,5 @@ namespace Infrastructure.Repositories.Product;
 
 public class ProductInsertRepository(ApplicationDBContext context) : IProductInsertRepository
 {
-    public void Add(ProductEntity product)
-    {
-        context.Products.Add(product);
-    }
+    public void Add(ProductEntity product) { context.Products.Add(product); }
 }

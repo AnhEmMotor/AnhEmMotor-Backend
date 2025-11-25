@@ -9,7 +9,8 @@ public class SettingRepository(ApplicationDBContext context) : ISettingRepositor
 {
     public Task<IEnumerable<SettingEntity>> GetAllAsync(CancellationToken cancellationToken)
     {
-        return context.Settings.AsNoTracking()
+        return context.Settings
+            .AsNoTracking()
             .ToListAsync(cancellationToken)
             .ContinueWith<IEnumerable<SettingEntity>>(t => t.Result, cancellationToken);
     }
@@ -20,16 +21,15 @@ public class SettingRepository(ApplicationDBContext context) : ISettingRepositor
 
         var existingSettings = context.Settings.Where(s => settingKeys.Contains(s.Key)).ToList();
 
-        foreach (var setting in settings)
+        foreach(var setting in settings)
         {
             var existingSetting = existingSettings.FirstOrDefault(s => string.Compare(s.Key, setting.Key) == 0);
 
-            if (existingSetting != null)
+            if(existingSetting != null)
             {
                 existingSetting.Value = setting.Value;
                 context.Settings.Update(existingSetting);
-            }
-            else
+            } else
             {
                 context.Settings.Add(setting);
             }

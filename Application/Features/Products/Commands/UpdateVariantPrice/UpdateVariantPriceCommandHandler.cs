@@ -16,7 +16,8 @@ public sealed class UpdateVariantPriceCommandHandler(
         UpdateVariantPriceCommand command,
         CancellationToken cancellationToken)
     {
-        var variant = await variantReadRepository.GetByIdWithDetailsAsync(command.VariantId, cancellationToken);
+        var variant = await variantReadRepository.GetByIdWithDetailsAsync(command.VariantId, cancellationToken)
+            .ConfigureAwait(false);
 
         if(variant == null)
         {
@@ -28,7 +29,7 @@ public sealed class UpdateVariantPriceCommandHandler(
 
         variant.Price = command.Price;
         updateRepository.Update(variant);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         var response = variant.Adapt<ProductVariantLiteResponse>();
         return (response, null);

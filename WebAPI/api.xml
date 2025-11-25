@@ -9,10 +9,12 @@
             Represents a standardized error response returned by an API, including error message, type, details, validation
             errors, and optional inner exception information.
             </summary>
-            <remarks>Use this class to provide structured error information in API responses, enabling clients to handle
-            errors consistently. The class supports representing general errors, validation errors, and nested exceptions for
-            detailed diagnostics. Validation errors are included when input validation fails, and inner exceptions can be used
-            to convey exception chains for debugging purposes.</remarks>
+            <remarks>
+            Use this class to provide structured error information in API responses, enabling clients to handle errors
+            consistently. The class supports representing general errors, validation errors, and nested exceptions for detailed
+            diagnostics. Validation errors are included when input validation fails, and inner exceptions can be used to convey
+            exception chains for debugging purposes.
+            </remarks>
             <remarks>
             Initializes a new instance of the ApiErrorResponse class with the specified error message.
             </remarks>
@@ -23,10 +25,12 @@
             Represents a standardized error response returned by an API, including error message, type, details, validation
             errors, and optional inner exception information.
             </summary>
-            <remarks>Use this class to provide structured error information in API responses, enabling clients to handle
-            errors consistently. The class supports representing general errors, validation errors, and nested exceptions for
-            detailed diagnostics. Validation errors are included when input validation fails, and inner exceptions can be used
-            to convey exception chains for debugging purposes.</remarks>
+            <remarks>
+            Use this class to provide structured error information in API responses, enabling clients to handle errors
+            consistently. The class supports representing general errors, validation errors, and nested exceptions for detailed
+            diagnostics. Validation errors are included when input validation fails, and inner exceptions can be used to convey
+            exception chains for debugging purposes.
+            </remarks>
             <remarks>
             Initializes a new instance of the ApiErrorResponse class with the specified error message.
             </remarks>
@@ -51,16 +55,19 @@
             <summary>
             Gets or sets the collection of validation errors associated with the current operation.
             </summary>
-            <remarks>The list contains details for each validation error encountered. If no errors are present,
-            the property may be null or an empty list.</remarks>
+            <remarks>
+            The list contains details for each validation error encountered. If no errors are present, the property may be
+            null or an empty list.
+            </remarks>
         </member>
         <member name="P:WebAPI.Contracts.Errors.ApiErrorResponse.InnerException">
             <summary>
             Gets or sets the underlying API error response that caused the current error, if any.
             </summary>
-            <remarks>Use this property to access additional details about the original error when handling nested
-            or chained API exceptions. This can be useful for debugging or for providing more informative error messages to
-            users.</remarks>
+            <remarks>
+            Use this property to access additional details about the original error when handling nested or chained API
+            exceptions. This can be useful for debugging or for providing more informative error messages to users.
+            </remarks>
         </member>
         <member name="M:WebAPI.Contracts.Errors.ApiErrorResponse.CreateProductionError(System.String)">
             <summary>
@@ -74,27 +81,35 @@
             Creates an <see cref="T:WebAPI.Contracts.Errors.ApiErrorResponse"/> containing detailed information about the specified exception for
             development and debugging purposes.
             </summary>
-            <remarks>This method is intended for use in development environments where exposing detailed exception
-            information is useful for debugging. It recursively includes inner exception details, which may reveal sensitive
-            information. Avoid using this method in production scenarios.</remarks>
+            <remarks>
+            This method is intended for use in development environments where exposing detailed exception information is
+            useful for debugging. It recursively includes inner exception details, which may reveal sensitive information.
+            Avoid using this method in production scenarios.
+            </remarks>
             <param name="ex">The exception to include in the error response. Cannot be null.</param>
-            <returns>An <see cref="T:WebAPI.Contracts.Errors.ApiErrorResponse"/> populated with the exception's message, type, stack trace, and any inner
-            exceptions.</returns>
+            <returns>
+            An <see cref="T:WebAPI.Contracts.Errors.ApiErrorResponse"/> populated with the exception's message, type, stack trace, and any inner
+            exceptions.
+            </returns>
         </member>
         <member name="M:WebAPI.Contracts.Errors.ApiErrorResponse.CreateValidationError(System.Collections.Generic.IEnumerable{FluentValidation.Results.ValidationFailure})">
             <summary>
             Creates an API error response representing one or more validation failures.
             </summary>
-            <param name="failures">A collection of validation failures to include in the error response. Each failure should specify the property
-            name and the associated error message.</param>
+            <param name="failures">
+            A collection of validation failures to include in the error response. Each failure should specify the property
+            name and the associated error message.
+            </param>
             <returns>An <see cref="T:WebAPI.Contracts.Errors.ApiErrorResponse"/> containing a summary message and details for each validation failure provided.</returns>
         </member>
         <member name="T:WebAPI.Contracts.Errors.ValidationErrorDetail">
             <summary>
             Represents details about a validation error for a specific field.
             </summary>
-            <remarks>Use this class to convey information about which field failed validation and the associated error
-            message. This is typically used in validation result collections to provide structured error feedback.</remarks>
+            <remarks>
+            Use this class to convey information about which field failed validation and the associated error message. This is
+            typically used in validation result collections to provide structured error feedback.
+            </remarks>
         </member>
         <member name="P:WebAPI.Contracts.Errors.ValidationErrorDetail.Field">
             <summary>
@@ -203,7 +218,7 @@
             </summary>
             <param name="mediator"></param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.MediaFileController.GetFiles(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.MediaFileController.GetFilesAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách tệp media (có phân trang, lọc, sắp xếp).
             </summary>
@@ -211,7 +226,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.MediaFileController.GetDeletedFiles(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.MediaFileController.GetDeletedFilesAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách tệp media đã bị xoá (có phân trang, lọc, sắp xếp).
             </summary>
@@ -219,7 +234,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.MediaFileController.GetFileById(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.MediaFileController.GetFileByIdAsync(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Lấy thông tin của tệp media được chọn.
             </summary>
@@ -384,12 +399,12 @@
             Kiểm tra slug có sẵn sàng sử dụng hay không.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.CreateProduct(Application.ApiContracts.Product.CreateProductRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.CreateProduct(Application.ApiContracts.Product.Requests.CreateProductRequest,System.Threading.CancellationToken)">
             <summary>
             Tạo mới sản phẩm với các biến thể.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateProduct(System.Int32,Application.ApiContracts.Product.UpdateProductRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateProduct(System.Int32,Application.ApiContracts.Product.Requests.UpdateProductRequest,System.Threading.CancellationToken)">
             <summary>
             Cập nhật sản phẩm theo Id.
             </summary>
@@ -399,7 +414,7 @@
             Xoá sản phẩm (soft delete) và cascade xoá ảnh của các biến thể.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.DeleteProducts(Application.ApiContracts.Product.DeleteManyProductsRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.DeleteProducts(Application.ApiContracts.Product.Requests.DeleteManyProductsRequest,System.Threading.CancellationToken)">
             <summary>
             Xoá nhiều sản phẩm cùng lúc (soft delete) và cascade xoá ảnh.
             </summary>
@@ -409,37 +424,37 @@
             Khôi phục sản phẩm đã bị xoá.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.RestoreProducts(Application.ApiContracts.Product.RestoreManyProductsRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.RestoreProducts(Application.ApiContracts.Product.Requests.RestoreManyProductsRequest,System.Threading.CancellationToken)">
             <summary>
             Khôi phục nhiều sản phẩm cùng lúc.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateProductPrice(System.Int32,Application.ApiContracts.Product.UpdateProductPriceRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateProductPrice(System.Int32,Application.ApiContracts.Product.Requests.UpdateProductPriceRequest,System.Threading.CancellationToken)">
             <summary>
             Chỉnh giá cho tất cả các biến thể của 1 sản phẩm.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateManyProductPrices(Application.ApiContracts.Product.UpdateManyProductPricesRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateManyProductPrices(Application.ApiContracts.Product.Requests.UpdateManyProductPricesRequest,System.Threading.CancellationToken)">
             <summary>
             Chỉnh giá cho nhiều sản phẩm cùng lúc.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateVariantPrice(System.Int32,Application.ApiContracts.Product.UpdateVariantPriceRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateVariantPrice(System.Int32,Application.ApiContracts.Product.Requests.UpdateVariantPriceRequest,System.Threading.CancellationToken)">
             <summary>
             Chỉnh giá cho 1 biến thể sản phẩm.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateManyVariantPrices(Application.ApiContracts.Product.UpdateManyVariantPricesRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateManyVariantPrices(Application.ApiContracts.Product.Requests.UpdateManyVariantPricesRequest,System.Threading.CancellationToken)">
             <summary>
             Chỉnh giá cho nhiều biến thể sản phẩm cùng lúc.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateProductStatus(System.Int32,Application.ApiContracts.Product.UpdateProductStatusRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateProductStatus(System.Int32,Application.ApiContracts.Product.Requests.UpdateProductStatusRequest,System.Threading.CancellationToken)">
             <summary>
             Chỉnh trạng thái của 1 sản phẩm.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateManyProductStatuses(Application.ApiContracts.Product.UpdateManyProductStatusesRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateManyProductStatuses(Application.ApiContracts.Product.Requests.UpdateManyProductStatusesRequest,System.Threading.CancellationToken)">
             <summary>
             Chỉnh trạng thái nhiều sản phẩm cùng lúc.
             </summary>
@@ -578,17 +593,20 @@
             Provides a custom JSON converter for strings that substitutes empty strings for null values during deserialization
             and omits empty strings during serialization.
             </summary>
-            <remarks>Use this converter to ensure that deserialized string properties are never null, but instead default
-            to an empty string. When serializing, properties with null or empty string values are not written to the JSON
-            output. This behavior can help avoid null reference issues and reduce JSON payload size for optional string
-            properties.</remarks>
+            <remarks>
+            Use this converter to ensure that deserialized string properties are never null, but instead default to an empty
+            string. When serializing, properties with null or empty string values are not written to the JSON output. This
+            behavior can help avoid null reference issues and reduce JSON payload size for optional string properties.
+            </remarks>
         </member>
         <member name="M:WebAPI.Converters.EmptyStringConverter.Read(System.Text.Json.Utf8JsonReader@,System.Type,System.Text.Json.JsonSerializerOptions)">
             <summary>
             Reads a JSON string value from the specified reader and returns it as a .NET string.
             </summary>
-            <param name="reader">A reference to the <see cref="T:System.Text.Json.Utf8JsonReader"/> positioned at the JSON value to read. The reader must be at a
-            string token.</param>
+            <param name="reader">
+            A reference to the <see cref="T:System.Text.Json.Utf8JsonReader"/> positioned at the JSON value to read. The reader must be at a
+            string token.
+            </param>
             <param name="typeToConvert">The type of the value to convert. This parameter is ignored for string values.</param>
             <param name="options">Options to control the behavior of the JSON serializer. This parameter is not used for string values.</param>
             <returns>The string value read from the JSON input. Returns <see langword="string.Empty"/> if the JSON value is null.</returns>
@@ -607,10 +625,11 @@
             Provides a centralized exception handler for HTTP requests, generating standardized API error responses and logging
             exceptions.
             </summary>
-            <remarks>This handler formats error responses as JSON and distinguishes between validation errors and
-            unhandled exceptions. In development environments, detailed exception information is included in the response; in
-            production, a generic error message is returned. All exceptions are logged appropriately based on their
-            type.</remarks>
+            <remarks>
+            This handler formats error responses as JSON and distinguishes between validation errors and unhandled exceptions.
+            In development environments, detailed exception information is included in the response; in production, a generic
+            error message is returned. All exceptions are logged appropriately based on their type.
+            </remarks>
             <param name="environment">The hosting environment used to determine whether detailed error information should be included in responses.</param>
             <param name="logger">The logger used to record exception details and validation failures.</param>
         </member>
@@ -619,10 +638,11 @@
             Provides a centralized exception handler for HTTP requests, generating standardized API error responses and logging
             exceptions.
             </summary>
-            <remarks>This handler formats error responses as JSON and distinguishes between validation errors and
-            unhandled exceptions. In development environments, detailed exception information is included in the response; in
-            production, a generic error message is returned. All exceptions are logged appropriately based on their
-            type.</remarks>
+            <remarks>
+            This handler formats error responses as JSON and distinguishes between validation errors and unhandled exceptions.
+            In development environments, detailed exception information is included in the response; in production, a generic
+            error message is returned. All exceptions are logged appropriately based on their type.
+            </remarks>
             <param name="environment">The hosting environment used to determine whether detailed error information should be included in responses.</param>
             <param name="logger">The logger used to record exception details and validation failures.</param>
         </member>
@@ -631,15 +651,19 @@
             Attempts to handle the specified exception by writing an appropriate error response to the HTTP context
             asynchronously.
             </summary>
-            <remarks>If the exception is a validation error, a detailed validation error response is returned with
-            status code 400 (Bad Request). For other exceptions, a generic error response is returned with status code 500
-            (Internal Server Error). The response format and content type are set to JSON. The method does not propagate the
-            exception further.</remarks>
+            <remarks>
+            If the exception is a validation error, a detailed validation error response is returned with status code 400
+            (Bad Request). For other exceptions, a generic error response is returned with status code 500 (Internal Server
+            Error). The response format and content type are set to JSON. The method does not propagate the exception
+            further.
+            </remarks>
             <param name="httpContext">The HTTP context to which the error response will be written. Must not be null.</param>
             <param name="exception">The exception to handle and convert into an error response. Must not be null.</param>
             <param name="cancellationToken">A cancellation token that can be used to cancel the asynchronous operation.</param>
-            <returns>A value indicating whether the exception was handled and an error response was written. Always returns <see
-            langword="true"/>.</returns>
+            <returns>
+            A value indicating whether the exception was handled and an error response was written. Always returns <see
+            langword="true"/>.
+            </returns>
         </member>
         <member name="T:WebAPI.StartupExtensions.ConfigureServicesExtension">
             <summary>
@@ -648,7 +672,8 @@
         </member>
         <member name="M:WebAPI.StartupExtensions.ConfigureServicesExtension.ConfigureServices(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration,Microsoft.AspNetCore.Hosting.IWebHostEnvironment)">
             <summary>
-            Cấu hình các dịch vụ cho ứng dụng, bao gồm tùy chọn Route, DI tầng Infrastructure, API Versioning và Swagger/OpenAPI.
+            Cấu hình các dịch vụ cho ứng dụng, bao gồm tùy chọn Route, DI tầng Infrastructure, API Versioning và
+            Swagger/OpenAPI.
             </summary>
             <param name="services">Bộ sưu tập các dịch vụ (IServiceCollection).</param>
             <param name="configuration">Cấu hình ứng dụng (IConfiguration).</param>
