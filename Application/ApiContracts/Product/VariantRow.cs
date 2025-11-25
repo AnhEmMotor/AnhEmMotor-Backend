@@ -1,4 +1,4 @@
-﻿namespace Application.ApiContracts.Product.Select
+﻿namespace Application.ApiContracts.Product
 {
     public sealed class VariantRow
     {

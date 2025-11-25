@@ -1,4 +1,3 @@
-using Application.ApiContracts.Product.Create;
 using System.Text.Json.Serialization;
 
 namespace Application.ApiContracts.Product.Common;

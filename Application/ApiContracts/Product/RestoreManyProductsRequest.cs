@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Application.ApiContracts.Product.Delete;
+namespace Application.ApiContracts.Product;
 
-public class DeleteManyProductsRequest
+public class RestoreManyProductsRequest
 {
     public List<int> Ids { get; set; } = [];
 }

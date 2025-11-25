@@ -1,4 +1,4 @@
-using Application.ApiContracts.Product.Select;
+using Application.ApiContracts.Product;
 using Application.Features.Products.Common;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
@@ -8,10 +8,8 @@ using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.ProductCategory;
 using Application.Interfaces.Repositories.ProductVariant;
 using Domain.Entities;
-using Domain.Enums;
 using Domain.Helpers;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using OptionValueEntity = Domain.Entities.OptionValue;
 using ProductEntity = Domain.Entities.Product;
 

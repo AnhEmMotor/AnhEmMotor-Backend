@@ -1,5 +1,4 @@
-using Application.ApiContracts.Product.Create;
-using Application.ApiContracts.Product.Select;
+using Application.ApiContracts.Product;
 using Domain.Helpers;
 using MediatR;
 

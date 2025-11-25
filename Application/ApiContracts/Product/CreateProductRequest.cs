@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace Application.ApiContracts.Product.Create;
+namespace Application.ApiContracts.Product;
 
 public class CreateProductRequest : ProductWriteRequestBase
 {

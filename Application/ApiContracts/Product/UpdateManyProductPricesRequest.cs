@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Application.ApiContracts.Product.Update;
+namespace Application.ApiContracts.Product;
 
-public class UpdateManyVariantPricesRequest
+public class UpdateManyProductPricesRequest
 {
     public List<int>? Ids { get; set; }
 

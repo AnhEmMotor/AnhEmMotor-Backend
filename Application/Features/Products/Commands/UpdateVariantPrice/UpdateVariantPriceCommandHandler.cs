@@ -1,5 +1,5 @@
+using Application.ApiContracts.Product;
 using Application.ApiContracts.Product.Common;
-using Application.ApiContracts.Product.Select;
 using Application.Features.Products.Common;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductVariant;

@@ -1,7 +1,7 @@
 using Application.ApiContracts.Product.Common;
 using System.Text.Json.Serialization;
 
-namespace Application.ApiContracts.Product.Select;
+namespace Application.ApiContracts.Product;
 
 public class ProductDetailResponse
 {
