@@ -1,7 +1,7 @@
 using Application.ApiContracts.Product;
-using Application.Features.Products.Common;
 using Application.Interfaces.Repositories.Product;
 using Domain.Helpers;
+using Mapster;
 using MediatR;
 
 namespace Application.Features.Products.Queries.GetProductById;
@@ -22,7 +22,7 @@ public sealed class GetProductByIdQueryHandler(IProductReadRepository readReposi
             });
         }
 
-        var response = ProductResponseMapper.BuildProductDetailResponse(product);
+        var response = product.Adapt<ProductDetailResponse>();
         return (response, null);
     }
 }

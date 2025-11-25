@@ -1,6 +1,7 @@
+using Application.ApiContracts.Product;
 using Domain.Helpers;
 using MediatR;
 
 namespace Application.Features.Products.Commands.RestoreManyProducts;
 
-public sealed record RestoreManyProductsCommand(List<int> Ids) : IRequest<(List<int>? Data, ErrorResponse? Error)>;
+public sealed record RestoreManyProductsCommand(List<int> Ids) : IRequest<(List<ProductDetailResponse>? Data, ErrorResponse? Error)>;

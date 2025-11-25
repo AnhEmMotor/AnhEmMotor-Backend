@@ -1,5 +1,4 @@
 using Application.ApiContracts.Product;
-using Application.Features.Products.Common;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
 using Application.Interfaces.Repositories.Option;
@@ -9,6 +8,7 @@ using Application.Interfaces.Repositories.ProductCategory;
 using Application.Interfaces.Repositories.ProductVariant;
 using Domain.Entities;
 using Domain.Helpers;
+using Mapster;
 using MediatR;
 using OptionValueEntity = Domain.Entities.OptionValue;
 using ProductEntity = Domain.Entities.Product;
@@ -235,7 +235,7 @@ public sealed class CreateProductCommandHandler(
         productInsertRepository.Add(product);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        var response = ProductResponseMapper.BuildProductDetailResponse(product);
+        var response = product.Adapt<ProductDetailResponse>();
         return (response, null);
     }
 }

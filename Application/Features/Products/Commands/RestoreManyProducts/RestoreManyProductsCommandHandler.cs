@@ -1,7 +1,9 @@
+using Application.ApiContracts.Product;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Product;
 using Domain.Enums;
 using Domain.Helpers;
+using Mapster;
 using MediatR;
 
 namespace Application.Features.Products.Commands.RestoreManyProducts;
@@ -9,9 +11,9 @@ namespace Application.Features.Products.Commands.RestoreManyProducts;
 public sealed class RestoreManyProductsCommandHandler(
     IProductReadRepository readRepository,
     IProductUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<RestoreManyProductsCommand, (List<int>? Data, ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<RestoreManyProductsCommand, (List<ProductDetailResponse>? Data, ErrorResponse? Error)>
 {
-    public async Task<(List<int>? Data, ErrorResponse? Error)> Handle(
+    public async Task<(List<ProductDetailResponse>? Data, ErrorResponse? Error)> Handle(
         RestoreManyProductsCommand command,
         CancellationToken cancellationToken)
     {
@@ -58,6 +60,7 @@ public sealed class RestoreManyProductsCommandHandler(
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        return (uniqueIds, null);
+        var responses = deletedProducts.Select(p => p.Adapt<ProductDetailResponse>()).ToList();
+        return (responses, null);
     }
 }

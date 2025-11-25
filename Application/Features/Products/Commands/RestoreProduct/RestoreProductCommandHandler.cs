@@ -1,10 +1,10 @@
 using Application.ApiContracts.Product;
 using Application.Common.Extensions;
-using Application.Features.Products.Common;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Product;
 using Domain.Enums;
 using Domain.Helpers;
+using Mapster;
 using MediatR;
 
 namespace Application.Features.Products.Commands.RestoreProduct;
@@ -49,7 +49,7 @@ public sealed class RestoreProductCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        var response = ProductResponseMapper.BuildProductDetailResponse(deletedProduct);
+        var response = deletedProduct.Adapt<ProductDetailResponse>();
         return (response, null);
     }
 }

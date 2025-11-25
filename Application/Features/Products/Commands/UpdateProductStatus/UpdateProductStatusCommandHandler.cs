@@ -1,8 +1,8 @@
 using Application.ApiContracts.Product;
-using Application.Features.Products.Common;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Product;
 using Domain.Helpers;
+using Mapster;
 using MediatR;
 
 namespace Application.Features.Products.Commands.UpdateProductStatus;
@@ -30,7 +30,7 @@ public sealed class UpdateProductStatusCommandHandler(
         updateRepository.Update(product);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        var response = ProductResponseMapper.BuildProductDetailResponse(product);
+        var response = product.Adapt<ProductDetailResponse>();
         return (response, null);
     }
 }

@@ -1,9 +1,8 @@
-using Application.ApiContracts.Product;
 using Application.ApiContracts.Product.Common;
-using Application.Features.Products.Common;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductVariant;
 using Domain.Helpers;
+using Mapster;
 using MediatR;
 
 namespace Application.Features.Products.Commands.UpdateVariantPrice;
@@ -31,26 +30,7 @@ public sealed class UpdateVariantPriceCommandHandler(
         updateRepository.Update(variant);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        var optionPairs = variant.VariantOptionValues
-            .Select(
-                vov => new OptionPair
-                {
-                    OptionName = vov.OptionValue?.Option?.Name,
-                    OptionValue = vov.OptionValue?.Name
-                })
-            .ToList();
-
-        var stock = variant.InputInfos?.Sum(ii => ii.RemainingCount) ?? 0;
-
-        var response = ProductResponseMapper.BuildVariantLiteResponse(
-            variant.Id,
-            variant.Product?.Id,
-            variant.Product?.Name,
-            optionPairs,
-            variant.Price,
-            variant.CoverImageUrl,
-            stock);
-
+        var response = variant.Adapt<ProductVariantLiteResponse>();
         return (response, null);
     }
 }

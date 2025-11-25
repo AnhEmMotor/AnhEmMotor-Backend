@@ -22,6 +22,7 @@ using Application.Features.Products.Queries.GetVariantLiteByProductId;
 using Asp.Versioning;
 using Domain.Helpers;
 using Domain.Shared;
+using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
@@ -125,7 +126,7 @@ public class ProductController(ISender sender) : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateProduct([FromBody] CreateProductRequest request, CancellationToken cancellationToken)
     {
-        var command = CreateProductCommand.FromRequest(request);
+        var command = request.Adapt<CreateProductCommand>();
         var (data, error) = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         if (error != null)
         {
@@ -207,7 +208,7 @@ public class ProductController(ISender sender) : ControllerBase
     /// Khôi phục nhiều sản phẩm cùng lúc.
     /// </summary>
     [HttpPost("restore-many")]
-    [ProducesResponseType(typeof(List<int>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(List<ProductDetailResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RestoreProducts([FromBody] RestoreManyProductsRequest request, CancellationToken cancellationToken)
     {
