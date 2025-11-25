@@ -1,23 +1,23 @@
-using Mapster;
-using MediatR;
-using Application.Features.Suppliers.Commands.RestoreManySuppliers;
 using Application.ApiContracts.Supplier;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Supplier;
-using Domain.Helpers;
 using Domain.Enums;
+using Domain.Helpers;
+using Mapster;
+using MediatR;
 
 namespace Application.Features.Suppliers.Commands.RestoreManySuppliers;
 
 public sealed class RestoreManySuppliersCommandHandler(
     ISupplierReadRepository readRepository,
     ISupplierUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork)
-    : IRequestHandler<RestoreManySuppliersCommand, (List<SupplierResponse>? Data, ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<RestoreManySuppliersCommand, (List<SupplierResponse>? Data, ErrorResponse? Error)>
 {
-    public async Task<(List<SupplierResponse>? Data, ErrorResponse? Error)> Handle(RestoreManySuppliersCommand request, CancellationToken cancellationToken)
+    public async Task<(List<SupplierResponse>? Data, ErrorResponse? Error)> Handle(
+        RestoreManySuppliersCommand request,
+        CancellationToken cancellationToken)
     {
-        if (request.Ids.Count == 0)
+        if(request.Ids.Count == 0)
         {
             return ([], null);
         }
@@ -25,38 +25,34 @@ public sealed class RestoreManySuppliersCommandHandler(
         var uniqueIds = request.Ids.Distinct().ToList();
         var errorDetails = new List<ErrorDetail>();
 
-        var allSuppliers = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.All).ConfigureAwait(false);
-        var deletedSuppliers = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.DeletedOnly).ConfigureAwait(false);
+        var allSuppliers = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.All)
+            .ConfigureAwait(false);
+        var deletedSuppliers = await readRepository.GetByIdAsync(
+            uniqueIds,
+            cancellationToken,
+            DataFetchMode.DeletedOnly)
+            .ConfigureAwait(false);
 
         var allSupplierMap = allSuppliers.ToDictionary(s => s.Id);
         var deletedSupplierSet = deletedSuppliers.Select(s => s.Id).ToHashSet();
 
-        foreach (var id in uniqueIds)
+        foreach(var id in uniqueIds)
         {
-            if (!allSupplierMap.ContainsKey(id))
+            if(!allSupplierMap.ContainsKey(id))
             {
-                errorDetails.Add(new ErrorDetail
-                {
-                    Field = "Id",
-                    Message = $"Supplier with Id {id} not found."
-                });
-            }
-            else if (!deletedSupplierSet.Contains(id))
+                errorDetails.Add(new ErrorDetail { Field = "Id", Message = $"Supplier with Id {id} not found." });
+            } else if(!deletedSupplierSet.Contains(id))
             {
-                errorDetails.Add(new ErrorDetail
-                {
-                    Field = "Id",
-                    Message = $"Supplier with Id {id} is not deleted."
-                });
+                errorDetails.Add(new ErrorDetail { Field = "Id", Message = $"Supplier with Id {id} is not deleted." });
             }
         }
 
-        if (errorDetails.Count > 0)
+        if(errorDetails.Count > 0)
         {
             return (null, new ErrorResponse { Errors = errorDetails });
         }
 
-        if (deletedSuppliers.ToList().Count > 0)
+        if(deletedSuppliers.ToList().Count > 0)
         {
             updateRepository.Restore(deletedSuppliers);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

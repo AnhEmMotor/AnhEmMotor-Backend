@@ -6,18 +6,19 @@ using MediatR;
 
 namespace Application.Features.ProductCategories.Queries.GetProductCategoryById;
 
-public sealed class GetProductCategoryByIdQueryHandler(IProductCategoryReadRepository repository)
-    : IRequestHandler<GetProductCategoryByIdQuery, (ProductCategoryResponse? Data, ErrorResponse? Error)>
+public sealed class GetProductCategoryByIdQueryHandler(IProductCategoryReadRepository repository) : IRequestHandler<GetProductCategoryByIdQuery, (ProductCategoryResponse? Data, ErrorResponse? Error)>
 {
-    public async Task<(ProductCategoryResponse? Data, ErrorResponse? Error)> Handle(GetProductCategoryByIdQuery request, CancellationToken cancellationToken)
+    public async Task<(ProductCategoryResponse? Data, ErrorResponse? Error)> Handle(
+        GetProductCategoryByIdQuery request,
+        CancellationToken cancellationToken)
     {
         var category = await repository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
 
-        if (category == null)
+        if(category == null)
         {
             return (null, new ErrorResponse
             {
-                Errors = [new ErrorDetail { Message = $"Product category with Id {request.Id} not found." }]
+                Errors = [ new ErrorDetail { Message = $"Product category with Id {request.Id} not found." } ]
             });
         }
 

@@ -10,21 +10,20 @@ namespace Application.Features.Files.Commands.UploadFile;
 public sealed class UploadImageCommandHandler(
     Interfaces.Repositories.LocalFile.IFileStorageService fileStorageService,
     IMediaFileInsertRepository insertRepository,
-    IUnitOfWork unitOfWork)
-    : IRequestHandler<UploadImageCommand, MediaFileResponse>
+    IUnitOfWork unitOfWork) : IRequestHandler<UploadImageCommand, MediaFileResponse>
 {
     public async Task<MediaFileResponse> Handle(UploadImageCommand request, CancellationToken cancellationToken)
     {
-        if (request.File == null || request.File.Length == 0)
+        if(request.File == null || request.File.Length == 0)
         {
             throw new ArgumentException("File is required");
         }
 
-        // SaveFileAsync will validate and compress the image to WebP
-        var (storagePath, fileExtension) = await fileStorageService.SaveFileAsync(request.File, cancellationToken).ConfigureAwait(false);
+        var (storagePath, fileExtension) = await fileStorageService.SaveFileAsync(request.File, cancellationToken)
+            .ConfigureAwait(false);
 
-        // Get actual file size after compression
-        var compressedFileResult = await fileStorageService.GetFileAsync(storagePath, cancellationToken).ConfigureAwait(false);
+        var compressedFileResult = await fileStorageService.GetFileAsync(storagePath, cancellationToken)
+            .ConfigureAwait(false);
         var actualFileSize = compressedFileResult?.FileBytes.Length ?? 0;
 
         var mediaFile = new MediaFileEntity
@@ -32,7 +31,7 @@ public sealed class UploadImageCommandHandler(
             StorageType = "local",
             StoragePath = storagePath,
             OriginalFileName = request.File.FileName,
-            ContentType = "image/webp", // Always WebP after compression
+            ContentType = "image/webp",
             FileExtension = fileExtension,
             FileSize = actualFileSize
         };

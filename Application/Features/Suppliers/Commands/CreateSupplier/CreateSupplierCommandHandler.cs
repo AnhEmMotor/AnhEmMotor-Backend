@@ -7,8 +7,7 @@ using MediatR;
 
 namespace Application.Features.Suppliers.Commands.CreateSupplier;
 
-public sealed class CreateSupplierCommandHandler(ISupplierInsertRepository repository, IUnitOfWork unitOfWork)
-    : IRequestHandler<CreateSupplierCommand, SupplierResponse>
+public sealed class CreateSupplierCommandHandler(ISupplierInsertRepository repository, IUnitOfWork unitOfWork) : IRequestHandler<CreateSupplierCommand, SupplierResponse>
 {
     public async Task<SupplierResponse> Handle(CreateSupplierCommand request, CancellationToken cancellationToken)
     {

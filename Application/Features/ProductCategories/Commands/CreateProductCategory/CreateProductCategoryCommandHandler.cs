@@ -7,10 +7,13 @@ using ProductCategoryEntity = Domain.Entities.ProductCategory;
 
 namespace Application.Features.ProductCategories.Commands.CreateProductCategory;
 
-public sealed class CreateProductCategoryCommandHandler(IProductCategoryInsertRepository repository, IUnitOfWork unitOfWork)
-    : IRequestHandler<CreateProductCategoryCommand, ProductCategoryResponse>
+public sealed class CreateProductCategoryCommandHandler(
+    IProductCategoryInsertRepository repository,
+    IUnitOfWork unitOfWork) : IRequestHandler<CreateProductCategoryCommand, ProductCategoryResponse>
 {
-    public async Task<ProductCategoryResponse> Handle(CreateProductCategoryCommand request, CancellationToken cancellationToken)
+    public async Task<ProductCategoryResponse> Handle(
+        CreateProductCategoryCommand request,
+        CancellationToken cancellationToken)
     {
         var category = request.Adapt<ProductCategoryEntity>();
 

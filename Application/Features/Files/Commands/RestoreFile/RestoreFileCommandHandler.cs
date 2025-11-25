@@ -12,22 +12,26 @@ public sealed class RestoreFileCommandHandler(
     IMediaFileReadRepository readRepository,
     IMediaFileUpdateRepository updateRepository,
     Interfaces.Repositories.LocalFile.IFileStorageService fileStorageService,
-    IUnitOfWork unitOfWork)
-    : IRequestHandler<RestoreFileCommand, (MediaFileResponse?, ErrorResponse?)>
+    IUnitOfWork unitOfWork) : IRequestHandler<RestoreFileCommand, (MediaFileResponse?, ErrorResponse?)>
 {
-    public async Task<(MediaFileResponse?, ErrorResponse?)> Handle(RestoreFileCommand request, CancellationToken cancellationToken)
+    public async Task<(MediaFileResponse?, ErrorResponse?)> Handle(
+        RestoreFileCommand request,
+        CancellationToken cancellationToken)
     {
-        var mediaFile = await readRepository.GetByStoragePathAsync(request.StoragePath, cancellationToken, DataFetchMode.DeletedOnly).ConfigureAwait(false);
+        var mediaFile = await readRepository.GetByStoragePathAsync(
+            request.StoragePath,
+            cancellationToken,
+            DataFetchMode.DeletedOnly)
+            .ConfigureAwait(false);
 
-        if (mediaFile is null)
+        if(mediaFile is null)
         {
             return (null, new ErrorResponse
             {
-                Errors = [new ErrorDetail { Message = "File not found or not deleted." }]
+                Errors = [ new ErrorDetail { Message = "File not found or not deleted." } ]
             });
         }
 
-        // Restore in database
         updateRepository.Restore(mediaFile);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 

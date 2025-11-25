@@ -6,8 +6,7 @@ using MediatR;
 
 namespace Application.Features.Products.Queries.GetProductById;
 
-public sealed class GetProductByIdQueryHandler(IProductReadRepository readRepository)
-    : IRequestHandler<GetProductByIdQuery, (ProductDetailResponse? Data, ErrorResponse? Error)>
+public sealed class GetProductByIdQueryHandler(IProductReadRepository readRepository) : IRequestHandler<GetProductByIdQuery, (ProductDetailResponse? Data, ErrorResponse? Error)>
 {
     public async Task<(ProductDetailResponse? Data, ErrorResponse? Error)> Handle(
         GetProductByIdQuery request,
@@ -15,17 +14,11 @@ public sealed class GetProductByIdQueryHandler(IProductReadRepository readReposi
     {
         var product = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
 
-        if (product == null)
+        if(product == null)
         {
             return (null, new ErrorResponse
             {
-                Errors =
-                [
-                    new ErrorDetail
-                    {
-                        Message = $"Product with Id {request.Id} not found."
-                    }
-                ]
+                Errors = [ new ErrorDetail { Message = $"Product with Id {request.Id} not found." } ]
             });
         }
 

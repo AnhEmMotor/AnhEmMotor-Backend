@@ -28,16 +28,10 @@ public sealed class CreateProductCommandValidator : AbstractValidator<CreateProd
             .When(x => !string.IsNullOrWhiteSpace(x.Description))
             .WithMessage("Description must not exceed 2000 characters.");
 
-        RuleFor(x => x.Weight)
-            .GreaterThan(0)
-            .When(x => x.Weight.HasValue)
-            .WithMessage("Weight must be greater than 0.");
+        RuleFor(x => x.Weight).GreaterThan(0).When(x => x.Weight.HasValue).WithMessage("Weight must be greater than 0.");
 
-        RuleFor(x => x.Variants)
-            .NotEmpty()
-            .WithMessage("At least one product variant is required.");
+        RuleFor(x => x.Variants).NotEmpty().WithMessage("At least one product variant is required.");
 
-        RuleForEach(x => x.Variants)
-            .SetValidator(new CreateProductVariantValidator());
+        RuleForEach(x => x.Variants).SetValidator(new CreateProductVariantValidator());
     }
 }

@@ -8,10 +8,11 @@ namespace Application.Features.Products.Commands.UpdateManyVariantPrices;
 public sealed class UpdateManyVariantPricesCommandHandler(
     IProductVariantReadRepository readRepository,
     IProductVariantUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork)
-    : IRequestHandler<UpdateManyVariantPricesCommand, (List<int>? Data, ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateManyVariantPricesCommand, (List<int>? Data, ErrorResponse? Error)>
 {
-    public async Task<(List<int>? Data, ErrorResponse? Error)> Handle(UpdateManyVariantPricesCommand command, CancellationToken cancellationToken)
+    public async Task<(List<int>? Data, ErrorResponse? Error)> Handle(
+        UpdateManyVariantPricesCommand command,
+        CancellationToken cancellationToken)
     {
         var errors = new List<ErrorDetail>();
         var variantIds = command.Ids;
@@ -19,27 +20,28 @@ public sealed class UpdateManyVariantPricesCommandHandler(
 
         var allVariants = await readRepository.GetByIdAsync(variantIds, cancellationToken);
 
-        if (allVariants.ToList().Count != variantIds.Count)
+        if(allVariants.ToList().Count != variantIds.Count)
         {
             var foundIds = allVariants.Select(v => v.Id).ToHashSet();
             var missingIds = variantIds.Where(id => !foundIds.Contains(id)).ToList();
-            
-            foreach (var missingId in missingIds)
+
+            foreach(var missingId in missingIds)
             {
-                errors.Add(new ErrorDetail
-                {
-                    Field = missingId.ToString(),
-                    Message = $"Biến thể với Id {missingId} không tồn tại."
-                });
+                errors.Add(
+                    new ErrorDetail
+                    {
+                        Field = missingId.ToString(),
+                        Message = $"Biến thể với Id {missingId} không tồn tại."
+                    });
             }
         }
 
-        if (errors.Count > 0)
+        if(errors.Count > 0)
         {
             return (null, new ErrorResponse { Errors = errors });
         }
 
-        foreach (var variant in allVariants)
+        foreach(var variant in allVariants)
         {
             variant.Price = newPrice;
             updateRepository.Update(variant);

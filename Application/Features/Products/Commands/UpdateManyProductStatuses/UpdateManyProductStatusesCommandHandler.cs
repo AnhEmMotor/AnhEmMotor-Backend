@@ -1,58 +1,48 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Product;
-using Application.Interfaces.Repositories.VariantOptionValue;
-using Domain.Enums;
+using Domain.Enums; // DataFetchMode
 using Domain.Helpers;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Products.Commands.UpdateManyProductStatuses;
 
 public sealed class UpdateManyProductStatusesCommandHandler(
     IProductReadRepository readRepository,
     IProductUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork)
-    : IRequestHandler<UpdateManyProductStatusesCommand, (List<int>? Data, ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateManyProductStatusesCommand, (List<int>? Data, ErrorResponse? Error)>
 {
-    public async Task<(List<int>? Data, ErrorResponse? Error)> Handle(UpdateManyProductStatusesCommand command, CancellationToken cancellationToken)
+    public async Task<(List<int>? Data, ErrorResponse? Error)> Handle(
+        UpdateManyProductStatusesCommand command,
+        CancellationToken cancellationToken)
     {
-        var errors = new List<ErrorDetail>();
-        var ids = command.Ids.Distinct().ToList();
+        var productIds = command.Ids.Distinct().ToList();
 
-        // First query to check which IDs exist
-        var existingIds = await readRepository.GetQueryable()
-            .Where(p => ids.Contains(p.Id))
-            .Select(p => p.Id)
-            .ToListAsync(cancellationToken);
+        var products = await readRepository.GetByIdAsync(productIds, cancellationToken, DataFetchMode.ActiveOnly);
+        var productList = products.ToList();
 
-        foreach (var id in ids)
+        if (productList.Count != productIds.Count)
         {
-            if (!existingIds.Contains(id))
-            {
-                errors.Add(new ErrorDetail
+            var foundIds = productList.Select(p => p.Id).ToHashSet();
+            var missingErrors = productIds
+                .Where(id => !foundIds.Contains(id))
+                .Select(id => new ErrorDetail
                 {
-                    Field = $"Id: {id}",
+                    Field = id.ToString(),
                     Message = $"Sản phẩm với Id {id} không tồn tại."
-                });
-            }
+                })
+                .ToList();
+
+            return (null, new ErrorResponse { Errors = missingErrors });
         }
 
-        if (errors.Count > 0)
-        {
-            return (null, new ErrorResponse { Errors = errors });
-        }
-
-        // Fetch entities WITHOUT navigation properties and with AsNoTracking to avoid tracking conflicts
-        var productEntities = await readRepository.GetByIdAsync(ids, cancellationToken, DataFetchMode.ActiveOnly);
-
-        foreach (var product in productEntities)
+        foreach (var product in productList)
         {
             product.StatusId = command.StatusId;
             updateRepository.Update(product);
         }
 
-        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return (ids, null);
+        return (productIds, null);
     }
 }

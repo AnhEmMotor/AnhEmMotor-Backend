@@ -8,15 +8,23 @@ namespace Application.Features.Products.Queries.GetDeletedProductsList;
 public sealed record GetDeletedProductsListQuery : IRequest<PagedResult<ProductDetailResponse>>
 {
     public int Page { get; init; } = 1;
+
     public int PageSize { get; init; } = 10;
+
     public string? Search { get; init; }
+
     public List<string> StatusIds { get; init; } = [];
+
     public string? Sorts { get; init; }
 
     public static GetDeletedProductsListQuery FromRequest(SieveModel request)
     {
         var search = ExtractFilterValue(request.Filters, "search");
-        var statusIds = ExtractFilterValue(request.Filters, "statusIds")?.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList() ?? [];
+        var statusIds = ExtractFilterValue(request.Filters, "statusIds")?.Split(
+                ',',
+                StringSplitOptions.RemoveEmptyEntries)
+                .ToList() ??
+            [];
 
         return new GetDeletedProductsListQuery
         {
@@ -30,16 +38,16 @@ public sealed record GetDeletedProductsListQuery : IRequest<PagedResult<ProductD
 
     private static string? ExtractFilterValue(string? filters, string key)
     {
-        if (string.IsNullOrWhiteSpace(filters))
+        if(string.IsNullOrWhiteSpace(filters))
         {
             return null;
         }
 
         var parts = filters.Split(',');
-        foreach (var part in parts)
+        foreach(var part in parts)
         {
-            var keyValue = part.Split(['=', '@', '!'], 2);
-            if (keyValue.Length == 2 && keyValue[0].Trim().Equals(key, StringComparison.OrdinalIgnoreCase))
+            var keyValue = part.Split([ '=', '@', '!' ], 2);
+            if(keyValue.Length == 2 && keyValue[0].Trim().Equals(key, StringComparison.OrdinalIgnoreCase))
             {
                 return keyValue[1].Trim();
             }

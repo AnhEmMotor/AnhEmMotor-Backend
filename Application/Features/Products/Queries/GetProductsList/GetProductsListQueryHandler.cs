@@ -1,15 +1,12 @@
 using Application.ApiContracts.Product;
 using Application.Features.Products.Common;
 using Application.Interfaces.Repositories.Product;
-using Domain.Enums;
 using Domain.Shared;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Products.Queries.GetProductsList;
 
-public sealed class GetProductsListQueryHandler(IProductReadRepository readRepository)
-    : IRequestHandler<GetProductsListQuery, PagedResult<ProductDetailResponse>>
+public sealed class GetProductsListQueryHandler(IProductReadRepository readRepository) : IRequestHandler<GetProductsListQuery, PagedResult<ProductDetailResponse>>
 {
     public async Task<PagedResult<ProductDetailResponse>> Handle(
         GetProductsListQuery request,

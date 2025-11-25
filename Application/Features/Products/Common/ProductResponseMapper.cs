@@ -9,24 +9,34 @@ public static class ProductResponseMapper
 {
     public static ProductDetailResponse BuildProductDetailResponse(ProductEntity product)
     {
-        var variantRows = product.ProductVariants.Select(variant => new VariantRow
-        {
-            Id = variant.Id,
-            ProductId = product.Id,
-            UrlSlug = variant.UrlSlug,
-            Price = variant.Price,
-            CoverImageUrl = variant.CoverImageUrl,
-            Photos = [.. variant.ProductCollectionPhotos.Select(photo => photo.ImageUrl ?? string.Empty)],
-            OptionPairs = [.. variant.VariantOptionValues.Select(vov => new OptionPair
-            {
-                OptionName = vov.OptionValue?.Option?.Name,
-                OptionValue = vov.OptionValue?.Name
-            })],
-            Stock = variant.InputInfos.Sum(ii => ii.RemainingCount) ?? 0,
-            HasBeenBooked = variant.OutputInfos
-                .Where(oi => oi.OutputOrder != null && OrderStatus.IsBookingStatus(oi.OutputOrder.StatusId))
-                .Sum(oi => (long?)oi.Count) ?? 0
-        }).ToList();
+        var variantRows = product.ProductVariants
+            .Select(
+                variant => new VariantRow
+                {
+                    Id = variant.Id,
+                    ProductId = product.Id,
+                    UrlSlug = variant.UrlSlug,
+                    Price = variant.Price,
+                    CoverImageUrl = variant.CoverImageUrl,
+                    Photos = [ .. variant.ProductCollectionPhotos.Select(photo => photo.ImageUrl ?? string.Empty) ],
+                    OptionPairs =
+                        [ .. variant.VariantOptionValues
+                                .Select(
+                                    vov => new OptionPair
+                                {
+                                    OptionName = vov.OptionValue?.Option?.Name,
+                                    OptionValue = vov.OptionValue?.Name
+                                }) ],
+                    Stock = variant.InputInfos.Sum(ii => ii.RemainingCount) ?? 0,
+                    HasBeenBooked =
+                        variant.OutputInfos
+                                    .Where(
+                                        oi => oi.OutputOrder != null &&
+                                                        OrderStatus.IsBookingStatus(oi.OutputOrder.StatusId))
+                                    .Sum(oi => (long?)oi.Count) ??
+                                0
+                })
+            .ToList();
 
         var summary = new ProductListRow
         {
@@ -66,34 +76,40 @@ public static class ProductResponseMapper
 
     public static ProductDetailResponse BuildProductDetailResponse(ProductListRow summary, List<VariantRow> variants)
     {
-        var variantResponses = variants.Select(variant => new ProductVariantDetailResponse
-        {
-            Id = variant.Id,
-            ProductId = variant.ProductId,
-            UrlSlug = variant.UrlSlug,
-            Price = variant.Price,
-            CoverImageUrl = variant.CoverImageUrl,
-            OptionValues = variant.OptionPairs
-                .Where(pair => !string.IsNullOrWhiteSpace(pair.OptionName) && !string.IsNullOrWhiteSpace(pair.OptionValue))
-                .GroupBy(pair => pair.OptionName!, StringComparer.OrdinalIgnoreCase)
-                .ToDictionary(g => g.Key, g => g.First().OptionValue!, StringComparer.OrdinalIgnoreCase),
-            PhotoCollection = variant.Photos,
-            Stock = variant.Stock,
-            HasBeenBooked = variant.HasBeenBooked,
-            StatusStockId = GetStockStatus(variant.Stock - variant.HasBeenBooked)
-        })
-        .OrderBy(v => v.Stock - v.HasBeenBooked)
-        .ThenBy(v => v.UrlSlug)
-        .ToList();
+        var variantResponses = variants.Select(
+            variant => new ProductVariantDetailResponse
+            {
+                Id = variant.Id,
+                ProductId = variant.ProductId,
+                UrlSlug = variant.UrlSlug,
+                Price = variant.Price,
+                CoverImageUrl = variant.CoverImageUrl,
+                OptionValues =
+                    variant.OptionPairs
+                            .Where(
+                                pair => !string.IsNullOrWhiteSpace(pair.OptionName) &&
+                                            !string.IsNullOrWhiteSpace(pair.OptionValue))
+                            .GroupBy(pair => pair.OptionName!, StringComparer.OrdinalIgnoreCase)
+                            .ToDictionary(g => g.Key, g => g.First().OptionValue!, StringComparer.OrdinalIgnoreCase),
+                PhotoCollection = variant.Photos,
+                Stock = variant.Stock,
+                HasBeenBooked = variant.HasBeenBooked,
+                StatusStockId = GetStockStatus(variant.Stock - variant.HasBeenBooked)
+            })
+            .OrderBy(v => v.Stock - v.HasBeenBooked)
+            .ThenBy(v => v.UrlSlug)
+            .ToList();
 
         var options = variantResponses
             .SelectMany(variant => variant.OptionValues)
             .GroupBy(pair => pair.Key, StringComparer.OrdinalIgnoreCase)
-            .Select(group => new ProductOptionDetailResponse
-            {
-                Name = group.Key,
-                Values = [.. group.Select(item => item.Value).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(v => v)]
-            })
+            .Select(
+                group => new ProductOptionDetailResponse
+                {
+                    Name = group.Key,
+                    Values =
+                        [ .. group.Select(item => item.Value).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(v => v) ]
+                })
             .OrderBy(option => option.Name)
             .ToList();
 
@@ -165,7 +181,7 @@ public static class ProductResponseMapper
 
     public static string BuildVariantName(List<OptionPair> optionPairs)
     {
-        if (optionPairs.Count == 0)
+        if(optionPairs.Count == 0)
         {
             return string.Empty;
         }
@@ -179,15 +195,13 @@ public static class ProductResponseMapper
     }
 
     public static string GetStockStatus(long availableStock)
-    {
-        return availableStock > 0 ? "in_stock" : "out_of_stock";
-    }
+    { return availableStock > 0 ? "in_stock" : "out_of_stock"; }
 
     public static List<string> NormalizeStatuses(List<string> statusIds)
     {
-        return [.. statusIds
+        return[ .. statusIds
             .Where(s => !string.IsNullOrWhiteSpace(s))
             .Select(s => s.Trim())
-            .Distinct(StringComparer.OrdinalIgnoreCase)];
+            .Distinct(StringComparer.OrdinalIgnoreCase) ];
     }
 }

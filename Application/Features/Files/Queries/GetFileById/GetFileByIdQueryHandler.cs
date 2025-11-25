@@ -8,23 +8,24 @@ namespace Application.Features.Files.Queries.GetFileById;
 
 public sealed class GetFileByIdQueryHandler(
     IMediaFileReadRepository repository,
-    Interfaces.Repositories.LocalFile.IFileStorageService fileStorageService)
-    : IRequestHandler<GetFileByIdQuery, (MediaFileResponse? Data, ErrorResponse? Error)>
+    Interfaces.Repositories.LocalFile.IFileStorageService fileStorageService) : IRequestHandler<GetFileByIdQuery, (MediaFileResponse? Data, ErrorResponse? Error)>
 {
-    public async Task<(MediaFileResponse? Data, ErrorResponse? Error)> Handle(GetFileByIdQuery request, CancellationToken cancellationToken)
+    public async Task<(MediaFileResponse? Data, ErrorResponse? Error)> Handle(
+        GetFileByIdQuery request,
+        CancellationToken cancellationToken)
     {
         var file = await repository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
 
-        if (file == null)
+        if(file == null)
         {
             return (null, new ErrorResponse
             {
-                Errors = [new ErrorDetail { Message = $"File with Id {request.Id} not found." }]
+                Errors = [ new ErrorDetail { Message = $"File with Id {request.Id} not found." } ]
             });
         }
 
         var response = file.Adapt<MediaFileResponse>();
-        if (!string.IsNullOrEmpty(file.StoragePath))
+        if(!string.IsNullOrEmpty(file.StoragePath))
         {
             response.PublicUrl = fileStorageService.GetPublicUrl(file.StoragePath);
         }

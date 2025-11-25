@@ -26,9 +26,7 @@ namespace Application.Features.Products.Commands.CreateProduct
                 .When(x => !string.IsNullOrWhiteSpace(x.CoverImageUrl))
                 .WithMessage("Cover image URL must not exceed 100 characters.");
 
-            RuleFor(x => x.OptionValueIds)
-                .NotNull()
-                .WithMessage("Option values must be specified (can be empty list).");
+            RuleFor(x => x.OptionValueIds).NotNull().WithMessage("Option values must be specified (can be empty list).");
         }
     }
 }
