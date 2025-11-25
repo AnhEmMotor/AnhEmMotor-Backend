@@ -1,7 +1,12 @@
 using Application.ApiContracts.Product.Select;
 using Application.Features.Products.Common;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.Brand;
+using Application.Interfaces.Repositories.Option;
+using Application.Interfaces.Repositories.OptionValue;
 using Application.Interfaces.Repositories.Product;
+using Application.Interfaces.Repositories.ProductCategory;
+using Application.Interfaces.Repositories.ProductVariant;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Helpers;
@@ -13,8 +18,13 @@ using ProductEntity = Domain.Entities.Product;
 namespace Application.Features.Products.Commands.CreateProduct;
 
 public sealed class CreateProductCommandHandler(
-    IProductSelectRepository selectRepository,
-    IProductInsertRepository insertRepository,
+    IProductCategoryReadRepository productCategoryReadRepository,
+    IBrandReadRepository brandReadRepository,
+    IProductVariantReadRepository productVariantReadRepository,
+    IOptionValueReadRepository optionValueReadRepository,
+    IOptionReadRepository optionReadRepository,
+    IProductInsertRepository productInsertRepository,
+    IOptionValueInsertRepository optionValueInsertRepository,
     IUnitOfWork unitOfWork)
     : IRequestHandler<CreateProductCommand, (ProductDetailResponse? Data, ErrorResponse? Error)>
 {
@@ -23,7 +33,7 @@ public sealed class CreateProductCommandHandler(
         var errors = new List<ErrorDetail>();
 
         // Validate Category (must exist and not soft-deleted)
-        var category = await selectRepository.GetCategoryByIdAsync(request.CategoryId!.Value, cancellationToken).ConfigureAwait(false);
+        var category = await productCategoryReadRepository.GetByIdAsync(request.CategoryId!.Value, cancellationToken).ConfigureAwait(false);
         if (category == null)
         {
             errors.Add(new ErrorDetail { Field = nameof(request.CategoryId), Message = $"Product category with Id {request.CategoryId} not found or has been deleted." });
@@ -32,7 +42,7 @@ public sealed class CreateProductCommandHandler(
         // Validate Brand (must exist and not soft-deleted)
         if (request.BrandId.HasValue)
         {
-            var brand = await selectRepository.GetBrandByIdAsync(request.BrandId.Value, cancellationToken).ConfigureAwait(false);
+            var brand = await brandReadRepository.GetByIdAsync(request.BrandId.Value, cancellationToken).ConfigureAwait(false);
             if (brand == null)
             {
                 errors.Add(new ErrorDetail { Field = nameof(request.BrandId), Message = $"Brand with Id {request.BrandId} not found or has been deleted." });
@@ -50,7 +60,7 @@ public sealed class CreateProductCommandHandler(
 
             foreach (var slug in slugs)
             {
-                var existing = await selectRepository.GetVariantBySlugAsync(slug!, includeDeleted: true, cancellationToken).ConfigureAwait(false);
+                var existing = await productVariantReadRepository.GetBySlugAsync(slug!, cancellationToken).ConfigureAwait(false);
                 if (existing != null)
                 {
                     errors.Add(new ErrorDetail { Field = "Variants.UrlSlug", Message = $"Slug '{slug}' is already in use." });
@@ -77,11 +87,13 @@ public sealed class CreateProductCommandHandler(
                             var valueName = kvp.Value?.Trim();
                             if (!string.IsNullOrWhiteSpace(valueName))
                             {
-                                if (!allOptionValues.ContainsKey(optionId))
+                                if (!allOptionValues.TryGetValue(optionId, out HashSet<string>? value))
                                 {
-                                    allOptionValues[optionId] = [];
+                                    value = [];
+                                    allOptionValues[optionId] = value;
                                 }
-                                allOptionValues[optionId].Add(valueName);
+
+                                value.Add(valueName);
                             }
                         }
                     }
@@ -95,7 +107,7 @@ public sealed class CreateProductCommandHandler(
                 var valueNames = optionKvp.Value;
 
                 // Validate Option exists
-                var option = await selectRepository.GetOptionByIdAsync(optionId, cancellationToken).ConfigureAwait(false);
+                var option = await optionReadRepository.GetByIdAsync(optionId, cancellationToken).ConfigureAwait(false);
                 if (option == null)
                 {
                     errors.Add(new ErrorDetail { Field = "Variants.OptionValues", Message = $"Option with Id {optionId} not found." });
@@ -107,7 +119,7 @@ public sealed class CreateProductCommandHandler(
                 foreach (var valueName in valueNames)
                 {
                     // Try to find existing OptionValue
-                    var existingValue = await selectRepository.GetOptionValueByNameAsync(optionId, valueName, cancellationToken).ConfigureAwait(false);
+                    var existingValue = await optionValueReadRepository.GetByIdAndNameAsync(optionId, valueName, cancellationToken).ConfigureAwait(false);
                     
                     if (existingValue != null)
                     {
@@ -121,7 +133,7 @@ public sealed class CreateProductCommandHandler(
                             OptionId = optionId,
                             Name = valueName
                         };
-                        insertRepository.AddOptionValue(newValue);
+                        optionValueInsertRepository.Add(newValue);
                         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                         
                         valueMap[valueName] = newValue.Id;
@@ -199,8 +211,7 @@ public sealed class CreateProductCommandHandler(
                         {
                             var valueName = kvp.Value?.Trim();
                             if (!string.IsNullOrWhiteSpace(valueName) && 
-                                optionIdToValueMap.ContainsKey(optionId) &&
-                                optionIdToValueMap[optionId].TryGetValue(valueName, out var valueId))
+                                optionIdToValueMap.TryGetValue(optionId, out Dictionary<string, int>? value) && value.TryGetValue(valueName, out var valueId))
                             {
                                 variant.VariantOptionValues.Add(new VariantOptionValue
                                 {
@@ -215,17 +226,10 @@ public sealed class CreateProductCommandHandler(
             }
         }
 
-        insertRepository.Add(product);
+        productInsertRepository.Add(product);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        // Retrieve created product with all details
-        var created = await selectRepository.GetProductWithDetailsByIdAsync(product.Id, includeDeleted: false, cancellationToken).ConfigureAwait(false);
-        if (created == null)
-        {
-            return (null, new ErrorResponse { Errors = [new ErrorDetail { Message = "Failed to retrieve created product." }] });
-        }
-
-        var response = ProductResponseMapper.BuildProductDetailResponse(created);
+        var response = ProductResponseMapper.BuildProductDetailResponse(product);
         return (response, null);
     }
 }

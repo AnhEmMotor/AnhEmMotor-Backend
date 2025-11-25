@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Http;
+using Application;
+using Application.Interfaces;
 
-namespace Application.Interfaces.Services;
+namespace Application.Interfaces.Repositories.LocalFile;
 
 public interface IFileStorageService
 {

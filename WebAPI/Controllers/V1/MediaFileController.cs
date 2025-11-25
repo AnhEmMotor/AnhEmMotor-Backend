@@ -9,7 +9,6 @@ using Application.Features.Files.Queries.GetDeletedFilesList;
 using Application.Features.Files.Queries.GetFileById;
 using Application.Features.Files.Queries.GetFilesList;
 using Application.Features.Files.Queries.ViewImage;
-using Application.Interfaces.Services;
 using Asp.Versioning;
 using Domain.Helpers;
 using Domain.Shared;

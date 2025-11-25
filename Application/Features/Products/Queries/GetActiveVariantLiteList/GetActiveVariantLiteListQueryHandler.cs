@@ -1,38 +1,21 @@
 ﻿using Application.ApiContracts.Product.Common;
 using Application.ApiContracts.Product.Select;
 using Application.Features.Products.Common;
-using Application.Interfaces.Repositories.Product;
-using Domain.Enums;
+using Application.Interfaces.Repositories.ProductVariant;
 using Domain.Shared;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Products.Queries.GetActiveVariantLiteList;
 
-public sealed class GetActiveVariantLiteListQueryHandler(IProductSelectRepository repository)
+public sealed class GetActiveVariantLiteListQueryHandler(IProductVariantReadRepository repository)
     : IRequestHandler<GetActiveVariantLiteListQuery, PagedResult<ProductVariantLiteResponse>>
 {
     public async Task<PagedResult<ProductVariantLiteResponse>> Handle(GetActiveVariantLiteListQuery request, CancellationToken cancellationToken)
     {
-        var query = repository.GetActiveVariants()
-            .Where(v => v.Product != null && EF.Property<DateTimeOffset?>(v.Product, AuditingProperties.DeletedAt) == null)
-            .Include(v => v.Product)
-                .ThenInclude(p => p!.ProductCategory)
-            .Include(v => v.Product)
-                .ThenInclude(p => p!.Brand)
-            .Include(v => v.VariantOptionValues)
-                .ThenInclude(vov => vov.OptionValue)
-                    .ThenInclude(ov => ov!.Option)
-            .Include(v => v.InputInfos)
-            .Include(v => v.OutputInfos)
-                .ThenInclude(oi => oi.OutputOrder);
+        var page = Math.Max(request.Page, 1);
+        var pageSize = Math.Max(request.PageSize, 1);
 
-        var totalCount = await query.CountAsync(cancellationToken).ConfigureAwait(false);
-        var variants = await query
-            .Skip((request.Page - 1) * request.PageSize)
-            .Take(request.PageSize)
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
+        var (variants, totalCount) = await repository.GetPagedVariantsAsync(page, pageSize, cancellationToken);
 
         var responses = variants.Select(v =>
         {
@@ -57,6 +40,6 @@ public sealed class GetActiveVariantLiteListQueryHandler(IProductSelectRepositor
             );
         }).ToList();
 
-        return new PagedResult<ProductVariantLiteResponse>(responses, totalCount, request.Page, request.PageSize);
+        return new PagedResult<ProductVariantLiteResponse>(responses, totalCount, page, pageSize);
     }
 }

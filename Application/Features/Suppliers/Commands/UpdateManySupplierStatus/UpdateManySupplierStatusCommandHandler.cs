@@ -11,7 +11,7 @@ using SupplierStatusConstants = Domain.Constants.SupplierStatus;
 namespace Application.Features.Suppliers.Commands.UpdateManySupplierStatus;
 
 public sealed class UpdateManySupplierStatusCommandHandler(
-    ISupplierReadRepository selectRepository,
+    ISupplierReadRepository readRepository,
     ISupplierUpdateRepository updateRepository,
     IUnitOfWork unitOfWork)
     : IRequestHandler<UpdateManySupplierStatusCommand, (List<SupplierResponse>? Data, ErrorResponse? Error)>
@@ -38,7 +38,7 @@ public sealed class UpdateManySupplierStatusCommandHandler(
         var errorDetails = new List<ErrorDetail>();
         var ids = request.Ids.Distinct().ToList();
 
-        var suppliers = await selectRepository.GetByIdAsync(ids, cancellationToken).ConfigureAwait(false);
+        var suppliers = await readRepository.GetByIdAsync(ids, cancellationToken).ConfigureAwait(false);
         var supplierMap = suppliers.ToDictionary(s => s.Id);
 
         foreach (var id in ids)

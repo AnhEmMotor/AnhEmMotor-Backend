@@ -9,14 +9,14 @@ using MediatR;
 namespace Application.Features.Suppliers.Commands.RestoreSupplier;
 
 public sealed class RestoreSupplierCommandHandler(
-    ISupplierReadRepository selectRepository,
+    ISupplierReadRepository readRepository,
     ISupplierUpdateRepository updateRepository,
     IUnitOfWork unitOfWork)
     : IRequestHandler<RestoreSupplierCommand, (SupplierResponse? Data, ErrorResponse? Error)>
 {
     public async Task<(SupplierResponse? Data, ErrorResponse? Error)> Handle(RestoreSupplierCommand request, CancellationToken cancellationToken)
     {
-        var supplier = await selectRepository.GetByIdAsync(request.Id, cancellationToken, DataFetchMode.DeletedOnly).ConfigureAwait(false);
+        var supplier = await readRepository.GetByIdAsync(request.Id, cancellationToken, DataFetchMode.DeletedOnly).ConfigureAwait(false);
 
         if (supplier == null)
         {

@@ -7,14 +7,14 @@ using MediatR;
 namespace Application.Features.Products.Commands.DeleteProduct;
 
 public sealed class DeleteProductCommandHandler(
-    IProductSelectRepository selectRepository,
+    IProductReadRepository readRepository,
     IProductDeleteRepository deleteRepository,
     IUnitOfWork unitOfWork)
     : IRequestHandler<DeleteProductCommand, ErrorResponse?>
 {
     public async Task<ErrorResponse?> Handle(DeleteProductCommand command, CancellationToken cancellationToken)
     {
-        var product = await selectRepository.GetProductWithDetailsByIdAsync(command.Id, includeDeleted: false, cancellationToken).ConfigureAwait(false);
+        var product = await readRepository.GetByIdWithDetailsAsync(command.Id, cancellationToken).ConfigureAwait(false);
 
         if (product == null)
         {

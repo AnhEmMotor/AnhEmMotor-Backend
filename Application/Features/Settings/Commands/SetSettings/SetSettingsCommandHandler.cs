@@ -17,7 +17,7 @@ public sealed class SetSettingsCommandHandler(ISettingRepository settingReposito
             Value = req.Value
         });
 
-        settingRepository.UpsertBatch(settingsToUpsert);
+        settingRepository.Update(settingsToUpsert);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         return (request.Settings, null);

@@ -2,29 +2,21 @@ using Application.ApiContracts.Product.Common;
 using Application.ApiContracts.Product.Select;
 using Application.Features.Products.Common;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.Product;
+using Application.Interfaces.Repositories.ProductVariant;
 using Domain.Helpers;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Products.Commands.UpdateVariantPrice;
 
 public sealed class UpdateVariantPriceCommandHandler(
-    IProductSelectRepository selectRepository,
-    IProductUpdateRepository updateRepository,
+    IProductVariantReadRepository variantReadRepository,
+    IProductVariantUpdateRepository updateRepository,
     IUnitOfWork unitOfWork)
     : IRequestHandler<UpdateVariantPriceCommand, (ProductVariantLiteResponse? Data, ErrorResponse? Error)>
 {
     public async Task<(ProductVariantLiteResponse? Data, ErrorResponse? Error)> Handle(UpdateVariantPriceCommand command, CancellationToken cancellationToken)
     {
-        var variant = await selectRepository.GetActiveVariants()
-            .Include(v => v.Product)
-            .Include(v => v.VariantOptionValues)
-                .ThenInclude(vov => vov.OptionValue)
-                    .ThenInclude(ov => ov!.Option)
-            .Include(v => v.InputInfos)
-            .FirstOrDefaultAsync(v => v.Id == command.VariantId, cancellationToken)
-            .ConfigureAwait(false);
+        var variant = await variantReadRepository.GetByIdWithDetailsAsync(command.VariantId, cancellationToken);
 
         if (variant == null)
         {
@@ -35,8 +27,8 @@ public sealed class UpdateVariantPriceCommandHandler(
         }
 
         variant.Price = command.Price;
-        updateRepository.UpdateVariant(variant);
-        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        updateRepository.Update(variant);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         var optionPairs = variant.VariantOptionValues
             .Select(vov => new OptionPair

@@ -84,7 +84,7 @@ public class ProductController(ISender sender) : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetVarientById(int id, CancellationToken cancellationToken = default)
     {
-        var (data, error) = await sender.Send(new GetProductByIdQuery(id, false), cancellationToken).ConfigureAwait(true);
+        var (data, error) = await sender.Send(new GetProductByIdQuery(id), cancellationToken).ConfigureAwait(true);
         if (error != null)
         {
             return NotFound(error);

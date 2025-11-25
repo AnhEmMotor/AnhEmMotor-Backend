@@ -1,5 +1,7 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Product;
+using Application.Interfaces.Repositories.VariantOptionValue;
+using Domain.Enums;
 using Domain.Helpers;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Application.Features.Products.Commands.UpdateManyProductStatuses;
 
 public sealed class UpdateManyProductStatusesCommandHandler(
-    IProductSelectRepository selectRepository,
+    IProductReadRepository readRepository,
     IProductUpdateRepository updateRepository,
     IUnitOfWork unitOfWork)
     : IRequestHandler<UpdateManyProductStatusesCommand, (List<int>? Data, ErrorResponse? Error)>
@@ -18,10 +20,10 @@ public sealed class UpdateManyProductStatusesCommandHandler(
         var ids = command.Ids.Distinct().ToList();
 
         // First query to check which IDs exist
-        var existingIds = await selectRepository.GetActiveProducts()
+        var existingIds = await readRepository.GetQueryable()
             .Where(p => ids.Contains(p.Id))
             .Select(p => p.Id)
-            .ToListAsync(cancellationToken).ConfigureAwait(false);
+            .ToListAsync(cancellationToken);
 
         foreach (var id in ids)
         {
@@ -41,38 +43,7 @@ public sealed class UpdateManyProductStatusesCommandHandler(
         }
 
         // Fetch entities WITHOUT navigation properties and with AsNoTracking to avoid tracking conflicts
-        var productEntities = await selectRepository.GetActiveProducts()
-            .Where(p => ids.Contains(p.Id))
-            .Select(p => new Domain.Entities.Product
-            {
-                Id = p.Id,
-                Name = p.Name,
-                CategoryId = p.CategoryId,
-                BrandId = p.BrandId,
-                StatusId = p.StatusId,
-                Weight = p.Weight,
-                Dimensions = p.Dimensions,
-                Wheelbase = p.Wheelbase,
-                SeatHeight = p.SeatHeight,
-                GroundClearance = p.GroundClearance,
-                FuelCapacity = p.FuelCapacity,
-                TireSize = p.TireSize,
-                FrontSuspension = p.FrontSuspension,
-                RearSuspension = p.RearSuspension,
-                EngineType = p.EngineType,
-                MaxPower = p.MaxPower,
-                OilCapacity = p.OilCapacity,
-                FuelConsumption = p.FuelConsumption,
-                TransmissionType = p.TransmissionType,
-                StarterSystem = p.StarterSystem,
-                MaxTorque = p.MaxTorque,
-                Displacement = p.Displacement,
-                BoreStroke = p.BoreStroke,
-                CompressionRatio = p.CompressionRatio,
-                Description = p.Description
-            })
-            .AsNoTracking()
-            .ToListAsync(cancellationToken).ConfigureAwait(false);
+        var productEntities = await readRepository.GetByIdAsync(ids, cancellationToken, DataFetchMode.ActiveOnly);
 
         foreach (var product in productEntities)
         {

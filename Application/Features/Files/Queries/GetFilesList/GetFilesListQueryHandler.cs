@@ -1,6 +1,5 @@
 using Application.ApiContracts.File;
 using Application.Interfaces.Repositories.MediaFile;
-using Application.Interfaces.Services;
 using Application.Sieve;
 using Domain.Shared;
 using Mapster;
@@ -12,7 +11,7 @@ namespace Application.Features.Files.Queries.GetFilesList;
 
 public sealed class GetFilesListQueryHandler(
     IMediaFileReadRepository repository,
-    IFileStorageService fileStorageService,
+    Interfaces.Repositories.LocalFile.IFileStorageService fileStorageService,
     ISieveProcessor sieveProcessor)
     : IRequestHandler<GetFilesListQuery, PagedResult<MediaFileResponse>>
 {

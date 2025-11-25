@@ -1,10 +1,11 @@
 using Application.ApiContracts.Product.Common;
 using Application.Interfaces.Repositories.Product;
+using Application.Interfaces.Repositories.ProductVariant;
 using MediatR;
 
 namespace Application.Features.Products.Queries.CheckSlugAvailability;
 
-public sealed class CheckSlugAvailabilityQueryHandler(IProductSelectRepository selectRepository)
+public sealed class CheckSlugAvailabilityQueryHandler(IProductVariantReadRepository readRepository)
     : IRequestHandler<CheckSlugAvailabilityQuery, SlugAvailabilityResponse>
 {
     public async Task<SlugAvailabilityResponse> Handle(
@@ -22,9 +23,7 @@ public sealed class CheckSlugAvailabilityQueryHandler(IProductSelectRepository s
             };
         }
 
-        var existing = await selectRepository
-            .GetVariantBySlugAsync(normalizedSlug, includeDeleted: true, cancellationToken)
-            .ConfigureAwait(false);
+        var existing = await readRepository.GetBySlugAsync(normalizedSlug, cancellationToken).ConfigureAwait(false);
 
         return new SlugAvailabilityResponse
         {

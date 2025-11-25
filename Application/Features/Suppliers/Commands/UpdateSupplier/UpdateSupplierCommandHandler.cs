@@ -8,14 +8,14 @@ using Domain.Helpers;
 namespace Application.Features.Suppliers.Commands.UpdateSupplier;
 
 public sealed class UpdateSupplierCommandHandler(
-    ISupplierReadRepository selectRepository,
+    ISupplierReadRepository readRepository,
     ISupplierUpdateRepository updateRepository,
     IUnitOfWork unitOfWork)
     : IRequestHandler<UpdateSupplierCommand, (SupplierResponse? Data, ErrorResponse? Error)>
 {
     public async Task<(SupplierResponse? Data, ErrorResponse? Error)> Handle(UpdateSupplierCommand request, CancellationToken cancellationToken)
     {
-        var supplier = await selectRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
+        var supplier = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
 
         if (supplier == null)
         {

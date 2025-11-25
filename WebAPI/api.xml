@@ -456,7 +456,7 @@
             </summary>
             <param name="mediator"></param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SettingController.SetSettings(Application.ApiContracts.Setting.SetSettingsRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SettingController.SetSettings(System.Collections.Generic.Dictionary{System.String,System.Nullable{System.Int64}},System.Threading.CancellationToken)">
             <summary>
             Sửa các cài đặt hệ thống (cập nhật số lượng cảnh báo tồn kho, số lượng mua tối đa, ...)
             </summary>

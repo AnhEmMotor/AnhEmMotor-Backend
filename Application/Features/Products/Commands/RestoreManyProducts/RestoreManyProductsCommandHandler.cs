@@ -1,12 +1,14 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Product;
+using Application.Interfaces.Repositories.VariantOptionValue;
 using Domain.Helpers;
 using MediatR;
+using Domain.Enums;
 
 namespace Application.Features.Products.Commands.RestoreManyProducts;
 
 public sealed class RestoreManyProductsCommandHandler(
-    IProductSelectRepository selectRepository,
+    IProductReadRepository readRepository,
     IProductUpdateRepository updateRepository,
     IUnitOfWork unitOfWork)
     : IRequestHandler<RestoreManyProductsCommand, (List<int>? Data, ErrorResponse? Error)>
@@ -20,8 +22,8 @@ public sealed class RestoreManyProductsCommandHandler(
 
         var uniqueIds = command.Ids.Distinct().ToList();
 
-        var deletedProducts = await selectRepository.GetDeletedProductsByIdsAsync(uniqueIds, cancellationToken).ConfigureAwait(false);
-        var allProducts = await selectRepository.GetAllProductsByIdsAsync(uniqueIds, cancellationToken).ConfigureAwait(false);
+        var deletedProducts = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.DeletedOnly).ConfigureAwait(false);
+        var allProducts = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.All).ConfigureAwait(false);
 
         var allProductsMap = allProducts.ToDictionary(p => p.Id);
         var deletedProductsSet = deletedProducts.Select(p => p.Id).ToHashSet();
@@ -56,7 +58,7 @@ public sealed class RestoreManyProductsCommandHandler(
             return (null, new ErrorResponse { Errors = errorDetails });
         }
 
-        if (deletedProducts.Count > 0)
+        if (deletedProducts.ToList().Count > 0)
         {
             updateRepository.Restore(deletedProducts);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

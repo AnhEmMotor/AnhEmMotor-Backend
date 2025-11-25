@@ -10,7 +10,7 @@ using Domain.Enums;
 namespace Application.Features.Suppliers.Commands.RestoreManySuppliers;
 
 public sealed class RestoreManySuppliersCommandHandler(
-    ISupplierReadRepository selectRepository,
+    ISupplierReadRepository readRepository,
     ISupplierUpdateRepository updateRepository,
     IUnitOfWork unitOfWork)
     : IRequestHandler<RestoreManySuppliersCommand, (List<SupplierResponse>? Data, ErrorResponse? Error)>
@@ -25,8 +25,8 @@ public sealed class RestoreManySuppliersCommandHandler(
         var uniqueIds = request.Ids.Distinct().ToList();
         var errorDetails = new List<ErrorDetail>();
 
-        var allSuppliers = await selectRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.All).ConfigureAwait(false);
-        var deletedSuppliers = await selectRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.DeletedOnly).ConfigureAwait(false);
+        var allSuppliers = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.All).ConfigureAwait(false);
+        var deletedSuppliers = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.DeletedOnly).ConfigureAwait(false);
 
         var allSupplierMap = allSuppliers.ToDictionary(s => s.Id);
         var deletedSupplierSet = deletedSuppliers.Select(s => s.Id).ToHashSet();
