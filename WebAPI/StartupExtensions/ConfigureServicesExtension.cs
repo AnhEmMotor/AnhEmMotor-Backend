@@ -7,6 +7,7 @@ using OpenTelemetry.Exporter;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Sieve.Models;
 using WebAPI.Converters;
 using WebAPI.Middleware;
 
@@ -41,7 +42,8 @@ namespace WebAPI.StartupExtensions
                     options.SerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
                     options.SerializerOptions.Converters.Add(new EmptyStringConverter());
                 });
-            services.AddApplicationServices(configuration);
+            services.Configure<SieveOptions>(configuration.GetSection("Sieve"));
+            services.AddApplicationServices();
             services.AddExceptionHandler<GlobalExceptionHandler>();
             services.AddProblemDetails();
             var resourceBuilder = ResourceBuilder.CreateDefault().AddService(serviceName, serviceVersion);

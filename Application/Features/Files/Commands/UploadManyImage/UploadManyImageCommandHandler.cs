@@ -23,9 +23,11 @@ public sealed class UploadManyImageCommandHandler(
 
         var mediaFiles = new List<MediaFileEntity>();
 
-        foreach(var file in request.Files)
+        foreach(var fileDto in request.Files)
         {
-            var (storagePath, fileExtension) = await fileStorageService.SaveFileAsync(file, cancellationToken)
+            var (storagePath, fileExtension) = await fileStorageService.SaveFileAsync(
+                fileDto.FileContent,
+                cancellationToken)
                 .ConfigureAwait(false);
 
             var compressedFileResult = await fileStorageService.GetFileAsync(storagePath, cancellationToken)
@@ -37,7 +39,7 @@ public sealed class UploadManyImageCommandHandler(
                 {
                     StorageType = "local",
                     StoragePath = storagePath,
-                    OriginalFileName = file.FileName,
+                    OriginalFileName = fileDto.FileName,
                     ContentType = "image/webp",
                     FileExtension = fileExtension,
                     FileSize = actualFileSize
