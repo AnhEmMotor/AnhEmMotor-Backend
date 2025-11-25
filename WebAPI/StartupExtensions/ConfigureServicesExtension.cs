@@ -36,8 +36,7 @@ namespace WebAPI.StartupExtensions
                 options.SerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
                 options.SerializerOptions.Converters.Add(new EmptyStringConverter());
             });
-            services.AddApplicationServices();
-            services.Configure<SieveOptions>(configuration.GetSection("Sieve"));
+            services.AddApplicationServices(configuration);
             services.AddExceptionHandler<GlobalExceptionHandler>();
             services.AddProblemDetails();
             var resourceBuilder = ResourceBuilder.CreateDefault().AddService(serviceName, serviceVersion);

@@ -9,13 +9,13 @@ using Sieve.Services;
 
 namespace Infrastructure.Repositories
 {
-    public class SievePaginator(ISieveProcessor sieveProcessor) : ICustomSievePaginator
+    public class SievePaginator(ISieveProcessor sieveProcessor) : IPaginator
     {
         public async Task<PagedResult<TResponse>> ApplyAsync<TEntity, TResponse>(
             IQueryable<TEntity> query,
             SieveModel sieveModel,
-            DataFetchMode? defaultSortMode,
-            CancellationToken cancellationToken)
+            DataFetchMode? defaultSortMode = DataFetchMode.ActiveOnly,
+            CancellationToken cancellationToken = default)  
             where TEntity : class
         {
             if (defaultSortMode.HasValue)

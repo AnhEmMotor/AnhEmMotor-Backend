@@ -7,7 +7,7 @@ using SupplierEntity = Domain.Entities.Supplier;
 
 namespace Application.Features.Suppliers.Queries.GetSuppliersList;
 
-public sealed class GetSuppliersListQueryHandler(ISupplierReadRepository repository, ICustomSievePaginator paginator) : IRequestHandler<GetSuppliersListQuery, PagedResult<SupplierResponse>>
+public sealed class GetSuppliersListQueryHandler(ISupplierReadRepository repository, IPaginator paginator) : IRequestHandler<GetSuppliersListQuery, PagedResult<SupplierResponse>>
 {
     public async Task<PagedResult<SupplierResponse>> Handle(
         GetSuppliersListQuery request,

@@ -31,8 +31,3 @@ app.UseRouting();
 app.UseExceptionHandler();
 app.MapControllers();
 app.Run();
-
-/// <summary>
-/// Đầu vào của chương trình! Bạn không cần quan tâm đến đây!
-/// </summary>
-public partial class Program { }
