@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Application.ApiContracts.Product.Create;
+namespace Application.ApiContracts.Product;
 
 public class ProductVariantWriteRequest
 {

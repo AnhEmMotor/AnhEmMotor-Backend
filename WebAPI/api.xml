@@ -384,12 +384,12 @@
             Kiểm tra slug có sẵn sàng sử dụng hay không.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.CreateProduct(Application.ApiContracts.Product.Create.CreateProductRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.CreateProduct(Application.ApiContracts.Product.CreateProductRequest,System.Threading.CancellationToken)">
             <summary>
             Tạo mới sản phẩm với các biến thể.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateProduct(System.Int32,Application.ApiContracts.Product.Update.UpdateProductRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateProduct(System.Int32,Application.ApiContracts.Product.UpdateProductRequest,System.Threading.CancellationToken)">
             <summary>
             Cập nhật sản phẩm theo Id.
             </summary>
@@ -399,7 +399,7 @@
             Xoá sản phẩm (soft delete) và cascade xoá ảnh của các biến thể.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.DeleteProducts(Application.ApiContracts.Product.Delete.DeleteManyProductsRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.DeleteProducts(Application.ApiContracts.Product.DeleteManyProductsRequest,System.Threading.CancellationToken)">
             <summary>
             Xoá nhiều sản phẩm cùng lúc (soft delete) và cascade xoá ảnh.
             </summary>
@@ -409,37 +409,37 @@
             Khôi phục sản phẩm đã bị xoá.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.RestoreProducts(Application.ApiContracts.Product.Delete.RestoreManyProductsRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.RestoreProducts(Application.ApiContracts.Product.RestoreManyProductsRequest,System.Threading.CancellationToken)">
             <summary>
             Khôi phục nhiều sản phẩm cùng lúc.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateProductPrice(System.Int32,Application.ApiContracts.Product.Update.UpdateProductPriceRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateProductPrice(System.Int32,Application.ApiContracts.Product.UpdateProductPriceRequest,System.Threading.CancellationToken)">
             <summary>
             Chỉnh giá cho tất cả các biến thể của 1 sản phẩm.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateManyProductPrices(Application.ApiContracts.Product.Update.UpdateManyProductPricesRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateManyProductPrices(Application.ApiContracts.Product.UpdateManyProductPricesRequest,System.Threading.CancellationToken)">
             <summary>
             Chỉnh giá cho nhiều sản phẩm cùng lúc.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateVariantPrice(System.Int32,Application.ApiContracts.Product.Update.UpdateVariantPriceRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateVariantPrice(System.Int32,Application.ApiContracts.Product.UpdateVariantPriceRequest,System.Threading.CancellationToken)">
             <summary>
             Chỉnh giá cho 1 biến thể sản phẩm.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateManyVariantPrices(Application.ApiContracts.Product.Update.UpdateManyVariantPricesRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateManyVariantPrices(Application.ApiContracts.Product.UpdateManyVariantPricesRequest,System.Threading.CancellationToken)">
             <summary>
             Chỉnh giá cho nhiều biến thể sản phẩm cùng lúc.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateProductStatus(System.Int32,Application.ApiContracts.Product.Update.UpdateProductStatusRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateProductStatus(System.Int32,Application.ApiContracts.Product.UpdateProductStatusRequest,System.Threading.CancellationToken)">
             <summary>
             Chỉnh trạng thái của 1 sản phẩm.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateManyProductStatuses(Application.ApiContracts.Product.Update.UpdateManyProductStatusesRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateManyProductStatuses(Application.ApiContracts.Product.UpdateManyProductStatusesRequest,System.Threading.CancellationToken)">
             <summary>
             Chỉnh trạng thái nhiều sản phẩm cùng lúc.
             </summary>

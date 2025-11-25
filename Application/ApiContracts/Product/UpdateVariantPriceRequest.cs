@@ -1,4 +1,4 @@
-namespace Application.ApiContracts.Product.Update;
+namespace Application.ApiContracts.Product;
 
 public class UpdateVariantPriceRequest
 {

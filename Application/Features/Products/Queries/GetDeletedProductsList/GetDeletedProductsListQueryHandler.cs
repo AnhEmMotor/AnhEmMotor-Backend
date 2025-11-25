@@ -1,4 +1,4 @@
-using Application.ApiContracts.Product.Select;
+using Application.ApiContracts.Product;
 using Application.Features.Products.Common;
 using Application.Interfaces.Repositories.Product;
 using Domain.Shared;

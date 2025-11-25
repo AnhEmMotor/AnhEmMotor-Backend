@@ -1,4 +1,6 @@
-﻿using Application.Interfaces.Repositories.Product;
+﻿using Application.ApiContracts.Product;
+using Application.Features.Products.Common;
+using Application.Interfaces.Repositories.Product;
 using Domain.Enums;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
@@ -54,16 +56,6 @@ public class ProductReadRepository(ApplicationDBContext context) : IProductReadR
             .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
     }
 
-    public async Task<bool> OptionValuesBelongToOptionsAsync(IEnumerable<int> optionValueIds, IEnumerable<int> optionIds, CancellationToken cancellationToken)
-    {
-        var optionValues = await context.OptionValues
-            .AsNoTracking()
-            .Where(ov => optionValueIds.Contains(ov.Id))
-            .Select(ov => ov.OptionId)
-            .ToListAsync(cancellationToken);
-        return optionValues.All(oid => oid.HasValue && optionIds.Contains(oid.Value));
-    }
-
     public async Task<IEnumerable<ProductEntity>> GetByIdWithVariantsAsync(IEnumerable<int> ids, CancellationToken cancellationToken, DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         return await context.GetQuery<ProductEntity>(mode)
@@ -117,6 +109,69 @@ public class ProductReadRepository(ApplicationDBContext context) : IProductReadR
             .Take(pageSize)
             .AsSplitQuery()
             .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
+    }
+
+    public async Task<(List<ProductDetailResponse> Items, int TotalCount)> GetPagedProductDetailsAsync(
+        ProductFilter filter,
+        CancellationToken cancellationToken)
+    {
+        var page = Math.Max(filter.Page, 1);
+        var pageSize = Math.Max(filter.PageSize, 1);
+        var searchPattern = string.IsNullOrWhiteSpace(filter.Search) ? null : $"%{filter.Search.Trim()}%";
+
+        // 1. Base Query
+        var query = context.GetQuery<ProductEntity>(DataFetchMode.ActiveOnly)
+            .AsNoTracking();
+
+        // 2. Filter (Search Pattern)
+        if (searchPattern != null)
+        {
+            query = query.Where(p =>
+                EF.Functions.Like(p.Name, searchPattern) ||
+                (p.ProductCategory != null && EF.Functions.Like(p.ProductCategory.Name, searchPattern)) ||
+                (p.Brand != null && EF.Functions.Like(p.Brand.Name, searchPattern))
+            );
+        }
+
+        // 3. Filter (Status)
+        if (filter.StatusIds != null && filter.StatusIds.Count > 0)
+        {
+            query = query.Where(p => p.StatusId != null && filter.StatusIds.Contains(p.StatusId));
+        }
+
+        // 4. Count Total
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        // 5. Fetch Data (Projection)
+        // Ở đây tôi dùng chiến lược: Fetch Entity + Include rồi Map Memory.
+        // Lý do: Map thẳng ra DTO phức tạp (VariantRow) bằng LINQ to SQL đôi khi bị hạn chế hoặc lỗi dịch SQL.
+        // Fetch Entity + SplitQuery là an toàn và hiệu năng đủ tốt.
+
+        var entities = await query
+            .Include(p => p.ProductCategory)
+            .Include(p => p.Brand)
+            .Include(p => p.ProductVariants)
+                .ThenInclude(v => v.InputInfos)
+            .Include(p => p.ProductVariants)
+                .ThenInclude(v => v.OutputInfos)
+                    .ThenInclude(oi => oi.OutputOrder)
+            .Include(p => p.ProductVariants)
+                .ThenInclude(v => v.ProductCollectionPhotos)
+            .Include(p => p.ProductVariants)
+                .ThenInclude(v => v.VariantOptionValues)
+                    .ThenInclude(vov => vov.OptionValue)
+                        .ThenInclude(ov => ov!.Option)
+            .OrderByDescending(p => p.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .AsSplitQuery()
+            .ToListAsync(cancellationToken);
+
+        // 6. Map to DTO (In-Memory)
+        // Logic tính Stock/Booked nằm trong Mapper hoặc Helper
+        var items = entities.Select(p => ProductResponseMapper.BuildProductDetailResponse(p)).ToList();
 
         return (items, totalCount);
     }

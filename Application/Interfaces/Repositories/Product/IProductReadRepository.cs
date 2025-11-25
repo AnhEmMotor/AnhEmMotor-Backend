@@ -1,3 +1,4 @@
+using Application.ApiContracts.Product;
 using Domain.Enums;
 using ProductEntity = Domain.Entities.Product;
 
@@ -10,7 +11,7 @@ public interface IProductReadRepository
     Task<ProductEntity?> GetByIdAsync(int id, CancellationToken cancellationToken, DataFetchMode mode = DataFetchMode.ActiveOnly);
     Task<IEnumerable<ProductEntity>> GetByIdAsync(IEnumerable<int> ids, CancellationToken cancellationToken, DataFetchMode mode = DataFetchMode.ActiveOnly);
     Task<ProductEntity?> GetByIdWithDetailsAsync(int id, CancellationToken cancellationToken, DataFetchMode mode = DataFetchMode.ActiveOnly);
-    Task<bool> OptionValuesBelongToOptionsAsync(IEnumerable<int> optionValueIds, IEnumerable<int> optionIds, CancellationToken cancellationToken);
     Task<IEnumerable<ProductEntity>> GetByIdWithVariantsAsync(IEnumerable<int> ids, CancellationToken cancellationToken, DataFetchMode mode = DataFetchMode.ActiveOnly);
     Task<(List<ProductEntity> Items, int TotalCount)> GetPagedDeletedProductsAsync(int page, int pageSize, CancellationToken cancellationToken);
+    Task<(List<ProductDetailResponse> Items, int TotalCount)> GetPagedProductDetailsAsync(ProductFilter filter, CancellationToken cancellationToken);
 }

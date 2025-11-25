@@ -1,6 +1,6 @@
 using Application.ApiContracts.Product.Common;
 
-namespace Application.ApiContracts.Product.Update;
+namespace Application.ApiContracts.Product;
 
 public class UpdateProductRequest : ProductWriteRequestBase
 {

@@ -1,4 +1,3 @@
-using Application.ApiContracts.Product.Select;
 using Application.Common.Extensions;
 using Application.Features.Products.Common;
 using Application.Interfaces.Repositories;
@@ -8,6 +7,7 @@ using Application.Interfaces.Repositories.VariantOptionValue;
 using Domain.Helpers;
 using MediatR;
 using Domain.Enums;
+using Application.ApiContracts.Product;
 
 namespace Application.Features.Products.Commands.RestoreProduct;
 

@@ -1,8 +1,5 @@
-﻿using Application.ApiContracts.Product.Common;
-using Application.ApiContracts.Product.Create;
-using Application.ApiContracts.Product.Delete;
-using Application.ApiContracts.Product.Select;
-using Application.ApiContracts.Product.Update;
+﻿using Application.ApiContracts.Product;
+using Application.ApiContracts.Product.Common;
 using Application.Features.Products.Commands.CreateProduct;
 using Application.Features.Products.Commands.DeleteManyProducts;
 using Application.Features.Products.Commands.DeleteProduct;

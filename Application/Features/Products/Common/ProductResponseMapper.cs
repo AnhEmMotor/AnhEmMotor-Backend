@@ -1,5 +1,5 @@
+using Application.ApiContracts.Product;
 using Application.ApiContracts.Product.Common;
-using Application.ApiContracts.Product.Select;
 using Domain.Constants;
 using ProductEntity = Domain.Entities.Product;
 
