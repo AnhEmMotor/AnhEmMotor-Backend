@@ -1,26 +1,32 @@
 ﻿using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
+using Application.Interfaces.Repositories.Input;
 using Application.Interfaces.Repositories.LocalFile;
 using Application.Interfaces.Repositories.MediaFile;
 using Application.Interfaces.Repositories.Option;
 using Application.Interfaces.Repositories.OptionValue;
+using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.ProductCategory;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Setting;
+using Application.Interfaces.Repositories.Statistical;
 using Application.Interfaces.Repositories.Supplier;
 using Application.Interfaces.Repositories.VariantOptionValue;
 using Infrastructure.DBContexts;
 using Infrastructure.Repositories;
 using Infrastructure.Repositories.Brand;
+using Infrastructure.Repositories.Input;
 using Infrastructure.Repositories.LocalFile;
 using Infrastructure.Repositories.MediaFile;
 using Infrastructure.Repositories.Option;
 using Infrastructure.Repositories.OptionValue;
+using Infrastructure.Repositories.Output;
 using Infrastructure.Repositories.Product;
 using Infrastructure.Repositories.ProductCategory;
 using Infrastructure.Repositories.ProductVariant;
 using Infrastructure.Repositories.Setting;
+using Infrastructure.Repositories.Statistical;
 using Infrastructure.Repositories.Supplier;
 using Infrastructure.Repositories.VariantOptionValue;
 using Microsoft.EntityFrameworkCore;
@@ -92,6 +98,18 @@ public static class DBContext
         services.AddScoped<IFileStorageService, LocalFileStorageService>();
 
         services.AddScoped<IPaginator, SievePaginator>();
+
+        services.AddScoped<IInputReadRepository, InputReadRepository>();
+        services.AddScoped<IInputInsertRepository, InputInsertRepository>();
+        services.AddScoped<IInputUpdateRepository, InputUpdateRepository>();
+        services.AddScoped<IInputDeleteRepository, InputDeleteRepository>();
+
+        services.AddScoped<IOutputReadRepository, OutputReadRepository>();
+        services.AddScoped<IOutputInsertRepository, OutputInsertRepository>();
+        services.AddScoped<IOutputUpdateRepository, OutputUpdateRepository>();
+        services.AddScoped<IOutputDeleteRepository, OutputDeleteRepository>();
+
+        services.AddScoped<IStatisticalReadRepository, StatisticalReadRepository>();
 
         return services;
     }

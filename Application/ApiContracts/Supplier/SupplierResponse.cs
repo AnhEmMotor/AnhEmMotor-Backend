@@ -15,5 +15,7 @@ namespace Application.ApiContracts.Supplier
         public string? Notes { get; set; }
 
         public string? Address { get; set; }
+
+        public long? TotalInput { get; set; }
     }
 }
