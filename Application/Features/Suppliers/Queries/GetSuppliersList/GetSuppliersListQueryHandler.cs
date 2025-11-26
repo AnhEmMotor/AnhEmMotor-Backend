@@ -3,7 +3,6 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Supplier;
 using Domain.Shared;
 using MediatR;
-using SupplierEntity = Domain.Entities.Supplier;
 
 namespace Application.Features.Suppliers.Queries.GetSuppliersList;
 
@@ -13,9 +12,9 @@ public sealed class GetSuppliersListQueryHandler(ISupplierReadRepository reposit
         GetSuppliersListQuery request,
         CancellationToken cancellationToken)
     {
-        var query = repository.GetQueryable();
+        var query = repository.GetQueryableWithTotalInput();
 
-        return paginator.ApplyAsync<SupplierEntity, SupplierResponse>(
+        return paginator.ApplyAsync<SupplierWithTotalInputDto, SupplierResponse>(
             query,
             request.SieveModel,
             cancellationToken: cancellationToken);
