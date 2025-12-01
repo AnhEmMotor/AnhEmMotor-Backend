@@ -93,7 +93,6 @@ namespace Infrastructure.Repositories.ProductVariant
                 .Include(v => v.InputInfos)
                 .Include(v => v.OutputInfos)
                     .ThenInclude(oi => oi.OutputOrder)
-                .IgnoreQueryFilters()
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .AsSplitQuery()
