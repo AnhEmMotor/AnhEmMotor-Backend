@@ -6,6 +6,7 @@ using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Supplier;
 using Domain.Constants;
 using Domain.Enums;
+using Domain.Helpers;
 using Mapster;
 using MediatR;
 using InputEntity = Domain.Entities.Input;
@@ -18,9 +19,9 @@ public sealed class CreateInputCommandHandler(
     IInputReadRepository readRepository,
     ISupplierReadRepository supplierRepository,
     IProductVariantReadRepository variantRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateInputCommand, InputResponse>
+    IUnitOfWork unitOfWork) : IRequestHandler<CreateInputCommand, (InputResponse? Data, ErrorResponse? Error)>
 {
-    public async Task<InputResponse> Handle(
+    public async Task<(InputResponse? Data, ErrorResponse? Error)> Handle(
         CreateInputCommand request,
         CancellationToken cancellationToken)
     {
@@ -34,12 +35,18 @@ public sealed class CreateInputCommandHandler(
 
             if(supplier is null)
             {
-                throw new InvalidOperationException($"Nhà cung cấp {request.SupplierId} không tồn tại hoặc đã bị xóa.");
+                return (null, new ErrorResponse
+                {
+                    Errors = [ new ErrorDetail { Field = "SupplierId", Message = $"Nhà cung cấp {request.SupplierId} không tồn tại hoặc đã bị xóa." } ]
+                });
             }
 
             if(supplier.StatusId != SupplierStatus.Active)
             {
-                throw new InvalidOperationException($"Nhà cung cấp {supplier.Name} không ở trạng thái 'active'.");
+                return (null, new ErrorResponse
+                {
+                    Errors = [ new ErrorDetail { Field = "SupplierId", Message = $"Nhà cung cấp {supplier.Name} không ở trạng thái 'active'." } ]
+                });
             }
         }
 
@@ -57,12 +64,18 @@ public sealed class CreateInputCommandHandler(
 
                 if(variant is null)
                 {
-                    throw new InvalidOperationException($"Sản phẩm {product.ProductId} không tồn tại hoặc đã bị xóa.");
+                    return (null, new ErrorResponse
+                    {
+                        Errors = [ new ErrorDetail { Field = "Products", Message = $"Sản phẩm {product.ProductId} không tồn tại hoặc đã bị xóa." } ]
+                    });
                 }
 
                 if(variant.Product?.StatusId != ProductStatus.ForSale)
                 {
-                    throw new InvalidOperationException($"Sản phẩm {variant.Product?.Name} không ở trạng thái 'for-sale'.");
+                    return (null, new ErrorResponse
+                    {
+                        Errors = [ new ErrorDetail { Field = "Products", Message = $"Sản phẩm {variant.Product?.Name} không ở trạng thái 'for-sale'." } ]
+                    });
                 }
             }
         }
@@ -84,6 +97,6 @@ public sealed class CreateInputCommandHandler(
             cancellationToken)
             .ConfigureAwait(false);
 
-        return created.Adapt<InputResponse>();
+        return (created!.Adapt<InputResponse>(), null);
     }
 }

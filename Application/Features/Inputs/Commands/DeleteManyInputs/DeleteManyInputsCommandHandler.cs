@@ -1,5 +1,6 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
+using Domain.Helpers;
 using MediatR;
 
 namespace Application.Features.Inputs.Commands.DeleteManyInputs;
@@ -7,9 +8,9 @@ namespace Application.Features.Inputs.Commands.DeleteManyInputs;
 public sealed class DeleteManyInputsCommandHandler(
     IInputReadRepository readRepository,
     IInputDeleteRepository deleteRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<DeleteManyInputsCommand, Unit>
+    IUnitOfWork unitOfWork) : IRequestHandler<DeleteManyInputsCommand, ErrorResponse?>
 {
-    public async Task<Unit> Handle(
+    public async Task<ErrorResponse?> Handle(
         DeleteManyInputsCommand request,
         CancellationToken cancellationToken)
     {
@@ -24,13 +25,15 @@ public sealed class DeleteManyInputsCommandHandler(
         {
             var foundIds = inputsList.Select(i => i.Id).ToList();
             var missingIds = request.Ids.Except(foundIds).ToList();
-            throw new InvalidOperationException(
-                $"Không tìm thấy {missingIds.Count} phiếu nhập: {string.Join(", ", missingIds)}");
+            return new ErrorResponse
+            {
+                Errors = [ new ErrorDetail { Field = "Ids", Message = $"Không tìm thấy {missingIds.Count} phiếu nhập: {string.Join(", ", missingIds)}" } ]
+            };
         }
 
         deleteRepository.Delete(inputsList);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return Unit.Value;
+        return null;
     }
 }

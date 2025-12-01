@@ -1,9 +1,10 @@
 using Application.ApiContracts.Output;
+using Domain.Helpers;
 using MediatR;
 
 namespace Application.Features.Outputs.Commands.UpdateOutput;
 
-public sealed record UpdateOutputCommand : IRequest<OutputResponse>
+public sealed record UpdateOutputCommand : IRequest<(OutputResponse? Data, ErrorResponse? Error)>
 {
     public int Id { get; init; }
     public string? StatusId { get; init; }

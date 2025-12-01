@@ -6,6 +6,7 @@ using Application.Interfaces.Repositories.Supplier;
 using Domain.Constants;
 using Domain.Entities;
 using Domain.Enums;
+using Domain.Helpers;
 using Mapster;
 using MediatR;
 
@@ -17,9 +18,9 @@ public sealed class UpdateInputCommandHandler(
     IInputDeleteRepository deleteRepository,
     ISupplierReadRepository supplierRepository,
     IProductVariantReadRepository variantRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateInputCommand, InputResponse>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateInputCommand, (InputResponse? Data, ErrorResponse? Error)>
 {
-    public async Task<InputResponse> Handle(
+    public async Task<(InputResponse? Data, ErrorResponse? Error)> Handle(
         UpdateInputCommand request,
         CancellationToken cancellationToken)
     {
@@ -31,7 +32,10 @@ public sealed class UpdateInputCommandHandler(
 
         if (input is null)
         {
-            throw new InvalidOperationException($"Không tìm thấy phiếu nhập có ID {request.Id}.");
+            return (null, new ErrorResponse
+            {
+                Errors = [ new ErrorDetail { Field = "Id", Message = $"Không tìm thấy phiếu nhập có ID {request.Id}." } ]
+            });
         }
 
         if (request.SupplierId.HasValue && request.SupplierId != input.SupplierId)
@@ -44,7 +48,10 @@ public sealed class UpdateInputCommandHandler(
 
             if (supplier is null || supplier.StatusId != Domain.Constants.SupplierStatus.Active)
             {
-                throw new InvalidOperationException("Nhà cung cấp không hợp lệ hoặc không còn hoạt động.");
+                return (null, new ErrorResponse
+                {
+                    Errors = [ new ErrorDetail { Field = "SupplierId", Message = "Nhà cung cấp không hợp lệ hoặc không còn hoạt động." } ]
+                });
             }
         }
 
@@ -67,16 +74,20 @@ public sealed class UpdateInputCommandHandler(
             {
                 var foundIds = variantsList.Select(v => v.Id).ToList();
                 var missingIds = variantIds.Except(foundIds).ToList();
-                throw new InvalidOperationException(
-                    $"Không tìm thấy {missingIds.Count} sản phẩm: {string.Join(", ", missingIds)}");
+                return (null, new ErrorResponse
+                {
+                    Errors = [ new ErrorDetail { Field = "Products", Message = $"Không tìm thấy {missingIds.Count} sản phẩm: {string.Join(", ", missingIds)}" } ]
+                });
             }
 
             foreach (var variant in variantsList)
             {
                 if (variant.Product?.StatusId != Domain.Constants.ProductStatus.ForSale)
                 {
-                    throw new InvalidOperationException(
-                        $"Sản phẩm '{variant.Product?.Name ?? variant.Id.ToString()}' không còn được bán.");
+                    return (null, new ErrorResponse
+                    {
+                        Errors = [ new ErrorDetail { Field = "Products", Message = $"Sản phẩm '{variant.Product?.Name ?? variant.Id.ToString()}' không còn được bán." } ]
+                    });
                 }
             }
         }
@@ -127,6 +138,6 @@ public sealed class UpdateInputCommandHandler(
             cancellationToken)
             .ConfigureAwait(false);
 
-        return updated!.Adapt<InputResponse>();
+        return (updated!.Adapt<InputResponse>(), null);
     }
 }

@@ -1,6 +1,7 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Domain.Constants;
+using Domain.Helpers;
 using MediatR;
 
 namespace Application.Features.Outputs.Commands.UpdateManyOutputStatus;
@@ -8,15 +9,18 @@ namespace Application.Features.Outputs.Commands.UpdateManyOutputStatus;
 public sealed class UpdateManyOutputStatusCommandHandler(
     IOutputReadRepository readRepository,
     IOutputUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateManyOutputStatusCommand, Unit>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateManyOutputStatusCommand, ErrorResponse?>
 {
-    public async Task<Unit> Handle(
+    public async Task<ErrorResponse?> Handle(
         UpdateManyOutputStatusCommand request,
         CancellationToken cancellationToken)
     {
         if (!OrderStatus.IsValid(request.NewStatusId))
         {
-            throw new InvalidOperationException($"Trạng thái '{request.NewStatusId}' không hợp lệ.");
+            return new ErrorResponse
+            {
+                Errors = [ new ErrorDetail { Field = "NewStatusId", Message = $"Trạng thái '{request.NewStatusId}' không hợp lệ." } ]
+            };
         }
 
         var outputs = await readRepository.GetByIdAsync(
@@ -30,8 +34,10 @@ public sealed class UpdateManyOutputStatusCommandHandler(
         {
             var foundIds = outputsList.Select(o => o.Id).ToList();
             var missingIds = request.Ids.Except(foundIds).ToList();
-            throw new InvalidOperationException(
-                $"Không tìm thấy {missingIds.Count} đơn hàng: {string.Join(", ", missingIds)}");
+            return new ErrorResponse
+            {
+                Errors = [ new ErrorDetail { Field = "Ids", Message = $"Không tìm thấy {missingIds.Count} đơn hàng: {string.Join(", ", missingIds)}" } ]
+            };
         }
 
         foreach (var output in outputsList)
@@ -39,9 +45,10 @@ public sealed class UpdateManyOutputStatusCommandHandler(
             if (!OrderStatusTransitions.IsTransitionAllowed(output.StatusId, request.NewStatusId))
             {
                 var allowed = OrderStatusTransitions.GetAllowedTransitions(output.StatusId);
-                throw new InvalidOperationException(
-                    $"Đơn hàng ID {output.Id}: Không thể chuyển từ '{output.StatusId}' sang '{request.NewStatusId}'. " +
-                    $"Chỉ được chuyển sang: {string.Join(", ", allowed)}");
+                return new ErrorResponse
+                {
+                    Errors = [ new ErrorDetail { Field = "NewStatusId", Message = $"Đơn hàng ID {output.Id}: Không thể chuyển từ '{output.StatusId}' sang '{request.NewStatusId}'. Chỉ được chuyển sang: {string.Join(", ", allowed)}" } ]
+                };
             }
         }
 
@@ -63,6 +70,6 @@ public sealed class UpdateManyOutputStatusCommandHandler(
         }
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return Unit.Value;
+        return null;
     }
 }

@@ -5,6 +5,7 @@ using Application.Interfaces.Repositories.ProductVariant;
 using Domain.Constants;
 using Domain.Entities;
 using Domain.Enums;
+using Domain.Helpers;
 using Mapster;
 using MediatR;
 
@@ -14,15 +15,18 @@ public sealed class CreateOutputCommandHandler(
     IOutputReadRepository readRepository,
     IOutputInsertRepository insertRepository,
     IProductVariantReadRepository variantRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateOutputCommand, OutputResponse>
+    IUnitOfWork unitOfWork) : IRequestHandler<CreateOutputCommand, (OutputResponse? Data, ErrorResponse? Error)>
 {
-    public async Task<OutputResponse> Handle(
+    public async Task<(OutputResponse? Data, ErrorResponse? Error)> Handle(
         CreateOutputCommand request,
         CancellationToken cancellationToken)
     {
         if (request.Products.Count == 0)
         {
-            throw new InvalidOperationException("Đơn hàng phải có ít nhất một sản phẩm.");
+            return (null, new ErrorResponse
+            {
+                Errors = [ new ErrorDetail { Field = "Products", Message = "Đơn hàng phải có ít nhất một sản phẩm." } ]
+            });
         }
 
         var variantIds = request.Products
@@ -43,16 +47,20 @@ public sealed class CreateOutputCommandHandler(
         {
             var foundIds = variantsList.Select(v => v.Id).ToList();
             var missingIds = variantIds.Except(foundIds).ToList();
-            throw new InvalidOperationException(
-                $"Không tìm thấy {missingIds.Count} sản phẩm: {string.Join(", ", missingIds)}");
+            return (null, new ErrorResponse
+            {
+                Errors = [ new ErrorDetail { Field = "Products", Message = $"Không tìm thấy {missingIds.Count} sản phẩm: {string.Join(", ", missingIds)}" } ]
+            });
         }
 
             foreach (var variant in variantsList)
             {
                 if (variant.Product?.StatusId != Domain.Constants.ProductStatus.ForSale)
                 {
-                    throw new InvalidOperationException(
-                        $"Sản phẩm '{variant.Product?.Name ?? variant.Id.ToString()}' không còn được bán.");
+                    return (null, new ErrorResponse
+                    {
+                        Errors = [ new ErrorDetail { Field = "Products", Message = $"Sản phẩm '{variant.Product?.Name ?? variant.Id.ToString()}' không còn được bán." } ]
+                    });
                 }
             }        var output = request.Adapt<Output>();
 
@@ -69,6 +77,6 @@ public sealed class CreateOutputCommandHandler(
             cancellationToken)
             .ConfigureAwait(false);
 
-        return created!.Adapt<OutputResponse>();
+        return (created!.Adapt<OutputResponse>(), null);
     }
 }

@@ -3,6 +3,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
 using Domain.Constants;
 using Domain.Enums;
+using Domain.Helpers;
 using Mapster;
 using MediatR;
 
@@ -11,9 +12,9 @@ namespace Application.Features.Inputs.Commands.UpdateInputStatus;
 public sealed class UpdateInputStatusCommandHandler(
     IInputReadRepository readRepository,
     IInputUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateInputStatusCommand, InputResponse>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateInputStatusCommand, (InputResponse? Data, ErrorResponse? Error)>
 {
-    public async Task<InputResponse> Handle(
+    public async Task<(InputResponse? Data, ErrorResponse? Error)> Handle(
         UpdateInputStatusCommand request,
         CancellationToken cancellationToken)
     {
@@ -25,17 +26,26 @@ public sealed class UpdateInputStatusCommandHandler(
 
         if (input is null)
         {
-            throw new InvalidOperationException($"Không tìm thấy phiếu nhập có ID {request.Id}.");
+            return (null, new ErrorResponse
+            {
+                Errors = [ new ErrorDetail { Field = "Id", Message = $"Không tìm thấy phiếu nhập có ID {request.Id}." } ]
+            });
         }
 
         if (input.StatusId == InputStatus.Finish || input.StatusId == InputStatus.Cacncel)
         {
-            throw new InvalidOperationException("Không thể sửa trạng thái phiếu nhập đã hoàn thành hoặc đã hủy.");
+            return (null, new ErrorResponse
+            {
+                Errors = [ new ErrorDetail { Field = "StatusId", Message = "Không thể sửa trạng thái phiếu nhập đã hoàn thành hoặc đã hủy." } ]
+            });
         }
 
         if (!InputStatus.IsValid(request.StatusId))
         {
-            throw new InvalidOperationException($"Trạng thái '{request.StatusId}' không hợp lệ.");
+            return (null, new ErrorResponse
+            {
+                Errors = [ new ErrorDetail { Field = "StatusId", Message = $"Trạng thái '{request.StatusId}' không hợp lệ." } ]
+            });
         }
 
         input.StatusId = request.StatusId;
@@ -54,6 +64,6 @@ public sealed class UpdateInputStatusCommandHandler(
             cancellationToken)
             .ConfigureAwait(false);
 
-        return updated!.Adapt<InputResponse>();
+        return (updated!.Adapt<InputResponse>(), null);
     }
 }

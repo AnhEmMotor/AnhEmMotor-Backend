@@ -1,6 +1,7 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
 using Domain.Constants;
+using Domain.Helpers;
 using MediatR;
 
 namespace Application.Features.Inputs.Commands.UpdateManyInputStatus;
@@ -8,15 +9,18 @@ namespace Application.Features.Inputs.Commands.UpdateManyInputStatus;
 public sealed class UpdateManyInputStatusCommandHandler(
     IInputReadRepository readRepository,
     IInputUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateManyInputStatusCommand, Unit>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateManyInputStatusCommand, ErrorResponse?>
 {
-    public async Task<Unit> Handle(
+    public async Task<ErrorResponse?> Handle(
         UpdateManyInputStatusCommand request,
         CancellationToken cancellationToken)
     {
         if (!InputStatus.IsValid(request.StatusId))
         {
-            throw new InvalidOperationException($"Trạng thái '{request.StatusId}' không hợp lệ.");
+            return new ErrorResponse
+            {
+                Errors = [ new ErrorDetail { Field = "StatusId", Message = $"Trạng thái '{request.StatusId}' không hợp lệ." } ]
+            };
         }
 
         var inputs = await readRepository.GetByIdAsync(
@@ -30,8 +34,10 @@ public sealed class UpdateManyInputStatusCommandHandler(
         {
             var foundIds = inputsList.Select(i => i.Id).ToList();
             var missingIds = request.Ids.Except(foundIds).ToList();
-            throw new InvalidOperationException(
-                $"Không tìm thấy {missingIds.Count} phiếu nhập: {string.Join(", ", missingIds)}");
+            return new ErrorResponse
+            {
+                Errors = [ new ErrorDetail { Field = "Ids", Message = $"Không tìm thấy {missingIds.Count} phiếu nhập: {string.Join(", ", missingIds)}" } ]
+            };
         }
 
         foreach (var input in inputsList)
@@ -41,6 +47,6 @@ public sealed class UpdateManyInputStatusCommandHandler(
         }
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return Unit.Value;
+        return null;
     }
 }

@@ -5,6 +5,7 @@ using Application.Interfaces.Repositories.ProductVariant;
 using Domain.Constants;
 using Domain.Entities;
 using Domain.Enums;
+using Domain.Helpers;
 using Mapster;
 using MediatR;
 
@@ -15,9 +16,9 @@ public sealed class UpdateOutputCommandHandler(
     IOutputUpdateRepository updateRepository,
     IOutputDeleteRepository deleteRepository,
     IProductVariantReadRepository variantRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateOutputCommand, OutputResponse>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateOutputCommand, (OutputResponse? Data, ErrorResponse? Error)>
 {
-    public async Task<OutputResponse> Handle(
+    public async Task<(OutputResponse? Data, ErrorResponse? Error)> Handle(
         UpdateOutputCommand request,
         CancellationToken cancellationToken)
     {
@@ -29,7 +30,10 @@ public sealed class UpdateOutputCommandHandler(
 
         if (output is null)
         {
-            throw new InvalidOperationException($"Không tìm thấy đơn hàng có ID {request.Id}.");
+            return (null, new ErrorResponse
+            {
+                Errors = [ new ErrorDetail { Field = "Id", Message = $"Không tìm thấy đơn hàng có ID {request.Id}." } ]
+            });
         }
 
         var variantIds = request.Products
@@ -52,16 +56,20 @@ public sealed class UpdateOutputCommandHandler(
             {
                 var foundIds = variantsList.Select(v => v.Id).ToList();
                 var missingIds = variantIds.Except(foundIds).ToList();
-                throw new InvalidOperationException(
-                    $"Không tìm thấy {missingIds.Count} sản phẩm: {string.Join(", ", missingIds)}");
+                return (null, new ErrorResponse
+                {
+                    Errors = [ new ErrorDetail { Field = "Products", Message = $"Không tìm thấy {missingIds.Count} sản phẩm: {string.Join(", ", missingIds)}" } ]
+                });
             }
 
             foreach (var variant in variantsList)
             {
                 if (variant.Product?.StatusId != Domain.Constants.ProductStatus.ForSale)
                 {
-                    throw new InvalidOperationException(
-                        $"Sản phẩm '{variant.Product?.Name ?? variant.Id.ToString()}' không còn được bán.");
+                    return (null, new ErrorResponse
+                    {
+                        Errors = [ new ErrorDetail { Field = "Products", Message = $"Sản phẩm '{variant.Product?.Name ?? variant.Id.ToString()}' không còn được bán." } ]
+                    });
                 }
             }
         }
@@ -107,6 +115,6 @@ public sealed class UpdateOutputCommandHandler(
             cancellationToken)
             .ConfigureAwait(false);
 
-        return updated!.Adapt<OutputResponse>();
+        return (updated!.Adapt<OutputResponse>(), null);
     }
 }

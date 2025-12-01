@@ -1,6 +1,7 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Domain.Enums;
+using Domain.Helpers;
 using MediatR;
 
 namespace Application.Features.Outputs.Commands.RestoreOutput;
@@ -8,9 +9,9 @@ namespace Application.Features.Outputs.Commands.RestoreOutput;
 public sealed class RestoreOutputCommandHandler(
     IOutputReadRepository readRepository,
     IOutputUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<RestoreOutputCommand, Unit>
+    IUnitOfWork unitOfWork) : IRequestHandler<RestoreOutputCommand, ErrorResponse?>
 {
-    public async Task<Unit> Handle(
+    public async Task<ErrorResponse?> Handle(
         RestoreOutputCommand request,
         CancellationToken cancellationToken)
     {
@@ -22,12 +23,15 @@ public sealed class RestoreOutputCommandHandler(
 
         if (output is null)
         {
-            throw new InvalidOperationException($"Không tìm thấy đơn hàng đã xóa có ID {request.Id}.");
+            return new ErrorResponse
+            {
+                Errors = [ new ErrorDetail { Field = "Id", Message = $"Không tìm thấy đơn hàng đã xóa có ID {request.Id}." } ]
+            };
         }
 
         updateRepository.Restore(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return Unit.Value;
+        return null;
     }
 }

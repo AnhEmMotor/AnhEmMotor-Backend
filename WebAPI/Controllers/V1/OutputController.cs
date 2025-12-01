@@ -80,13 +80,18 @@ public class OutputController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpPost]
     [ProducesResponseType(typeof(OutputResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateOutput(
         [FromBody] CreateOutputRequest request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<CreateOutputCommand>();
-        var response = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return CreatedAtAction(nameof(GetOutputById), new { id = response.Id }, response);
+        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        if (error != null)
+        {
+            return BadRequest(error);
+        }
+        return CreatedAtAction(nameof(GetOutputById), new { id = data!.Id }, data);
     }
 
     /// <summary>
@@ -95,14 +100,19 @@ public class OutputController(IMediator mediator) : ControllerBase
     [HttpPut("{id:int}")]
     [ProducesResponseType(typeof(OutputResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateOutput(
         int id,
         [FromBody] UpdateOutputRequest request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<UpdateOutputCommand>() with { Id = id };
-        var response = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return Ok(response);
+        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        if (error != null)
+        {
+            return BadRequest(error);
+        }
+        return Ok(data);
     }
 
     /// <summary>
@@ -111,14 +121,19 @@ public class OutputController(IMediator mediator) : ControllerBase
     [HttpPatch("{id:int}/status")]
     [ProducesResponseType(typeof(OutputResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateOutputStatus(
         int id,
         [FromBody] UpdateOutputStatusRequest request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<UpdateOutputStatusCommand>() with { Id = id };
-        var response = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return Ok(response);
+        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        if (error != null)
+        {
+            return BadRequest(error);
+        }
+        return Ok(data);
     }
 
     /// <summary>
@@ -126,12 +141,17 @@ public class OutputController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpPatch("status")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateManyOutputStatus(
         [FromBody] UpdateManyOutputStatusRequest request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<UpdateManyOutputStatusCommand>();
-        await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var error = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        if (error != null)
+        {
+            return BadRequest(error);
+        }
         return NoContent();
     }
 
@@ -144,7 +164,11 @@ public class OutputController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> DeleteOutput(int id, CancellationToken cancellationToken)
     {
         var command = new DeleteOutputCommand(id);
-        await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var error = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        if (error != null)
+        {
+            return NotFound(error);
+        }
         return NoContent();
     }
 
@@ -153,12 +177,17 @@ public class OutputController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpDelete]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteManyOutputs(
         [FromBody] DeleteManyOutputsRequest request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<DeleteManyOutputsCommand>();
-        await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var error = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        if (error != null)
+        {
+            return NotFound(error);
+        }
         return NoContent();
     }
 
@@ -171,7 +200,11 @@ public class OutputController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> RestoreOutput(int id, CancellationToken cancellationToken)
     {
         var command = new RestoreOutputCommand(id);
-        await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var error = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        if (error != null)
+        {
+            return NotFound(error);
+        }
         return NoContent();
     }
 
@@ -180,12 +213,17 @@ public class OutputController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpPost("restore")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RestoreManyOutputs(
         [FromBody] RestoreManyOutputsRequest request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<RestoreManyOutputsCommand>();
-        await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var error = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        if (error != null)
+        {
+            return NotFound(error);
+        }
         return NoContent();
     }
 }

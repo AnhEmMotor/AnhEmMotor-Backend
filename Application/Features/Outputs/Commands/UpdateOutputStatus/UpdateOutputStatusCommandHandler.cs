@@ -3,6 +3,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Domain.Constants;
 using Domain.Enums;
+using Domain.Helpers;
 using Mapster;
 using MediatR;
 
@@ -11,9 +12,9 @@ namespace Application.Features.Outputs.Commands.UpdateOutputStatus;
 public sealed class UpdateOutputStatusCommandHandler(
     IOutputReadRepository readRepository,
     IOutputUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateOutputStatusCommand, OutputResponse>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateOutputStatusCommand, (OutputResponse? Data, ErrorResponse? Error)>
 {
-    public async Task<OutputResponse> Handle(
+    public async Task<(OutputResponse? Data, ErrorResponse? Error)> Handle(
         UpdateOutputStatusCommand request,
         CancellationToken cancellationToken)
     {
@@ -25,20 +26,27 @@ public sealed class UpdateOutputStatusCommandHandler(
 
         if (output is null)
         {
-            throw new InvalidOperationException($"Không tìm thấy đơn hàng có ID {request.Id}.");
+            return (null, new ErrorResponse
+            {
+                Errors = [ new ErrorDetail { Field = "Id", Message = $"Không tìm thấy đơn hàng có ID {request.Id}." } ]
+            });
         }
 
         if (!OrderStatus.IsValid(request.NewStatusId))
         {
-            throw new InvalidOperationException($"Trạng thái '{request.NewStatusId}' không hợp lệ.");
+            return (null, new ErrorResponse
+            {
+                Errors = [ new ErrorDetail { Field = "NewStatusId", Message = $"Trạng thái '{request.NewStatusId}' không hợp lệ." } ]
+            });
         }
 
         if (!OrderStatusTransitions.IsTransitionAllowed(output.StatusId, request.NewStatusId))
         {
             var allowed = OrderStatusTransitions.GetAllowedTransitions(output.StatusId);
-            throw new InvalidOperationException(
-                $"Không thể chuyển từ '{output.StatusId}' sang '{request.NewStatusId}'. " +
-                $"Chỉ được chuyển sang: {string.Join(", ", allowed)}");
+            return (null, new ErrorResponse
+            {
+                Errors = [ new ErrorDetail { Field = "NewStatusId", Message = $"Không thể chuyển từ '{output.StatusId}' sang '{request.NewStatusId}'. Chỉ được chuyển sang: {string.Join(", ", allowed)}" } ]
+            });
         }
 
         if (request.NewStatusId == OrderStatus.Completed)
@@ -54,9 +62,10 @@ public sealed class UpdateOutputStatusCommandHandler(
 
                     if (stock < outputInfo.Count.Value)
                     {
-                        throw new InvalidOperationException(
-                            $"Sản phẩm ID {outputInfo.ProductId} không đủ tồn kho. " +
-                            $"Hiện có: {stock}, cần: {outputInfo.Count.Value}");
+                        return (null, new ErrorResponse
+                        {
+                            Errors = [ new ErrorDetail { Field = "Products", Message = $"Sản phẩm ID {outputInfo.ProductId} không đủ tồn kho. Hiện có: {stock}, cần: {outputInfo.Count.Value}" } ]
+                        });
                     }
                 }
             }
@@ -76,6 +85,6 @@ public sealed class UpdateOutputStatusCommandHandler(
             cancellationToken)
             .ConfigureAwait(false);
 
-        return updated!.Adapt<OutputResponse>();
+        return (updated!.Adapt<OutputResponse>(), null);
     }
 }

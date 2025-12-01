@@ -1,5 +1,6 @@
+using Domain.Helpers;
 using MediatR;
 
 namespace Application.Features.Inputs.Commands.RestoreInput;
 
-public sealed record RestoreInputCommand(int Id) : IRequest<Unit>;
+public sealed record RestoreInputCommand(int Id) : IRequest<ErrorResponse?>;

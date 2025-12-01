@@ -97,13 +97,18 @@ public class InputController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpPost]
     [ProducesResponseType(typeof(InputResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateInput(
         [FromBody] CreateInputRequest request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<CreateInputCommand>();
-        var response = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return CreatedAtAction(nameof(GetInputById), new { id = response.Id }, response);
+        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        if (error != null)
+        {
+            return BadRequest(error);
+        }
+        return CreatedAtAction(nameof(GetInputById), new { id = data!.Id }, data);
     }
 
     /// <summary>
@@ -132,14 +137,19 @@ public class InputController(IMediator mediator) : ControllerBase
     [HttpPut("{id:int}")]
     [ProducesResponseType(typeof(InputResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateInput(
         int id,
         [FromBody] UpdateInputRequest request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<UpdateInputCommand>() with { Id = id };
-        var response = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return Ok(response);
+        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        if (error != null)
+        {
+            return BadRequest(error);
+        }
+        return Ok(data);
     }
 
     /// <summary>
@@ -148,14 +158,19 @@ public class InputController(IMediator mediator) : ControllerBase
     [HttpPatch("{id:int}/status")]
     [ProducesResponseType(typeof(InputResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateInputStatus(
         int id,
         [FromBody] UpdateInputStatusRequest request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<UpdateInputStatusCommand>() with { Id = id };
-        var response = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return Ok(response);
+        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        if (error != null)
+        {
+            return BadRequest(error);
+        }
+        return Ok(data);
     }
 
     /// <summary>
@@ -163,12 +178,17 @@ public class InputController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpPatch("status")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateManyInputStatus(
         [FromBody] UpdateManyInputStatusRequest request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<UpdateManyInputStatusCommand>();
-        await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var error = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        if (error != null)
+        {
+            return BadRequest(error);
+        }
         return NoContent();
     }
 
@@ -181,7 +201,11 @@ public class InputController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> DeleteInput(int id, CancellationToken cancellationToken)
     {
         var command = new DeleteInputCommand(id);
-        await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var error = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        if (error != null)
+        {
+            return NotFound(error);
+        }
         return NoContent();
     }
 
@@ -190,12 +214,17 @@ public class InputController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpDelete]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteManyInputs(
         [FromBody] DeleteManyInputsRequest request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<DeleteManyInputsCommand>();
-        await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var error = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        if (error != null)
+        {
+            return NotFound(error);
+        }
         return NoContent();
     }
 
@@ -208,7 +237,11 @@ public class InputController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> RestoreInput(int id, CancellationToken cancellationToken)
     {
         var command = new RestoreInputCommand(id);
-        await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var error = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        if (error != null)
+        {
+            return NotFound(error);
+        }
         return NoContent();
     }
 
@@ -217,12 +250,17 @@ public class InputController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpPost("restore")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RestoreManyInputs(
         [FromBody] RestoreManyInputsRequest request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<RestoreManyInputsCommand>();
-        await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var error = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        if (error != null)
+        {
+            return NotFound(error);
+        }
         return NoContent();
     }
 }

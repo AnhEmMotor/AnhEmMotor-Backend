@@ -1,6 +1,7 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
 using Domain.Enums;
+using Domain.Helpers;
 using MediatR;
 
 namespace Application.Features.Inputs.Commands.RestoreManyInputs;
@@ -8,9 +9,9 @@ namespace Application.Features.Inputs.Commands.RestoreManyInputs;
 public sealed class RestoreManyInputsCommandHandler(
     IInputReadRepository readRepository,
     IInputUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<RestoreManyInputsCommand, Unit>
+    IUnitOfWork unitOfWork) : IRequestHandler<RestoreManyInputsCommand, ErrorResponse?>
 {
-    public async Task<Unit> Handle(
+    public async Task<ErrorResponse?> Handle(
         RestoreManyInputsCommand request,
         CancellationToken cancellationToken)
     {
@@ -26,13 +27,15 @@ public sealed class RestoreManyInputsCommandHandler(
         {
             var foundIds = inputsList.Select(i => i.Id).ToList();
             var missingIds = request.Ids.Except(foundIds).ToList();
-            throw new InvalidOperationException(
-                $"Không tìm thấy {missingIds.Count} phiếu nhập đã xóa: {string.Join(", ", missingIds)}");
+            return new ErrorResponse
+            {
+                Errors = [ new ErrorDetail { Field = "Ids", Message = $"Không tìm thấy {missingIds.Count} phiếu nhập đã xóa: {string.Join(", ", missingIds)}" } ]
+            };
         }
 
         updateRepository.Restore(inputsList);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return Unit.Value;
+        return null;
     }
 }
