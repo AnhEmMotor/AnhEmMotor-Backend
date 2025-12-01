@@ -34,11 +34,6 @@ public sealed class UpdateInputCommandHandler(
             throw new InvalidOperationException($"Không tìm thấy phiếu nhập có ID {request.Id}.");
         }
 
-        if (!string.IsNullOrWhiteSpace(request.StatusId) && !Domain.Constants.InputStatus.IsValid(request.StatusId))
-        {
-            throw new InvalidOperationException($"Trạng thái '{request.StatusId}' không hợp lệ.");
-        }
-
         if (request.SupplierId.HasValue && request.SupplierId != input.SupplierId)
         {
             var supplier = await supplierRepository.GetByIdAsync(

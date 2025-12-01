@@ -138,6 +138,10 @@ public class ProductMappingConfig : IRegister
             : $"{productName} ({variantName})";
 
         var stock = variant.InputInfos.Sum(ii => ii.RemainingCount) ?? 0;
+        var photos = variant.ProductCollectionPhotos
+            .Select(p => p.ImageUrl ?? string.Empty)
+            .Where(url => !string.IsNullOrWhiteSpace(url))
+            .ToList();
 
         return new ProductVariantLiteResponse
         {
@@ -148,7 +152,8 @@ public class ProductMappingConfig : IRegister
             DisplayName = displayName,
             Price = variant.Price,
             CoverImageUrl = variant.CoverImageUrl,
-            Stock = stock
+            Stock = stock,
+            Photos = photos
         };
     }
 

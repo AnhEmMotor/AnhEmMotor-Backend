@@ -1,4 +1,5 @@
 using Application.ApiContracts.Input;
+using Application.Features.Inputs.Commands.CloneInput;
 using Application.Features.Inputs.Commands.CreateInput;
 using Application.Features.Inputs.Commands.DeleteInput;
 using Application.Features.Inputs.Commands.DeleteManyInputs;
@@ -103,6 +104,26 @@ public class InputController(IMediator mediator) : ControllerBase
         var command = request.Adapt<CreateInputCommand>();
         var response = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return CreatedAtAction(nameof(GetInputById), new { id = response.Id }, response);
+    }
+
+    /// <summary>
+    /// Clone phiếu nhập từ phiếu nhập gốc. Chỉ clone các sản phẩm còn hợp lệ (chưa xoá, còn đang bán).
+    /// </summary>
+    [HttpPost("{id:int}/clone")]
+    [ProducesResponseType(typeof(InputResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> CloneInput(int id, CancellationToken cancellationToken)
+    {
+        var command = new CloneInputCommand(id);
+        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+
+        if(error != null)
+        {
+            return BadRequest(error);
+        }
+
+        return CreatedAtAction(nameof(GetInputById), new { id = data!.Id }, data);
     }
 
     /// <summary>

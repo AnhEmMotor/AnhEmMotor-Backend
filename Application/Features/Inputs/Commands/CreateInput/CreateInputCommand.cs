@@ -5,8 +5,6 @@ namespace Application.Features.Inputs.Commands.CreateInput;
 
 public sealed record CreateInputCommand : IRequest<InputResponse>
 {
-    public DateTimeOffset? InputDate { get; init; }
-
     public string? Notes { get; init; }
 
     public string? StatusId { get; init; }

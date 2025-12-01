@@ -60,6 +60,7 @@ public class ProductReadRepository(ApplicationDBContext context) : IProductReadR
             .Include(p => p.ProductVariants)
             .ThenInclude(v => v.OutputInfos)
             .ThenInclude(oi => oi.OutputOrder)
+            .IgnoreQueryFilters()
             .AsSplitQuery()
             .FirstOrDefaultAsync(p => p.Id == id, cancellationToken)
             .ContinueWith(t => t.Result, cancellationToken);
@@ -100,6 +101,7 @@ public class ProductReadRepository(ApplicationDBContext context) : IProductReadR
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.OutputInfos)
             .ThenInclude(oi => oi.OutputOrder)
+            .IgnoreQueryFilters()
             .OrderByDescending(p => p.DeletedAt)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
@@ -152,6 +154,7 @@ public class ProductReadRepository(ApplicationDBContext context) : IProductReadR
             .ThenInclude(v => v.VariantOptionValues)
             .ThenInclude(vov => vov.OptionValue)
             .ThenInclude(ov => ov!.Option)
+            .IgnoreQueryFilters()
             .OrderByDescending(p => p.CreatedAt)
             .Skip((normalizedPage - 1) * normalizedPageSize)
             .Take(normalizedPageSize)

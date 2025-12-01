@@ -24,11 +24,6 @@ public sealed class CreateInputCommandHandler(
         CreateInputCommand request,
         CancellationToken cancellationToken)
     {
-        if(!InputStatus.IsValid(request.StatusId))
-        {
-            throw new InvalidOperationException($"Trạng thái '{request.StatusId}' không hợp lệ.");
-        }
-
         if(request.SupplierId.HasValue)
         {
             var supplier = await supplierRepository.GetByIdAsync(
@@ -73,6 +68,7 @@ public sealed class CreateInputCommandHandler(
         }
 
         var input = request.Adapt<InputEntity>();
+        input.StatusId = InputStatus.Working;
         input.InputInfos = request.Products.Select(p =>
         {
             var inputInfo = p.Adapt<InputInfoEntity>();

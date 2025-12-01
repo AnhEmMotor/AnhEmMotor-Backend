@@ -28,12 +28,24 @@ public sealed class UpdateInputStatusCommandHandler(
             throw new InvalidOperationException($"Không tìm thấy phiếu nhập có ID {request.Id}.");
         }
 
+        if (input.StatusId == InputStatus.Finish || input.StatusId == InputStatus.Cacncel)
+        {
+            throw new InvalidOperationException("Không thể sửa trạng thái phiếu nhập đã hoàn thành hoặc đã hủy.");
+        }
+
         if (!InputStatus.IsValid(request.StatusId))
         {
             throw new InvalidOperationException($"Trạng thái '{request.StatusId}' không hợp lệ.");
         }
 
         input.StatusId = request.StatusId;
+
+        // Khi trạng thái chuyển thành finished thì set InputDate
+        if(string.Equals(request.StatusId, InputStatus.Finish, StringComparison.OrdinalIgnoreCase))
+        {
+            input.InputDate = DateTimeOffset.UtcNow;
+        }
+
         updateRepository.Update(input);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 

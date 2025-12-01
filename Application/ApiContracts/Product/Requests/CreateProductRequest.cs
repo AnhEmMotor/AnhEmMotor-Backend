@@ -13,8 +13,5 @@ public class CreateProductRequest : ProductWriteRequestBase
     [JsonPropertyName("brand_id")]
     public new int? BrandId { get; set; }
 
-    [JsonPropertyName("status_id")]
-    public new string? StatusId { get; set; }
-
     public new List<ProductVariantWriteRequest>? Variants { get; set; }
 }

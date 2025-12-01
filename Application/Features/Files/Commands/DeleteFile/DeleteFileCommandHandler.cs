@@ -9,7 +9,8 @@ namespace Application.Features.Files.Commands.DeleteFile;
 public sealed class DeleteFileCommandHandler(
     IMediaFileReadRepository readRepository,
     IMediaFileDeleteRepository deleteRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<DeleteFileCommand, ErrorResponse?>
+    IUnitOfWork unitOfWork,
+    Interfaces.Repositories.LocalFile.IFileStorageService fileStorageService) : IRequestHandler<DeleteFileCommand, ErrorResponse?>
 {
     public async Task<ErrorResponse?> Handle(DeleteFileCommand request, CancellationToken cancellationToken)
     {
@@ -26,6 +27,17 @@ public sealed class DeleteFileCommandHandler(
 
         deleteRepository.Delete(mediaFile);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        if(!string.IsNullOrWhiteSpace(mediaFile.StoragePath))
+        {
+            try
+            {
+                fileStorageService.DeleteFile(mediaFile.StoragePath);
+            }
+            catch
+            {
+            }
+        }
 
         return null;
     }

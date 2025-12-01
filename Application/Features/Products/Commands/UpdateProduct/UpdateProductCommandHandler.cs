@@ -137,7 +137,6 @@ public sealed class UpdateProductCommandHandler(
         product.Displacement = request.Displacement;
         product.BoreStroke = request.BoreStroke?.Trim();
         product.CompressionRatio = request.CompressionRatio?.Trim();
-        product.StatusId = request.StatusId?.Trim() ?? "for-sale";
 
         var allRequestedOptionValues = request.Variants?
             .SelectMany(v => v.OptionValues ?? [])

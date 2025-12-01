@@ -17,5 +17,7 @@ public class ProductVariantLiteResponse
     public string? CoverImageUrl { get; set; }
 
     public long Stock { get; set; }
+
+    public List<string> Photos { get; set; } = [];
 }
 

@@ -32,11 +32,6 @@ public sealed class UpdateOutputCommandHandler(
             throw new InvalidOperationException($"Không tìm thấy đơn hàng có ID {request.Id}.");
         }
 
-        if (!string.IsNullOrWhiteSpace(request.StatusId) && !OrderStatus.IsValid(request.StatusId))
-        {
-            throw new InvalidOperationException($"Trạng thái '{request.StatusId}' không hợp lệ.");
-        }
-
         var variantIds = request.Products
             .Where(p => p.ProductId.HasValue)
             .Select(p => p.ProductId!.Value)

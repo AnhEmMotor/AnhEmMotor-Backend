@@ -26,6 +26,7 @@ public class StatisticalController(IMediator mediator) : ControllerBase
     /// Lấy doanh thu theo ngày trong khoảng thời gian xác định.
     /// </summary>
     /// <param name="days">Số ngày tính từ hiện tại trở về trước</param>
+    /// <param name="cancellationToken"></param>
     [HttpGet("daily-revenue")]
     [ProducesResponseType(typeof(IEnumerable<DailyRevenueDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetDailyRevenue(
@@ -53,6 +54,7 @@ public class StatisticalController(IMediator mediator) : ControllerBase
     /// Lấy doanh thu và lợi nhuận theo tháng.
     /// </summary>
     /// <param name="months">Số tháng tính từ hiện tại trở về trước</param>
+    /// <param name="cancellationToken"></param>
     [HttpGet("monthly-revenue-profit")]
     [ProducesResponseType(typeof(IEnumerable<MonthlyRevenueProfitDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetMonthlyRevenueProfit(

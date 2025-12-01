@@ -185,7 +185,7 @@ public sealed class CreateProductCommandHandler(
             Displacement = request.Displacement,
             BoreStroke = request.BoreStroke?.Trim(),
             CompressionRatio = request.CompressionRatio?.Trim(),
-            StatusId = request.StatusId?.Trim() ?? "for-sale",
+            StatusId = "for-sale",
             ProductVariants = []
         };
 

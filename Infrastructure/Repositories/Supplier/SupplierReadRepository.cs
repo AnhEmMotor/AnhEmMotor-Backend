@@ -36,11 +36,11 @@ public class SupplierReadRepository(ApplicationDBContext context) : ISupplierRea
             .Select(g => new SupplierWithTotalInputDto
             {
                 Id = g.Key.Id,
-                Name = g.Key.Name,
+                Name = g.Key.Name!,
                 Phone = g.Key.Phone,
                 Email = g.Key.Email,
                 Address = g.Key.Address,
-                StatusId = g.Key.StatusId,
+                StatusId = g.Key.StatusId!,
                 CreatedAt = g.Key.CreatedAt,
                 UpdatedAt = g.Key.UpdatedAt,
                 DeletedAt = g.Key.DeletedAt,

@@ -20,11 +20,6 @@ public sealed class CreateOutputCommandHandler(
         CreateOutputCommand request,
         CancellationToken cancellationToken)
     {
-        if (!string.IsNullOrWhiteSpace(request.StatusId) && !OrderStatus.IsValid(request.StatusId))
-        {
-            throw new InvalidOperationException($"Trạng thái '{request.StatusId}' không hợp lệ.");
-        }
-
         if (request.Products.Count == 0)
         {
             throw new InvalidOperationException("Đơn hàng phải có ít nhất một sản phẩm.");

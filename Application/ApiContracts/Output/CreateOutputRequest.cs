@@ -2,8 +2,6 @@ namespace Application.ApiContracts.Output;
 
 public class CreateOutputRequest
 {
-    public string? StatusId { get; set; }
-
     public string? Notes { get; set; }
 
     public List<CreateOutputInfoRequest> Products { get; set; } = [];

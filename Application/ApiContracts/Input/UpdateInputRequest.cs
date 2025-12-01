@@ -2,11 +2,7 @@ namespace Application.ApiContracts.Input;
 
 public class UpdateInputRequest
 {
-    public DateTimeOffset? InputDate { get; set; }
-
     public string? Notes { get; set; }
-
-    public string? StatusId { get; set; }
 
     public int? SupplierId { get; set; }
 

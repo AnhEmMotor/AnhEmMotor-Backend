@@ -243,6 +243,11 @@
             Tạo phiếu nhập mới.
             </summary>
         </member>
+        <member name="M:WebAPI.Controllers.V1.InputController.CloneInput(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Clone phiếu nhập từ phiếu nhập gốc. Chỉ clone các sản phẩm còn hợp lệ (chưa xoá, còn đang bán).
+            </summary>
+        </member>
         <member name="M:WebAPI.Controllers.V1.InputController.UpdateInput(System.Int32,Application.ApiContracts.Input.UpdateInputRequest,System.Threading.CancellationToken)">
             <summary>
             Cập nhật phiếu nhập.
@@ -642,6 +647,7 @@
             Lấy doanh thu theo ngày trong khoảng thời gian xác định.
             </summary>
             <param name="days">Số ngày tính từ hiện tại trở về trước</param>
+            <param name="cancellationToken"></param>
         </member>
         <member name="M:WebAPI.Controllers.V1.StatisticalController.GetDashboardStats(System.Threading.CancellationToken)">
             <summary>
@@ -653,6 +659,7 @@
             Lấy doanh thu và lợi nhuận theo tháng.
             </summary>
             <param name="months">Số tháng tính từ hiện tại trở về trước</param>
+            <param name="cancellationToken"></param>
         </member>
         <member name="M:WebAPI.Controllers.V1.StatisticalController.GetOrderStatusCounts(System.Threading.CancellationToken)">
             <summary>

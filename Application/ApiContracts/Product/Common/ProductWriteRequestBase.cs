@@ -12,9 +12,6 @@ public abstract class ProductWriteRequestBase
     [JsonPropertyName("brand_id")]
     public int? BrandId { get; set; }
 
-    [JsonPropertyName("status_id")]
-    public string? StatusId { get; set; }
-
     public string? Description { get; set; }
 
     public decimal? Weight { get; set; }

@@ -41,10 +41,11 @@ namespace Infrastructure.Repositories.ProductVariant
             return context.GetQuery<ProductVariantEntity>(mode)
                 .Where(v => v.ProductId == productId)
                 .Include(v => v.Product)
+                .Include(v => v.ProductCollectionPhotos)
                 .Include(v => v.InputInfos)
                 .Include(v => v.VariantOptionValues)
-                .ThenInclude(vov => vov.OptionValue)
-                .ThenInclude(ov => ov!.Option)
+                    .ThenInclude(vov => vov.OptionValue)
+                    .ThenInclude(ov => ov!.Option)
                 .AsSplitQuery()
                 .ToListAsync(cancellationToken)
                 .ContinueWith<IEnumerable<ProductVariantEntity>>(t => t.Result, cancellationToken);
@@ -57,6 +58,7 @@ namespace Infrastructure.Repositories.ProductVariant
         {
             return context.GetQuery<ProductVariantEntity>(mode)
                 .Where(v => ids.Contains(v.Id))
+                .Include(v => v.Product)
                 .ToListAsync(cancellationToken)
                 .ContinueWith<IEnumerable<ProductVariantEntity>>(t => t.Result, cancellationToken);
         }
@@ -81,15 +83,17 @@ namespace Infrastructure.Repositories.ProductVariant
 
             var items = await query
                 .Include(v => v.Product)
-                .ThenInclude(p => p!.ProductCategory)
+                    .ThenInclude(p => p!.ProductCategory)
                 .Include(v => v.Product)
-                .ThenInclude(p => p!.Brand)
+                    .ThenInclude(p => p!.Brand)
+                .Include(v => v.ProductCollectionPhotos)
                 .Include(v => v.VariantOptionValues)
-                .ThenInclude(vov => vov.OptionValue)
-                .ThenInclude(ov => ov!.Option)
+                    .ThenInclude(vov => vov.OptionValue)
+                    .ThenInclude(ov => ov!.Option)
                 .Include(v => v.InputInfos)
                 .Include(v => v.OutputInfos)
-                .ThenInclude(oi => oi.OutputOrder)
+                    .ThenInclude(oi => oi.OutputOrder)
+                .IgnoreQueryFilters()
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .AsSplitQuery()
