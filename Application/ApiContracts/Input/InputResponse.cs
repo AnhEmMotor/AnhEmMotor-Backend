@@ -17,8 +17,4 @@ public class InputResponse
     public long? TotalPayable { get; set; }
 
     public List<InputInfoDto> Products { get; set; } = [];
-
-    public DateTimeOffset? CreatedAt { get; set; }
-
-    public DateTimeOffset? UpdatedAt { get; set; }
 }

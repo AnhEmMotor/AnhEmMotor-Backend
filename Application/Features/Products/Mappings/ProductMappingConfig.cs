@@ -151,6 +151,7 @@ public class ProductMappingConfig : IRegister
             VariantName = variantName,
             DisplayName = displayName,
             Price = variant.Price,
+            StatusId = variant.Product?.StatusId ?? string.Empty,
             CoverImageUrl = variant.CoverImageUrl,
             Stock = stock,
             Photos = photos

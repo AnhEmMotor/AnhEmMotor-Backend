@@ -182,20 +182,27 @@ public class ProductReadRepository(ApplicationDBContext context) : IProductReadR
         var totalCount = await query.CountAsync(cancellationToken).ConfigureAwait(false);
 
         var entities = await query
-            .Include(p => p.ProductCategory) // Lấy cả Category đã xóa (do IgnoreQueryFilters)
-            .Include(p => p.Brand)           // Lấy cả Brand đã xóa
-                                             // QUAN TRỌNG: Chỉ lấy ProductVariant CHƯA XÓA
+            .Include(p => p.ProductCategory)
+            .Include(p => p.Brand)
+            // Lấy ProductVariant chưa xóa
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
-                .ThenInclude(v => v.InputInfos)
+                // FIX: Chỉ lấy InputInfo chưa xóa.
+                // Vì IgnoreQueryFilters() ở trên cùng đã tắt bộ lọc của bảng này rồi.
+                .ThenInclude(v => v.InputInfos.Where(ii => ii.DeletedAt == null && ii.InputReceipt!.DeletedAt == null))
+
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
-                .ThenInclude(v => v.OutputInfos)
-                .ThenInclude(oi => oi.OutputOrder)
+                // FIX: Tương tự với OutputInfo, phải lọc cái chưa xóa thì tồn kho mới đúng
+                .ThenInclude(v => v.OutputInfos.Where(oi => oi.DeletedAt == null && oi.OutputOrder!.DeletedAt == null))
+                .ThenInclude(oi => oi.OutputOrder) // Giả sử OutputOrder cũng cần check deleted thì thêm Where ở đây luôn
+
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
                 .ThenInclude(v => v.ProductCollectionPhotos)
+
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
-                .ThenInclude(v => v.VariantOptionValues) // Lấy giá trị option của biến thể active
-                .ThenInclude(vov => vov.OptionValue)     // Vẫn lấy OptionValue dù nó đã bị xóa (để hiển thị lịch sử)
+                .ThenInclude(v => v.VariantOptionValues)
+                .ThenInclude(vov => vov.OptionValue)
                 .ThenInclude(ov => ov!.Option)
+
             .OrderByDescending(p => p.CreatedAt)
             .Skip((normalizedPage - 1) * normalizedPageSize)
             .Take(normalizedPageSize)

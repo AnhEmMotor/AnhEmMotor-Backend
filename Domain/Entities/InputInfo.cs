@@ -12,7 +12,7 @@ namespace Domain.Entities
 
         [Column("InputId")]
         [ForeignKey("InputReceipt")]
-        public int? InputId { get; set; }
+        public int InputId { get; set; }
 
         [Column("ProductId")]
         [ForeignKey("ProductVariant")]

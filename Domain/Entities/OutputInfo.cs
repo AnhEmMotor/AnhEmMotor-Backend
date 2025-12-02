@@ -19,7 +19,7 @@ namespace Domain.Entities
 
         [Column("OutputId")]
         [ForeignKey("OutputOrder")]
-        public int? OutputId { get; set; }
+        public int OutputId { get; set; }
 
         [Column("Price")]
         public long? Price { get; set; }

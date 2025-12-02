@@ -86,13 +86,20 @@ namespace Infrastructure.Repositories.ProductVariant
                     .ThenInclude(p => p!.ProductCategory)
                 .Include(v => v.Product)
                     .ThenInclude(p => p!.Brand)
+                .Include(v => v.Product)
+                    .ThenInclude(p => p!.ProductStatus)
                 .Include(v => v.ProductCollectionPhotos)
                 .Include(v => v.VariantOptionValues)
                     .ThenInclude(vov => vov.OptionValue)
                     .ThenInclude(ov => ov!.Option)
-                .Include(v => v.InputInfos)
-                .Include(v => v.OutputInfos)
+
+                // FIX: Tường minh lọc InputInfo chưa xóa
+                .Include(v => v.InputInfos.Where(ii => ii.DeletedAt == null && ii.InputReceipt!.DeletedAt == null))
+
+                // FIX: Tường minh lọc OutputInfo chưa xóa
+                .Include(v => v.OutputInfos.Where(oi => oi.DeletedAt == null && oi.OutputOrder!.DeletedAt == null))
                     .ThenInclude(oi => oi.OutputOrder)
+
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .AsSplitQuery()

@@ -1,4 +1,4 @@
-namespace Application.ApiContracts.Product.Common;
+﻿namespace Application.ApiContracts.Product.Common;
 
 public class ProductVariantLiteResponse
 {
@@ -8,7 +8,9 @@ public class ProductVariantLiteResponse
 
     public string? ProductName { get; set; }
 
-    public string DisplayName { get; set; } = string.Empty;
+    public string? DisplayName { get; set; }
+
+    public string? StatusId { get; set; }
 
     public string? VariantName { get; set; }
 

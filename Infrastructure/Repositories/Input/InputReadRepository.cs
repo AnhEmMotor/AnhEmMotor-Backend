@@ -10,14 +10,32 @@ public class InputReadRepository(ApplicationDBContext context) : IInputReadRepos
 {
     public IQueryable<InputEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return context.GetQuery<InputEntity>(mode);
+        var query = context.InputReceipts.IgnoreQueryFilters();
+
+        if (mode == DataFetchMode.ActiveOnly)
+        {
+            query = query.Where(x => x.DeletedAt == null);
+        }
+        else if (mode == DataFetchMode.DeletedOnly)
+        {
+            query = query.Where(x => x.DeletedAt != null);
+        }
+
+        return query
+            .Include(x => x.InputInfos.Where(y => y.DeletedAt == null))
+                .ThenInclude(x => x.ProductVariant)
+                    .ThenInclude(x => x!.Product)
+            .Include(x => x.Supplier)
+            .Include(x => x.InputStatus);
     }
 
     public Task<IEnumerable<InputEntity>> GetAllAsync(
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return context.GetQuery<InputEntity>(mode)
+        var query = GetQueryable(mode);
+
+        return query
             .ToListAsync(cancellationToken)
             .ContinueWith<IEnumerable<InputEntity>>(t => t.Result, cancellationToken);
     }
@@ -27,8 +45,10 @@ public class InputReadRepository(ApplicationDBContext context) : IInputReadRepos
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return context.GetQuery<InputEntity>(mode)
-            .FirstOrDefaultAsync(i => i.Id == id, cancellationToken)
+        var query = GetQueryable(mode);
+
+        return query
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
             .ContinueWith(t => t.Result, cancellationToken);
     }
 
@@ -37,8 +57,10 @@ public class InputReadRepository(ApplicationDBContext context) : IInputReadRepos
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return context.GetQuery<InputEntity>(mode)
-            .Where(i => ids.Contains(i.Id))
+        var query = GetQueryable(mode);
+
+        return query
+            .Where(x => ids.Contains(x.Id))
             .ToListAsync(cancellationToken)
             .ContinueWith<IEnumerable<InputEntity>>(t => t.Result, cancellationToken);
     }
@@ -48,18 +70,21 @@ public class InputReadRepository(ApplicationDBContext context) : IInputReadRepos
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return context.GetQuery<InputEntity>(mode)
-            .Include(i => i.InputInfos)
-                .ThenInclude(ii => ii.ProductVariant)
-                    .ThenInclude(pv => pv!.Product)
-            .Include(i => i.InputInfos)
-                .ThenInclude(ii => ii.ProductVariant)
-                    .ThenInclude(pv => pv!.VariantOptionValues)
-                        .ThenInclude(vov => vov.OptionValue)
-                            .ThenInclude(ov => ov!.Option)
-            .Include(i => i.Supplier)
-            .Include(i => i.InputStatus)
-            .FirstOrDefaultAsync(i => i.Id == id, cancellationToken)
+        var query = GetQueryable(mode);
+
+        return query
+            .Include(x => x.InputInfos.Where(y => y.DeletedAt == null))
+                .ThenInclude(x => x.ProductVariant)
+                    .ThenInclude(x => x!.Product)
+            .Include(x => x.InputInfos.Where(y => y.DeletedAt == null))
+                .ThenInclude(x => x.ProductVariant)
+                    .ThenInclude(x => x!.VariantOptionValues)
+                        .ThenInclude(x => x.OptionValue)
+                            .ThenInclude(x => x!.Option)
+            .Include(x => x.Supplier)
+            .Include(x => x.InputStatus)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
             .ContinueWith(t => t.Result, cancellationToken);
     }
 
@@ -68,11 +93,13 @@ public class InputReadRepository(ApplicationDBContext context) : IInputReadRepos
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return context.GetQuery<InputEntity>(mode)
-            .Include(i => i.InputInfos)
-                .ThenInclude(ii => ii.ProductVariant)
-                    .ThenInclude(pv => pv!.Product)
-            .Where(i => i.SupplierId == supplierId)
-            .OrderByDescending(i => i.CreatedAt);
+        var query = GetQueryable(mode);
+
+        return query
+            .Include(x => x.InputInfos.Where(y => y.DeletedAt == null))
+                .ThenInclude(x => x.ProductVariant)
+                    .ThenInclude(x => x!.Product)
+            .Where(x => x.SupplierId == supplierId)
+            .OrderByDescending(x => x.CreatedAt);
     }
 }
