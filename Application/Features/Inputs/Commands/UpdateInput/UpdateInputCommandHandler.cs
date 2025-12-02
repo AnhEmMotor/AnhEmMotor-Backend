@@ -3,7 +3,6 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Supplier;
-using Domain.Constants;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Helpers;
@@ -36,6 +35,25 @@ public sealed class UpdateInputCommandHandler(
             {
                 Errors = [ new ErrorDetail { Field = "Id", Message = $"Không tìm thấy phiếu nhập có ID {request.Id}." } ]
             });
+        }
+
+        if (input.StatusId == Domain.Constants.InputStatus.Cancel || input.StatusId == Domain.Constants.InputStatus.Finish)
+        {
+            if (request.Products.Count != 0)
+            {
+                return (null, new ErrorResponse
+                {
+                    Errors = [new ErrorDetail { Field = "Products", Message = "Không được chỉnh sửa sản phẩm trong phiếu nhập đã hoàn thành hoặc đã hủy." }]
+                });
+            }
+
+            if (request.SupplierId != null)
+            {
+                return (null, new ErrorResponse
+                {
+                    Errors = [new ErrorDetail { Field = "Products", Message = "Không được chỉnh sửa mã nhà cung cấp trong phiếu nhập đã hoàn thành hoặc đã hủy." }]
+                });
+            }
         }
 
         if (request.SupplierId.HasValue && request.SupplierId != input.SupplierId)

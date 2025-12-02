@@ -6,9 +6,9 @@ namespace Domain.Constants
     {
         public const string Working = "working";
         public const string Finish = "finished";
-        public const string Cacncel = "cancelled";
+        public const string Cancel = "cancelled";
 
-        public static readonly string[] AllowedValues = [ Working, Finish, Cacncel ];
+        public static readonly string[] AllowedValues = [ Working, Finish, Cancel];
 
         public static bool IsValid(string? value)
         {

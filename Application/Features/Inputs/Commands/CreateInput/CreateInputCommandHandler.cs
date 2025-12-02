@@ -82,12 +82,12 @@ public sealed class CreateInputCommandHandler(
 
         var input = request.Adapt<InputEntity>();
         input.StatusId = InputStatus.Working;
-        input.InputInfos = request.Products.Select(p =>
+        input.InputInfos = [.. request.Products.Select(p =>
         {
             var inputInfo = p.Adapt<InputInfoEntity>();
             inputInfo.RemainingCount = p.Count ?? 0;
             return inputInfo;
-        }).ToList();
+        })];
 
         insertRepository.Add(input);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

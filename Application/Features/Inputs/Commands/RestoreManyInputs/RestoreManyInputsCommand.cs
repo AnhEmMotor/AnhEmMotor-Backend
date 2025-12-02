@@ -1,9 +1,10 @@
+using Application.ApiContracts.Input;
 using Domain.Helpers;
 using MediatR;
 
 namespace Application.Features.Inputs.Commands.RestoreManyInputs;
 
-public sealed record RestoreManyInputsCommand : IRequest<ErrorResponse?>
+public sealed record RestoreManyInputsCommand : IRequest<(List<InputResponse>? Data, ErrorResponse? Error)>
 {
     public ICollection<int> Ids { get; init; } = [];
 }

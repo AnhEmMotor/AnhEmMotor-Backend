@@ -1,5 +1,6 @@
 using Application.ApiContracts.Input;
 using Application.Features.Inputs.Commands.CreateInput;
+using Application.Features.Inputs.Commands.UpdateInput;
 using Domain.Entities;
 using Mapster;
 
@@ -27,10 +28,10 @@ public sealed class InputMappingConfig : IRegister
                 ? src.ProductVariant.Product.Name
                 : null);
 
-        config.NewConfig<UpdateInputRequest, Input>()
+        config.NewConfig<UpdateInputInfoRequest, InputInfo>()
             .IgnoreNullValues(true);
 
-        config.NewConfig<UpdateInputInfoRequest, InputInfo>()
+        config.NewConfig<UpdateInputCommand, Input>()
             .IgnoreNullValues(true);
     }
 }

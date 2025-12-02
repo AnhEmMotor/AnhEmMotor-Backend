@@ -24,5 +24,7 @@ public sealed class OutputMappingConfig : IRegister
 
         config.NewConfig<UpdateOutputInfoRequest, OutputInfo>()
             .IgnoreNullValues(true);
+
+        config.NewConfig<UpdateOutputRequest, Output>().IgnoreNullValues(true);
     }
 }

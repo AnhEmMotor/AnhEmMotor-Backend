@@ -32,7 +32,9 @@ public sealed class UpdateInputStatusCommandHandler(
             });
         }
 
-        if (input.StatusId == InputStatus.Finish || input.StatusId == InputStatus.Cacncel)
+        
+
+        if (input.StatusId == InputStatus.Finish || input.StatusId == InputStatus.Cancel)
         {
             return (null, new ErrorResponse
             {
