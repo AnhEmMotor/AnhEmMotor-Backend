@@ -9,5 +9,5 @@ public sealed record UpdateOutputCommand : IRequest<(OutputResponse? Data, Error
     public int Id { get; init; }
     public string? StatusId { get; init; }
     public string? Notes { get; init; }
-    public ICollection<OutputInfoDto> Products { get; init; } = [];
+    public ICollection<OutputInfoDto> OutputInfos { get; init; } = [];
 }

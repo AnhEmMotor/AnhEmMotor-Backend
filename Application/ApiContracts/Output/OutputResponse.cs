@@ -11,8 +11,4 @@ public class OutputResponse
     public long? Total { get; set; }
 
     public List<OutputInfoDto> Products { get; set; } = [];
-
-    public DateTimeOffset? CreatedAt { get; set; }
-
-    public DateTimeOffset? UpdatedAt { get; set; }
 }

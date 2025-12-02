@@ -2,7 +2,6 @@ using Application.ApiContracts.Output;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.ProductVariant;
-using Domain.Constants;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Helpers;
@@ -32,15 +31,17 @@ public sealed class UpdateOutputCommandHandler(
         {
             return (null, new ErrorResponse
             {
-                Errors = [ new ErrorDetail { Field = "Id", Message = $"Không tìm thấy đơn hàng có ID {request.Id}." } ]
+                Errors = [new ErrorDetail { Field = "Id", Message = $"Không tìm thấy đơn hàng có ID {request.Id}." }]
             });
         }
 
-        var variantIds = request.Products
+        var variantIds = request.OutputInfos
             .Where(p => p.ProductId.HasValue)
             .Select(p => p.ProductId!.Value)
             .Distinct()
             .ToList();
+
+        List<ProductVariant> variantsList = [];
 
         if (variantIds.Count > 0)
         {
@@ -50,7 +51,7 @@ public sealed class UpdateOutputCommandHandler(
                 DataFetchMode.ActiveOnly)
                 .ConfigureAwait(false);
 
-            var variantsList = variants.ToList();
+            variantsList = [.. variants];
 
             if (variantsList.Count != variantIds.Count)
             {
@@ -58,7 +59,7 @@ public sealed class UpdateOutputCommandHandler(
                 var missingIds = variantIds.Except(foundIds).ToList();
                 return (null, new ErrorResponse
                 {
-                    Errors = [ new ErrorDetail { Field = "Products", Message = $"Không tìm thấy {missingIds.Count} sản phẩm: {string.Join(", ", missingIds)}" } ]
+                    Errors = [new ErrorDetail { Field = "Products", Message = $"Không tìm thấy {missingIds.Count} sản phẩm: {string.Join(", ", missingIds)}" }]
                 });
             }
 
@@ -68,7 +69,7 @@ public sealed class UpdateOutputCommandHandler(
                 {
                     return (null, new ErrorResponse
                     {
-                        Errors = [ new ErrorDetail { Field = "Products", Message = $"Sản phẩm '{variant.Product?.Name ?? variant.Id.ToString()}' không còn được bán." } ]
+                        Errors = [new ErrorDetail { Field = "Products", Message = $"Sản phẩm '{variant.Product?.Name ?? variant.Id.ToString()}' không còn được bán." }]
                     });
                 }
             }
@@ -77,7 +78,8 @@ public sealed class UpdateOutputCommandHandler(
         request.Adapt(output);
 
         var existingInfoDict = output.OutputInfos.ToDictionary(oi => oi.Id);
-        var requestInfoDict = request.Products
+
+        var requestInfoDict = request.OutputInfos
             .Where(p => p.Id.HasValue && p.Id > 0)
             .ToDictionary(p => p.Id!.Value);
 
@@ -87,22 +89,33 @@ public sealed class UpdateOutputCommandHandler(
 
         foreach (var info in toDelete)
         {
-            deleteRepository.DeleteOutputInfo(info);
             output.OutputInfos.Remove(info);
+            deleteRepository.DeleteOutputInfo(info);
         }
 
-        foreach (var productRequest in request.Products)
+        foreach (var productRequest in request.OutputInfos)
         {
+            var currentVariant = variantsList.FirstOrDefault(v => v.Id == productRequest.ProductId);
+
             if (productRequest.Id.HasValue && productRequest.Id > 0)
             {
                 if (existingInfoDict.TryGetValue(productRequest.Id.Value, out var existingInfo))
                 {
                     productRequest.Adapt(existingInfo);
+
+                    if (currentVariant != null)
+                    {
+                        existingInfo.Price = currentVariant.Price;
+                    }
                 }
             }
             else
             {
                 var newInfo = productRequest.Adapt<OutputInfo>();
+                if (currentVariant != null)
+                {
+                    newInfo.Price = currentVariant.Price;
+                }
                 output.OutputInfos.Add(newInfo);
             }
         }

@@ -8,5 +8,5 @@ public sealed record CreateOutputCommand : IRequest<(OutputResponse? Data, Error
 {
     public string? StatusId { get; init; }
     public string? Notes { get; init; }
-    public ICollection<OutputInfoDto> Products { get; init; } = [];
+    public ICollection<OutputInfoDto> OutputInfos { get; init; } = [];
 }

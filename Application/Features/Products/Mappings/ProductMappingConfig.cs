@@ -8,7 +8,7 @@ namespace Application.Features.Products.Mappings;
 
 public class ProductMappingConfig : IRegister
 {
-    public void Register(TypeAdapterConfig config)
+    public void Register(TypeAdapterConfig config) 
     {
         config.NewConfig<ApiContracts.Product.Requests.CreateProductRequest, Commands.CreateProduct.CreateProductCommand>(
             )

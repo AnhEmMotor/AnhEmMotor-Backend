@@ -1,21 +1,18 @@
-﻿using FluentValidation;
+﻿using Application.ApiContracts.Output;
 using Application.Features.Inputs.Commands.CreateInput;
-using Application;
-using Application.Features;
-using Application.Features.Inputs;
-using Application.Features.Inputs.Commands;
+using FluentValidation;
 
-namespace Application.Features.Inputs.Commands.UpdateInput;
+namespace Application.Features.Outputs.Commands.CreateOutput;
 
-public sealed class UpdateInputCommandValidator : AbstractValidator<CreateInputCommand>
+public sealed class CreateOutputCommandValidator : AbstractValidator<CreateOutputCommand>
 {
-    public UpdateInputCommandValidator()
+    public CreateOutputCommandValidator()
     {
-        RuleFor(x => x.Products)
+        RuleFor(x => x.OutputInfos)
             .NotEmpty()
             .WithMessage("Input must contain at least one product.");
 
-        RuleFor(x => x.Products)
+        RuleFor(x => x.OutputInfos)
             .Must(products =>
             {
                 // Bước 1: Lấy ra tất cả ProductId hợp lệ
@@ -35,15 +32,15 @@ public sealed class UpdateInputCommandValidator : AbstractValidator<CreateInputC
                 // Trả về TRUE (PASS) nếu KHÔNG có lặp lại.
                 return !isDuplicate;
             })
-            .WithMessage("Product ID cannot be duplicated in a single input.");
+            .WithMessage("Product ID cannot be duplicated in a single output.");
 
-        RuleForEach(x => x.Products).SetValidator(new UpdateInput.UpdateInputProductCommandValidator());
+        RuleForEach(x => x.OutputInfos).SetValidator(new CreateOutputProductCommandValidator());
     }
 }
 
-public sealed class UpdateInputProductCommandValidator : AbstractValidator<CreateInputProductCommand>
+public sealed class CreateOutputProductCommandValidator : AbstractValidator<OutputInfoDto>
 {
-    public UpdateInputProductCommandValidator()
+    public CreateOutputProductCommandValidator()
     {
         RuleFor(x => x.ProductId)
             .NotNull()
@@ -52,9 +49,5 @@ public sealed class UpdateInputProductCommandValidator : AbstractValidator<Creat
         RuleFor(x => x.Count)
             .NotNull()
             .GreaterThan((short)0);
-
-        RuleFor(x => x.InputPrice)
-            .NotNull()
-            .GreaterThanOrEqualTo(0);
     }
 }

@@ -21,7 +21,7 @@ public sealed class CreateOutputCommandHandler(
         CreateOutputCommand request,
         CancellationToken cancellationToken)
     {
-        if (request.Products.Count == 0)
+        if (request.OutputInfos.Count == 0)
         {
             return (null, new ErrorResponse
             {
@@ -29,7 +29,7 @@ public sealed class CreateOutputCommandHandler(
             });
         }
 
-        var variantIds = request.Products
+        var variantIds = request.OutputInfos
             .Where(p => p.ProductId.HasValue)
             .Select(p => p.ProductId!.Value)
             .Distinct()
@@ -62,7 +62,17 @@ public sealed class CreateOutputCommandHandler(
                         Errors = [ new ErrorDetail { Field = "Products", Message = $"Sản phẩm '{variant.Product?.Name ?? variant.Id.ToString()}' không còn được bán." } ]
                     });
                 }
-            }        var output = request.Adapt<Output>();
+            }        
+        var output = request.Adapt<Output>();
+
+        foreach (var info in output.OutputInfos)
+        {
+            var matchingVariant = variantsList.FirstOrDefault(v => v.Id == info.ProductId);
+            if (matchingVariant != null)
+            {
+                info.Price = matchingVariant.Price;
+            }
+        }
 
         if (string.IsNullOrWhiteSpace(output.StatusId))
         {

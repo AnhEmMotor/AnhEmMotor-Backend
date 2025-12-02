@@ -1,4 +1,5 @@
 using Application.ApiContracts.Output;
+using Application.Features.Outputs.Commands.UpdateOutput;
 using Domain.Entities;
 using Mapster;
 
@@ -26,5 +27,7 @@ public sealed class OutputMappingConfig : IRegister
             .IgnoreNullValues(true);
 
         config.NewConfig<UpdateOutputRequest, Output>().IgnoreNullValues(true);
+        config.NewConfig<UpdateOutputInfoRequest, OutputInfo>().IgnoreNullValues(true);
+        config.NewConfig<UpdateOutputCommand, Output>().IgnoreNullValues(true).Ignore(dest => dest.OutputInfos);
     }
 }

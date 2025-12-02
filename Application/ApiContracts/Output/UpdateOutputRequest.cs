@@ -1,10 +1,13 @@
+using System.Text.Json.Serialization;
+
 namespace Application.ApiContracts.Output;
 
 public class UpdateOutputRequest
 {
     public string? Notes { get; set; }
 
-    public List<UpdateOutputInfoRequest> Products { get; set; } = [];
+    [JsonPropertyName("products")]
+    public List<UpdateOutputInfoRequest> OutputInfos { get; set; } = [];
 }
 
 public class UpdateOutputInfoRequest
@@ -14,6 +17,4 @@ public class UpdateOutputInfoRequest
     public int? ProductId { get; set; }
 
     public short? Count { get; set; }
-
-    public long? Price { get; set; }
 }
