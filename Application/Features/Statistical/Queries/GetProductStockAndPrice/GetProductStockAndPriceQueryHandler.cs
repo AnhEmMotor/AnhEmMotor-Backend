@@ -1,17 +1,11 @@
+using Application.ApiContracts.Staticals;
 using Application.Interfaces.Repositories.Statistical;
 using MediatR;
 
 namespace Application.Features.Statistical.Queries.GetProductStockAndPrice;
 
-public sealed class GetProductStockAndPriceQueryHandler(
-    IStatisticalReadRepository repository) : IRequestHandler<GetProductStockAndPriceQuery, ProductStockPriceDto?>
+public sealed class GetProductStockAndPriceQueryHandler(IStatisticalReadRepository repository) : IRequestHandler<GetProductStockAndPriceQuery, ProductStockPriceResponse?>
 {
-    public Task<ProductStockPriceDto?> Handle(
-        GetProductStockAndPriceQuery request,
-        CancellationToken cancellationToken)
-    {
-        return repository.GetProductStockAndPriceAsync(
-            request.VariantId,
-            cancellationToken);
-    }
+    public Task<ProductStockPriceResponse?> Handle(GetProductStockAndPriceQuery request, CancellationToken cancellationToken)
+    { return repository.GetProductStockAndPriceAsync(request.VariantId, cancellationToken); }
 }

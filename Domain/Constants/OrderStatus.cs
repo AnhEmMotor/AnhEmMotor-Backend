@@ -14,29 +14,29 @@
         public const string WaitingPickup = "waiting_pickup";
         public const string Cancelled = "cancelled";
 
-        public static readonly HashSet<string> All = [Completed, ConfirmedCod, Delivering, DepositPaid, PaidProcessing, Pending, Refunded, Refunding, WaitingDeposit, WaitingPickup, Cancelled];
+        public static readonly HashSet<string> All = [ Completed, ConfirmedCod, Delivering, DepositPaid, PaidProcessing, Pending, Refunded, Refunding, WaitingDeposit, WaitingPickup, Cancelled ];
 
-        public static readonly HashSet<string> BookingPhases = [ConfirmedCod, Delivering, DepositPaid, PaidProcessing, Pending, Refunded, Refunding, WaitingDeposit, WaitingPickup];
+        public static readonly HashSet<string> BookingPhases = [ ConfirmedCod, Delivering, DepositPaid, PaidProcessing, Pending, Refunded, Refunding, WaitingDeposit, WaitingPickup ];
 
-        public static readonly HashSet<string> NotDeletedPhases = [Completed, Refunded];
+        public static readonly HashSet<string> NotDeletedPhases = [ Completed, Refunded ];
 
         public static bool IsValid(string? value)
         {
-            if (string.IsNullOrWhiteSpace(value))
+            if(string.IsNullOrWhiteSpace(value))
                 return false;
             return All.Contains(value, StringComparer.OrdinalIgnoreCase);
         }
 
         public static bool IsBookingStatus(string? value)
         {
-            if (string.IsNullOrWhiteSpace(value))
+            if(string.IsNullOrWhiteSpace(value))
                 return false;
             return BookingPhases.Contains(value, StringComparer.OrdinalIgnoreCase);
         }
 
         public static bool IsCannotDelete(string? value)
         {
-            if (string.IsNullOrWhiteSpace(value))
+            if(string.IsNullOrWhiteSpace(value))
                 return false;
             return NotDeletedPhases.Contains(value, StringComparer.OrdinalIgnoreCase);
         }

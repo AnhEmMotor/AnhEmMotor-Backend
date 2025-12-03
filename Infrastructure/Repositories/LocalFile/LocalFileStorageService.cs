@@ -14,7 +14,7 @@ public class LocalFileStorageService(IWebHostEnvironment environment, IHttpConte
     private const long MaxFileSize = 10 * 1024 * 1024;
     private readonly string _uploadFolder = Path.Combine(environment.WebRootPath, "uploads");
 
-    private readonly List<string> _allowedMimeTypes =[ "image/jpeg", "image/png", "image/gif", "image/webp" ];
+    private readonly List<string> _allowedMimeTypes = [ "image/jpeg", "image/png", "image/gif", "image/webp" ];
 
     public async Task<(string StoragePath, string FileExtension)> SaveFileAsync(
         Stream file,

@@ -16,5 +16,5 @@ public class InputResponse
 
     public long? TotalPayable { get; set; }
 
-    public List<InputInfoDto> Products { get; set; } = [];
+    public List<InputInfoResponse> Products { get; set; } = [];
 }

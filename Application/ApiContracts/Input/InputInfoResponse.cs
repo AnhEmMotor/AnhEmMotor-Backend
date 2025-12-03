@@ -1,6 +1,6 @@
-namespace Application.ApiContracts.Output;
+namespace Application.ApiContracts.Input;
 
-public class OutputInfoDto
+public class InputInfoResponse
 {
     public int? Id { get; set; }
 
@@ -10,7 +10,7 @@ public class OutputInfoDto
 
     public short? Count { get; set; }
 
-    public long? Price { get; set; }
+    public long? InputPrice { get; set; }
 
-    public long? CostPrice { get; set; }
+    public long? RemainingCount { get; set; }
 }

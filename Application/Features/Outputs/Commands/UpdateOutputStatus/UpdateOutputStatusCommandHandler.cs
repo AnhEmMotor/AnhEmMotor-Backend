@@ -24,7 +24,7 @@ public sealed class UpdateOutputStatusCommandHandler(
             DataFetchMode.ActiveOnly)
             .ConfigureAwait(false);
 
-        if (output is null)
+        if(output is null)
         {
             return (null, new ErrorResponse
             {
@@ -32,58 +32,65 @@ public sealed class UpdateOutputStatusCommandHandler(
             });
         }
 
-        if (!OrderStatus.IsValid(request.StatusId))
+        if(!OrderStatus.IsValid(request.StatusId))
         {
             return (null, new ErrorResponse
             {
-                Errors = [ new ErrorDetail { Field = "StatusId", Message = $"Trạng thái '{request.StatusId}' không hợp lệ." } ]
+                Errors =
+                    [ new ErrorDetail { Field = "StatusId", Message = $"Trạng thái '{request.StatusId}' không hợp lệ." } ]
             });
         }
 
-        if (!OrderStatusTransitions.IsTransitionAllowed(output.StatusId, request.StatusId))
+        if(!OrderStatusTransitions.IsTransitionAllowed(output.StatusId, request.StatusId))
         {
             var allowed = OrderStatusTransitions.GetAllowedTransitions(output.StatusId);
             return (null, new ErrorResponse
             {
-                Errors = [ new ErrorDetail { Field = "StatusId", Message = $"Không thể chuyển từ '{output.StatusId}' sang '{request.StatusId}'. Chỉ được chuyển sang: {string.Join(", ", allowed)}" } ]
+                Errors =
+                    [ new ErrorDetail
+                    {
+                        Field = "StatusId",
+                        Message =
+                            $"Không thể chuyển từ '{output.StatusId}' sang '{request.StatusId}'. Chỉ được chuyển sang: {string.Join(", ", allowed)}"
+                    } ]
             });
         }
 
-        if (request.StatusId == OrderStatus.Completed)
+        if(string.Compare(request.StatusId, OrderStatus.Completed) != 0)
         {
-            foreach (var outputInfo in output.OutputInfos)
+            foreach(var outputInfo in output.OutputInfos)
             {
-                if (outputInfo.ProductId.HasValue && outputInfo.Count.HasValue)
+                if(outputInfo.ProductId.HasValue && outputInfo.Count.HasValue)
                 {
                     var stock = await readRepository.GetStockQuantityByVariantIdAsync(
                         outputInfo.ProductId.Value,
                         cancellationToken)
                         .ConfigureAwait(false);
 
-                    if (stock < outputInfo.Count.Value)
+                    if(stock < outputInfo.Count.Value)
                     {
                         return (null, new ErrorResponse
                         {
-                            Errors = [ new ErrorDetail { Field = "Products", Message = $"Sản phẩm ID {outputInfo.ProductId} không đủ tồn kho. Hiện có: {stock}, cần: {outputInfo.Count.Value}" } ]
+                            Errors =
+                                [ new ErrorDetail
+                                {
+                                    Field = "Products",
+                                    Message =
+                                        $"Sản phẩm ID {outputInfo.ProductId} không đủ tồn kho. Hiện có: {stock}, cần: {outputInfo.Count.Value}"
+                                } ]
                         });
                     }
                 }
             }
 
-            await updateRepository.ProcessCOGSForCompletedOrderAsync(
-                output.Id,
-                cancellationToken)
-                .ConfigureAwait(false);
+            await updateRepository.ProcessCOGSForCompletedOrderAsync(output.Id, cancellationToken).ConfigureAwait(false);
         }
 
         output.StatusId = request.StatusId;
         updateRepository.Update(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        var updated = await readRepository.GetByIdWithDetailsAsync(
-            output.Id,
-            cancellationToken)
-            .ConfigureAwait(false);
+        var updated = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
 
         return (updated!.Adapt<OutputResponse>(), null);
     }

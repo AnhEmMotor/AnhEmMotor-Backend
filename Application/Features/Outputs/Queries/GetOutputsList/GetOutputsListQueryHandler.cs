@@ -7,13 +7,9 @@ using OutputEntity = Domain.Entities.Output;
 
 namespace Application.Features.Outputs.Queries.GetOutputsList;
 
-public sealed class GetOutputsListQueryHandler(
-    IOutputReadRepository repository,
-    IPaginator paginator) : IRequestHandler<GetOutputsListQuery, PagedResult<OutputResponse>>
+public sealed class GetOutputsListQueryHandler(IOutputReadRepository repository, IPaginator paginator) : IRequestHandler<GetOutputsListQuery, PagedResult<OutputResponse>>
 {
-    public Task<PagedResult<OutputResponse>> Handle(
-        GetOutputsListQuery request,
-        CancellationToken cancellationToken)
+    public Task<PagedResult<OutputResponse>> Handle(GetOutputsListQuery request, CancellationToken cancellationToken)
     {
         var query = repository.GetQueryable();
 

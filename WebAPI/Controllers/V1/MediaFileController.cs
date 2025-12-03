@@ -112,13 +112,13 @@ public class MediaFileController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UploadManyImages(List<IFormFile> files, CancellationToken cancellationToken)
     {
-        var fileDtos = new List<FileUploadDto>();
+        var fileDtos = new List<FileUploadRequest>();
 
         foreach(var file in files)
         {
             if(file.Length > 0)
             {
-                fileDtos.Add(new FileUploadDto(file.OpenReadStream(), file.FileName));
+                fileDtos.Add(new FileUploadRequest(file.OpenReadStream(), file.FileName));
             }
         }
 

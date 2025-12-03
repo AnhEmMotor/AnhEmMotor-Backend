@@ -29,34 +29,45 @@ public sealed class UpdateInputCommandHandler(
             DataFetchMode.ActiveOnly)
             .ConfigureAwait(false);
 
-        if (input is null)
+        if(input is null)
         {
             return (null, new ErrorResponse
             {
-                Errors = [ new ErrorDetail { Field = "Id", Message = $"Không tìm thấy phiếu nhập có ID {request.Id}." } ]
+                Errors =
+                    [ new ErrorDetail { Field = "Id", Message = $"Không tìm thấy phiếu nhập có ID {request.Id}." } ]
             });
         }
 
-        if (Domain.Constants.InputStatus.IsCannotEdit(input.StatusId))
+        if(Domain.Constants.InputStatus.IsCannotEdit(input.StatusId))
         {
-            if (request.Products.Count != 0)
+            if(request.Products.Count != 0)
             {
                 return (null, new ErrorResponse
                 {
-                    Errors = [new ErrorDetail { Field = "Products", Message = "Không được chỉnh sửa sản phẩm trong phiếu nhập đã hoàn thành hoặc đã hủy." }]
+                    Errors =
+                        [ new ErrorDetail
+                        {
+                            Field = "Products",
+                            Message = "Không được chỉnh sửa sản phẩm trong phiếu nhập đã hoàn thành hoặc đã hủy."
+                        } ]
                 });
             }
 
-            if (request.SupplierId != null)
+            if(request.SupplierId != null)
             {
                 return (null, new ErrorResponse
                 {
-                    Errors = [new ErrorDetail { Field = "Products", Message = "Không được chỉnh sửa mã nhà cung cấp trong phiếu nhập đã hoàn thành hoặc đã hủy." }]
+                    Errors =
+                        [ new ErrorDetail
+                        {
+                            Field = "Products",
+                            Message = "Không được chỉnh sửa mã nhà cung cấp trong phiếu nhập đã hoàn thành hoặc đã hủy."
+                        } ]
                 });
             }
         }
 
-        if (request.SupplierId.HasValue && request.SupplierId != input.SupplierId)
+        if(request.SupplierId.HasValue && request.SupplierId != input.SupplierId)
         {
             var supplier = await supplierRepository.GetByIdAsync(
                 request.SupplierId.Value,
@@ -64,11 +75,16 @@ public sealed class UpdateInputCommandHandler(
                 DataFetchMode.ActiveOnly)
                 .ConfigureAwait(false);
 
-            if (supplier is null || supplier.StatusId != Domain.Constants.SupplierStatus.Active)
+            if(supplier is null || string.Compare(supplier.StatusId, Domain.Constants.SupplierStatus.Active) != 0)
             {
                 return (null, new ErrorResponse
                 {
-                    Errors = [ new ErrorDetail { Field = "SupplierId", Message = "Nhà cung cấp không hợp lệ hoặc không còn hoạt động." } ]
+                    Errors =
+                        [ new ErrorDetail
+                        {
+                            Field = "SupplierId",
+                            Message = "Nhà cung cấp không hợp lệ hoặc không còn hoạt động."
+                        } ]
                 });
             }
         }
@@ -79,32 +95,40 @@ public sealed class UpdateInputCommandHandler(
             .Distinct()
             .ToList();
 
-        if (variantIds.Count > 0)
+        if(variantIds.Count > 0)
         {
-            var variants = await variantRepository.GetByIdAsync(
-                variantIds,
-                cancellationToken,
-                DataFetchMode.ActiveOnly)
+            var variants = await variantRepository.GetByIdAsync(variantIds, cancellationToken, DataFetchMode.ActiveOnly)
                 .ConfigureAwait(false);
 
             var variantsList = variants.ToList();
-            if (variantsList.Count != variantIds.Count)
+            if(variantsList.Count != variantIds.Count)
             {
                 var foundIds = variantsList.Select(v => v.Id).ToList();
                 var missingIds = variantIds.Except(foundIds).ToList();
                 return (null, new ErrorResponse
                 {
-                    Errors = [ new ErrorDetail { Field = "Products", Message = $"Không tìm thấy {missingIds.Count} sản phẩm: {string.Join(", ", missingIds)}" } ]
+                    Errors =
+                        [ new ErrorDetail
+                        {
+                            Field = "Products",
+                            Message = $"Không tìm thấy {missingIds.Count} sản phẩm: {string.Join(", ", missingIds)}"
+                        } ]
                 });
             }
 
-            foreach (var variant in variantsList)
+            foreach(var variant in variantsList)
             {
-                if (variant.Product?.StatusId != Domain.Constants.ProductStatus.ForSale)
+                if(string.Compare(variant.Product?.StatusId, Domain.Constants.ProductStatus.ForSale) != 0)
                 {
                     return (null, new ErrorResponse
                     {
-                        Errors = [ new ErrorDetail { Field = "Products", Message = $"Sản phẩm '{variant.Product?.Name ?? variant.Id.ToString()}' không còn được bán." } ]
+                        Errors =
+                            [ new ErrorDetail
+                            {
+                                Field = "Products",
+                                Message =
+                                    $"Sản phẩm '{variant.Product?.Name ?? variant.Id.ToString()}' không còn được bán."
+                            } ]
                     });
                 }
             }
@@ -113,34 +137,29 @@ public sealed class UpdateInputCommandHandler(
         request.Adapt(input);
 
         var existingInfoDict = input.InputInfos.ToDictionary(ii => ii.Id);
-        var requestInfoDict = request.Products
-            .Where(p => p.Id.HasValue && p.Id > 0)
-            .ToDictionary(p => p.Id!.Value);
+        var requestInfoDict = request.Products.Where(p => p.Id.HasValue && p.Id > 0).ToDictionary(p => p.Id!.Value);
 
-        var toDelete = input.InputInfos
-            .Where(ii => !requestInfoDict.ContainsKey(ii.Id))
-            .ToList();
+        var toDelete = input.InputInfos.Where(ii => !requestInfoDict.ContainsKey(ii.Id)).ToList();
 
-        foreach (var info in toDelete)
+        foreach(var info in toDelete)
         {
             deleteRepository.DeleteInputInfo(info);
             input.InputInfos.Remove(info);
         }
 
-        foreach (var productRequest in request.Products)
+        foreach(var productRequest in request.Products)
         {
-            if (productRequest.Id.HasValue && productRequest.Id > 0)
+            if(productRequest.Id.HasValue && productRequest.Id > 0)
             {
-                if (existingInfoDict.TryGetValue(productRequest.Id.Value, out var existingInfo))
+                if(existingInfoDict.TryGetValue(productRequest.Id.Value, out var existingInfo))
                 {
                     productRequest.Adapt(existingInfo);
-                    if (productRequest.Count.HasValue)
+                    if(productRequest.Count.HasValue)
                     {
                         existingInfo.RemainingCount = productRequest.Count.Value;
                     }
                 }
-            }
-            else
+            } else
             {
                 var newInfo = productRequest.Adapt<InputInfo>();
                 newInfo.RemainingCount = newInfo.Count ?? 0;
@@ -151,10 +170,7 @@ public sealed class UpdateInputCommandHandler(
         updateRepository.Update(input);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        var updated = await readRepository.GetByIdWithDetailsAsync(
-            input.Id,
-            cancellationToken)
-            .ConfigureAwait(false);
+        var updated = await readRepository.GetByIdWithDetailsAsync(input.Id, cancellationToken).ConfigureAwait(false);
 
         return (updated!.Adapt<InputResponse>(), null);
     }

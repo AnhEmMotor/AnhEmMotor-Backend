@@ -1,6 +1,6 @@
-using Application.Interfaces.Repositories.Statistical;
+using Application.ApiContracts.Staticals;
 using MediatR;
 
 namespace Application.Features.Statistical.Queries.GetProductStockAndPrice;
 
-public sealed record GetProductStockAndPriceQuery(int VariantId) : IRequest<ProductStockPriceDto?>;
+public sealed record GetProductStockAndPriceQuery(int VariantId) : IRequest<ProductStockPriceResponse?>;

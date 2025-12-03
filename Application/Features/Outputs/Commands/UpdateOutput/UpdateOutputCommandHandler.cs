@@ -27,11 +27,11 @@ public sealed class UpdateOutputCommandHandler(
             DataFetchMode.ActiveOnly)
             .ConfigureAwait(false);
 
-        if (output is null)
+        if(output is null)
         {
             return (null, new ErrorResponse
             {
-                Errors = [new ErrorDetail { Field = "Id", Message = $"Không tìm thấy đơn hàng có ID {request.Id}." }]
+                Errors = [ new ErrorDetail { Field = "Id", Message = $"Không tìm thấy đơn hàng có ID {request.Id}." } ]
             });
         }
 
@@ -43,33 +43,41 @@ public sealed class UpdateOutputCommandHandler(
 
         List<ProductVariant> variantsList = [];
 
-        if (variantIds.Count > 0)
+        if(variantIds.Count > 0)
         {
-            var variants = await variantRepository.GetByIdAsync(
-                variantIds,
-                cancellationToken,
-                DataFetchMode.ActiveOnly)
+            var variants = await variantRepository.GetByIdAsync(variantIds, cancellationToken, DataFetchMode.ActiveOnly)
                 .ConfigureAwait(false);
 
-            variantsList = [.. variants];
+            variantsList = [ .. variants ];
 
-            if (variantsList.Count != variantIds.Count)
+            if(variantsList.Count != variantIds.Count)
             {
                 var foundIds = variantsList.Select(v => v.Id).ToList();
                 var missingIds = variantIds.Except(foundIds).ToList();
                 return (null, new ErrorResponse
                 {
-                    Errors = [new ErrorDetail { Field = "Products", Message = $"Không tìm thấy {missingIds.Count} sản phẩm: {string.Join(", ", missingIds)}" }]
+                    Errors =
+                        [ new ErrorDetail
+                        {
+                            Field = "Products",
+                            Message = $"Không tìm thấy {missingIds.Count} sản phẩm: {string.Join(", ", missingIds)}"
+                        } ]
                 });
             }
 
-            foreach (var variant in variantsList)
+            foreach(var variant in variantsList)
             {
-                if (variant.Product?.StatusId != Domain.Constants.ProductStatus.ForSale)
+                if(string.Compare(variant.Product?.StatusId, Domain.Constants.ProductStatus.ForSale) != 0)
                 {
                     return (null, new ErrorResponse
                     {
-                        Errors = [new ErrorDetail { Field = "Products", Message = $"Sản phẩm '{variant.Product?.Name ?? variant.Id.ToString()}' không còn được bán." }]
+                        Errors =
+                            [ new ErrorDetail
+                            {
+                                Field = "Products",
+                                Message =
+                                    $"Sản phẩm '{variant.Product?.Name ?? variant.Id.ToString()}' không còn được bán."
+                            } ]
                     });
                 }
             }
@@ -79,40 +87,35 @@ public sealed class UpdateOutputCommandHandler(
 
         var existingInfoDict = output.OutputInfos.ToDictionary(oi => oi.Id);
 
-        var requestInfoDict = request.OutputInfos
-            .Where(p => p.Id.HasValue && p.Id > 0)
-            .ToDictionary(p => p.Id!.Value);
+        var requestInfoDict = request.OutputInfos.Where(p => p.Id.HasValue && p.Id > 0).ToDictionary(p => p.Id!.Value);
 
-        var toDelete = output.OutputInfos
-            .Where(oi => !requestInfoDict.ContainsKey(oi.Id))
-            .ToList();
+        var toDelete = output.OutputInfos.Where(oi => !requestInfoDict.ContainsKey(oi.Id)).ToList();
 
-        foreach (var info in toDelete)
+        foreach(var info in toDelete)
         {
             output.OutputInfos.Remove(info);
             deleteRepository.DeleteOutputInfo(info);
         }
 
-        foreach (var productRequest in request.OutputInfos)
+        foreach(var productRequest in request.OutputInfos)
         {
             var currentVariant = variantsList.FirstOrDefault(v => v.Id == productRequest.ProductId);
 
-            if (productRequest.Id.HasValue && productRequest.Id > 0)
+            if(productRequest.Id.HasValue && productRequest.Id > 0)
             {
-                if (existingInfoDict.TryGetValue(productRequest.Id.Value, out var existingInfo))
+                if(existingInfoDict.TryGetValue(productRequest.Id.Value, out var existingInfo))
                 {
                     productRequest.Adapt(existingInfo);
 
-                    if (currentVariant != null)
+                    if(currentVariant != null)
                     {
                         existingInfo.Price = currentVariant.Price;
                     }
                 }
-            }
-            else
+            } else
             {
                 var newInfo = productRequest.Adapt<OutputInfo>();
-                if (currentVariant != null)
+                if(currentVariant != null)
                 {
                     newInfo.Price = currentVariant.Price;
                 }
@@ -123,10 +126,7 @@ public sealed class UpdateOutputCommandHandler(
         updateRepository.Update(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        var updated = await readRepository.GetByIdWithDetailsAsync(
-            output.Id,
-            cancellationToken)
-            .ConfigureAwait(false);
+        var updated = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
 
         return (updated!.Adapt<OutputResponse>(), null);
     }

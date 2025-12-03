@@ -26,7 +26,5 @@ public interface IOutputReadRepository
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-    Task<long> GetStockQuantityByVariantIdAsync(
-        int variantId,
-        CancellationToken cancellationToken);
+    Task<long> GetStockQuantityByVariantIdAsync(int variantId, CancellationToken cancellationToken);
 }

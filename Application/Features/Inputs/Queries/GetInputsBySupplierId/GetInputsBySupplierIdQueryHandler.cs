@@ -7,17 +7,13 @@ using InputEntity = Domain.Entities.Input;
 
 namespace Application.Features.Inputs.Queries.GetInputsBySupplierId;
 
-public sealed class GetInputsBySupplierIdQueryHandler(
-    IInputReadRepository repository,
-    IPaginator paginator) : IRequestHandler<GetInputsBySupplierIdQuery, PagedResult<InputResponse>>
+public sealed class GetInputsBySupplierIdQueryHandler(IInputReadRepository repository, IPaginator paginator) : IRequestHandler<GetInputsBySupplierIdQuery, PagedResult<InputResponse>>
 {
     public Task<PagedResult<InputResponse>> Handle(
         GetInputsBySupplierIdQuery request,
         CancellationToken cancellationToken)
     {
-        var query = repository.GetBySupplierIdAsync(
-            request.SupplierId,
-            cancellationToken);
+        var query = repository.GetBySupplierIdAsync(request.SupplierId, cancellationToken);
 
         return paginator.ApplyAsync<InputEntity, InputResponse>(
             query,

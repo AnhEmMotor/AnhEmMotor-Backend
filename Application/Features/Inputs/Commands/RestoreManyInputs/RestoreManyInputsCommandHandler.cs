@@ -17,21 +17,24 @@ public sealed class RestoreManyInputsCommandHandler(
         RestoreManyInputsCommand request,
         CancellationToken cancellationToken)
     {
-        var inputs = await readRepository.GetByIdAsync(
-            request.Ids,
-            cancellationToken,
-            DataFetchMode.DeletedOnly)
+        var inputs = await readRepository.GetByIdAsync(request.Ids, cancellationToken, DataFetchMode.DeletedOnly)
             .ConfigureAwait(false);
 
         var inputsList = inputs.ToList();
 
-        if (inputsList.Count != request.Ids.Count)
+        if(inputsList.Count != request.Ids.Count)
         {
             var foundIds = inputsList.Select(i => i.Id).ToList();
             var missingIds = request.Ids.Except(foundIds).ToList();
             return (null, new ErrorResponse
             {
-                Errors = [ new ErrorDetail { Field = "Ids", Message = $"Không tìm thấy {missingIds.Count} phiếu nhập đã xóa: {string.Join(", ", missingIds)}" } ]
+                Errors =
+                    [ new ErrorDetail
+                    {
+                        Field = "Ids",
+                        Message =
+                            $"Không tìm thấy {missingIds.Count} phiếu nhập đã xóa: {string.Join(", ", missingIds)}"
+                    } ]
             });
         }
 

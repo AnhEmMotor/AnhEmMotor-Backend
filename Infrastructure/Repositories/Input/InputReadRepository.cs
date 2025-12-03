@@ -12,19 +12,18 @@ public class InputReadRepository(ApplicationDBContext context) : IInputReadRepos
     {
         var query = context.InputReceipts.IgnoreQueryFilters();
 
-        if (mode == DataFetchMode.ActiveOnly)
+        if(mode == DataFetchMode.ActiveOnly)
         {
             query = query.Where(x => x.DeletedAt == null);
-        }
-        else if (mode == DataFetchMode.DeletedOnly)
+        } else if(mode == DataFetchMode.DeletedOnly)
         {
             query = query.Where(x => x.DeletedAt != null);
         }
 
         return query
             .Include(x => x.InputInfos.Where(y => y.DeletedAt == null))
-                .ThenInclude(x => x.ProductVariant)
-                    .ThenInclude(x => x!.Product)
+            .ThenInclude(x => x.ProductVariant)
+            .ThenInclude(x => x!.Product)
             .Include(x => x.Supplier)
             .Include(x => x.InputStatus);
     }
@@ -74,13 +73,13 @@ public class InputReadRepository(ApplicationDBContext context) : IInputReadRepos
 
         return query
             .Include(x => x.InputInfos.Where(y => y.DeletedAt == null))
-                .ThenInclude(x => x.ProductVariant)
-                    .ThenInclude(x => x!.Product)
+            .ThenInclude(x => x.ProductVariant)
+            .ThenInclude(x => x!.Product)
             .Include(x => x.InputInfos.Where(y => y.DeletedAt == null))
-                .ThenInclude(x => x.ProductVariant)
-                    .ThenInclude(x => x!.VariantOptionValues)
-                        .ThenInclude(x => x.OptionValue)
-                            .ThenInclude(x => x!.Option)
+            .ThenInclude(x => x.ProductVariant)
+            .ThenInclude(x => x!.VariantOptionValues)
+            .ThenInclude(x => x.OptionValue)
+            .ThenInclude(x => x!.Option)
             .Include(x => x.Supplier)
             .Include(x => x.InputStatus)
             .AsSplitQuery()
@@ -97,8 +96,8 @@ public class InputReadRepository(ApplicationDBContext context) : IInputReadRepos
 
         return query
             .Include(x => x.InputInfos.Where(y => y.DeletedAt == null))
-                .ThenInclude(x => x.ProductVariant)
-                    .ThenInclude(x => x!.Product)
+            .ThenInclude(x => x.ProductVariant)
+            .ThenInclude(x => x!.Product)
             .Where(x => x.SupplierId == supplierId)
             .OrderByDescending(x => x.CreatedAt);
     }

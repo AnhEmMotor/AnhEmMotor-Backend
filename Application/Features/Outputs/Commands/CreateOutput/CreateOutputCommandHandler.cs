@@ -21,7 +21,7 @@ public sealed class CreateOutputCommandHandler(
         CreateOutputCommand request,
         CancellationToken cancellationToken)
     {
-        if (request.OutputInfos.Count == 0)
+        if(request.OutputInfos.Count == 0)
         {
             return (null, new ErrorResponse
             {
@@ -35,46 +35,53 @@ public sealed class CreateOutputCommandHandler(
             .Distinct()
             .ToList();
 
-        var variants = await variantRepository.GetByIdAsync(
-            variantIds,
-            cancellationToken,
-            DataFetchMode.ActiveOnly)
+        var variants = await variantRepository.GetByIdAsync(variantIds, cancellationToken, DataFetchMode.ActiveOnly)
             .ConfigureAwait(false);
 
         var variantsList = variants.ToList();
 
-        if (variantsList.Count != variantIds.Count)
+        if(variantsList.Count != variantIds.Count)
         {
             var foundIds = variantsList.Select(v => v.Id).ToList();
             var missingIds = variantIds.Except(foundIds).ToList();
             return (null, new ErrorResponse
             {
-                Errors = [ new ErrorDetail { Field = "Products", Message = $"Không tìm thấy {missingIds.Count} sản phẩm: {string.Join(", ", missingIds)}" } ]
+                Errors =
+                    [ new ErrorDetail
+                    {
+                        Field = "Products",
+                        Message = $"Không tìm thấy {missingIds.Count} sản phẩm: {string.Join(", ", missingIds)}"
+                    } ]
             });
         }
 
-            foreach (var variant in variantsList)
+        foreach(var variant in variantsList)
+        {
+            if(string.Compare(variant.Product?.StatusId, Domain.Constants.ProductStatus.ForSale) != 0)
             {
-                if (variant.Product?.StatusId != Domain.Constants.ProductStatus.ForSale)
+                return (null, new ErrorResponse
                 {
-                    return (null, new ErrorResponse
-                    {
-                        Errors = [ new ErrorDetail { Field = "Products", Message = $"Sản phẩm '{variant.Product?.Name ?? variant.Id.ToString()}' không còn được bán." } ]
-                    });
-                }
-            }        
+                    Errors =
+                        [ new ErrorDetail
+                        {
+                            Field = "Products",
+                            Message = $"Sản phẩm '{variant.Product?.Name ?? variant.Id.ToString()}' không còn được bán."
+                        } ]
+                });
+            }
+        }
         var output = request.Adapt<Output>();
 
-        foreach (var info in output.OutputInfos)
+        foreach(var info in output.OutputInfos)
         {
             var matchingVariant = variantsList.FirstOrDefault(v => v.Id == info.ProductId);
-            if (matchingVariant != null)
+            if(matchingVariant != null)
             {
                 info.Price = matchingVariant.Price;
             }
         }
 
-        if (string.IsNullOrWhiteSpace(output.StatusId))
+        if(string.IsNullOrWhiteSpace(output.StatusId))
         {
             output.StatusId = OrderStatus.Pending;
         }
@@ -82,10 +89,7 @@ public sealed class CreateOutputCommandHandler(
         insertRepository.Add(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        var created = await readRepository.GetByIdWithDetailsAsync(
-            output.Id,
-            cancellationToken)
-            .ConfigureAwait(false);
+        var created = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
 
         return (created!.Adapt<OutputResponse>(), null);
     }

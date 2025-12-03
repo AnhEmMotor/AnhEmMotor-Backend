@@ -8,7 +8,7 @@ namespace Application.Features.Products.Mappings;
 
 public class ProductMappingConfig : IRegister
 {
-    public void Register(TypeAdapterConfig config) 
+    public void Register(TypeAdapterConfig config)
     {
         config.NewConfig<ApiContracts.Product.Requests.CreateProductRequest, Commands.CreateProduct.CreateProductCommand>(
             )
@@ -43,13 +43,20 @@ public class ProductMappingConfig : IRegister
                                                 : null,
                                 OptionValue = vov.OptionValue != null ? vov.OptionValue.Name : null
                             })
-                    .ToList()).Map(dest => dest.Stock, src => src.InputInfos
-        .Where(ii => ii.InputReceipt != null && InputStatus.IsFinished(ii.InputReceipt.StatusId)) // THÊM ĐIỀU KIỆN NÀY
-        .Sum(ii => ii.RemainingCount) ?? 0)
+                    .ToList())
+            .Map(
+                dest => dest.Stock,
+                src => src.InputInfos
+                        .Where(ii => ii.InputReceipt != null && InputStatus.IsFinished(ii.InputReceipt.StatusId))
+                        .Sum(ii => ii.RemainingCount) ??
+                    0)
 
-    .Map(dest => dest.HasBeenBooked, src => src.OutputInfos
-        .Where(oi => oi.OutputOrder != null && OrderStatus.IsBookingStatus(oi.OutputOrder.StatusId)) // LOGIC NÀY ĐÚNG, GIỮ LẠI VÀ ĐẢM BẢO NULL CHECK
-        .Sum(oi => (long?)oi.Count) ?? 0);
+            .Map(
+                dest => dest.HasBeenBooked,
+                src => src.OutputInfos
+                        .Where(oi => oi.OutputOrder != null && OrderStatus.IsBookingStatus(oi.OutputOrder.StatusId))
+                        .Sum(oi => (long?)oi.Count) ??
+                    0);
 
         config.NewConfig<VariantRow, ApiContracts.Product.Responses.ProductVariantDetailResponse>()
             .Map(
@@ -137,8 +144,9 @@ public class ProductMappingConfig : IRegister
             : $"{productName} ({variantName})";
 
         var stock = variant.InputInfos
-         .Where(ii => ii.InputReceipt != null && InputStatus.IsFinished(ii.InputReceipt.StatusId))
-         .Sum(ii => ii.RemainingCount) ?? 0;
+                .Where(ii => ii.InputReceipt != null && InputStatus.IsFinished(ii.InputReceipt.StatusId))
+                .Sum(ii => ii.RemainingCount) ??
+            0;
         var photos = variant.ProductCollectionPhotos
             .Select(p => p.ImageUrl ?? string.Empty)
             .Where(url => !string.IsNullOrWhiteSpace(url))
@@ -179,7 +187,6 @@ public class ProductMappingConfig : IRegister
 
     private static long CalculateTotalStock(ProductEntity product)
     {
-        // Logic mới: Chỉ cộng dồn RemainingCount nếu phiếu nhập đó ĐÃ HOÀN THÀNH (IsFinished)
         return product.ProductVariants
             .SelectMany(variant => variant.InputInfos)
             .Where(ii => ii.InputReceipt != null && InputStatus.IsFinished(ii.InputReceipt.StatusId))
@@ -188,7 +195,6 @@ public class ProductMappingConfig : IRegister
 
     private static long CalculateTotalBooked(ProductEntity product)
     {
-        // Logic: Chỉ cộng dồn Count nếu phiếu xuất đang ở trạng thái BOOKING
         return product.ProductVariants
             .SelectMany(variant => variant.OutputInfos)
             .Where(info => info.OutputOrder != null && OrderStatus.IsBookingStatus(info.OutputOrder.StatusId))

@@ -8,14 +8,3 @@ public class UpdateInputRequest
 
     public List<UpdateInputInfoRequest> Products { get; set; } = [];
 }
-
-public class UpdateInputInfoRequest
-{
-    public int? Id { get; set; }
-
-    public int? ProductId { get; set; }
-
-    public short? Count { get; set; }
-
-    public long? InputPrice { get; set; }
-}

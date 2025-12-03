@@ -17,17 +17,15 @@ public sealed class RestoreOutputCommandHandler(
         RestoreOutputCommand request,
         CancellationToken cancellationToken)
     {
-        var output = await readRepository.GetByIdAsync(
-            request.Id,
-            cancellationToken,
-            DataFetchMode.DeletedOnly)
+        var output = await readRepository.GetByIdAsync(request.Id, cancellationToken, DataFetchMode.DeletedOnly)
             .ConfigureAwait(false);
 
-        if (output is null)
+        if(output is null)
         {
             return (null, new ErrorResponse
             {
-                Errors = [ new ErrorDetail { Field = "Id", Message = $"Không tìm thấy đơn hàng đã xóa có ID {request.Id}." } ]
+                Errors =
+                    [ new ErrorDetail { Field = "Id", Message = $"Không tìm thấy đơn hàng đã xóa có ID {request.Id}." } ]
             });
         }
 

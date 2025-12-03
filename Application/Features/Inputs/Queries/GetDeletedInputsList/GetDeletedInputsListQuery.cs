@@ -1,5 +1,4 @@
 using Application.ApiContracts.Input;
-using Domain.Enums;
 using Domain.Shared;
 using MediatR;
 using Sieve.Models;

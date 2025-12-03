@@ -9,10 +9,3 @@ public class CreateOutputRequest
     [JsonPropertyName("products")]
     public List<CreateOutputInfoRequest> OutputInfos { get; set; } = [];
 }
-
-public class CreateOutputInfoRequest
-{
-    public int? ProductId { get; set; }
-
-    public short? Count { get; set; }
-}

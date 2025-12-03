@@ -44,8 +44,8 @@ namespace Infrastructure.Repositories.ProductVariant
                 .Include(v => v.ProductCollectionPhotos)
                 .Include(v => v.InputInfos)
                 .Include(v => v.VariantOptionValues)
-                    .ThenInclude(vov => vov.OptionValue)
-                    .ThenInclude(ov => ov!.Option)
+                .ThenInclude(vov => vov.OptionValue)
+                .ThenInclude(ov => ov!.Option)
                 .AsSplitQuery()
                 .ToListAsync(cancellationToken)
                 .ContinueWith<IEnumerable<ProductVariantEntity>>(t => t.Result, cancellationToken);
@@ -83,22 +83,20 @@ namespace Infrastructure.Repositories.ProductVariant
 
             var items = await query
                 .Include(v => v.Product)
-                    .ThenInclude(p => p!.ProductCategory)
+                .ThenInclude(p => p!.ProductCategory)
                 .Include(v => v.Product)
-                    .ThenInclude(p => p!.Brand)
+                .ThenInclude(p => p!.Brand)
                 .Include(v => v.Product)
-                    .ThenInclude(p => p!.ProductStatus)
+                .ThenInclude(p => p!.ProductStatus)
                 .Include(v => v.ProductCollectionPhotos)
                 .Include(v => v.VariantOptionValues)
-                    .ThenInclude(vov => vov.OptionValue)
-                    .ThenInclude(ov => ov!.Option)
+                .ThenInclude(vov => vov.OptionValue)
+                .ThenInclude(ov => ov!.Option)
 
-                // FIX: Tường minh lọc InputInfo chưa xóa
                 .Include(v => v.InputInfos.Where(ii => ii.DeletedAt == null && ii.InputReceipt!.DeletedAt == null))
 
-                // FIX: Tường minh lọc OutputInfo chưa xóa
                 .Include(v => v.OutputInfos.Where(oi => oi.DeletedAt == null && oi.OutputOrder!.DeletedAt == null))
-                    .ThenInclude(oi => oi.OutputOrder)
+                .ThenInclude(oi => oi.OutputOrder)
 
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)

@@ -4,11 +4,23 @@ public static class OrderStatusTransitions
 {
     private static readonly Dictionary<string, HashSet<string>> AllowedTransitions = new()
     {
-        { OrderStatus.Pending, [ OrderStatus.ConfirmedCod, OrderStatus.PaidProcessing, OrderStatus.WaitingDeposit, OrderStatus.Cancelled ] },
-        { OrderStatus.ConfirmedCod, [ OrderStatus.Delivering, OrderStatus.WaitingPickup, OrderStatus.Completed, OrderStatus.Cancelled ] },
-        { OrderStatus.PaidProcessing, [ OrderStatus.Delivering, OrderStatus.WaitingPickup, OrderStatus.Completed, OrderStatus.Refunding ] },
+        {
+            OrderStatus.Pending,
+            [ OrderStatus.ConfirmedCod, OrderStatus.PaidProcessing, OrderStatus.WaitingDeposit, OrderStatus.Cancelled ]
+        },
+        {
+            OrderStatus.ConfirmedCod,
+            [ OrderStatus.Delivering, OrderStatus.WaitingPickup, OrderStatus.Completed, OrderStatus.Cancelled ]
+        },
+        {
+            OrderStatus.PaidProcessing,
+            [ OrderStatus.Delivering, OrderStatus.WaitingPickup, OrderStatus.Completed, OrderStatus.Refunding ]
+        },
         { OrderStatus.WaitingDeposit, [ OrderStatus.DepositPaid, OrderStatus.Cancelled ] },
-        { OrderStatus.DepositPaid, [ OrderStatus.Delivering, OrderStatus.WaitingPickup, OrderStatus.Completed, OrderStatus.Refunding ] },
+        {
+            OrderStatus.DepositPaid,
+            [ OrderStatus.Delivering, OrderStatus.WaitingPickup, OrderStatus.Completed, OrderStatus.Refunding ]
+        },
         { OrderStatus.Delivering, [ OrderStatus.Completed, OrderStatus.Refunding ] },
         { OrderStatus.WaitingPickup, [ OrderStatus.Completed, OrderStatus.Refunding ] },
         { OrderStatus.Cancelled, [ OrderStatus.Pending ] },

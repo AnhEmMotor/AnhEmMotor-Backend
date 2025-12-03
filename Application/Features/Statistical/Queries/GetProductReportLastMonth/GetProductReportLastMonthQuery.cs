@@ -1,6 +1,6 @@
-using Application.Interfaces.Repositories.Statistical;
+using Application.ApiContracts.Staticals;
 using MediatR;
 
 namespace Application.Features.Statistical.Queries.GetProductReportLastMonth;
 
-public sealed record GetProductReportLastMonthQuery : IRequest<IEnumerable<ProductReportDto>>;
+public sealed record GetProductReportLastMonthQuery : IRequest<IEnumerable<ProductReportResponse>>;

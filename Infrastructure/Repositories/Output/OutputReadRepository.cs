@@ -9,24 +9,22 @@ namespace Infrastructure.Repositories.Output;
 
 public class OutputReadRepository(ApplicationDBContext context) : IOutputReadRepository
 {
-
     public IQueryable<OutputEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         var query = context.OutputOrders.IgnoreQueryFilters();
 
-        if (mode == DataFetchMode.ActiveOnly)
+        if(mode == DataFetchMode.ActiveOnly)
         {
             query = query.Where(x => x.DeletedAt == null);
-        }
-        else if (mode == DataFetchMode.DeletedOnly)
+        } else if(mode == DataFetchMode.DeletedOnly)
         {
             query = query.Where(x => x.DeletedAt != null);
         }
 
         return query
             .Include(x => x.OutputInfos.Where(y => y.DeletedAt == null))
-                .ThenInclude(x => x.ProductVariant)
-                    .ThenInclude(x => x!.Product)
+            .ThenInclude(x => x.ProductVariant)
+            .ThenInclude(x => x!.Product)
             .Include(x => x.OutputStatus);
     }
 
@@ -71,35 +69,27 @@ public class OutputReadRepository(ApplicationDBContext context) : IOutputReadRep
     {
         return context.GetQuery<OutputEntity>(mode)
             .Include(o => o.OutputInfos)
-                .ThenInclude(oi => oi.ProductVariant)
-                    .ThenInclude(pv => pv!.Product)
+            .ThenInclude(oi => oi.ProductVariant)
+            .ThenInclude(pv => pv!.Product)
             .Include(o => o.OutputInfos)
-                .ThenInclude(oi => oi.ProductVariant)
-                    .ThenInclude(pv => pv!.VariantOptionValues)
-                        .ThenInclude(vov => vov.OptionValue)
-                            .ThenInclude(ov => ov!.Option)
+            .ThenInclude(oi => oi.ProductVariant)
+            .ThenInclude(pv => pv!.VariantOptionValues)
+            .ThenInclude(vov => vov.OptionValue)
+            .ThenInclude(ov => ov!.Option)
             .Include(o => o.OutputStatus)
             .FirstOrDefaultAsync(o => o.Id == id, cancellationToken)
             .ContinueWith(t => t.Result, cancellationToken);
     }
 
-    public async Task<long> GetStockQuantityByVariantIdAsync(
-    int variantId,
-    CancellationToken cancellationToken)
+    public async Task<long> GetStockQuantityByVariantIdAsync(int variantId, CancellationToken cancellationToken)
     {
         var validStatusIds = InputStatus.FinishInputValues;
 
         var currentStock = await context.InputInfos
             .AsNoTracking()
             .Where(ii => ii.ProductId == variantId && ii.DeletedAt == null)
-            .Join(
-                context.InputReceipts,
-                ii => ii.InputId,
-                i => i.Id,
-                (ii, i) => new { ii, i })
-            .Where(x =>
-                x.i.DeletedAt == null &&
-                validStatusIds.Contains(x.i.StatusId))
+            .Join(context.InputReceipts, ii => ii.InputId, i => i.Id, (ii, i) => new { ii, i })
+            .Where(x => x.i.DeletedAt == null && validStatusIds.Contains(x.i.StatusId))
             .SumAsync(x => x.ii.RemainingCount ?? 0, cancellationToken)
             .ConfigureAwait(false);
 

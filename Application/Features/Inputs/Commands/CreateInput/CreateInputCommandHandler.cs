@@ -1,7 +1,6 @@
 using Application.ApiContracts.Input;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
-using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Supplier;
 using Domain.Constants;
@@ -37,15 +36,25 @@ public sealed class CreateInputCommandHandler(
             {
                 return (null, new ErrorResponse
                 {
-                    Errors = [ new ErrorDetail { Field = "SupplierId", Message = $"Nhà cung cấp {request.SupplierId} không tồn tại hoặc đã bị xóa." } ]
+                    Errors =
+                        [ new ErrorDetail
+                        {
+                            Field = "SupplierId",
+                            Message = $"Nhà cung cấp {request.SupplierId} không tồn tại hoặc đã bị xóa."
+                        } ]
                 });
             }
 
-            if(supplier.StatusId != SupplierStatus.Active)
+            if(string.Compare(supplier.StatusId, SupplierStatus.Active) != 0)
             {
                 return (null, new ErrorResponse
                 {
-                    Errors = [ new ErrorDetail { Field = "SupplierId", Message = $"Nhà cung cấp {supplier.Name} không ở trạng thái 'active'." } ]
+                    Errors =
+                        [ new ErrorDetail
+                        {
+                            Field = "SupplierId",
+                            Message = $"Nhà cung cấp {supplier.Name} không ở trạng thái 'active'."
+                        } ]
                 });
             }
         }
@@ -66,15 +75,25 @@ public sealed class CreateInputCommandHandler(
                 {
                     return (null, new ErrorResponse
                     {
-                        Errors = [ new ErrorDetail { Field = "Products", Message = $"Sản phẩm {product.ProductId} không tồn tại hoặc đã bị xóa." } ]
+                        Errors =
+                            [ new ErrorDetail
+                            {
+                                Field = "Products",
+                                Message = $"Sản phẩm {product.ProductId} không tồn tại hoặc đã bị xóa."
+                            } ]
                     });
                 }
 
-                if(variant.Product?.StatusId != ProductStatus.ForSale)
+                if(string.Compare(variant.Product?.StatusId, ProductStatus.ForSale) != 0)
                 {
                     return (null, new ErrorResponse
                     {
-                        Errors = [ new ErrorDetail { Field = "Products", Message = $"Sản phẩm {variant.Product?.Name} không ở trạng thái 'for-sale'." } ]
+                        Errors =
+                            [ new ErrorDetail
+                            {
+                                Field = "Products",
+                                Message = $"Sản phẩm {variant.Product?.Name} không ở trạng thái 'for-sale'."
+                            } ]
                     });
                 }
             }
@@ -82,20 +101,19 @@ public sealed class CreateInputCommandHandler(
 
         var input = request.Adapt<InputEntity>();
         input.StatusId = InputStatus.Working;
-        input.InputInfos = [.. request.Products.Select(p =>
-        {
-            var inputInfo = p.Adapt<InputInfoEntity>();
-            inputInfo.RemainingCount = p.Count ?? 0;
-            return inputInfo;
-        })];
+        input.InputInfos = [ .. request.Products
+            .Select(
+                p =>
+                {
+                    var inputInfo = p.Adapt<InputInfoEntity>();
+                    inputInfo.RemainingCount = p.Count ?? 0;
+                    return inputInfo;
+                }) ];
 
         insertRepository.Add(input);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        var created = await readRepository.GetByIdWithDetailsAsync(
-            input.Id,
-            cancellationToken)
-            .ConfigureAwait(false);
+        var created = await readRepository.GetByIdWithDetailsAsync(input.Id, cancellationToken).ConfigureAwait(false);
 
         return (created!.Adapt<InputResponse>(), null);
     }

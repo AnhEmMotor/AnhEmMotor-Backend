@@ -9,14 +9,15 @@ public class InventoryValuationService
         long totalCost = 0;
         var quantityNeeded = quantityToSell;
 
-        foreach (var batch in availableBatches)
+        foreach(var batch in availableBatches)
         {
-            if (quantityNeeded <= 0) break;
+            if(quantityNeeded <= 0)
+                break;
 
             var batchRemaining = batch.RemainingCount ?? 0;
             var batchPrice = batch.InputPrice ?? 0;
 
-            if (batchRemaining >= quantityNeeded)
+            if(batchRemaining >= quantityNeeded)
             {
                 totalCost += quantityNeeded * batchPrice;
                 batch.RemainingCount = batchRemaining - quantityNeeded;
@@ -29,12 +30,13 @@ public class InventoryValuationService
             batch.RemainingCount = 0;
         }
 
-        if (quantityNeeded > 0)
+        if(quantityNeeded > 0)
         {
             throw new InvalidOperationException($"Insufficient inventory. Missing {quantityNeeded} units.");
         }
 
-        if (quantityToSell == 0) return 0;
+        if(quantityToSell == 0)
+            return 0;
 
         return (long)Math.Round((decimal)totalCost / quantityToSell);
     }

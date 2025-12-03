@@ -33,8 +33,7 @@ public sealed class DeleteFileCommandHandler(
             try
             {
                 fileStorageService.DeleteFile(mediaFile.StoragePath);
-            }
-            catch
+            } catch
             {
             }
         }

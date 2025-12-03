@@ -14,7 +14,7 @@ public sealed class GetSuppliersListQueryHandler(ISupplierReadRepository reposit
     {
         var query = repository.GetQueryableWithTotalInput();
 
-        return paginator.ApplyAsync<SupplierWithTotalInputDto, SupplierResponse>(
+        return paginator.ApplyAsync<SupplierWithTotalInputResponse, SupplierResponse>(
             query,
             request.SieveModel,
             cancellationToken: cancellationToken);

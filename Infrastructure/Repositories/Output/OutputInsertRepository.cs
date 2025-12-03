@@ -6,8 +6,5 @@ namespace Infrastructure.Repositories.Output;
 
 public class OutputInsertRepository(ApplicationDBContext context) : IOutputInsertRepository
 {
-    public void Add(OutputEntity output)
-    {
-        context.OutputOrders.Add(output);
-    }
+    public void Add(OutputEntity output) { context.OutputOrders.Add(output); }
 }

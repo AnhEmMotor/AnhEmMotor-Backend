@@ -10,7 +10,5 @@ public interface IOutputUpdateRepository
 
     void Restore(IEnumerable<OutputEntity> outputs);
 
-    Task ProcessCOGSForCompletedOrderAsync(
-        int outputId,
-        CancellationToken cancellationToken);
+    Task ProcessCOGSForCompletedOrderAsync(int outputId, CancellationToken cancellationToken);
 }

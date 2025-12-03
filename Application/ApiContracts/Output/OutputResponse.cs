@@ -10,5 +10,5 @@ public class OutputResponse
 
     public long? Total { get; set; }
 
-    public List<OutputInfoDto> Products { get; set; } = [];
+    public List<OutputInfoResponse> Products { get; set; } = [];
 }

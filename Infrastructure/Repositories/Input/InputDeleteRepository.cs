@@ -7,18 +7,9 @@ namespace Infrastructure.Repositories.Input;
 
 public class InputDeleteRepository(ApplicationDBContext context) : IInputDeleteRepository
 {
-    public void Delete(InputEntity input)
-    {
-        context.SoftDeleteUsingSetColumn(input);
-    }
+    public void Delete(InputEntity input) { context.SoftDeleteUsingSetColumn(input); }
 
-    public void Delete(IEnumerable<InputEntity> inputs)
-    {
-        context.SoftDeleteUsingSetColumnRange(inputs);
-    }
+    public void Delete(IEnumerable<InputEntity> inputs) { context.SoftDeleteUsingSetColumnRange(inputs); }
 
-    public void DeleteInputInfo(InputInfoEntity inputInfo)
-    {
-        context.InputInfos.Remove(inputInfo);
-    }
+    public void DeleteInputInfo(InputInfoEntity inputInfo) { context.InputInfos.Remove(inputInfo); }
 }

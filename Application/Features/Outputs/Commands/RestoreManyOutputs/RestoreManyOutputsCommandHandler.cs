@@ -17,21 +17,23 @@ public sealed class RestoreManyOutputsCommandHandler(
         RestoreManyOutputsCommand request,
         CancellationToken cancellationToken)
     {
-        var outputs = await readRepository.GetByIdAsync(
-            request.Ids,
-            cancellationToken,
-            DataFetchMode.DeletedOnly)
+        var outputs = await readRepository.GetByIdAsync(request.Ids, cancellationToken, DataFetchMode.DeletedOnly)
             .ConfigureAwait(false);
 
         var outputsList = outputs.ToList();
 
-        if (outputsList.Count != request.Ids.Count)
+        if(outputsList.Count != request.Ids.Count)
         {
             var foundIds = outputsList.Select(o => o.Id).ToList();
             var missingIds = request.Ids.Except(foundIds).ToList();
             return (null, new ErrorResponse
             {
-                Errors = [ new ErrorDetail { Field = "Ids", Message = $"Không tìm thấy {missingIds.Count} đơn hàng đã xóa: {string.Join(", ", missingIds)}" } ]
+                Errors =
+                    [ new ErrorDetail
+                    {
+                        Field = "Ids",
+                        Message = $"Không tìm thấy {missingIds.Count} đơn hàng đã xóa: {string.Join(", ", missingIds)}"
+                    } ]
             });
         }
 

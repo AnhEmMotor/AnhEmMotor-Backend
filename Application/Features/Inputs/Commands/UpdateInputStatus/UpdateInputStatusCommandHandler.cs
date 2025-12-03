@@ -24,35 +24,40 @@ public sealed class UpdateInputStatusCommandHandler(
             DataFetchMode.ActiveOnly)
             .ConfigureAwait(false);
 
-        if (input is null)
+        if(input is null)
         {
             return (null, new ErrorResponse
             {
-                Errors = [ new ErrorDetail { Field = "Id", Message = $"Không tìm thấy phiếu nhập có ID {request.Id}." } ]
+                Errors =
+                    [ new ErrorDetail { Field = "Id", Message = $"Không tìm thấy phiếu nhập có ID {request.Id}." } ]
             });
         }
 
-        
 
-        if (Domain.Constants.InputStatus.IsCannotEdit(input.StatusId))
+        if(InputStatus.IsCannotEdit(input.StatusId))
         {
             return (null, new ErrorResponse
             {
-                Errors = [ new ErrorDetail { Field = "StatusId", Message = "Không thể sửa trạng thái phiếu nhập đã hoàn thành hoặc đã hủy." } ]
+                Errors =
+                    [ new ErrorDetail
+                    {
+                        Field = "StatusId",
+                        Message = "Không thể sửa trạng thái phiếu nhập đã hoàn thành hoặc đã hủy."
+                    } ]
             });
         }
 
-        if (!InputStatus.IsValid(request.StatusId))
+        if(!InputStatus.IsValid(request.StatusId))
         {
             return (null, new ErrorResponse
             {
-                Errors = [ new ErrorDetail { Field = "StatusId", Message = $"Trạng thái '{request.StatusId}' không hợp lệ." } ]
+                Errors =
+                    [ new ErrorDetail { Field = "StatusId", Message = $"Trạng thái '{request.StatusId}' không hợp lệ." } ]
             });
         }
 
         input.StatusId = request.StatusId;
 
-        // Khi trạng thái chuyển thành finished thì set InputDate
         if(string.Equals(request.StatusId, InputStatus.Finish, StringComparison.OrdinalIgnoreCase))
         {
             input.InputDate = DateTimeOffset.UtcNow;
@@ -61,10 +66,7 @@ public sealed class UpdateInputStatusCommandHandler(
         updateRepository.Update(input);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        var updated = await readRepository.GetByIdWithDetailsAsync(
-            input.Id,
-            cancellationToken)
-            .ConfigureAwait(false);
+        var updated = await readRepository.GetByIdWithDetailsAsync(input.Id, cancellationToken).ConfigureAwait(false);
 
         return (updated!.Adapt<InputResponse>(), null);
     }

@@ -35,9 +35,7 @@ public sealed class CloneInputCommandHandler(
             return (null, new ErrorResponse
             {
                 Errors =
-                [
-                    new ErrorDetail { Field = "Id", Message = $"Phiếu nhập với Id = {command.Id} không tồn tại" }
-                ]
+                    [ new ErrorDetail { Field = "Id", Message = $"Phiếu nhập với Id = {command.Id} không tồn tại" } ]
             });
         }
 
@@ -47,18 +45,16 @@ public sealed class CloneInputCommandHandler(
             DataFetchMode.ActiveOnly)
             .ConfigureAwait(false);
 
-        if(supplier is null || supplier.StatusId != SupplierStatus.Active)
+        if(supplier is null || string.Compare(supplier.StatusId, SupplierStatus.Active) != 0)
         {
             return (null, new ErrorResponse
             {
                 Errors =
-                [
-                    new ErrorDetail
-                        {
-                            Field = "SupplierId",
-                            Message = "Nhà cung cấp không tồn tại hoặc không còn hoạt động"
-                        }
-                ]
+                    [ new ErrorDetail
+                    {
+                        Field = "SupplierId",
+                        Message = "Nhà cung cấp không tồn tại hoặc không còn hoạt động"
+                    } ]
             });
         }
 
@@ -90,20 +86,21 @@ public sealed class CloneInputCommandHandler(
                 continue;
             }
 
-            if(variant.Product?.StatusId != ProductStatus.ForSale)
+            if(string.Compare(variant.Product?.StatusId, ProductStatus.ForSale) != 0)
             {
                 continue;
             }
 
-            validProducts.Add(new InputInfoEntity
-            {
-                ProductId = originalProduct.ProductId,
-                Count = originalProduct.Count,
-                RemainingCount = originalProduct.Count,
-                InputPrice = originalProduct.InputPrice,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            });
+            validProducts.Add(
+                new InputInfoEntity
+                {
+                    ProductId = originalProduct.ProductId,
+                    Count = originalProduct.Count,
+                    RemainingCount = originalProduct.Count,
+                    InputPrice = originalProduct.InputPrice,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                });
         }
 
         if(validProducts.Count == 0)
@@ -111,13 +108,12 @@ public sealed class CloneInputCommandHandler(
             return (null, new ErrorResponse
             {
                 Errors =
-                [
-                    new ErrorDetail
-                        {
-                            Field = "Products",
-                            Message = "Tất cả sản phẩm trong phiếu nhập gốc đều không còn hợp lệ (đã xoá hoặc không còn bán)"
-                        }
-                ]
+                    [ new ErrorDetail
+                    {
+                        Field = "Products",
+                        Message =
+                            "Tất cả sản phẩm trong phiếu nhập gốc đều không còn hợp lệ (đã xoá hoặc không còn bán)"
+                    } ]
             });
         }
 
@@ -134,9 +130,7 @@ public sealed class CloneInputCommandHandler(
         inputInsertRepository.Add(newInput);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        var createdInput = await inputReadRepository.GetByIdWithDetailsAsync(
-            newInput.Id,
-            cancellationToken)
+        var createdInput = await inputReadRepository.GetByIdWithDetailsAsync(newInput.Id, cancellationToken)
             .ConfigureAwait(false);
 
         return (createdInput!.Adapt<InputResponse>(), null);

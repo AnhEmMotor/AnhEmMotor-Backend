@@ -37,9 +37,7 @@ public class InputController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpGet]
     [ProducesResponseType(typeof(PagedResult<InputResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetInputs(
-        [FromQuery] SieveModel sieveModel,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> GetInputs([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
     {
         var query = new GetInputsListQuery(sieveModel);
         var pagedResult = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
@@ -70,7 +68,7 @@ public class InputController(IMediator mediator) : ControllerBase
     {
         var query = new GetInputByIdQuery(id);
         var (data, error) = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-        if (error != null)
+        if(error != null)
         {
             return NotFound(error);
         }
@@ -104,7 +102,7 @@ public class InputController(IMediator mediator) : ControllerBase
     {
         var command = request.Adapt<CreateInputCommand>();
         var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if (error != null)
+        if(error != null)
         {
             return BadRequest(error);
         }
@@ -145,7 +143,7 @@ public class InputController(IMediator mediator) : ControllerBase
     {
         var command = request.Adapt<UpdateInputCommand>() with { Id = id };
         var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if (error != null)
+        if(error != null)
         {
             return BadRequest(error);
         }
@@ -166,7 +164,7 @@ public class InputController(IMediator mediator) : ControllerBase
     {
         var command = request.Adapt<UpdateInputStatusCommand>() with { Id = id };
         var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if (error != null)
+        if(error != null)
         {
             return BadRequest(error);
         }
@@ -185,7 +183,7 @@ public class InputController(IMediator mediator) : ControllerBase
     {
         var command = request.Adapt<UpdateManyInputStatusCommand>();
         var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if (error != null)
+        if(error != null)
         {
             return BadRequest(error);
         }
@@ -202,7 +200,7 @@ public class InputController(IMediator mediator) : ControllerBase
     {
         var command = new DeleteInputCommand(id);
         var error = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if (error != null)
+        if(error != null)
         {
             return NotFound(error);
         }
@@ -221,7 +219,7 @@ public class InputController(IMediator mediator) : ControllerBase
     {
         var command = request.Adapt<DeleteManyInputsCommand>();
         var error = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if (error != null)
+        if(error != null)
         {
             return NotFound(error);
         }
@@ -238,7 +236,7 @@ public class InputController(IMediator mediator) : ControllerBase
     {
         var command = new RestoreInputCommand(id);
         var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if (error != null)
+        if(error != null)
         {
             return NotFound(error);
         }
@@ -257,7 +255,7 @@ public class InputController(IMediator mediator) : ControllerBase
     {
         var command = request.Adapt<RestoreManyInputsCommand>();
         var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if (error != null)
+        if(error != null)
         {
             return NotFound(error);
         }

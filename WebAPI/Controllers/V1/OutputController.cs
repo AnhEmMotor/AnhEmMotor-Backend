@@ -35,9 +35,7 @@ public class OutputController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpGet]
     [ProducesResponseType(typeof(PagedResult<OutputResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetOutputs(
-        [FromQuery] SieveModel sieveModel,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> GetOutputs([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
     {
         var query = new GetOutputsListQuery(sieveModel);
         var pagedResult = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
@@ -68,7 +66,7 @@ public class OutputController(IMediator mediator) : ControllerBase
     {
         var query = new GetOutputByIdQuery(id);
         var (data, error) = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-        if (error != null)
+        if(error != null)
         {
             return NotFound(error);
         }
@@ -87,7 +85,7 @@ public class OutputController(IMediator mediator) : ControllerBase
     {
         var command = request.Adapt<CreateOutputCommand>();
         var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if (error != null)
+        if(error != null)
         {
             return BadRequest(error);
         }
@@ -108,7 +106,7 @@ public class OutputController(IMediator mediator) : ControllerBase
     {
         var command = request.Adapt<UpdateOutputCommand>() with { Id = id };
         var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if (error != null)
+        if(error != null)
         {
             return BadRequest(error);
         }
@@ -129,7 +127,7 @@ public class OutputController(IMediator mediator) : ControllerBase
     {
         var command = request.Adapt<UpdateOutputStatusCommand>() with { Id = id };
         var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if (error != null)
+        if(error != null)
         {
             return BadRequest(error);
         }
@@ -148,7 +146,7 @@ public class OutputController(IMediator mediator) : ControllerBase
     {
         var command = request.Adapt<UpdateManyOutputStatusCommand>();
         var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if (error != null)
+        if(error != null)
         {
             return BadRequest(error);
         }
@@ -165,7 +163,7 @@ public class OutputController(IMediator mediator) : ControllerBase
     {
         var command = new DeleteOutputCommand(id);
         var error = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if (error != null)
+        if(error != null)
         {
             return NotFound(error);
         }
@@ -184,7 +182,7 @@ public class OutputController(IMediator mediator) : ControllerBase
     {
         var command = request.Adapt<DeleteManyOutputsCommand>();
         var error = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if (error != null)
+        if(error != null)
         {
             return NotFound(error);
         }
@@ -201,7 +199,7 @@ public class OutputController(IMediator mediator) : ControllerBase
     {
         var command = new RestoreOutputCommand(id);
         var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if (error != null)
+        if(error != null)
         {
             return NotFound(error);
         }
@@ -220,7 +218,7 @@ public class OutputController(IMediator mediator) : ControllerBase
     {
         var command = request.Adapt<RestoreManyOutputsCommand>();
         var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if (error != null)
+        if(error != null)
         {
             return NotFound(error);
         }

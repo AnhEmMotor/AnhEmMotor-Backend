@@ -6,23 +6,19 @@ using MediatR;
 
 namespace Application.Features.Inputs.Queries.GetInputById;
 
-public sealed class GetInputByIdQueryHandler(
-    IInputReadRepository repository) : IRequestHandler<GetInputByIdQuery, (InputResponse? Data, ErrorResponse? Error)>
+public sealed class GetInputByIdQueryHandler(IInputReadRepository repository) : IRequestHandler<GetInputByIdQuery, (InputResponse? Data, ErrorResponse? Error)>
 {
     public async Task<(InputResponse? Data, ErrorResponse? Error)> Handle(
         GetInputByIdQuery request,
         CancellationToken cancellationToken)
     {
-        var input = await repository.GetByIdWithDetailsAsync(
-            request.Id,
-            cancellationToken)
-            .ConfigureAwait(false);
+        var input = await repository.GetByIdWithDetailsAsync(request.Id, cancellationToken).ConfigureAwait(false);
 
-        if (input is null)
+        if(input is null)
         {
             return (null, new ErrorResponse
             {
-                Errors = [new ErrorDetail { Message = $"Không tìm thấy phiếu nhập có ID {request.Id}." }]
+                Errors = [ new ErrorDetail { Message = $"Không tìm thấy phiếu nhập có ID {request.Id}." } ]
             });
         }
 

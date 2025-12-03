@@ -14,12 +14,3 @@ public sealed record CreateInputCommand : IRequest<(InputResponse? Data, ErrorRe
 
     public List<CreateInputProductCommand> Products { get; init; } = [];
 }
-
-public sealed record CreateInputProductCommand
-{
-    public int? ProductId { get; init; }
-
-    public short? Count { get; init; }
-
-    public long? InputPrice { get; init; }
-}

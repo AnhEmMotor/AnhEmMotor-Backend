@@ -4,19 +4,15 @@
 
 namespace Infrastructure.Migrations
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public partial class EditSomeNullColumn : Migration
     {
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_InputInfo_Input_InputId",
-                table: "InputInfo");
+            migrationBuilder.DropForeignKey(name: "FK_InputInfo_Input_InputId", table: "InputInfo");
 
-            migrationBuilder.DropForeignKey(
-                name: "FK_OutputInfo_Output_OutputId",
-                table: "OutputInfo");
+            migrationBuilder.DropForeignKey(name: "FK_OutputInfo_Output_OutputId", table: "OutputInfo");
 
             migrationBuilder.AlterColumn<int>(
                 name: "OutputId",
@@ -55,16 +51,12 @@ namespace Infrastructure.Migrations
                 onDelete: ReferentialAction.Cascade);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_InputInfo_Input_InputId",
-                table: "InputInfo");
+            migrationBuilder.DropForeignKey(name: "FK_InputInfo_Input_InputId", table: "InputInfo");
 
-            migrationBuilder.DropForeignKey(
-                name: "FK_OutputInfo_Output_OutputId",
-                table: "OutputInfo");
+            migrationBuilder.DropForeignKey(name: "FK_OutputInfo_Output_OutputId", table: "OutputInfo");
 
             migrationBuilder.AlterColumn<int>(
                 name: "OutputId",

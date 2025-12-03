@@ -7,13 +7,9 @@ using InputEntity = Domain.Entities.Input;
 
 namespace Application.Features.Inputs.Queries.GetInputsList;
 
-public sealed class GetInputsListQueryHandler(
-    IInputReadRepository repository,
-    IPaginator paginator) : IRequestHandler<GetInputsListQuery, PagedResult<InputResponse>>
+public sealed class GetInputsListQueryHandler(IInputReadRepository repository, IPaginator paginator) : IRequestHandler<GetInputsListQuery, PagedResult<InputResponse>>
 {
-    public Task<PagedResult<InputResponse>> Handle(
-        GetInputsListQuery request,
-        CancellationToken cancellationToken)
+    public Task<PagedResult<InputResponse>> Handle(GetInputsListQuery request, CancellationToken cancellationToken)
     {
         var query = repository.GetQueryable();
 

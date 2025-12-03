@@ -1,17 +1,13 @@
+using Application.ApiContracts.Staticals;
 using Application.Interfaces.Repositories.Statistical;
 using MediatR;
 
 namespace Application.Features.Statistical.Queries.GetMonthlyRevenueProfit;
 
-public sealed class GetMonthlyRevenueProfitQueryHandler(
-    IStatisticalReadRepository repository) : IRequestHandler<GetMonthlyRevenueProfitQuery, IEnumerable<MonthlyRevenueProfitDto>>
+public sealed class GetMonthlyRevenueProfitQueryHandler(IStatisticalReadRepository repository) : IRequestHandler<GetMonthlyRevenueProfitQuery, IEnumerable<MonthlyRevenueProfitResponse>>
 {
-    public Task<IEnumerable<MonthlyRevenueProfitDto>> Handle(
+    public Task<IEnumerable<MonthlyRevenueProfitResponse>> Handle(
         GetMonthlyRevenueProfitQuery request,
         CancellationToken cancellationToken)
-    {
-        return repository.GetMonthlyRevenueProfitAsync(
-            request.Months,
-            cancellationToken);
-    }
+    { return repository.GetMonthlyRevenueProfitAsync(request.Months, cancellationToken); }
 }

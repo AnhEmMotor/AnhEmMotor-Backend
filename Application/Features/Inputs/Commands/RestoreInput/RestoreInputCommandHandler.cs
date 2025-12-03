@@ -17,17 +17,19 @@ public sealed class RestoreInputCommandHandler(
         RestoreInputCommand request,
         CancellationToken cancellationToken)
     {
-        var input = await readRepository.GetByIdAsync(
-            request.Id,
-            cancellationToken,
-            DataFetchMode.DeletedOnly)
+        var input = await readRepository.GetByIdAsync(request.Id, cancellationToken, DataFetchMode.DeletedOnly)
             .ConfigureAwait(false);
 
-        if (input is null)
+        if(input is null)
         {
             return (null, new ErrorResponse
             {
-                Errors = [ new ErrorDetail { Field = "Id", Message = $"Không tìm thấy phiếu nhập đã xóa có ID {request.Id}." } ]
+                Errors =
+                    [ new ErrorDetail
+                    {
+                        Field = "Id",
+                        Message = $"Không tìm thấy phiếu nhập đã xóa có ID {request.Id}."
+                    } ]
             });
         }
 

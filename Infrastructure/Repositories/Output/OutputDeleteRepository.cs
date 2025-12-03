@@ -7,18 +7,9 @@ namespace Infrastructure.Repositories.Output;
 
 public class OutputDeleteRepository(ApplicationDBContext context) : IOutputDeleteRepository
 {
-    public void Delete(OutputEntity output)
-    {
-        context.SoftDeleteUsingSetColumn(output);
-    }
+    public void Delete(OutputEntity output) { context.SoftDeleteUsingSetColumn(output); }
 
-    public void Delete(IEnumerable<OutputEntity> outputs)
-    {
-        context.SoftDeleteUsingSetColumnRange(outputs);
-    }
+    public void Delete(IEnumerable<OutputEntity> outputs) { context.SoftDeleteUsingSetColumnRange(outputs); }
 
-    public void DeleteOutputInfo(OutputInfoEntity outputInfo)
-    {
-        context.OutputInfos.Remove(outputInfo);
-    }
+    public void DeleteOutputInfo(OutputInfoEntity outputInfo) { context.OutputInfos.Remove(outputInfo); }
 }
