@@ -27,6 +27,14 @@ public sealed class DeleteOutputCommandHandler(
             };
         }
 
+        if (Domain.Constants.OrderStatus.IsCannotDelete(output.StatusId))
+        {
+            return new ErrorResponse
+            {
+                Errors = [ new ErrorDetail { Field = "StatusId", Message = $"Không thể xóa đơn hàng có trạng thái '{output.StatusId}'." } ]
+            };
+        }
+
         deleteRepository.Delete(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 

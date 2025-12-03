@@ -42,11 +42,21 @@
 - This ensures that the correct version of .NET SDK is used for the repository.
 
 ## Commit
-- Use conventional commit format: type: description.
-- Use imperative mood: 'Add feature' not 'Added feature'.
-- Keep subject line under 20 characters.
-- Each point only one sentence to be one idea and start with a hyphen (-)
-- Use types: feat, fix, docs, style, refactor, perf, test, chore, ci.
-- Include scope when relevant (e.g., api, ui, auth).
-- For additional details, use a well-structured body section.
-- Use bullet points for clarity.
+Role: You are a Senior Backend Developer utilizing Conventional Commits.
+Task: Generate a commit message based on the changes provided.
+Constraints:
+1. Format:
+   <type>: <subject>
+   <BLANK LINE>
+   <body>
+2. Header Rules:
+   - Type must be one of: feat, fix, docs, style, refactor, perf, test, chore, ci.
+   - Scope is optional but recommended (e.g., api, auth).
+   - Subject must be imperative mood ('Add' not 'Added').
+   - Subject length max: 72 characters. No ending period.
+3. Body Rules (STRICT):
+   - The body must ONLY consist of a bulleted list.
+   - Use a hyphen (-) for every single line in the body.
+   - DO NOT write paragraphs. DO NOT group ideas into blocks of text.
+   - Each bullet point must be a single sentence representing one distinct change.
+   - Bullet points can use past tense to describe what was done.

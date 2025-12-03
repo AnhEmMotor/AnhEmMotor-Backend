@@ -32,24 +32,24 @@ public sealed class UpdateOutputStatusCommandHandler(
             });
         }
 
-        if (!OrderStatus.IsValid(request.NewStatusId))
+        if (!OrderStatus.IsValid(request.StatusId))
         {
             return (null, new ErrorResponse
             {
-                Errors = [ new ErrorDetail { Field = "NewStatusId", Message = $"Trạng thái '{request.NewStatusId}' không hợp lệ." } ]
+                Errors = [ new ErrorDetail { Field = "StatusId", Message = $"Trạng thái '{request.StatusId}' không hợp lệ." } ]
             });
         }
 
-        if (!OrderStatusTransitions.IsTransitionAllowed(output.StatusId, request.NewStatusId))
+        if (!OrderStatusTransitions.IsTransitionAllowed(output.StatusId, request.StatusId))
         {
             var allowed = OrderStatusTransitions.GetAllowedTransitions(output.StatusId);
             return (null, new ErrorResponse
             {
-                Errors = [ new ErrorDetail { Field = "NewStatusId", Message = $"Không thể chuyển từ '{output.StatusId}' sang '{request.NewStatusId}'. Chỉ được chuyển sang: {string.Join(", ", allowed)}" } ]
+                Errors = [ new ErrorDetail { Field = "StatusId", Message = $"Không thể chuyển từ '{output.StatusId}' sang '{request.StatusId}'. Chỉ được chuyển sang: {string.Join(", ", allowed)}" } ]
             });
         }
 
-        if (request.NewStatusId == OrderStatus.Completed)
+        if (request.StatusId == OrderStatus.Completed)
         {
             foreach (var outputInfo in output.OutputInfos)
             {
@@ -76,7 +76,7 @@ public sealed class UpdateOutputStatusCommandHandler(
                 .ConfigureAwait(false);
         }
 
-        output.StatusId = request.NewStatusId;
+        output.StatusId = request.StatusId;
         updateRepository.Update(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 

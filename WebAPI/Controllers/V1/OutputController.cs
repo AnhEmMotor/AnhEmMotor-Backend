@@ -140,19 +140,19 @@ public class OutputController(IMediator mediator) : ControllerBase
     /// Cập nhật trạng thái của nhiều đơn hàng cùng lúc.
     /// </summary>
     [HttpPatch("status")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(List<OutputResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateManyOutputStatus(
         [FromBody] UpdateManyOutputStatusRequest request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<UpdateManyOutputStatusCommand>();
-        var error = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         if (error != null)
         {
             return BadRequest(error);
         }
-        return NoContent();
+        return Ok(data);
     }
 
     /// <summary>
@@ -195,35 +195,35 @@ public class OutputController(IMediator mediator) : ControllerBase
     /// Khôi phục đơn hàng đã bị xóa.
     /// </summary>
     [HttpPost("{id:int}/restore")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(OutputResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RestoreOutput(int id, CancellationToken cancellationToken)
     {
         var command = new RestoreOutputCommand(id);
-        var error = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         if (error != null)
         {
             return NotFound(error);
         }
-        return NoContent();
+        return Ok(data);
     }
 
     /// <summary>
     /// Khôi phục nhiều đơn hàng đã bị xóa cùng lúc.
     /// </summary>
     [HttpPost("restore")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(List<OutputResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RestoreManyOutputs(
         [FromBody] RestoreManyOutputsRequest request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<RestoreManyOutputsCommand>();
-        var error = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         if (error != null)
         {
             return NotFound(error);
         }
-        return NoContent();
+        return Ok(data);
     }
 }

@@ -34,7 +34,7 @@ public sealed class UpdateInputStatusCommandHandler(
 
         
 
-        if (input.StatusId == InputStatus.Finish || input.StatusId == InputStatus.Cancel)
+        if (Domain.Constants.InputStatus.IsCannotEdit(input.StatusId))
         {
             return (null, new ErrorResponse
             {

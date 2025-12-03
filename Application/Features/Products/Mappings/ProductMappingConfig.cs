@@ -1,4 +1,4 @@
-using Application.ApiContracts.Product.Common;
+﻿using Application.ApiContracts.Product.Common;
 using Domain.Constants;
 using Mapster;
 using ProductEntity = Domain.Entities.Product;
@@ -43,14 +43,13 @@ public class ProductMappingConfig : IRegister
                                                 : null,
                                 OptionValue = vov.OptionValue != null ? vov.OptionValue.Name : null
                             })
-                    .ToList())
-            .Map(dest => dest.Stock, src => src.InputInfos.Sum(ii => ii.RemainingCount) ?? 0)
-            .Map(
-                dest => dest.HasBeenBooked,
-                src => src.OutputInfos
-                        .Where(oi => oi.OutputOrder != null && OrderStatus.IsBookingStatus(oi.OutputOrder.StatusId))
-                        .Sum(oi => (long?)oi.Count) ??
-                    0);
+                    .ToList()).Map(dest => dest.Stock, src => src.InputInfos
+        .Where(ii => ii.InputReceipt != null && InputStatus.IsFinished(ii.InputReceipt.StatusId)) // THÊM ĐIỀU KIỆN NÀY
+        .Sum(ii => ii.RemainingCount) ?? 0)
+
+    .Map(dest => dest.HasBeenBooked, src => src.OutputInfos
+        .Where(oi => oi.OutputOrder != null && OrderStatus.IsBookingStatus(oi.OutputOrder.StatusId)) // LOGIC NÀY ĐÚNG, GIỮ LẠI VÀ ĐẢM BẢO NULL CHECK
+        .Sum(oi => (long?)oi.Count) ?? 0);
 
         config.NewConfig<VariantRow, ApiContracts.Product.Responses.ProductVariantDetailResponse>()
             .Map(
@@ -137,7 +136,9 @@ public class ProductMappingConfig : IRegister
             ? productName ?? string.Empty
             : $"{productName} ({variantName})";
 
-        var stock = variant.InputInfos.Sum(ii => ii.RemainingCount) ?? 0;
+        var stock = variant.InputInfos
+         .Where(ii => ii.InputReceipt != null && InputStatus.IsFinished(ii.InputReceipt.StatusId))
+         .Sum(ii => ii.RemainingCount) ?? 0;
         var photos = variant.ProductCollectionPhotos
             .Select(p => p.ImageUrl ?? string.Empty)
             .Where(url => !string.IsNullOrWhiteSpace(url))
@@ -177,10 +178,17 @@ public class ProductMappingConfig : IRegister
     { return availableStock > 0 ? "in_stock" : "out_of_stock"; }
 
     private static long CalculateTotalStock(ProductEntity product)
-    { return product.ProductVariants.SelectMany(variant => variant.InputInfos).Sum(info => info.RemainingCount ?? 0); }
+    {
+        // Logic mới: Chỉ cộng dồn RemainingCount nếu phiếu nhập đó ĐÃ HOÀN THÀNH (IsFinished)
+        return product.ProductVariants
+            .SelectMany(variant => variant.InputInfos)
+            .Where(ii => ii.InputReceipt != null && InputStatus.IsFinished(ii.InputReceipt.StatusId))
+            .Sum(info => info.RemainingCount ?? 0);
+    }
 
     private static long CalculateTotalBooked(ProductEntity product)
     {
+        // Logic: Chỉ cộng dồn Count nếu phiếu xuất đang ở trạng thái BOOKING
         return product.ProductVariants
             .SelectMany(variant => variant.OutputInfos)
             .Where(info => info.OutputOrder != null && OrderStatus.IsBookingStatus(info.OutputOrder.StatusId))

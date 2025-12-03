@@ -37,7 +37,7 @@ public sealed class UpdateInputCommandHandler(
             });
         }
 
-        if (input.StatusId == Domain.Constants.InputStatus.Cancel || input.StatusId == Domain.Constants.InputStatus.Finish)
+        if (Domain.Constants.InputStatus.IsCannotEdit(input.StatusId))
         {
             if (request.Products.Count != 0)
             {

@@ -9,16 +9,33 @@ namespace Infrastructure.Repositories.Output;
 
 public class OutputReadRepository(ApplicationDBContext context) : IOutputReadRepository
 {
+
     public IQueryable<OutputEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return context.GetQuery<OutputEntity>(mode);
+        var query = context.OutputOrders.IgnoreQueryFilters();
+
+        if (mode == DataFetchMode.ActiveOnly)
+        {
+            query = query.Where(x => x.DeletedAt == null);
+        }
+        else if (mode == DataFetchMode.DeletedOnly)
+        {
+            query = query.Where(x => x.DeletedAt != null);
+        }
+
+        return query
+            .Include(x => x.OutputInfos.Where(y => y.DeletedAt == null))
+                .ThenInclude(x => x.ProductVariant)
+                    .ThenInclude(x => x!.Product)
+            .Include(x => x.OutputStatus);
     }
 
     public Task<IEnumerable<OutputEntity>> GetAllAsync(
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return context.GetQuery<OutputEntity>(mode)
+        var query = GetQueryable(mode);
+        return query
             .ToListAsync(cancellationToken)
             .ContinueWith<IEnumerable<OutputEntity>>(t => t.Result, cancellationToken);
     }
@@ -28,7 +45,9 @@ public class OutputReadRepository(ApplicationDBContext context) : IOutputReadRep
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return context.GetQuery<OutputEntity>(mode)
+        var query = GetQueryable(mode);
+
+        return query
             .FirstOrDefaultAsync(o => o.Id == id, cancellationToken)
             .ContinueWith(t => t.Result, cancellationToken);
     }
@@ -38,7 +57,8 @@ public class OutputReadRepository(ApplicationDBContext context) : IOutputReadRep
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return context.GetQuery<OutputEntity>(mode)
+        var query = GetQueryable(mode);
+        return query
             .Where(o => ids.Contains(o.Id))
             .ToListAsync(cancellationToken)
             .ContinueWith<IEnumerable<OutputEntity>>(t => t.Result, cancellationToken);
@@ -64,31 +84,25 @@ public class OutputReadRepository(ApplicationDBContext context) : IOutputReadRep
     }
 
     public async Task<long> GetStockQuantityByVariantIdAsync(
-        int variantId,
-        CancellationToken cancellationToken)
+    int variantId,
+    CancellationToken cancellationToken)
     {
-        var totalInput = await context.InputInfos
-            .Where(ii => ii.ProductId == variantId)
+        var validStatusIds = InputStatus.FinishInputValues;
+
+        var currentStock = await context.InputInfos
+            .AsNoTracking()
+            .Where(ii => ii.ProductId == variantId && ii.DeletedAt == null)
             .Join(
                 context.InputReceipts,
                 ii => ii.InputId,
                 i => i.Id,
                 (ii, i) => new { ii, i })
-            .Where(x => x.i.StatusId == InputStatus.Finish)
-            .SumAsync(x => (long?)x.ii.Count ?? 0, cancellationToken)
+            .Where(x =>
+                x.i.DeletedAt == null &&
+                validStatusIds.Contains(x.i.StatusId))
+            .SumAsync(x => x.ii.RemainingCount ?? 0, cancellationToken)
             .ConfigureAwait(false);
 
-        var totalOutput = await context.OutputInfos
-            .Where(oi => oi.ProductId == variantId)
-            .Join(
-                context.OutputOrders,
-                oi => oi.OutputId,
-                o => o.Id,
-                (oi, o) => new { oi, o })
-            .Where(x => x.o.StatusId != OrderStatus.Cancelled)
-            .SumAsync(x => (long?)x.oi.Count ?? 0, cancellationToken)
-            .ConfigureAwait(false);
-
-        return totalInput - totalOutput;
+        return currentStock;
     }
 }

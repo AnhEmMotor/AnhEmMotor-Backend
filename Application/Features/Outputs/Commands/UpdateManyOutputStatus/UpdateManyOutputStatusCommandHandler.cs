@@ -1,7 +1,9 @@
+using Application.ApiContracts.Output;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Domain.Constants;
 using Domain.Helpers;
+using Mapster;
 using MediatR;
 
 namespace Application.Features.Outputs.Commands.UpdateManyOutputStatus;
@@ -9,18 +11,21 @@ namespace Application.Features.Outputs.Commands.UpdateManyOutputStatus;
 public sealed class UpdateManyOutputStatusCommandHandler(
     IOutputReadRepository readRepository,
     IOutputUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateManyOutputStatusCommand, ErrorResponse?>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateManyOutputStatusCommand, (List<OutputResponse>? Data, ErrorResponse? Error)>
 {
-    public async Task<ErrorResponse?> Handle(
+    public async Task<(List<OutputResponse>? Data, ErrorResponse? Error)> Handle(
         UpdateManyOutputStatusCommand request,
         CancellationToken cancellationToken)
     {
-        if (!OrderStatus.IsValid(request.NewStatusId))
+        var errors = new List<ErrorDetail>();
+
+        if (!OrderStatus.IsValid(request.StatusId))
         {
-            return new ErrorResponse
+            errors.Add(new ErrorDetail
             {
-                Errors = [ new ErrorDetail { Field = "NewStatusId", Message = $"Trạng thái '{request.NewStatusId}' không hợp lệ." } ]
-            };
+                Field = "StatusId",
+                Message = $"Trạng thái '{request.StatusId}' không hợp lệ."
+            });
         }
 
         var outputs = await readRepository.GetByIdAsync(
@@ -30,29 +35,82 @@ public sealed class UpdateManyOutputStatusCommandHandler(
 
         var outputsList = outputs.ToList();
 
-        if (outputsList.Count != request.Ids.Count)
+        var foundIds = outputsList.Select(o => o.Id).ToList();
+        var missingIds = request.Ids.Except(foundIds).ToList();
+
+        if (missingIds.Count != 0)
         {
-            var foundIds = outputsList.Select(o => o.Id).ToList();
-            var missingIds = request.Ids.Except(foundIds).ToList();
-            return new ErrorResponse
+            errors.Add(new ErrorDetail
             {
-                Errors = [ new ErrorDetail { Field = "Ids", Message = $"Không tìm thấy {missingIds.Count} đơn hàng: {string.Join(", ", missingIds)}" } ]
-            };
+                Field = "Ids",
+                Message = $"Không tìm thấy {missingIds.Count} đơn hàng: {string.Join(", ", missingIds)}"
+            });
         }
 
         foreach (var output in outputsList)
         {
-            if (!OrderStatusTransitions.IsTransitionAllowed(output.StatusId, request.NewStatusId))
+            if (!OrderStatusTransitions.IsTransitionAllowed(output.StatusId, request.StatusId))
             {
                 var allowed = OrderStatusTransitions.GetAllowedTransitions(output.StatusId);
-                return new ErrorResponse
+                errors.Add(new ErrorDetail
                 {
-                    Errors = [ new ErrorDetail { Field = "NewStatusId", Message = $"Đơn hàng ID {output.Id}: Không thể chuyển từ '{output.StatusId}' sang '{request.NewStatusId}'. Chỉ được chuyển sang: {string.Join(", ", allowed)}" } ]
-                };
+                    Field = "StatusId",
+                    Message = $"Đơn hàng ID {output.Id}: Không thể chuyển từ '{output.StatusId}' sang '{request.StatusId}'. Chỉ được chuyển sang: {string.Join(", ", allowed)}"
+                });
             }
         }
 
-        if (request.NewStatusId == OrderStatus.Completed)
+        if (request.StatusId == OrderStatus.Completed && outputsList.Count > 0)
+        {
+            var productDemands = new Dictionary<int, int>();
+
+            foreach (var output in outputsList)
+            {
+                if (output.OutputInfos == null) continue;
+
+                foreach (var info in output.OutputInfos)
+                {
+                    if (info.ProductId.HasValue && info.Count.HasValue)
+                    {
+                        if (productDemands.ContainsKey(info.ProductId.Value))
+                        {
+                            productDemands[info.ProductId.Value] += info.Count.Value;
+                        }
+                        else
+                        {
+                            productDemands[info.ProductId.Value] = info.Count.Value;
+                        }
+                    }
+                }
+            }
+
+            foreach (var kvp in productDemands)
+            {
+                var variantId = kvp.Key;
+                var totalNeeded = kvp.Value;
+
+                var currentStock = await readRepository.GetStockQuantityByVariantIdAsync(
+                    variantId,
+                    cancellationToken)
+                    .ConfigureAwait(false);
+
+                if (currentStock < totalNeeded)
+                {
+                    errors.Add(new ErrorDetail
+                    {
+                        Field = "Products",
+                        Message = $"Sản phẩm ID {variantId} không đủ tồn kho. Tổng kho hiện có: {currentStock}, Tổng đơn hàng cần: {totalNeeded}, Thiếu: {totalNeeded - currentStock}"
+                    });
+                }
+            }
+        }
+
+        if (errors.Count > 0)
+        {
+            return (null, new ErrorResponse { Errors = errors });
+        }
+
+        if (request.StatusId == OrderStatus.Completed)
         {
             foreach (var output in outputsList)
             {
@@ -65,11 +123,12 @@ public sealed class UpdateManyOutputStatusCommandHandler(
 
         foreach (var output in outputsList)
         {
-            output.StatusId = request.NewStatusId;
+            output.StatusId = request.StatusId;
             updateRepository.Update(output);
         }
+
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return null;
+        return (outputsList.Adapt<List<OutputResponse>>(), null);
     }
 }

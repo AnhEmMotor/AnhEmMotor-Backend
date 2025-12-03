@@ -31,6 +31,22 @@ public sealed class DeleteManyOutputsCommandHandler(
             };
         }
 
+        var errors = new List<ErrorDetail>();
+
+        foreach (var output in outputsList)
+        {
+            if (Domain.Constants.OrderStatus.IsCannotDelete(output.StatusId))
+            {
+                errors.Add(
+                    new ErrorDetail { Field = "Ids", Message = $"Đơn hàng với Id {output.Id} đã bị xóa trước đó" });
+            }
+        }
+
+        if (errors.Count > 0)
+        {
+            return new ErrorResponse { Errors = errors };
+        }
+
         deleteRepository.Delete(outputsList);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 

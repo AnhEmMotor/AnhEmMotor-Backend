@@ -1,9 +1,9 @@
 using Application.Interfaces.Repositories.Output;
-using Domain.Constants;
+using Domain.Entities;
+using Domain.Services;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using OutputEntity = Domain.Entities.Output;
-using OutputInfoEntity = Domain.Entities.OutputInfo;
 
 namespace Infrastructure.Repositories.Output;
 
@@ -24,77 +24,42 @@ public class OutputUpdateRepository(ApplicationDBContext context) : IOutputUpdat
         context.RestoreDeleteUsingSetColumnRange(outputs);
     }
 
-    public async Task ProcessCOGSForCompletedOrderAsync(
-        int outputId,
-        CancellationToken cancellationToken)
+    public async Task ProcessCOGSForCompletedOrderAsync(int outputId, CancellationToken cancellationToken)
     {
         var outputInfos = await context.OutputInfos
             .Where(oi => oi.OutputId == outputId)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
 
-        foreach(var outputInfo in outputInfos)
+        foreach (var outputInfo in outputInfos)
         {
-            if(outputInfo.ProductId is null || outputInfo.Count is null)
+            if (outputInfo.ProductId is null || outputInfo.Count is null)
             {
                 continue;
             }
 
-            var costPrice = await CalculateCOGSFIFOAsync(
-                outputInfo.ProductId.Value,
-                outputInfo.Count.Value,
-                cancellationToken)
-                .ConfigureAwait(false);
+            var batches = await GetAvailableBatchesAsync(outputInfo.ProductId.Value, cancellationToken);
 
-            outputInfo.CostPrice = costPrice;
+            var unitCost = InventoryValuationService.CalculateUnitCostAndDeductInventory(batches, outputInfo.Count.Value);
+
+            outputInfo.CostPrice = unitCost;
         }
     }
 
-    private async Task<long> CalculateCOGSFIFOAsync(
-        int variantId,
-        short quantityToSell,
-        CancellationToken cancellationToken)
+    private async Task<List<InputInfo>> GetAvailableBatchesAsync(int productId, CancellationToken cancellationToken)
     {
-        long totalCost = 0;
-        var quantityNeeded = quantityToSell;
+        var finishedStatuses = Domain.Constants.InputStatus.FinishInputValues;
 
-        var batches = await context.InputInfos
-            .Where(ii => ii.ProductId == variantId && ii.RemainingCount > 0)
+        return await context.InputInfos
+            .Include(ii => ii.InputReceipt)
+            .Where(ii =>
+                ii.ProductId == productId &&
+                ii.RemainingCount > 0 &&
+                ii.InputReceipt != null &&
+                finishedStatuses.Contains(ii.InputReceipt.StatusId)
+            )
             .OrderBy(ii => ii.CreatedAt)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-
-        foreach(var batch in batches)
-        {
-            if(quantityNeeded <= 0)
-            {
-                break;
-            }
-
-            var batchRemaining = batch.RemainingCount ?? 0;
-            var batchPrice = batch.InputPrice ?? 0;
-
-            if(batchRemaining >= quantityNeeded)
-            {
-                totalCost += quantityNeeded * batchPrice;
-                batch.RemainingCount = batchRemaining - quantityNeeded;
-                quantityNeeded = 0;
-                break;
-            }
-            else
-            {
-                totalCost += batchRemaining * batchPrice;
-                quantityNeeded -= (short)batchRemaining;
-                batch.RemainingCount = 0;
-            }
-        }
-
-        if(quantityNeeded > 0)
-        {
-            throw new InvalidOperationException(
-                $"Không đủ hàng tồn kho. Chỉ có thể bán {quantityToSell - quantityNeeded}, thiếu {quantityNeeded} sản phẩm.");
-        }
-
-        return (long)Math.Round((decimal)totalCost / quantityToSell);
     }
 }

@@ -1,5 +1,6 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
+using Domain.Entities;
 using Domain.Helpers;
 using MediatR;
 
@@ -24,6 +25,14 @@ public sealed class DeleteInputCommandHandler(
             return new ErrorResponse
             {
                 Errors = [ new ErrorDetail { Field = "Id", Message = $"Không tìm thấy phiếu nhập có ID {request.Id}." } ]
+            };
+        }
+
+        if (Domain.Constants.InputStatus.IsCannotDelete(input.StatusId))
+        {
+            return new ErrorResponse
+            {
+                Errors = [new ErrorDetail { Field = "StatusId", Message = $"Không thể xóa đơn hàng có trạng thái '{input.StatusId}'." }]
             };
         }
 

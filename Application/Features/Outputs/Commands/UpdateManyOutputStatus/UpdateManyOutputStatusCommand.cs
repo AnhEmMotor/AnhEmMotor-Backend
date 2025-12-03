@@ -1,10 +1,11 @@
+using Application.ApiContracts.Output;
 using Domain.Helpers;
 using MediatR;
 
 namespace Application.Features.Outputs.Commands.UpdateManyOutputStatus;
 
-public sealed record UpdateManyOutputStatusCommand : IRequest<ErrorResponse?>
+public sealed record UpdateManyOutputStatusCommand : IRequest<(List<OutputResponse>? Data, ErrorResponse? Error)>
 {
     public ICollection<int> Ids { get; init; } = [];
-    public string NewStatusId { get; init; } = string.Empty;
+    public string StatusId { get; init; } = string.Empty;
 }

@@ -48,7 +48,7 @@ public sealed class UpdateManyInputStatusCommandHandler(
         {
             // Logic 1: Nếu phiếu đã Kết thúc hoặc Hủy thì KHÔNG ĐƯỢC phép đổi trạng thái nữa
             // (Bạn có thể tùy chỉnh logic này tùy theo business flow của bạn)
-            if (input.StatusId == InputStatus.Cancel || input.StatusId == InputStatus.Finish)
+            if (Domain.Constants.InputStatus.IsCannotEdit(input.StatusId))
             {
                 errors.Add(new ErrorDetail
                 {

@@ -189,6 +189,7 @@ public class ProductReadRepository(ApplicationDBContext context) : IProductReadR
                 // FIX: Chỉ lấy InputInfo chưa xóa.
                 // Vì IgnoreQueryFilters() ở trên cùng đã tắt bộ lọc của bảng này rồi.
                 .ThenInclude(v => v.InputInfos.Where(ii => ii.DeletedAt == null && ii.InputReceipt!.DeletedAt == null))
+                    .ThenInclude(ii => ii.InputReceipt)
 
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
                 // FIX: Tương tự với OutputInfo, phải lọc cái chưa xóa thì tồn kho mới đúng
