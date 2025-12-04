@@ -3,6 +3,7 @@ using Asp.Versioning;
 using Domain.Helpers;
 using Infrastructure.DependencyInjection;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.OpenApi;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -128,6 +129,26 @@ namespace WebAPI.StartupExtensions
             services.AddSwaggerGen(
                 options =>
                 {
+                    // Add JWT Authentication to Swagger
+                    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                    {
+                        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                        Name = "Authorization",
+                        In = ParameterLocation.Header,
+                        Type = SecuritySchemeType.Http,
+                        Scheme = "bearer",
+                        BearerFormat = "JWT"
+                    });
+
+                    options.AddSecurityRequirement(doc =>
+                    {
+                        var securitySchemeReference = new OpenApiSecuritySchemeReference("Bearer", null);
+                        return new OpenApiSecurityRequirement
+                        {
+                            [securitySchemeReference] = new List<string>()
+                        };
+                    });
+
                     if(environment.IsEnvironment("Test") == false)
                     {
                         var xmlFilePath = Path.Combine(AppContext.BaseDirectory, "api.xml");
@@ -138,7 +159,6 @@ namespace WebAPI.StartupExtensions
                     }
                 });
             services.ConfigureOptions<ConfigureSwaggerOptions>();
-            services.AddControllers();
             return services;
         }
     }

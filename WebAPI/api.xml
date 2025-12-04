@@ -121,6 +121,96 @@
             Gets or sets the error message associated with the current operation.
             </summary>
         </member>
+        <member name="T:WebAPI.Controllers.AuthController">
+            <summary>
+            Controller xử lý xác thực và đăng nhập
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.AuthController.#ctor(Microsoft.AspNetCore.Identity.UserManager{Domain.Entities.ApplicationUser},Microsoft.AspNetCore.Identity.SignInManager{Domain.Entities.ApplicationUser},Infrastructure.Services.TokenService)">
+            <summary>
+            Controller xử lý xác thực và đăng nhập
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.AuthController.Register(Application.ApiContracts.Auth.RegisterRequest)">
+            <summary>
+            Đăng ký tài khoản mới
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.AuthController.Login(Application.ApiContracts.Auth.LoginRequest)">
+            <summary>
+            Đăng nhập bằng Username/Email và Password
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.AuthController.RefreshToken">
+            <summary>
+            Làm mới Access Token bằng Refresh Token
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.AuthController.Logout">
+            <summary>
+            Đăng xuất
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.AuthController.GoogleLogin(Application.ApiContracts.Auth.GoogleLoginRequest)">
+            <summary>
+            Đăng nhập bằng Google (placeholder - cần cấu hình Google OAuth)
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.AuthController.FacebookLogin(Application.ApiContracts.Auth.FacebookLoginRequest)">
+            <summary>
+            Đăng nhập bằng Facebook (placeholder - cần cấu hình Facebook OAuth)
+            </summary>
+        </member>
+        <member name="T:WebAPI.Controllers.PermissionController">
+            <summary>
+            Controller quản lý quyền hạn và vai trò
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.PermissionController.#ctor(Microsoft.AspNetCore.Identity.RoleManager{Domain.Entities.ApplicationRole},Infrastructure.DBContexts.ApplicationDBContext)">
+            <summary>
+            Controller quản lý quyền hạn và vai trò
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.PermissionController.GetAllPermissions">
+            <summary>
+            Lấy tất cả các permissions có trong hệ thống
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.PermissionController.GetRolePermissions(System.String)">
+            <summary>
+            Lấy các quyền của một vai trò cụ thể
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.PermissionController.UpdateRolePermissions(System.String,Application.ApiContracts.Auth.UpdateRolePermissionsRequest)">
+            <summary>
+            Cập nhật quyền cho một vai trò
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.PermissionController.GetAllRoles">
+            <summary>
+            Lấy tất cả các vai trò
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.PermissionController.CreateRole(WebAPI.Controllers.CreateRoleRequest)">
+            <summary>
+            Tạo vai trò mới
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.PermissionController.DeleteRole(System.String)">
+            <summary>
+            Xóa vai trò
+            </summary>
+        </member>
+        <member name="T:WebAPI.Controllers.CreateRoleRequest">
+            <summary>
+            DTO cho tạo role mới
+            </summary>
+        </member>
+        <member name="P:WebAPI.Controllers.CreateRoleRequest.RoleName">
+            <summary>
+            Gets or sets the name of the role associated with the user or entity.
+            </summary>
+        </member>
         <member name="T:WebAPI.Controllers.V1.BrandController">
             <summary>
             Quản lý danh sách các thương hiệu sản phẩm (ví dụ: Honda, Yamaha, Suzuki).
@@ -892,50 +982,6 @@
             <summary>
             Auto-generated public partial Program class for top-level statement apps.
             </summary>
-        </member>
-        <member name="M:Microsoft.AspNetCore.OpenApi.Generated.DocumentationCommentIdHelper.CreateDocumentationId(System.Type)">
-            <summary>
-            Generates a documentation comment ID for a type.
-            Example: T:Namespace.Outer+Inner`1 becomes T:Namespace.Outer.Inner`1
-            </summary>
-        </member>
-        <member name="M:Microsoft.AspNetCore.OpenApi.Generated.DocumentationCommentIdHelper.CreateDocumentationId(System.Reflection.PropertyInfo)">
-            <summary>
-            Generates a documentation comment ID for a property.
-            Example: P:Namespace.ContainingType.PropertyName or for an indexer P:Namespace.ContainingType.Item(System.Int32)
-            </summary>
-        </member>
-        <member name="M:Microsoft.AspNetCore.OpenApi.Generated.DocumentationCommentIdHelper.CreateDocumentationId(System.Type,System.String)">
-            <summary>
-            Generates a documentation comment ID for a property given its container type and property name.
-            Example: P:Namespace.ContainingType.PropertyName
-            </summary>
-        </member>
-        <member name="M:Microsoft.AspNetCore.OpenApi.Generated.DocumentationCommentIdHelper.CreateDocumentationId(System.Reflection.MethodInfo)">
-            <summary>
-            Generates a documentation comment ID for a method (or constructor).
-            For example:
-              M:Namespace.ContainingType.MethodName(ParamType1,ParamType2)~ReturnType
-              M:Namespace.ContainingType.#ctor(ParamType)
-            </summary>
-        </member>
-        <member name="M:Microsoft.AspNetCore.OpenApi.Generated.DocumentationCommentIdHelper.GetTypeDocId(System.Type,System.Boolean,System.Boolean)">
-            <summary>
-            Generates a documentation ID string for a type.
-            This method handles nested types (replacing '+' with '.'),
-            generic types, arrays, pointers, by-ref types, and generic parameters.
-            The <paramref name="includeGenericArguments"/> flag controls whether
-            constructed generic type arguments are emitted, while <paramref name="omitGenericArity"/>
-            controls whether the generic arity marker (e.g. "`1") is appended.
-            </summary>
-        </member>
-        <member name="M:Microsoft.AspNetCore.OpenApi.Generated.DocumentationCommentIdHelper.NormalizeDocId(System.String)">
-            <summary>
-            Normalizes a documentation comment ID to match the compiler-style format.
-            Strips the return type suffix for ordinary methods but retains it for conversion operators.
-            </summary>
-            <param name="docId">The documentation comment ID to normalize.</param>
-            <returns>The normalized documentation comment ID.</returns>
         </member>
     </members>
 </doc>

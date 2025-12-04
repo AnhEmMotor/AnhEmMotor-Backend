@@ -1,11 +1,13 @@
 ﻿using Domain.Entities;
 using Domain.Enums;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace Infrastructure.DBContexts;
 
-public class ApplicationDBContext(DbContextOptions<ApplicationDBContext> options) : DbContext(options)
+public class ApplicationDBContext(DbContextOptions<ApplicationDBContext> options) : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>(options)
 {
     public virtual DbSet<Brand> Brands { get; set; }
 
@@ -45,9 +47,41 @@ public class ApplicationDBContext(DbContextOptions<ApplicationDBContext> options
 
     public virtual DbSet<MediaFile> MediaFiles { get; set; }
 
+    public virtual DbSet<Permission> Permissions { get; set; }
+
+    public virtual DbSet<RolePermission> RolePermissions { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        // Cấu hình bảng Identity
+        modelBuilder.Entity<ApplicationUser>().ToTable("Users");
+        modelBuilder.Entity<ApplicationRole>().ToTable("Roles");
+        modelBuilder.Entity<IdentityUserRole<Guid>>().ToTable("UserRoles");
+        modelBuilder.Entity<IdentityUserClaim<Guid>>().ToTable("UserClaims");
+        modelBuilder.Entity<IdentityUserLogin<Guid>>().ToTable("UserLogins");
+        modelBuilder.Entity<IdentityRoleClaim<Guid>>().ToTable("RoleClaims");
+        modelBuilder.Entity<IdentityUserToken<Guid>>().ToTable("UserTokens");
+
+        // Cấu hình Permission và RolePermission
+        modelBuilder.Entity<Permission>().ToTable("Permissions");
+        modelBuilder.Entity<RolePermission>().ToTable("RolePermissions");
+
+        modelBuilder.Entity<RolePermission>()
+            .HasKey(rp => new { rp.RoleId, rp.PermissionId });
+
+        modelBuilder.Entity<RolePermission>()
+            .HasOne(rp => rp.Role)
+            .WithMany(r => r.RolePermissions)
+            .HasForeignKey(rp => rp.RoleId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<RolePermission>()
+            .HasOne(rp => rp.Permission)
+            .WithMany(p => p.RolePermissions)
+            .HasForeignKey(rp => rp.PermissionId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         foreach(var entityType in modelBuilder.Model.GetEntityTypes())
         {
