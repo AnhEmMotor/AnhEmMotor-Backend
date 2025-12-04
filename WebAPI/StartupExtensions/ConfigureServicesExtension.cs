@@ -11,6 +11,10 @@ using OpenTelemetry.Trace;
 using Sieve.Models;
 using WebAPI.Converters;
 using WebAPI.Middleware;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace WebAPI.StartupExtensions
 {
@@ -85,6 +89,33 @@ namespace WebAPI.StartupExtensions
             {
                 services.AddInfrastructureServices(configuration);
             }
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.SaveToken = true;
+                options.RequireHttpsMetadata = false; // Set true nếu chạy Production có SSL
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ClockSkew = TimeSpan.Zero, // Loại bỏ độ trễ mặc định 5 phút
+
+                    ValidIssuer = configuration["Jwt:Issuer"],
+                    ValidAudience = configuration["Jwt:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!)),
+
+                    // QUAN TRỌNG: Map claim ngắn gọn ("role") sang ClaimTypes.Role của .NET
+                    RoleClaimType = "role",
+                    NameClaimType = JwtRegisteredClaimNames.Name
+                };
+            });
             services.AddApiVersioning(
                 config =>
                 {
@@ -145,7 +176,7 @@ namespace WebAPI.StartupExtensions
                         var securitySchemeReference = new OpenApiSecuritySchemeReference("Bearer", null);
                         return new OpenApiSecurityRequirement
                         {
-                            [securitySchemeReference] = new List<string>()
+                            [securitySchemeReference] = []
                         };
                     });
 

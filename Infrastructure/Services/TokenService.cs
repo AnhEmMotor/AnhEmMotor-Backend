@@ -6,6 +6,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 
 namespace Infrastructure.Services;
 
@@ -17,35 +18,46 @@ public class TokenService(IConfiguration configuration, UserManager<ApplicationU
     /// <summary>
     /// Tạo Access Token cho người dùng
     /// </summary>
-    public async Task<string> CreateAccessTokenAsync(ApplicationUser user)
+    /// <param name="user">Thông tin người dùng</param>
+    /// <param name="authMethods">Phương thức xác thực (vd: ["pwd"], ["google"], ["facebook"])</param>
+    public async Task<string> CreateAccessTokenAsync(ApplicationUser user, string[] authMethods)
     {
         var userRoles = await userManager.GetRolesAsync(user);
+
         var claims = new List<Claim>
         {
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new(ClaimTypes.Name, user.UserName ?? string.Empty),
-            new(ClaimTypes.Email, user.Email ?? string.Empty),
-            new("FullName", user.FullName),
-            new("Gender", user.Gender.ToString())
+            new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
+            new(JwtRegisteredClaimNames.Name, user.UserName ?? string.Empty),
+            new("FullName", user.FullName ?? string.Empty)
         };
+
+        // Thêm claim "amr" dưới dạng JSON array
+        if (authMethods is { Length: > 0 })
+        {
+            claims.Add(new Claim("amr", JsonSerializer.Serialize(authMethods), JsonClaimValueTypes.JsonArray));
+        }
 
         foreach (var userRole in userRoles)
         {
-            claims.Add(new Claim(ClaimTypes.Role, userRole));
+            claims.Add(new Claim("role", userRole));
         }
 
         var jwtKey = configuration["Jwt:Key"];
+        var jwtExpiryInMinutes = configuration.GetValue<int>("Jwt:ExpiryInMinutes");
+
         if (string.IsNullOrEmpty(jwtKey))
         {
-            throw new InvalidOperationException("JWT Key is not configured in appsettings.json.");
+            throw new InvalidOperationException("Jwt:Key is missing in configuration.");
         }
 
         var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
+
         var token = new JwtSecurityToken(
             issuer: configuration["Jwt:Issuer"],
             audience: configuration["Jwt:Audience"],
-            expires: DateTime.UtcNow.AddMinutes(15),
+            expires: DateTime.UtcNow.AddMinutes(jwtExpiryInMinutes > 0 ? jwtExpiryInMinutes : 15),
             claims: claims,
             signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
         );

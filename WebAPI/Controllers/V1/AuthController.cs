@@ -6,9 +6,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System.Security.Claims;
 
-namespace WebAPI.Controllers;
+namespace WebAPI.Controllers.V1;
 
 /// <summary>
 /// Controller xử lý xác thực và đăng nhập
@@ -19,7 +20,8 @@ namespace WebAPI.Controllers;
 public class AuthController(
     UserManager<ApplicationUser> userManager,
     SignInManager<ApplicationUser> signInManager,
-    TokenService tokenService) : ControllerBase
+    TokenService tokenService,
+    IConfiguration configuration) : ControllerBase
 {
     /// <summary>
     /// Đăng ký tài khoản mới
@@ -54,7 +56,15 @@ public class AuthController(
         var result = await userManager.CreateAsync(user, model.Password);
         if (!result.Succeeded)
         {
-            return BadRequest(new { Errors = result.Errors });
+            return BadRequest(new { result.Errors });
+        }
+
+        // Gán default roles cho user mới
+        var defaultRoles = configuration.GetSection("ProtectedAuthorizationEntities:DefaultRolesForNewUsers").Get<List<string>>() ?? [];
+        if (defaultRoles.Count > 0)
+        {
+            var randomRole = defaultRoles[Random.Shared.Next(defaultRoles.Count)];
+            await userManager.AddToRoleAsync(user, randomRole);
         }
 
         return Ok(new { Message = "Registration successful!" });
@@ -90,7 +100,7 @@ public class AuthController(
             return Unauthorized(new { Message = "Invalid credentials." });
         }
 
-        var accessToken = await tokenService.CreateAccessTokenAsync(user);
+        var accessToken = await tokenService.CreateAccessTokenAsync(user, ["pwd"]);
         var refreshToken = TokenService.CreateRefreshToken();
 
         user.RefreshToken = refreshToken;
@@ -140,7 +150,7 @@ public class AuthController(
             return Unauthorized(new { Message = "Refresh token has expired. Please login again." });
         }
 
-        var newAccessToken = await tokenService.CreateAccessTokenAsync(user);
+        var newAccessToken = await tokenService.CreateAccessTokenAsync(user, ["pwd"]);
         var newRefreshToken = TokenService.CreateRefreshToken();
 
         user.RefreshToken = newRefreshToken;

@@ -1,4 +1,5 @@
-﻿using Application.Interfaces.Repositories;
+﻿using Application.Interfaces.Authentication;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
 using Application.Interfaces.Repositories.Input;
 using Application.Interfaces.Repositories.LocalFile;
@@ -112,6 +113,7 @@ public static class DBContext
 
         // Register TokenService
         services.AddScoped<TokenService>();
+        services.AddScoped<ICurrentUserService, CurrentUserService>();
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 

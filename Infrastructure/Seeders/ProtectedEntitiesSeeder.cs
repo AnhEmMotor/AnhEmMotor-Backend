@@ -4,6 +4,7 @@ using Infrastructure.DBContexts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using System.Collections.Generic;
 
 namespace Infrastructure.Seeders;
 
@@ -65,8 +66,29 @@ public static class ProtectedEntitiesSeeder
         }
 
         // Seed ProtectedUsers
-        var protectedUserEmails = configuration.GetSection("ProtectedAuthorizationEntities:ProtectedUsers").Get<List<string>>() ?? [];
-        foreach (var email in protectedUserEmails)
+        var protectedUsersSection = configuration.GetSection("ProtectedAuthorizationEntities:ProtectedUsers");
+        var protectedUsers = new Dictionary<string, string>();
+
+        // Parse protected users từ configuration
+        // Format: "email:password" hoặc chỉ "email" (sử dụng default password)
+        var protectedUserList = protectedUsersSection.Get<List<string>>() ?? [];
+        foreach (var entry in protectedUserList)
+        {
+            if (string.IsNullOrWhiteSpace(entry)) continue;
+
+            var parts = entry.Split(':');
+            var email = parts[0]?.Trim() ?? string.Empty;
+            var password = parts.Length > 1 ? parts[1]?.Trim() : null;
+
+            if (!string.IsNullOrEmpty(email))
+            {
+                protectedUsers[email] = password ?? "DefaultProtectedUser@123456";
+            }
+        }
+
+        var defaultRolesForNewUsers = configuration.GetSection("ProtectedAuthorizationEntities:DefaultRolesForNewUsers").Get<List<string>>() ?? [];
+
+        foreach (var (email, password) in protectedUsers)
         {
             var user = await userManager.FindByEmailAsync(email);
             if (user is null && superRoles.Count != 0)
@@ -82,8 +104,7 @@ public static class ProtectedEntitiesSeeder
                     PhoneNumber = "0000000000"
                 };
 
-                // Mật khẩu mặc định: Admin@123456 (nên thay đổi sau khi đăng nhập lần đầu)
-                var result = await userManager.CreateAsync(newUser, "Admin@123456");
+                var result = await userManager.CreateAsync(newUser, password);
                 if (result.Succeeded)
                 {
                     // Gán SuperRole đầu tiên cho user
@@ -97,6 +118,19 @@ public static class ProtectedEntitiesSeeder
                 if (!userRoles.Any(r => superRoles.Contains(r)))
                 {
                     await userManager.AddToRoleAsync(user, superRoles[0]);
+                }
+            }
+        }
+
+        // Seed default roles for new users
+        if (defaultRolesForNewUsers.Count != 0)
+        {
+            foreach (var roleName in defaultRolesForNewUsers)
+            {
+                var roleExists = await roleManager.RoleExistsAsync(roleName);
+                if (!roleExists)
+                {
+                    await roleManager.CreateAsync(new ApplicationRole { Name = roleName });
                 }
             }
         }

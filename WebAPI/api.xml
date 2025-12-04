@@ -121,94 +121,44 @@
             Gets or sets the error message associated with the current operation.
             </summary>
         </member>
-        <member name="T:WebAPI.Controllers.AuthController">
+        <member name="T:WebAPI.Controllers.V1.AuthController">
             <summary>
             Controller xử lý xác thực và đăng nhập
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.AuthController.#ctor(Microsoft.AspNetCore.Identity.UserManager{Domain.Entities.ApplicationUser},Microsoft.AspNetCore.Identity.SignInManager{Domain.Entities.ApplicationUser},Infrastructure.Services.TokenService)">
+        <member name="M:WebAPI.Controllers.V1.AuthController.#ctor(Microsoft.AspNetCore.Identity.UserManager{Domain.Entities.ApplicationUser},Microsoft.AspNetCore.Identity.SignInManager{Domain.Entities.ApplicationUser},Infrastructure.Services.TokenService,Microsoft.Extensions.Configuration.IConfiguration)">
             <summary>
             Controller xử lý xác thực và đăng nhập
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.AuthController.Register(Application.ApiContracts.Auth.RegisterRequest)">
+        <member name="M:WebAPI.Controllers.V1.AuthController.Register(Application.ApiContracts.Auth.RegisterRequest)">
             <summary>
             Đăng ký tài khoản mới
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.AuthController.Login(Application.ApiContracts.Auth.LoginRequest)">
+        <member name="M:WebAPI.Controllers.V1.AuthController.Login(Application.ApiContracts.Auth.LoginRequest)">
             <summary>
             Đăng nhập bằng Username/Email và Password
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.AuthController.RefreshToken">
+        <member name="M:WebAPI.Controllers.V1.AuthController.RefreshToken">
             <summary>
             Làm mới Access Token bằng Refresh Token
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.AuthController.Logout">
+        <member name="M:WebAPI.Controllers.V1.AuthController.Logout">
             <summary>
             Đăng xuất
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.AuthController.GoogleLogin(Application.ApiContracts.Auth.GoogleLoginRequest)">
+        <member name="M:WebAPI.Controllers.V1.AuthController.GoogleLogin(Application.ApiContracts.Auth.GoogleLoginRequest)">
             <summary>
             Đăng nhập bằng Google (placeholder - cần cấu hình Google OAuth)
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.AuthController.FacebookLogin(Application.ApiContracts.Auth.FacebookLoginRequest)">
+        <member name="M:WebAPI.Controllers.V1.AuthController.FacebookLogin(Application.ApiContracts.Auth.FacebookLoginRequest)">
             <summary>
             Đăng nhập bằng Facebook (placeholder - cần cấu hình Facebook OAuth)
-            </summary>
-        </member>
-        <member name="T:WebAPI.Controllers.PermissionController">
-            <summary>
-            Controller quản lý quyền hạn và vai trò
-            </summary>
-        </member>
-        <member name="M:WebAPI.Controllers.PermissionController.#ctor(Microsoft.AspNetCore.Identity.RoleManager{Domain.Entities.ApplicationRole},Infrastructure.DBContexts.ApplicationDBContext)">
-            <summary>
-            Controller quản lý quyền hạn và vai trò
-            </summary>
-        </member>
-        <member name="M:WebAPI.Controllers.PermissionController.GetAllPermissions">
-            <summary>
-            Lấy tất cả các permissions có trong hệ thống
-            </summary>
-        </member>
-        <member name="M:WebAPI.Controllers.PermissionController.GetRolePermissions(System.String)">
-            <summary>
-            Lấy các quyền của một vai trò cụ thể
-            </summary>
-        </member>
-        <member name="M:WebAPI.Controllers.PermissionController.UpdateRolePermissions(System.String,Application.ApiContracts.Auth.UpdateRolePermissionsRequest)">
-            <summary>
-            Cập nhật quyền cho một vai trò
-            </summary>
-        </member>
-        <member name="M:WebAPI.Controllers.PermissionController.GetAllRoles">
-            <summary>
-            Lấy tất cả các vai trò
-            </summary>
-        </member>
-        <member name="M:WebAPI.Controllers.PermissionController.CreateRole(WebAPI.Controllers.CreateRoleRequest)">
-            <summary>
-            Tạo vai trò mới
-            </summary>
-        </member>
-        <member name="M:WebAPI.Controllers.PermissionController.DeleteRole(System.String)">
-            <summary>
-            Xóa vai trò
-            </summary>
-        </member>
-        <member name="T:WebAPI.Controllers.CreateRoleRequest">
-            <summary>
-            DTO cho tạo role mới
-            </summary>
-        </member>
-        <member name="P:WebAPI.Controllers.CreateRoleRequest.RoleName">
-            <summary>
-            Gets or sets the name of the role associated with the user or entity.
             </summary>
         </member>
         <member name="T:WebAPI.Controllers.V1.BrandController">
@@ -531,6 +481,66 @@
         <member name="M:WebAPI.Controllers.V1.OutputController.RestoreManyOutputs(Application.ApiContracts.Output.RestoreManyOutputsRequest,System.Threading.CancellationToken)">
             <summary>
             Khôi phục nhiều đơn hàng đã bị xóa cùng lúc.
+            </summary>
+        </member>
+        <member name="T:WebAPI.Controllers.V1.PermissionController">
+            <summary>
+            Controller quản lý quyền hạn và vai trò
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.PermissionController.#ctor(Microsoft.AspNetCore.Identity.RoleManager{Domain.Entities.ApplicationRole},Microsoft.AspNetCore.Identity.UserManager{Domain.Entities.ApplicationUser},Infrastructure.DBContexts.ApplicationDBContext)">
+            <summary>
+            Controller quản lý quyền hạn và vai trò
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.PermissionController.GetAllPermissions">
+            <summary>
+            Lấy tất cả các permissions có trong hệ thống với mô tả và trạng thái truy cập của người dùng hiện tại
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.PermissionController.GetPermissionDescriptions">
+            <summary>
+            Lấy danh sách permission descriptions dùng cho i18n
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.PermissionController.GetMyPermissions">
+            <summary>
+            Lấy các quyền của người dùng hiện tại
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.PermissionController.GetRolePermissions(System.String)">
+            <summary>
+            Lấy các quyền của một vai trò cụ thể
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.PermissionController.UpdateRolePermissions(System.String,Application.ApiContracts.Auth.UpdateRolePermissionsRequest)">
+            <summary>
+            Cập nhật quyền cho một vai trò
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.PermissionController.GetAllRoles">
+            <summary>
+            Lấy tất cả các vai trò
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.PermissionController.CreateRole(WebAPI.Controllers.V1.CreateRoleRequest)">
+            <summary>
+            Tạo vai trò mới
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.PermissionController.DeleteRole(System.String)">
+            <summary>
+            Xóa vai trò
+            </summary>
+        </member>
+        <member name="T:WebAPI.Controllers.V1.CreateRoleRequest">
+            <summary>
+            DTO cho tạo role mới
+            </summary>
+        </member>
+        <member name="P:WebAPI.Controllers.V1.CreateRoleRequest.RoleName">
+            <summary>
+            Gets or sets the name of the role associated with the user or entity.
             </summary>
         </member>
         <member name="T:WebAPI.Controllers.V1.ProductCategoryController">

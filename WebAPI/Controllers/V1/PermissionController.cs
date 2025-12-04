@@ -4,12 +4,14 @@ using Domain.Constants;
 using Domain.Entities;
 using Infrastructure.Authorization;
 using Infrastructure.DBContexts;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
+using System.Security.Claims;
 
-namespace WebAPI.Controllers;
+namespace WebAPI.Controllers.V1;
 
 /// <summary>
 /// Controller quản lý quyền hạn và vai trò
@@ -19,29 +21,145 @@ namespace WebAPI.Controllers;
 [ApiController]
 public class PermissionController(
     RoleManager<ApplicationRole> roleManager,
+    UserManager<ApplicationUser> userManager,
     ApplicationDBContext context) : ControllerBase
 {
     /// <summary>
-    /// Lấy tất cả các permissions có trong hệ thống
+    /// Lấy tất cả các permissions có trong hệ thống với mô tả và trạng thái truy cập của người dùng hiện tại
     /// </summary>
     [HttpGet("permissions")]
     [HasPermission(Permissions.Roles.View)]
-    public IActionResult GetAllPermissions()
+    public async Task<IActionResult> GetAllPermissions()
     {
-        var allPermissions = typeof(Permissions)
+        // Lấy user hiện tại
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        ApplicationUser? currentUser = null;
+        
+        if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out var userId))
+        {
+            currentUser = await userManager.FindByIdAsync(userId.ToString());
+        }
+
+        // Lấy permissions từ class Permissions
+        var permissionDefinitions = typeof(Permissions)
             .GetNestedTypes()
             .SelectMany(type => type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy))
             .Where(fieldInfo => fieldInfo.IsLiteral && !fieldInfo.IsInitOnly)
             .Select(fieldInfo => new
             {
                 Category = fieldInfo.DeclaringType?.Name ?? "Unknown",
+                Key = fieldInfo.Name,
                 Permission = fieldInfo.GetRawConstantValue() as string
             })
             .Where(p => p.Permission is not null)
-            .GroupBy(p => p.Category)
-            .ToDictionary(g => g.Key, g => g.Select(p => p.Permission).ToList());
+            .ToList();
 
-        return Ok(allPermissions);
+        // Lấy permissions đã được gán cho user (nếu user đã đăng nhập)
+        var userPermissions = new HashSet<string>();
+        if (currentUser is not null)
+        {
+            var userRoles = await userManager.GetRolesAsync(currentUser);
+            var roleEntities = await context.Roles
+                .Where(r => userRoles.Contains(r.Name!))
+                .ToListAsync();
+
+            var roleIds = roleEntities.Select(r => r.Id).ToList();
+            userPermissions = (await context.RolePermissions
+                .Where(rp => roleIds.Contains(rp.RoleId))
+                .Select(rp => rp.Permission!.Name)
+                .ToListAsync())
+                .ToHashSet();
+        }
+
+        var result = permissionDefinitions
+            .GroupBy(p => p.Category)
+            .ToDictionary(
+                g => g.Key,
+                g => g.Select(p => new
+                {
+                    p.Key,
+                    Permission = p.Permission,
+                    // Mô tả sẽ được map từ Resource/i18n files - hiện tại là null
+                    Description = (string?)null,
+                    // True nếu user có quyền này, false nếu không
+                    HasAccess = userPermissions.Contains(p.Permission!)
+                }).ToList());
+
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Lấy danh sách permission descriptions dùng cho i18n
+    /// </summary>
+    [HttpGet("permissions/descriptions")]
+    [AllowAnonymous]
+    public IActionResult GetPermissionDescriptions()
+    {
+        var permissionDescriptions = typeof(Permissions)
+            .GetNestedTypes()
+            .SelectMany(type => type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy))
+            .Where(fieldInfo => fieldInfo.IsLiteral && !fieldInfo.IsInitOnly)
+            .Select(fieldInfo => new
+            {
+                Category = fieldInfo.DeclaringType?.Name ?? "Unknown",
+                Key = fieldInfo.Name,
+                Permission = fieldInfo.GetRawConstantValue() as string,
+                // Description key sẽ được sử dụng để lookup trong i18n
+                // Format: "permissions.category.key" (vd: "permissions.products.view")
+                DescriptionKey = $"permissions.{fieldInfo.DeclaringType?.Name?.ToLower()}.{fieldInfo.Name.ToLower()}"
+            })
+            .Where(p => p.Permission is not null)
+            .GroupBy(p => p.Category)
+            .ToDictionary(
+                g => g.Key,
+                g => g.Select(p => new
+                {
+                    p.Key,
+                    p.Permission,
+                    p.DescriptionKey
+                }).ToList());
+
+        return Ok(permissionDescriptions);
+    }
+
+    /// <summary>
+    /// Lấy các quyền của người dùng hiện tại
+    /// </summary>
+    [HttpGet("my-permissions")]
+    [Authorize]
+    public async Task<IActionResult> GetMyPermissions()
+    {
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+        {
+            return Unauthorized(new { Message = "Invalid user token." });
+        }
+
+        var user = await userManager.FindByIdAsync(userId.ToString());
+        if (user is null)
+        {
+            return NotFound(new { Message = "User not found." });
+        }
+
+        var userRoles = await userManager.GetRolesAsync(user);
+        var roleEntities = await context.Roles
+            .Where(r => userRoles.Contains(r.Name!))
+            .ToListAsync();
+
+        var roleIds = roleEntities.Select(r => r.Id).ToList();
+        var userPermissions = await context.RolePermissions
+            .Where(rp => roleIds.Contains(rp.RoleId))
+            .Select(rp => rp.Permission!.Name)
+            .Distinct()
+            .ToListAsync();
+
+        return Ok(new
+        {
+            UserId = userId,
+            UserName = user.UserName,
+            Roles = userRoles,
+            Permissions = userPermissions
+        });
     }
 
     /// <summary>

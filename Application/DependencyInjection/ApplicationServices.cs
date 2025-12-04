@@ -21,6 +21,7 @@ public static class ApplicationServices
         services.AddValidatorsFromAssembly(assembly);
 
         services.AddTransient(typeof(MediatR.IPipelineBehavior<,>), typeof(Behaviors.ValidationBehavior<,>));
+        services.AddTransient(typeof(MediatR.IPipelineBehavior<,>), typeof(Behaviors.UserIdentityBehavior<,>));
 
         services.AddScoped<ISieveProcessor, CustomSieveProcessor>();
 
