@@ -13,5 +13,5 @@ public class LoginResponse
     /// <summary>
     /// Thời gian hết hạn của Access Token
     /// </summary>
-    public DateTime ExpiresAt { get; set; }
+    public DateTimeOffset ExpiresAt { get; set; }
 }

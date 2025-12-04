@@ -26,7 +26,7 @@ public class ApplicationUser : IdentityUser<Guid>
     /// <summary>
     /// Thời gian hết hạn của Refresh Token
     /// </summary>
-    public DateTime RefreshTokenExpiryTime { get; set; }
+    public DateTimeOffset RefreshTokenExpiryTime { get; set; }
 
     /// <summary>
     /// Các vai trò của người dùng

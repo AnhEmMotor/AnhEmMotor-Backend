@@ -33,16 +33,16 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
     public async Task<DashboardStatsResponse?> GetDashboardStatsAsync(CancellationToken cancellationToken)
     {
         var lastMonthStart = new DateTimeOffset(
-            DateTime.UtcNow.AddMonths(-1).Year,
-            DateTime.UtcNow.AddMonths(-1).Month,
+            DateTimeOffset.UtcNow.AddMonths(-1).Year,
+            DateTimeOffset.UtcNow.AddMonths(-1).Month,
             1,
             0,
             0,
             0,
             TimeSpan.Zero);
         var currentMonthStart = new DateTimeOffset(
-            DateTime.UtcNow.Year,
-            DateTime.UtcNow.Month,
+            DateTimeOffset.UtcNow.Year,
+            DateTimeOffset.UtcNow.Month,
             1,
             0,
             0,
@@ -89,7 +89,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         int months,
         CancellationToken cancellationToken)
     {
-        var currentMonth = new DateOnly(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
+        var currentMonth = new DateOnly(DateTimeOffset.UtcNow.Year, DateTimeOffset.UtcNow.Month, 1);
         var startMonth = currentMonth.AddMonths(-(months - 1));
 
         var monthSeries = Enumerable.Range(0, months).Select(i => startMonth.AddMonths(i)).ToList();
@@ -132,16 +132,16 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
     public async Task<IEnumerable<ProductReportResponse>> GetProductReportLastMonthAsync(CancellationToken cancellationToken)
     {
         var lastMonthStart = new DateTimeOffset(
-            DateTime.UtcNow.AddMonths(-1).Year,
-            DateTime.UtcNow.AddMonths(-1).Month,
+            DateTimeOffset.UtcNow.AddMonths(-1).Year,
+            DateTimeOffset.UtcNow.AddMonths(-1).Month,
             1,
             0,
             0,
             0,
             TimeSpan.Zero);
         var currentMonthStart = new DateTimeOffset(
-            DateTime.UtcNow.Year,
-            DateTime.UtcNow.Month,
+            DateTimeOffset.UtcNow.Year,
+            DateTimeOffset.UtcNow.Month,
             1,
             0,
             0,

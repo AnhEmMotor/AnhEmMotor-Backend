@@ -1,20 +1,23 @@
 ﻿using Application.DependencyInjection;
 using Asp.Versioning;
+using Domain.Entities;
 using Domain.Helpers;
+using Infrastructure.DBContexts;
 using Infrastructure.DependencyInjection;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Sieve.Models;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
 using WebAPI.Converters;
 using WebAPI.Middleware;
-using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
 
 namespace WebAPI.StartupExtensions
 {
@@ -89,6 +92,11 @@ namespace WebAPI.StartupExtensions
             {
                 services.AddInfrastructureServices(configuration);
             }
+            var jwtKey = configuration["Jwt:Key"];
+            if (string.IsNullOrEmpty(jwtKey))
+            {
+                throw new InvalidOperationException("JWT Key is not configured in appsettings.json.");
+            }
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -98,24 +106,32 @@ namespace WebAPI.StartupExtensions
             .AddJwtBearer(options =>
             {
                 options.SaveToken = true;
-                options.RequireHttpsMetadata = false; // Set true nếu chạy Production có SSL
+                options.RequireHttpsMetadata = false; 
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
                     ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    ClockSkew = TimeSpan.Zero, // Loại bỏ độ trễ mặc định 5 phút
-
+                    ClockSkew = TimeSpan.Zero, 
                     ValidIssuer = configuration["Jwt:Issuer"],
                     ValidAudience = configuration["Jwt:Audience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!)),
-
-                    // QUAN TRỌNG: Map claim ngắn gọn ("role") sang ClaimTypes.Role của .NET
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
                     RoleClaimType = "role",
                     NameClaimType = JwtRegisteredClaimNames.Name
                 };
             });
+            services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
+            {
+                options.Password.RequiredLength = 8;
+                options.Password.RequireNonAlphanumeric = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireDigit = true;
+                options.User.RequireUniqueEmail = true;
+            })
+                .AddEntityFrameworkStores<ApplicationDBContext>()
+                .AddDefaultTokenProviders();
             services.AddApiVersioning(
                 config =>
                 {

@@ -498,11 +498,6 @@
             Lấy tất cả các permissions có trong hệ thống với mô tả và trạng thái truy cập của người dùng hiện tại
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.PermissionController.GetPermissionDescriptions">
-            <summary>
-            Lấy danh sách permission descriptions dùng cho i18n
-            </summary>
-        </member>
         <member name="M:WebAPI.Controllers.V1.PermissionController.GetMyPermissions">
             <summary>
             Lấy các quyền của người dùng hiện tại

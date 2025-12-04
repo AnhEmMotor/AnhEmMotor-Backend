@@ -53,11 +53,14 @@ public class TokenService(IConfiguration configuration, UserManager<ApplicationU
         }
 
         var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
+        var now = DateTimeOffset.UtcNow;
+        var minutesToAdd = jwtExpiryInMinutes > 0 ? jwtExpiryInMinutes : 15;
+        var expiresAt = now.AddMinutes(minutesToAdd);
 
         var token = new JwtSecurityToken(
             issuer: configuration["Jwt:Issuer"],
             audience: configuration["Jwt:Audience"],
-            expires: DateTime.UtcNow.AddMinutes(jwtExpiryInMinutes > 0 ? jwtExpiryInMinutes : 15),
+            expires: expiresAt.UtcDateTime,
             claims: claims,
             signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
         );

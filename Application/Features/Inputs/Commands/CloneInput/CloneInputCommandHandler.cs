@@ -98,8 +98,8 @@ public sealed class CloneInputCommandHandler(
                     Count = originalProduct.Count,
                     RemainingCount = originalProduct.Count,
                     InputPrice = originalProduct.InputPrice,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
+                    CreatedAt = DateTimeOffset.UtcNow,
+                    UpdatedAt = DateTimeOffset.UtcNow
                 });
         }
 
@@ -123,8 +123,8 @@ public sealed class CloneInputCommandHandler(
             SupplierId = originalInput.SupplierId,
             StatusId = InputStatus.Working,
             InputInfos = validProducts,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            CreatedAt = DateTimeOffset.UtcNow,
+            UpdatedAt = DateTimeOffset.UtcNow
         };
 
         inputInsertRepository.Add(newInput);

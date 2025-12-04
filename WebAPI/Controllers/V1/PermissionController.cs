@@ -64,11 +64,10 @@ public class PermissionController(
                 .ToListAsync();
 
             var roleIds = roleEntities.Select(r => r.Id).ToList();
-            userPermissions = (await context.RolePermissions
+            userPermissions = [.. (await context.RolePermissions
                 .Where(rp => roleIds.Contains(rp.RoleId))
                 .Select(rp => rp.Permission!.Name)
-                .ToListAsync())
-                .ToHashSet();
+                .ToListAsync())];
         }
 
         var result = permissionDefinitions
@@ -78,7 +77,7 @@ public class PermissionController(
                 g => g.Select(p => new
                 {
                     p.Key,
-                    Permission = p.Permission,
+                    p.Permission,
                     // Mô tả sẽ được map từ Resource/i18n files - hiện tại là null
                     Description = (string?)null,
                     // True nếu user có quyền này, false nếu không
@@ -86,40 +85,6 @@ public class PermissionController(
                 }).ToList());
 
         return Ok(result);
-    }
-
-    /// <summary>
-    /// Lấy danh sách permission descriptions dùng cho i18n
-    /// </summary>
-    [HttpGet("permissions/descriptions")]
-    [AllowAnonymous]
-    public IActionResult GetPermissionDescriptions()
-    {
-        var permissionDescriptions = typeof(Permissions)
-            .GetNestedTypes()
-            .SelectMany(type => type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy))
-            .Where(fieldInfo => fieldInfo.IsLiteral && !fieldInfo.IsInitOnly)
-            .Select(fieldInfo => new
-            {
-                Category = fieldInfo.DeclaringType?.Name ?? "Unknown",
-                Key = fieldInfo.Name,
-                Permission = fieldInfo.GetRawConstantValue() as string,
-                // Description key sẽ được sử dụng để lookup trong i18n
-                // Format: "permissions.category.key" (vd: "permissions.products.view")
-                DescriptionKey = $"permissions.{fieldInfo.DeclaringType?.Name?.ToLower()}.{fieldInfo.Name.ToLower()}"
-            })
-            .Where(p => p.Permission is not null)
-            .GroupBy(p => p.Category)
-            .ToDictionary(
-                g => g.Key,
-                g => g.Select(p => new
-                {
-                    p.Key,
-                    p.Permission,
-                    p.DescriptionKey
-                }).ToList());
-
-        return Ok(permissionDescriptions);
     }
 
     /// <summary>
@@ -156,7 +121,7 @@ public class PermissionController(
         return Ok(new
         {
             UserId = userId,
-            UserName = user.UserName,
+            user.UserName,
             Roles = userRoles,
             Permissions = userPermissions
         });

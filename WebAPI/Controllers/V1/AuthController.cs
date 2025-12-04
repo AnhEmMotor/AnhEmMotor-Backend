@@ -104,13 +104,13 @@ public class AuthController(
         var refreshToken = TokenService.CreateRefreshToken();
 
         user.RefreshToken = refreshToken;
-        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+        user.RefreshTokenExpiryTime = DateTimeOffset.UtcNow.AddDays(7);
         await userManager.UpdateAsync(user);
 
         var cookieOptions = new CookieOptions
         {
             HttpOnly = true,
-            Expires = DateTime.UtcNow.AddDays(7),
+            Expires = DateTimeOffset.UtcNow.AddDays(7),
             Secure = true,
             SameSite = SameSiteMode.Strict
         };
@@ -120,7 +120,7 @@ public class AuthController(
         return Ok(new LoginResponse
         {
             AccessToken = accessToken,
-            ExpiresAt = DateTime.UtcNow.AddMinutes(15)
+            ExpiresAt = DateTimeOffset.UtcNow.AddMinutes(15)
         });
     }
 
@@ -145,7 +145,7 @@ public class AuthController(
             return Unauthorized(new { Message = "Invalid refresh token." });
         }
 
-        if (user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+        if (user.RefreshTokenExpiryTime <= DateTimeOffset.UtcNow)
         {
             return Unauthorized(new { Message = "Refresh token has expired. Please login again." });
         }
@@ -154,13 +154,13 @@ public class AuthController(
         var newRefreshToken = TokenService.CreateRefreshToken();
 
         user.RefreshToken = newRefreshToken;
-        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+        user.RefreshTokenExpiryTime = DateTimeOffset.UtcNow.AddDays(7);
         await userManager.UpdateAsync(user);
 
         var cookieOptions = new CookieOptions
         {
             HttpOnly = true,
-            Expires = DateTime.UtcNow.AddDays(7),
+            Expires = DateTimeOffset.UtcNow.AddDays(7),
             Secure = true,
             SameSite = SameSiteMode.Strict
         };
@@ -170,7 +170,7 @@ public class AuthController(
         return Ok(new LoginResponse
         {
             AccessToken = newAccessToken,
-            ExpiresAt = DateTime.UtcNow.AddMinutes(15)
+            ExpiresAt = DateTimeOffset.UtcNow.AddMinutes(15)
         });
     }
 
@@ -188,7 +188,7 @@ public class AuthController(
             if (user is not null)
             {
                 user.RefreshToken = null;
-                user.RefreshTokenExpiryTime = DateTime.MinValue;
+                user.RefreshTokenExpiryTime = DateTimeOffset.MinValue;
                 await userManager.UpdateAsync(user);
             }
         }
