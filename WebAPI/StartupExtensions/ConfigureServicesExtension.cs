@@ -173,38 +173,30 @@ namespace WebAPI.StartupExtensions
                             return new BadRequestObjectResult(errorResponse);
                         };
                     });
-            services.AddSwaggerGen(
-                options =>
+            services.AddSwaggerGen(options =>
+            {
+                options.AddSecurityDefinition("bearer", new OpenApiSecurityScheme
                 {
-                    // Add JWT Authentication to Swagger
-                    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-                    {
-                        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
-                        Name = "Authorization",
-                        In = ParameterLocation.Header,
-                        Type = SecuritySchemeType.Http,
-                        Scheme = "bearer",
-                        BearerFormat = "JWT"
-                    });
-
-                    options.AddSecurityRequirement(doc =>
-                    {
-                        var securitySchemeReference = new OpenApiSecuritySchemeReference("Bearer", null);
-                        return new OpenApiSecurityRequirement
-                        {
-                            [securitySchemeReference] = []
-                        };
-                    });
-
-                    if(environment.IsEnvironment("Test") == false)
-                    {
-                        var xmlFilePath = Path.Combine(AppContext.BaseDirectory, "api.xml");
-                        if(File.Exists(xmlFilePath))
-                        {
-                            options.IncludeXmlComments(xmlFilePath);
-                        }
-                    }
+                    Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
                 });
+                options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+                {
+                    [new OpenApiSecuritySchemeReference("bearer", document)] = []
+                });
+                if (environment.IsEnvironment("Test") == false)
+                {
+                    var xmlFilePath = Path.Combine(AppContext.BaseDirectory, "api.xml");
+                    if (File.Exists(xmlFilePath))
+                    {
+                        options.IncludeXmlComments(xmlFilePath);
+                    }
+                }
+            });
             services.ConfigureOptions<ConfigureSwaggerOptions>();
             return services;
         }
