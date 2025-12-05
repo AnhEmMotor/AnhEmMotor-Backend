@@ -30,7 +30,8 @@ public class TokenService(IConfiguration configuration, UserManager<ApplicationU
             new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
             new(JwtRegisteredClaimNames.Name, user.UserName ?? string.Empty),
-            new("FullName", user.FullName ?? string.Empty)
+            new("full_name", user.FullName ?? string.Empty),
+            new("status", user.Status ?? string.Empty)
         };
 
         // Thêm claim "amr" dưới dạng JSON array

@@ -72,6 +72,15 @@ public class UserController(
     public async Task<IActionResult> UpdateCurrentUser([FromBody] UpdateUserRequest model)
     {
         var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!GenderStatus.IsValid(model.Gender))
+        {
+            return BadRequest(new
+            {
+                Message = "Invalid gender. Please check again.",
+            });
+        }
+
         if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
         {
             return Unauthorized(new { Message = "Invalid user token." });
@@ -130,6 +139,11 @@ public class UserController(
     [Authorize]
     public async Task<IActionResult> ChangePasswordCurrentUser([FromBody] ChangePasswordRequest model)
     {
+        if (string.Compare(model.CurrentPassword, model.NewPassword) == 0)
+        {
+            return BadRequest(new { Message = "New password can not dupplicate current password. " });
+        }
+
         var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
         {
@@ -170,6 +184,12 @@ public class UserController(
         if (user is null)
         {
             return NotFound(new { Message = "User not found." });
+        }
+
+        // Check if already deleted
+        if (user.DeletedAt is not null)
+        {
+            return BadRequest(new { Message = "This account has already been deleted." });
         }
 
         // Kiểm tra protected users

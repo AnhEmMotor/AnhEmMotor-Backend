@@ -1,14 +1,18 @@
 ﻿using Application.ApiContracts.User;
+using Application.Features.UserManager.Queries.GetUsersList;
 using Asp.Versioning;
 using Domain.Constants;
 using Domain.Entities;
 using Domain.Helpers;
+using Domain.Shared;
 using Infrastructure.Authorization;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
+using Sieve.Models;
 using System.Security.Claims;
 
 namespace WebAPI.Controllers.V1
@@ -21,8 +25,10 @@ namespace WebAPI.Controllers.V1
     /// specific permissions and may return error responses if protection rules are violated. API versioning is
     /// supported via the route template. Thread safety is managed by ASP.NET Core's request handling; concurrent
     /// requests may result in race conditions if user or role state changes rapidly.</remarks>
+    /// <param name="mediator">The MediatR mediator used to send queries and commands.</param>
     /// <param name="userManager">The user manager used to perform operations on user accounts, such as retrieval, update, deletion, and role
     /// management.</param>
+    /// <param name="roleManager">The role manager used to manage roles and their permissions.</param>
     /// <param name="configuration">The application configuration used to access protected user and role settings that affect authorization and
     /// deletion logic.</param>
     [ApiVersion("1.0")]
@@ -30,40 +36,27 @@ namespace WebAPI.Controllers.V1
     [Route("api/v{version:apiVersion}/[controller]")]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
     [ApiController]
-    public class UserManagerController(UserManager<ApplicationUser> userManager, IConfiguration configuration) : ControllerBase
+    public class UserManagerController(
+        IMediator mediator,
+        UserManager<ApplicationUser> userManager,
+        RoleManager<ApplicationRole> roleManager,
+        IConfiguration configuration) : ControllerBase
     {
         /// <summary>
-        /// Lấy danh sách tất cả người dùng
+        /// Lấy danh sách tất cả người dùng (có phân trang, lọc, sắp xếp).
         /// </summary>
+        /// <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
+        /// <param name="cancellationToken"></param>
         [HttpGet]
         [HasPermission(PermissionsList.Users.View)]
-        public async Task<IActionResult> GetAllUsers()
+        [ProducesResponseType(typeof(PagedResult<UserResponse>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetAllUsers(
+            [FromQuery] SieveModel sieveModel,
+            CancellationToken cancellationToken)
         {
-            var users = await userManager.Users.ToListAsync();
-
-            var userDtos = new List<object>();
-
-            foreach(var user in users)
-            {
-                var roles = await userManager.GetRolesAsync(user);
-
-                userDtos.Add(
-                    new
-                    {
-                        user.Id,
-                        user.UserName,
-                        user.Email,
-                        user.FullName,
-                        user.Gender,
-                        user.PhoneNumber,
-                        user.EmailConfirmed,
-                        user.Status,
-                        user.DeletedAt,
-                        Roles = roles
-                    });
-            }
-
-            return Ok(userDtos);
+            var query = new GetUsersListQuery(sieveModel);
+            var pagedResult = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+            return Ok(pagedResult);
         }
 
         /// <summary>
@@ -115,8 +108,13 @@ namespace WebAPI.Controllers.V1
                 user.FullName = model.FullName;
             }
 
+            // Validate Gender if provided
             if(!string.IsNullOrWhiteSpace(model.Gender))
             {
+                if(!GenderStatus.IsValid(model.Gender))
+                {
+                    return BadRequest(new { Message = $"Invalid gender value. Allowed values: {string.Join(", ", GenderStatus.All)}" });
+                }
                 user.Gender = model.Gender;
             }
 
@@ -173,6 +171,12 @@ namespace WebAPI.Controllers.V1
                 return NotFound(new { Message = "User not found." });
             }
 
+            // Check old password != new password
+            if(model.CurrentPassword == model.NewPassword)
+            {
+                return BadRequest(new { Message = "New password must be different from current password." });
+            }
+
             var result = await userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
             if(!result.Succeeded)
             {
@@ -183,145 +187,48 @@ namespace WebAPI.Controllers.V1
         }
 
         /// <summary>
-        /// Xóa một người dùng (hard delete - Identity không hỗ trợ soft delete)
-        /// </summary>
-        [HttpDelete("{userId:guid}")]
-        [HasPermission(PermissionsList.Users.Delete)]
-        public async Task<IActionResult> DeleteUser(Guid userId)
-        {
-            var user = await userManager.FindByIdAsync(userId.ToString());
-            if(user is null)
-            {
-                return NotFound(new { Message = "User not found." });
-            }
-
-            var protectedUsers = configuration.GetSection("ProtectedAuthorizationEntities:ProtectedUsers")
-                    .Get<List<string>>() ??
-                [];
-            var protectedEmails = protectedUsers.Select(entry => entry.Split(':')[0].Trim()).ToList();
-
-            if(!string.IsNullOrEmpty(user.Email) && protectedEmails.Contains(user.Email))
-            {
-                return BadRequest(new { Message = "Cannot delete protected user." });
-            }
-
-            var superRoles = configuration.GetSection("ProtectedAuthorizationEntities:SuperRoles").Get<List<string>>() ??
-                [];
-            var userRoles = await userManager.GetRolesAsync(user);
-
-            foreach(var userRole in userRoles)
-            {
-                if(superRoles.Contains(userRole))
-                {
-                    var usersInRole = await userManager.GetUsersInRoleAsync(userRole);
-                    if(usersInRole.Count == 1)
-                    {
-                        return BadRequest(
-                            new { Message = $"Cannot delete user. This is the last user with SuperRole '{userRole}'." });
-                    }
-                }
-            }
-
-            var result = await userManager.DeleteAsync(user);
-            if(!result.Succeeded)
-            {
-                return BadRequest(new { result.Errors });
-            }
-
-            return Ok(new { Message = "User deleted successfully." });
-        }
-
-        /// <summary>
-        /// Xóa nhiều người dùng (hard delete) Quy tắc: Chỉ được phép xóa khi và chỉ khi tất cả users đều có thể được
-        /// xóa
-        /// </summary>
-        [HttpPost("delete-multiple")]
-        [HasPermission(PermissionsList.Users.Delete)]
-        public async Task<IActionResult> DeleteMultipleUsers([FromBody] List<Guid> userIds)
-        {
-            var protectedUsers = configuration.GetSection("ProtectedAuthorizationEntities:ProtectedUsers")
-                    .Get<List<string>>() ??
-                [];
-            var protectedEmails = protectedUsers.Select(entry => entry.Split(':')[0].Trim()).ToList();
-            var superRoles = configuration.GetSection("ProtectedAuthorizationEntities:SuperRoles").Get<List<string>>() ??
-                [];
-
-            var usersToDelete = new List<ApplicationUser>();
-            var errorMessages = new List<string>();
-
-            foreach(var userId in userIds)
-            {
-                var user = await userManager.FindByIdAsync(userId.ToString());
-                if(user is null)
-                {
-                    errorMessages.Add($"User {userId} not found.");
-                    continue;
-                }
-
-                if(!string.IsNullOrEmpty(user.Email) && protectedEmails.Contains(user.Email))
-                {
-                    errorMessages.Add($"User {user.Email} is protected and cannot be deleted.");
-                    continue;
-                }
-
-                var userRoles = await userManager.GetRolesAsync(user);
-                var isLastInSuperRole = false;
-
-                foreach(var userRole in userRoles)
-                {
-                    if(superRoles.Contains(userRole))
-                    {
-                        var usersInRole = await userManager.GetUsersInRoleAsync(userRole);
-                        if(usersInRole.Count == 1)
-                        {
-                            errorMessages.Add($"User {user.UserName} is the last user with SuperRole '{userRole}'.");
-                            isLastInSuperRole = true;
-                            break;
-                        }
-                    }
-                }
-
-                if(!isLastInSuperRole)
-                {
-                    usersToDelete.Add(user);
-                }
-            }
-
-            if(errorMessages.Count > 0)
-            {
-                return BadRequest(
-                    new { Message = "Cannot delete users. The following errors occurred:", Errors = errorMessages });
-            }
-
-            if(usersToDelete.Count == 0)
-            {
-                return BadRequest(new { Message = "No valid users to delete." });
-            }
-
-            var deletedCount = 0;
-            foreach(var user in usersToDelete)
-            {
-                var result = await userManager.DeleteAsync(user);
-                if(result.Succeeded)
-                {
-                    deletedCount++;
-                }
-            }
-
-            return Ok(new { Message = $"Deleted {deletedCount} user(s) successfully.", DeletedCount = deletedCount });
-        }
-
-        /// <summary>
         /// Gán roles cho người dùng
         /// </summary>
         [HttpPost("{userId:guid}/assign-roles")]
         [HasPermission(PermissionsList.Users.AssignRoles)]
         public async Task<IActionResult> AssignRoles(Guid userId, [FromBody] AssignRolesRequest model)
         {
+            foreach (string role in model.RoleNames)
+            {
+                if (string.IsNullOrWhiteSpace(role))
+                {
+                    return BadRequest(new { Message = "Role names cannot contain empty or whitespace values." });
+                }
+                if (UserStatus.IsValid(role))
+                {
+                    return BadRequest(new { Message = "Role names not vaild." });
+                }
+            }
+            
+
             var user = await userManager.FindByIdAsync(userId.ToString());
             if(user is null)
             {
                 return NotFound(new { Message = "User not found." });
+            }
+
+            // Validate all roles exist BEFORE assignment
+            var invalidRoles = new List<string>();
+            foreach(var roleName in model.RoleNames)
+            {
+                var roleExists = await roleManager.RoleExistsAsync(roleName);
+                if(!roleExists)
+                {
+                    invalidRoles.Add(roleName);
+                }
+            }
+
+            if(invalidRoles.Count > 0)
+            {
+                return BadRequest(new
+                {
+                    Message = $"The following roles do not exist: {string.Join(", ", invalidRoles)}"
+                });
             }
 
             var currentRoles = await userManager.GetRolesAsync(user);
@@ -375,6 +282,11 @@ namespace WebAPI.Controllers.V1
         [HasPermission(PermissionsList.Users.Edit)]
         public async Task<IActionResult> ChangeUserStatus(Guid userId, [FromBody] ChangeUserStatusRequest model)
         {
+            if (!UserStatus.IsValid(model.Status))
+            {
+                return BadRequest(new { Message = "Status not vaild, please check." });
+            }
+
             var user = await userManager.FindByIdAsync(userId.ToString());
             if(user is null)
             {
@@ -445,6 +357,10 @@ namespace WebAPI.Controllers.V1
         [HasPermission(PermissionsList.Users.Edit)]
         public async Task<IActionResult> ChangeMultipleUsersStatus([FromBody] ChangeMultipleUsersStatusRequest model)
         {
+            if (!UserStatus.IsValid(model.Status))
+            {
+                return BadRequest(new { Message = "Status not vaild, please check." });
+            }
             var protectedUsers = configuration.GetSection("ProtectedAuthorizationEntities:ProtectedUsers")
                     .Get<List<string>>() ??
                 [];

@@ -436,6 +436,11 @@
             Lấy các quyền của người dùng hiện tại
             </summary>
         </member>
+        <member name="M:WebAPI.Controllers.V1.PermissionController.GetUserPermissionsById(System.Guid)">
+            <summary>
+            Lấy các quyền của một người dùng theo User ID
+            </summary>
+        </member>
         <member name="M:WebAPI.Controllers.V1.PermissionController.GetRolePermissions(System.String)">
             <summary>
             Lấy các quyền của một vai trò cụ thể
@@ -453,7 +458,12 @@
         </member>
         <member name="M:WebAPI.Controllers.V1.PermissionController.CreateRole(WebAPI.Controllers.V1.CreateRoleRequest)">
             <summary>
-            Tạo vai trò mới
+            Tạo vai trò mới với các quyền được gán
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.PermissionController.UpdateRole(System.String,WebAPI.Controllers.V1.UpdateRoleRequest)">
+            <summary>
+            Cập nhật thông tin vai trò (chỉ cập nhật Description nếu được cung cấp)
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.PermissionController.DeleteRole(System.String)">
@@ -466,6 +476,16 @@
             Xóa nhiều vai trò (hard delete)
             </summary>
         </member>
+        <member name="T:WebAPI.Controllers.V1.UpdateRoleRequest">
+            <summary>
+            DTO cập nhật vai trò
+            </summary>
+        </member>
+        <member name="P:WebAPI.Controllers.V1.UpdateRoleRequest.Description">
+            <summary>
+            Mô tả của vai trò (tuỳ chọn - nếu không truyền thì giữ nguyên)
+            </summary>
+        </member>
         <member name="T:WebAPI.Controllers.V1.CreateRoleRequest">
             <summary>
             DTO cho tạo role mới
@@ -473,7 +493,17 @@
         </member>
         <member name="P:WebAPI.Controllers.V1.CreateRoleRequest.RoleName">
             <summary>
-            Gets or sets the name of the role associated with the user or entity.
+            Tên vai trò
+            </summary>
+        </member>
+        <member name="P:WebAPI.Controllers.V1.CreateRoleRequest.Description">
+            <summary>
+            Mô tả của vai trò (tuỳ chọn)
+            </summary>
+        </member>
+        <member name="P:WebAPI.Controllers.V1.CreateRoleRequest.Permissions">
+            <summary>
+            Danh sách quyền cho vai trò (bắt buộc - phải có ít nhất 1 quyền)
             </summary>
         </member>
         <member name="T:WebAPI.Controllers.V1.ProductCategoryController">
@@ -922,12 +952,14 @@
             specific permissions and may return error responses if protection rules are violated. API versioning is
             supported via the route template. Thread safety is managed by ASP.NET Core's request handling; concurrent
             requests may result in race conditions if user or role state changes rapidly.</remarks>
+            <param name="mediator">The MediatR mediator used to send queries and commands.</param>
             <param name="userManager">The user manager used to perform operations on user accounts, such as retrieval, update, deletion, and role
             management.</param>
+            <param name="roleManager">The role manager used to manage roles and their permissions.</param>
             <param name="configuration">The application configuration used to access protected user and role settings that affect authorization and
             deletion logic.</param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.UserManagerController.#ctor(Microsoft.AspNetCore.Identity.UserManager{Domain.Entities.ApplicationUser},Microsoft.Extensions.Configuration.IConfiguration)">
+        <member name="M:WebAPI.Controllers.V1.UserManagerController.#ctor(MediatR.IMediator,Microsoft.AspNetCore.Identity.UserManager{Domain.Entities.ApplicationUser},Microsoft.AspNetCore.Identity.RoleManager{Domain.Entities.ApplicationRole},Microsoft.Extensions.Configuration.IConfiguration)">
             <summary>
             Quản lý người dùng (Chỉ có người dùng có quyền mới được vào đây)
             </summary>
@@ -936,15 +968,19 @@
             specific permissions and may return error responses if protection rules are violated. API versioning is
             supported via the route template. Thread safety is managed by ASP.NET Core's request handling; concurrent
             requests may result in race conditions if user or role state changes rapidly.</remarks>
+            <param name="mediator">The MediatR mediator used to send queries and commands.</param>
             <param name="userManager">The user manager used to perform operations on user accounts, such as retrieval, update, deletion, and role
             management.</param>
+            <param name="roleManager">The role manager used to manage roles and their permissions.</param>
             <param name="configuration">The application configuration used to access protected user and role settings that affect authorization and
             deletion logic.</param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.UserManagerController.GetAllUsers">
+        <member name="M:WebAPI.Controllers.V1.UserManagerController.GetAllUsers(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
-            Lấy danh sách tất cả người dùng
+            Lấy danh sách tất cả người dùng (có phân trang, lọc, sắp xếp).
             </summary>
+            <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
+            <param name="cancellationToken"></param>
         </member>
         <member name="M:WebAPI.Controllers.V1.UserManagerController.GetUserById(System.Guid)">
             <summary>
@@ -959,17 +995,6 @@
         <member name="M:WebAPI.Controllers.V1.UserManagerController.ChangePassword(System.Guid,Application.ApiContracts.User.ChangePasswordRequest)">
             <summary>
             Đổi mật khẩu người dùng theo ID
-            </summary>
-        </member>
-        <member name="M:WebAPI.Controllers.V1.UserManagerController.DeleteUser(System.Guid)">
-            <summary>
-            Xóa một người dùng (hard delete - Identity không hỗ trợ soft delete)
-            </summary>
-        </member>
-        <member name="M:WebAPI.Controllers.V1.UserManagerController.DeleteMultipleUsers(System.Collections.Generic.List{System.Guid})">
-            <summary>
-            Xóa nhiều người dùng (hard delete) Quy tắc: Chỉ được phép xóa khi và chỉ khi tất cả users đều có thể được
-            xóa
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.UserManagerController.AssignRoles(System.Guid,Application.ApiContracts.User.AssignRolesRequest)">

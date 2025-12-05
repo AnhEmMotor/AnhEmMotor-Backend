@@ -132,6 +132,8 @@ public static class DBContext
 
         services.AddScoped<IStatisticalReadRepository, StatisticalReadRepository>();
 
+        services.AddScoped<IUserRepository, UserRepository>();
+
         return services;
     }
 }

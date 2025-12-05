@@ -59,22 +59,6 @@ public class PermissionController(
             .Where(p => p.Permission is not null)
             .ToList();
 
-        // Lấy permissions đã được gán cho user (nếu user đã đăng nhập)
-        var userPermissions = new HashSet<string>();
-        if (currentUser is not null)
-        {
-            var userRoles = await userManager.GetRolesAsync(currentUser);
-            var roleEntities = await context.Roles
-                .Where(r => userRoles.Contains(r.Name!))
-                .ToListAsync();
-
-            var roleIds = roleEntities.Select(r => r.Id).ToList();
-            userPermissions = [.. (await context.RolePermissions
-                .Where(rp => roleIds.Contains(rp.RoleId))
-                .Select(rp => rp.Permission!.Name)
-                .ToListAsync())];
-        }
-
         var result = permissionDefinitions
             .GroupBy(p => p.Category)
             .ToDictionary(
@@ -88,7 +72,6 @@ public class PermissionController(
                         p.Permission,
                         DisplayName = metadata?.DisplayName ?? p.Key,
                         metadata?.Description,
-                        HasAccess = userPermissions.Contains(p.Permission!)
                     };
                 }).ToList());
 
@@ -150,6 +133,55 @@ public class PermissionController(
     }
 
     /// <summary>
+    /// Lấy các quyền của một người dùng theo User ID
+    /// </summary>
+    [HttpGet("users/{userId:guid}/permissions")]
+    [HasPermission(PermissionsList.Users.View)]
+    public async Task<IActionResult> GetUserPermissionsById(Guid userId)
+    {
+        var user = await userManager.FindByIdAsync(userId.ToString());
+        if (user is null)
+        {
+            return NotFound(new { Message = "User not found." });
+        }
+
+        var userRoles = await userManager.GetRolesAsync(user);
+        var roleEntities = await context.Roles
+            .Where(r => userRoles.Contains(r.Name!))
+            .ToListAsync();
+
+        var roleIds = roleEntities.Select(r => r.Id).ToList();
+        var userPermissionNames = await context.RolePermissions
+            .Where(rp => roleIds.Contains(rp.RoleId))
+            .Select(rp => rp.Permission!.Name)
+            .Distinct()
+            .ToListAsync();
+
+        var userPermissions = userPermissionNames
+            .Select(p => new
+            {
+                Name = p,
+                Metadata = PermissionsList.GetMetadata(p)
+            })
+            .Select(p => new
+            {
+                p.Name,
+                DisplayName = p.Metadata?.DisplayName ?? p.Name,
+                p.Metadata?.Description
+            })
+            .ToList();
+
+        return Ok(new
+        {
+            UserId = userId,
+            user.UserName,
+            user.Email,
+            Roles = userRoles,
+            Permissions = userPermissions
+        });
+    }
+
+    /// <summary>
     /// Lấy các quyền của một vai trò cụ thể
     /// </summary>
     [HttpGet("roles/{roleName}/permissions")]
@@ -200,8 +232,16 @@ public class PermissionController(
             return NotFound(new { Message = "Role not found." });
         }
 
-        // Lấy tất cả các permissions hợp lệ
-        var allPermissions = typeof(PermissionsList)
+        bool isRoleInfoUpdated = false;
+        if (model.Description is not null && role.Description != model.Description)
+        {
+            role.Description = model.Description;
+            isRoleInfoUpdated = true;
+        }
+
+        if (model.Permissions.Count != 0)
+        {
+            var allPermissions = typeof(PermissionsList)
             .GetNestedTypes()
             .SelectMany(type => type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy))
             .Where(fieldInfo => fieldInfo.IsLiteral && !fieldInfo.IsInitOnly)
@@ -209,91 +249,88 @@ public class PermissionController(
             .Where(permission => permission is not null)
             .ToList();
 
-        // Kiểm tra permissions không hợp lệ
-        var invalidPermissions = model.Permissions.Except(allPermissions!).ToList();
-        if (invalidPermissions.Count != 0)
-        {
-            return BadRequest(new
-            {
-                Message = $"Invalid permissions: {string.Join(", ", invalidPermissions)}"
-            });
-        }
-
-        // Lấy permissions hiện tại của role
-        var currentRolePermissions = await context.RolePermissions
-            .Where(rp => rp.RoleId == role.Id)
-            .Include(rp => rp.Permission)
-            .ToListAsync();
-
-        var currentPermissionNames = currentRolePermissions
-            .Where(rp => rp.Permission is not null)
-            .Select(rp => rp.Permission!.Name)
-            .ToHashSet();
-
-        // Xác định permissions cần xóa
-        var permissionsToRemove = currentRolePermissions
-            .Where(rp => rp.Permission is not null && !model.Permissions.Contains(rp.Permission.Name))
-            .ToList();
-
-        // Xác định permissions cần thêm
-        var permissionNamesToAdd = model.Permissions
-            .Where(pName => !currentPermissionNames.Contains(pName))
-            .ToList();
-
-        // Kiểm tra không được xóa permission cuối cùng (để đảm bảo ít nhất 1 role có permission)
-        if (permissionsToRemove.Count != 0)
-        {
-            var permissionIdsToRemove = permissionsToRemove
-                .Select(rp => rp.PermissionId)
-                .ToHashSet();
-
-            var orphanedPermissionNames = await context.RolePermissions
-                .Where(rp => permissionIdsToRemove.Contains(rp.PermissionId))
-                .Where(rp => rp.Permission != null)
-                .GroupBy(rp => rp.Permission!.Name)
-                .Where(g => g.Count() == 1)
-                .Select(g => g.Key)
-                .ToListAsync();
-
-            if (orphanedPermissionNames.Count != 0)
+            var invalidPermissions = model.Permissions.Except(allPermissions!).ToList();
+            if (invalidPermissions.Count != 0)
             {
                 return BadRequest(new
                 {
-                    Message = $"Cannot remove the last role assignment for permissions: {string.Join(", ", orphanedPermissionNames)}. Assign them to another role first."
+                    Message = $"Invalid permissions: {string.Join(", ", invalidPermissions)}"
                 });
             }
-        }
 
-        // Lấy permissions cần thêm từ database
-        var dbPermissionsToAdd = await context.Permissions
-            .Where(p => permissionNamesToAdd.Contains(p.Name))
-            .ToListAsync();
+            var currentRolePermissions = await context.RolePermissions
+                .Where(rp => rp.RoleId == role.Id)
+                .Include(rp => rp.Permission)
+                .ToListAsync();
 
-        var rolePermissionsToAdd = dbPermissionsToAdd
-            .Select(p => new RolePermission
+            var currentPermissionNames = currentRolePermissions
+                .Where(rp => rp.Permission is not null)
+                .Select(rp => rp.Permission!.Name)
+                .ToHashSet();
+
+            var permissionsToRemove = currentRolePermissions
+                .Where(rp => rp.Permission is not null && !model.Permissions.Contains(rp.Permission.Name))
+                .ToList();
+
+            var permissionNamesToAdd = model.Permissions
+                .Where(pName => !currentPermissionNames.Contains(pName))
+                .ToList();
+
+            if (permissionsToRemove.Count != 0)
             {
-                RoleId = role.Id,
-                PermissionId = p.Id
-            })
-            .ToList();
+                var permissionIdsToRemove = permissionsToRemove
+                    .Select(rp => rp.PermissionId)
+                    .ToHashSet();
 
-        // Thực hiện xóa và thêm
-        if (permissionsToRemove.Count != 0)
-        {
-            context.RolePermissions.RemoveRange(permissionsToRemove);
+                var orphanedPermissionNames = await context.RolePermissions
+                    .Where(rp => permissionIdsToRemove.Contains(rp.PermissionId))
+                    .Where(rp => rp.Permission != null)
+                    .GroupBy(rp => rp.Permission!.Name)
+                    .Where(g => g.Count() == 1)
+                    .Select(g => g.Key)
+                    .ToListAsync();
+
+                if (orphanedPermissionNames.Count != 0)
+                {
+                    return BadRequest(new
+                    {
+                        Message = $"Cannot remove the last role assignment for permissions: {string.Join(", ", orphanedPermissionNames)}. Assign them to another role first."
+                    });
+                }
+            }
+
+            var dbPermissionsToAdd = await context.Permissions
+                .Where(p => permissionNamesToAdd.Contains(p.Name))
+                .ToListAsync();
+
+            var rolePermissionsToAdd = dbPermissionsToAdd
+                .Select(p => new RolePermission
+                {
+                    RoleId = role.Id,
+                    PermissionId = p.Id
+                })
+                .ToList();
+
+            if (permissionsToRemove.Count != 0)
+            {
+                context.RolePermissions.RemoveRange(permissionsToRemove);
+                isRoleInfoUpdated = true;
+            }
+
+            if (rolePermissionsToAdd.Count != 0)
+            {
+                await context.RolePermissions.AddRangeAsync(rolePermissionsToAdd);
+                isRoleInfoUpdated = true;
+            }
         }
+        
 
-        if (rolePermissionsToAdd.Count != 0)
-        {
-            await context.RolePermissions.AddRangeAsync(rolePermissionsToAdd);
-        }
-
-        if (permissionsToRemove.Count != 0 || rolePermissionsToAdd.Count != 0)
+        if (isRoleInfoUpdated)
         {
             await context.SaveChangesAsync();
         }
 
-        return Ok(new { Message = $"Permissions for role '{roleName}' updated successfully." });
+        return Ok(new { Message = $"Role '{roleName}' updated successfully." });
     }
 
     /// <summary>
@@ -315,25 +352,115 @@ public class PermissionController(
     }
 
     /// <summary>
-    /// Tạo vai trò mới
+    /// Tạo vai trò mới với các quyền được gán
     /// </summary>
     [HttpPost("roles")]
     [HasPermission(PermissionsList.Roles.Create)]
     public async Task<IActionResult> CreateRole([FromBody] CreateRoleRequest model)
     {
+        // Kiểm tra role đã tồn tại
         var roleExists = await roleManager.RoleExistsAsync(model.RoleName);
         if (roleExists)
         {
             return BadRequest(new { Message = "Role already exists." });
         }
 
-        var result = await roleManager.CreateAsync(new ApplicationRole { Name = model.RoleName });
+        // Kiểm tra permissions không rỗng
+        if (model.Permissions is null || model.Permissions.Count == 0)
+        {
+            return BadRequest(new { Message = "At least one permission must be assigned to the role." });
+        }
+
+        // Lấy tất cả permissions hợp lệ
+        var allPermissions = typeof(PermissionsList)
+            .GetNestedTypes()
+            .SelectMany(type => type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy))
+            .Where(fieldInfo => fieldInfo.IsLiteral && !fieldInfo.IsInitOnly)
+            .Select(fieldInfo => fieldInfo.GetRawConstantValue() as string)
+            .Where(permission => permission is not null)
+            .ToList();
+
+        // Kiểm tra permissions hợp lệ
+        var invalidPermissions = model.Permissions.Except(allPermissions!).ToList();
+        if (invalidPermissions.Count != 0)
+        {
+            return BadRequest(new
+            {
+                Message = $"Invalid permissions: {string.Join(", ", invalidPermissions)}"
+            });
+        }
+
+        // Tạo role
+        var role = new ApplicationRole
+        {
+            Name = model.RoleName,
+            Description = model.Description
+        };
+
+        var createResult = await roleManager.CreateAsync(role);
+        if (!createResult.Succeeded)
+        {
+            return BadRequest(new { createResult.Errors });
+        }
+
+        // Gán permissions cho role
+        var permissionsInDb = await context.Permissions
+            .Where(p => model.Permissions.Contains(p.Name))
+            .ToListAsync();
+
+        var rolePermissions = permissionsInDb
+            .Select(p => new RolePermission
+            {
+                RoleId = role.Id,
+                PermissionId = p.Id
+            })
+            .ToList();
+
+        await context.RolePermissions.AddRangeAsync(rolePermissions);
+        await context.SaveChangesAsync();
+
+        return Ok(new
+        {
+            Message = $"Role '{model.RoleName}' created successfully with {rolePermissions.Count} permission(s).",
+            RoleId = role.Id,
+            RoleName = role.Name,
+            Description = role.Description,
+            Permissions = model.Permissions
+        });
+    }
+
+    /// <summary>
+    /// Cập nhật thông tin vai trò (chỉ cập nhật Description nếu được cung cấp)
+    /// </summary>
+    [HttpPut("roles/{roleName}")]
+    [HasPermission(PermissionsList.Roles.Edit)]
+    public async Task<IActionResult> UpdateRole(string roleName, [FromBody] UpdateRoleRequest model)
+    {
+        var role = await roleManager.FindByNameAsync(roleName);
+        if (role is null)
+        {
+            return NotFound(new { Message = "Role not found." });
+        }
+
+        // Chỉ cập nhật Description nếu được cung cấp
+        if (!string.IsNullOrWhiteSpace(model.Description))
+        {
+            role.Description = model.Description;
+        }
+
+        var result = await roleManager.UpdateAsync(role);
         if (!result.Succeeded)
         {
             return BadRequest(new { result.Errors });
         }
 
-        return Ok(new { Message = $"Role '{model.RoleName}' created successfully." });
+        return Ok(new
+        {
+            Message = $"Role '{roleName}' updated successfully.",
+            RoleId = role.Id,
+            RoleName = role.Name,
+            Description = role.Description
+        });
     }
 
     /// <summary>
@@ -356,6 +483,16 @@ public class PermissionController(
             return BadRequest(new { Message = "Cannot delete SuperRole." });
         }
 
+        // Kiểm tra không có user nào có role này
+        var usersWithRole = await userManager.GetUsersInRoleAsync(roleName);
+        if (usersWithRole.Count > 0)
+        {
+            return BadRequest(new
+            {
+                Message = $"Cannot delete role '{roleName}' because {usersWithRole.Count} user(s) have this role."
+            });
+        }
+
         var result = await roleManager.DeleteAsync(role);
         if (!result.Succeeded)
         {
@@ -373,43 +510,76 @@ public class PermissionController(
     public async Task<IActionResult> DeleteMultipleRoles([FromBody] List<string> roleNames)
     {
         var superRoles = configuration.GetSection("ProtectedAuthorizationEntities:SuperRoles").Get<List<string>>() ?? [];
-
+        var skippedRoles = new List<string>();
         var deletedCount = 0;
-        var skippedCount = 0;
 
+        // Kiểm tra trước khi xóa
         foreach (var roleName in roleNames)
         {
+            // Kiểm tra SuperRoles
             if (superRoles.Contains(roleName))
             {
-                skippedCount++;
+                skippedRoles.Add($"{roleName} (SuperRole)");
                 continue;
             }
 
             var role = await roleManager.FindByNameAsync(roleName);
             if (role is null)
             {
-                skippedCount++;
+                skippedRoles.Add($"{roleName} (Not found)");
                 continue;
             }
 
-            var result = await roleManager.DeleteAsync(role);
-            if (result.Succeeded)
+            // Kiểm tra có user nào có role này không
+            var usersWithRole = await userManager.GetUsersInRoleAsync(roleName);
+            if (usersWithRole.Count > 0)
             {
-                deletedCount++;
+                skippedRoles.Add($"{roleName} ({usersWithRole.Count} user(s) assigned)");
+                continue;
             }
-            else
+        }
+
+        // Nếu có skipped roles, báo lỗi
+        if (skippedRoles.Count > 0)
+        {
+            return BadRequest(new
             {
-                skippedCount++;
+                Message = "Cannot delete some roles due to validation errors.",
+                SkippedRoles = skippedRoles
+            });
+        }
+
+        // Xóa tất cả roles
+        foreach (var roleName in roleNames)
+        {
+            var role = await roleManager.FindByNameAsync(roleName);
+            if (role is not null)
+            {
+                var result = await roleManager.DeleteAsync(role);
+                if (result.Succeeded)
+                {
+                    deletedCount++;
+                }
             }
         }
 
         return Ok(new
         {
             Message = $"Deleted {deletedCount} role(s) successfully.",
-            DeletedCount = deletedCount,
-            SkippedCount = skippedCount
+            DeletedCount = deletedCount
         });
     }
+}
+
+/// <summary>
+/// DTO cập nhật vai trò
+/// </summary>
+public class UpdateRoleRequest
+{
+    /// <summary>
+    /// Mô tả của vai trò (tuỳ chọn - nếu không truyền thì giữ nguyên)
+    /// </summary>
+    public string? Description { get; set; }
 }
 
 /// <summary>
@@ -418,7 +588,17 @@ public class PermissionController(
 public class CreateRoleRequest
 {
     /// <summary>
-    /// Gets or sets the name of the role associated with the user or entity.
+    /// Tên vai trò
     /// </summary>
     public string RoleName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Mô tả của vai trò (tuỳ chọn)
+    /// </summary>
+    public string? Description { get; set; }
+
+    /// <summary>
+    /// Danh sách quyền cho vai trò (bắt buộc - phải có ít nhất 1 quyền)
+    /// </summary>
+    public List<string> Permissions { get; set; } = [];
 }

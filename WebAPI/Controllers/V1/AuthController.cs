@@ -9,8 +9,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.Annotations;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text;
 
 namespace WebAPI.Controllers.V1;
 
@@ -35,6 +38,14 @@ public class AuthController(
     [AllowAnonymous]
     public async Task<IActionResult> Register([FromBody] RegisterRequest model)
     {
+        if (!GenderStatus.IsValid(model.Gender))
+        {
+            return BadRequest(new
+            {
+                Message = "Gender not vaild. Please check again."
+            });
+        }
+
         // Kiểm tra username đã tồn tại
         var existingUser = await userManager.FindByNameAsync(model.Username);
         if (existingUser is not null)
@@ -157,9 +168,57 @@ public class AuthController(
             return Unauthorized(new { Message = "Invalid refresh token." });
         }
 
+        if (user.Status != "Active")
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new { Message = "Please login again." });
+        }
+
+        if (user.Status == "Active" && user.DeletedAt != null)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new { Message = "Please login again." });
+        }
+
         if (user.RefreshTokenExpiryTime <= DateTimeOffset.UtcNow)
         {
             return Unauthorized(new { Message = "Refresh token has expired. Please login again." });
+        }
+
+        // Validate status against stored JWT claim if authorization header exists
+        var authHeader = Request.Headers.Authorization.ToString();
+        if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer "))
+        {
+            var token = authHeader.Substring("Bearer ".Length);
+            try
+            {
+                var jwtKey = configuration["Jwt:Key"];
+                if (!string.IsNullOrEmpty(jwtKey))
+                {
+                    var tokenHandler = new JwtSecurityTokenHandler();
+                    var key = Encoding.UTF8.GetBytes(jwtKey);
+
+                    tokenHandler.ValidateToken(token, new TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(key),
+                        ValidateIssuer = false,
+                        ValidateAudience = false,
+                        ClockSkew = TimeSpan.Zero
+                    }, out SecurityToken validatedToken);
+
+                    if (validatedToken is JwtSecurityToken jwtToken)
+                    {
+                        var tokenStatusClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "status")?.Value;
+                        if (!string.IsNullOrEmpty(tokenStatusClaim) && tokenStatusClaim != user.Status)
+                        {
+                            return Unauthorized(new { Message = "User status has changed. Please login again." });
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // If token validation fails, continue with refresh - the token is just for status check
+            }
         }
 
         var newAccessToken = await tokenService.CreateAccessTokenAsync(user, ["pwd"]);
