@@ -1,5 +1,5 @@
 ﻿using Application.Interfaces.Repositories.Option;
-using Domain.Enums;
+using Domain.Constants;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using System;

@@ -1,4 +1,4 @@
-using Domain.Enums;
+using Domain.Constants;
 using CategoryEntity = Domain.Entities.ProductCategory;
 
 namespace Application.Interfaces.Repositories.ProductCategory;

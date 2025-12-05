@@ -4,6 +4,7 @@ using Application.Features.Settings.Queries.GetAllSettings;
 using Asp.Versioning;
 using Domain.Helpers;
 using MediatR;
+using Swashbuckle.AspNetCore.Annotations;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers.V1;
@@ -13,6 +14,7 @@ namespace WebAPI.Controllers.V1;
 /// </summary>
 /// <param name="mediator"></param>
 [ApiController]
+[SwaggerTag("Quản lý cài đặt hệ thống: cập nhật số lượng cảnh báo tồn kho, số lượng mua tối đa, ...")]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]

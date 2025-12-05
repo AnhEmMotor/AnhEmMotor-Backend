@@ -14,7 +14,7 @@ using Application.Interfaces.Repositories.Setting;
 using Application.Interfaces.Repositories.Statistical;
 using Application.Interfaces.Repositories.Supplier;
 using Application.Interfaces.Repositories.VariantOptionValue;
-using Domain.Entities;
+
 using Infrastructure.Authorization;
 using Infrastructure.DBContexts;
 using Infrastructure.Repositories;
@@ -33,6 +33,7 @@ using Infrastructure.Repositories.Statistical;
 using Infrastructure.Repositories.Supplier;
 using Infrastructure.Repositories.VariantOptionValue;
 using Infrastructure.Services;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -61,6 +62,7 @@ public static class DBContext
 
         // Configure Identity
         
+       
 
         // Configure Authorization with custom policy provider
         services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();

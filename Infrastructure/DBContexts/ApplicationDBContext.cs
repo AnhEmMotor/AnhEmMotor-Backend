@@ -1,9 +1,12 @@
-﻿using Domain.Entities;
-using Domain.Enums;
+﻿using Domain.Constants;
+using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using InputStatus = Domain.Entities.InputStatus;
+using ProductStatus = Domain.Entities.ProductStatus;
+using SupplierStatus = Domain.Entities.SupplierStatus;
 
 namespace Infrastructure.DBContexts;
 

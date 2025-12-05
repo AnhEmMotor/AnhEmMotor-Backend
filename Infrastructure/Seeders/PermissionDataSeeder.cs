@@ -17,7 +17,7 @@ public static class PermissionDataSeeder
     public static async Task SeedPermissionsAsync(ApplicationDBContext context)
     {
         // Lấy tất cả các permissions từ class Permissions
-        var allPermissions = typeof(Permissions)
+        var allPermissions = typeof(PermissionsList)
             .GetNestedTypes()
             .SelectMany(type => type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy))
             .Where(fieldInfo => fieldInfo.IsLiteral && !fieldInfo.IsInitOnly)

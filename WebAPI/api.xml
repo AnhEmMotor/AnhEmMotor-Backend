@@ -246,79 +246,79 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="T:WebAPI.Controllers.V1.InputController">
+        <member name="T:WebAPI.Controllers.V1.InventoryReceiptsController">
             <summary>
             Quản lý phiếu nhập hàng.
             </summary>
             <param name="mediator"></param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.InputController.#ctor(MediatR.IMediator)">
+        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.#ctor(MediatR.IMediator)">
             <summary>
             Quản lý phiếu nhập hàng.
             </summary>
             <param name="mediator"></param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.InputController.GetInputs(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.GetInputs(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách phiếu nhập (có phân trang, lọc, sắp xếp).
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.InputController.GetDeletedInputs(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.GetDeletedInputs(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách phiếu nhập đã bị xóa (có phân trang, lọc, sắp xếp).
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.InputController.GetInputById(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.GetInputById(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Lấy thông tin chi tiết của phiếu nhập.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.InputController.GetInputsBySupplierId(System.Int32,Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.GetInputsBySupplierId(System.Int32,Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách phiếu nhập theo nhà cung cấp.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.InputController.CreateInput(Application.ApiContracts.Input.CreateInputRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.CreateInput(Application.ApiContracts.Input.CreateInputRequest,System.Threading.CancellationToken)">
             <summary>
             Tạo phiếu nhập mới.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.InputController.CloneInput(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.CloneInput(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Clone phiếu nhập từ phiếu nhập gốc. Chỉ clone các sản phẩm còn hợp lệ (chưa xoá, còn đang bán).
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.InputController.UpdateInput(System.Int32,Application.ApiContracts.Input.UpdateInputRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.UpdateInput(System.Int32,Application.ApiContracts.Input.UpdateInputRequest,System.Threading.CancellationToken)">
             <summary>
             Cập nhật phiếu nhập.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.InputController.UpdateInputStatus(System.Int32,Application.ApiContracts.Input.UpdateInputStatusRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.UpdateInputStatus(System.Int32,Application.ApiContracts.Input.UpdateInputStatusRequest,System.Threading.CancellationToken)">
             <summary>
             Cập nhật trạng thái của phiếu nhập.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.InputController.UpdateManyInputStatus(Application.ApiContracts.Input.UpdateManyInputStatusRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.UpdateManyInputStatus(Application.ApiContracts.Input.UpdateManyInputStatusRequest,System.Threading.CancellationToken)">
             <summary>
             Cập nhật trạng thái của nhiều phiếu nhập cùng lúc.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.InputController.DeleteInput(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.DeleteInput(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Xóa phiếu nhập.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.InputController.DeleteManyInputs(Application.ApiContracts.Input.DeleteManyInputsRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.DeleteManyInputs(Application.ApiContracts.Input.DeleteManyInputsRequest,System.Threading.CancellationToken)">
             <summary>
             Xóa nhiều phiếu nhập cùng lúc.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.InputController.RestoreInput(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.RestoreInput(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Khôi phục phiếu nhập đã bị xóa.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.InputController.RestoreManyInputs(Application.ApiContracts.Input.RestoreManyInputsRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.RestoreManyInputs(Application.ApiContracts.Input.RestoreManyInputsRequest,System.Threading.CancellationToken)">
             <summary>
             Khôi phục nhiều phiếu nhập đã bị xóa cùng lúc.
             </summary>
@@ -416,79 +416,12 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="T:WebAPI.Controllers.V1.OutputController">
-            <summary>
-            Quản lý đơn hàng/phiếu xuất.
-            </summary>
-            <param name="mediator"></param>
-        </member>
-        <member name="M:WebAPI.Controllers.V1.OutputController.#ctor(MediatR.IMediator)">
-            <summary>
-            Quản lý đơn hàng/phiếu xuất.
-            </summary>
-            <param name="mediator"></param>
-        </member>
-        <member name="M:WebAPI.Controllers.V1.OutputController.GetOutputs(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
-            <summary>
-            Lấy danh sách đơn hàng (có phân trang, lọc, sắp xếp).
-            </summary>
-        </member>
-        <member name="M:WebAPI.Controllers.V1.OutputController.GetDeletedOutputs(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
-            <summary>
-            Lấy danh sách đơn hàng đã bị xóa (có phân trang, lọc, sắp xếp).
-            </summary>
-        </member>
-        <member name="M:WebAPI.Controllers.V1.OutputController.GetOutputById(System.Int32,System.Threading.CancellationToken)">
-            <summary>
-            Lấy thông tin chi tiết của đơn hàng.
-            </summary>
-        </member>
-        <member name="M:WebAPI.Controllers.V1.OutputController.CreateOutput(Application.ApiContracts.Output.CreateOutputRequest,System.Threading.CancellationToken)">
-            <summary>
-            Tạo đơn hàng mới.
-            </summary>
-        </member>
-        <member name="M:WebAPI.Controllers.V1.OutputController.UpdateOutput(System.Int32,Application.ApiContracts.Output.UpdateOutputRequest,System.Threading.CancellationToken)">
-            <summary>
-            Cập nhật đơn hàng.
-            </summary>
-        </member>
-        <member name="M:WebAPI.Controllers.V1.OutputController.UpdateOutputStatus(System.Int32,Application.ApiContracts.Output.UpdateOutputStatusRequest,System.Threading.CancellationToken)">
-            <summary>
-            Cập nhật trạng thái của đơn hàng.
-            </summary>
-        </member>
-        <member name="M:WebAPI.Controllers.V1.OutputController.UpdateManyOutputStatus(Application.ApiContracts.Output.UpdateManyOutputStatusRequest,System.Threading.CancellationToken)">
-            <summary>
-            Cập nhật trạng thái của nhiều đơn hàng cùng lúc.
-            </summary>
-        </member>
-        <member name="M:WebAPI.Controllers.V1.OutputController.DeleteOutput(System.Int32,System.Threading.CancellationToken)">
-            <summary>
-            Xóa đơn hàng.
-            </summary>
-        </member>
-        <member name="M:WebAPI.Controllers.V1.OutputController.DeleteManyOutputs(Application.ApiContracts.Output.DeleteManyOutputsRequest,System.Threading.CancellationToken)">
-            <summary>
-            Xóa nhiều đơn hàng cùng lúc.
-            </summary>
-        </member>
-        <member name="M:WebAPI.Controllers.V1.OutputController.RestoreOutput(System.Int32,System.Threading.CancellationToken)">
-            <summary>
-            Khôi phục đơn hàng đã bị xóa.
-            </summary>
-        </member>
-        <member name="M:WebAPI.Controllers.V1.OutputController.RestoreManyOutputs(Application.ApiContracts.Output.RestoreManyOutputsRequest,System.Threading.CancellationToken)">
-            <summary>
-            Khôi phục nhiều đơn hàng đã bị xóa cùng lúc.
-            </summary>
-        </member>
         <member name="T:WebAPI.Controllers.V1.PermissionController">
             <summary>
             Controller quản lý quyền hạn và vai trò
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.PermissionController.#ctor(Microsoft.AspNetCore.Identity.RoleManager{Domain.Entities.ApplicationRole},Microsoft.AspNetCore.Identity.UserManager{Domain.Entities.ApplicationUser},Infrastructure.DBContexts.ApplicationDBContext)">
+        <member name="M:WebAPI.Controllers.V1.PermissionController.#ctor(Microsoft.AspNetCore.Identity.RoleManager{Domain.Entities.ApplicationRole},Microsoft.AspNetCore.Identity.UserManager{Domain.Entities.ApplicationUser},Infrastructure.DBContexts.ApplicationDBContext,Microsoft.Extensions.Configuration.IConfiguration)">
             <summary>
             Controller quản lý quyền hạn và vai trò
             </summary>
@@ -525,7 +458,12 @@
         </member>
         <member name="M:WebAPI.Controllers.V1.PermissionController.DeleteRole(System.String)">
             <summary>
-            Xóa vai trò
+            Xóa vai trò (hard delete)
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.PermissionController.DeleteMultipleRoles(System.Collections.Generic.List{System.String})">
+            <summary>
+            Xóa nhiều vai trò (hard delete)
             </summary>
         </member>
         <member name="T:WebAPI.Controllers.V1.CreateRoleRequest">
@@ -698,6 +636,73 @@
             Chỉnh trạng thái nhiều sản phẩm cùng lúc.
             </summary>
         </member>
+        <member name="T:WebAPI.Controllers.V1.SalesOrdersController">
+            <summary>
+            Quản lý đơn hàng/phiếu xuất.
+            </summary>
+            <param name="mediator"></param>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.#ctor(MediatR.IMediator)">
+            <summary>
+            Quản lý đơn hàng/phiếu xuất.
+            </summary>
+            <param name="mediator"></param>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetOutputs(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+            <summary>
+            Lấy danh sách đơn hàng (có phân trang, lọc, sắp xếp).
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetDeletedOutputs(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+            <summary>
+            Lấy danh sách đơn hàng đã bị xóa (có phân trang, lọc, sắp xếp).
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetOutputById(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Lấy thông tin chi tiết của đơn hàng.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.CreateOutput(Application.ApiContracts.Output.CreateOutputRequest,System.Threading.CancellationToken)">
+            <summary>
+            Tạo đơn hàng mới.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.UpdateOutput(System.Int32,Application.ApiContracts.Output.UpdateOutputRequest,System.Threading.CancellationToken)">
+            <summary>
+            Cập nhật đơn hàng.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.UpdateOutputStatus(System.Int32,Application.ApiContracts.Output.UpdateOutputStatusRequest,System.Threading.CancellationToken)">
+            <summary>
+            Cập nhật trạng thái của đơn hàng.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.UpdateManyOutputStatus(Application.ApiContracts.Output.UpdateManyOutputStatusRequest,System.Threading.CancellationToken)">
+            <summary>
+            Cập nhật trạng thái của nhiều đơn hàng cùng lúc.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.DeleteOutput(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Xóa đơn hàng.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.DeleteManyOutputs(Application.ApiContracts.Output.DeleteManyOutputsRequest,System.Threading.CancellationToken)">
+            <summary>
+            Xóa nhiều đơn hàng cùng lúc.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.RestoreOutput(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Khôi phục đơn hàng đã bị xóa.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.RestoreManyOutputs(Application.ApiContracts.Output.RestoreManyOutputsRequest,System.Threading.CancellationToken)">
+            <summary>
+            Khôi phục nhiều đơn hàng đã bị xóa cùng lúc.
+            </summary>
+        </member>
         <member name="T:WebAPI.Controllers.V1.SettingController">
             <summary>
             Quản lý cài đặt hệ thống: cập nhật số lượng cảnh báo tồn kho, số lượng mua tối đa, ...
@@ -725,48 +730,48 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="T:WebAPI.Controllers.V1.StatisticalController">
+        <member name="T:WebAPI.Controllers.V1.StatisticsController">
             <summary>
-            API thống kê và báo cáo.
+            Thống kê và báo cáo.
             </summary>
             <param name="mediator"></param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.StatisticalController.#ctor(MediatR.IMediator)">
+        <member name="M:WebAPI.Controllers.V1.StatisticsController.#ctor(MediatR.IMediator)">
             <summary>
-            API thống kê và báo cáo.
+            Thống kê và báo cáo.
             </summary>
             <param name="mediator"></param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.StatisticalController.GetDailyRevenue(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.StatisticsController.GetDailyRevenue(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Lấy doanh thu theo ngày trong khoảng thời gian xác định.
             </summary>
             <param name="days">Số ngày tính từ hiện tại trở về trước</param>
             <param name="cancellationToken"></param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.StatisticalController.GetDashboardStats(System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.StatisticsController.GetDashboardStats(System.Threading.CancellationToken)">
             <summary>
             Lấy các chỉ số tổng hợp cho Dashboard.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.StatisticalController.GetMonthlyRevenueProfit(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.StatisticsController.GetMonthlyRevenueProfit(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Lấy doanh thu và lợi nhuận theo tháng.
             </summary>
             <param name="months">Số tháng tính từ hiện tại trở về trước</param>
             <param name="cancellationToken"></param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.StatisticalController.GetOrderStatusCounts(System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.StatisticsController.GetOrderStatusCounts(System.Threading.CancellationToken)">
             <summary>
             Lấy số lượng đơn hàng theo từng trạng thái.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.StatisticalController.GetProductReportLastMonth(System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.StatisticsController.GetProductReportLastMonth(System.Threading.CancellationToken)">
             <summary>
             Lấy báo cáo sản phẩm của tháng trước.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.StatisticalController.GetProductStockAndPrice(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.StatisticsController.GetProductStockAndPrice(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Lấy giá và tồn kho của một sản phẩm cụ thể.
             </summary>
@@ -872,6 +877,116 @@
             <param name="request">Danh sách Id nhà cung cấp và trạng thái mới.</param>
             <param name="cancellationToken"></param>
             <returns></returns>
+        </member>
+        <member name="T:WebAPI.Controllers.V1.UserController">
+            <summary>
+            Quản lý người dùng (Bất cứ người dùng nào đã đăng nhập đều có quyền vào đây)
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.UserController.#ctor(Microsoft.AspNetCore.Identity.UserManager{Domain.Entities.ApplicationUser},Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Quản lý người dùng (Bất cứ người dùng nào đã đăng nhập đều có quyền vào đây)
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.UserController.GetCurrentUser">
+            <summary>
+            Lấy thông tin người dùng hiện tại từ JWT
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.UserController.UpdateCurrentUser(Application.ApiContracts.User.UpdateUserRequest)">
+            <summary>
+            Đổi thông tin người dùng hiện tại từ JWT
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.UserController.ChangePasswordCurrentUser(Application.ApiContracts.User.ChangePasswordRequest)">
+            <summary>
+            Đổi mật khẩu người dùng hiện tại từ JWT
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.UserController.DeleteCurrentUserAccount">
+            <summary>
+            Xoá tài khoản của người dùng hiện tại (soft delete - set DeletedAt)
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.UserController.RestoreUserAccount(System.Guid)">
+            <summary>
+            Khôi phục tài khoản người dùng (soft delete recovery - set DeletedAt to null)
+            </summary>
+        </member>
+        <member name="T:WebAPI.Controllers.V1.UserManagerController">
+            <summary>
+            Quản lý người dùng (Chỉ có người dùng có quyền mới được vào đây)
+            </summary>
+            <remarks>This controller enforces business rules to prevent modification or deletion of protected
+            users and roles, such as SuperRoles and users listed in the protected configuration. All endpoints require
+            specific permissions and may return error responses if protection rules are violated. API versioning is
+            supported via the route template. Thread safety is managed by ASP.NET Core's request handling; concurrent
+            requests may result in race conditions if user or role state changes rapidly.</remarks>
+            <param name="userManager">The user manager used to perform operations on user accounts, such as retrieval, update, deletion, and role
+            management.</param>
+            <param name="configuration">The application configuration used to access protected user and role settings that affect authorization and
+            deletion logic.</param>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.UserManagerController.#ctor(Microsoft.AspNetCore.Identity.UserManager{Domain.Entities.ApplicationUser},Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Quản lý người dùng (Chỉ có người dùng có quyền mới được vào đây)
+            </summary>
+            <remarks>This controller enforces business rules to prevent modification or deletion of protected
+            users and roles, such as SuperRoles and users listed in the protected configuration. All endpoints require
+            specific permissions and may return error responses if protection rules are violated. API versioning is
+            supported via the route template. Thread safety is managed by ASP.NET Core's request handling; concurrent
+            requests may result in race conditions if user or role state changes rapidly.</remarks>
+            <param name="userManager">The user manager used to perform operations on user accounts, such as retrieval, update, deletion, and role
+            management.</param>
+            <param name="configuration">The application configuration used to access protected user and role settings that affect authorization and
+            deletion logic.</param>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.UserManagerController.GetAllUsers">
+            <summary>
+            Lấy danh sách tất cả người dùng
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.UserManagerController.GetUserById(System.Guid)">
+            <summary>
+            Lấy thông tin người dùng theo ID
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.UserManagerController.UpdateUser(System.Guid,Application.ApiContracts.User.UpdateUserRequest)">
+            <summary>
+            Cập nhật thông tin người dùng
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.UserManagerController.ChangePassword(System.Guid,Application.ApiContracts.User.ChangePasswordRequest)">
+            <summary>
+            Đổi mật khẩu người dùng theo ID
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.UserManagerController.DeleteUser(System.Guid)">
+            <summary>
+            Xóa một người dùng (hard delete - Identity không hỗ trợ soft delete)
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.UserManagerController.DeleteMultipleUsers(System.Collections.Generic.List{System.Guid})">
+            <summary>
+            Xóa nhiều người dùng (hard delete) Quy tắc: Chỉ được phép xóa khi và chỉ khi tất cả users đều có thể được
+            xóa
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.UserManagerController.AssignRoles(System.Guid,Application.ApiContracts.User.AssignRolesRequest)">
+            <summary>
+            Gán roles cho người dùng
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.UserManagerController.ChangeUserStatus(System.Guid,Application.ApiContracts.User.ChangeUserStatusRequest)">
+            <summary>
+            Thay đổi trạng thái của người dùng
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.UserManagerController.ChangeMultipleUsersStatus(Application.ApiContracts.User.ChangeMultipleUsersStatusRequest)">
+            <summary>
+            Thay đổi trạng thái của nhiều người dùng Quy tắc: Chỉ được phép thay đổi khi và chỉ khi tất cả users đều có
+            thể thay đổi được
+            </summary>
         </member>
         <member name="T:WebAPI.Converters.EmptyStringConverter">
             <summary>

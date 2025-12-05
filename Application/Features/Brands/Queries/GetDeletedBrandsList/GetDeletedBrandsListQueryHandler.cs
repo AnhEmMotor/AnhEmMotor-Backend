@@ -1,7 +1,7 @@
 using Application.ApiContracts.Brand;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
-using Domain.Enums;
+using Domain.Constants;
 using Domain.Shared;
 using MediatR;
 using BrandEntity = Domain.Entities.Brand;

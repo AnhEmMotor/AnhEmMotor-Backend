@@ -1,4 +1,4 @@
-﻿using Domain.Enums;
+﻿using Domain.Constants;
 using InputEntity = Domain.Entities.Input;
 
 namespace Application.Interfaces.Repositories.Input;

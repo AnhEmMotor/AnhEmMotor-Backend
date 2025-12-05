@@ -8,19 +8,21 @@ using Application.Features.Statistical.Queries.GetProductStockAndPrice;
 using Asp.Versioning;
 using Domain.Helpers;
 using MediatR;
+using Swashbuckle.AspNetCore.Annotations;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers.V1;
 
 /// <summary>
-/// API thống kê và báo cáo.
+/// Thống kê và báo cáo.
 /// </summary>
 /// <param name="mediator"></param>
 [ApiVersion("1.0")]
+[SwaggerTag("Thống kê và báo cáo")]
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
-public class StatisticalController(IMediator mediator) : ControllerBase
+public class StatisticsController(IMediator mediator) : ControllerBase
 {
     /// <summary>
     /// Lấy doanh thu theo ngày trong khoảng thời gian xác định.

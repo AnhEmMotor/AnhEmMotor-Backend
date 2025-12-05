@@ -1,4 +1,4 @@
-﻿using Domain.Enums;
+﻿using Domain.Constants;
 using BrandEntity = Domain.Entities.Brand;
 
 namespace Application.Interfaces.Repositories.Brand

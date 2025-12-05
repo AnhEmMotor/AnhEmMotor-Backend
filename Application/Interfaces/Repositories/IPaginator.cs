@@ -1,4 +1,4 @@
-﻿using Domain.Enums;
+﻿using Domain.Constants;
 using Domain.Shared;
 using Sieve.Models;
 using System;

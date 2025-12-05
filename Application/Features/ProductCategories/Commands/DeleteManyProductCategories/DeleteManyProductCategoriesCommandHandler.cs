@@ -1,6 +1,6 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductCategory;
-using Domain.Enums;
+using Domain.Constants;
 using Domain.Helpers;
 using MediatR;
 

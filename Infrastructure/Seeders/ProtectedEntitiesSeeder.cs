@@ -1,5 +1,5 @@
+using Domain.Constants;
 using Domain.Entities;
-using Domain.Enums;
 using Infrastructure.DBContexts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -98,26 +98,13 @@ public static class ProtectedEntitiesSeeder
                 {
                     UserName = email,
                     Email = email,
-                    EmailConfirmed = true,
-                    FullName = "System Administrator",
-                    Gender = Gender.Other,
-                    PhoneNumber = "0000000000"
+                    Status = UserStatus.Active,
                 };
 
                 var result = await userManager.CreateAsync(newUser, password);
                 if (result.Succeeded)
                 {
-                    // Gán SuperRole đầu tiên cho user
                     await userManager.AddToRoleAsync(newUser, superRoles[0]);
-                }
-            }
-            else if (user is not null && superRoles.Count != 0)
-            {
-                // Đảm bảo user đã có SuperRole
-                var userRoles = await userManager.GetRolesAsync(user);
-                if (!userRoles.Any(r => superRoles.Contains(r)))
-                {
-                    await userManager.AddToRoleAsync(user, superRoles[0]);
                 }
             }
         }

@@ -15,6 +15,7 @@ using Domain.Shared;
 using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 using Sieve.Models;
 
 namespace WebAPI.Controllers.V1;
@@ -24,6 +25,7 @@ namespace WebAPI.Controllers.V1;
 /// </summary>
 /// <param name="mediator"></param>
 [ApiVersion("1.0")]
+[SwaggerTag("Quản lý tệp media")]
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]

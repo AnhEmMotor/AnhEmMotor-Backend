@@ -1,4 +1,4 @@
-﻿using Domain.Enums;
+﻿using Domain.Constants;
 using OutputEntity = Domain.Entities.Output;
 
 namespace Application.Interfaces.Repositories.Output;

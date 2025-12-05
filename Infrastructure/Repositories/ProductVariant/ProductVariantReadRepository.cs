@@ -1,5 +1,5 @@
 ﻿using Application.Interfaces.Repositories.ProductVariant;
-using Domain.Enums;
+using Domain.Constants;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using ProductVariantEntity = Domain.Entities.ProductVariant;

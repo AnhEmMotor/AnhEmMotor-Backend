@@ -15,6 +15,7 @@ using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace WebAPI.Controllers.V1;
 
@@ -23,6 +24,7 @@ namespace WebAPI.Controllers.V1;
 /// </summary>
 /// <param name="mediator"></param>
 [ApiVersion("1.0")]
+[SwaggerTag("Quản lý danh sách các thương hiệu sản phẩm")]
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]

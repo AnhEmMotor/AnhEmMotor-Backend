@@ -2,6 +2,7 @@ using Application.ApiContracts.Auth;
 using Asp.Versioning;
 using Domain.Constants;
 using Domain.Entities;
+using Domain.Helpers;
 using Infrastructure.Authorization;
 using Infrastructure.DBContexts;
 using Microsoft.AspNetCore.Authorization;
@@ -9,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
+using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
 
 namespace WebAPI.Controllers.V1;
@@ -17,18 +19,21 @@ namespace WebAPI.Controllers.V1;
 /// Controller quản lý quyền hạn và vai trò
 /// </summary>
 [ApiVersion("1.0")]
+[SwaggerTag("Controller quản lý quyền hạn và vai trò")]
 [Route("api/v{version:apiVersion}/[controller]")]
+[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
 [ApiController]
 public class PermissionController(
     RoleManager<ApplicationRole> roleManager,
     UserManager<ApplicationUser> userManager,
-    ApplicationDBContext context) : ControllerBase
+    ApplicationDBContext context,
+    IConfiguration configuration) : ControllerBase
 {
     /// <summary>
     /// Lấy tất cả các permissions có trong hệ thống với mô tả và trạng thái truy cập của người dùng hiện tại
     /// </summary>
     [HttpGet("permissions")]
-    [HasPermission(Permissions.Roles.View)]
+    [HasPermission(PermissionsList.Roles.View)]
     public async Task<IActionResult> GetAllPermissions()
     {
         // Lấy user hiện tại
@@ -41,7 +46,7 @@ public class PermissionController(
         }
 
         // Lấy permissions từ class Permissions
-        var permissionDefinitions = typeof(Permissions)
+        var permissionDefinitions = typeof(PermissionsList)
             .GetNestedTypes()
             .SelectMany(type => type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy))
             .Where(fieldInfo => fieldInfo.IsLiteral && !fieldInfo.IsInitOnly)
@@ -74,14 +79,17 @@ public class PermissionController(
             .GroupBy(p => p.Category)
             .ToDictionary(
                 g => g.Key,
-                g => g.Select(p => new
+                g => g.Select(p =>
                 {
-                    p.Key,
-                    p.Permission,
-                    // Mô tả sẽ được map từ Resource/i18n files - hiện tại là null
-                    Description = (string?)null,
-                    // True nếu user có quyền này, false nếu không
-                    HasAccess = userPermissions.Contains(p.Permission!)
+                    var metadata = PermissionsList.GetMetadata(p.Permission!);
+                    return new
+                    {
+                        p.Key,
+                        p.Permission,
+                        DisplayName = metadata?.DisplayName ?? p.Key,
+                        metadata?.Description,
+                        HasAccess = userPermissions.Contains(p.Permission!)
+                    };
                 }).ToList());
 
         return Ok(result);
@@ -112,11 +120,25 @@ public class PermissionController(
             .ToListAsync();
 
         var roleIds = roleEntities.Select(r => r.Id).ToList();
-        var userPermissions = await context.RolePermissions
+        var userPermissionNames = await context.RolePermissions
             .Where(rp => roleIds.Contains(rp.RoleId))
             .Select(rp => rp.Permission!.Name)
             .Distinct()
             .ToListAsync();
+
+        var userPermissions = userPermissionNames
+            .Select(p => new
+            {
+                Name = p,
+                Metadata = PermissionsList.GetMetadata(p)
+            })
+            .Select(p => new
+            {
+                p.Name,
+                DisplayName = p.Metadata?.DisplayName ?? p.Name,
+                p.Metadata?.Description
+            })
+            .ToList();
 
         return Ok(new
         {
@@ -131,7 +153,7 @@ public class PermissionController(
     /// Lấy các quyền của một vai trò cụ thể
     /// </summary>
     [HttpGet("roles/{roleName}/permissions")]
-    [HasPermission(Permissions.Roles.View)]
+    [HasPermission(PermissionsList.Roles.View)]
     public async Task<IActionResult> GetRolePermissions(string roleName)
     {
         var role = await roleManager.FindByNameAsync(roleName);
@@ -146,14 +168,28 @@ public class PermissionController(
             .Select(rp => rp.Permission!.Name)
             .ToListAsync();
 
-        return Ok(new { RoleName = roleName, Permissions = permissions });
+        var permissionsWithMetadata = permissions
+            .Select(p => new
+            {
+                Name = p,
+                Metadata = PermissionsList.GetMetadata(p)
+            })
+            .Select(p => new
+            {
+                p.Name,
+                DisplayName = p.Metadata?.DisplayName ?? p.Name,
+                p.Metadata?.Description
+            })
+            .ToList();
+
+        return Ok(new { RoleName = roleName, Permissions = permissionsWithMetadata });
     }
 
     /// <summary>
     /// Cập nhật quyền cho một vai trò
     /// </summary>
     [HttpPut("roles/{roleName}/permissions")]
-    [HasPermission(Permissions.Roles.AssignPermissions)]
+    [HasPermission(PermissionsList.Roles.AssignPermissions)]
     public async Task<IActionResult> UpdateRolePermissions(
         string roleName,
         [FromBody] UpdateRolePermissionsRequest model)
@@ -165,7 +201,7 @@ public class PermissionController(
         }
 
         // Lấy tất cả các permissions hợp lệ
-        var allPermissions = typeof(Permissions)
+        var allPermissions = typeof(PermissionsList)
             .GetNestedTypes()
             .SelectMany(type => type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy))
             .Where(fieldInfo => fieldInfo.IsLiteral && !fieldInfo.IsInitOnly)
@@ -264,7 +300,7 @@ public class PermissionController(
     /// Lấy tất cả các vai trò
     /// </summary>
     [HttpGet("roles")]
-    [HasPermission(Permissions.Roles.View)]
+    [HasPermission(PermissionsList.Roles.View)]
     public async Task<IActionResult> GetAllRoles()
     {
         var roles = await roleManager.Roles
@@ -282,7 +318,7 @@ public class PermissionController(
     /// Tạo vai trò mới
     /// </summary>
     [HttpPost("roles")]
-    [HasPermission(Permissions.Roles.Create)]
+    [HasPermission(PermissionsList.Roles.Create)]
     public async Task<IActionResult> CreateRole([FromBody] CreateRoleRequest model)
     {
         var roleExists = await roleManager.RoleExistsAsync(model.RoleName);
@@ -301,16 +337,23 @@ public class PermissionController(
     }
 
     /// <summary>
-    /// Xóa vai trò
+    /// Xóa vai trò (hard delete)
     /// </summary>
     [HttpDelete("roles/{roleName}")]
-    [HasPermission(Permissions.Roles.Delete)]
+    [HasPermission(PermissionsList.Roles.Delete)]
     public async Task<IActionResult> DeleteRole(string roleName)
     {
         var role = await roleManager.FindByNameAsync(roleName);
         if (role is null)
         {
             return NotFound(new { Message = "Role not found." });
+        }
+
+        // Kiểm tra SuperRoles
+        var superRoles = configuration.GetSection("ProtectedAuthorizationEntities:SuperRoles").Get<List<string>>() ?? [];
+        if (superRoles.Contains(roleName))
+        {
+            return BadRequest(new { Message = "Cannot delete SuperRole." });
         }
 
         var result = await roleManager.DeleteAsync(role);
@@ -320,6 +363,52 @@ public class PermissionController(
         }
 
         return Ok(new { Message = $"Role '{roleName}' deleted successfully." });
+    }
+
+    /// <summary>
+    /// Xóa nhiều vai trò (hard delete)
+    /// </summary>
+    [HttpPost("roles/delete-multiple")]
+    [HasPermission(PermissionsList.Roles.Delete)]
+    public async Task<IActionResult> DeleteMultipleRoles([FromBody] List<string> roleNames)
+    {
+        var superRoles = configuration.GetSection("ProtectedAuthorizationEntities:SuperRoles").Get<List<string>>() ?? [];
+
+        var deletedCount = 0;
+        var skippedCount = 0;
+
+        foreach (var roleName in roleNames)
+        {
+            if (superRoles.Contains(roleName))
+            {
+                skippedCount++;
+                continue;
+            }
+
+            var role = await roleManager.FindByNameAsync(roleName);
+            if (role is null)
+            {
+                skippedCount++;
+                continue;
+            }
+
+            var result = await roleManager.DeleteAsync(role);
+            if (result.Succeeded)
+            {
+                deletedCount++;
+            }
+            else
+            {
+                skippedCount++;
+            }
+        }
+
+        return Ok(new
+        {
+            Message = $"Deleted {deletedCount} role(s) successfully.",
+            DeletedCount = deletedCount,
+            SkippedCount = skippedCount
+        });
     }
 }
 

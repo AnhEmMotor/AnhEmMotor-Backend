@@ -1,5 +1,3 @@
-using Domain.Enums;
-
 namespace Application.ApiContracts.Auth;
 
 /// <summary>
@@ -33,7 +31,7 @@ public class RegisterRequest
     public string? PhoneNumber { get; set; }
 
     /// <summary>
-    /// Giới tính (1: Nam, 2: Nữ, 3: Khác)
+    /// Giới tính (Male, Female, Other)
     /// </summary>
-    public Gender Gender { get; set; }
+    public string Gender { get; set; } = "Male";
 }

@@ -18,6 +18,7 @@ using Domain.Shared;
 using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 using Sieve.Models;
 
 namespace WebAPI.Controllers.V1;
@@ -27,10 +28,11 @@ namespace WebAPI.Controllers.V1;
 /// </summary>
 /// <param name="mediator"></param>
 [ApiVersion("1.0")]
+[SwaggerTag("Quản lý phiếu nhập hàng")]
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
-public class InputController(IMediator mediator) : ControllerBase
+public class InventoryReceiptsController(IMediator mediator) : ControllerBase
 {
     /// <summary>
     /// Lấy danh sách phiếu nhập (có phân trang, lọc, sắp xếp).

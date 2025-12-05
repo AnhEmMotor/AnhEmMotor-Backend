@@ -1,5 +1,5 @@
 ﻿using Application.Interfaces.Repositories.Brand;
-using Domain.Enums;
+using Domain.Constants;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using BrandEntity = Domain.Entities.Brand;

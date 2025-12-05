@@ -1,4 +1,4 @@
-﻿using Domain.Enums;
+﻿using Domain.Constants;
 using System;
 using OptionEntity = Domain.Entities.Option;
 

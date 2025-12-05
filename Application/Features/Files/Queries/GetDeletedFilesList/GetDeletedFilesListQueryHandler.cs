@@ -1,7 +1,7 @@
 using Application.ApiContracts.File;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.MediaFile;
-using Domain.Enums;
+using Domain.Constants;
 using Domain.Shared;
 using MediatR;
 using MediaFileEntity = Domain.Entities.MediaFile;

@@ -1,4 +1,4 @@
-﻿using Domain.Enums;
+﻿using Domain.Constants;
 using Sieve.Models;
 
 namespace Application.Sieve

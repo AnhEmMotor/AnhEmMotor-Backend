@@ -1,7 +1,7 @@
 using Application.ApiContracts.Output;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
-using Domain.Enums;
+using Domain.Constants;
 using Domain.Shared;
 using MediatR;
 using OutputEntity = Domain.Entities.Output;

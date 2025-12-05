@@ -15,6 +15,7 @@ using Domain.Helpers;
 using Domain.Shared;
 using Mapster;
 using MediatR;
+using Swashbuckle.AspNetCore.Annotations;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 
@@ -25,10 +26,11 @@ namespace WebAPI.Controllers.V1;
 /// </summary>
 /// <param name="mediator"></param>
 [ApiVersion("1.0")]
+[SwaggerTag("Quản lý đơn hàng/phiếu xuất")]
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
-public class OutputController(IMediator mediator) : ControllerBase
+public class SalesOrdersController(IMediator mediator) : ControllerBase
 {
     /// <summary>
     /// Lấy danh sách đơn hàng (có phân trang, lọc, sắp xếp).

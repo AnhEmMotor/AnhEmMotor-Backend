@@ -1,6 +1,6 @@
 ﻿using Application.ApiContracts.Product.Common;
 using Application.Interfaces.Repositories.ProductVariant;
-using Domain.Enums;
+using Domain.Constants;
 using Domain.Shared;
 using Mapster;
 using MediatR;

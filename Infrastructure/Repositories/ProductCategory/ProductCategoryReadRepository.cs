@@ -1,5 +1,5 @@
 using Application.Interfaces.Repositories.ProductCategory;
-using Domain.Enums;
+using Domain.Constants;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using CategoryEntity = Domain.Entities.ProductCategory;

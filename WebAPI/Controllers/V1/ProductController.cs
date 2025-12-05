@@ -18,8 +18,11 @@ using Application.Features.Products.Queries.GetProductById;
 using Application.Features.Products.Queries.GetProductsList;
 using Application.Features.Products.Queries.GetVariantLiteByProductId;
 using Asp.Versioning;
+using Domain.Constants;
 using Domain.Helpers;
+using Swashbuckle.AspNetCore.Annotations;
 using Domain.Shared;
+using Infrastructure.Authorization;
 using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -31,6 +34,7 @@ namespace WebAPI.Controllers.V1;
 /// Quản lý sản phẩm.
 /// </summary>
 [ApiVersion("1.0")]
+[SwaggerTag("Quản lý sản phẩm")]
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
@@ -40,6 +44,7 @@ public class ProductController(ISender sender) : ControllerBase
     /// Lấy danh sách sản phẩm đầy đủ (có phân trang, lọc, tìm kiếm).
     /// </summary>
     [HttpGet]
+    [HasPermission(PermissionsList.Products.View)]
     [ProducesResponseType(
         typeof(PagedResult<Application.ApiContracts.Product.Responses.ProductDetailResponse>),
         StatusCodes.Status200OK)]

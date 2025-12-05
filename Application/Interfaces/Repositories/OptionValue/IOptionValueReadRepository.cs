@@ -1,4 +1,4 @@
-﻿using Domain.Enums;
+﻿using Domain.Constants;
 using OptionValueEntity = Domain.Entities.OptionValue;
 
 namespace Application.Interfaces.Repositories.OptionValue

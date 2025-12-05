@@ -2,6 +2,7 @@
 using Infrastructure.DBContexts;
 using Infrastructure.Seeders;
 using Microsoft.AspNetCore.Identity;
+using Swashbuckle.AspNetCore.SwaggerUI;
 using WebAPI.StartupExtensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,7 +35,9 @@ try
                     $"/swagger/{description.GroupName}/swagger.json",
                     description.GroupName.ToUpperInvariant());
             }
+            options.DocExpansion(DocExpansion.None);
         });
+
 } catch(System.Reflection.ReflectionTypeLoadException ex)
 {
     foreach(var loaderException in ex.LoaderExceptions)

@@ -1,6 +1,5 @@
 ﻿using Application.Interfaces.Repositories.Output;
 using Domain.Constants;
-using Domain.Enums;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using OutputEntity = Domain.Entities.Output;

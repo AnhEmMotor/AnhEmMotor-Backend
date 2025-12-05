@@ -1,6 +1,6 @@
 ﻿using Application.Interfaces.Repositories;
 using Application.Sieve;
-using Domain.Enums;
+using Domain.Constants;
 using Domain.Shared;
 using Mapster;
 using Microsoft.EntityFrameworkCore;

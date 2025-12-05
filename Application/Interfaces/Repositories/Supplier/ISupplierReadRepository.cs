@@ -1,5 +1,5 @@
 using Application.ApiContracts.Supplier;
-using Domain.Enums;
+using Domain.Constants;
 using SupplierEntity = Domain.Entities.Supplier;
 
 namespace Application.Interfaces.Repositories.Supplier

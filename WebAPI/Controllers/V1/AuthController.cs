@@ -1,12 +1,15 @@
 using Application.ApiContracts.Auth;
 using Asp.Versioning;
+using Domain.Constants;
 using Domain.Entities;
+using Domain.Helpers;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
 
 namespace WebAPI.Controllers.V1;
@@ -15,7 +18,9 @@ namespace WebAPI.Controllers.V1;
 /// Controller xử lý xác thực và đăng nhập
 /// </summary>
 [ApiVersion("1.0")]
+[SwaggerTag("Controller xử lý xác thực và đăng nhập")]
 [Route("api/v{version:apiVersion}/[controller]")]
+[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
 [ApiController]
 public class AuthController(
     UserManager<ApplicationUser> userManager,
@@ -46,11 +51,12 @@ public class AuthController(
 
         var user = new ApplicationUser
         {
-            UserName = model.Username,
+            UserName = string.IsNullOrEmpty(model.Username) == true ? model.Email : model.Username,
             Email = model.Email,
             FullName = model.FullName,
             PhoneNumber = model.PhoneNumber,
-            Gender = model.Gender
+            Gender = model.Gender ?? GenderStatus.Male,
+            Status = UserStatus.Active
         };
 
         var result = await userManager.CreateAsync(user, model.Password);
@@ -92,6 +98,12 @@ public class AuthController(
         if (user is null)
         {
             return Unauthorized(new { Message = "Invalid credentials." });
+        }
+
+        // Kiểm tra trạng thái của user
+        if (user.Status != UserStatus.Active || user.DeletedAt is not null)
+        {
+            return Unauthorized(new { Message = "Account is not available." });
         }
 
         var result = await signInManager.CheckPasswordSignInAsync(user, model.Password, false);

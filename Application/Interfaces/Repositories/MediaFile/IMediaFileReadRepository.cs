@@ -1,4 +1,4 @@
-using Domain.Enums;
+using Domain.Constants;
 using MediaFileEntity = Domain.Entities.MediaFile;
 
 namespace Application.Interfaces.Repositories.MediaFile;

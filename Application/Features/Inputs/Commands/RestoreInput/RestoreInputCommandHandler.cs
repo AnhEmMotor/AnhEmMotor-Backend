@@ -1,7 +1,7 @@
 using Application.ApiContracts.Input;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
-using Domain.Enums;
+using Domain.Constants;
 using Domain.Helpers;
 using Mapster;
 using MediatR;

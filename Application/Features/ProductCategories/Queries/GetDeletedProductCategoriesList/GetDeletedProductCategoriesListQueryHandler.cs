@@ -1,7 +1,7 @@
 using Application.ApiContracts.ProductCategory;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductCategory;
-using Domain.Enums;
+using Domain.Constants;
 using Domain.Shared;
 using MediatR;
 using ProductCategoryEntity = Domain.Entities.ProductCategory;

@@ -1,7 +1,6 @@
 using Application.ApiContracts.Supplier;
 using Application.Interfaces.Repositories.Supplier;
 using Domain.Constants;
-using Domain.Enums;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using SupplierEntity = Domain.Entities.Supplier;

@@ -1,7 +1,7 @@
 using Application.ApiContracts.Supplier;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Supplier;
-using Domain.Enums;
+using Domain.Constants;
 using Domain.Shared;
 using MediatR;
 using SupplierEntity = Domain.Entities.Supplier;

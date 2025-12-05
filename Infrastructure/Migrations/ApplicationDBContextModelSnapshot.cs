@@ -63,6 +63,9 @@ namespace Infrastructure.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -74,8 +77,9 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Gender")
-                        .HasColumnType("int");
+                    b.Property<string>("Gender")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -107,6 +111,10 @@ namespace Infrastructure.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("TwoFactorEnabled")
@@ -157,7 +165,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Brand");
+                    b.ToTable("Brand", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Input", b =>
@@ -200,7 +208,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("SupplierId");
 
-                    b.ToTable("Input");
+                    b.ToTable("Input", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.InputInfo", b =>
@@ -247,7 +255,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("InputInfo");
+                    b.ToTable("InputInfo", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.InputStatus", b =>
@@ -267,7 +275,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Key");
 
-                    b.ToTable("InputStatus");
+                    b.ToTable("InputStatus", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.MediaFile", b =>
@@ -313,7 +321,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MediaFiles");
+                    b.ToTable("MediaFiles", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Option", b =>
@@ -340,7 +348,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Option");
+                    b.ToTable("Option", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.OptionValue", b =>
@@ -373,7 +381,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("OptionId");
 
-                    b.ToTable("OptionValue");
+                    b.ToTable("OptionValue", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Output", b =>
@@ -414,7 +422,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("StatusId");
 
-                    b.ToTable("Output");
+                    b.ToTable("Output", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.OutputInfo", b =>
@@ -461,7 +469,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("OutputInfo");
+                    b.ToTable("OutputInfo", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.OutputStatus", b =>
@@ -481,7 +489,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Key");
 
-                    b.ToTable("OutputStatus");
+                    b.ToTable("OutputStatus", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Permission", b =>
@@ -623,7 +631,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("StatusId");
 
-                    b.ToTable("Product");
+                    b.ToTable("Product", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductCategory", b =>
@@ -654,7 +662,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ProductCategory");
+                    b.ToTable("ProductCategory", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductCollectionPhoto", b =>
@@ -687,7 +695,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("ProductVariantId");
 
-                    b.ToTable("ProductCollectionPhoto");
+                    b.ToTable("ProductCollectionPhoto", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductStatus", b =>
@@ -707,7 +715,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Key");
 
-                    b.ToTable("ProductStatus");
+                    b.ToTable("ProductStatus", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductVariant", b =>
@@ -748,7 +756,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductVariant");
+                    b.ToTable("ProductVariant", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.RolePermission", b =>
@@ -787,7 +795,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Key");
 
-                    b.ToTable("Setting");
+                    b.ToTable("Setting", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Supplier", b =>
@@ -836,7 +844,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("StatusId");
 
-                    b.ToTable("Supplier");
+                    b.ToTable("Supplier", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.SupplierStatus", b =>
@@ -856,7 +864,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Key");
 
-                    b.ToTable("SupplierStatus");
+                    b.ToTable("SupplierStatus", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.VariantOptionValue", b =>
@@ -891,7 +899,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("VariantId");
 
-                    b.ToTable("VariantOptionValue");
+                    b.ToTable("VariantOptionValue", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>

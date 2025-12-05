@@ -1,4 +1,4 @@
-﻿namespace Domain.Enums
+﻿namespace Domain.Constants
 {
     public enum DataFetchMode
     {
