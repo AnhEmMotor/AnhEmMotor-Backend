@@ -1,4 +1,4 @@
-using Application.ApiContracts.Staticals;
+using Application.ApiContracts.Statistical.Responses;
 using MediatR;
 
 namespace Application.Features.Statistical.Queries.GetDashboardStats;

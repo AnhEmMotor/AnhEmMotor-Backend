@@ -1,4 +1,3 @@
-using Application.ApiContracts.File;
 using Application.Interfaces.Repositories.MediaFile;
 using Domain.Helpers;
 using Mapster;
@@ -8,9 +7,9 @@ namespace Application.Features.Files.Queries.GetFileById;
 
 public sealed class GetFileByIdQueryHandler(
     IMediaFileReadRepository repository,
-    Interfaces.Repositories.LocalFile.IFileStorageService fileStorageService) : IRequestHandler<GetFileByIdQuery, (MediaFileResponse? Data, ErrorResponse? Error)>
+    Interfaces.Repositories.LocalFile.IFileStorageService fileStorageService) : IRequestHandler<GetFileByIdQuery, (ApiContracts.File.Responses.MediaFileResponse? Data, ErrorResponse? Error)>
 {
-    public async Task<(MediaFileResponse? Data, ErrorResponse? Error)> Handle(
+    public async Task<(ApiContracts.File.Responses.MediaFileResponse? Data, ErrorResponse? Error)> Handle(
         GetFileByIdQuery request,
         CancellationToken cancellationToken)
     {
@@ -24,7 +23,7 @@ public sealed class GetFileByIdQueryHandler(
             });
         }
 
-        var response = file.Adapt<MediaFileResponse>();
+        var response = file.Adapt<ApiContracts.File.Responses.MediaFileResponse>();
         if(!string.IsNullOrEmpty(file.StoragePath))
         {
             response.PublicUrl = fileStorageService.GetPublicUrl(file.StoragePath);

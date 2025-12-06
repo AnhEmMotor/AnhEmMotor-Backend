@@ -1,4 +1,4 @@
-using Application.ApiContracts.Output;
+using Application.ApiContracts.Output.Responses;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Domain.Constants;

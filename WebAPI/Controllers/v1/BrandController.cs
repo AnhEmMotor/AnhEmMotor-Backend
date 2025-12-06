@@ -1,5 +1,4 @@
-﻿using Application.ApiContracts.Brand;
-using Application.Features.Brands.Commands.CreateBrand;
+﻿using Application.Features.Brands.Commands.CreateBrand;
 using Application.Features.Brands.Commands.DeleteBrand;
 using Application.Features.Brands.Commands.DeleteManyBrands;
 using Application.Features.Brands.Commands.RestoreBrand;
@@ -37,7 +36,7 @@ public class BrandController(IMediator mediator) : ControllerBase
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpGet]
-    [ProducesResponseType(typeof(PagedResult<BrandResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedResult<Application.ApiContracts.Brand.Responses.BrandResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetBrands([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
     {
         var query = new GetBrandsListQuery(sieveModel);
@@ -52,7 +51,7 @@ public class BrandController(IMediator mediator) : ControllerBase
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpGet("deleted")]
-    [ProducesResponseType(typeof(PagedResult<BrandResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedResult<Application.ApiContracts.Brand.Responses.BrandResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetDeletedBrands(
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
@@ -69,7 +68,7 @@ public class BrandController(IMediator mediator) : ControllerBase
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpGet("{id:int}")]
-    [ProducesResponseType(typeof(BrandResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Application.ApiContracts.Brand.Responses.BrandResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetBrandById(int id, CancellationToken cancellationToken)
     {
@@ -89,9 +88,9 @@ public class BrandController(IMediator mediator) : ControllerBase
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpPost]
-    [ProducesResponseType(typeof(BrandResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(Application.ApiContracts.Brand.Responses.BrandResponse), StatusCodes.Status201Created)]
     public async Task<IActionResult> CreateBrand(
-        [FromBody] CreateBrandRequest request,
+        [FromBody] Application.ApiContracts.Brand.Requests.CreateBrandRequest request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<CreateBrandCommand>();
@@ -107,11 +106,11 @@ public class BrandController(IMediator mediator) : ControllerBase
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpPut("{id:int}")]
-    [ProducesResponseType(typeof(BrandResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Application.ApiContracts.Brand.Responses.BrandResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateBrand(
         int id,
-        [FromBody] UpdateBrandRequest request,
+        [FromBody] Application.ApiContracts.Brand.Requests.UpdateBrandRequest request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<UpdateBrandCommand>() with { Id = id };
@@ -152,7 +151,7 @@ public class BrandController(IMediator mediator) : ControllerBase
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpPost("restore/{id:int}")]
-    [ProducesResponseType(typeof(BrandResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Application.ApiContracts.Brand.Responses.BrandResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RestoreBrand(int id, CancellationToken cancellationToken)
     {
@@ -177,7 +176,7 @@ public class BrandController(IMediator mediator) : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteBrands(
-        [FromBody] DeleteManyBrandsRequest request,
+        [FromBody] Application.ApiContracts.Brand.Requests.DeleteManyBrandsRequest request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<DeleteManyBrandsCommand>();
@@ -198,10 +197,10 @@ public class BrandController(IMediator mediator) : ControllerBase
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpPost("restore-many")]
-    [ProducesResponseType(typeof(List<BrandResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(List<Application.ApiContracts.Brand.Responses.BrandResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RestoreBrands(
-        [FromBody] RestoreManyBrandsRequest request,
+        [FromBody] Application.ApiContracts.Brand.Requests.RestoreManyBrandsRequest request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<RestoreManyBrandsCommand>();

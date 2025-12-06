@@ -1,4 +1,3 @@
-using Application.ApiContracts.File;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.MediaFile;
 using Domain.Constants;
@@ -12,9 +11,9 @@ public sealed class RestoreFileCommandHandler(
     IMediaFileReadRepository readRepository,
     IMediaFileUpdateRepository updateRepository,
     Interfaces.Repositories.LocalFile.IFileStorageService fileStorageService,
-    IUnitOfWork unitOfWork) : IRequestHandler<RestoreFileCommand, (MediaFileResponse?, ErrorResponse?)>
+    IUnitOfWork unitOfWork) : IRequestHandler<RestoreFileCommand, (ApiContracts.File.Responses.MediaFileResponse?, ErrorResponse?)>
 {
-    public async Task<(MediaFileResponse?, ErrorResponse?)> Handle(
+    public async Task<(ApiContracts.File.Responses.MediaFileResponse?, ErrorResponse?)> Handle(
         RestoreFileCommand request,
         CancellationToken cancellationToken)
     {
@@ -35,7 +34,7 @@ public sealed class RestoreFileCommandHandler(
         updateRepository.Restore(mediaFile);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        var response = mediaFile.Adapt<MediaFileResponse>();
+        var response = mediaFile.Adapt<ApiContracts.File.Responses.MediaFileResponse>();
         response.PublicUrl = fileStorageService.GetPublicUrl(mediaFile.StoragePath!);
 
         return (response, null);

@@ -1,9 +1,8 @@
-using Application.ApiContracts.File;
 using MediatR;
 
 namespace Application.Features.Files.Commands.UploadManyImage;
 
-public sealed record UploadManyImageCommand : IRequest<List<MediaFileResponse>>
+public sealed record UploadManyImageCommand : IRequest<List<ApiContracts.File.Responses.MediaFileResponse>>
 {
-    public List<FileUploadRequest> Files { get; init; } = [];
+    public List<ApiContracts.File.Requests.FileUploadRequest> Files { get; init; } = [];
 }

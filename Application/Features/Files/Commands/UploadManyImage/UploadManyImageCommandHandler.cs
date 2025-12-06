@@ -1,4 +1,3 @@
-using Application.ApiContracts.File;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.MediaFile;
 using Mapster;
@@ -10,9 +9,9 @@ namespace Application.Features.Files.Commands.UploadManyImage;
 public sealed class UploadManyImageCommandHandler(
     Interfaces.Repositories.LocalFile.IFileStorageService fileStorageService,
     IMediaFileInsertRepository insertRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UploadManyImageCommand, List<MediaFileResponse>>
+    IUnitOfWork unitOfWork) : IRequestHandler<UploadManyImageCommand, List<ApiContracts.File.Responses.MediaFileResponse>>
 {
-    public async Task<List<MediaFileResponse>> Handle(
+    public async Task<List<ApiContracts.File.Responses.MediaFileResponse>> Handle(
         UploadManyImageCommand request,
         CancellationToken cancellationToken)
     {
@@ -49,7 +48,7 @@ public sealed class UploadManyImageCommandHandler(
         insertRepository.AddRange(mediaFiles);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        var responses = mediaFiles.Adapt<List<MediaFileResponse>>();
+        var responses = mediaFiles.Adapt<List<ApiContracts.File.Responses.MediaFileResponse>>();
         foreach(var response in responses)
         {
             response.PublicUrl = fileStorageService.GetPublicUrl(response.StoragePath!);

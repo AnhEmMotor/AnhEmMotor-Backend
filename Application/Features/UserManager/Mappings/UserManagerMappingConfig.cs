@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.User;
+﻿using Application.ApiContracts.User.Responses;
 using Domain.Entities;
 using Mapster;
 
@@ -9,6 +9,6 @@ public sealed class UserManagerMappingConfig : IRegister
     public void Register(TypeAdapterConfig config)
     {
         config.NewConfig<ApplicationUser, UserResponse>()
-            .Ignore(dest => dest.Roles);
+            .Ignore(dest => dest.Roles!);
     }
 }

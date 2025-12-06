@@ -1,4 +1,4 @@
-using Application.ApiContracts.Output;
+using Application.ApiContracts.Output.Responses;
 using Application.Interfaces.Repositories.Output;
 using Domain.Helpers;
 using Mapster;

@@ -1,4 +1,4 @@
-using Application.ApiContracts.Supplier;
+using Application.ApiContracts.Supplier.Responses;
 using MediatR;
 
 namespace Application.Features.Suppliers.Commands.CreateSupplier;

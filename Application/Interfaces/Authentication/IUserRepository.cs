@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.User;
+﻿using Application.ApiContracts.User.Responses;
 using Domain.Shared;
 using Sieve.Models;
 

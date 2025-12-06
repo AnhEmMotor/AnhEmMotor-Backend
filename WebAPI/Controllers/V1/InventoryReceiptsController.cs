@@ -20,6 +20,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using Sieve.Models;
+using Application.ApiContracts.Input.Responses;
 
 namespace WebAPI.Controllers.V1;
 
@@ -99,7 +100,7 @@ public class InventoryReceiptsController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(InputResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateInput(
-        [FromBody] CreateInputRequest request,
+        [FromBody] Application.ApiContracts.Input.Requests.CreateInputRequest request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<CreateInputCommand>();
@@ -140,7 +141,7 @@ public class InventoryReceiptsController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateInput(
         int id,
-        [FromBody] UpdateInputRequest request,
+        [FromBody] Application.ApiContracts.Input.Requests.UpdateInputRequest request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<UpdateInputCommand>() with { Id = id };
@@ -161,7 +162,7 @@ public class InventoryReceiptsController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateInputStatus(
         int id,
-        [FromBody] UpdateInputStatusRequest request,
+        [FromBody] Application.ApiContracts.Input.Requests.UpdateInputStatusRequest request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<UpdateInputStatusCommand>() with { Id = id };
@@ -180,7 +181,7 @@ public class InventoryReceiptsController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(List<InputResponse>), StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateManyInputStatus(
-        [FromBody] UpdateManyInputStatusRequest request,
+        [FromBody] Application.ApiContracts.Input.Requests.UpdateManyInputStatusRequest request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<UpdateManyInputStatusCommand>();
@@ -216,7 +217,7 @@ public class InventoryReceiptsController(IMediator mediator) : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteManyInputs(
-        [FromBody] DeleteManyInputsRequest request,
+        [FromBody] Application.ApiContracts.Input.Requests.DeleteManyInputsRequest request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<DeleteManyInputsCommand>();
@@ -252,7 +253,7 @@ public class InventoryReceiptsController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(List<InputResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RestoreManyInputs(
-        [FromBody] RestoreManyInputsRequest request,
+        [FromBody] Application.ApiContracts.Input.Requests.RestoreManyInputsRequest request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<RestoreManyInputsCommand>();

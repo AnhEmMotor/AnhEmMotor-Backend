@@ -1,4 +1,3 @@
-using Application.ApiContracts.File;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.MediaFile;
 using Domain.Constants;
@@ -12,9 +11,9 @@ public sealed class RestoreManyFilesCommandHandler(
     IMediaFileReadRepository readRepository,
     IMediaFileUpdateRepository updateRepository,
     Interfaces.Repositories.LocalFile.IFileStorageService fileStorageService,
-    IUnitOfWork unitOfWork) : IRequestHandler<RestoreManyFilesCommand, (List<MediaFileResponse>? Data, ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<RestoreManyFilesCommand, (List<ApiContracts.File.Responses.MediaFileResponse>? Data, ErrorResponse? Error)>
 {
-    public async Task<(List<MediaFileResponse>? Data, ErrorResponse? Error)> Handle(
+    public async Task<(List<ApiContracts.File.Responses.MediaFileResponse>? Data, ErrorResponse? Error)> Handle(
         RestoreManyFilesCommand request,
         CancellationToken cancellationToken)
     {
@@ -59,7 +58,7 @@ public sealed class RestoreManyFilesCommandHandler(
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        var responses = deletedFiles.Adapt<List<MediaFileResponse>>();
+        var responses = deletedFiles.Adapt<List<ApiContracts.File.Responses.MediaFileResponse>>();
         foreach(var response in responses)
         {
             if(!string.IsNullOrEmpty(response.StoragePath))

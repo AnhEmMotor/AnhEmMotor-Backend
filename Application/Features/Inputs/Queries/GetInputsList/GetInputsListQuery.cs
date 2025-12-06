@@ -1,4 +1,4 @@
-using Application.ApiContracts.Input;
+using Application.ApiContracts.Input.Responses;
 using Domain.Shared;
 using MediatR;
 using Sieve.Models;

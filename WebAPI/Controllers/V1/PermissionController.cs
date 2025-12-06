@@ -1,4 +1,5 @@
-using Application.ApiContracts.Auth;
+using Application.ApiContracts.Permission.Requests;
+using Application.ApiContracts.Permission.Responses;
 using Asp.Versioning;
 using Domain.Constants;
 using Domain.Entities;
@@ -9,9 +10,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Reflection;
 using System.Security.Claims;
+
 
 namespace WebAPI.Controllers.V1;
 
@@ -34,6 +36,7 @@ public class PermissionController(
     /// </summary>
     [HttpGet("permissions")]
     [HasPermission(PermissionsList.Roles.View)]
+    [ProducesResponseType(typeof(List<PermissionResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllPermissions()
     {
         // Lấy user hiện tại
@@ -66,12 +69,11 @@ public class PermissionController(
                 g => g.Select(p =>
                 {
                     var metadata = PermissionsList.GetMetadata(p.Permission!);
-                    return new
+                    return new PermissionResponse()
                     {
-                        p.Key,
-                        p.Permission,
+                        ID = p.Permission,
                         DisplayName = metadata?.DisplayName ?? p.Key,
-                        metadata?.Description,
+                        Description = metadata?.Description,
                     };
                 }).ToList());
 
@@ -83,18 +85,21 @@ public class PermissionController(
     /// </summary>
     [HttpGet("my-permissions")]
     [Authorize]
+    [ProducesResponseType(typeof(List<PermissionAndRoleOfUserResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetMyPermissions()
     {
         var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
         {
-            return Unauthorized(new { Message = "Invalid user token." });
+            return Unauthorized(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "Invalid user token." }] });
         }
 
         var user = await userManager.FindByIdAsync(userId.ToString());
         if (user is null)
         {
-            return NotFound(new { Message = "User not found." });
+            return NotFound(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "User not found." }] });
         }
 
         var userRoles = await userManager.GetRolesAsync(user);
@@ -115,18 +120,19 @@ public class PermissionController(
                 Name = p,
                 Metadata = PermissionsList.GetMetadata(p)
             })
-            .Select(p => new
+            .Select(p => new PermissionResponse()
             {
-                p.Name,
+                ID = p.Name,
                 DisplayName = p.Metadata?.DisplayName ?? p.Name,
-                p.Metadata?.Description
+                Description = p.Metadata?.Description
             })
             .ToList();
 
-        return Ok(new
+        return Ok(new PermissionAndRoleOfUserResponse()
         {
             UserId = userId,
-            user.UserName,
+            Email = user.Email,
+            UserName = user.UserName,
             Roles = userRoles,
             Permissions = userPermissions
         });
@@ -137,12 +143,14 @@ public class PermissionController(
     /// </summary>
     [HttpGet("users/{userId:guid}/permissions")]
     [HasPermission(PermissionsList.Users.View)]
+    [ProducesResponseType(typeof(List<PermissionAndRoleOfUserResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetUserPermissionsById(Guid userId)
     {
         var user = await userManager.FindByIdAsync(userId.ToString());
         if (user is null)
         {
-            return NotFound(new { Message = "User not found." });
+            return NotFound(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "User not found." }] });
         }
 
         var userRoles = await userManager.GetRolesAsync(user);
@@ -163,19 +171,19 @@ public class PermissionController(
                 Name = p,
                 Metadata = PermissionsList.GetMetadata(p)
             })
-            .Select(p => new
+            .Select(p => new PermissionResponse()
             {
-                p.Name,
+                ID = p.Name,
                 DisplayName = p.Metadata?.DisplayName ?? p.Name,
-                p.Metadata?.Description
+                Description = p.Metadata?.Description
             })
             .ToList();
 
-        return Ok(new
+        return Ok(new PermissionAndRoleOfUserResponse()
         {
             UserId = userId,
-            user.UserName,
-            user.Email,
+            Email = user.Email,
+            UserName = user.UserName,
             Roles = userRoles,
             Permissions = userPermissions
         });
@@ -186,12 +194,14 @@ public class PermissionController(
     /// </summary>
     [HttpGet("roles/{roleName}/permissions")]
     [HasPermission(PermissionsList.Roles.View)]
+    [ProducesResponseType(typeof(List<PermissionResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetRolePermissions(string roleName)
     {
         var role = await roleManager.FindByNameAsync(roleName);
         if (role is null)
         {
-            return NotFound(new { Message = "Role not found." });
+            return NotFound(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "Role not found." }] });
         }
 
         var permissions = await context.RolePermissions
@@ -214,7 +224,7 @@ public class PermissionController(
             })
             .ToList();
 
-        return Ok(new { RoleName = roleName, Permissions = permissionsWithMetadata });
+        return Ok(permissionsWithMetadata);
     }
 
     /// <summary>
@@ -222,14 +232,17 @@ public class PermissionController(
     /// </summary>
     [HttpPut("roles/{roleName}/permissions")]
     [HasPermission(PermissionsList.Roles.AssignPermissions)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(PermissionRoleUpdateResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> UpdateRolePermissions(
         string roleName,
-        [FromBody] UpdateRolePermissionsRequest model)
+        [FromBody] UpdateRoleRequest model)
     {
         var role = await roleManager.FindByNameAsync(roleName);
         if (role is null)
         {
-            return NotFound(new { Message = "Role not found." });
+            return NotFound(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "Role not found." }] });
         }
 
         bool isRoleInfoUpdated = false;
@@ -252,9 +265,10 @@ public class PermissionController(
             var invalidPermissions = model.Permissions.Except(allPermissions!).ToList();
             if (invalidPermissions.Count != 0)
             {
-                return BadRequest(new
+                return BadRequest(new ErrorResponse()
                 {
-                    Message = $"Invalid permissions: {string.Join(", ", invalidPermissions)}"
+                    Errors = [new ErrorDetail() { Message = $"Invalid permissions: {string.Join(", ", invalidPermissions)}"
+                }]
                 });
             }
 
@@ -292,9 +306,10 @@ public class PermissionController(
 
                 if (orphanedPermissionNames.Count != 0)
                 {
-                    return BadRequest(new
+                    return BadRequest(new ErrorResponse()
                     {
-                        Message = $"Cannot remove the last role assignment for permissions: {string.Join(", ", orphanedPermissionNames)}. Assign them to another role first."
+                        Errors = [new ErrorDetail() {Message = $"Cannot remove the last role assignment for permissions: {string.Join(", ", orphanedPermissionNames)}. Assign them to another role first."
+                    }]
                     });
                 }
             }
@@ -330,7 +345,7 @@ public class PermissionController(
             await context.SaveChangesAsync();
         }
 
-        return Ok(new { Message = $"Role '{roleName}' updated successfully." });
+        return Ok(new PermissionRoleUpdateResponse());
     }
 
     /// <summary>
@@ -338,13 +353,14 @@ public class PermissionController(
     /// </summary>
     [HttpGet("roles")]
     [HasPermission(PermissionsList.Roles.View)]
+    [ProducesResponseType(typeof(List<RoleSelectResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllRoles()
     {
         var roles = await roleManager.Roles
-            .Select(r => new
+            .Select(r => new RoleSelectResponse
             {
-                r.Id,
-                r.Name
+                ID = r.Id,
+                Name = r.Name
             })
             .ToListAsync();
 
@@ -356,19 +372,21 @@ public class PermissionController(
     /// </summary>
     [HttpPost("roles")]
     [HasPermission(PermissionsList.Roles.Create)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(RoleCreateResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> CreateRole([FromBody] CreateRoleRequest model)
     {
         // Kiểm tra role đã tồn tại
         var roleExists = await roleManager.RoleExistsAsync(model.RoleName);
         if (roleExists)
         {
-            return BadRequest(new { Message = "Role already exists." });
+            return BadRequest(new ErrorResponse { Errors = [new ErrorDetail() { Message = "Role already exists." }] } );
         }
 
         // Kiểm tra permissions không rỗng
         if (model.Permissions is null || model.Permissions.Count == 0)
         {
-            return BadRequest(new { Message = "At least one permission must be assigned to the role." });
+            return BadRequest(new ErrorResponse { Errors = [new ErrorDetail() { Message = "At least one permission must be assigned to the role." }] } );
         }
 
         // Lấy tất cả permissions hợp lệ
@@ -384,10 +402,7 @@ public class PermissionController(
         var invalidPermissions = model.Permissions.Except(allPermissions!).ToList();
         if (invalidPermissions.Count != 0)
         {
-            return BadRequest(new
-            {
-                Message = $"Invalid permissions: {string.Join(", ", invalidPermissions)}"
-            });
+            return BadRequest(new ErrorResponse { Errors = [new ErrorDetail() { Message = $"Invalid permissions: {string.Join(", ", invalidPermissions)}" }] });
         }
 
         // Tạo role
@@ -400,7 +415,18 @@ public class PermissionController(
         var createResult = await roleManager.CreateAsync(role);
         if (!createResult.Succeeded)
         {
-            return BadRequest(new { createResult.Errors });
+            ErrorResponse error = new();
+            foreach (var identityError in createResult.Errors)
+            {
+                string fieldName = IdentityHelper.GetFieldForIdentityError(identityError.Code);
+
+                error.Errors.Add(new ErrorDetail()
+                {
+                    Field = fieldName,
+                    Message = identityError.Description
+                });
+            }
+            return BadRequest(error);
         }
 
         // Gán permissions cho role
@@ -419,7 +445,7 @@ public class PermissionController(
         await context.RolePermissions.AddRangeAsync(rolePermissions);
         await context.SaveChangesAsync();
 
-        return Ok(new
+        return Ok(new RoleCreateResponse()
         {
             Message = $"Role '{model.RoleName}' created successfully with {rolePermissions.Count} permission(s).",
             RoleId = role.Id,
@@ -434,12 +460,15 @@ public class PermissionController(
     /// </summary>
     [HttpPut("roles/{roleName}")]
     [HasPermission(PermissionsList.Roles.Edit)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(RoleUpdateResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> UpdateRole(string roleName, [FromBody] UpdateRoleRequest model)
     {
         var role = await roleManager.FindByNameAsync(roleName);
         if (role is null)
         {
-            return NotFound(new { Message = "Role not found." });
+            return NotFound(new ErrorResponse { Errors = [new ErrorDetail() { Message = "Role not found." }] } );
         }
 
         // Chỉ cập nhật Description nếu được cung cấp
@@ -451,10 +480,25 @@ public class PermissionController(
         var result = await roleManager.UpdateAsync(role);
         if (!result.Succeeded)
         {
-            return BadRequest(new { result.Errors });
+            ErrorResponse error = new();
+            foreach (var identityError in result.Errors)
+            {
+                string fieldName = IdentityHelper.GetFieldForIdentityError(identityError.Code);
+
+                error.Errors.Add(new ErrorDetail()
+                {
+                    Field = fieldName,
+                    Message = identityError.Description
+                });
+            }
+            return BadRequest(error);
+        }
+        if (!result.Succeeded)
+        {
+            return BadRequest(new ErrorResponse { Errors = [new ErrorDetail() { Message = "Role not found." }] } );
         }
 
-        return Ok(new
+        return Ok(new RoleUpdateResponse()
         {
             Message = $"Role '{roleName}' updated successfully.",
             RoleId = role.Id,
@@ -468,38 +512,49 @@ public class PermissionController(
     /// </summary>
     [HttpDelete("roles/{roleName}")]
     [HasPermission(PermissionsList.Roles.Delete)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(RoleDeleteResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> DeleteRole(string roleName)
     {
         var role = await roleManager.FindByNameAsync(roleName);
         if (role is null)
         {
-            return NotFound(new { Message = "Role not found." });
+            return NotFound(new ErrorResponse { Errors = [new ErrorDetail() { Message = "Role not found." }] } );
         }
 
         // Kiểm tra SuperRoles
         var superRoles = configuration.GetSection("ProtectedAuthorizationEntities:SuperRoles").Get<List<string>>() ?? [];
         if (superRoles.Contains(roleName))
         {
-            return BadRequest(new { Message = "Cannot delete SuperRole." });
+            return BadRequest(new ErrorResponse { Errors = [new ErrorDetail() { Message = "Cannot delete SuperRole." }] } );
         }
 
         // Kiểm tra không có user nào có role này
         var usersWithRole = await userManager.GetUsersInRoleAsync(roleName);
         if (usersWithRole.Count > 0)
         {
-            return BadRequest(new
-            {
-                Message = $"Cannot delete role '{roleName}' because {usersWithRole.Count} user(s) have this role."
-            });
+            return BadRequest(new ErrorResponse { Errors = [new ErrorDetail() { Message = $"Cannot delete role '{roleName}' because {usersWithRole.Count} user(s) have this role."  }] });
         }
 
         var result = await roleManager.DeleteAsync(role);
         if (!result.Succeeded)
         {
-            return BadRequest(new { result.Errors });
+            ErrorResponse error = new();
+            foreach (var identityError in result.Errors)
+            {
+                string fieldName = IdentityHelper.GetFieldForIdentityError(identityError.Code);
+
+                error.Errors.Add(new ErrorDetail()
+                {
+                    Field = fieldName,
+                    Message = identityError.Description
+                });
+            }
+            return BadRequest(error);
         }
 
-        return Ok(new { Message = $"Role '{roleName}' deleted successfully." });
+        return Ok(new RoleDeleteResponse() { Message = $"Role '{roleName}' deleted successfully." });
     }
 
     /// <summary>
@@ -507,6 +562,8 @@ public class PermissionController(
     /// </summary>
     [HttpPost("roles/delete-multiple")]
     [HasPermission(PermissionsList.Roles.Delete)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(RoleDeleteResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> DeleteMultipleRoles([FromBody] List<string> roleNames)
     {
         var superRoles = configuration.GetSection("ProtectedAuthorizationEntities:SuperRoles").Get<List<string>>() ?? [];
@@ -542,11 +599,7 @@ public class PermissionController(
         // Nếu có skipped roles, báo lỗi
         if (skippedRoles.Count > 0)
         {
-            return BadRequest(new
-            {
-                Message = "Cannot delete some roles due to validation errors.",
-                SkippedRoles = skippedRoles
-            });
+            return BadRequest(new ErrorResponse { Errors = [new ErrorDetail() { Message = $"Cannot delete some roles due to validation errors: {string.Join(',', skippedRoles)}" }] });
         }
 
         // Xóa tất cả roles
@@ -563,42 +616,10 @@ public class PermissionController(
             }
         }
 
-        return Ok(new
+        return Ok(new RoleDeleteResponse()
         {
-            Message = $"Deleted {deletedCount} role(s) successfully.",
-            DeletedCount = deletedCount
+            Message = $"Deleted {deletedCount} role(s) successfully."
         });
     }
 }
 
-/// <summary>
-/// DTO cập nhật vai trò
-/// </summary>
-public class UpdateRoleRequest
-{
-    /// <summary>
-    /// Mô tả của vai trò (tuỳ chọn - nếu không truyền thì giữ nguyên)
-    /// </summary>
-    public string? Description { get; set; }
-}
-
-/// <summary>
-/// DTO cho tạo role mới
-/// </summary>
-public class CreateRoleRequest
-{
-    /// <summary>
-    /// Tên vai trò
-    /// </summary>
-    public string RoleName { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Mô tả của vai trò (tuỳ chọn)
-    /// </summary>
-    public string? Description { get; set; }
-
-    /// <summary>
-    /// Danh sách quyền cho vai trò (bắt buộc - phải có ít nhất 1 quyền)
-    /// </summary>
-    public List<string> Permissions { get; set; } = [];
-}

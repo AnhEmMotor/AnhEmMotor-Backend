@@ -1,10 +1,9 @@
-using Application.ApiContracts.User;
+using Application.ApiContracts.User.Requests;
+using Application.ApiContracts.User.Responses;
 using Asp.Versioning;
 using Domain.Constants;
 using Domain.Entities;
 using Domain.Helpers;
-using Infrastructure.Authorization;
-using Infrastructure.DBContexts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -31,65 +30,67 @@ public class UserController(
     /// </summary>
     [HttpGet("me")]
     [Authorize]
+    [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetCurrentUser()
     {
         var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
         {
-            return Unauthorized(new { Message = "Invalid user token." });
+            return Unauthorized(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "Invalid user token." }] });
         }
 
         var user = await userManager.FindByIdAsync(userId.ToString());
         if (user is null)
         {
-            return NotFound(new { Message = "User not found." });
+            return NotFound(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "User not found." }] });
         }
 
         var roles = await userManager.GetRolesAsync(user);
 
-        return Ok(new
+        return Ok(new UserResponse()
         {
-            user.Id,
-            user.UserName,
-            user.Email,
-            user.FullName,
-            user.Gender,
-            user.PhoneNumber,
-            user.EmailConfirmed,
-            user.Status,
-            user.DeletedAt,
+            Id = user.Id,
+            UserName = user.UserName,
+            Email = user.Email,
+            FullName = user.FullName,
+            Gender = user.Gender,
+            PhoneNumber = user.PhoneNumber,
+            EmailConfirmed = user.EmailConfirmed,
+            Status = user.Status,
+            DeletedAt = user.DeletedAt,
             Roles = roles
         });
     }
-
-    
 
     /// <summary>
     /// Đổi thông tin người dùng hiện tại từ JWT
     /// </summary>
     [HttpPut("me")]
     [Authorize]
+    [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> UpdateCurrentUser([FromBody] UpdateUserRequest model)
     {
         var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         if (!GenderStatus.IsValid(model.Gender))
         {
-            return BadRequest(new
-            {
-                Message = "Invalid gender. Please check again.",
-            });
+            return BadRequest(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "Invalid gender. Please check again." }] });
         }
 
         if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
         {
-            return Unauthorized(new { Message = "Invalid user token." });
+            return Unauthorized(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "Invalid user token." }] });
         }
 
         var user = await userManager.FindByIdAsync(userId.ToString());
         if (user is null)
         {
-            return NotFound(new { Message = "User not found." });
+            return NotFound(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "User not found." }] });
         }
 
         if (!string.IsNullOrWhiteSpace(model.FullName))
@@ -110,86 +111,112 @@ public class UserController(
         var result = await userManager.UpdateAsync(user);
         if (!result.Succeeded)
         {
-            return BadRequest(new { result.Errors });
+            ErrorResponse error = new();
+            foreach (var identityError in result.Errors)
+            {
+                string fieldName = IdentityHelper.GetFieldForIdentityError(identityError.Code);
+
+                error.Errors.Add(new ErrorDetail()
+                {
+                    Field = fieldName,
+                    Message = identityError.Description
+                });
+            }
+            return BadRequest(error);
         }
 
         var roles = await userManager.GetRolesAsync(user);
 
-        return Ok(new
+        return Ok(new UserResponse()
         {
-            user.Id,
-            user.UserName,
-            user.Email,
-            user.FullName,
-            user.Gender,
-            user.PhoneNumber,
-            user.EmailConfirmed,
-            user.Status,
-            user.DeletedAt,
+            Id = user.Id,
+            UserName = user.UserName,
+            Email = user.Email,
+            FullName = user.FullName,
+            Gender = user.Gender,
+            PhoneNumber = user.PhoneNumber,
+            EmailConfirmed = user.EmailConfirmed,
+            Status = user.Status,
+            DeletedAt = user.DeletedAt,
             Roles = roles
         });
     }
-
-    
 
     /// <summary>
     /// Đổi mật khẩu người dùng hiện tại từ JWT
     /// </summary>
     [HttpPost("change-password")]
     [Authorize]
+    [ProducesResponseType(typeof(ChangePasswordUserByUserResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> ChangePasswordCurrentUser([FromBody] ChangePasswordRequest model)
     {
         if (string.Compare(model.CurrentPassword, model.NewPassword) == 0)
         {
-            return BadRequest(new { Message = "New password can not dupplicate current password. " });
+            return BadRequest(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "New password can not dupplicate current password. " }] });
         }
 
         var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
         {
-            return Unauthorized(new { Message = "Invalid user token." });
+            return Unauthorized(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "Invalid user token." }] });
         }
 
         var user = await userManager.FindByIdAsync(userId.ToString());
         if (user is null)
         {
-            return NotFound(new { Message = "User not found." });
+            return NotFound(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "User not found." }] });
         }
 
         var result = await userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
         if (!result.Succeeded)
         {
-            return BadRequest(new { result.Errors });
+            ErrorResponse error = new();
+            foreach (var identityError in result.Errors)
+            {
+                string fieldName = IdentityHelper.GetFieldForIdentityError(identityError.Code);
+
+                error.Errors.Add(new ErrorDetail()
+                {
+                    Field = fieldName,
+                    Message = identityError.Description
+                });
+            }
+            return BadRequest(error);
         }
 
-        return Ok(new { Message = "Password changed successfully." });
+        return Ok(new ChangePasswordUserByUserResponse() { Message = "Password changed successfully." });
     }
 
-    
-
     /// <summary>
-    /// Xoá tài khoản của người dùng hiện tại (soft delete - set DeletedAt)
+    /// Xoá tài khoản của người dùng từ JWT
     /// </summary>
     [HttpPost("delete-account")]
     [Authorize]
+    [ProducesResponseType(typeof(DeleteUserByUserReponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> DeleteCurrentUserAccount()
     {
         var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
         {
-            return Unauthorized(new { Message = "Invalid user token." });
+            return Unauthorized(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "Invalid user token." }] });
         }
 
         var user = await userManager.FindByIdAsync(userId.ToString());
         if (user is null)
         {
-            return NotFound(new { Message = "User not found." });
+            return NotFound(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "User not found." }] });
         }
 
         // Check if already deleted
         if (user.DeletedAt is not null)
         {
-            return BadRequest(new { Message = "This account has already been deleted." });
+            return BadRequest(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "This account has already been deleted." }] });
         }
 
         // Kiểm tra protected users
@@ -198,21 +225,30 @@ public class UserController(
 
         if (!string.IsNullOrEmpty(user.Email) && protectedEmails.Contains(user.Email))
         {
-            return BadRequest(new { Message = "Protected users cannot delete their account." });
+            return BadRequest(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "Protected users cannot delete their account." }] });
         }
 
         user.DeletedAt = DateTimeOffset.UtcNow;
         var result = await userManager.UpdateAsync(user);
         if (!result.Succeeded)
         {
-            return BadRequest(new { result.Errors });
+            ErrorResponse error = new();
+            foreach (var identityError in result.Errors)
+            {
+                string fieldName = IdentityHelper.GetFieldForIdentityError(identityError.Code);
+
+                error.Errors.Add(new ErrorDetail()
+                {
+                    Field = fieldName,
+                    Message = identityError.Description
+                });
+            }
+            return BadRequest(error);
         }
 
-        return Ok(new
+        return Ok(new DeleteUserByUserReponse()
         {
             Message = "Your account has been deleted successfully.",
-            user.Id,
-            user.DeletedAt
         });
     }
 
@@ -220,26 +256,26 @@ public class UserController(
     /// Khôi phục tài khoản người dùng (soft delete recovery - set DeletedAt to null)
     /// </summary>
     [HttpPost("{userId:guid}/restore")]
+    [ProducesResponseType(typeof(RestoreUserResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RestoreUserAccount(Guid userId)
     {
         var user = await userManager.FindByIdAsync(userId.ToString());
         if (user is null)
         {
-            return NotFound(new { Message = "User not found." });
+            return NotFound(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "User not found." }] });
         }
 
         if (user.DeletedAt is null)
         {
-            return BadRequest(new { Message = "User account is not deleted." });
+            return BadRequest(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "User account is not deleted." }] });
         }
 
         // Chỉ có thể khôi phục nếu Status là Active
         if (user.Status != UserStatus.Active)
         {
-            return BadRequest(new
-            {
-                Message = $"Cannot restore user with status '{user.Status}'. User status must be Active."
-            });
+            return BadRequest(new ErrorResponse() { Errors = [new ErrorDetail() { Message = $"Cannot restore user with status '{user.Status}'. User status must be Active." }] });
         }
 
         user.DeletedAt = null;
@@ -249,14 +285,9 @@ public class UserController(
             return BadRequest(new { result.Errors });
         }
 
-        return Ok(new
+        return Ok(new RestoreUserResponse()
         {
             Message = "User account has been restored successfully.",
-            user.Id,
-            user.UserName,
-            user.Email,
-            user.Status,
-            user.DeletedAt
         });
     }
 }

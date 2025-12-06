@@ -1,5 +1,4 @@
-﻿using Application.ApiContracts.ProductCategory;
-using Application.Features.ProductCategories.Commands.CreateProductCategory;
+﻿using Application.Features.ProductCategories.Commands.CreateProductCategory;
 using Application.Features.ProductCategories.Commands.DeleteManyProductCategories;
 using Application.Features.ProductCategories.Commands.DeleteProductCategory;
 using Application.Features.ProductCategories.Commands.RestoreManyProductCategories;
@@ -16,6 +15,8 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using Sieve.Models;
+using Application.ApiContracts.ProductCategory.Requests;
+using Application.ApiContracts.ProductCategory.Responses;
 
 namespace WebAPI.Controllers.V1;
 

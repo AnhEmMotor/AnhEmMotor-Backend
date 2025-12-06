@@ -1,4 +1,3 @@
-using Application.ApiContracts.Brand;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
 using Domain.Constants;
@@ -11,9 +10,9 @@ namespace Application.Features.Brands.Commands.RestoreManyBrands;
 public sealed class RestoreManyBrandsCommandHandler(
     IBrandReadRepository readRepository,
     IBrandUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<RestoreManyBrandsCommand, (List<BrandResponse>? Data, ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<RestoreManyBrandsCommand, (List<ApiContracts.Brand.Responses.BrandResponse>? Data, ErrorResponse? Error)>
 {
-    public async Task<(List<BrandResponse>? Data, ErrorResponse? Error)> Handle(
+    public async Task<(List<ApiContracts.Brand.Responses.BrandResponse>? Data, ErrorResponse? Error)> Handle(
         RestoreManyBrandsCommand request,
         CancellationToken cancellationToken)
     {
@@ -55,6 +54,6 @@ public sealed class RestoreManyBrandsCommandHandler(
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        return (deletedBrands.Adapt<List<BrandResponse>>(), null);
+        return (deletedBrands.Adapt<List<ApiContracts.Brand.Responses.BrandResponse>>(), null);
     }
 }

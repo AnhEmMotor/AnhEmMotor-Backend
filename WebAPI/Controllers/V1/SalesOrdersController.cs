@@ -18,6 +18,7 @@ using MediatR;
 using Swashbuckle.AspNetCore.Annotations;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
+using Application.ApiContracts.Output.Responses;
 
 namespace WebAPI.Controllers.V1;
 
@@ -82,7 +83,7 @@ public class SalesOrdersController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(OutputResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateOutput(
-        [FromBody] CreateOutputRequest request,
+        [FromBody] Application.ApiContracts.Output.Requests.CreateOutputRequest request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<CreateOutputCommand>();
@@ -103,7 +104,7 @@ public class SalesOrdersController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateOutput(
         int id,
-        [FromBody] UpdateOutputRequest request,
+        [FromBody] Application.ApiContracts.Output.Requests.UpdateOutputRequest request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<UpdateOutputCommand>() with { Id = id };
@@ -124,7 +125,7 @@ public class SalesOrdersController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateOutputStatus(
         int id,
-        [FromBody] UpdateOutputStatusRequest request,
+        [FromBody] Application.ApiContracts.Output.Requests.UpdateOutputStatusRequest request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<UpdateOutputStatusCommand>() with { Id = id };
@@ -143,7 +144,7 @@ public class SalesOrdersController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(List<OutputResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateManyOutputStatus(
-        [FromBody] UpdateManyOutputStatusRequest request,
+        [FromBody] Application.ApiContracts.Output.Requests.UpdateManyOutputStatusRequest request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<UpdateManyOutputStatusCommand>();
@@ -179,7 +180,7 @@ public class SalesOrdersController(IMediator mediator) : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteManyOutputs(
-        [FromBody] DeleteManyOutputsRequest request,
+        [FromBody] Application.ApiContracts.Output.Requests.DeleteManyOutputsRequest request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<DeleteManyOutputsCommand>();
@@ -215,7 +216,7 @@ public class SalesOrdersController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(List<OutputResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RestoreManyOutputs(
-        [FromBody] RestoreManyOutputsRequest request,
+        [FromBody] Application.ApiContracts.Output.Requests.RestoreManyOutputsRequest request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<RestoreManyOutputsCommand>();

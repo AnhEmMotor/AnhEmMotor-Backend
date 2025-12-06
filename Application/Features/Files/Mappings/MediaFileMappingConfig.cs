@@ -1,4 +1,3 @@
-using Application.ApiContracts.File;
 using Application.Features.Files.Commands.DeleteManyFiles;
 using Application.Features.Files.Commands.RestoreManyFiles;
 using Mapster;
@@ -10,10 +9,10 @@ public sealed class MediaFileMappingConfig : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {
-        config.NewConfig<MediaFileEntity, MediaFileResponse>();
+        config.NewConfig<MediaFileEntity, ApiContracts.File.Responses.MediaFileResponse>();
 
-        config.NewConfig<DeleteManyMediaFilesRequest, DeleteManyFilesCommand>();
+        config.NewConfig<ApiContracts.File.Requests.DeleteManyMediaFilesRequest, DeleteManyFilesCommand>();
 
-        config.NewConfig<RestoreManyMediaFilesRequest, RestoreManyFilesCommand>();
+        config.NewConfig<ApiContracts.File.Requests.RestoreManyMediaFilesRequest, RestoreManyFilesCommand>();
     }
 }

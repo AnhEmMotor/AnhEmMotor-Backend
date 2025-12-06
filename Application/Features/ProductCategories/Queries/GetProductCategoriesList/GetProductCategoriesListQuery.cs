@@ -1,4 +1,4 @@
-using Application.ApiContracts.ProductCategory;
+using Application.ApiContracts.ProductCategory.Responses;
 using Domain.Shared;
 using MediatR;
 using Sieve.Models;

@@ -1,4 +1,5 @@
-﻿using Application.ApiContracts.Supplier;
+﻿using Application.ApiContracts.Supplier.Requests;
+using Application.ApiContracts.Supplier.Responses;
 using Application.Features.Suppliers.Commands.CreateSupplier;
 using Application.Features.Suppliers.Commands.DeleteManySuppliers;
 using Application.Features.Suppliers.Commands.RestoreManySuppliers;

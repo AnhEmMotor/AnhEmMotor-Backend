@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Brand;
+﻿
 using Application.Features.Brands.Commands.CreateBrand;
 using Application.Features.Brands.Commands.DeleteManyBrands;
 using Application.Features.Brands.Commands.RestoreManyBrands;
@@ -12,18 +12,18 @@ public sealed class BrandMappingConfig : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {
-        config.NewConfig<CreateBrandRequest, CreateBrandCommand>();
+        config.NewConfig<ApiContracts.Brand.Requests.CreateBrandRequest, CreateBrandCommand>();
 
         config.NewConfig<CreateBrandCommand, BrandEntity>();
 
-        config.NewConfig<BrandEntity, BrandResponse>();
+        config.NewConfig<BrandEntity, ApiContracts.Brand.Responses.BrandResponse>();
 
-        config.NewConfig<UpdateBrandRequest, UpdateBrandCommand>();
+        config.NewConfig<ApiContracts.Brand.Requests.UpdateBrandRequest, UpdateBrandCommand>();
 
         config.NewConfig<UpdateBrandCommand, BrandEntity>().IgnoreNullValues(true);
 
-        config.NewConfig<DeleteManyBrandsRequest, DeleteManyBrandsCommand>();
+        config.NewConfig<ApiContracts.Brand.Requests.DeleteManyBrandsRequest, DeleteManyBrandsCommand>();
 
-        config.NewConfig<RestoreManyBrandsRequest, RestoreManyBrandsCommand>();
+        config.NewConfig<ApiContracts.Brand.Requests.RestoreManyBrandsRequest, RestoreManyBrandsCommand>();
     }
 }

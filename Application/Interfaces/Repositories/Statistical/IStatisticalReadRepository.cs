@@ -1,4 +1,4 @@
-using Application.ApiContracts.Staticals;
+using Application.ApiContracts.Statistical.Responses;
 
 namespace Application.Interfaces.Repositories.Statistical;
 

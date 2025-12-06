@@ -1,4 +1,5 @@
-using Application.ApiContracts.ProductCategory;
+using Application.ApiContracts.ProductCategory.Requests;
+using Application.ApiContracts.ProductCategory.Responses;
 using Application.Features.ProductCategories.Commands.CreateProductCategory;
 using Application.Features.ProductCategories.Commands.DeleteManyProductCategories;
 using Application.Features.ProductCategories.Commands.RestoreManyProductCategories;

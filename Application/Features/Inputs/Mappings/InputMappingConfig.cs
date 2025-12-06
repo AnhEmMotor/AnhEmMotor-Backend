@@ -1,4 +1,5 @@
 using Application.ApiContracts.Input;
+using Application.ApiContracts.Input.Responses;
 using Application.Features.Inputs.Commands.CreateInput;
 using Application.Features.Inputs.Commands.UpdateInput;
 using Domain.Entities;
@@ -10,8 +11,8 @@ public sealed class InputMappingConfig : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {
-        config.NewConfig<CreateInputRequest, CreateInputCommand>();
-        config.NewConfig<CreateInputInfoRequest, CreateInputProductCommand>();
+        config.NewConfig<ApiContracts.Input.Requests.CreateInputRequest, CreateInputCommand>();
+        config.NewConfig<ApiContracts.Input.Requests.CreateInputInfoRequest, CreateInputProductCommand>();
 
         config.NewConfig<CreateInputCommand, Input>();
         config.NewConfig<CreateInputProductCommand, InputInfo>();
@@ -30,7 +31,7 @@ public sealed class InputMappingConfig : IRegister
                     ? src.ProductVariant.Product.Name
                     : null);
 
-        config.NewConfig<UpdateInputInfoRequest, InputInfo>().IgnoreNullValues(true);
+        config.NewConfig<ApiContracts.Input.Requests.UpdateInputInfoRequest, InputInfo>().IgnoreNullValues(true);
 
         config.NewConfig<UpdateInputCommand, Input>().IgnoreNullValues(true);
     }

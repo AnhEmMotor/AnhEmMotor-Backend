@@ -1,4 +1,3 @@
-using Application.ApiContracts.Staticals;
 using Application.Features.Statistical.Queries.GetDailyRevenue;
 using Application.Features.Statistical.Queries.GetDashboardStats;
 using Application.Features.Statistical.Queries.GetMonthlyRevenueProfit;
@@ -10,6 +9,7 @@ using Domain.Helpers;
 using MediatR;
 using Swashbuckle.AspNetCore.Annotations;
 using Microsoft.AspNetCore.Mvc;
+using Application.ApiContracts.Statistical.Responses;
 
 namespace WebAPI.Controllers.V1;
 

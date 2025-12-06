@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.User;
+﻿using Application.ApiContracts.User.Responses;
 using Application.Interfaces.Repositories;
 using Domain.Shared;
 using MediatR;

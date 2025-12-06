@@ -1,4 +1,3 @@
-using Application.ApiContracts.Brand;
 using Application.Interfaces.Repositories.Brand;
 using Domain.Helpers;
 using Mapster;
@@ -6,9 +5,9 @@ using MediatR;
 
 namespace Application.Features.Brands.Queries.GetBrandById;
 
-public sealed class GetBrandByIdQueryHandler(IBrandReadRepository repository) : IRequestHandler<GetBrandByIdQuery, (BrandResponse? Data, ErrorResponse? Error)>
+public sealed class GetBrandByIdQueryHandler(IBrandReadRepository repository) : IRequestHandler<GetBrandByIdQuery, (ApiContracts.Brand.Responses.BrandResponse? Data, ErrorResponse? Error)>
 {
-    public async Task<(BrandResponse? Data, ErrorResponse? Error)> Handle(
+    public async Task<(ApiContracts.Brand.Responses.BrandResponse? Data, ErrorResponse? Error)> Handle(
         GetBrandByIdQuery request,
         CancellationToken cancellationToken)
     {
@@ -22,6 +21,6 @@ public sealed class GetBrandByIdQueryHandler(IBrandReadRepository repository) : 
             });
         }
 
-        return (brand.Adapt<BrandResponse>(), null);
+        return (brand.Adapt<ApiContracts.Brand.Responses.BrandResponse>(), null);
     }
 }

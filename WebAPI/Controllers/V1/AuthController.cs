@@ -1,19 +1,19 @@
-using Application.ApiContracts.Auth;
 using Asp.Versioning;
 using Domain.Constants;
 using Domain.Entities;
 using Domain.Helpers;
+using Infrastructure.Authorization;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.Annotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Application.ApiContracts.Auth.Responses;
 
 namespace WebAPI.Controllers.V1;
 
@@ -35,34 +35,31 @@ public class AuthController(
     /// Đăng ký tài khoản mới
     /// </summary>
     [HttpPost("register")]
-    [AllowAnonymous]
-    public async Task<IActionResult> Register([FromBody] RegisterRequest model)
+    [AnonymousOnly]
+    [ProducesResponseType(typeof(RegistrationSuccessResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Register([FromBody] Application.ApiContracts.Auth.Requests.RegisterRequest model)
     {
         if (!GenderStatus.IsValid(model.Gender))
         {
-            return BadRequest(new
-            {
-                Message = "Gender not vaild. Please check again."
-            });
+            return BadRequest(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "Gender not vaild. Please check again.", Field = "gender" }] });
         }
 
-        // Kiểm tra username đã tồn tại
         var existingUser = await userManager.FindByNameAsync(model.Username);
         if (existingUser is not null)
         {
-            return BadRequest(new { Message = "Username already exists." });
+            return BadRequest(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "Username already exists.", Field = "username" }] });
         }
 
-        // Kiểm tra email đã tồn tại
         existingUser = await userManager.FindByEmailAsync(model.Email);
         if (existingUser is not null)
         {
-            return BadRequest(new { Message = "Email already exists." });
+            return BadRequest(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "Email already exists.", Field = "email" }] });
         }
 
         var user = new ApplicationUser
         {
-            UserName = string.IsNullOrEmpty(model.Username) == true ? model.Email : model.Username,
+            UserName = string.IsNullOrEmpty(model.Username) ? model.Email : model.Username,
             Email = model.Email,
             FullName = model.FullName,
             PhoneNumber = model.PhoneNumber,
@@ -71,12 +68,23 @@ public class AuthController(
         };
 
         var result = await userManager.CreateAsync(user, model.Password);
+
         if (!result.Succeeded)
         {
-            return BadRequest(new { result.Errors });
+            ErrorResponse error = new();
+            foreach (var identityError in result.Errors)
+            {
+                string fieldName = IdentityHelper.GetFieldForIdentityError(identityError.Code);
+
+                error.Errors.Add(new ErrorDetail()
+                {
+                    Field = fieldName,
+                    Message = identityError.Description
+                });
+            }
+            return BadRequest(error);
         }
 
-        // Gán default roles cho user mới
         var defaultRoles = configuration.GetSection("ProtectedAuthorizationEntities:DefaultRolesForNewUsers").Get<List<string>>() ?? [];
         if (defaultRoles.Count > 0)
         {
@@ -84,15 +92,17 @@ public class AuthController(
             await userManager.AddToRoleAsync(user, randomRole);
         }
 
-        return Ok(new { Message = "Registration successful!" });
+        return Ok(new RegistrationSuccessResponse());
     }
 
     /// <summary>
     /// Đăng nhập bằng Username/Email và Password
     /// </summary>
     [HttpPost("login")]
-    [AllowAnonymous]
-    public async Task<IActionResult> Login([FromBody] LoginRequest model)
+    [AnonymousOnly]
+    [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> Login([FromBody] Application.ApiContracts.Auth.Requests.LoginRequest model)
     {
         ApplicationUser? user;
 
@@ -108,19 +118,19 @@ public class AuthController(
 
         if (user is null)
         {
-            return Unauthorized(new { Message = "Invalid credentials." });
+            return Unauthorized(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "Invalid credentials." }] });
         }
 
         // Kiểm tra trạng thái của user
         if (user.Status != UserStatus.Active || user.DeletedAt is not null)
         {
-            return Unauthorized(new { Message = "Account is not available." });
+            return Unauthorized(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "Account is not available." }] });
         }
 
         var result = await signInManager.CheckPasswordSignInAsync(user, model.Password, false);
         if (!result.Succeeded)
         {
-            return Unauthorized(new { Message = "Invalid credentials." });
+            return Unauthorized(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "Invalid credentials." }] });
         }
 
         var accessToken = await tokenService.CreateAccessTokenAsync(user, ["pwd"]);
@@ -152,12 +162,15 @@ public class AuthController(
     /// </summary>
     [HttpPost("refresh-token")]
     [AllowAnonymous]
+    [ProducesResponseType(typeof(GetAccessTokenFromRefreshTokenResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> RefreshToken()
     {
         var refreshToken = Request.Cookies["refreshToken"];
         if (string.IsNullOrEmpty(refreshToken))
         {
-            return Unauthorized(new { Message = "Refresh token is missing." });
+            return Unauthorized(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "Refresh token is missing." }] });
         }
 
         var user = await userManager.Users
@@ -165,22 +178,22 @@ public class AuthController(
 
         if (user is null)
         {
-            return Unauthorized(new { Message = "Invalid refresh token." });
+            return Unauthorized(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "Invalid refresh token." }] });
         }
 
         if (user.Status != "Active")
         {
-            return StatusCode(StatusCodes.Status403Forbidden, new { Message = "Please login again." });
+            return StatusCode(StatusCodes.Status403Forbidden, (new ErrorResponse() { Errors = [new ErrorDetail() { Message = "Please login again." }] }));
         }
 
         if (user.Status == "Active" && user.DeletedAt != null)
         {
-            return StatusCode(StatusCodes.Status403Forbidden, new { Message = "Please login again." });
+            return StatusCode(StatusCodes.Status403Forbidden, (new ErrorResponse() { Errors = [new ErrorDetail() { Message = "Please login again." }] }));
         }
 
         if (user.RefreshTokenExpiryTime <= DateTimeOffset.UtcNow)
         {
-            return Unauthorized(new { Message = "Refresh token has expired. Please login again." });
+            return Unauthorized(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "Refresh token has expired. Please login again." }] });
         }
 
         // Validate status against stored JWT claim if authorization header exists
@@ -210,7 +223,7 @@ public class AuthController(
                         var tokenStatusClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "status")?.Value;
                         if (!string.IsNullOrEmpty(tokenStatusClaim) && tokenStatusClaim != user.Status)
                         {
-                            return Unauthorized(new { Message = "User status has changed. Please login again." });
+                            return Unauthorized(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "User status has changed. Please login again." }] });
                         }
                     }
                 }
@@ -238,7 +251,7 @@ public class AuthController(
 
         Response.Cookies.Append("refreshToken", newRefreshToken, cookieOptions);
 
-        return Ok(new LoginResponse
+        return Ok(new GetAccessTokenFromRefreshTokenResponse
         {
             AccessToken = newAccessToken,
             ExpiresAt = DateTimeOffset.UtcNow.AddMinutes(15)
@@ -249,6 +262,7 @@ public class AuthController(
     /// Đăng xuất
     /// </summary>
     [HttpPost("logout")]
+    [ProducesResponseType(typeof(LogoutSuccessResponse), StatusCodes.Status200OK)]
     [Authorize]
     public async Task<IActionResult> Logout()
     {
@@ -265,36 +279,38 @@ public class AuthController(
         }
 
         Response.Cookies.Delete("refreshToken");
-        return Ok(new { Message = "Logged out successfully." });
+        return Ok(new LogoutSuccessResponse());
     }
 
     /// <summary>
     /// Đăng nhập bằng Google (placeholder - cần cấu hình Google OAuth)
     /// </summary>
     [HttpPost("google")]
-    [AllowAnonymous]
-    public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginRequest model)
+    [AnonymousOnly]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status501NotImplemented)]
+    public async Task<IActionResult> GoogleLogin([FromBody] Application.ApiContracts.Auth.Requests.GoogleLoginRequest model)
     {
         // TODO: Implement Google OAuth login
         // 1. Verify ID Token with Google
         // 2. Get user info from token
         // 3. Create or find user in database
         // 4. Generate JWT token
-        return StatusCode(501, new { Message = "Google login not implemented yet." });
+        return StatusCode(501, new ErrorResponse() { Errors = [new ErrorDetail() { Message = "Google login not implemented yet." }] });
     }
 
     /// <summary>
     /// Đăng nhập bằng Facebook (placeholder - cần cấu hình Facebook OAuth)
     /// </summary>
     [HttpPost("facebook")]
-    [AllowAnonymous]
-    public async Task<IActionResult> FacebookLogin([FromBody] FacebookLoginRequest model)
+    [AnonymousOnly]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status501NotImplemented)]
+    public async Task<IActionResult> FacebookLogin([FromBody] Application.ApiContracts.Auth.Requests.FacebookLoginRequest model)
     {
         // TODO: Implement Facebook OAuth login
         // 1. Verify Access Token with Facebook
         // 2. Get user info from Facebook Graph API
         // 3. Create or find user in database
         // 4. Generate JWT token
-        return StatusCode(501, new { Message = "Facebook login not implemented yet." });
+        return StatusCode(501, new ErrorResponse() { Errors = [new ErrorDetail() { Message = "Facebook login not implemented yet." }] });
     }
 }

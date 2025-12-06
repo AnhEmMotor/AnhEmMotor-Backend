@@ -1,4 +1,4 @@
-using Application.ApiContracts.Input;
+using Application.ApiContracts.Input.Responses;
 using Domain.Helpers;
 using MediatR;
 

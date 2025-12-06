@@ -1,4 +1,5 @@
 using Application.ApiContracts.Output;
+using Application.ApiContracts.Output.Responses;
 using Application.Features.Outputs.Commands.UpdateOutput;
 using Domain.Entities;
 using Mapster;
@@ -22,12 +23,12 @@ public sealed class OutputMappingConfig : IRegister
                     ? src.ProductVariant.Product.Name
                     : null);
 
-        config.NewConfig<UpdateOutputRequest, Output>().IgnoreNullValues(true);
+        config.NewConfig<ApiContracts.Output.Requests.UpdateOutputRequest, Output>().IgnoreNullValues(true);
 
-        config.NewConfig<UpdateOutputInfoRequest, OutputInfo>().IgnoreNullValues(true);
+        config.NewConfig<ApiContracts.Output.Requests.UpdateOutputInfoRequest, OutputInfo>().IgnoreNullValues(true);
 
-        config.NewConfig<UpdateOutputRequest, Output>().IgnoreNullValues(true);
-        config.NewConfig<UpdateOutputInfoRequest, OutputInfo>().IgnoreNullValues(true);
+        config.NewConfig<ApiContracts.Output.Requests.UpdateOutputRequest, Output>().IgnoreNullValues(true);
+        config.NewConfig<ApiContracts.Output.Requests.UpdateOutputInfoRequest, OutputInfo>().IgnoreNullValues(true);
         config.NewConfig<UpdateOutputCommand, Output>().IgnoreNullValues(true).Ignore(dest => dest.OutputInfos);
     }
 }

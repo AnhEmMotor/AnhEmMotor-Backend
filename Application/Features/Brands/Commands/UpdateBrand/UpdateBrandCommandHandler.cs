@@ -1,4 +1,3 @@
-using Application.ApiContracts.Brand;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
 using Domain.Helpers;
@@ -10,9 +9,9 @@ namespace Application.Features.Brands.Commands.UpdateBrand;
 public sealed class UpdateBrandCommandHandler(
     IBrandReadRepository readRepository,
     IBrandUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateBrandCommand, (BrandResponse? Data, ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateBrandCommand, (ApiContracts.Brand.Responses.BrandResponse? Data, ErrorResponse? Error)>
 {
-    public async Task<(BrandResponse? Data, ErrorResponse? Error)> Handle(
+    public async Task<(ApiContracts.Brand.Responses.BrandResponse? Data, ErrorResponse? Error)> Handle(
         UpdateBrandCommand request,
         CancellationToken cancellationToken)
     {
@@ -31,6 +30,6 @@ public sealed class UpdateBrandCommandHandler(
         updateRepository.Update(brand);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return (brand.Adapt<BrandResponse>(), null);
+        return (brand.Adapt<ApiContracts.Brand.Responses.BrandResponse>(), null);
     }
 }
