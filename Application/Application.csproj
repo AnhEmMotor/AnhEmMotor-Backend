@@ -22,6 +22,8 @@
   <ItemGroup>
     <Folder Include="ApiContracts\Statistical\Requests\" />
     <Folder Include="DependencyInjection\" />
+    <Folder Include="Features\Auth\Commands\Register\" />
+    <Folder Include="Features\Auth\Queries\" />
   </ItemGroup>
 
 </Project>

@@ -200,7 +200,7 @@ public class AuthController(
         var authHeader = Request.Headers.Authorization.ToString();
         if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer "))
         {
-            var token = authHeader.Substring("Bearer ".Length);
+            var token = authHeader["Bearer ".Length..];
             try
             {
                 var jwtKey = configuration["Jwt:Key"];

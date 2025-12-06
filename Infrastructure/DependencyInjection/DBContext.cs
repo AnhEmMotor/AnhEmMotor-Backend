@@ -1,5 +1,4 @@
-﻿using Application.Interfaces.Authentication;
-using Application.Interfaces.Repositories;
+﻿using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
 using Application.Interfaces.Repositories.Input;
 using Application.Interfaces.Repositories.LocalFile;
@@ -14,7 +13,6 @@ using Application.Interfaces.Repositories.Setting;
 using Application.Interfaces.Repositories.Statistical;
 using Application.Interfaces.Repositories.Supplier;
 using Application.Interfaces.Repositories.VariantOptionValue;
-
 using Infrastructure.Authorization;
 using Infrastructure.DBContexts;
 using Infrastructure.Repositories;
@@ -33,7 +31,6 @@ using Infrastructure.Repositories.Statistical;
 using Infrastructure.Repositories.Supplier;
 using Infrastructure.Repositories.VariantOptionValue;
 using Infrastructure.Services;
-
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -72,7 +69,6 @@ public static class DBContext
 
         // Register TokenService
         services.AddScoped<TokenService>();
-        services.AddScoped<ICurrentUserService, CurrentUserService>();
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
