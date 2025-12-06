@@ -126,7 +126,7 @@
             Controller xử lý xác thực và đăng nhập
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.AuthController.#ctor(Microsoft.AspNetCore.Identity.UserManager{Domain.Entities.ApplicationUser},Microsoft.AspNetCore.Identity.SignInManager{Domain.Entities.ApplicationUser},Infrastructure.Services.TokenService,Microsoft.Extensions.Configuration.IConfiguration)">
+        <member name="M:WebAPI.Controllers.V1.AuthController.#ctor(MediatR.IMediator)">
             <summary>
             Controller xử lý xác thực và đăng nhập
             </summary>
@@ -421,7 +421,7 @@
             Controller quản lý quyền hạn và vai trò
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.PermissionController.#ctor(Microsoft.AspNetCore.Identity.RoleManager{Domain.Entities.ApplicationRole},Microsoft.AspNetCore.Identity.UserManager{Domain.Entities.ApplicationUser},Infrastructure.DBContexts.ApplicationDBContext,Microsoft.Extensions.Configuration.IConfiguration)">
+        <member name="M:WebAPI.Controllers.V1.PermissionController.#ctor(MediatR.IMediator)">
             <summary>
             Controller quản lý quyền hạn và vai trò
             </summary>
@@ -883,7 +883,7 @@
             Quản lý người dùng (Bất cứ người dùng nào đã đăng nhập đều có quyền vào đây)
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.UserController.#ctor(Microsoft.AspNetCore.Identity.UserManager{Domain.Entities.ApplicationUser},Microsoft.Extensions.Configuration.IConfiguration)">
+        <member name="M:WebAPI.Controllers.V1.UserController.#ctor(MediatR.IMediator)">
             <summary>
             Quản lý người dùng (Bất cứ người dùng nào đã đăng nhập đều có quyền vào đây)
             </summary>
@@ -923,13 +923,8 @@
             supported via the route template. Thread safety is managed by ASP.NET Core's request handling; concurrent
             requests may result in race conditions if user or role state changes rapidly.</remarks>
             <param name="mediator">The MediatR mediator used to send queries and commands.</param>
-            <param name="userManager">The user manager used to perform operations on user accounts, such as retrieval, update, deletion, and role
-            management.</param>
-            <param name="roleManager">The role manager used to manage roles and their permissions.</param>
-            <param name="configuration">The application configuration used to access protected user and role settings that affect authorization and
-            deletion logic.</param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.UserManagerController.#ctor(MediatR.IMediator,Microsoft.AspNetCore.Identity.UserManager{Domain.Entities.ApplicationUser},Microsoft.AspNetCore.Identity.RoleManager{Domain.Entities.ApplicationRole},Microsoft.Extensions.Configuration.IConfiguration)">
+        <member name="M:WebAPI.Controllers.V1.UserManagerController.#ctor(MediatR.IMediator)">
             <summary>
             Quản lý người dùng (Chỉ có người dùng có quyền mới được vào đây)
             </summary>
@@ -939,11 +934,6 @@
             supported via the route template. Thread safety is managed by ASP.NET Core's request handling; concurrent
             requests may result in race conditions if user or role state changes rapidly.</remarks>
             <param name="mediator">The MediatR mediator used to send queries and commands.</param>
-            <param name="userManager">The user manager used to perform operations on user accounts, such as retrieval, update, deletion, and role
-            management.</param>
-            <param name="roleManager">The role manager used to manage roles and their permissions.</param>
-            <param name="configuration">The application configuration used to access protected user and role settings that affect authorization and
-            deletion logic.</param>
         </member>
         <member name="M:WebAPI.Controllers.V1.UserManagerController.GetAllUsers(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>

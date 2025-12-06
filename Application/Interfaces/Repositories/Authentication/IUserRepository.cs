@@ -2,7 +2,7 @@
 using Domain.Shared;
 using Sieve.Models;
 
-namespace Application.Interfaces.Repositories;
+namespace Application.Interfaces.Repositories.Authentication;
 
 public interface IUserRepository
 {

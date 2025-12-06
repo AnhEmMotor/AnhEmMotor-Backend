@@ -19,4 +19,10 @@ public class LoginResponse
     /// Thời gian hết hạn của Access Token
     /// </summary>
     public DateTimeOffset ExpiresAt { get; set; }
+
+    /// <summary>
+    /// Refresh Token (Only for internal use to set cookie)
+    /// </summary>
+    [System.Text.Json.Serialization.JsonIgnore]
+    public string? RefreshToken { get; set; }
 }

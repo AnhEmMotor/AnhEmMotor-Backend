@@ -14,6 +14,12 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Application.ApiContracts.Auth.Responses;
+using MediatR;
+using Application.Features.Auth.Commands.Register;
+using Application.Features.Auth.Commands.Login;
+using Application.Features.Auth.Commands.RefreshToken;
+using Application.Features.Auth.Commands.Logout;
+using Application.Features.Auth.Commands.GoogleLogin;
 
 namespace WebAPI.Controllers.V1;
 
@@ -25,11 +31,7 @@ namespace WebAPI.Controllers.V1;
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
 [ApiController]
-public class AuthController(
-    UserManager<ApplicationUser> userManager,
-    SignInManager<ApplicationUser> signInManager,
-    TokenService tokenService,
-    IConfiguration configuration) : ControllerBase
+public class AuthController(IMediator mediator) : ControllerBase
 {
     /// <summary>
     /// Đăng ký tài khoản mới
@@ -40,59 +42,8 @@ public class AuthController(
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Register([FromBody] Application.ApiContracts.Auth.Requests.RegisterRequest model)
     {
-        if (!GenderStatus.IsValid(model.Gender))
-        {
-            return BadRequest(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "Gender not vaild. Please check again.", Field = "gender" }] });
-        }
-
-        var existingUser = await userManager.FindByNameAsync(model.Username);
-        if (existingUser is not null)
-        {
-            return BadRequest(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "Username already exists.", Field = "username" }] });
-        }
-
-        existingUser = await userManager.FindByEmailAsync(model.Email);
-        if (existingUser is not null)
-        {
-            return BadRequest(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "Email already exists.", Field = "email" }] });
-        }
-
-        var user = new ApplicationUser
-        {
-            UserName = string.IsNullOrEmpty(model.Username) ? model.Email : model.Username,
-            Email = model.Email,
-            FullName = model.FullName,
-            PhoneNumber = model.PhoneNumber,
-            Gender = model.Gender ?? GenderStatus.Male,
-            Status = UserStatus.Active
-        };
-
-        var result = await userManager.CreateAsync(user, model.Password);
-
-        if (!result.Succeeded)
-        {
-            ErrorResponse error = new();
-            foreach (var identityError in result.Errors)
-            {
-                string fieldName = IdentityHelper.GetFieldForIdentityError(identityError.Code);
-
-                error.Errors.Add(new ErrorDetail()
-                {
-                    Field = fieldName,
-                    Message = identityError.Description
-                });
-            }
-            return BadRequest(error);
-        }
-
-        var defaultRoles = configuration.GetSection("ProtectedAuthorizationEntities:DefaultRolesForNewUsers").Get<List<string>>() ?? [];
-        if (defaultRoles.Count > 0)
-        {
-            var randomRole = defaultRoles[Random.Shared.Next(defaultRoles.Count)];
-            await userManager.AddToRoleAsync(user, randomRole);
-        }
-
-        return Ok(new RegistrationSuccessResponse());
+        var result = await mediator.Send(new RegisterCommand(model.Username, model.Email, model.Password, model.FullName, model.PhoneNumber, model.Gender));
+        return Ok(result);
     }
 
     /// <summary>
@@ -104,57 +55,8 @@ public class AuthController(
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Login([FromBody] Application.ApiContracts.Auth.Requests.LoginRequest model)
     {
-        ApplicationUser? user;
-
-        // Kiểm tra xem người dùng nhập username hay email
-        if (model.UsernameOrEmail.Contains('@'))
-        {
-            user = await userManager.FindByEmailAsync(model.UsernameOrEmail);
-        }
-        else
-        {
-            user = await userManager.FindByNameAsync(model.UsernameOrEmail);
-        }
-
-        if (user is null)
-        {
-            return Unauthorized(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "Invalid credentials." }] });
-        }
-
-        // Kiểm tra trạng thái của user
-        if (user.Status != UserStatus.Active || user.DeletedAt is not null)
-        {
-            return Unauthorized(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "Account is not available." }] });
-        }
-
-        var result = await signInManager.CheckPasswordSignInAsync(user, model.Password, false);
-        if (!result.Succeeded)
-        {
-            return Unauthorized(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "Invalid credentials." }] });
-        }
-
-        var accessToken = await tokenService.CreateAccessTokenAsync(user, ["pwd"]);
-        var refreshToken = TokenService.CreateRefreshToken();
-
-        user.RefreshToken = refreshToken;
-        user.RefreshTokenExpiryTime = DateTimeOffset.UtcNow.AddDays(7);
-        await userManager.UpdateAsync(user);
-
-        var cookieOptions = new CookieOptions
-        {
-            HttpOnly = true,
-            Expires = DateTimeOffset.UtcNow.AddDays(7),
-            Secure = true,
-            SameSite = SameSiteMode.Strict
-        };
-
-        Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
-
-        return Ok(new LoginResponse
-        {
-            AccessToken = accessToken,
-            ExpiresAt = DateTimeOffset.UtcNow.AddMinutes(15)
-        });
+        var result = await mediator.Send(new LoginCommand(model.UsernameOrEmail, model.Password));
+        return Ok(result);
     }
 
     /// <summary>
@@ -167,95 +69,8 @@ public class AuthController(
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> RefreshToken()
     {
-        var refreshToken = Request.Cookies["refreshToken"];
-        if (string.IsNullOrEmpty(refreshToken))
-        {
-            return Unauthorized(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "Refresh token is missing." }] });
-        }
-
-        var user = await userManager.Users
-            .FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
-
-        if (user is null)
-        {
-            return Unauthorized(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "Invalid refresh token." }] });
-        }
-
-        if (user.Status != "Active")
-        {
-            return StatusCode(StatusCodes.Status403Forbidden, (new ErrorResponse() { Errors = [new ErrorDetail() { Message = "Please login again." }] }));
-        }
-
-        if (user.Status == "Active" && user.DeletedAt != null)
-        {
-            return StatusCode(StatusCodes.Status403Forbidden, (new ErrorResponse() { Errors = [new ErrorDetail() { Message = "Please login again." }] }));
-        }
-
-        if (user.RefreshTokenExpiryTime <= DateTimeOffset.UtcNow)
-        {
-            return Unauthorized(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "Refresh token has expired. Please login again." }] });
-        }
-
-        // Validate status against stored JWT claim if authorization header exists
-        var authHeader = Request.Headers.Authorization.ToString();
-        if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer "))
-        {
-            var token = authHeader["Bearer ".Length..];
-            try
-            {
-                var jwtKey = configuration["Jwt:Key"];
-                if (!string.IsNullOrEmpty(jwtKey))
-                {
-                    var tokenHandler = new JwtSecurityTokenHandler();
-                    var key = Encoding.UTF8.GetBytes(jwtKey);
-
-                    tokenHandler.ValidateToken(token, new TokenValidationParameters
-                    {
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(key),
-                        ValidateIssuer = false,
-                        ValidateAudience = false,
-                        ClockSkew = TimeSpan.Zero
-                    }, out SecurityToken validatedToken);
-
-                    if (validatedToken is JwtSecurityToken jwtToken)
-                    {
-                        var tokenStatusClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "status")?.Value;
-                        if (!string.IsNullOrEmpty(tokenStatusClaim) && tokenStatusClaim != user.Status)
-                        {
-                            return Unauthorized(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "User status has changed. Please login again." }] });
-                        }
-                    }
-                }
-            }
-            catch
-            {
-                // If token validation fails, continue with refresh - the token is just for status check
-            }
-        }
-
-        var newAccessToken = await tokenService.CreateAccessTokenAsync(user, ["pwd"]);
-        var newRefreshToken = TokenService.CreateRefreshToken();
-
-        user.RefreshToken = newRefreshToken;
-        user.RefreshTokenExpiryTime = DateTimeOffset.UtcNow.AddDays(7);
-        await userManager.UpdateAsync(user);
-
-        var cookieOptions = new CookieOptions
-        {
-            HttpOnly = true,
-            Expires = DateTimeOffset.UtcNow.AddDays(7),
-            Secure = true,
-            SameSite = SameSiteMode.Strict
-        };
-
-        Response.Cookies.Append("refreshToken", newRefreshToken, cookieOptions);
-
-        return Ok(new GetAccessTokenFromRefreshTokenResponse
-        {
-            AccessToken = newAccessToken,
-            ExpiresAt = DateTimeOffset.UtcNow.AddMinutes(15)
-        });
+        var result = await mediator.Send(new RefreshTokenCommand());
+        return Ok(result);
     }
 
     /// <summary>
@@ -267,17 +82,8 @@ public class AuthController(
     public async Task<IActionResult> Logout()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (userId is not null)
-        {
-            var user = await userManager.FindByIdAsync(userId);
-            if (user is not null)
-            {
-                user.RefreshToken = null;
-                user.RefreshTokenExpiryTime = DateTimeOffset.MinValue;
-                await userManager.UpdateAsync(user);
-            }
-        }
-
+        await mediator.Send(new LogoutCommand(userId));
+        
         Response.Cookies.Delete("refreshToken");
         return Ok(new LogoutSuccessResponse());
     }
@@ -290,12 +96,8 @@ public class AuthController(
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status501NotImplemented)]
     public async Task<IActionResult> GoogleLogin([FromBody] Application.ApiContracts.Auth.Requests.GoogleLoginRequest model)
     {
-        // TODO: Implement Google OAuth login
-        // 1. Verify ID Token with Google
-        // 2. Get user info from token
-        // 3. Create or find user in database
-        // 4. Generate JWT token
-        return StatusCode(501, new ErrorResponse() { Errors = [new ErrorDetail() { Message = "Google login not implemented yet." }] });
+        await mediator.Send(new GoogleLoginCommand(model));
+        return Ok();
     }
 
     /// <summary>

@@ -1,3 +1,4 @@
+using Application.Interfaces.Repositories.Authentication;
 using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -13,7 +14,7 @@ namespace Infrastructure.Services;
 /// <summary>
 /// Service xử lý tạo JWT Access Token và Refresh Token
 /// </summary>
-public class TokenService(IConfiguration configuration, UserManager<ApplicationUser> userManager)
+public class TokenService(IConfiguration configuration, UserManager<ApplicationUser> userManager) : ITokenService
 {
     /// <summary>
     /// Tạo Access Token cho người dùng
@@ -46,7 +47,7 @@ public class TokenService(IConfiguration configuration, UserManager<ApplicationU
         }
 
         var jwtKey = configuration["Jwt:Key"];
-        var jwtExpiryInMinutes = configuration.GetValue<int>("Jwt:ExpiryInMinutes");
+        var jwtExpiryInMinutes = configuration.GetValue<int>("Jwt:AccessTokenExpiryInMinutes");
 
         if (string.IsNullOrEmpty(jwtKey))
         {
@@ -72,11 +73,46 @@ public class TokenService(IConfiguration configuration, UserManager<ApplicationU
     /// <summary>
     /// Tạo Refresh Token ngẫu nhiên
     /// </summary>
-    public static string CreateRefreshToken()
+    public string CreateRefreshToken()
     {
         var randomNumber = new byte[32];
         using var rng = RandomNumberGenerator.Create();
         rng.GetBytes(randomNumber);
         return Convert.ToBase64String(randomNumber);
+    }
+
+    public string? GetClaimFromToken(string token, string claimType)
+    {
+        var jwtKey = configuration["Jwt:Key"];
+        if (string.IsNullOrEmpty(jwtKey))
+        {
+            return null;
+        }
+
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var key = Encoding.UTF8.GetBytes(jwtKey);
+
+        try
+        {
+            tokenHandler.ValidateToken(token, new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ClockSkew = TimeSpan.Zero
+            }, out SecurityToken validatedToken);
+
+            if (validatedToken is JwtSecurityToken jwtToken)
+            {
+                return jwtToken.Claims.FirstOrDefault(c => c.Type == claimType)?.Value;
+            }
+        }
+        catch
+        {
+            // Token validation failed
+        }
+
+        return null;
     }
 }

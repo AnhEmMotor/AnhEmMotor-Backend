@@ -1,11 +1,11 @@
-﻿using Application.Interfaces.Repositories;
-using Domain.Entities;
+﻿using Domain.Entities;
 using Domain.Shared;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Services;
 using Sieve.Models;
 using Application.ApiContracts.User.Responses;
+using Application.Interfaces.Repositories.Authentication;
 
 namespace Infrastructure.Repositories;
 

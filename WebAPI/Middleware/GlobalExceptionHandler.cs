@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using Application.Common.Exceptions;
+using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using System.Net;
 using WebAPI.Contracts.Errors;
@@ -47,8 +48,33 @@ public class GlobalExceptionHandler(IWebHostEnvironment environment, ILogger<Glo
         {
             statusCode = (int)HttpStatusCode.BadRequest;
             errorResponse = ApiErrorResponse.CreateValidationError(validationException.Errors);
-            logger.LogWarning("Validation failed: {Message}", exception.Message);
-        } else
+        }
+        else if (exception is UnauthorizedException unauthorizedException)
+        {
+            statusCode = (int)HttpStatusCode.Unauthorized;
+            errorResponse = ApiErrorResponse.CreateProductionError(unauthorizedException.Message);
+        }
+        else if (exception is ForbiddenException forbiddenException)
+        {
+            statusCode = (int)HttpStatusCode.Forbidden;
+            errorResponse = ApiErrorResponse.CreateProductionError(forbiddenException.Message);
+        }
+        else if (exception is NotFoundException notFoundException)
+        {
+            statusCode = (int)HttpStatusCode.NotFound;
+            errorResponse = ApiErrorResponse.CreateProductionError(notFoundException.Message);
+        }
+        else if (exception is BadHttpRequestException badRequestException)
+        {
+            statusCode = (int)HttpStatusCode.BadRequest;
+            errorResponse = ApiErrorResponse.CreateProductionError(badRequestException.Message);
+        }
+        else if (exception is NotImplementedException notImplementedException)
+        {
+            statusCode = (int)HttpStatusCode.NotImplemented;
+            errorResponse = ApiErrorResponse.CreateProductionError(notImplementedException.Message);
+        }
+        else
         {
             statusCode = (int)HttpStatusCode.InternalServerError;
             logger.LogError(exception, "Unhandled exception: {Message}", exception.Message);

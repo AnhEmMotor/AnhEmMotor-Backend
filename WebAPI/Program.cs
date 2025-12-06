@@ -10,16 +10,21 @@ builder.Services.ConfigureServices(builder.Configuration, builder.Environment);
 
 var app = builder.Build();
 
-// Seed permissions and protected entities
 using (var scope = app.Services.CreateScope())
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-    var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+    var serviceProvider = scope.ServiceProvider;
+    var dbContext = serviceProvider.GetRequiredService<ApplicationDBContext>();
+    var roleManager = serviceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
+    var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+    var configuration = serviceProvider.GetRequiredService<IConfiguration>();
 
-    await PermissionDataSeeder.SeedPermissionsAsync(dbContext);
-    await ProtectedEntitiesSeeder.SeedProtectedEntitiesAsync(dbContext, roleManager, userManager, configuration);
+    var shouldSeed = configuration.GetValue<bool>("SeedingOptions:RunDataSeedingOnStartup");
+
+    if (shouldSeed)
+    {
+        await PermissionDataSeeder.SeedPermissionsAsync(dbContext);
+        await ProtectedEntitiesSeeder.SeedProtectedEntitiesAsync(dbContext, roleManager, userManager, configuration);
+    }
 }
 
 try

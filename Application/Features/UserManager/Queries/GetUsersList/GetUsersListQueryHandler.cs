@@ -1,5 +1,5 @@
 ﻿using Application.ApiContracts.User.Responses;
-using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.Authentication;
 using Domain.Shared;
 using MediatR;
 

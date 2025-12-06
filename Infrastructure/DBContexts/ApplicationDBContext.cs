@@ -1,4 +1,5 @@
-﻿using Domain.Constants;
+﻿using Application.Interfaces.Repositories;
+using Domain.Constants;
 using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -12,6 +13,8 @@ namespace Infrastructure.DBContexts;
 
 public class ApplicationDBContext(DbContextOptions<ApplicationDBContext> options) : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>(options)
 {
+    public new DbSet<IdentityUserRole<Guid>> UserRoles => Set<IdentityUserRole<Guid>>();
+
     public virtual DbSet<Brand> Brands { get; set; }
 
     public virtual DbSet<Input> InputReceipts { get; set; }

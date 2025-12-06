@@ -18,6 +18,9 @@ using OpenTelemetry.Trace;
 using Sieve.Models;
 using WebAPI.Converters;
 using WebAPI.Middleware;
+using Application.Interfaces.Repositories.Authorization;
+using Infrastructure.Repositories.Authorization;
+using Application.Interfaces.Repositories.Authentication;
 
 namespace WebAPI.StartupExtensions
 {
@@ -81,6 +84,11 @@ namespace WebAPI.StartupExtensions
                     };
                 });
             services.AddHttpContextAccessor();
+            services.AddScoped<ICurrentUserService, Infrastructure.Services.CurrentUserService>();
+            services.AddScoped<Application.Interfaces.Repositories.IAsyncQueryableExecuter, Infrastructure.Repositories.AsyncQueryableExecuter>();
+            services.AddScoped<IPermissionRepository, PermissionRepository>();
+            services.AddScoped<IRolePermissionRepository, RolePermissionRepository>();
+            services.AddScoped<IApplicationRoleRepository, ApplicationRoleRepository>();
             services.AddMapsterConfiguration(typeof(ApplicationServices).Assembly);
             services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(
                 options =>
@@ -130,8 +138,6 @@ namespace WebAPI.StartupExtensions
             {
                 services.AddInfrastructureServices(configuration);
             }
-            
-            
             services.AddApiVersioning(
                 config =>
                 {

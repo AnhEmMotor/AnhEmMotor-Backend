@@ -1,19 +1,24 @@
 using Application.ApiContracts.Permission.Requests;
 using Application.ApiContracts.Permission.Responses;
+using Application.Features.Permissions.Commands.CreateRole;
+using Application.Features.Permissions.Commands.DeleteMultipleRoles;
+using Application.Features.Permissions.Commands.DeleteRole;
+using Application.Features.Permissions.Commands.UpdateRole;
+using Application.Features.Permissions.Commands.UpdateRolePermissions;
+using Application.Features.Permissions.Queries.GetAllPermissions;
+using Application.Features.Permissions.Queries.GetAllRoles;
+using Application.Features.Permissions.Queries.GetMyPermissions;
+using Application.Features.Permissions.Queries.GetRolePermissions;
+using Application.Features.Permissions.Queries.GetUserPermissionsById;
 using Asp.Versioning;
 using Domain.Constants;
-using Domain.Entities;
 using Domain.Helpers;
 using Infrastructure.Authorization;
-using Infrastructure.DBContexts;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
-using System.Reflection;
 using System.Security.Claims;
-
 
 namespace WebAPI.Controllers.V1;
 
@@ -25,11 +30,7 @@ namespace WebAPI.Controllers.V1;
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
 [ApiController]
-public class PermissionController(
-    RoleManager<ApplicationRole> roleManager,
-    UserManager<ApplicationUser> userManager,
-    ApplicationDBContext context,
-    IConfiguration configuration) : ControllerBase
+public class PermissionController(IMediator mediator) : ControllerBase
 {
     /// <summary>
     /// Lấy tất cả các permissions có trong hệ thống với mô tả và trạng thái truy cập của người dùng hiện tại
@@ -39,44 +40,7 @@ public class PermissionController(
     [ProducesResponseType(typeof(List<PermissionResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllPermissions()
     {
-        // Lấy user hiện tại
-        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        ApplicationUser? currentUser = null;
-        
-        if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out var userId))
-        {
-            currentUser = await userManager.FindByIdAsync(userId.ToString());
-        }
-
-        // Lấy permissions từ class Permissions
-        var permissionDefinitions = typeof(PermissionsList)
-            .GetNestedTypes()
-            .SelectMany(type => type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy))
-            .Where(fieldInfo => fieldInfo.IsLiteral && !fieldInfo.IsInitOnly)
-            .Select(fieldInfo => new
-            {
-                Category = fieldInfo.DeclaringType?.Name ?? "Unknown",
-                Key = fieldInfo.Name,
-                Permission = fieldInfo.GetRawConstantValue() as string
-            })
-            .Where(p => p.Permission is not null)
-            .ToList();
-
-        var result = permissionDefinitions
-            .GroupBy(p => p.Category)
-            .ToDictionary(
-                g => g.Key,
-                g => g.Select(p =>
-                {
-                    var metadata = PermissionsList.GetMetadata(p.Permission!);
-                    return new PermissionResponse()
-                    {
-                        ID = p.Permission,
-                        DisplayName = metadata?.DisplayName ?? p.Key,
-                        Description = metadata?.Description,
-                    };
-                }).ToList());
-
+        var result = await mediator.Send(new GetAllPermissionsQuery());
         return Ok(result);
     }
 
@@ -91,51 +55,8 @@ public class PermissionController(
     public async Task<IActionResult> GetMyPermissions()
     {
         var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
-        {
-            return Unauthorized(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "Invalid user token." }] });
-        }
-
-        var user = await userManager.FindByIdAsync(userId.ToString());
-        if (user is null)
-        {
-            return NotFound(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "User not found." }] });
-        }
-
-        var userRoles = await userManager.GetRolesAsync(user);
-        var roleEntities = await context.Roles
-            .Where(r => userRoles.Contains(r.Name!))
-            .ToListAsync();
-
-        var roleIds = roleEntities.Select(r => r.Id).ToList();
-        var userPermissionNames = await context.RolePermissions
-            .Where(rp => roleIds.Contains(rp.RoleId))
-            .Select(rp => rp.Permission!.Name)
-            .Distinct()
-            .ToListAsync();
-
-        var userPermissions = userPermissionNames
-            .Select(p => new
-            {
-                Name = p,
-                Metadata = PermissionsList.GetMetadata(p)
-            })
-            .Select(p => new PermissionResponse()
-            {
-                ID = p.Name,
-                DisplayName = p.Metadata?.DisplayName ?? p.Name,
-                Description = p.Metadata?.Description
-            })
-            .ToList();
-
-        return Ok(new PermissionAndRoleOfUserResponse()
-        {
-            UserId = userId,
-            Email = user.Email,
-            UserName = user.UserName,
-            Roles = userRoles,
-            Permissions = userPermissions
-        });
+        var result = await mediator.Send(new GetMyPermissionsQuery(userIdClaim));
+        return Ok(result);
     }
 
     /// <summary>
@@ -147,46 +68,8 @@ public class PermissionController(
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetUserPermissionsById(Guid userId)
     {
-        var user = await userManager.FindByIdAsync(userId.ToString());
-        if (user is null)
-        {
-            return NotFound(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "User not found." }] });
-        }
-
-        var userRoles = await userManager.GetRolesAsync(user);
-        var roleEntities = await context.Roles
-            .Where(r => userRoles.Contains(r.Name!))
-            .ToListAsync();
-
-        var roleIds = roleEntities.Select(r => r.Id).ToList();
-        var userPermissionNames = await context.RolePermissions
-            .Where(rp => roleIds.Contains(rp.RoleId))
-            .Select(rp => rp.Permission!.Name)
-            .Distinct()
-            .ToListAsync();
-
-        var userPermissions = userPermissionNames
-            .Select(p => new
-            {
-                Name = p,
-                Metadata = PermissionsList.GetMetadata(p)
-            })
-            .Select(p => new PermissionResponse()
-            {
-                ID = p.Name,
-                DisplayName = p.Metadata?.DisplayName ?? p.Name,
-                Description = p.Metadata?.Description
-            })
-            .ToList();
-
-        return Ok(new PermissionAndRoleOfUserResponse()
-        {
-            UserId = userId,
-            Email = user.Email,
-            UserName = user.UserName,
-            Roles = userRoles,
-            Permissions = userPermissions
-        });
+        var result = await mediator.Send(new GetUserPermissionsByIdQuery(userId));
+        return Ok(result);
     }
 
     /// <summary>
@@ -198,33 +81,8 @@ public class PermissionController(
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetRolePermissions(string roleName)
     {
-        var role = await roleManager.FindByNameAsync(roleName);
-        if (role is null)
-        {
-            return NotFound(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "Role not found." }] });
-        }
-
-        var permissions = await context.RolePermissions
-            .Where(rp => rp.RoleId == role.Id)
-            .Where(rp => rp.Permission != null)
-            .Select(rp => rp.Permission!.Name)
-            .ToListAsync();
-
-        var permissionsWithMetadata = permissions
-            .Select(p => new
-            {
-                Name = p,
-                Metadata = PermissionsList.GetMetadata(p)
-            })
-            .Select(p => new
-            {
-                p.Name,
-                DisplayName = p.Metadata?.DisplayName ?? p.Name,
-                p.Metadata?.Description
-            })
-            .ToList();
-
-        return Ok(permissionsWithMetadata);
+        var result = await mediator.Send(new GetRolePermissionsQuery(roleName));
+        return Ok(result);
     }
 
     /// <summary>
@@ -239,113 +97,8 @@ public class PermissionController(
         string roleName,
         [FromBody] UpdateRoleRequest model)
     {
-        var role = await roleManager.FindByNameAsync(roleName);
-        if (role is null)
-        {
-            return NotFound(new ErrorResponse() { Errors = [new ErrorDetail() { Message = "Role not found." }] });
-        }
-
-        bool isRoleInfoUpdated = false;
-        if (model.Description is not null && role.Description != model.Description)
-        {
-            role.Description = model.Description;
-            isRoleInfoUpdated = true;
-        }
-
-        if (model.Permissions.Count != 0)
-        {
-            var allPermissions = typeof(PermissionsList)
-            .GetNestedTypes()
-            .SelectMany(type => type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy))
-            .Where(fieldInfo => fieldInfo.IsLiteral && !fieldInfo.IsInitOnly)
-            .Select(fieldInfo => fieldInfo.GetRawConstantValue() as string)
-            .Where(permission => permission is not null)
-            .ToList();
-
-            var invalidPermissions = model.Permissions.Except(allPermissions!).ToList();
-            if (invalidPermissions.Count != 0)
-            {
-                return BadRequest(new ErrorResponse()
-                {
-                    Errors = [new ErrorDetail() { Message = $"Invalid permissions: {string.Join(", ", invalidPermissions)}"
-                }]
-                });
-            }
-
-            var currentRolePermissions = await context.RolePermissions
-                .Where(rp => rp.RoleId == role.Id)
-                .Include(rp => rp.Permission)
-                .ToListAsync();
-
-            var currentPermissionNames = currentRolePermissions
-                .Where(rp => rp.Permission is not null)
-                .Select(rp => rp.Permission!.Name)
-                .ToHashSet();
-
-            var permissionsToRemove = currentRolePermissions
-                .Where(rp => rp.Permission is not null && !model.Permissions.Contains(rp.Permission.Name))
-                .ToList();
-
-            var permissionNamesToAdd = model.Permissions
-                .Where(pName => !currentPermissionNames.Contains(pName))
-                .ToList();
-
-            if (permissionsToRemove.Count != 0)
-            {
-                var permissionIdsToRemove = permissionsToRemove
-                    .Select(rp => rp.PermissionId)
-                    .ToHashSet();
-
-                var orphanedPermissionNames = await context.RolePermissions
-                    .Where(rp => permissionIdsToRemove.Contains(rp.PermissionId))
-                    .Where(rp => rp.Permission != null)
-                    .GroupBy(rp => rp.Permission!.Name)
-                    .Where(g => g.Count() == 1)
-                    .Select(g => g.Key)
-                    .ToListAsync();
-
-                if (orphanedPermissionNames.Count != 0)
-                {
-                    return BadRequest(new ErrorResponse()
-                    {
-                        Errors = [new ErrorDetail() {Message = $"Cannot remove the last role assignment for permissions: {string.Join(", ", orphanedPermissionNames)}. Assign them to another role first."
-                    }]
-                    });
-                }
-            }
-
-            var dbPermissionsToAdd = await context.Permissions
-                .Where(p => permissionNamesToAdd.Contains(p.Name))
-                .ToListAsync();
-
-            var rolePermissionsToAdd = dbPermissionsToAdd
-                .Select(p => new RolePermission
-                {
-                    RoleId = role.Id,
-                    PermissionId = p.Id
-                })
-                .ToList();
-
-            if (permissionsToRemove.Count != 0)
-            {
-                context.RolePermissions.RemoveRange(permissionsToRemove);
-                isRoleInfoUpdated = true;
-            }
-
-            if (rolePermissionsToAdd.Count != 0)
-            {
-                await context.RolePermissions.AddRangeAsync(rolePermissionsToAdd);
-                isRoleInfoUpdated = true;
-            }
-        }
-        
-
-        if (isRoleInfoUpdated)
-        {
-            await context.SaveChangesAsync();
-        }
-
-        return Ok(new PermissionRoleUpdateResponse());
+        var result = await mediator.Send(new UpdateRolePermissionsCommand(roleName, model));
+        return Ok(result);
     }
 
     /// <summary>
@@ -356,15 +109,8 @@ public class PermissionController(
     [ProducesResponseType(typeof(List<RoleSelectResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllRoles()
     {
-        var roles = await roleManager.Roles
-            .Select(r => new RoleSelectResponse
-            {
-                ID = r.Id,
-                Name = r.Name
-            })
-            .ToListAsync();
-
-        return Ok(roles);
+        var result = await mediator.Send(new GetAllRolesQuery());
+        return Ok(result);
     }
 
     /// <summary>
@@ -376,83 +122,8 @@ public class PermissionController(
     [ProducesResponseType(typeof(RoleCreateResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> CreateRole([FromBody] CreateRoleRequest model)
     {
-        // Kiểm tra role đã tồn tại
-        var roleExists = await roleManager.RoleExistsAsync(model.RoleName);
-        if (roleExists)
-        {
-            return BadRequest(new ErrorResponse { Errors = [new ErrorDetail() { Message = "Role already exists." }] } );
-        }
-
-        // Kiểm tra permissions không rỗng
-        if (model.Permissions is null || model.Permissions.Count == 0)
-        {
-            return BadRequest(new ErrorResponse { Errors = [new ErrorDetail() { Message = "At least one permission must be assigned to the role." }] } );
-        }
-
-        // Lấy tất cả permissions hợp lệ
-        var allPermissions = typeof(PermissionsList)
-            .GetNestedTypes()
-            .SelectMany(type => type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy))
-            .Where(fieldInfo => fieldInfo.IsLiteral && !fieldInfo.IsInitOnly)
-            .Select(fieldInfo => fieldInfo.GetRawConstantValue() as string)
-            .Where(permission => permission is not null)
-            .ToList();
-
-        // Kiểm tra permissions hợp lệ
-        var invalidPermissions = model.Permissions.Except(allPermissions!).ToList();
-        if (invalidPermissions.Count != 0)
-        {
-            return BadRequest(new ErrorResponse { Errors = [new ErrorDetail() { Message = $"Invalid permissions: {string.Join(", ", invalidPermissions)}" }] });
-        }
-
-        // Tạo role
-        var role = new ApplicationRole
-        {
-            Name = model.RoleName,
-            Description = model.Description
-        };
-
-        var createResult = await roleManager.CreateAsync(role);
-        if (!createResult.Succeeded)
-        {
-            ErrorResponse error = new();
-            foreach (var identityError in createResult.Errors)
-            {
-                string fieldName = IdentityHelper.GetFieldForIdentityError(identityError.Code);
-
-                error.Errors.Add(new ErrorDetail()
-                {
-                    Field = fieldName,
-                    Message = identityError.Description
-                });
-            }
-            return BadRequest(error);
-        }
-
-        // Gán permissions cho role
-        var permissionsInDb = await context.Permissions
-            .Where(p => model.Permissions.Contains(p.Name))
-            .ToListAsync();
-
-        var rolePermissions = permissionsInDb
-            .Select(p => new RolePermission
-            {
-                RoleId = role.Id,
-                PermissionId = p.Id
-            })
-            .ToList();
-
-        await context.RolePermissions.AddRangeAsync(rolePermissions);
-        await context.SaveChangesAsync();
-
-        return Ok(new RoleCreateResponse()
-        {
-            Message = $"Role '{model.RoleName}' created successfully with {rolePermissions.Count} permission(s).",
-            RoleId = role.Id,
-            RoleName = role.Name,
-            Description = role.Description,
-            Permissions = model.Permissions
-        });
+        var result = await mediator.Send(new CreateRoleCommand(model));
+        return Ok(result);
     }
 
     /// <summary>
@@ -465,46 +136,8 @@ public class PermissionController(
     [ProducesResponseType(typeof(RoleUpdateResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> UpdateRole(string roleName, [FromBody] UpdateRoleRequest model)
     {
-        var role = await roleManager.FindByNameAsync(roleName);
-        if (role is null)
-        {
-            return NotFound(new ErrorResponse { Errors = [new ErrorDetail() { Message = "Role not found." }] } );
-        }
-
-        // Chỉ cập nhật Description nếu được cung cấp
-        if (!string.IsNullOrWhiteSpace(model.Description))
-        {
-            role.Description = model.Description;
-        }
-
-        var result = await roleManager.UpdateAsync(role);
-        if (!result.Succeeded)
-        {
-            ErrorResponse error = new();
-            foreach (var identityError in result.Errors)
-            {
-                string fieldName = IdentityHelper.GetFieldForIdentityError(identityError.Code);
-
-                error.Errors.Add(new ErrorDetail()
-                {
-                    Field = fieldName,
-                    Message = identityError.Description
-                });
-            }
-            return BadRequest(error);
-        }
-        if (!result.Succeeded)
-        {
-            return BadRequest(new ErrorResponse { Errors = [new ErrorDetail() { Message = "Role not found." }] } );
-        }
-
-        return Ok(new RoleUpdateResponse()
-        {
-            Message = $"Role '{roleName}' updated successfully.",
-            RoleId = role.Id,
-            RoleName = role.Name,
-            Description = role.Description
-        });
+        var result = await mediator.Send(new UpdateRoleCommand(roleName, model));
+        return Ok(result);
     }
 
     /// <summary>
@@ -517,44 +150,8 @@ public class PermissionController(
     [ProducesResponseType(typeof(RoleDeleteResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> DeleteRole(string roleName)
     {
-        var role = await roleManager.FindByNameAsync(roleName);
-        if (role is null)
-        {
-            return NotFound(new ErrorResponse { Errors = [new ErrorDetail() { Message = "Role not found." }] } );
-        }
-
-        // Kiểm tra SuperRoles
-        var superRoles = configuration.GetSection("ProtectedAuthorizationEntities:SuperRoles").Get<List<string>>() ?? [];
-        if (superRoles.Contains(roleName))
-        {
-            return BadRequest(new ErrorResponse { Errors = [new ErrorDetail() { Message = "Cannot delete SuperRole." }] } );
-        }
-
-        // Kiểm tra không có user nào có role này
-        var usersWithRole = await userManager.GetUsersInRoleAsync(roleName);
-        if (usersWithRole.Count > 0)
-        {
-            return BadRequest(new ErrorResponse { Errors = [new ErrorDetail() { Message = $"Cannot delete role '{roleName}' because {usersWithRole.Count} user(s) have this role."  }] });
-        }
-
-        var result = await roleManager.DeleteAsync(role);
-        if (!result.Succeeded)
-        {
-            ErrorResponse error = new();
-            foreach (var identityError in result.Errors)
-            {
-                string fieldName = IdentityHelper.GetFieldForIdentityError(identityError.Code);
-
-                error.Errors.Add(new ErrorDetail()
-                {
-                    Field = fieldName,
-                    Message = identityError.Description
-                });
-            }
-            return BadRequest(error);
-        }
-
-        return Ok(new RoleDeleteResponse() { Message = $"Role '{roleName}' deleted successfully." });
+        var result = await mediator.Send(new DeleteRoleCommand(roleName));
+        return Ok(result);
     }
 
     /// <summary>
@@ -566,60 +163,7 @@ public class PermissionController(
     [ProducesResponseType(typeof(RoleDeleteResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> DeleteMultipleRoles([FromBody] List<string> roleNames)
     {
-        var superRoles = configuration.GetSection("ProtectedAuthorizationEntities:SuperRoles").Get<List<string>>() ?? [];
-        var skippedRoles = new List<string>();
-        var deletedCount = 0;
-
-        // Kiểm tra trước khi xóa
-        foreach (var roleName in roleNames)
-        {
-            // Kiểm tra SuperRoles
-            if (superRoles.Contains(roleName))
-            {
-                skippedRoles.Add($"{roleName} (SuperRole)");
-                continue;
-            }
-
-            var role = await roleManager.FindByNameAsync(roleName);
-            if (role is null)
-            {
-                skippedRoles.Add($"{roleName} (Not found)");
-                continue;
-            }
-
-            // Kiểm tra có user nào có role này không
-            var usersWithRole = await userManager.GetUsersInRoleAsync(roleName);
-            if (usersWithRole.Count > 0)
-            {
-                skippedRoles.Add($"{roleName} ({usersWithRole.Count} user(s) assigned)");
-                continue;
-            }
-        }
-
-        // Nếu có skipped roles, báo lỗi
-        if (skippedRoles.Count > 0)
-        {
-            return BadRequest(new ErrorResponse { Errors = [new ErrorDetail() { Message = $"Cannot delete some roles due to validation errors: {string.Join(',', skippedRoles)}" }] });
-        }
-
-        // Xóa tất cả roles
-        foreach (var roleName in roleNames)
-        {
-            var role = await roleManager.FindByNameAsync(roleName);
-            if (role is not null)
-            {
-                var result = await roleManager.DeleteAsync(role);
-                if (result.Succeeded)
-                {
-                    deletedCount++;
-                }
-            }
-        }
-
-        return Ok(new RoleDeleteResponse()
-        {
-            Message = $"Deleted {deletedCount} role(s) successfully."
-        });
+        var result = await mediator.Send(new DeleteMultipleRolesCommand(roleNames));
+        return Ok(result);
     }
 }
-
