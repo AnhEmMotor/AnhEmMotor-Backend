@@ -1,5 +1,5 @@
 using Application.ApiContracts.Permission.Responses;
-using Domain.Constants;
+using Domain.Constants.Security;
 using MediatR;
 using System.Reflection;
 

@@ -18,7 +18,7 @@ using Application.Features.Products.Queries.GetProductById;
 using Application.Features.Products.Queries.GetProductsList;
 using Application.Features.Products.Queries.GetVariantLiteByProductId;
 using Asp.Versioning;
-using Domain.Constants;
+using Domain.Constants.Security;
 using Domain.Helpers;
 using Domain.Shared;
 using Infrastructure.Authorization;

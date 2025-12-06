@@ -10,7 +10,7 @@ using Application.Features.UserManager.Commands.UpdateUser;
 using Application.Features.UserManager.Queries.GetUserById;
 using Application.Features.UserManager.Queries.GetUsersList;
 using Asp.Versioning;
-using Domain.Constants;
+using Domain.Constants.Security;
 using Domain.Helpers;
 using Domain.Shared;
 using Infrastructure.Authorization;

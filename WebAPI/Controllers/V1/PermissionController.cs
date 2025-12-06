@@ -11,7 +11,7 @@ using Application.Features.Permissions.Queries.GetMyPermissions;
 using Application.Features.Permissions.Queries.GetRolePermissions;
 using Application.Features.Permissions.Queries.GetUserPermissionsById;
 using Asp.Versioning;
-using Domain.Constants;
+using Domain.Constants.Security;
 using Domain.Helpers;
 using Infrastructure.Authorization;
 using MediatR;

@@ -1,4 +1,4 @@
-using Domain.Constants;
+using Domain.Constants.Security;
 using Domain.Entities;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;

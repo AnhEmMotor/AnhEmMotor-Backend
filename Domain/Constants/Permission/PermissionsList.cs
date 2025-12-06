@@ -1,4 +1,4 @@
-namespace Domain.Constants;
+namespace Domain.Constants.Security;
 
 /// <summary>
 /// Định nghĩa các quyền trong hệ thống với metadata (tên, mô tả)

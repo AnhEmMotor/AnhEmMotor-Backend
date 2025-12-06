@@ -1,7 +1,7 @@
 using Application.ApiContracts.Permission.Responses;
 using Application.Common.Exceptions;
 using Application.Interfaces.Repositories.Authorization;
-using Domain.Constants;
+using Domain.Constants.Security;
 using Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
