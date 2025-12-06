@@ -1,4 +1,4 @@
-using Application.ApiContracts.Input;
+using Application.ApiContracts.Input.Responses;
 using Application.Features.Inputs.Commands.CloneInput;
 using Application.Features.Inputs.Commands.CreateInput;
 using Application.Features.Inputs.Commands.DeleteInput;
@@ -18,9 +18,8 @@ using Domain.Shared;
 using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Annotations;
 using Sieve.Models;
-using Application.ApiContracts.Input.Responses;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace WebAPI.Controllers.V1;
 

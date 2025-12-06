@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Application.ApiContracts.UserManager.Responses
 {
-    public class ChangeStatusByManagerResponse
+    public class ChangeStatusUserByManagerResponse
     {
         public string? Message { get; set; }
     }

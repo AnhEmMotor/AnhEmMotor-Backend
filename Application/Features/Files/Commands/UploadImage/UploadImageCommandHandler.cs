@@ -11,7 +11,9 @@ public sealed class UploadImageCommandHandler(
     IMediaFileInsertRepository insertRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<UploadImageCommand, ApiContracts.File.Responses.MediaFileResponse>
 {
-    public async Task<ApiContracts.File.Responses.MediaFileResponse> Handle(UploadImageCommand request, CancellationToken cancellationToken)
+    public async Task<ApiContracts.File.Responses.MediaFileResponse> Handle(
+        UploadImageCommand request,
+        CancellationToken cancellationToken)
     {
         if(request.FileContent == null || request.FileContent.Length == 0)
         {

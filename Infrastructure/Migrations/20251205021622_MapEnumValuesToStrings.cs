@@ -4,15 +4,14 @@
 
 namespace Infrastructure.Migrations
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public partial class MapEnumValuesToStrings : Migration
     {
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // Map Gender enum values from int to string
-            // 0 = Male, 1 = Female, 2 = Other
-            migrationBuilder.Sql(@"
+            migrationBuilder.Sql(
+                @"
                 UPDATE [Users]
                 SET [Gender] = CASE 
                     WHEN CAST([Gender] AS INT) = 0 THEN 'Male'
@@ -22,9 +21,8 @@ namespace Infrastructure.Migrations
                 END
             ");
 
-            // Map Status enum values from int to string
-            // 0 = Inactive, 1 = Active, 2 = Banned, 3 = Suspended
-            migrationBuilder.Sql(@"
+            migrationBuilder.Sql(
+                @"
                 UPDATE [Users]
                 SET [Status] = CASE 
                     WHEN CAST([Status] AS INT) = 0 THEN 'Inactive'
@@ -36,11 +34,11 @@ namespace Infrastructure.Migrations
             ");
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            // Map Gender enum values from string back to int
-            migrationBuilder.Sql(@"
+            migrationBuilder.Sql(
+                @"
                 UPDATE [Users]
                 SET [Gender] = CASE 
                     WHEN [Gender] = 'Male' THEN '0'
@@ -50,8 +48,8 @@ namespace Infrastructure.Migrations
                 END
             ");
 
-            // Map Status enum values from string back to int
-            migrationBuilder.Sql(@"
+            migrationBuilder.Sql(
+                @"
                 UPDATE [Users]
                 SET [Status] = CASE 
                     WHEN [Status] = 'Inactive' THEN '0'

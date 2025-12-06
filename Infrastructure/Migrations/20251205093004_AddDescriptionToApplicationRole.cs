@@ -4,10 +4,10 @@
 
 namespace Infrastructure.Migrations
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public partial class AddDescriptionToApplicationRole : Migration
     {
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<string>(
@@ -17,12 +17,8 @@ namespace Infrastructure.Migrations
                 nullable: true);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropColumn(
-                name: "Description",
-                table: "Roles");
-        }
+        { migrationBuilder.DropColumn(name: "Description", table: "Roles"); }
     }
 }

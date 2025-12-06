@@ -10,13 +10,11 @@ public class GetUserByIdQueryHandler(UserManager<ApplicationUser> userManager) :
 {
     public async Task<UserResponse> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
     {
-        var user = await userManager.FindByIdAsync(request.UserId.ToString());
-        if (user is null)
-        {
+        var user = await userManager.FindByIdAsync(request.UserId.ToString()).ConfigureAwait(false) ??
             throw new NotFoundException("User not found.");
-        }
+        var roles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
 
-        var roles = await userManager.GetRolesAsync(user);
+        cancellationToken.ThrowIfCancellationRequested();
 
         return new UserResponse()
         {

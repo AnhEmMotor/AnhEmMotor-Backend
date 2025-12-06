@@ -20,13 +20,13 @@ using Application.Features.Products.Queries.GetVariantLiteByProductId;
 using Asp.Versioning;
 using Domain.Constants;
 using Domain.Helpers;
-using Swashbuckle.AspNetCore.Annotations;
 using Domain.Shared;
 using Infrastructure.Authorization;
 using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace WebAPI.Controllers.V1;
 

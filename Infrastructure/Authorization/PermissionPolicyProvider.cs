@@ -14,16 +14,13 @@ public class PermissionPolicyProvider(IOptions<AuthorizationOptions> options) : 
 
     public DefaultAuthorizationPolicyProvider FallbackPolicyProvider { get; } = new(options);
 
-    public Task<AuthorizationPolicy> GetDefaultPolicyAsync() =>
-        FallbackPolicyProvider.GetDefaultPolicyAsync();
+    public Task<AuthorizationPolicy> GetDefaultPolicyAsync() => FallbackPolicyProvider.GetDefaultPolicyAsync();
 
-    public Task<AuthorizationPolicy?> GetFallbackPolicyAsync() =>
-        FallbackPolicyProvider.GetFallbackPolicyAsync();
+    public Task<AuthorizationPolicy?> GetFallbackPolicyAsync() => FallbackPolicyProvider.GetFallbackPolicyAsync();
 
     public Task<AuthorizationPolicy?> GetPolicyAsync(string policyName)
     {
-        // Policy cho một quyền đơn lẻ
-        if (policyName.StartsWith(HasPermissionPrefix, StringComparison.OrdinalIgnoreCase))
+        if(policyName.StartsWith(HasPermissionPrefix, StringComparison.OrdinalIgnoreCase))
         {
             var permission = policyName[HasPermissionPrefix.Length..];
             var policy = new AuthorizationPolicyBuilder();
@@ -31,8 +28,7 @@ public class PermissionPolicyProvider(IOptions<AuthorizationOptions> options) : 
             return Task.FromResult<AuthorizationPolicy?>(policy.Build());
         }
 
-        // Policy yêu cầu TẤT CẢ các quyền
-        if (policyName.StartsWith(RequiresAllPermissionsPrefix, StringComparison.OrdinalIgnoreCase))
+        if(policyName.StartsWith(RequiresAllPermissionsPrefix, StringComparison.OrdinalIgnoreCase))
         {
             var permissionsString = policyName[RequiresAllPermissionsPrefix.Length..];
             var permissions = permissionsString.Split(',', StringSplitOptions.RemoveEmptyEntries);
@@ -41,8 +37,7 @@ public class PermissionPolicyProvider(IOptions<AuthorizationOptions> options) : 
             return Task.FromResult<AuthorizationPolicy?>(policy.Build());
         }
 
-        // Policy yêu cầu ÍT NHẤT MỘT quyền
-        if (policyName.StartsWith(RequiresAnyPermissionsPrefix, StringComparison.OrdinalIgnoreCase))
+        if(policyName.StartsWith(RequiresAnyPermissionsPrefix, StringComparison.OrdinalIgnoreCase))
         {
             var permissionsString = policyName[RequiresAnyPermissionsPrefix.Length..];
             var permissions = permissionsString.Split(',', StringSplitOptions.RemoveEmptyEntries);

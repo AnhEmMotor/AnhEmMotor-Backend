@@ -1,8 +1,4 @@
-﻿using Application;
-using Application.ApiContracts;
-using Application.ApiContracts.Brand;
-
-namespace Application.ApiContracts.Brand.Responses
+﻿namespace Application.ApiContracts.Brand.Responses
 {
     public class BrandResponse
     {

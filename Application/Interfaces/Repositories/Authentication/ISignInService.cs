@@ -5,5 +5,9 @@ namespace Application.Interfaces.Repositories.Authentication;
 
 public interface ISignInService
 {
-    Task<SignInResult> CheckPasswordSignInAsync(ApplicationUser user, string password, bool lockoutOnFailure);
+    Task<SignInResult> CheckPasswordSignInAsync(
+        ApplicationUser user,
+        string password,
+        bool lockoutOnFailure,
+        CancellationToken cancellationToken);
 }

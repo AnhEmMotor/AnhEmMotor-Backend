@@ -10,18 +10,16 @@ public class GetCurrentUserQueryHandler(UserManager<ApplicationUser> userManager
 {
     public async Task<UserResponse> Handle(GetCurrentUserQuery request, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(request.UserId) || !Guid.TryParse(request.UserId, out var userId))
+        if(string.IsNullOrEmpty(request.UserId) || !Guid.TryParse(request.UserId, out var userId))
         {
             throw new UnauthorizedException("Invalid user token.");
         }
 
-        var user = await userManager.FindByIdAsync(userId.ToString());
-        if (user is null)
-        {
-            throw new NotFoundException("User not found.");
-        }
+        cancellationToken.ThrowIfCancellationRequested();
 
-        var roles = await userManager.GetRolesAsync(user);
+        var user = await userManager.FindByIdAsync(userId.ToString()).ConfigureAwait(false) ??
+            throw new NotFoundException("User not found.");
+        var roles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
 
         return new UserResponse()
         {

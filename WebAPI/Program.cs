@@ -10,7 +10,10 @@ builder.Services.ConfigureServices(builder.Configuration, builder.Environment);
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
+var hostLifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
+var cancellationToken = hostLifetime.ApplicationStopping;
+
+using(var scope = app.Services.CreateScope())
 {
     var serviceProvider = scope.ServiceProvider;
     var dbContext = serviceProvider.GetRequiredService<ApplicationDBContext>();
@@ -20,10 +23,16 @@ using (var scope = app.Services.CreateScope())
 
     var shouldSeed = configuration.GetValue<bool>("SeedingOptions:RunDataSeedingOnStartup");
 
-    if (shouldSeed)
+    if(shouldSeed)
     {
-        await PermissionDataSeeder.SeedPermissionsAsync(dbContext);
-        await ProtectedEntitiesSeeder.SeedProtectedEntitiesAsync(dbContext, roleManager, userManager, configuration);
+        await PermissionDataSeeder.SeedPermissionsAsync(dbContext, cancellationToken).ConfigureAwait(false);
+        await ProtectedEntitiesSeeder.SeedProtectedEntitiesAsync(
+            dbContext,
+            roleManager,
+            userManager,
+            configuration,
+            cancellationToken)
+            .ConfigureAwait(false);
     }
 }
 
@@ -42,7 +51,6 @@ try
             }
             options.DocExpansion(DocExpansion.None);
         });
-
 } catch(System.Reflection.ReflectionTypeLoadException ex)
 {
     foreach(var loaderException in ex.LoaderExceptions)

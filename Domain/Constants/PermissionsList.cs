@@ -130,65 +130,54 @@ public static class PermissionsList
     /// </summary>
     private static readonly Dictionary<string, PermissionMetadata> PermissionMetadataMap = new()
     {
-        // Brands
         { Brands.View, new PermissionMetadata("View Brands", "Xem danh sách thương hiệu") },
         { Brands.Create, new PermissionMetadata("Create Brand", "Tạo thương hiệu mới") },
         { Brands.Edit, new PermissionMetadata("Edit Brand", "Chỉnh sửa thương hiệu") },
         { Brands.Delete, new PermissionMetadata("Delete Brand", "Xóa thương hiệu") },
 
-        // Products
         { Products.View, new PermissionMetadata("View Products", "Xem danh sách sản phẩm") },
         { Products.Create, new PermissionMetadata("Create Product", "Tạo sản phẩm mới") },
         { Products.Edit, new PermissionMetadata("Edit Product", "Chỉnh sửa sản phẩm") },
         { Products.Delete, new PermissionMetadata("Delete Product", "Xóa sản phẩm") },
 
-        // ProductCategories
         { ProductCategories.View, new PermissionMetadata("View Product Categories", "Xem danh mục sản phẩm") },
         { ProductCategories.Create, new PermissionMetadata("Create Product Category", "Tạo danh mục sản phẩm mới") },
         { ProductCategories.Edit, new PermissionMetadata("Edit Product Category", "Chỉnh sửa danh mục sản phẩm") },
         { ProductCategories.Delete, new PermissionMetadata("Delete Product Category", "Xóa danh mục sản phẩm") },
 
-        // Suppliers
         { Suppliers.View, new PermissionMetadata("View Suppliers", "Xem danh sách nhà cung cấp") },
         { Suppliers.Create, new PermissionMetadata("Create Supplier", "Tạo nhà cung cấp mới") },
         { Suppliers.Edit, new PermissionMetadata("Edit Supplier", "Chỉnh sửa nhà cung cấp") },
         { Suppliers.Delete, new PermissionMetadata("Delete Supplier", "Xóa nhà cung cấp") },
 
-        // Inputs
         { Inputs.View, new PermissionMetadata("View Inputs", "Xem danh sách đơn nhập hàng") },
         { Inputs.Create, new PermissionMetadata("Create Input", "Tạo đơn nhập hàng mới") },
         { Inputs.Edit, new PermissionMetadata("Edit Input", "Chỉnh sửa đơn nhập hàng") },
         { Inputs.Delete, new PermissionMetadata("Delete Input", "Xóa đơn nhập hàng") },
         { Inputs.Approve, new PermissionMetadata("Approve Input", "Phê duyệt đơn nhập hàng") },
 
-        // Outputs
         { Outputs.View, new PermissionMetadata("View Outputs", "Xem danh sách đơn xuất hàng") },
         { Outputs.Create, new PermissionMetadata("Create Output", "Tạo đơn xuất hàng mới") },
         { Outputs.Edit, new PermissionMetadata("Edit Output", "Chỉnh sửa đơn xuất hàng") },
         { Outputs.Delete, new PermissionMetadata("Delete Output", "Xóa đơn xuất hàng") },
         { Outputs.Approve, new PermissionMetadata("Approve Output", "Phê duyệt đơn xuất hàng") },
 
-        // Files
         { Files.View, new PermissionMetadata("View Files", "Xem danh sách tệp tin") },
         { Files.Upload, new PermissionMetadata("Upload File", "Tải lên tệp tin") },
         { Files.Delete, new PermissionMetadata("Delete File", "Xóa tệp tin") },
 
-        // Settings
         { Settings.View, new PermissionMetadata("View Settings", "Xem cài đặt hệ thống") },
         { Settings.Edit, new PermissionMetadata("Edit Settings", "Chỉnh sửa cài đặt hệ thống") },
 
-        // Statistical
         { Statistical.View, new PermissionMetadata("View Statistics", "Xem thống kê") },
         { Statistical.Export, new PermissionMetadata("Export Statistics", "Xuất báo cáo thống kê") },
 
-        // Roles
         { Roles.View, new PermissionMetadata("View Roles", "Xem danh sách vai trò") },
         { Roles.Create, new PermissionMetadata("Create Role", "Tạo vai trò mới") },
         { Roles.Edit, new PermissionMetadata("Edit Role", "Chỉnh sửa vai trò") },
         { Roles.Delete, new PermissionMetadata("Delete Role", "Xóa vai trò") },
         { Roles.AssignPermissions, new PermissionMetadata("Assign Permissions", "Gán quyền cho vai trò") },
 
-        // Users
         { Users.View, new PermissionMetadata("View Users", "Xem danh sách người dùng") },
         { Users.Create, new PermissionMetadata("Create User", "Tạo người dùng mới") },
         { Users.Edit, new PermissionMetadata("Edit User", "Chỉnh sửa thông tin người dùng") },
@@ -202,23 +191,5 @@ public static class PermissionsList
     /// <param name="permissionName">Tên permission</param>
     /// <returns>Metadata chứa DisplayName và Description, hoặc null nếu không tìm thấy</returns>
     public static PermissionMetadata? GetMetadata(string permissionName)
-    {
-        return PermissionMetadataMap.TryGetValue(permissionName, out var metadata) ? metadata : null;
-    }
-}
-
-/// <summary>
-/// Metadata của một permission
-/// </summary>
-public class PermissionMetadata(string displayName, string description)
-{
-    /// <summary>
-    /// Tên hiển thị của permission
-    /// </summary>
-    public string DisplayName { get; } = displayName;
-
-    /// <summary>
-    /// Mô tả chi tiết của permission
-    /// </summary>
-    public string Description { get; } = description;
+    { return PermissionMetadataMap.TryGetValue(permissionName, out var metadata) ? metadata : null; }
 }

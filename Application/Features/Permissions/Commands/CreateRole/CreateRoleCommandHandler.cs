@@ -1,7 +1,5 @@
-using Application.ApiContracts.Permission.Requests;
 using Application.ApiContracts.Permission.Responses;
 using Application.Common.Exceptions;
-using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Authorization;
 using Domain.Constants;
@@ -22,62 +20,52 @@ public class CreateRoleCommandHandler(
     {
         var model = request.Model;
 
-        // Kiểm tra role đã tồn tại
-        var roleExists = await roleManager.RoleExistsAsync(model.RoleName);
-        if (roleExists)
+        var roleExists = await roleManager.RoleExistsAsync(model.RoleName).ConfigureAwait(false);
+        if(roleExists)
         {
             throw new BadRequestException("Role already exists.");
         }
 
-        // Kiểm tra permissions không rỗng
-        if (model.Permissions is null || model.Permissions.Count == 0)
+        if(model.Permissions is null || model.Permissions.Count == 0)
         {
             throw new BadRequestException("At least one permission must be assigned to the role.");
         }
 
-        // Lấy tất cả permissions hợp lệ
         var allPermissions = typeof(PermissionsList)
             .GetNestedTypes()
-            .SelectMany(type => type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy))
+            .SelectMany(
+                type => type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy))
             .Where(fieldInfo => fieldInfo.IsLiteral && !fieldInfo.IsInitOnly)
             .Select(fieldInfo => fieldInfo.GetRawConstantValue() as string)
             .Where(permission => permission is not null)
             .ToList();
 
-        // Kiểm tra permissions hợp lệ
         var invalidPermissions = model.Permissions.Except(allPermissions!).ToList();
-        if (invalidPermissions.Count != 0)
+        if(invalidPermissions.Count != 0)
         {
             throw new BadRequestException($"Invalid permissions: {string.Join(", ", invalidPermissions)}");
         }
 
-        // Tạo role
-        var role = new ApplicationRole
-        {
-            Name = model.RoleName,
-            Description = model.Description
-        };
+        var role = new ApplicationRole { Name = model.RoleName, Description = model.Description };
 
-        var createResult = await roleManager.CreateAsync(role);
-        if (!createResult.Succeeded)
+        var createResult = await roleManager.CreateAsync(role).ConfigureAwait(false);
+        if(!createResult.Succeeded)
         {
             var errors = string.Join(", ", createResult.Errors.Select(e => e.Description));
             throw new BadRequestException(errors);
         }
 
-        // Gán permissions cho role
-        var permissionsInDb = await permissionRepository.GetPermissionsByNamesAsync(model.Permissions, cancellationToken);
+        var permissionsInDb = await permissionRepository.GetPermissionsByNamesAsync(
+            model.Permissions,
+            cancellationToken)
+            .ConfigureAwait(false);
 
         var rolePermissions = permissionsInDb
-            .Select(p => new RolePermission
-            {
-                RoleId = role.Id,
-                PermissionId = p.Id
-            })
+            .Select(p => new RolePermission { RoleId = role.Id, PermissionId = p.Id })
             .ToList();
 
-        await rolePermissionRepository.AddRangeAsync(rolePermissions, cancellationToken);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await rolePermissionRepository.AddRangeAsync(rolePermissions, cancellationToken).ConfigureAwait(false);
+        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         return new RoleCreateResponse()
         {

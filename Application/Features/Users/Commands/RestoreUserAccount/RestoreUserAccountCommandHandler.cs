@@ -12,31 +12,33 @@ namespace Application.Features.Users.Commands.RestoreUserAccount;
 
 public class RestoreUserAccountCommandHandler(UserManager<ApplicationUser> userManager) : IRequestHandler<RestoreUserAccountCommand, RestoreUserResponse>
 {
-    public async Task<RestoreUserResponse> Handle(RestoreUserAccountCommand request, CancellationToken cancellationToken)
+    public async Task<RestoreUserResponse> Handle(
+        RestoreUserAccountCommand request,
+        CancellationToken cancellationToken)
     {
-        var user = await userManager.FindByIdAsync(request.UserId.ToString());
-        if (user is null)
-        {
+        var user = await userManager.FindByIdAsync(request.UserId.ToString()).ConfigureAwait(false) ??
             throw new NotFoundException("User not found.");
+        if(user.DeletedAt is null)
+        {
+            throw new ValidationException([ new ValidationFailure("DeletedAt", "User account is not deleted.") ]);
         }
 
-        if (user.DeletedAt is null)
+        if(string.Compare(user.Status, UserStatus.Active) != 0)
         {
-            throw new ValidationException([new ValidationFailure("DeletedAt", "User account is not deleted.")]);
+            throw new ValidationException(
+                [ new ValidationFailure(
+                    "Status",
+                    $"Cannot restore user with status '{user.Status}'. User status must be Active.") ]);
         }
 
-        // Chỉ có thể khôi phục nếu Status là Active
-        if (user.Status != UserStatus.Active)
-        {
-            throw new ValidationException([new ValidationFailure("Status", $"Cannot restore user with status '{user.Status}'. User status must be Active.")]);
-        }
+        cancellationToken.ThrowIfCancellationRequested();
 
         user.DeletedAt = null;
-        var result = await userManager.UpdateAsync(user);
-        if (!result.Succeeded)
+        var result = await userManager.UpdateAsync(user).ConfigureAwait(false);
+        if(!result.Succeeded)
         {
             var failures = new List<ValidationFailure>();
-            foreach (var error in result.Errors)
+            foreach(var error in result.Errors)
             {
                 string fieldName = IdentityHelper.GetFieldForIdentityError(error.Code);
                 failures.Add(new ValidationFailure(fieldName, error.Description));
@@ -44,9 +46,6 @@ public class RestoreUserAccountCommandHandler(UserManager<ApplicationUser> userM
             throw new ValidationException(failures);
         }
 
-        return new RestoreUserResponse()
-        {
-            Message = "User account has been restored successfully.",
-        };
+        return new RestoreUserResponse() { Message = "User account has been restored successfully.", };
     }
 }

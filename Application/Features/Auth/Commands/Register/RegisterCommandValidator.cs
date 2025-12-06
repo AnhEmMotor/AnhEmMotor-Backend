@@ -1,4 +1,3 @@
-using Application.Features.Auth.Commands.Register;
 using Domain.Constants;
 using Domain.Entities;
 using FluentValidation;
@@ -15,21 +14,23 @@ public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
             .WithMessage("Gender not vaild. Please check again.");
 
         RuleFor(x => x.Username)
-            .MustAsync(async (username, cancellation) =>
-            {
-                var existingUser = await userManager.FindByNameAsync(username);
-                return existingUser is null;
-            })
+            .MustAsync(
+                async (username, cancellation) =>
+                {
+                    var existingUser = await userManager.FindByNameAsync(username).ConfigureAwait(false);
+                    return existingUser is null;
+                })
             .WithMessage("Username already exists.");
 
         RuleFor(x => x.Email)
             .NotEmpty()
             .EmailAddress()
-            .MustAsync(async (email, cancellation) =>
-            {
-                var existingUser = await userManager.FindByEmailAsync(email);
-                return existingUser is null;
-            })
+            .MustAsync(
+                async (email, cancellation) =>
+                {
+                    var existingUser = await userManager.FindByEmailAsync(email).ConfigureAwait(false);
+                    return existingUser is null;
+                })
             .WithMessage("Email already exists.");
     }
 }

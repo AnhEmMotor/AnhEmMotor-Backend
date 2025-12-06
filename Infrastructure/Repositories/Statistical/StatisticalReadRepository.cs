@@ -8,7 +8,9 @@ namespace Infrastructure.Repositories.Statistical;
 
 public class StatisticalReadRepository(ApplicationDBContext context) : IStatisticalReadRepository
 {
-    public async Task<IEnumerable<DailyRevenueResponse>> GetDailyRevenueAsync(int days, CancellationToken cancellationToken)
+    public async Task<IEnumerable<DailyRevenueResponse>> GetDailyRevenueAsync(
+        int days,
+        CancellationToken cancellationToken)
     {
         var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-(days - 1)));
 
@@ -129,7 +131,8 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             .ContinueWith<IEnumerable<OrderStatusCountResponse>>(t => t.Result, cancellationToken);
     }
 
-    public async Task<IEnumerable<ProductReportResponse>> GetProductReportLastMonthAsync(CancellationToken cancellationToken)
+    public async Task<IEnumerable<ProductReportResponse>> GetProductReportLastMonthAsync(
+        CancellationToken cancellationToken)
     {
         var lastMonthStart = new DateTimeOffset(
             DateTimeOffset.UtcNow.AddMonths(-1).Year,
@@ -219,6 +222,10 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                 .ConfigureAwait(false) ??
             0;
 
-        return new ProductStockPriceResponse { UnitPrice = variant.Price ?? 0, StockQuantity = totalInput - totalOutput };
+        return new ProductStockPriceResponse
+        {
+            UnitPrice = variant.Price ?? 0,
+            StockQuantity = totalInput - totalOutput
+        };
     }
 }

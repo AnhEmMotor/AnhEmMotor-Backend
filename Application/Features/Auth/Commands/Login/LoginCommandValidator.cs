@@ -1,4 +1,3 @@
-using Application.Features.Auth.Commands.Login;
 using FluentValidation;
 
 namespace Application.Features.Auth.Commands.Login;

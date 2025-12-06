@@ -131,32 +131,32 @@
             Controller xử lý xác thực và đăng nhập
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.AuthController.Register(Application.ApiContracts.Auth.Requests.RegisterRequest)">
+        <member name="M:WebAPI.Controllers.V1.AuthController.Register(Application.ApiContracts.Auth.Requests.RegisterRequest,System.Threading.CancellationToken)">
             <summary>
             Đăng ký tài khoản mới
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.AuthController.Login(Application.ApiContracts.Auth.Requests.LoginRequest)">
+        <member name="M:WebAPI.Controllers.V1.AuthController.Login(Application.ApiContracts.Auth.Requests.LoginRequest,System.Threading.CancellationToken)">
             <summary>
             Đăng nhập bằng Username/Email và Password
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.AuthController.RefreshToken">
+        <member name="M:WebAPI.Controllers.V1.AuthController.RefreshToken(System.Threading.CancellationToken)">
             <summary>
             Làm mới Access Token bằng Refresh Token
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.AuthController.Logout">
+        <member name="M:WebAPI.Controllers.V1.AuthController.Logout(System.Threading.CancellationToken)">
             <summary>
             Đăng xuất
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.AuthController.GoogleLogin(Application.ApiContracts.Auth.Requests.GoogleLoginRequest)">
+        <member name="M:WebAPI.Controllers.V1.AuthController.GoogleLogin(Application.ApiContracts.Auth.Requests.GoogleLoginRequest,System.Threading.CancellationToken)">
             <summary>
             Đăng nhập bằng Google (placeholder - cần cấu hình Google OAuth)
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.AuthController.FacebookLogin(Application.ApiContracts.Auth.Requests.FacebookLoginRequest)">
+        <member name="M:WebAPI.Controllers.V1.AuthController.FacebookLogin">
             <summary>
             Đăng nhập bằng Facebook (placeholder - cần cấu hình Facebook OAuth)
             </summary>
@@ -426,52 +426,52 @@
             Controller quản lý quyền hạn và vai trò
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.PermissionController.GetAllPermissions">
+        <member name="M:WebAPI.Controllers.V1.PermissionController.GetAllPermissions(System.Threading.CancellationToken)">
             <summary>
             Lấy tất cả các permissions có trong hệ thống với mô tả và trạng thái truy cập của người dùng hiện tại
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.PermissionController.GetMyPermissions">
+        <member name="M:WebAPI.Controllers.V1.PermissionController.GetMyPermissions(System.Threading.CancellationToken)">
             <summary>
             Lấy các quyền của người dùng hiện tại
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.PermissionController.GetUserPermissionsById(System.Guid)">
+        <member name="M:WebAPI.Controllers.V1.PermissionController.GetUserPermissionsById(System.Guid,System.Threading.CancellationToken)">
             <summary>
             Lấy các quyền của một người dùng theo User ID
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.PermissionController.GetRolePermissions(System.String)">
+        <member name="M:WebAPI.Controllers.V1.PermissionController.GetRolePermissions(System.String,System.Threading.CancellationToken)">
             <summary>
             Lấy các quyền của một vai trò cụ thể
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.PermissionController.UpdateRolePermissions(System.String,Application.ApiContracts.Permission.Requests.UpdateRoleRequest)">
+        <member name="M:WebAPI.Controllers.V1.PermissionController.UpdateRolePermissions(System.String,Application.ApiContracts.Permission.Requests.UpdateRoleRequest,System.Threading.CancellationToken)">
             <summary>
             Cập nhật quyền cho một vai trò
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.PermissionController.GetAllRoles">
+        <member name="M:WebAPI.Controllers.V1.PermissionController.GetAllRoles(System.Threading.CancellationToken)">
             <summary>
             Lấy tất cả các vai trò
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.PermissionController.CreateRole(Application.ApiContracts.Permission.Requests.CreateRoleRequest)">
+        <member name="M:WebAPI.Controllers.V1.PermissionController.CreateRole(Application.ApiContracts.Permission.Requests.CreateRoleRequest,System.Threading.CancellationToken)">
             <summary>
             Tạo vai trò mới với các quyền được gán
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.PermissionController.UpdateRole(System.String,Application.ApiContracts.Permission.Requests.UpdateRoleRequest)">
+        <member name="M:WebAPI.Controllers.V1.PermissionController.UpdateRole(System.String,Application.ApiContracts.Permission.Requests.UpdateRoleRequest,System.Threading.CancellationToken)">
             <summary>
             Cập nhật thông tin vai trò (chỉ cập nhật Description nếu được cung cấp)
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.PermissionController.DeleteRole(System.String)">
+        <member name="M:WebAPI.Controllers.V1.PermissionController.DeleteRole(System.String,System.Threading.CancellationToken)">
             <summary>
             Xóa vai trò (hard delete)
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.PermissionController.DeleteMultipleRoles(System.Collections.Generic.List{System.String})">
+        <member name="M:WebAPI.Controllers.V1.PermissionController.DeleteMultipleRoles(System.Collections.Generic.List{System.String},System.Threading.CancellationToken)">
             <summary>
             Xóa nhiều vai trò (hard delete)
             </summary>
@@ -888,27 +888,27 @@
             Quản lý người dùng (Bất cứ người dùng nào đã đăng nhập đều có quyền vào đây)
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.UserController.GetCurrentUser">
+        <member name="M:WebAPI.Controllers.V1.UserController.GetCurrentUser(System.Threading.CancellationToken)">
             <summary>
             Lấy thông tin người dùng hiện tại từ JWT
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.UserController.UpdateCurrentUser(Application.ApiContracts.User.Requests.UpdateUserRequest)">
+        <member name="M:WebAPI.Controllers.V1.UserController.UpdateCurrentUser(Application.ApiContracts.User.Requests.UpdateUserRequest,System.Threading.CancellationToken)">
             <summary>
             Đổi thông tin người dùng hiện tại từ JWT
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.UserController.ChangePasswordCurrentUser(Application.ApiContracts.User.Requests.ChangePasswordRequest)">
+        <member name="M:WebAPI.Controllers.V1.UserController.ChangePasswordCurrentUser(Application.ApiContracts.User.Requests.ChangePasswordRequest,System.Threading.CancellationToken)">
             <summary>
             Đổi mật khẩu người dùng hiện tại từ JWT
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.UserController.DeleteCurrentUserAccount">
+        <member name="M:WebAPI.Controllers.V1.UserController.DeleteCurrentUserAccount(System.Threading.CancellationToken)">
             <summary>
             Xoá tài khoản của người dùng từ JWT
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.UserController.RestoreUserAccount(System.Guid)">
+        <member name="M:WebAPI.Controllers.V1.UserController.RestoreUserAccount(System.Guid,System.Threading.CancellationToken)">
             <summary>
             Khôi phục tài khoản người dùng (soft delete recovery - set DeletedAt to null)
             </summary>
@@ -917,22 +917,26 @@
             <summary>
             Quản lý người dùng (Chỉ có người dùng có quyền mới được vào đây)
             </summary>
-            <remarks>This controller enforces business rules to prevent modification or deletion of protected
-            users and roles, such as SuperRoles and users listed in the protected configuration. All endpoints require
-            specific permissions and may return error responses if protection rules are violated. API versioning is
-            supported via the route template. Thread safety is managed by ASP.NET Core's request handling; concurrent
-            requests may result in race conditions if user or role state changes rapidly.</remarks>
+            <remarks>
+            This controller enforces business rules to prevent modification or deletion of protected users and roles, such as
+            SuperRoles and users listed in the protected configuration. All endpoints require specific permissions and may
+            return error responses if protection rules are violated. API versioning is supported via the route template. Thread
+            safety is managed by ASP.NET Core's request handling; concurrent requests may result in race conditions if user or
+            role state changes rapidly.
+            </remarks>
             <param name="mediator">The MediatR mediator used to send queries and commands.</param>
         </member>
         <member name="M:WebAPI.Controllers.V1.UserManagerController.#ctor(MediatR.IMediator)">
             <summary>
             Quản lý người dùng (Chỉ có người dùng có quyền mới được vào đây)
             </summary>
-            <remarks>This controller enforces business rules to prevent modification or deletion of protected
-            users and roles, such as SuperRoles and users listed in the protected configuration. All endpoints require
-            specific permissions and may return error responses if protection rules are violated. API versioning is
-            supported via the route template. Thread safety is managed by ASP.NET Core's request handling; concurrent
-            requests may result in race conditions if user or role state changes rapidly.</remarks>
+            <remarks>
+            This controller enforces business rules to prevent modification or deletion of protected users and roles, such as
+            SuperRoles and users listed in the protected configuration. All endpoints require specific permissions and may
+            return error responses if protection rules are violated. API versioning is supported via the route template. Thread
+            safety is managed by ASP.NET Core's request handling; concurrent requests may result in race conditions if user or
+            role state changes rapidly.
+            </remarks>
             <param name="mediator">The MediatR mediator used to send queries and commands.</param>
         </member>
         <member name="M:WebAPI.Controllers.V1.UserManagerController.GetAllUsers(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
@@ -942,34 +946,34 @@
             <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
             <param name="cancellationToken"></param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.UserManagerController.GetUserById(System.Guid)">
+        <member name="M:WebAPI.Controllers.V1.UserManagerController.GetUserById(System.Guid,System.Threading.CancellationToken)">
             <summary>
             Lấy thông tin người dùng theo ID
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.UserManagerController.UpdateUser(System.Guid,Application.ApiContracts.User.Requests.UpdateUserRequest)">
+        <member name="M:WebAPI.Controllers.V1.UserManagerController.UpdateUser(System.Guid,Application.ApiContracts.User.Requests.UpdateUserRequest,System.Threading.CancellationToken)">
             <summary>
             Cập nhật thông tin người dùng
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.UserManagerController.ChangePassword(System.Guid,Application.ApiContracts.User.Requests.ChangePasswordRequest)">
+        <member name="M:WebAPI.Controllers.V1.UserManagerController.ChangePassword(System.Guid,Application.ApiContracts.User.Requests.ChangePasswordRequest,System.Threading.CancellationToken)">
             <summary>
             Đổi mật khẩu người dùng theo ID
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.UserManagerController.AssignRoles(System.Guid,Application.ApiContracts.UserManager.Requests.AssignRolesRequest)">
+        <member name="M:WebAPI.Controllers.V1.UserManagerController.AssignRoles(System.Guid,Application.ApiContracts.UserManager.Requests.AssignRolesRequest,System.Threading.CancellationToken)">
             <summary>
             Gán roles cho người dùng
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.UserManagerController.ChangeUserStatus(System.Guid,Application.ApiContracts.UserManager.Requests.ChangeUserStatusRequest)">
+        <member name="M:WebAPI.Controllers.V1.UserManagerController.ChangeUserStatus(System.Guid,Application.ApiContracts.UserManager.Requests.ChangeUserStatusRequest,System.Threading.CancellationToken)">
             <summary>
             Thay đổi trạng thái của người dùng
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.UserManagerController.ChangeMultipleUsersStatus(Application.ApiContracts.UserManager.Requests.ChangeMultipleUsersStatusRequest)">
+        <member name="M:WebAPI.Controllers.V1.UserManagerController.ChangeMultipleUsersStatus(Application.ApiContracts.UserManager.Requests.ChangeMultipleUsersStatusRequest,System.Threading.CancellationToken)">
             <summary>
-            Thay đổi trạng thái của nhiều người dùng 
+            Thay đổi trạng thái của nhiều người dùng
             </summary>
         </member>
         <member name="T:WebAPI.Converters.EmptyStringConverter">

@@ -14,37 +14,37 @@ public class UpdateUserCommandHandler(UserManager<ApplicationUser> userManager) 
 {
     public async Task<UserResponse> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
     {
-        var user = await userManager.FindByIdAsync(request.UserId.ToString());
-        if (user is null)
-        {
+        var user = await userManager.FindByIdAsync(request.UserId.ToString()).ConfigureAwait(false) ??
             throw new NotFoundException("User not found.");
-        }
-
-        if (!string.IsNullOrWhiteSpace(request.Model.FullName))
+        if(!string.IsNullOrWhiteSpace(request.Model.FullName))
         {
             user.FullName = request.Model.FullName;
         }
 
-        // Validate Gender if provided
-        if (!string.IsNullOrWhiteSpace(request.Model.Gender))
+        if(!string.IsNullOrWhiteSpace(request.Model.Gender))
         {
-            if (!GenderStatus.IsValid(request.Model.Gender))
+            if(!GenderStatus.IsValid(request.Model.Gender))
             {
-                throw new ValidationException([new ValidationFailure("Gender", $"Invalid gender value. Allowed values: {string.Join(", ", GenderStatus.All)}")]);
+                throw new ValidationException(
+                    [ new ValidationFailure(
+                        "Gender",
+                        $"Invalid gender value. Allowed values: {string.Join(", ", GenderStatus.All)}") ]);
             }
             user.Gender = request.Model.Gender;
         }
 
-        if (!string.IsNullOrWhiteSpace(request.Model.PhoneNumber))
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if(!string.IsNullOrWhiteSpace(request.Model.PhoneNumber))
         {
             user.PhoneNumber = request.Model.PhoneNumber;
         }
 
-        var result = await userManager.UpdateAsync(user);
-        if (!result.Succeeded)
+        var result = await userManager.UpdateAsync(user).ConfigureAwait(false);
+        if(!result.Succeeded)
         {
             var failures = new List<ValidationFailure>();
-            foreach (var error in result.Errors)
+            foreach(var error in result.Errors)
             {
                 string fieldName = IdentityHelper.GetFieldForIdentityError(error.Code);
                 failures.Add(new ValidationFailure(fieldName, error.Description));
@@ -52,7 +52,7 @@ public class UpdateUserCommandHandler(UserManager<ApplicationUser> userManager) 
             throw new ValidationException(failures);
         }
 
-        var roles = await userManager.GetRolesAsync(user);
+        var roles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
 
         return new UserResponse
         {

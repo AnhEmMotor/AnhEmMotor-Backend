@@ -1,34 +1,33 @@
-﻿using Domain.Entities;
+﻿using Application.ApiContracts.User.Responses;
+using Application.Interfaces.Repositories.Authentication;
+using Domain.Entities;
 using Domain.Shared;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Sieve.Services;
 using Sieve.Models;
-using Application.ApiContracts.User.Responses;
-using Application.Interfaces.Repositories.Authentication;
+using Sieve.Services;
 
-namespace Infrastructure.Repositories;
+namespace Infrastructure.Repositories.User;
 
-public class UserRepository(
-    UserManager<ApplicationUser> userManager,
-    ISieveProcessor sieveProcessor)
-    : IUserRepository
+public class UserRepository(UserManager<ApplicationUser> userManager, ISieveProcessor sieveProcessor) : IUserRepository
 {
-    public async Task<PagedResult<UserResponse>> GetPagedListAsync(SieveModel sieveModel, CancellationToken cancellationToken)
+    public async Task<PagedResult<UserResponse>> GetPagedListAsync(
+        SieveModel sieveModel,
+        CancellationToken cancellationToken)
     {
         var query = userManager.Users.AsNoTracking();
 
         var countQuery = sieveProcessor.Apply(sieveModel, query, applyPagination: false);
-        var totalCount = await countQuery.CountAsync(cancellationToken);
+        var totalCount = await countQuery.CountAsync(cancellationToken).ConfigureAwait(false);
 
         var pagedQuery = sieveProcessor.Apply(sieveModel, query);
-        var entities = await pagedQuery.ToListAsync(cancellationToken);
+        var entities = await pagedQuery.ToListAsync(cancellationToken).ConfigureAwait(false);
 
         var userResponses = new List<UserResponse>();
 
-        foreach (var user in entities)
+        foreach(var user in entities)
         {
-            var roles = await userManager.GetRolesAsync(user);
+            var roles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
 
             var response = new UserResponse
             {
@@ -41,16 +40,12 @@ public class UserRepository(
                 EmailConfirmed = user.EmailConfirmed,
                 Status = user.Status ?? "Active",
                 DeletedAt = user.DeletedAt,
-                Roles = [.. roles]
+                Roles = [ .. roles ]
             };
 
             userResponses.Add(response);
         }
 
-        return new PagedResult<UserResponse>(
-            userResponses,
-            totalCount,
-            sieveModel.Page ?? 1,
-            sieveModel.PageSize ?? 10);
+        return new PagedResult<UserResponse>(userResponses, totalCount, sieveModel.Page ?? 1, sieveModel.PageSize ?? 10);
     }
 }

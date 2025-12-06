@@ -1,7 +1,6 @@
 using Application.ApiContracts.Permission.Responses;
 using Application.Common.Exceptions;
 using Domain.Entities;
-using Domain.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 
@@ -14,16 +13,18 @@ public class UpdateRoleCommandHandler(RoleManager<ApplicationRole> roleManager) 
         var roleName = request.RoleName;
         var model = request.Model;
 
-        var role = await roleManager.FindByNameAsync(roleName) ?? throw new NotFoundException("Role not found.");
+        var role = await roleManager.FindByNameAsync(roleName).ConfigureAwait(false) ??
+            throw new NotFoundException("Role not found.");
 
-        // Chỉ cập nhật Description nếu được cung cấp
-        if (!string.IsNullOrWhiteSpace(model.Description))
+        if(!string.IsNullOrWhiteSpace(model.Description))
         {
             role.Description = model.Description;
         }
 
-        var result = await roleManager.UpdateAsync(role);
-        if (!result.Succeeded)
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var result = await roleManager.UpdateAsync(role).ConfigureAwait(false);
+        if(!result.Succeeded)
         {
             var errors = string.Join(", ", result.Errors.Select(e => e.Description));
             throw new BadRequestException(errors);

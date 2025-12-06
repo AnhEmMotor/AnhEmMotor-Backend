@@ -1,5 +1,4 @@
-﻿using Application.Interfaces;
-using Application.Interfaces.Repositories;
+﻿using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Authentication;
 using Application.Interfaces.Repositories.Brand;
 using Application.Interfaces.Repositories.Input;
@@ -58,17 +57,13 @@ public static class DBContext
                         b.CommandTimeout(2);
                     });
             });
-        // Configure Identity
-
-        // Configure Authorization with custom policy provider
         services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
         services.AddScoped<IAuthorizationHandler, PermissionHandler>();
         services.AddScoped<IAuthorizationHandler, AllPermissionsHandler>();
         services.AddScoped<IAuthorizationHandler, AnyPermissionsHandler>();
 
-        // Register TokenService
         services.AddScoped<ITokenService, TokenService>();
-        services.AddScoped<TokenService>(); // Keep concrete registration if needed elsewhere, or remove if all usages are migrated
+        services.AddScoped<TokenService>();
         services.AddScoped<ISignInService, SignInService>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
@@ -128,7 +123,7 @@ public static class DBContext
 
         services.AddScoped<IStatisticalReadRepository, StatisticalReadRepository>();
 
-        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IUserRepository, Repositories.User.UserRepository>();
 
         return services;
     }

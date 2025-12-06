@@ -4,4 +4,4 @@ using MediatR;
 
 namespace Application.Features.UserManager.Commands.ChangeUserStatus;
 
-public record ChangeUserStatusCommand(Guid UserId, ChangeUserStatusRequest Model) : IRequest<ChangeStatusByManagerResponse>;
+public record ChangeUserStatusCommand(Guid UserId, ChangeUserStatusRequest Model) : IRequest<ChangeStatusUserByManagerResponse>;

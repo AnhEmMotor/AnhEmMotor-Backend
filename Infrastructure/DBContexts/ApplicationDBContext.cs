@@ -1,5 +1,4 @@
-﻿using Application.Interfaces.Repositories;
-using Domain.Constants;
+﻿using Domain.Constants;
 using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -11,7 +10,8 @@ using SupplierStatus = Domain.Entities.SupplierStatus;
 
 namespace Infrastructure.DBContexts;
 
-public class ApplicationDBContext(DbContextOptions<ApplicationDBContext> options) : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>(options)
+public class ApplicationDBContext(DbContextOptions<ApplicationDBContext> options) : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>(
+    options)
 {
     public new DbSet<IdentityUserRole<Guid>> UserRoles => Set<IdentityUserRole<Guid>>();
 
@@ -61,7 +61,6 @@ public class ApplicationDBContext(DbContextOptions<ApplicationDBContext> options
     {
         base.OnModelCreating(modelBuilder);
 
-        // Cấu hình bảng Identity
         modelBuilder.Entity<ApplicationUser>().ToTable("Users");
         modelBuilder.Entity<ApplicationRole>().ToTable("Roles");
         modelBuilder.Entity<IdentityUserRole<Guid>>().ToTable("UserRoles");
@@ -70,12 +69,10 @@ public class ApplicationDBContext(DbContextOptions<ApplicationDBContext> options
         modelBuilder.Entity<IdentityRoleClaim<Guid>>().ToTable("RoleClaims");
         modelBuilder.Entity<IdentityUserToken<Guid>>().ToTable("UserTokens");
 
-        // Cấu hình Permission và RolePermission
         modelBuilder.Entity<Permission>().ToTable("Permissions");
         modelBuilder.Entity<RolePermission>().ToTable("RolePermissions");
 
-        modelBuilder.Entity<RolePermission>()
-            .HasKey(rp => new { rp.RoleId, rp.PermissionId });
+        modelBuilder.Entity<RolePermission>().HasKey(rp => new { rp.RoleId, rp.PermissionId });
 
         modelBuilder.Entity<RolePermission>()
             .HasOne(rp => rp.Role)

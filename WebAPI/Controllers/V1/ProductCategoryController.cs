@@ -1,4 +1,6 @@
-﻿using Application.Features.ProductCategories.Commands.CreateProductCategory;
+﻿using Application.ApiContracts.ProductCategory.Requests;
+using Application.ApiContracts.ProductCategory.Responses;
+using Application.Features.ProductCategories.Commands.CreateProductCategory;
 using Application.Features.ProductCategories.Commands.DeleteManyProductCategories;
 using Application.Features.ProductCategories.Commands.DeleteProductCategory;
 using Application.Features.ProductCategories.Commands.RestoreManyProductCategories;
@@ -13,10 +15,8 @@ using Domain.Shared;
 using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Annotations;
 using Sieve.Models;
-using Application.ApiContracts.ProductCategory.Requests;
-using Application.ApiContracts.ProductCategory.Responses;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace WebAPI.Controllers.V1;
 

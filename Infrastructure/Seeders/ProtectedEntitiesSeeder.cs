@@ -4,7 +4,6 @@ using Infrastructure.DBContexts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using System.Collections.Generic;
 
 namespace Infrastructure.Seeders;
 
@@ -20,104 +19,96 @@ public static class ProtectedEntitiesSeeder
         ApplicationDBContext context,
         RoleManager<ApplicationRole> roleManager,
         UserManager<ApplicationUser> userManager,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        CancellationToken cancellationToken)
     {
-        // Seed SuperRoles
         var superRoles = configuration.GetSection("ProtectedAuthorizationEntities:SuperRoles").Get<List<string>>() ?? [];
-        foreach (var roleName in superRoles)
+        foreach(var roleName in superRoles)
         {
-            var roleExists = await roleManager.RoleExistsAsync(roleName);
-            if (!roleExists)
+            var roleExists = await roleManager.RoleExistsAsync(roleName).ConfigureAwait(false);
+            if(!roleExists)
             {
-                await roleManager.CreateAsync(new ApplicationRole { Name = roleName });
+                await roleManager.CreateAsync(new ApplicationRole { Name = roleName }).ConfigureAwait(false);
             }
         }
 
-        // Gán tất cả các permissions cho SuperRoles
-        if (superRoles.Count != 0)
+        if(superRoles.Count != 0)
         {
-            var allPermissions = await context.Permissions.ToListAsync();
+            var allPermissions = await context.Permissions.ToListAsync(cancellationToken).ConfigureAwait(false);
             var superRoleEntities = await context.Roles
                 .Where(r => r.Name != null && superRoles.Contains(r.Name))
-                .ToListAsync();
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
 
-            foreach (var role in superRoleEntities)
+            foreach(var role in superRoleEntities)
             {
                 var existingPermissions = await context.RolePermissions
                     .Where(rp => rp.RoleId == role.Id)
                     .Select(rp => rp.PermissionId)
-                    .ToListAsync();
+                    .ToListAsync(cancellationToken)
+                    .ConfigureAwait(false);
 
                 var permissionsToAdd = allPermissions
                     .Where(p => !existingPermissions.Contains(p.Id))
-                    .Select(p => new RolePermission
-                    {
-                        RoleId = role.Id,
-                        PermissionId = p.Id
-                    });
+                    .Select(p => new RolePermission { RoleId = role.Id, PermissionId = p.Id });
 
-                if (permissionsToAdd.Any())
+                if(permissionsToAdd.Any())
                 {
-                    await context.RolePermissions.AddRangeAsync(permissionsToAdd);
+                    await context.RolePermissions
+                        .AddRangeAsync(permissionsToAdd, cancellationToken)
+                        .ConfigureAwait(false);
                 }
             }
 
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        // Seed ProtectedUsers
         var protectedUsersSection = configuration.GetSection("ProtectedAuthorizationEntities:ProtectedUsers");
         var protectedUsers = new Dictionary<string, string>();
 
-        // Parse protected users từ configuration
-        // Format: "email:password" hoặc chỉ "email" (sử dụng default password)
         var protectedUserList = protectedUsersSection.Get<List<string>>() ?? [];
-        foreach (var entry in protectedUserList)
+        foreach(var entry in protectedUserList)
         {
-            if (string.IsNullOrWhiteSpace(entry)) continue;
+            if(string.IsNullOrWhiteSpace(entry))
+                continue;
 
             var parts = entry.Split(':');
             var email = parts[0]?.Trim() ?? string.Empty;
             var password = parts.Length > 1 ? parts[1]?.Trim() : null;
 
-            if (!string.IsNullOrEmpty(email))
+            if(!string.IsNullOrEmpty(email))
             {
                 protectedUsers[email] = password ?? "DefaultProtectedUser@123456";
             }
         }
 
-        var defaultRolesForNewUsers = configuration.GetSection("ProtectedAuthorizationEntities:DefaultRolesForNewUsers").Get<List<string>>() ?? [];
+        var defaultRolesForNewUsers = configuration.GetSection("ProtectedAuthorizationEntities:DefaultRolesForNewUsers")
+                .Get<List<string>>() ??
+            [];
 
         foreach (var (email, password) in protectedUsers)
         {
-            var user = await userManager.FindByEmailAsync(email);
-            if (user is null && superRoles.Count != 0)
+            var user = await userManager.FindByEmailAsync(email).ConfigureAwait(false);
+            if(user is null && superRoles.Count != 0)
             {
-                // Tạo user mới với thông tin mặc định
-                var newUser = new ApplicationUser
-                {
-                    UserName = email,
-                    Email = email,
-                    Status = UserStatus.Active,
-                };
+                var newUser = new ApplicationUser { UserName = email, Email = email, Status = UserStatus.Active, };
 
-                var result = await userManager.CreateAsync(newUser, password);
-                if (result.Succeeded)
+                var result = await userManager.CreateAsync(newUser, password).ConfigureAwait(false);
+                if(result.Succeeded)
                 {
-                    await userManager.AddToRoleAsync(newUser, superRoles[0]);
+                    await userManager.AddToRoleAsync(newUser, superRoles[0]).ConfigureAwait(false);
                 }
             }
         }
 
-        // Seed default roles for new users
-        if (defaultRolesForNewUsers.Count != 0)
+        if(defaultRolesForNewUsers.Count != 0)
         {
-            foreach (var roleName in defaultRolesForNewUsers)
+            foreach(var roleName in defaultRolesForNewUsers)
             {
-                var roleExists = await roleManager.RoleExistsAsync(roleName);
-                if (!roleExists)
+                var roleExists = await roleManager.RoleExistsAsync(roleName).ConfigureAwait(false);
+                if(!roleExists)
                 {
-                    await roleManager.CreateAsync(new ApplicationRole { Name = roleName });
+                    await roleManager.CreateAsync(new ApplicationRole { Name = roleName }).ConfigureAwait(false);
                 }
             }
         }

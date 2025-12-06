@@ -8,7 +8,9 @@ namespace Application.Features.Brands.Queries.GetBrandsList;
 
 public sealed class GetBrandsListQueryHandler(IBrandReadRepository repository, IPaginator paginator) : IRequestHandler<GetBrandsListQuery, PagedResult<ApiContracts.Brand.Responses.BrandResponse>>
 {
-    public Task<PagedResult<ApiContracts.Brand.Responses.BrandResponse>> Handle(GetBrandsListQuery request, CancellationToken cancellationToken)
+    public Task<PagedResult<ApiContracts.Brand.Responses.BrandResponse>> Handle(
+        GetBrandsListQuery request,
+        CancellationToken cancellationToken)
     {
         var query = repository.GetQueryable();
 

@@ -18,63 +18,68 @@ public class AssignRolesCommandHandler(
 {
     public async Task<AssignRoleResponse> Handle(AssignRolesCommand request, CancellationToken cancellationToken)
     {
-        foreach (string role in request.Model.RoleNames)
+        foreach(string role in request.Model.RoleNames)
         {
-            if (string.IsNullOrWhiteSpace(role))
+            if(string.IsNullOrWhiteSpace(role))
             {
-                throw new ValidationException([new ValidationFailure("RoleNames", "Role names cannot contain empty or whitespace values.")]);
+                throw new ValidationException(
+                    [ new ValidationFailure("RoleNames", "Role names cannot contain empty or whitespace values.") ]);
             }
-            if (UserStatus.IsValid(role))
+            if(UserStatus.IsValid(role))
             {
-                throw new ValidationException([new ValidationFailure("RoleNames", "Role names not vaild.")]);
+                throw new ValidationException([ new ValidationFailure("RoleNames", "Role names not vaild.") ]);
             }
         }
 
-        var user = await userManager.FindByIdAsync(request.UserId.ToString());
-        if (user is null)
-        {
+        var user = await userManager.FindByIdAsync(request.UserId.ToString()).ConfigureAwait(false) ??
             throw new NotFoundException("User not found.");
-        }
 
-        // Validate all roles exist BEFORE assignment
         var invalidRoles = new List<string>();
-        foreach (var roleName in request.Model.RoleNames)
+        foreach(var roleName in request.Model.RoleNames)
         {
-            var roleExists = await roleManager.RoleExistsAsync(roleName);
-            if (!roleExists)
+            var roleExists = await roleManager.RoleExistsAsync(roleName).ConfigureAwait(false);
+            if(!roleExists)
             {
                 invalidRoles.Add(roleName);
             }
         }
 
-        if (invalidRoles.Count > 0)
+        if(invalidRoles.Count > 0)
         {
-            throw new ValidationException([new ValidationFailure("RoleNames", $"The following roles do not exist: {string.Join(", ", invalidRoles)}")]);
+            throw new ValidationException(
+                [ new ValidationFailure(
+                    "RoleNames",
+                    $"The following roles do not exist: {string.Join(", ", invalidRoles)}") ]);
         }
 
-        var currentRoles = await userManager.GetRolesAsync(user);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var currentRoles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
         var superRoles = configuration.GetSection("ProtectedAuthorizationEntities:SuperRoles").Get<List<string>>() ?? [];
 
         var rolesToRemove = currentRoles.Except(request.Model.RoleNames).ToList();
-        foreach (var roleToRemove in rolesToRemove)
+        foreach(var roleToRemove in rolesToRemove)
         {
-            if (superRoles.Contains(roleToRemove))
+            if(superRoles.Contains(roleToRemove))
             {
-                var usersWithThisRole = await userManager.GetUsersInRoleAsync(roleToRemove);
-                if (usersWithThisRole.Count == 1 && usersWithThisRole[0].Id == request.UserId)
+                var usersWithThisRole = await userManager.GetUsersInRoleAsync(roleToRemove).ConfigureAwait(false);
+                if(usersWithThisRole.Count == 1 && usersWithThisRole[0].Id == request.UserId)
                 {
-                    throw new ValidationException([new ValidationFailure("RoleNames", $"Cannot remove SuperRole '{roleToRemove}' from user. This is the last user with this role.")]);
+                    throw new ValidationException(
+                        [ new ValidationFailure(
+                            "RoleNames",
+                            $"Cannot remove SuperRole '{roleToRemove}' from user. This is the last user with this role.") ]);
                 }
             }
         }
 
-        if (currentRoles.Count > 0)
+        if(currentRoles.Count > 0)
         {
-            var removeResult = await userManager.RemoveFromRolesAsync(user, currentRoles);
-            if (!removeResult.Succeeded)
+            var removeResult = await userManager.RemoveFromRolesAsync(user, currentRoles).ConfigureAwait(false);
+            if(!removeResult.Succeeded)
             {
                 var failures = new List<ValidationFailure>();
-                foreach (var error in removeResult.Errors)
+                foreach(var error in removeResult.Errors)
                 {
                     string fieldName = IdentityHelper.GetFieldForIdentityError(error.Code);
                     failures.Add(new ValidationFailure(fieldName, error.Description));
@@ -83,13 +88,13 @@ public class AssignRolesCommandHandler(
             }
         }
 
-        if (request.Model.RoleNames.Count > 0)
+        if(request.Model.RoleNames.Count > 0)
         {
-            var addResult = await userManager.AddToRolesAsync(user, request.Model.RoleNames);
-            if (!addResult.Succeeded)
+            var addResult = await userManager.AddToRolesAsync(user, request.Model.RoleNames).ConfigureAwait(false);
+            if(!addResult.Succeeded)
             {
                 var failures = new List<ValidationFailure>();
-                foreach (var error in addResult.Errors)
+                foreach(var error in addResult.Errors)
                 {
                     string fieldName = IdentityHelper.GetFieldForIdentityError(error.Code);
                     failures.Add(new ValidationFailure(fieldName, error.Description));
@@ -98,8 +103,15 @@ public class AssignRolesCommandHandler(
             }
         }
 
-        var updatedRoles = await userManager.GetRolesAsync(user);
+        var updatedRoles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
 
-        return new AssignRoleResponse() { Id = user.Id, UserName = user.UserName, Email = user.Email, FullName = user.FullName, Roles = updatedRoles };
+        return new AssignRoleResponse()
+        {
+            Id = user.Id,
+            UserName = user.UserName,
+            Email = user.Email,
+            FullName = user.FullName,
+            Roles = updatedRoles
+        };
     }
 }

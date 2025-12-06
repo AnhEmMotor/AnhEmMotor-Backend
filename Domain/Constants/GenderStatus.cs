@@ -23,7 +23,7 @@ public static class GenderStatus
     /// <summary>
     /// Danh sách tất cả giới tính hợp lệ
     /// </summary>
-    public static readonly List<string> All = [Male, Female, Other];
+    public static readonly List<string> All = [ Male, Female, Other ];
 
     /// <summary>
     /// Kiểm tra xem giới tính có hợp lệ không

@@ -14,12 +14,12 @@ public static class PermissionDataSeeder
     /// <summary>
     /// Seed các permissions từ class Permissions vào database
     /// </summary>
-    public static async Task SeedPermissionsAsync(ApplicationDBContext context)
+    public static async Task SeedPermissionsAsync(ApplicationDBContext context, CancellationToken cancellationToken)
     {
-        // Lấy tất cả các permissions từ class Permissions
         var allPermissions = typeof(PermissionsList)
             .GetNestedTypes()
-            .SelectMany(type => type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy))
+            .SelectMany(
+                type => type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy))
             .Where(fieldInfo => fieldInfo.IsLiteral && !fieldInfo.IsInitOnly)
             .Select(fieldInfo => fieldInfo.GetRawConstantValue() as string)
             .Where(permission => permission is not null)
@@ -27,16 +27,17 @@ public static class PermissionDataSeeder
 
         var existingPermissions = await context.Permissions
             .Select(p => p.Name)
-            .ToListAsync();
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
 
         var newPermissions = allPermissions
             .Except(existingPermissions)
             .Select(name => new Permission { Name = name! });
 
-        if (newPermissions.Any())
+        if(newPermissions.Any())
         {
-            await context.Permissions.AddRangeAsync(newPermissions);
-            await context.SaveChangesAsync();
+            await context.Permissions.AddRangeAsync(newPermissions, cancellationToken).ConfigureAwait(false);
+            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }

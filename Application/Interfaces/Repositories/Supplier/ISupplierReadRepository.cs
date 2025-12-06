@@ -8,7 +8,8 @@ namespace Application.Interfaces.Repositories.Supplier
     {
         IQueryable<SupplierEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-        IQueryable<SupplierWithTotalInputResponse> GetQueryableWithTotalInput(DataFetchMode mode = DataFetchMode.ActiveOnly);
+        IQueryable<SupplierWithTotalInputResponse> GetQueryableWithTotalInput(
+            DataFetchMode mode = DataFetchMode.ActiveOnly);
 
         Task<IEnumerable<SupplierEntity>> GetAllAsync(
             CancellationToken cancellationToken,

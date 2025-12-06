@@ -34,8 +34,7 @@ public class ApplicationUser : IdentityUser<Guid>
     public string Status { get; set; } = UserStatus.Active;
 
     /// <summary>
-    /// Thời gian người dùng xoá tài khoản (soft delete)
-    /// Nếu null = tài khoản chưa bị xoá
+    /// Thời gian người dùng xoá tài khoản (soft delete) Nếu null = tài khoản chưa bị xoá
     /// </summary>
     public DateTimeOffset? DeletedAt { get; set; }
 

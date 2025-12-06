@@ -1,19 +1,17 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 #nullable disable
 
 namespace Infrastructure.Migrations
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public partial class ReplaceIsActiveWithStatusAndAddDeletedAt : Migration
     {
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "IsActive",
-                table: "Users");
+            migrationBuilder.DropColumn(name: "IsActive", table: "Users");
 
             migrationBuilder.AddColumn<DateTimeOffset>(
                 name: "DeletedAt",
@@ -29,22 +27,14 @@ namespace Infrastructure.Migrations
                 defaultValue: 0);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "DeletedAt",
-                table: "Users");
+            migrationBuilder.DropColumn(name: "DeletedAt", table: "Users");
 
-            migrationBuilder.DropColumn(
-                name: "Status",
-                table: "Users");
+            migrationBuilder.DropColumn(name: "Status", table: "Users");
 
-            migrationBuilder.AddColumn<bool>(
-                name: "IsActive",
-                table: "Users",
-                type: "bit",
-                nullable: true);
+            migrationBuilder.AddColumn<bool>(name: "IsActive", table: "Users", type: "bit", nullable: true);
         }
     }
 }

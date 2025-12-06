@@ -2,13 +2,13 @@
 using Application.ApiContracts.User.Responses;
 using Application.ApiContracts.UserManager.Requests;
 using Application.ApiContracts.UserManager.Responses;
-using Application.Features.UserManager.Queries.GetUsersList;
-using Application.Features.UserManager.Queries.GetUserById;
-using Application.Features.UserManager.Commands.UpdateUser;
-using Application.Features.UserManager.Commands.ChangePassword;
 using Application.Features.UserManager.Commands.AssignRoles;
-using Application.Features.UserManager.Commands.ChangeUserStatus;
 using Application.Features.UserManager.Commands.ChangeMultipleUsersStatus;
+using Application.Features.UserManager.Commands.ChangePassword;
+using Application.Features.UserManager.Commands.ChangeUserStatus;
+using Application.Features.UserManager.Commands.UpdateUser;
+using Application.Features.UserManager.Queries.GetUserById;
+using Application.Features.UserManager.Queries.GetUsersList;
 using Asp.Versioning;
 using Domain.Constants;
 using Domain.Helpers;
@@ -26,11 +26,13 @@ namespace WebAPI.Controllers.V1;
 /// <summary>
 /// Quản lý người dùng (Chỉ có người dùng có quyền mới được vào đây)
 /// </summary>
-/// <remarks>This controller enforces business rules to prevent modification or deletion of protected
-/// users and roles, such as SuperRoles and users listed in the protected configuration. All endpoints require
-/// specific permissions and may return error responses if protection rules are violated. API versioning is
-/// supported via the route template. Thread safety is managed by ASP.NET Core's request handling; concurrent
-/// requests may result in race conditions if user or role state changes rapidly.</remarks>
+/// <remarks>
+/// This controller enforces business rules to prevent modification or deletion of protected users and roles, such as
+/// SuperRoles and users listed in the protected configuration. All endpoints require specific permissions and may
+/// return error responses if protection rules are violated. API versioning is supported via the route template. Thread
+/// safety is managed by ASP.NET Core's request handling; concurrent requests may result in race conditions if user or
+/// role state changes rapidly.
+/// </remarks>
 /// <param name="mediator">The MediatR mediator used to send queries and commands.</param>
 [ApiVersion("1.0")]
 [SwaggerTag("Quản lý người dùng (Chỉ có người dùng có quyền mới được vào đây)")]
@@ -47,9 +49,7 @@ public class UserManagerController(IMediator mediator) : ControllerBase
     [HttpGet]
     [HasPermission(PermissionsList.Users.View)]
     [ProducesResponseType(typeof(PagedResult<UserResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetAllUsers(
-        [FromQuery] SieveModel sieveModel,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAllUsers([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
     {
         var query = new GetUsersListQuery(sieveModel);
         var pagedResult = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
@@ -63,9 +63,9 @@ public class UserManagerController(IMediator mediator) : ControllerBase
     [HasPermission(PermissionsList.Users.View)]
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetUserById(Guid userId)
+    public async Task<IActionResult> GetUserById(Guid userId, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetUserByIdQuery(userId));
+        var result = await mediator.Send(new GetUserByIdQuery(userId), cancellationToken).ConfigureAwait(true);
         return Ok(result);
     }
 
@@ -77,9 +77,12 @@ public class UserManagerController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> UpdateUser(Guid userId, [FromBody] UpdateUserRequest model)
+    public async Task<IActionResult> UpdateUser(
+        Guid userId,
+        [FromBody] UpdateUserRequest model,
+        CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new UpdateUserCommand(userId, model));
+        var result = await mediator.Send(new UpdateUserCommand(userId, model), cancellationToken).ConfigureAwait(true);
         return Ok(result);
     }
 
@@ -93,10 +96,14 @@ public class UserManagerController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> ChangePassword(Guid userId, [FromBody] ChangePasswordRequest model)
+    public async Task<IActionResult> ChangePassword(
+        Guid userId,
+        [FromBody] ChangePasswordRequest model,
+        CancellationToken cancellationToken)
     {
         var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var result = await mediator.Send(new ChangePasswordCommand(userId, model, currentUserId));
+        var result = await mediator.Send(new ChangePasswordCommand(userId, model, currentUserId), cancellationToken)
+            .ConfigureAwait(true);
         return Ok(result);
     }
 
@@ -110,9 +117,12 @@ public class UserManagerController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [HasPermission(PermissionsList.Users.AssignRoles)]
-    public async Task<IActionResult> AssignRoles(Guid userId, [FromBody] AssignRolesRequest model)
+    public async Task<IActionResult> AssignRoles(
+        Guid userId,
+        [FromBody] AssignRolesRequest model,
+        CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new AssignRolesCommand(userId, model));
+        var result = await mediator.Send(new AssignRolesCommand(userId, model), cancellationToken).ConfigureAwait(true);
         return Ok(result);
     }
 
@@ -121,27 +131,34 @@ public class UserManagerController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpPatch("{userId:guid}/status")]
     [HasPermission(PermissionsList.Users.Edit)]
-    [ProducesResponseType(typeof(ChangeStatusByManagerResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ChangeStatusUserByManagerResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> ChangeUserStatus(Guid userId, [FromBody] ChangeUserStatusRequest model)
+    public async Task<IActionResult> ChangeUserStatus(
+        Guid userId,
+        [FromBody] ChangeUserStatusRequest model,
+        CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new ChangeUserStatusCommand(userId, model));
+        var result = await mediator.Send(new ChangeUserStatusCommand(userId, model), cancellationToken)
+            .ConfigureAwait(true);
         return Ok(result);
     }
 
 
     /// <summary>
-    /// Thay đổi trạng thái của nhiều người dùng 
+    /// Thay đổi trạng thái của nhiều người dùng
     /// </summary>
     [HttpPatch("status")]
     [ProducesResponseType(typeof(ChangeStatusMultiUserByManagerResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [HasPermission(PermissionsList.Users.Edit)]
-    public async Task<IActionResult> ChangeMultipleUsersStatus([FromBody] ChangeMultipleUsersStatusRequest model)
+    public async Task<IActionResult> ChangeMultipleUsersStatus(
+        [FromBody] ChangeMultipleUsersStatusRequest model,
+        CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new ChangeMultipleUsersStatusCommand(model));
+        var result = await mediator.Send(new ChangeMultipleUsersStatusCommand(model), cancellationToken)
+            .ConfigureAwait(true);
         return Ok(result);
     }
 }

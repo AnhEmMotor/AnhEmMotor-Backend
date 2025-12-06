@@ -10,9 +10,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Application.Features.Auth.Commands.Register;
 
-public class RegisterCommandHandler(
-    UserManager<ApplicationUser> userManager,
-    IConfiguration configuration) : IRequestHandler<RegisterCommand, RegistrationSuccessResponse>
+public class RegisterCommandHandler(UserManager<ApplicationUser> userManager, IConfiguration configuration) : IRequestHandler<RegisterCommand, RegistrationSuccessResponse>
 {
     public async Task<RegistrationSuccessResponse> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
@@ -26,12 +24,14 @@ public class RegisterCommandHandler(
             Status = UserStatus.Active
         };
 
-        var result = await userManager.CreateAsync(user, request.Password);
+        cancellationToken.ThrowIfCancellationRequested();
 
-        if (!result.Succeeded)
+        var result = await userManager.CreateAsync(user, request.Password).ConfigureAwait(false);
+
+        if(!result.Succeeded)
         {
             var failures = new List<ValidationFailure>();
-            foreach (var error in result.Errors)
+            foreach(var error in result.Errors)
             {
                 string fieldName = IdentityHelper.GetFieldForIdentityError(error.Code);
                 failures.Add(new ValidationFailure(fieldName, error.Description));
@@ -39,11 +39,13 @@ public class RegisterCommandHandler(
             throw new ValidationException(failures);
         }
 
-        var defaultRoles = configuration.GetSection("ProtectedAuthorizationEntities:DefaultRolesForNewUsers").Get<List<string>>() ?? [];
-        if (defaultRoles.Count > 0)
+        var defaultRoles = configuration.GetSection("ProtectedAuthorizationEntities:DefaultRolesForNewUsers")
+                .Get<List<string>>() ??
+            [];
+        if(defaultRoles.Count > 0)
         {
             var randomRole = defaultRoles[Random.Shared.Next(defaultRoles.Count)];
-            await userManager.AddToRoleAsync(user, randomRole);
+            await userManager.AddToRoleAsync(user, randomRole).ConfigureAwait(false);
         }
 
         return new RegistrationSuccessResponse();

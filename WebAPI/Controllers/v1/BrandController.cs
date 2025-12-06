@@ -36,7 +36,9 @@ public class BrandController(IMediator mediator) : ControllerBase
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpGet]
-    [ProducesResponseType(typeof(PagedResult<Application.ApiContracts.Brand.Responses.BrandResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(
+        typeof(PagedResult<Application.ApiContracts.Brand.Responses.BrandResponse>),
+        StatusCodes.Status200OK)]
     public async Task<IActionResult> GetBrands([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
     {
         var query = new GetBrandsListQuery(sieveModel);
@@ -51,7 +53,9 @@ public class BrandController(IMediator mediator) : ControllerBase
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpGet("deleted")]
-    [ProducesResponseType(typeof(PagedResult<Application.ApiContracts.Brand.Responses.BrandResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(
+        typeof(PagedResult<Application.ApiContracts.Brand.Responses.BrandResponse>),
+        StatusCodes.Status200OK)]
     public async Task<IActionResult> GetDeletedBrands(
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)

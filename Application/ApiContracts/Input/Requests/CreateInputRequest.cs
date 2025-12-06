@@ -1,7 +1,3 @@
-using Application.ApiContracts.Input;
-using Application;
-using Application.ApiContracts;
-
 namespace Application.ApiContracts.Input.Requests;
 
 public class CreateInputRequest
@@ -10,5 +6,5 @@ public class CreateInputRequest
 
     public int? SupplierId { get; set; }
 
-    public List<Requests.CreateInputInfoRequest> Products { get; set; } = [];
+    public List<CreateInputInfoRequest> Products { get; set; } = [];
 }

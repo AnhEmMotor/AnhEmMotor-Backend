@@ -1,4 +1,4 @@
-using Application.ApiContracts.Output;
+using Application.ApiContracts.Output.Responses;
 using Application.Features.Outputs.Commands.CreateOutput;
 using Application.Features.Outputs.Commands.DeleteManyOutputs;
 using Application.Features.Outputs.Commands.DeleteOutput;
@@ -15,10 +15,9 @@ using Domain.Helpers;
 using Domain.Shared;
 using Mapster;
 using MediatR;
-using Swashbuckle.AspNetCore.Annotations;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
-using Application.ApiContracts.Output.Responses;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace WebAPI.Controllers.V1;
 

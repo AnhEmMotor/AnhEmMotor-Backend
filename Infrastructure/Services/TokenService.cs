@@ -21,9 +21,13 @@ public class TokenService(IConfiguration configuration, UserManager<ApplicationU
     /// </summary>
     /// <param name="user">Thông tin người dùng</param>
     /// <param name="authMethods">Phương thức xác thực (vd: ["pwd"], ["google"], ["facebook"])</param>
-    public async Task<string> CreateAccessTokenAsync(ApplicationUser user, string[] authMethods)
+    public async Task<string> CreateAccessTokenAsync(
+        ApplicationUser user,
+        string[] authMethods,
+        CancellationToken cancellationToken)
     {
-        var userRoles = await userManager.GetRolesAsync(user);
+        cancellationToken.ThrowIfCancellationRequested();
+        var userRoles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
 
         var claims = new List<Claim>
         {
@@ -35,13 +39,12 @@ public class TokenService(IConfiguration configuration, UserManager<ApplicationU
             new("status", user.Status ?? string.Empty)
         };
 
-        // Thêm claim "amr" dưới dạng JSON array
-        if (authMethods is { Length: > 0 })
+        if(authMethods is { Length: > 0 })
         {
             claims.Add(new Claim("amr", JsonSerializer.Serialize(authMethods), JsonClaimValueTypes.JsonArray));
         }
 
-        foreach (var userRole in userRoles)
+        foreach(var userRole in userRoles)
         {
             claims.Add(new Claim("role", userRole));
         }
@@ -49,7 +52,7 @@ public class TokenService(IConfiguration configuration, UserManager<ApplicationU
         var jwtKey = configuration["Jwt:Key"];
         var jwtExpiryInMinutes = configuration.GetValue<int>("Jwt:AccessTokenExpiryInMinutes");
 
-        if (string.IsNullOrEmpty(jwtKey))
+        if(string.IsNullOrEmpty(jwtKey))
         {
             throw new InvalidOperationException("Jwt:Key is missing in configuration.");
         }
@@ -64,8 +67,7 @@ public class TokenService(IConfiguration configuration, UserManager<ApplicationU
             audience: configuration["Jwt:Audience"],
             expires: expiresAt.UtcDateTime,
             claims: claims,
-            signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
-        );
+            signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256));
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
@@ -84,7 +86,7 @@ public class TokenService(IConfiguration configuration, UserManager<ApplicationU
     public string? GetClaimFromToken(string token, string claimType)
     {
         var jwtKey = configuration["Jwt:Key"];
-        if (string.IsNullOrEmpty(jwtKey))
+        if(string.IsNullOrEmpty(jwtKey))
         {
             return null;
         }
@@ -94,23 +96,24 @@ public class TokenService(IConfiguration configuration, UserManager<ApplicationU
 
         try
         {
-            tokenHandler.ValidateToken(token, new TokenValidationParameters
-            {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(key),
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ClockSkew = TimeSpan.Zero
-            }, out SecurityToken validatedToken);
+            tokenHandler.ValidateToken(
+                token,
+                new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ClockSkew = TimeSpan.Zero
+                },
+                out SecurityToken validatedToken);
 
-            if (validatedToken is JwtSecurityToken jwtToken)
+            if(validatedToken is JwtSecurityToken jwtToken)
             {
-                return jwtToken.Claims.FirstOrDefault(c => c.Type == claimType)?.Value;
+                return jwtToken.Claims.FirstOrDefault(c => string.Compare(c.Type, claimType) == 0)?.Value;
             }
-        }
-        catch
+        } catch
         {
-            // Token validation failed
         }
 
         return null;

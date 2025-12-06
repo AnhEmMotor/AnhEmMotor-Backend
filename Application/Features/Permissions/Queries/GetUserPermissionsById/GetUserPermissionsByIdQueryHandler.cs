@@ -1,6 +1,5 @@
 using Application.ApiContracts.Permission.Responses;
 using Application.Common.Exceptions;
-using Application.Interfaces;
 using Application.Interfaces.Repositories.Authorization;
 using Domain.Constants;
 using Domain.Entities;
@@ -14,27 +13,31 @@ public class GetUserPermissionsByIdQueryHandler(
     IApplicationRoleRepository applicationRoleRepository,
     IRolePermissionRepository rolePermissionRepository) : IRequestHandler<GetUserPermissionsByIdQuery, PermissionAndRoleOfUserResponse>
 {
-    public async Task<PermissionAndRoleOfUserResponse> Handle(GetUserPermissionsByIdQuery request, CancellationToken cancellationToken)
+    public async Task<PermissionAndRoleOfUserResponse> Handle(
+        GetUserPermissionsByIdQuery request,
+        CancellationToken cancellationToken)
     {
-        var user = await userManager.FindByIdAsync(request.UserId.ToString()) ?? throw new NotFoundException("User not found.");
-        var userRoles = await userManager.GetRolesAsync(user);
-        var roleEntities = await applicationRoleRepository.GetRolesByNamesAsync(userRoles!, cancellationToken);
+        var user = await userManager.FindByIdAsync(request.UserId.ToString()).ConfigureAwait(false) ??
+            throw new NotFoundException("User not found.");
+        var userRoles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
+        var roleEntities = await applicationRoleRepository.GetRolesByNamesAsync(userRoles!, cancellationToken)
+            .ConfigureAwait(false);
 
         var roleIds = roleEntities.Select(r => r.Id).ToList();
-        var userPermissionNames = await rolePermissionRepository.GetPermissionNamesByRoleIdsAsync(roleIds, cancellationToken);
+        var userPermissionNames = await rolePermissionRepository.GetPermissionNamesByRoleIdsAsync(
+            roleIds,
+            cancellationToken)
+            .ConfigureAwait(false);
 
         var userPermissions = userPermissionNames
-            .Select(p => new
-            {
-                Name = p,
-                Metadata = PermissionsList.GetMetadata(p)
-            })
-            .Select(p => new PermissionResponse()
-            {
-                ID = p.Name,
-                DisplayName = p.Metadata?.DisplayName ?? p.Name,
-                Description = p.Metadata?.Description
-            })
+            .Select(p => new { Name = p, Metadata = PermissionsList.GetMetadata(p) })
+            .Select(
+                p => new PermissionResponse()
+                {
+                    ID = p.Name,
+                    DisplayName = p.Metadata?.DisplayName ?? p.Name,
+                    Description = p.Metadata?.Description
+                })
             .ToList();
 
         return new PermissionAndRoleOfUserResponse()

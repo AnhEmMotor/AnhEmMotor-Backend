@@ -4,8 +4,8 @@ using Application.Features.Settings.Queries.GetAllSettings;
 using Asp.Versioning;
 using Domain.Helpers;
 using MediatR;
-using Swashbuckle.AspNetCore.Annotations;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace WebAPI.Controllers.V1;
 

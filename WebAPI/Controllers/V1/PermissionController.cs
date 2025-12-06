@@ -38,9 +38,9 @@ public class PermissionController(IMediator mediator) : ControllerBase
     [HttpGet("permissions")]
     [HasPermission(PermissionsList.Roles.View)]
     [ProducesResponseType(typeof(List<PermissionResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetAllPermissions()
+    public async Task<IActionResult> GetAllPermissions(CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetAllPermissionsQuery());
+        var result = await mediator.Send(new GetAllPermissionsQuery(), cancellationToken).ConfigureAwait(true);
         return Ok(result);
     }
 
@@ -52,10 +52,10 @@ public class PermissionController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(List<PermissionAndRoleOfUserResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetMyPermissions()
+    public async Task<IActionResult> GetMyPermissions(CancellationToken cancellationToken)
     {
         var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var result = await mediator.Send(new GetMyPermissionsQuery(userIdClaim));
+        var result = await mediator.Send(new GetMyPermissionsQuery(userIdClaim), cancellationToken).ConfigureAwait(true);
         return Ok(result);
     }
 
@@ -66,9 +66,10 @@ public class PermissionController(IMediator mediator) : ControllerBase
     [HasPermission(PermissionsList.Users.View)]
     [ProducesResponseType(typeof(List<PermissionAndRoleOfUserResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetUserPermissionsById(Guid userId)
+    public async Task<IActionResult> GetUserPermissionsById(Guid userId, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetUserPermissionsByIdQuery(userId));
+        var result = await mediator.Send(new GetUserPermissionsByIdQuery(userId), cancellationToken)
+            .ConfigureAwait(true);
         return Ok(result);
     }
 
@@ -79,9 +80,9 @@ public class PermissionController(IMediator mediator) : ControllerBase
     [HasPermission(PermissionsList.Roles.View)]
     [ProducesResponseType(typeof(List<PermissionResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetRolePermissions(string roleName)
+    public async Task<IActionResult> GetRolePermissions(string roleName, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetRolePermissionsQuery(roleName));
+        var result = await mediator.Send(new GetRolePermissionsQuery(roleName), cancellationToken).ConfigureAwait(true);
         return Ok(result);
     }
 
@@ -95,9 +96,11 @@ public class PermissionController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(PermissionRoleUpdateResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> UpdateRolePermissions(
         string roleName,
-        [FromBody] UpdateRoleRequest model)
+        [FromBody] UpdateRoleRequest model,
+        CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new UpdateRolePermissionsCommand(roleName, model));
+        var result = await mediator.Send(new UpdateRolePermissionsCommand(roleName, model), cancellationToken)
+            .ConfigureAwait(true);
         return Ok(result);
     }
 
@@ -107,9 +110,9 @@ public class PermissionController(IMediator mediator) : ControllerBase
     [HttpGet("roles")]
     [HasPermission(PermissionsList.Roles.View)]
     [ProducesResponseType(typeof(List<RoleSelectResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetAllRoles()
+    public async Task<IActionResult> GetAllRoles(CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetAllRolesQuery());
+        var result = await mediator.Send(new GetAllRolesQuery(), cancellationToken).ConfigureAwait(true);
         return Ok(result);
     }
 
@@ -120,9 +123,9 @@ public class PermissionController(IMediator mediator) : ControllerBase
     [HasPermission(PermissionsList.Roles.Create)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(RoleCreateResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> CreateRole([FromBody] CreateRoleRequest model)
+    public async Task<IActionResult> CreateRole([FromBody] CreateRoleRequest model, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new CreateRoleCommand(model));
+        var result = await mediator.Send(new CreateRoleCommand(model), cancellationToken).ConfigureAwait(true);
         return Ok(result);
     }
 
@@ -134,9 +137,12 @@ public class PermissionController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(RoleUpdateResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> UpdateRole(string roleName, [FromBody] UpdateRoleRequest model)
+    public async Task<IActionResult> UpdateRole(
+        string roleName,
+        [FromBody] UpdateRoleRequest model,
+        CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new UpdateRoleCommand(roleName, model));
+        var result = await mediator.Send(new UpdateRoleCommand(roleName, model), cancellationToken).ConfigureAwait(true);
         return Ok(result);
     }
 
@@ -148,9 +154,9 @@ public class PermissionController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(RoleDeleteResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> DeleteRole(string roleName)
+    public async Task<IActionResult> DeleteRole(string roleName, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new DeleteRoleCommand(roleName));
+        var result = await mediator.Send(new DeleteRoleCommand(roleName), cancellationToken).ConfigureAwait(true);
         return Ok(result);
     }
 
@@ -161,9 +167,12 @@ public class PermissionController(IMediator mediator) : ControllerBase
     [HasPermission(PermissionsList.Roles.Delete)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(RoleDeleteResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> DeleteMultipleRoles([FromBody] List<string> roleNames)
+    public async Task<IActionResult> DeleteMultipleRoles(
+        [FromBody] List<string> roleNames,
+        CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new DeleteMultipleRolesCommand(roleNames));
+        var result = await mediator.Send(new DeleteMultipleRolesCommand(roleNames), cancellationToken)
+            .ConfigureAwait(true);
         return Ok(result);
     }
 }

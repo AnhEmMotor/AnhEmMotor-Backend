@@ -1,26 +1,26 @@
 ﻿using Application.DependencyInjection;
+using Application.Interfaces.Repositories.Authentication;
+using Application.Interfaces.Repositories.Authorization;
 using Asp.Versioning;
 using Domain.Entities;
 using Domain.Helpers;
 using Infrastructure.DBContexts;
 using Infrastructure.DependencyInjection;
+using Infrastructure.Repositories.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using System.IdentityModel.Tokens.Jwt;
 using Microsoft.OpenApi;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Sieve.Models;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
 using WebAPI.Converters;
 using WebAPI.Middleware;
-using Application.Interfaces.Repositories.Authorization;
-using Infrastructure.Repositories.Authorization;
-using Application.Interfaces.Repositories.Authentication;
 
 namespace WebAPI.StartupExtensions
 {
@@ -46,46 +46,52 @@ namespace WebAPI.StartupExtensions
             IWebHostEnvironment environment)
         {
             var jwtKey = configuration["Jwt:Key"];
-            if (string.IsNullOrEmpty(jwtKey))
+            if(string.IsNullOrEmpty(jwtKey))
             {
                 throw new InvalidOperationException("JWT Key is not configured in appsettings.json.");
             }
-            services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
-            {
-                options.Password.RequiredLength = 8;
-                options.Password.RequireNonAlphanumeric = true;
-                options.Password.RequireUppercase = true;
-                options.Password.RequireLowercase = true;
-                options.Password.RequireDigit = true;
-                options.User.RequireUniqueEmail = true;
-            }).AddEntityFrameworkStores<ApplicationDBContext>().AddDefaultTokenProviders();
-            services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-                .AddJwtBearer(options =>
+            services.AddIdentity<ApplicationUser, ApplicationRole>(
+                options =>
                 {
-                    options.SaveToken = true;
-                    options.RequireHttpsMetadata = false;
-                    options.TokenValidationParameters = new TokenValidationParameters
+                    options.Password.RequiredLength = 8;
+                    options.Password.RequireNonAlphanumeric = true;
+                    options.Password.RequireUppercase = true;
+                    options.Password.RequireLowercase = true;
+                    options.Password.RequireDigit = true;
+                    options.User.RequireUniqueEmail = true;
+                })
+                .AddEntityFrameworkStores<ApplicationDBContext>()
+                .AddDefaultTokenProviders();
+            services.AddAuthentication(
+                options =>
+                {
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearer(
+                    options =>
                     {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ClockSkew = TimeSpan.Zero,
-                        ValidIssuer = configuration["Jwt:Issuer"],
-                        ValidAudience = configuration["Jwt:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
-                        RoleClaimType = "role",
-                        NameClaimType = JwtRegisteredClaimNames.Name
-                    };
-                });
+                        options.SaveToken = true;
+                        options.RequireHttpsMetadata = false;
+                        options.TokenValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuer = true,
+                            ValidateAudience = true,
+                            ValidateLifetime = true,
+                            ValidateIssuerSigningKey = true,
+                            ClockSkew = TimeSpan.Zero,
+                            ValidIssuer = configuration["Jwt:Issuer"],
+                            ValidAudience = configuration["Jwt:Audience"],
+                            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+                            RoleClaimType = "role",
+                            NameClaimType = JwtRegisteredClaimNames.Name
+                        };
+                    });
             services.AddHttpContextAccessor();
             services.AddScoped<ICurrentUserService, Infrastructure.Services.CurrentUserService>();
-            services.AddScoped<Application.Interfaces.Repositories.IAsyncQueryableExecuter, Infrastructure.Repositories.AsyncQueryableExecuter>();
+            services.AddScoped<Application.Interfaces.Repositories.IAsyncQueryableExecuter, Infrastructure.Repositories.AsyncQueryableExecuter>(
+                );
             services.AddScoped<IPermissionRepository, PermissionRepository>();
             services.AddScoped<IRolePermissionRepository, RolePermissionRepository>();
             services.AddScoped<IApplicationRoleRepository, ApplicationRoleRepository>();
@@ -179,31 +185,36 @@ namespace WebAPI.StartupExtensions
                             return new BadRequestObjectResult(errorResponse);
                         };
                     });
-            services.AddSwaggerGen(options =>
-            {
-                options.AddSecurityDefinition("bearer", new OpenApiSecurityScheme
+            services.AddSwaggerGen(
+                options =>
                 {
-                    Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
-                    Name = "Authorization",
-                    In = ParameterLocation.Header,
-                    Type = SecuritySchemeType.Http,
-                    Scheme = "bearer",
-                    BearerFormat = "JWT",
-                });
-                options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
-                {
-                    [new OpenApiSecuritySchemeReference("bearer", document)] = []
-                });
-                if (environment.IsEnvironment("Test") == false)
-                {
-                    var xmlFilePath = Path.Combine(AppContext.BaseDirectory, "api.xml");
-                    if (File.Exists(xmlFilePath))
+                    options.AddSecurityDefinition(
+                        "bearer",
+                        new OpenApiSecurityScheme
+                            {
+                                Description =
+                                    "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                                Name = "Authorization",
+                                In = ParameterLocation.Header,
+                                Type = SecuritySchemeType.Http,
+                                Scheme = "bearer",
+                                BearerFormat = "JWT",
+                            });
+                    options.AddSecurityRequirement(
+                        document => new OpenApiSecurityRequirement
+                            {
+                                [new OpenApiSecuritySchemeReference("bearer", document)] = []
+                            });
+                    if(environment.IsEnvironment("Test") == false)
                     {
-                        options.IncludeXmlComments(xmlFilePath);
+                        var xmlFilePath = Path.Combine(AppContext.BaseDirectory, "api.xml");
+                        if(File.Exists(xmlFilePath))
+                        {
+                            options.IncludeXmlComments(xmlFilePath);
+                        }
                     }
-                }
-                options.EnableAnnotations();
-            });
+                    options.EnableAnnotations();
+                });
             services.ConfigureOptions<ConfigureSwaggerOptions>();
             return services;
         }

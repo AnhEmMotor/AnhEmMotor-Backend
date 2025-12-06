@@ -14,40 +14,44 @@ public class DeleteCurrentUserAccountCommandHandler(
     UserManager<ApplicationUser> userManager,
     IConfiguration configuration) : IRequestHandler<DeleteCurrentUserAccountCommand, DeleteUserByUserReponse>
 {
-    public async Task<DeleteUserByUserReponse> Handle(DeleteCurrentUserAccountCommand request, CancellationToken cancellationToken)
+    public async Task<DeleteUserByUserReponse> Handle(
+        DeleteCurrentUserAccountCommand request,
+        CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(request.UserId) || !Guid.TryParse(request.UserId, out var userId))
+        if(string.IsNullOrEmpty(request.UserId) || !Guid.TryParse(request.UserId, out var userId))
         {
             throw new UnauthorizedException("Invalid user token.");
         }
 
-        var user = await userManager.FindByIdAsync(userId.ToString());
-        if (user is null)
-        {
+        var user = await userManager.FindByIdAsync(userId.ToString()).ConfigureAwait(false) ??
             throw new NotFoundException("User not found.");
-        }
 
-        // Check if already deleted
-        if (user.DeletedAt is not null)
+
+        if(user.DeletedAt is not null)
         {
-            throw new ValidationException([new ValidationFailure("DeletedAt", "This account has already been deleted.")]);
+            throw new ValidationException(
+                [ new ValidationFailure("DeletedAt", "This account has already been deleted.") ]);
         }
 
-        // Kiểm tra protected users
-        var protectedUsers = configuration.GetSection("ProtectedAuthorizationEntities:ProtectedUsers").Get<List<string>>() ?? [];
+        var protectedUsers = configuration.GetSection("ProtectedAuthorizationEntities:ProtectedUsers")
+                .Get<List<string>>() ??
+            [];
         var protectedEmails = protectedUsers.Select(entry => entry.Split(':')[0].Trim()).ToList();
 
-        if (!string.IsNullOrEmpty(user.Email) && protectedEmails.Contains(user.Email))
+        if(!string.IsNullOrEmpty(user.Email) && protectedEmails.Contains(user.Email))
         {
-            throw new ValidationException([new ValidationFailure("Email", "Protected users cannot delete their account.")]);
+            throw new ValidationException(
+                [ new ValidationFailure("Email", "Protected users cannot delete their account.") ]);
         }
 
+        cancellationToken.ThrowIfCancellationRequested();
+
         user.DeletedAt = DateTimeOffset.UtcNow;
-        var result = await userManager.UpdateAsync(user);
-        if (!result.Succeeded)
+        var result = await userManager.UpdateAsync(user).ConfigureAwait(false);
+        if(!result.Succeeded)
         {
             var failures = new List<ValidationFailure>();
-            foreach (var error in result.Errors)
+            foreach(var error in result.Errors)
             {
                 string fieldName = IdentityHelper.GetFieldForIdentityError(error.Code);
                 failures.Add(new ValidationFailure(fieldName, error.Description));
@@ -55,9 +59,6 @@ public class DeleteCurrentUserAccountCommandHandler(
             throw new ValidationException(failures);
         }
 
-        return new DeleteUserByUserReponse()
-        {
-            Message = "Your account has been deleted successfully.",
-        };
+        return new DeleteUserByUserReponse() { Message = "Your account has been deleted successfully.", };
     }
 }

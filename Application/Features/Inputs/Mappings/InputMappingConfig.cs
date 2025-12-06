@@ -1,4 +1,3 @@
-using Application.ApiContracts.Input;
 using Application.ApiContracts.Input.Responses;
 using Application.Features.Inputs.Commands.CreateInput;
 using Application.Features.Inputs.Commands.UpdateInput;

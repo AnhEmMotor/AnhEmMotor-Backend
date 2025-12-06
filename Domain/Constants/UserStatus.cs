@@ -28,7 +28,7 @@ public static class UserStatus
     /// <summary>
     /// Danh sách tất cả trạng thái hợp lệ
     /// </summary>
-    public static readonly List<string> All = [Inactive, Active, Banned, Suspended];
+    public static readonly List<string> All = [ Inactive, Active, Banned, Suspended ];
 
     /// <summary>
     /// Kiểm tra xem trạng thái có hợp lệ không

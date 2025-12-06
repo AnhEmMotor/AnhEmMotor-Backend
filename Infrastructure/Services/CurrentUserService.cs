@@ -1,19 +1,14 @@
 ﻿using Application.Interfaces.Repositories.Authentication;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration; // Cần thêm namespace này
+using Microsoft.Extensions.Configuration;
 
 namespace Infrastructure.Services;
 
-public class CurrentUserService(
-    IHttpContextAccessor httpContextAccessor,
-    IConfiguration configuration) : ICurrentUserService 
+public class CurrentUserService(IHttpContextAccessor httpContextAccessor, IConfiguration configuration) : ICurrentUserService
 {
     private readonly IConfiguration _configuration = configuration;
 
-    public string? GetRefreshToken()
-    {
-        return httpContextAccessor.HttpContext?.Request.Cookies["refreshToken"];
-    }
+    public string? GetRefreshToken() { return httpContextAccessor.HttpContext?.Request.Cookies["refreshToken"]; }
 
     public void SetRefreshToken(string token)
     {
@@ -31,7 +26,5 @@ public class CurrentUserService(
     }
 
     public string? GetAuthorizationHeader()
-    {
-        return httpContextAccessor.HttpContext?.Request.Headers["Authorization"];
-    }
+    { return httpContextAccessor.HttpContext?.Request.Headers["Authorization"]; }
 }
