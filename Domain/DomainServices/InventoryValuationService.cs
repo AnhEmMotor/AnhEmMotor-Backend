@@ -1,6 +1,6 @@
 ﻿using Domain.Entities;
 
-namespace Domain.Services;
+namespace Domain.DomainServices;
 
 public class InventoryValuationService
 {

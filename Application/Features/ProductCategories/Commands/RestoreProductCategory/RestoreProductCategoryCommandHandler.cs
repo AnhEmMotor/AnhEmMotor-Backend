@@ -2,7 +2,6 @@ using Application.ApiContracts.ProductCategory.Responses;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductCategory;
 using Domain.Constants;
-using Domain.Helpers;
 using Mapster;
 using MediatR;
 
@@ -11,9 +10,9 @@ namespace Application.Features.ProductCategories.Commands.RestoreProductCategory
 public sealed class RestoreProductCategoryCommandHandler(
     IProductCategoryReadRepository readRepository,
     IProductCategoryUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<RestoreProductCategoryCommand, (ProductCategoryResponse? Data, ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<RestoreProductCategoryCommand, (ProductCategoryResponse? Data, Common.Models.ErrorResponse? Error)>
 {
-    public async Task<(ProductCategoryResponse? Data, ErrorResponse? Error)> Handle(
+    public async Task<(ProductCategoryResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
         RestoreProductCategoryCommand request,
         CancellationToken cancellationToken)
     {
@@ -22,10 +21,10 @@ public sealed class RestoreProductCategoryCommandHandler(
 
         if(category == null)
         {
-            return (null, new ErrorResponse
+            return (null, new Common.Models.ErrorResponse
             {
                 Errors =
-                    [ new ErrorDetail
+                    [ new Common.Models.ErrorDetail
                     {
                         Message = $"Product category with Id {request.Id} not found in deleted categories."
                     } ]

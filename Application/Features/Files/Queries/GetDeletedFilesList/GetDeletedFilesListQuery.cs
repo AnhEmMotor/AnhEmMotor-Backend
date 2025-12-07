@@ -1,7 +1,7 @@
-using Domain.Shared;
+using Application.ApiContracts.File.Responses;
 using MediatR;
 using Sieve.Models;
 
 namespace Application.Features.Files.Queries.GetDeletedFilesList;
 
-public sealed record GetDeletedFilesListQuery(SieveModel SieveModel) : IRequest<PagedResult<ApiContracts.File.Responses.MediaFileResponse>>;
+public sealed record GetDeletedFilesListQuery(SieveModel SieveModel) : IRequest<Domain.Primitives.PagedResult<MediaFileResponse>>;

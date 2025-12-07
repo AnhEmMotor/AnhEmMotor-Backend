@@ -1,14 +1,13 @@
 ﻿using Application.ApiContracts.Product.Common;
 using Application.Interfaces.Repositories.ProductVariant;
-using Domain.Shared;
 using Mapster;
 using MediatR;
 
 namespace Application.Features.Products.Queries.GetActiveVariantLiteList;
 
-public sealed class GetActiveVariantLiteListQueryHandler(IProductVariantReadRepository repository) : IRequestHandler<GetActiveVariantLiteListQuery, PagedResult<ProductVariantLiteResponse>>
+public sealed class GetActiveVariantLiteListQueryHandler(IProductVariantReadRepository repository) : IRequestHandler<GetActiveVariantLiteListQuery, Domain.Primitives.PagedResult<ProductVariantLiteResponse>>
 {
-    public async Task<PagedResult<ProductVariantLiteResponse>> Handle(
+    public async Task<Domain.Primitives.PagedResult<ProductVariantLiteResponse>> Handle(
         GetActiveVariantLiteListQuery request,
         CancellationToken cancellationToken)
     {
@@ -20,6 +19,6 @@ public sealed class GetActiveVariantLiteListQueryHandler(IProductVariantReadRepo
 
         var responses = variants.Select(v => v.Adapt<ProductVariantLiteResponse>()).ToList();
 
-        return new PagedResult<ProductVariantLiteResponse>(responses, totalCount, page, pageSize);
+        return new Domain.Primitives.PagedResult<ProductVariantLiteResponse>(responses, totalCount, page, pageSize);
     }
 }

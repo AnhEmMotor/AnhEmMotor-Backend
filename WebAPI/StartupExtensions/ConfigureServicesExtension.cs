@@ -3,7 +3,6 @@ using Application.Interfaces.Repositories.Authentication;
 using Application.Interfaces.Repositories.Authorization;
 using Asp.Versioning;
 using Domain.Entities;
-using Domain.Helpers;
 using Infrastructure.DBContexts;
 using Infrastructure.DependencyInjection;
 using Infrastructure.Repositories.Authorization;
@@ -169,7 +168,7 @@ namespace WebAPI.StartupExtensions
                                 .SelectMany(
                                     kvp => kvp.Value!.Errors
                                             .Select(
-                                                error => new ErrorDetail
+                                                error => new Application.Common.Models.ErrorDetail
                                                         {
                                                             Field = kvp.Key,
                                                             Message = error.ErrorMessage

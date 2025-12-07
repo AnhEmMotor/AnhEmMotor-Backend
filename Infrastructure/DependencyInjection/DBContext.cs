@@ -15,6 +15,7 @@ using Application.Interfaces.Repositories.Statistical;
 using Application.Interfaces.Repositories.Supplier;
 using Application.Interfaces.Repositories.VariantOptionValue;
 using Infrastructure.Authorization;
+using Infrastructure.Authorization.Hander;
 using Infrastructure.DBContexts;
 using Infrastructure.Repositories;
 using Infrastructure.Repositories.Brand;

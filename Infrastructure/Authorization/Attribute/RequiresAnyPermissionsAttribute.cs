@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 
-namespace Infrastructure.Authorization;
+namespace Infrastructure.Authorization.Attribute;
 
 /// <summary>
 /// Attribute yêu cầu người dùng phải có ÍT NHẤT MỘT trong các quyền được chỉ định

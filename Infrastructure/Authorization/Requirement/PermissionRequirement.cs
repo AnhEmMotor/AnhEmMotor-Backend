@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 
-namespace Infrastructure.Authorization;
+namespace Infrastructure.Authorization.Requirement;
 
 /// <summary>
 /// Requirement cho một quyền đơn lẻ

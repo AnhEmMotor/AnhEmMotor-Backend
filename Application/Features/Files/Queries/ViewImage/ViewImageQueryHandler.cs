@@ -1,19 +1,19 @@
-using Domain.Helpers;
 using MediatR;
 
 namespace Application.Features.Files.Queries.ViewImage;
 
-public sealed class ViewImageQueryHandler(Interfaces.Repositories.LocalFile.IFileStorageService fileStorageService) : IRequestHandler<ViewImageQuery, ((Stream FileStream, string ContentType)? Data, ErrorResponse? Error)>
+public sealed class ViewImageQueryHandler(Interfaces.Repositories.LocalFile.IFileStorageService fileStorageService) : IRequestHandler<ViewImageQuery, ((Stream FileStream, string ContentType)? Data, Common.Models.ErrorResponse? Error)>
 {
-    public async Task<((Stream FileStream, string ContentType)? Data, ErrorResponse? Error)> Handle(
+    public async Task<((Stream FileStream, string ContentType)? Data, Common.Models.ErrorResponse? Error)> Handle(
         ViewImageQuery request,
         CancellationToken cancellationToken)
     {
         if(request.Width > 1200)
         {
-            return (null, new ErrorResponse
+            return (null, new Common.Models.ErrorResponse
             {
-                Errors = [ new ErrorDetail { Message = "Width exceeds maximum allowed size of 1200 pixels." } ]
+                Errors =
+                    [ new Common.Models.ErrorDetail { Message = "Width exceeds maximum allowed size of 1200 pixels." } ]
             });
         }
 
@@ -21,7 +21,10 @@ public sealed class ViewImageQueryHandler(Interfaces.Repositories.LocalFile.IFil
             .ConfigureAwait(false);
         if(fileResult == null)
         {
-            return (null, new ErrorResponse { Errors = [ new ErrorDetail { Message = "Image not found." } ] });
+            return (null, new Common.Models.ErrorResponse
+            {
+                Errors = [ new Common.Models.ErrorDetail { Message = "Image not found." } ]
+            });
         }
 
         var (fileBytes, _) = fileResult.Value;
@@ -35,9 +38,9 @@ public sealed class ViewImageQueryHandler(Interfaces.Repositories.LocalFile.IFil
             return ((processedStream, "image/webp"), null);
         } catch(Exception ex)
         {
-            return (null, new ErrorResponse
+            return (null, new Common.Models.ErrorResponse
             {
-                Errors = [ new ErrorDetail { Message = $"Image processing failed: {ex.Message}" } ]
+                Errors = [ new Common.Models.ErrorDetail { Message = $"Image processing failed: {ex.Message}" } ]
             });
         }
     }

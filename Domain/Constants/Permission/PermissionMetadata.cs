@@ -1,4 +1,4 @@
-namespace Domain.Constants.Security
+namespace Domain.Constants.Permission
 {
     /// <summary>
     /// Metadata của một permission

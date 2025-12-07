@@ -1,7 +1,6 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
 using Domain.Constants;
-using Domain.Helpers;
 using Mapster;
 using MediatR;
 
@@ -10,9 +9,9 @@ namespace Application.Features.Brands.Commands.RestoreManyBrands;
 public sealed class RestoreManyBrandsCommandHandler(
     IBrandReadRepository readRepository,
     IBrandUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<RestoreManyBrandsCommand, (List<ApiContracts.Brand.Responses.BrandResponse>? Data, ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<RestoreManyBrandsCommand, (List<ApiContracts.Brand.Responses.BrandResponse>? Data, Common.Models.ErrorResponse? Error)>
 {
-    public async Task<(List<ApiContracts.Brand.Responses.BrandResponse>? Data, ErrorResponse? Error)> Handle(
+    public async Task<(List<ApiContracts.Brand.Responses.BrandResponse>? Data, Common.Models.ErrorResponse? Error)> Handle(
         RestoreManyBrandsCommand request,
         CancellationToken cancellationToken)
     {
@@ -22,7 +21,7 @@ public sealed class RestoreManyBrandsCommandHandler(
         }
 
         var uniqueIds = request.Ids.Distinct().ToList();
-        var errorDetails = new List<ErrorDetail>();
+        var errorDetails = new List<Common.Models.ErrorDetail>();
 
         var allBrands = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.All)
             .ConfigureAwait(false);
@@ -36,16 +35,18 @@ public sealed class RestoreManyBrandsCommandHandler(
         {
             if(!allBrandMap.ContainsKey(id))
             {
-                errorDetails.Add(new ErrorDetail { Field = "Id", Message = $"Brand with Id {id} not found." });
+                errorDetails.Add(
+                    new Common.Models.ErrorDetail { Field = "Id", Message = $"Brand with Id {id} not found." });
             } else if(!deletedBrandSet.Contains(id))
             {
-                errorDetails.Add(new ErrorDetail { Field = "Id", Message = $"Brand with Id {id} is not deleted." });
+                errorDetails.Add(
+                    new Common.Models.ErrorDetail { Field = "Id", Message = $"Brand with Id {id} is not deleted." });
             }
         }
 
         if(errorDetails.Count > 0)
         {
-            return (null, new ErrorResponse { Errors = errorDetails });
+            return (null, new Common.Models.ErrorResponse { Errors = errorDetails });
         }
 
         if(deletedBrands.ToList().Count > 0)

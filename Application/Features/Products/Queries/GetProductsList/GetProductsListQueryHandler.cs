@@ -1,13 +1,13 @@
+using Application.ApiContracts.Product.Responses;
 using Application.Interfaces.Repositories.Product;
-using Domain.Shared;
 using Mapster;
 using MediatR;
 
 namespace Application.Features.Products.Queries.GetProductsList;
 
-public sealed class GetProductsListQueryHandler(IProductReadRepository readRepository) : IRequestHandler<GetProductsListQuery, PagedResult<ApiContracts.Product.Responses.ProductDetailResponse>>
+public sealed class GetProductsListQueryHandler(IProductReadRepository readRepository) : IRequestHandler<GetProductsListQuery, Domain.Primitives.PagedResult<ProductDetailResponse>>
 {
-    public async Task<PagedResult<ApiContracts.Product.Responses.ProductDetailResponse>> Handle(
+    public async Task<Domain.Primitives.PagedResult<ProductDetailResponse>> Handle(
         GetProductsListQuery request,
         CancellationToken cancellationToken)
     {
@@ -25,9 +25,9 @@ public sealed class GetProductsListQueryHandler(IProductReadRepository readRepos
             cancellationToken)
             .ConfigureAwait(false);
 
-        var items = entities.Select(e => e.Adapt<ApiContracts.Product.Responses.ProductDetailResponse>()).ToList();
+        var items = entities.Select(e => e.Adapt<ProductDetailResponse>()).ToList();
 
-        return new PagedResult<ApiContracts.Product.Responses.ProductDetailResponse>(
+        return new Domain.Primitives.PagedResult<ProductDetailResponse>(
             items,
             totalCount,
             request.Page,

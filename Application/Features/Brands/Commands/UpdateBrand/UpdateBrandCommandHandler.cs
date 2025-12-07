@@ -1,6 +1,5 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
-using Domain.Helpers;
 using Mapster;
 using MediatR;
 
@@ -9,9 +8,9 @@ namespace Application.Features.Brands.Commands.UpdateBrand;
 public sealed class UpdateBrandCommandHandler(
     IBrandReadRepository readRepository,
     IBrandUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateBrandCommand, (ApiContracts.Brand.Responses.BrandResponse? Data, ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateBrandCommand, (ApiContracts.Brand.Responses.BrandResponse? Data, Common.Models.ErrorResponse? Error)>
 {
-    public async Task<(ApiContracts.Brand.Responses.BrandResponse? Data, ErrorResponse? Error)> Handle(
+    public async Task<(ApiContracts.Brand.Responses.BrandResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
         UpdateBrandCommand request,
         CancellationToken cancellationToken)
     {
@@ -19,9 +18,10 @@ public sealed class UpdateBrandCommandHandler(
 
         if(brand == null)
         {
-            return (null, new ErrorResponse
+            return (null, new Common.Models.ErrorResponse
             {
-                Errors = [ new ErrorDetail { Field = "Id", Message = $"Brand with Id {request.Id} not found." } ]
+                Errors =
+                    [ new Common.Models.ErrorDetail { Field = "Id", Message = $"Brand with Id {request.Id} not found." } ]
             });
         }
 

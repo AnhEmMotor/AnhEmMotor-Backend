@@ -2,7 +2,6 @@
 using Application.Features.Settings.Commands.SetSettings;
 using Application.Features.Settings.Queries.GetAllSettings;
 using Asp.Versioning;
-using Domain.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -17,7 +16,7 @@ namespace WebAPI.Controllers.V1;
 [SwaggerTag("Quản lý cài đặt hệ thống: cập nhật số lượng cảnh báo tồn kho, số lượng mua tối đa, ...")]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]
-[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
+[ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status500InternalServerError)]
 public class SettingController(IMediator mediator) : ControllerBase
 {
     /// <summary>
@@ -28,7 +27,7 @@ public class SettingController(IMediator mediator) : ControllerBase
     /// <returns></returns>
     [HttpPut]
     [ProducesResponseType(typeof(Dictionary<string, long?>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> SetSettings(
         [FromBody][ValidSettingKeys] Dictionary<string, long?> request,
         CancellationToken cancellationToken)

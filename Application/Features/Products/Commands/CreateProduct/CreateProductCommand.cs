@@ -1,9 +1,8 @@
-using Domain.Helpers;
 using MediatR;
 
 namespace Application.Features.Products.Commands.CreateProduct;
 
-public sealed record CreateProductCommand : IRequest<(ApiContracts.Product.Responses.ProductDetailResponse? Data, ErrorResponse? Error)>
+public sealed record CreateProductCommand : IRequest<(ApiContracts.Product.Responses.ProductDetailResponse? Data, Common.Models.ErrorResponse? Error)>
 {
     public string? Name { get; init; }
 

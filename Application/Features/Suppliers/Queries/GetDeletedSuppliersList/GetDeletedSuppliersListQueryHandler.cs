@@ -2,15 +2,14 @@ using Application.ApiContracts.Supplier.Responses;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Supplier;
 using Domain.Constants;
-using Domain.Shared;
 using MediatR;
 using SupplierEntity = Domain.Entities.Supplier;
 
 namespace Application.Features.Suppliers.Queries.GetDeletedSuppliersList;
 
-public sealed class GetDeletedSuppliersListQueryHandler(ISupplierReadRepository repository, IPaginator paginator) : IRequestHandler<GetDeletedSuppliersListQuery, PagedResult<SupplierResponse>>
+public sealed class GetDeletedSuppliersListQueryHandler(ISupplierReadRepository repository, IPaginator paginator) : IRequestHandler<GetDeletedSuppliersListQuery, Domain.Primitives.PagedResult<SupplierResponse>>
 {
-    public Task<PagedResult<SupplierResponse>> Handle(
+    public Task<Domain.Primitives.PagedResult<SupplierResponse>> Handle(
         GetDeletedSuppliersListQuery request,
         CancellationToken cancellationToken)
     {

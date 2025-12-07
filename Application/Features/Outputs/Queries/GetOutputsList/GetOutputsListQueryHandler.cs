@@ -1,15 +1,14 @@
 using Application.ApiContracts.Output.Responses;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
-using Domain.Shared;
 using MediatR;
 using OutputEntity = Domain.Entities.Output;
 
 namespace Application.Features.Outputs.Queries.GetOutputsList;
 
-public sealed class GetOutputsListQueryHandler(IOutputReadRepository repository, IPaginator paginator) : IRequestHandler<GetOutputsListQuery, PagedResult<OutputResponse>>
+public sealed class GetOutputsListQueryHandler(IOutputReadRepository repository, IPaginator paginator) : IRequestHandler<GetOutputsListQuery, Domain.Primitives.PagedResult<OutputResponse>>
 {
-    public Task<PagedResult<OutputResponse>> Handle(GetOutputsListQuery request, CancellationToken cancellationToken)
+    public Task<Domain.Primitives.PagedResult<OutputResponse>> Handle(GetOutputsListQuery request, CancellationToken cancellationToken)
     {
         var query = repository.GetQueryable();
 

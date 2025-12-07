@@ -2,15 +2,14 @@ using Application.ApiContracts.Input.Responses;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
 using Domain.Constants;
-using Domain.Shared;
 using MediatR;
 using InputEntity = Domain.Entities.Input;
 
 namespace Application.Features.Inputs.Queries.GetDeletedInputsList;
 
-public sealed class GetDeletedInputsListQueryHandler(IInputReadRepository repository, IPaginator paginator) : IRequestHandler<GetDeletedInputsListQuery, PagedResult<InputResponse>>
+public sealed class GetDeletedInputsListQueryHandler(IInputReadRepository repository, IPaginator paginator) : IRequestHandler<GetDeletedInputsListQuery, Domain.Primitives.PagedResult<InputResponse>>
 {
-    public Task<PagedResult<InputResponse>> Handle(
+    public Task<Domain.Primitives.PagedResult<InputResponse>> Handle(
         GetDeletedInputsListQuery request,
         CancellationToken cancellationToken)
     {

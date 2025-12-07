@@ -1,7 +1,6 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.MediaFile;
 using Domain.Constants;
-using Domain.Helpers;
 using Mapster;
 using MediatR;
 
@@ -11,9 +10,9 @@ public sealed class RestoreFileCommandHandler(
     IMediaFileReadRepository readRepository,
     IMediaFileUpdateRepository updateRepository,
     Interfaces.Repositories.LocalFile.IFileStorageService fileStorageService,
-    IUnitOfWork unitOfWork) : IRequestHandler<RestoreFileCommand, (ApiContracts.File.Responses.MediaFileResponse?, ErrorResponse?)>
+    IUnitOfWork unitOfWork) : IRequestHandler<RestoreFileCommand, (ApiContracts.File.Responses.MediaFileResponse?, Common.Models.ErrorResponse?)>
 {
-    public async Task<(ApiContracts.File.Responses.MediaFileResponse?, ErrorResponse?)> Handle(
+    public async Task<(ApiContracts.File.Responses.MediaFileResponse?, Common.Models.ErrorResponse?)> Handle(
         RestoreFileCommand request,
         CancellationToken cancellationToken)
     {
@@ -25,9 +24,9 @@ public sealed class RestoreFileCommandHandler(
 
         if(mediaFile is null)
         {
-            return (null, new ErrorResponse
+            return (null, new Common.Models.ErrorResponse
             {
-                Errors = [ new ErrorDetail { Message = "File not found or not deleted." } ]
+                Errors = [ new Common.Models.ErrorDetail { Message = "File not found or not deleted." } ]
             });
         }
 

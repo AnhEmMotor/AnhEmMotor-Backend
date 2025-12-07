@@ -1,7 +1,7 @@
-using Domain.Shared;
+using Application.ApiContracts.Brand.Responses;
 using MediatR;
 using Sieve.Models;
 
 namespace Application.Features.Brands.Queries.GetBrandsList;
 
-public sealed record GetBrandsListQuery(SieveModel SieveModel) : IRequest<PagedResult<ApiContracts.Brand.Responses.BrandResponse>>;
+public sealed record GetBrandsListQuery(SieveModel SieveModel) : IRequest<Domain.Primitives.PagedResult<BrandResponse>>;

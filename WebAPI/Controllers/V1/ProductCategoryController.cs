@@ -10,8 +10,6 @@ using Application.Features.ProductCategories.Queries.GetDeletedProductCategories
 using Application.Features.ProductCategories.Queries.GetProductCategoriesList;
 using Application.Features.ProductCategories.Queries.GetProductCategoryById;
 using Asp.Versioning;
-using Domain.Helpers;
-using Domain.Shared;
 using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -28,14 +26,14 @@ namespace WebAPI.Controllers.V1;
 [SwaggerTag(" Quản lý danh mục sản phẩm")]
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
-[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
+[ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status500InternalServerError)]
 public class ProductCategoryController(IMediator mediator) : ControllerBase
 {
     /// <summary>
     /// Lấy danh sách danh mục sản phẩm (có phân trang, lọc, sắp xếp).
     /// </summary>
     [HttpGet]
-    [ProducesResponseType(typeof(PagedResult<ProductCategoryResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Domain.Primitives.PagedResult<ProductCategoryResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetProductCategories(
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
@@ -49,7 +47,7 @@ public class ProductCategoryController(IMediator mediator) : ControllerBase
     /// Lấy danh sách danh mục sản phẩm đã bị xoá (có phân trang, lọc, sắp xếp).
     /// </summary>
     [HttpGet("deleted")]
-    [ProducesResponseType(typeof(PagedResult<ProductCategoryResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Domain.Primitives.PagedResult<ProductCategoryResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetDeletedProductCategories(
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
@@ -64,7 +62,7 @@ public class ProductCategoryController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(ProductCategoryResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetProductCategoryById(int id, CancellationToken cancellationToken)
     {
         var query = new GetProductCategoryByIdQuery(id);
@@ -99,7 +97,7 @@ public class ProductCategoryController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpPut("{id:int}")]
     [ProducesResponseType(typeof(ProductCategoryResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateProductCategory(
         int id,
         [FromBody] UpdateProductCategoryRequest request,
@@ -120,7 +118,7 @@ public class ProductCategoryController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpDelete("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteProductCategory(int id, CancellationToken cancellationToken)
     {
         var command = new DeleteProductCategoryCommand() with { Id = id };
@@ -138,7 +136,7 @@ public class ProductCategoryController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpDelete("delete-many")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteProductCategories(
         [FromBody] DeleteManyProductCategoriesRequest request,
         CancellationToken cancellationToken)
@@ -159,8 +157,8 @@ public class ProductCategoryController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpPatch("restore/{id:int}")]
     [ProducesResponseType(typeof(ProductCategoryResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RestoreProductCategory(int id, CancellationToken cancellationToken)
     {
         var command = new RestoreProductCategoryCommand() with { Id = id };
@@ -179,7 +177,7 @@ public class ProductCategoryController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpPost("restore-many")]
     [ProducesResponseType(typeof(List<ProductCategoryResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RestoreProductCategories(
         [FromBody] RestoreManyProductCategoriesRequest request,
         CancellationToken cancellationToken)

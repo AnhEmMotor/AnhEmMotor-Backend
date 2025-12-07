@@ -5,7 +5,6 @@ using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Supplier;
 using Domain.Constants;
 using Domain.Entities;
-using Domain.Helpers;
 using Mapster;
 using MediatR;
 
@@ -17,9 +16,9 @@ public sealed class UpdateInputCommandHandler(
     IInputDeleteRepository deleteRepository,
     ISupplierReadRepository supplierRepository,
     IProductVariantReadRepository variantRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateInputCommand, (InputResponse? Data, ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateInputCommand, (InputResponse? Data, Common.Models.ErrorResponse? Error)>
 {
-    public async Task<(InputResponse? Data, ErrorResponse? Error)> Handle(
+    public async Task<(InputResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
         UpdateInputCommand request,
         CancellationToken cancellationToken)
     {
@@ -31,10 +30,14 @@ public sealed class UpdateInputCommandHandler(
 
         if(input is null)
         {
-            return (null, new ErrorResponse
+            return (null, new Common.Models.ErrorResponse
             {
                 Errors =
-                    [ new ErrorDetail { Field = "Id", Message = $"Không tìm thấy phiếu nhập có ID {request.Id}." } ]
+                    [ new Common.Models.ErrorDetail
+                    {
+                        Field = "Id",
+                        Message = $"Không tìm thấy phiếu nhập có ID {request.Id}."
+                    } ]
             });
         }
 
@@ -42,10 +45,10 @@ public sealed class UpdateInputCommandHandler(
         {
             if(request.Products.Count != 0)
             {
-                return (null, new ErrorResponse
+                return (null, new Common.Models.ErrorResponse
                 {
                     Errors =
-                        [ new ErrorDetail
+                        [ new Common.Models.ErrorDetail
                         {
                             Field = "Products",
                             Message = "Không được chỉnh sửa sản phẩm trong phiếu nhập đã hoàn thành hoặc đã hủy."
@@ -55,10 +58,10 @@ public sealed class UpdateInputCommandHandler(
 
             if(request.SupplierId != null)
             {
-                return (null, new ErrorResponse
+                return (null, new Common.Models.ErrorResponse
                 {
                     Errors =
-                        [ new ErrorDetail
+                        [ new Common.Models.ErrorDetail
                         {
                             Field = "Products",
                             Message = "Không được chỉnh sửa mã nhà cung cấp trong phiếu nhập đã hoàn thành hoặc đã hủy."
@@ -77,10 +80,10 @@ public sealed class UpdateInputCommandHandler(
 
             if(supplier is null || string.Compare(supplier.StatusId, Domain.Constants.SupplierStatus.Active) != 0)
             {
-                return (null, new ErrorResponse
+                return (null, new Common.Models.ErrorResponse
                 {
                     Errors =
-                        [ new ErrorDetail
+                        [ new Common.Models.ErrorDetail
                         {
                             Field = "SupplierId",
                             Message = "Nhà cung cấp không hợp lệ hoặc không còn hoạt động."
@@ -105,10 +108,10 @@ public sealed class UpdateInputCommandHandler(
             {
                 var foundIds = variantsList.Select(v => v.Id).ToList();
                 var missingIds = variantIds.Except(foundIds).ToList();
-                return (null, new ErrorResponse
+                return (null, new Common.Models.ErrorResponse
                 {
                     Errors =
-                        [ new ErrorDetail
+                        [ new Common.Models.ErrorDetail
                         {
                             Field = "Products",
                             Message = $"Không tìm thấy {missingIds.Count} sản phẩm: {string.Join(", ", missingIds)}"
@@ -120,10 +123,10 @@ public sealed class UpdateInputCommandHandler(
             {
                 if(string.Compare(variant.Product?.StatusId, Domain.Constants.ProductStatus.ForSale) != 0)
                 {
-                    return (null, new ErrorResponse
+                    return (null, new Common.Models.ErrorResponse
                     {
                         Errors =
-                            [ new ErrorDetail
+                            [ new Common.Models.ErrorDetail
                             {
                                 Field = "Products",
                                 Message =

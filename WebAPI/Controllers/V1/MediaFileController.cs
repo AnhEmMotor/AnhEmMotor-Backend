@@ -1,3 +1,4 @@
+using Application.ApiContracts.File.Responses;
 using Application.Features.Files.Commands.DeleteFile;
 using Application.Features.Files.Commands.DeleteManyFiles;
 using Application.Features.Files.Commands.RestoreFile;
@@ -9,8 +10,6 @@ using Application.Features.Files.Queries.GetFileById;
 using Application.Features.Files.Queries.GetFilesList;
 using Application.Features.Files.Queries.ViewImage;
 using Asp.Versioning;
-using Domain.Helpers;
-using Domain.Shared;
 using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -27,7 +26,7 @@ namespace WebAPI.Controllers.V1;
 [SwaggerTag("Quản lý tệp media")]
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
-[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
+[ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status500InternalServerError)]
 public class MediaFileController(IMediator mediator) : ControllerBase
 {
     /// <summary>
@@ -37,9 +36,7 @@ public class MediaFileController(IMediator mediator) : ControllerBase
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [NonAction]
-    [ProducesResponseType(
-        typeof(PagedResult<Application.ApiContracts.File.Responses.MediaFileResponse>),
-        StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Domain.Primitives.PagedResult<MediaFileResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetFilesAsync(
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
@@ -56,9 +53,7 @@ public class MediaFileController(IMediator mediator) : ControllerBase
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [NonAction]
-    [ProducesResponseType(
-        typeof(PagedResult<Application.ApiContracts.File.Responses.MediaFileResponse>),
-        StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Domain.Primitives.PagedResult<MediaFileResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetDeletedFilesAsync(
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
@@ -75,8 +70,8 @@ public class MediaFileController(IMediator mediator) : ControllerBase
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [NonAction]
-    [ProducesResponseType(typeof(Application.ApiContracts.File.Responses.MediaFileResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(MediaFileResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetFileByIdAsync(int id, CancellationToken cancellationToken)
     {
         var query = new GetFileByIdQuery(id);
@@ -95,10 +90,8 @@ public class MediaFileController(IMediator mediator) : ControllerBase
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpPost("upload-image")]
-    [ProducesResponseType(
-        typeof(Application.ApiContracts.File.Responses.MediaFileResponse),
-        StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(MediaFileResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UploadImage(IFormFile file, CancellationToken cancellationToken)
     {
         if(file == null)
@@ -115,10 +108,8 @@ public class MediaFileController(IMediator mediator) : ControllerBase
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpPost("upload-images")]
-    [ProducesResponseType(
-        typeof(List<Application.ApiContracts.File.Responses.MediaFileResponse>),
-        StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(List<MediaFileResponse>), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UploadManyImages(List<IFormFile> files, CancellationToken cancellationToken)
     {
         var fileDtos = new List<Application.ApiContracts.File.Requests.FileUploadRequest>();
@@ -146,7 +137,7 @@ public class MediaFileController(IMediator mediator) : ControllerBase
     /// <returns></returns>
     [HttpDelete("{storagePath}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteFile(string storagePath, CancellationToken cancellationToken)
     {
         var command = new DeleteFileCommand() with { StoragePath = storagePath };
@@ -166,7 +157,7 @@ public class MediaFileController(IMediator mediator) : ControllerBase
     /// <returns></returns>
     [HttpDelete("delete-many")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteFiles(
         [FromBody] Application.ApiContracts.File.Requests.DeleteManyMediaFilesRequest request,
         CancellationToken cancellationToken)
@@ -189,8 +180,8 @@ public class MediaFileController(IMediator mediator) : ControllerBase
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpPost("restore/{storagePath}")]
-    [ProducesResponseType(typeof(Application.ApiContracts.File.Responses.MediaFileResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(MediaFileResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RestoreFile(string storagePath, CancellationToken cancellationToken)
     {
         var command = new RestoreFileCommand() with { StoragePath = storagePath };
@@ -211,10 +202,8 @@ public class MediaFileController(IMediator mediator) : ControllerBase
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpPost("restore-many")]
-    [ProducesResponseType(
-        typeof(List<Application.ApiContracts.File.Responses.MediaFileResponse>),
-        StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(List<MediaFileResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RestoreFiles(
         [FromBody] Application.ApiContracts.File.Requests.RestoreManyMediaFilesRequest request,
         CancellationToken cancellationToken)
@@ -239,8 +228,8 @@ public class MediaFileController(IMediator mediator) : ControllerBase
     /// <returns></returns>
     [HttpGet("view-image/{storagePath}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> ViewImageWithResize(
         string storagePath,
         [FromQuery] int? width,
@@ -257,7 +246,11 @@ public class MediaFileController(IMediator mediator) : ControllerBase
 
         if(data == null)
         {
-            return NotFound(new ErrorResponse { Errors = [ new ErrorDetail { Message = "Image not found." } ] });
+            return NotFound(
+                new Application.Common.Models.ErrorResponse
+                {
+                    Errors = [ new Application.Common.Models.ErrorDetail { Message = "Image not found." } ]
+                });
         }
 
         var (fileStream, contentType) = data.Value;

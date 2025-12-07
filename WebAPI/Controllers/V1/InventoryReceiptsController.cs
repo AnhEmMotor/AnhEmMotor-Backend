@@ -13,8 +13,6 @@ using Application.Features.Inputs.Queries.GetInputById;
 using Application.Features.Inputs.Queries.GetInputsBySupplierId;
 using Application.Features.Inputs.Queries.GetInputsList;
 using Asp.Versioning;
-using Domain.Helpers;
-using Domain.Shared;
 using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -31,14 +29,14 @@ namespace WebAPI.Controllers.V1;
 [SwaggerTag("Quản lý phiếu nhập hàng")]
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
-[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
+[ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status500InternalServerError)]
 public class InventoryReceiptsController(IMediator mediator) : ControllerBase
 {
     /// <summary>
     /// Lấy danh sách phiếu nhập (có phân trang, lọc, sắp xếp).
     /// </summary>
     [HttpGet]
-    [ProducesResponseType(typeof(PagedResult<InputResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Domain.Primitives.PagedResult<InputResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetInputs([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
     {
         var query = new GetInputsListQuery(sieveModel);
@@ -50,7 +48,7 @@ public class InventoryReceiptsController(IMediator mediator) : ControllerBase
     /// Lấy danh sách phiếu nhập đã bị xóa (có phân trang, lọc, sắp xếp).
     /// </summary>
     [HttpGet("deleted")]
-    [ProducesResponseType(typeof(PagedResult<InputResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Domain.Primitives.PagedResult<InputResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetDeletedInputs(
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
@@ -65,7 +63,7 @@ public class InventoryReceiptsController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(InputResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetInputById(int id, CancellationToken cancellationToken)
     {
         var query = new GetInputByIdQuery(id);
@@ -81,7 +79,7 @@ public class InventoryReceiptsController(IMediator mediator) : ControllerBase
     /// Lấy danh sách phiếu nhập theo nhà cung cấp.
     /// </summary>
     [HttpGet("by-supplier/{supplierId:int}")]
-    [ProducesResponseType(typeof(PagedResult<InputResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Domain.Primitives.PagedResult<InputResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetInputsBySupplierId(
         int supplierId,
         [FromQuery] SieveModel sieveModel,
@@ -97,7 +95,7 @@ public class InventoryReceiptsController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpPost]
     [ProducesResponseType(typeof(InputResponse), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateInput(
         [FromBody] Application.ApiContracts.Input.Requests.CreateInputRequest request,
         CancellationToken cancellationToken)
@@ -116,8 +114,8 @@ public class InventoryReceiptsController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpPost("{id:int}/clone")]
     [ProducesResponseType(typeof(InputResponse), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CloneInput(int id, CancellationToken cancellationToken)
     {
         var command = new CloneInputCommand(id);
@@ -136,8 +134,8 @@ public class InventoryReceiptsController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpPut("{id:int}")]
     [ProducesResponseType(typeof(InputResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateInput(
         int id,
         [FromBody] Application.ApiContracts.Input.Requests.UpdateInputRequest request,
@@ -157,8 +155,8 @@ public class InventoryReceiptsController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpPatch("{id:int}/status")]
     [ProducesResponseType(typeof(InputResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateInputStatus(
         int id,
         [FromBody] Application.ApiContracts.Input.Requests.UpdateInputStatusRequest request,
@@ -178,7 +176,7 @@ public class InventoryReceiptsController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpPatch("status")]
     [ProducesResponseType(typeof(List<InputResponse>), StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateManyInputStatus(
         [FromBody] Application.ApiContracts.Input.Requests.UpdateManyInputStatusRequest request,
         CancellationToken cancellationToken)
@@ -197,7 +195,7 @@ public class InventoryReceiptsController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpDelete("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteInput(int id, CancellationToken cancellationToken)
     {
         var command = new DeleteInputCommand(id);
@@ -214,7 +212,7 @@ public class InventoryReceiptsController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpDelete]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteManyInputs(
         [FromBody] Application.ApiContracts.Input.Requests.DeleteManyInputsRequest request,
         CancellationToken cancellationToken)
@@ -233,7 +231,7 @@ public class InventoryReceiptsController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpPost("{id:int}/restore")]
     [ProducesResponseType(typeof(InputResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RestoreInput(int id, CancellationToken cancellationToken)
     {
         var command = new RestoreInputCommand(id);
@@ -250,7 +248,7 @@ public class InventoryReceiptsController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpPost("restore")]
     [ProducesResponseType(typeof(List<InputResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RestoreManyInputs(
         [FromBody] Application.ApiContracts.Input.Requests.RestoreManyInputsRequest request,
         CancellationToken cancellationToken)

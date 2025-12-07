@@ -1,3 +1,4 @@
+using Infrastructure.Authorization.Requirement;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 

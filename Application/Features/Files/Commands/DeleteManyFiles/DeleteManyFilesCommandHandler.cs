@@ -1,7 +1,6 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.MediaFile;
 using Domain.Constants;
-using Domain.Helpers;
 using MediatR;
 
 namespace Application.Features.Files.Commands.DeleteManyFiles;
@@ -9,9 +8,11 @@ namespace Application.Features.Files.Commands.DeleteManyFiles;
 public sealed class DeleteManyFilesCommandHandler(
     IMediaFileReadRepository readRepository,
     IMediaFileDeleteRepository deleteRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<DeleteManyFilesCommand, ErrorResponse?>
+    IUnitOfWork unitOfWork) : IRequestHandler<DeleteManyFilesCommand, Common.Models.ErrorResponse?>
 {
-    public async Task<ErrorResponse?> Handle(DeleteManyFilesCommand request, CancellationToken cancellationToken)
+    public async Task<Common.Models.ErrorResponse?> Handle(
+        DeleteManyFilesCommand request,
+        CancellationToken cancellationToken)
     {
         if(request.StoragePaths == null || request.StoragePaths.Count == 0)
         {
@@ -19,7 +20,7 @@ public sealed class DeleteManyFilesCommandHandler(
         }
 
         var uniquePaths = request.StoragePaths.Distinct().ToList();
-        var errorDetails = new List<ErrorDetail>();
+        var errorDetails = new List<Common.Models.ErrorDetail>();
 
         var allFiles = await readRepository.GetByStoragePathsAsync(uniquePaths, cancellationToken, DataFetchMode.All)
             .ConfigureAwait(false);
@@ -33,17 +34,22 @@ public sealed class DeleteManyFilesCommandHandler(
         {
             if(!allFileMap.ContainsKey(path))
             {
-                errorDetails.Add(new ErrorDetail { Field = "StoragePath", Message = $"File '{path}' not found." });
+                errorDetails.Add(
+                    new Common.Models.ErrorDetail { Field = "StoragePath", Message = $"File '{path}' not found." });
             } else if(!activeFileSet.Contains(path))
             {
                 errorDetails.Add(
-                    new ErrorDetail { Field = "StoragePath", Message = $"File '{path}' has already been deleted." });
+                    new Common.Models.ErrorDetail
+                    {
+                        Field = "StoragePath",
+                        Message = $"File '{path}' has already been deleted."
+                    });
             }
         }
 
         if(errorDetails.Count > 0)
         {
-            return new ErrorResponse { Errors = errorDetails };
+            return new Common.Models.ErrorResponse { Errors = errorDetails };
         }
 
         if(activeFiles.ToList().Count > 0)

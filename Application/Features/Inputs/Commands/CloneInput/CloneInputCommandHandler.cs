@@ -4,7 +4,6 @@ using Application.Interfaces.Repositories.Input;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Supplier;
 using Domain.Constants;
-using Domain.Helpers;
 using Mapster;
 using MediatR;
 using InputEntity = Domain.Entities.Input;
@@ -17,9 +16,9 @@ public sealed class CloneInputCommandHandler(
     IInputInsertRepository inputInsertRepository,
     ISupplierReadRepository supplierReadRepository,
     IProductVariantReadRepository variantReadRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<CloneInputCommand, (InputResponse? Data, ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<CloneInputCommand, (InputResponse? Data, Common.Models.ErrorResponse? Error)>
 {
-    public async Task<(InputResponse? Data, ErrorResponse? Error)> Handle(
+    public async Task<(InputResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
         CloneInputCommand command,
         CancellationToken cancellationToken)
     {
@@ -31,10 +30,14 @@ public sealed class CloneInputCommandHandler(
 
         if(originalInput is null)
         {
-            return (null, new ErrorResponse
+            return (null, new Common.Models.ErrorResponse
             {
                 Errors =
-                    [ new ErrorDetail { Field = "Id", Message = $"Phiếu nhập với Id = {command.Id} không tồn tại" } ]
+                    [ new Common.Models.ErrorDetail
+                    {
+                        Field = "Id",
+                        Message = $"Phiếu nhập với Id = {command.Id} không tồn tại"
+                    } ]
             });
         }
 
@@ -46,10 +49,10 @@ public sealed class CloneInputCommandHandler(
 
         if(supplier is null || string.Compare(supplier.StatusId, SupplierStatus.Active) != 0)
         {
-            return (null, new ErrorResponse
+            return (null, new Common.Models.ErrorResponse
             {
                 Errors =
-                    [ new ErrorDetail
+                    [ new Common.Models.ErrorDetail
                     {
                         Field = "SupplierId",
                         Message = "Nhà cung cấp không tồn tại hoặc không còn hoạt động"
@@ -104,10 +107,10 @@ public sealed class CloneInputCommandHandler(
 
         if(validProducts.Count == 0)
         {
-            return (null, new ErrorResponse
+            return (null, new Common.Models.ErrorResponse
             {
                 Errors =
-                    [ new ErrorDetail
+                    [ new Common.Models.ErrorDetail
                     {
                         Field = "Products",
                         Message =

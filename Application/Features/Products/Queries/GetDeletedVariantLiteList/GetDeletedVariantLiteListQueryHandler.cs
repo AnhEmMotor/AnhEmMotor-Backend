@@ -1,15 +1,14 @@
 ﻿using Application.ApiContracts.Product.Common;
 using Application.Interfaces.Repositories.ProductVariant;
 using Domain.Constants;
-using Domain.Shared;
 using Mapster;
 using MediatR;
 
 namespace Application.Features.Products.Queries.GetDeletedVariantLiteList;
 
-public sealed class GetDeletedVariantLiteListQueryHandler(IProductVariantReadRepository repository) : IRequestHandler<GetDeletedVariantLiteListQuery, PagedResult<ProductVariantLiteResponse>>
+public sealed class GetDeletedVariantLiteListQueryHandler(IProductVariantReadRepository repository) : IRequestHandler<GetDeletedVariantLiteListQuery, Domain.Primitives.PagedResult<ProductVariantLiteResponse>>
 {
-    public async Task<PagedResult<ProductVariantLiteResponse>> Handle(
+    public async Task<Domain.Primitives.PagedResult<ProductVariantLiteResponse>> Handle(
         GetDeletedVariantLiteListQuery request,
         CancellationToken cancellationToken)
     {
@@ -25,6 +24,6 @@ public sealed class GetDeletedVariantLiteListQueryHandler(IProductVariantReadRep
 
         var responses = variants.Select(v => v.Adapt<ProductVariantLiteResponse>()).ToList();
 
-        return new PagedResult<ProductVariantLiteResponse>(responses, totalCount, page, pageSize);
+        return new Domain.Primitives.PagedResult<ProductVariantLiteResponse>(responses, totalCount, page, pageSize);
     }
 }

@@ -6,7 +6,6 @@ using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.ProductCategory;
 using Application.Interfaces.Repositories.ProductVariant;
 using Domain.Entities;
-using Domain.Helpers;
 using Mapster;
 using MediatR;
 using OptionValueEntity = Domain.Entities.OptionValue;
@@ -22,20 +21,20 @@ public sealed class CreateProductCommandHandler(
     IOptionReadRepository optionReadRepository,
     IProductInsertRepository productInsertRepository,
     IOptionValueInsertRepository optionValueInsertRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateProductCommand, (ApiContracts.Product.Responses.ProductDetailResponse? Data, ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<CreateProductCommand, (ApiContracts.Product.Responses.ProductDetailResponse? Data, Common.Models.ErrorResponse? Error)>
 {
-    public async Task<(ApiContracts.Product.Responses.ProductDetailResponse? Data, ErrorResponse? Error)> Handle(
+    public async Task<(ApiContracts.Product.Responses.ProductDetailResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
         CreateProductCommand request,
         CancellationToken cancellationToken)
     {
-        var errors = new List<ErrorDetail>();
+        var errors = new List<Common.Models.ErrorDetail>();
 
         var category = await productCategoryReadRepository.GetByIdAsync(request.CategoryId!.Value, cancellationToken)
             .ConfigureAwait(false);
         if(category == null)
         {
             errors.Add(
-                new ErrorDetail
+                new Common.Models.ErrorDetail
                 {
                     Field = nameof(request.CategoryId),
                     Message = $"Product category with Id {request.CategoryId} not found or has been deleted."
@@ -49,7 +48,7 @@ public sealed class CreateProductCommandHandler(
             if(brand == null)
             {
                 errors.Add(
-                    new ErrorDetail
+                    new Common.Models.ErrorDetail
                     {
                         Field = nameof(request.BrandId),
                         Message = $"Brand with Id {request.BrandId} not found or has been deleted."
@@ -66,7 +65,11 @@ public sealed class CreateProductCommandHandler(
             if(slugs.Count != slugs.Distinct(StringComparer.OrdinalIgnoreCase).Count())
             {
                 errors.Add(
-                    new ErrorDetail { Field = "Variants", Message = "Duplicate slugs found within the request." });
+                    new Common.Models.ErrorDetail
+                    {
+                        Field = "Variants",
+                        Message = "Duplicate slugs found within the request."
+                    });
             }
 
             foreach(var slug in slugs)
@@ -76,7 +79,11 @@ public sealed class CreateProductCommandHandler(
                 if(existing != null)
                 {
                     errors.Add(
-                        new ErrorDetail { Field = "Variants.UrlSlug", Message = $"Slug '{slug}' is already in use." });
+                        new Common.Models.ErrorDetail
+                        {
+                            Field = "Variants.UrlSlug",
+                            Message = $"Slug '{slug}' is already in use."
+                        });
                 }
             }
         }
@@ -120,7 +127,7 @@ public sealed class CreateProductCommandHandler(
                 if(option == null)
                 {
                     errors.Add(
-                        new ErrorDetail
+                        new Common.Models.ErrorDetail
                         {
                             Field = "Variants.OptionValues",
                             Message = $"Option with Id {optionId} not found."
@@ -157,7 +164,7 @@ public sealed class CreateProductCommandHandler(
 
         if(errors.Count > 0)
         {
-            return (null, new ErrorResponse { Errors = errors });
+            return (null, new Common.Models.ErrorResponse { Errors = errors });
         }
 
         var product = new ProductEntity

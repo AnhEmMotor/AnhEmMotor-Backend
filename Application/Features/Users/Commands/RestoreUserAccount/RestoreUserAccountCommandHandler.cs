@@ -2,7 +2,6 @@ using Application.ApiContracts.User.Responses;
 using Application.Common.Exceptions;
 using Domain.Constants;
 using Domain.Entities;
-using Domain.Helpers;
 using FluentValidation;
 using FluentValidation.Results;
 using MediatR;
@@ -40,7 +39,7 @@ public class RestoreUserAccountCommandHandler(UserManager<ApplicationUser> userM
             var failures = new List<ValidationFailure>();
             foreach(var error in result.Errors)
             {
-                string fieldName = IdentityHelper.GetFieldForIdentityError(error.Code);
+                string fieldName = Common.Helper.IdentityHelper.GetFieldForIdentityError(error.Code);
                 failures.Add(new ValidationFailure(fieldName, error.Description));
             }
             throw new ValidationException(failures);

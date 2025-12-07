@@ -1,13 +1,13 @@
+using Application.ApiContracts.Product.Responses;
 using Application.Interfaces.Repositories.Product;
-using Domain.Shared;
 using Mapster;
 using MediatR;
 
 namespace Application.Features.Products.Queries.GetDeletedProductsList;
 
-public sealed class GetDeletedProductsListQueryHandler(IProductReadRepository repository) : IRequestHandler<GetDeletedProductsListQuery, PagedResult<ApiContracts.Product.Responses.ProductDetailResponse>>
+public sealed class GetDeletedProductsListQueryHandler(IProductReadRepository repository) : IRequestHandler<GetDeletedProductsListQuery, Domain.Primitives.PagedResult<ProductDetailResponse>>
 {
-    public async Task<PagedResult<ApiContracts.Product.Responses.ProductDetailResponse>> Handle(
+    public async Task<Domain.Primitives.PagedResult<ProductDetailResponse>> Handle(
         GetDeletedProductsListQuery request,
         CancellationToken cancellationToken)
     {
@@ -19,7 +19,7 @@ public sealed class GetDeletedProductsListQueryHandler(IProductReadRepository re
 
         var responses = products.Select(p => p.Adapt<ApiContracts.Product.Responses.ProductDetailResponse>()).ToList();
 
-        return new PagedResult<ApiContracts.Product.Responses.ProductDetailResponse>(
+        return new Domain.Primitives.PagedResult<ProductDetailResponse>(
             responses,
             totalCount,
             page,

@@ -1,7 +1,6 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductCategory;
 using Domain.Constants;
-using Domain.Helpers;
 using MediatR;
 
 namespace Application.Features.ProductCategories.Commands.DeleteManyProductCategories;
@@ -9,9 +8,9 @@ namespace Application.Features.ProductCategories.Commands.DeleteManyProductCateg
 public sealed class DeleteManyProductCategoriesCommandHandler(
     IProductCategoryReadRepository readRepository,
     IProductCategoryDeleteRepository deleteRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<DeleteManyProductCategoriesCommand, ErrorResponse?>
+    IUnitOfWork unitOfWork) : IRequestHandler<DeleteManyProductCategoriesCommand, Common.Models.ErrorResponse?>
 {
-    public async Task<ErrorResponse?> Handle(
+    public async Task<Common.Models.ErrorResponse?> Handle(
         DeleteManyProductCategoriesCommand request,
         CancellationToken cancellationToken)
     {
@@ -21,7 +20,7 @@ public sealed class DeleteManyProductCategoriesCommandHandler(
         }
 
         var uniqueIds = request.Ids.Distinct().ToList();
-        var errorDetails = new List<ErrorDetail>();
+        var errorDetails = new List<Common.Models.ErrorDetail>();
 
         var allCategories = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.All)
             .ConfigureAwait(false);
@@ -35,11 +34,15 @@ public sealed class DeleteManyProductCategoriesCommandHandler(
             if(!allCategoryMap.ContainsKey(id))
             {
                 errorDetails.Add(
-                    new ErrorDetail { Field = "Id", Message = $"Product category with Id {id} not found." });
+                    new Common.Models.ErrorDetail
+                    {
+                        Field = "Id",
+                        Message = $"Product category with Id {id} not found."
+                    });
             } else if(!activeCategorySet.Contains(id))
             {
                 errorDetails.Add(
-                    new ErrorDetail
+                    new Common.Models.ErrorDetail
                     {
                         Field = "Id",
                         Message = $"Product category with Id {id} has already been deleted."
@@ -49,7 +52,7 @@ public sealed class DeleteManyProductCategoriesCommandHandler(
 
         if(errorDetails.Count > 0)
         {
-            return new ErrorResponse { Errors = errorDetails };
+            return new Common.Models.ErrorResponse { Errors = errorDetails };
         }
 
         if(activeCategories.ToList().Count > 0)

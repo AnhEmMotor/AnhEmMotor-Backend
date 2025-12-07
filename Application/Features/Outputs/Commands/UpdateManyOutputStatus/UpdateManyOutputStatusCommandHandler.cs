@@ -2,7 +2,6 @@ using Application.ApiContracts.Output.Responses;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Domain.Constants;
-using Domain.Helpers;
 using Mapster;
 using MediatR;
 
@@ -11,18 +10,22 @@ namespace Application.Features.Outputs.Commands.UpdateManyOutputStatus;
 public sealed class UpdateManyOutputStatusCommandHandler(
     IOutputReadRepository readRepository,
     IOutputUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateManyOutputStatusCommand, (List<OutputResponse>? Data, ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateManyOutputStatusCommand, (List<OutputResponse>? Data, Common.Models.ErrorResponse? Error)>
 {
-    public async Task<(List<OutputResponse>? Data, ErrorResponse? Error)> Handle(
+    public async Task<(List<OutputResponse>? Data, Common.Models.ErrorResponse? Error)> Handle(
         UpdateManyOutputStatusCommand request,
         CancellationToken cancellationToken)
     {
-        var errors = new List<ErrorDetail>();
+        var errors = new List<Common.Models.ErrorDetail>();
 
         if(!OrderStatus.IsValid(request.StatusId))
         {
             errors.Add(
-                new ErrorDetail { Field = "StatusId", Message = $"Trạng thái '{request.StatusId}' không hợp lệ." });
+                new Common.Models.ErrorDetail
+                {
+                    Field = "StatusId",
+                    Message = $"Trạng thái '{request.StatusId}' không hợp lệ."
+                });
         }
 
         var outputs = await readRepository.GetByIdAsync(request.Ids, cancellationToken).ConfigureAwait(false);
@@ -35,7 +38,7 @@ public sealed class UpdateManyOutputStatusCommandHandler(
         if(missingIds.Count != 0)
         {
             errors.Add(
-                new ErrorDetail
+                new Common.Models.ErrorDetail
                 {
                     Field = "Ids",
                     Message = $"Không tìm thấy {missingIds.Count} đơn hàng: {string.Join(", ", missingIds)}"
@@ -48,7 +51,7 @@ public sealed class UpdateManyOutputStatusCommandHandler(
             {
                 var allowed = OrderStatusTransitions.GetAllowedTransitions(output.StatusId);
                 errors.Add(
-                    new ErrorDetail
+                    new Common.Models.ErrorDetail
                     {
                         Field = "StatusId",
                         Message =
@@ -92,7 +95,7 @@ public sealed class UpdateManyOutputStatusCommandHandler(
                 if(currentStock < totalNeeded)
                 {
                     errors.Add(
-                        new ErrorDetail
+                        new Common.Models.ErrorDetail
                         {
                             Field = "Products",
                             Message =
@@ -104,7 +107,7 @@ public sealed class UpdateManyOutputStatusCommandHandler(
 
         if(errors.Count > 0)
         {
-            return (null, new ErrorResponse { Errors = errors });
+            return (null, new Common.Models.ErrorResponse { Errors = errors });
         }
 
         if(string.Compare(request.StatusId, OrderStatus.Completed) == 0)

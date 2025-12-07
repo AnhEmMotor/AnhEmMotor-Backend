@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Domain.Helpers
+namespace Application.Common.Helper
 {
     public static class IdentityHelper
     {

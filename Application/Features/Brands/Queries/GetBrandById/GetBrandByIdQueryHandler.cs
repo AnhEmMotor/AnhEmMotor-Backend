@@ -1,13 +1,12 @@
 using Application.Interfaces.Repositories.Brand;
-using Domain.Helpers;
 using Mapster;
 using MediatR;
 
 namespace Application.Features.Brands.Queries.GetBrandById;
 
-public sealed class GetBrandByIdQueryHandler(IBrandReadRepository repository) : IRequestHandler<GetBrandByIdQuery, (ApiContracts.Brand.Responses.BrandResponse? Data, ErrorResponse? Error)>
+public sealed class GetBrandByIdQueryHandler(IBrandReadRepository repository) : IRequestHandler<GetBrandByIdQuery, (ApiContracts.Brand.Responses.BrandResponse? Data, Common.Models.ErrorResponse? Error)>
 {
-    public async Task<(ApiContracts.Brand.Responses.BrandResponse? Data, ErrorResponse? Error)> Handle(
+    public async Task<(ApiContracts.Brand.Responses.BrandResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
         GetBrandByIdQuery request,
         CancellationToken cancellationToken)
     {
@@ -15,9 +14,10 @@ public sealed class GetBrandByIdQueryHandler(IBrandReadRepository repository) : 
 
         if(brand == null)
         {
-            return (null, new ErrorResponse
+            return (null, new Common.Models.ErrorResponse
             {
-                Errors = [ new ErrorDetail { Field = "Id", Message = $"Brand with Id {request.Id} not found." } ]
+                Errors =
+                    [ new Common.Models.ErrorDetail { Field = "Id", Message = $"Brand with Id {request.Id} not found." } ]
             });
         }
 

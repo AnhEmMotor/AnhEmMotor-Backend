@@ -11,8 +11,6 @@ using Application.Features.Outputs.Queries.GetDeletedOutputsList;
 using Application.Features.Outputs.Queries.GetOutputById;
 using Application.Features.Outputs.Queries.GetOutputsList;
 using Asp.Versioning;
-using Domain.Helpers;
-using Domain.Shared;
 using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -29,14 +27,14 @@ namespace WebAPI.Controllers.V1;
 [SwaggerTag("Quản lý đơn hàng/phiếu xuất")]
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
-[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
+[ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status500InternalServerError)]
 public class SalesOrdersController(IMediator mediator) : ControllerBase
 {
     /// <summary>
     /// Lấy danh sách đơn hàng (có phân trang, lọc, sắp xếp).
     /// </summary>
     [HttpGet]
-    [ProducesResponseType(typeof(PagedResult<OutputResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Domain.Primitives.PagedResult<OutputResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetOutputs([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
     {
         var query = new GetOutputsListQuery(sieveModel);
@@ -48,7 +46,7 @@ public class SalesOrdersController(IMediator mediator) : ControllerBase
     /// Lấy danh sách đơn hàng đã bị xóa (có phân trang, lọc, sắp xếp).
     /// </summary>
     [HttpGet("deleted")]
-    [ProducesResponseType(typeof(PagedResult<OutputResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Domain.Primitives.PagedResult<OutputResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetDeletedOutputs(
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
@@ -63,7 +61,7 @@ public class SalesOrdersController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(OutputResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetOutputById(int id, CancellationToken cancellationToken)
     {
         var query = new GetOutputByIdQuery(id);
@@ -80,7 +78,7 @@ public class SalesOrdersController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpPost]
     [ProducesResponseType(typeof(OutputResponse), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateOutput(
         [FromBody] Application.ApiContracts.Output.Requests.CreateOutputRequest request,
         CancellationToken cancellationToken)
@@ -99,8 +97,8 @@ public class SalesOrdersController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpPut("{id:int}")]
     [ProducesResponseType(typeof(OutputResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateOutput(
         int id,
         [FromBody] Application.ApiContracts.Output.Requests.UpdateOutputRequest request,
@@ -120,8 +118,8 @@ public class SalesOrdersController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpPatch("{id:int}/status")]
     [ProducesResponseType(typeof(OutputResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateOutputStatus(
         int id,
         [FromBody] Application.ApiContracts.Output.Requests.UpdateOutputStatusRequest request,
@@ -141,7 +139,7 @@ public class SalesOrdersController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpPatch("status")]
     [ProducesResponseType(typeof(List<OutputResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateManyOutputStatus(
         [FromBody] Application.ApiContracts.Output.Requests.UpdateManyOutputStatusRequest request,
         CancellationToken cancellationToken)
@@ -160,7 +158,7 @@ public class SalesOrdersController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpDelete("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteOutput(int id, CancellationToken cancellationToken)
     {
         var command = new DeleteOutputCommand(id);
@@ -177,7 +175,7 @@ public class SalesOrdersController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpDelete]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteManyOutputs(
         [FromBody] Application.ApiContracts.Output.Requests.DeleteManyOutputsRequest request,
         CancellationToken cancellationToken)
@@ -196,7 +194,7 @@ public class SalesOrdersController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpPost("{id:int}/restore")]
     [ProducesResponseType(typeof(OutputResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RestoreOutput(int id, CancellationToken cancellationToken)
     {
         var command = new RestoreOutputCommand(id);
@@ -213,7 +211,7 @@ public class SalesOrdersController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpPost("restore")]
     [ProducesResponseType(typeof(List<OutputResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RestoreManyOutputs(
         [FromBody] Application.ApiContracts.Output.Requests.RestoreManyOutputsRequest request,
         CancellationToken cancellationToken)

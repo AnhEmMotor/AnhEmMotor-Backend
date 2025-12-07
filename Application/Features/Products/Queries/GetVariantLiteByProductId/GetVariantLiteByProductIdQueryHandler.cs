@@ -2,7 +2,6 @@
 using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.ProductVariant;
 using Domain.Constants;
-using Domain.Helpers;
 using Mapster;
 using MediatR;
 
@@ -10,9 +9,9 @@ namespace Application.Features.Products.Queries.GetVariantLiteByProductId;
 
 public sealed class GetVariantLiteByProductIdQueryHandler(
     IProductReadRepository productReadRepository,
-    IProductVariantReadRepository variantReadRepository) : IRequestHandler<GetVariantLiteByProductIdQuery, (List<ProductVariantLiteResponse>? Data, ErrorResponse? Error)>
+    IProductVariantReadRepository variantReadRepository) : IRequestHandler<GetVariantLiteByProductIdQuery, (List<ProductVariantLiteResponse>? Data, Common.Models.ErrorResponse? Error)>
 {
-    public async Task<(List<ProductVariantLiteResponse>? Data, ErrorResponse? Error)> Handle(
+    public async Task<(List<ProductVariantLiteResponse>? Data, Common.Models.ErrorResponse? Error)> Handle(
         GetVariantLiteByProductIdQuery request,
         CancellationToken cancellationToken)
     {
@@ -21,9 +20,10 @@ public sealed class GetVariantLiteByProductIdQueryHandler(
 
         if(product == null)
         {
-            return (null, new ErrorResponse
+            return (null, new Common.Models.ErrorResponse
             {
-                Errors = [ new ErrorDetail { Message = $"Product with Id {request.ProductId} not found." } ]
+                Errors =
+                    [ new Common.Models.ErrorDetail { Message = $"Product with Id {request.ProductId} not found." } ]
             });
         }
 

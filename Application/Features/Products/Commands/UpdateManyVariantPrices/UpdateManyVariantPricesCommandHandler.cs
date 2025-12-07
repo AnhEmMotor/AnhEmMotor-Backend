@@ -1,6 +1,5 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductVariant;
-using Domain.Helpers;
 using MediatR;
 
 namespace Application.Features.Products.Commands.UpdateManyVariantPrices;
@@ -8,13 +7,13 @@ namespace Application.Features.Products.Commands.UpdateManyVariantPrices;
 public sealed class UpdateManyVariantPricesCommandHandler(
     IProductVariantReadRepository readRepository,
     IProductVariantUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateManyVariantPricesCommand, (List<int>? Data, ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateManyVariantPricesCommand, (List<int>? Data, Common.Models.ErrorResponse? Error)>
 {
-    public async Task<(List<int>? Data, ErrorResponse? Error)> Handle(
+    public async Task<(List<int>? Data, Common.Models.ErrorResponse? Error)> Handle(
         UpdateManyVariantPricesCommand command,
         CancellationToken cancellationToken)
     {
-        var errors = new List<ErrorDetail>();
+        var errors = new List<Common.Models.ErrorDetail>();
         var variantIds = command.Ids;
         var newPrice = command.Price;
 
@@ -28,7 +27,7 @@ public sealed class UpdateManyVariantPricesCommandHandler(
             foreach(var missingId in missingIds)
             {
                 errors.Add(
-                    new ErrorDetail
+                    new Common.Models.ErrorDetail
                     {
                         Field = missingId.ToString(),
                         Message = $"Biến thể với Id {missingId} không tồn tại."
@@ -38,7 +37,7 @@ public sealed class UpdateManyVariantPricesCommandHandler(
 
         if(errors.Count > 0)
         {
-            return (null, new ErrorResponse { Errors = errors });
+            return (null, new Common.Models.ErrorResponse { Errors = errors });
         }
 
         foreach(var variant in allVariants)

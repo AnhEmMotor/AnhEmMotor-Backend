@@ -1,7 +1,6 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
 using Domain.Constants;
-using Domain.Helpers;
 using Mapster;
 using MediatR;
 
@@ -10,9 +9,9 @@ namespace Application.Features.Brands.Commands.RestoreBrand;
 public sealed class RestoreBrandCommandHandler(
     IBrandReadRepository readRepository,
     IBrandUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<RestoreBrandCommand, (ApiContracts.Brand.Responses.BrandResponse? Data, ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<RestoreBrandCommand, (ApiContracts.Brand.Responses.BrandResponse? Data, Common.Models.ErrorResponse? Error)>
 {
-    public async Task<(ApiContracts.Brand.Responses.BrandResponse? Data, ErrorResponse? Error)> Handle(
+    public async Task<(ApiContracts.Brand.Responses.BrandResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
         RestoreBrandCommand request,
         CancellationToken cancellationToken)
     {
@@ -21,10 +20,10 @@ public sealed class RestoreBrandCommandHandler(
 
         if(brand == null)
         {
-            return (null, new ErrorResponse
+            return (null, new Common.Models.ErrorResponse
             {
                 Errors =
-                    [ new ErrorDetail
+                    [ new Common.Models.ErrorDetail
                     {
                         Field = "Id",
                         Message = $"Brand with Id {request.Id} not found in deleted brands."

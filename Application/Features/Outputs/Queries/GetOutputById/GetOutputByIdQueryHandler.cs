@@ -1,14 +1,13 @@
 using Application.ApiContracts.Output.Responses;
 using Application.Interfaces.Repositories.Output;
-using Domain.Helpers;
 using Mapster;
 using MediatR;
 
 namespace Application.Features.Outputs.Queries.GetOutputById;
 
-public sealed class GetOutputByIdQueryHandler(IOutputReadRepository repository) : IRequestHandler<GetOutputByIdQuery, (OutputResponse? Data, ErrorResponse? Error)>
+public sealed class GetOutputByIdQueryHandler(IOutputReadRepository repository) : IRequestHandler<GetOutputByIdQuery, (OutputResponse? Data, Common.Models.ErrorResponse? Error)>
 {
-    public async Task<(OutputResponse? Data, ErrorResponse? Error)> Handle(
+    public async Task<(OutputResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
         GetOutputByIdQuery request,
         CancellationToken cancellationToken)
     {
@@ -16,9 +15,9 @@ public sealed class GetOutputByIdQueryHandler(IOutputReadRepository repository) 
 
         if(output is null)
         {
-            return (null, new ErrorResponse
+            return (null, new Common.Models.ErrorResponse
             {
-                Errors = [ new ErrorDetail { Message = $"Không tìm thấy đơn hàng có ID {request.Id}." } ]
+                Errors = [ new Common.Models.ErrorDetail { Message = $"Không tìm thấy đơn hàng có ID {request.Id}." } ]
             });
         }
 

@@ -1,9 +1,8 @@
-using Domain.Helpers;
 using MediatR;
 
 namespace Application.Features.Brands.Commands.DeleteBrand;
 
-public sealed record DeleteBrandCommand : IRequest<ErrorResponse?>
+public sealed record DeleteBrandCommand : IRequest<Common.Models.ErrorResponse?>
 {
     public int Id { get; init; }
 }

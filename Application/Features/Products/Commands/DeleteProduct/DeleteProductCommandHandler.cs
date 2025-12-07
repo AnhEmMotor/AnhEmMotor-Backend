@@ -1,6 +1,5 @@
 ﻿using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Product;
-using Domain.Helpers;
 using MediatR;
 
 namespace Application.Features.Products.Commands.DeleteProduct;
@@ -8,17 +7,19 @@ namespace Application.Features.Products.Commands.DeleteProduct;
 public sealed class DeleteProductCommandHandler(
     IProductReadRepository readRepository,
     IProductDeleteRepository deleteRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<DeleteProductCommand, ErrorResponse?>
+    IUnitOfWork unitOfWork) : IRequestHandler<DeleteProductCommand, Common.Models.ErrorResponse?>
 {
-    public async Task<ErrorResponse?> Handle(DeleteProductCommand command, CancellationToken cancellationToken)
+    public async Task<Common.Models.ErrorResponse?> Handle(
+        DeleteProductCommand command,
+        CancellationToken cancellationToken)
     {
         var product = await readRepository.GetByIdWithDetailsAsync(command.Id, cancellationToken).ConfigureAwait(false);
 
         if(product == null)
         {
-            return new ErrorResponse
+            return new Common.Models.ErrorResponse
             {
-                Errors = [ new ErrorDetail { Message = $"Product with Id {command.Id} not found." } ]
+                Errors = [ new Common.Models.ErrorDetail { Message = $"Product with Id {command.Id} not found." } ]
             };
         }
 

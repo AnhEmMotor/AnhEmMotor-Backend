@@ -2,7 +2,6 @@ using Application.ApiContracts.Input.Responses;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
 using Domain.Constants;
-using Domain.Helpers;
 using Mapster;
 using MediatR;
 
@@ -11,9 +10,9 @@ namespace Application.Features.Inputs.Commands.UpdateInputStatus;
 public sealed class UpdateInputStatusCommandHandler(
     IInputReadRepository readRepository,
     IInputUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateInputStatusCommand, (InputResponse? Data, ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateInputStatusCommand, (InputResponse? Data, Common.Models.ErrorResponse? Error)>
 {
-    public async Task<(InputResponse? Data, ErrorResponse? Error)> Handle(
+    public async Task<(InputResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
         UpdateInputStatusCommand request,
         CancellationToken cancellationToken)
     {
@@ -25,20 +24,24 @@ public sealed class UpdateInputStatusCommandHandler(
 
         if(input is null)
         {
-            return (null, new ErrorResponse
+            return (null, new Common.Models.ErrorResponse
             {
                 Errors =
-                    [ new ErrorDetail { Field = "Id", Message = $"Không tìm thấy phiếu nhập có ID {request.Id}." } ]
+                    [ new Common.Models.ErrorDetail
+                    {
+                        Field = "Id",
+                        Message = $"Không tìm thấy phiếu nhập có ID {request.Id}."
+                    } ]
             });
         }
 
 
         if(InputStatus.IsCannotEdit(input.StatusId))
         {
-            return (null, new ErrorResponse
+            return (null, new Common.Models.ErrorResponse
             {
                 Errors =
-                    [ new ErrorDetail
+                    [ new Common.Models.ErrorDetail
                     {
                         Field = "StatusId",
                         Message = "Không thể sửa trạng thái phiếu nhập đã hoàn thành hoặc đã hủy."
@@ -48,10 +51,14 @@ public sealed class UpdateInputStatusCommandHandler(
 
         if(!InputStatus.IsValid(request.StatusId))
         {
-            return (null, new ErrorResponse
+            return (null, new Common.Models.ErrorResponse
             {
                 Errors =
-                    [ new ErrorDetail { Field = "StatusId", Message = $"Trạng thái '{request.StatusId}' không hợp lệ." } ]
+                    [ new Common.Models.ErrorDetail
+                    {
+                        Field = "StatusId",
+                        Message = $"Trạng thái '{request.StatusId}' không hợp lệ."
+                    } ]
             });
         }
 

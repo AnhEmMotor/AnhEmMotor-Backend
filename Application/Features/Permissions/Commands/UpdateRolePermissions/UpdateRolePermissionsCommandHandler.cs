@@ -2,7 +2,6 @@ using Application.ApiContracts.Permission.Responses;
 using Application.Common.Exceptions;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Authorization;
-using Domain.Constants.Security;
 using Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
@@ -34,7 +33,7 @@ public class UpdateRolePermissionsCommandHandler(
 
         if(model.Permissions.Count != 0)
         {
-            var allPermissions = typeof(PermissionsList)
+            var allPermissions = typeof(Domain.Constants.Permission.PermissionsList)
             .GetNestedTypes()
                 .SelectMany(
                     type => type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy))

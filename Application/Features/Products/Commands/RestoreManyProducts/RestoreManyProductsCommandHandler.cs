@@ -1,7 +1,6 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Product;
 using Domain.Constants;
-using Domain.Helpers;
 using Mapster;
 using MediatR;
 
@@ -10,9 +9,9 @@ namespace Application.Features.Products.Commands.RestoreManyProducts;
 public sealed class RestoreManyProductsCommandHandler(
     IProductReadRepository readRepository,
     IProductUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<RestoreManyProductsCommand, (List<ApiContracts.Product.Responses.ProductDetailResponse>? Data, ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<RestoreManyProductsCommand, (List<ApiContracts.Product.Responses.ProductDetailResponse>? Data, Common.Models.ErrorResponse? Error)>
 {
-    public async Task<(List<ApiContracts.Product.Responses.ProductDetailResponse>? Data, ErrorResponse? Error)> Handle(
+    public async Task<(List<ApiContracts.Product.Responses.ProductDetailResponse>? Data, Common.Models.ErrorResponse? Error)> Handle(
         RestoreManyProductsCommand command,
         CancellationToken cancellationToken)
     {
@@ -31,26 +30,28 @@ public sealed class RestoreManyProductsCommandHandler(
         var allProductsMap = allProducts.ToDictionary(p => p.Id);
         var deletedProductsSet = deletedProducts.Select(p => p.Id).ToHashSet();
 
-        var errorDetails = new List<ErrorDetail>();
+        var errorDetails = new List<Common.Models.ErrorDetail>();
 
         foreach(var id in uniqueIds)
         {
             if(!allProductsMap.ContainsKey(id))
             {
-                errorDetails.Add(new ErrorDetail { Message = "Product not found", Field = $"Product ID: {id}" });
+                errorDetails.Add(
+                    new Common.Models.ErrorDetail { Message = "Product not found", Field = $"Product ID: {id}" });
                 continue;
             }
 
             if(!deletedProductsSet.Contains(id))
             {
                 var productName = allProductsMap[id].Name;
-                errorDetails.Add(new ErrorDetail { Message = "Product is not deleted", Field = productName });
+                errorDetails.Add(
+                    new Common.Models.ErrorDetail { Message = "Product is not deleted", Field = productName });
             }
         }
 
         if(errorDetails.Count > 0)
         {
-            return (null, new ErrorResponse { Errors = errorDetails });
+            return (null, new Common.Models.ErrorResponse { Errors = errorDetails });
         }
 
         if(deletedProducts.ToList().Count > 0)

@@ -4,7 +4,6 @@ using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.ProductVariant;
 using Domain.Constants;
 using Domain.Entities;
-using Domain.Helpers;
 using Mapster;
 using MediatR;
 
@@ -14,17 +13,22 @@ public sealed class CreateOutputCommandHandler(
     IOutputReadRepository readRepository,
     IOutputInsertRepository insertRepository,
     IProductVariantReadRepository variantRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateOutputCommand, (OutputResponse? Data, ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<CreateOutputCommand, (OutputResponse? Data, Common.Models.ErrorResponse? Error)>
 {
-    public async Task<(OutputResponse? Data, ErrorResponse? Error)> Handle(
+    public async Task<(OutputResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
         CreateOutputCommand request,
         CancellationToken cancellationToken)
     {
         if(request.OutputInfos.Count == 0)
         {
-            return (null, new ErrorResponse
+            return (null, new Common.Models.ErrorResponse
             {
-                Errors = [ new ErrorDetail { Field = "Products", Message = "Đơn hàng phải có ít nhất một sản phẩm." } ]
+                Errors =
+                    [ new Common.Models.ErrorDetail
+                    {
+                        Field = "Products",
+                        Message = "Đơn hàng phải có ít nhất một sản phẩm."
+                    } ]
             });
         }
 
@@ -43,10 +47,10 @@ public sealed class CreateOutputCommandHandler(
         {
             var foundIds = variantsList.Select(v => v.Id).ToList();
             var missingIds = variantIds.Except(foundIds).ToList();
-            return (null, new ErrorResponse
+            return (null, new Common.Models.ErrorResponse
             {
                 Errors =
-                    [ new ErrorDetail
+                    [ new Common.Models.ErrorDetail
                     {
                         Field = "Products",
                         Message = $"Không tìm thấy {missingIds.Count} sản phẩm: {string.Join(", ", missingIds)}"
@@ -58,10 +62,10 @@ public sealed class CreateOutputCommandHandler(
         {
             if(string.Compare(variant.Product?.StatusId, Domain.Constants.ProductStatus.ForSale) != 0)
             {
-                return (null, new ErrorResponse
+                return (null, new Common.Models.ErrorResponse
                 {
                     Errors =
-                        [ new ErrorDetail
+                        [ new Common.Models.ErrorDetail
                         {
                             Field = "Products",
                             Message = $"Sản phẩm '{variant.Product?.Name ?? variant.Id.ToString()}' không còn được bán."

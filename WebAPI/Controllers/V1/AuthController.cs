@@ -5,8 +5,7 @@ using Application.Features.Auth.Commands.Logout;
 using Application.Features.Auth.Commands.RefreshToken;
 using Application.Features.Auth.Commands.Register;
 using Asp.Versioning;
-using Domain.Helpers;
-using Infrastructure.Authorization;
+using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -23,7 +22,7 @@ namespace WebAPI.Controllers.V1;
 [ApiVersion("1.0")]
 [SwaggerTag("Controller xử lý xác thực và đăng nhập")]
 [Route("api/v{version:apiVersion}/[controller]")]
-[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
+[ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status500InternalServerError)]
 [ApiController]
 public class AuthController(IMediator mediator) : ControllerBase
 {
@@ -33,7 +32,7 @@ public class AuthController(IMediator mediator) : ControllerBase
     [HttpPost("register")]
     [AnonymousOnly]
     [ProducesResponseType(typeof(RegistrationSuccessResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Register(
         [FromBody] Application.ApiContracts.Auth.Requests.RegisterRequest model,
         CancellationToken cancellationToken)
@@ -57,7 +56,7 @@ public class AuthController(IMediator mediator) : ControllerBase
     [HttpPost("login")]
     [AnonymousOnly]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Login(
         [FromBody] Application.ApiContracts.Auth.Requests.LoginRequest model,
         CancellationToken cancellationToken)
@@ -73,8 +72,8 @@ public class AuthController(IMediator mediator) : ControllerBase
     [HttpPost("refresh-token")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(GetAccessTokenFromRefreshTokenResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> RefreshToken(CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new RefreshTokenCommand(), cancellationToken).ConfigureAwait(true);
@@ -101,7 +100,7 @@ public class AuthController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpPost("google")]
     [AnonymousOnly]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status501NotImplemented)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status501NotImplemented)]
     public async Task<IActionResult> GoogleLogin(
         [FromBody] Application.ApiContracts.Auth.Requests.GoogleLoginRequest model,
         CancellationToken cancellationToken)
@@ -115,12 +114,16 @@ public class AuthController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpPost("facebook")]
     [AnonymousOnly]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status501NotImplemented)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status501NotImplemented)]
     public IActionResult FacebookLogin()
     {
         // TODO: Implement Facebook OAuth login
         return StatusCode(
             501,
-            new ErrorResponse() { Errors = [ new ErrorDetail() { Message = "Facebook login not implemented yet." } ] });
+            new Application.Common.Models.ErrorResponse()
+            {
+                Errors =
+                    [ new Application.Common.Models.ErrorDetail() { Message = "Facebook login not implemented yet." } ]
+            });
     }
 }

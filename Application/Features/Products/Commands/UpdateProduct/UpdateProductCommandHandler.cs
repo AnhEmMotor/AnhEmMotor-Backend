@@ -5,7 +5,6 @@ using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.ProductCategory;
 using Application.Interfaces.Repositories.ProductVariant;
 using Domain.Entities;
-using Domain.Helpers;
 using Mapster;
 using MediatR;
 using System.Linq;
@@ -22,13 +21,13 @@ public sealed class UpdateProductCommandHandler(
     IOptionValueInsertRepository optionValueInsertRepository,
     IProductUpdateRepository updateRepository,
     IProductVarientDeleteRepository productVarientDeleteRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateProductCommand, (ApiContracts.Product.Responses.ProductDetailResponse? Data, ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateProductCommand, (ApiContracts.Product.Responses.ProductDetailResponse? Data, Common.Models.ErrorResponse? Error)>
 {
-    public async Task<(ApiContracts.Product.Responses.ProductDetailResponse? Data, ErrorResponse? Error)> Handle(
+    public async Task<(ApiContracts.Product.Responses.ProductDetailResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
         UpdateProductCommand command,
         CancellationToken cancellationToken)
     {
-        var errors = new List<ErrorDetail>();
+        var errors = new List<Common.Models.ErrorDetail>();
         var request = command.Request;
 
         var product = await productReadRepository.GetByIdWithDetailsAsync(command.Id, cancellationToken)
@@ -36,9 +35,9 @@ public sealed class UpdateProductCommandHandler(
 
         if(product == null)
         {
-            return (null, new ErrorResponse
+            return (null, new Common.Models.ErrorResponse
             {
-                Errors = [ new ErrorDetail { Message = $"Product with Id {command.Id} not found." } ]
+                Errors = [ new Common.Models.ErrorDetail { Message = $"Product with Id {command.Id} not found." } ]
             });
         }
 
@@ -49,7 +48,7 @@ public sealed class UpdateProductCommandHandler(
             if(category == null)
             {
                 errors.Add(
-                    new ErrorDetail
+                    new Common.Models.ErrorDetail
                     {
                         Field = nameof(request.CategoryId),
                         Message = $"Product category with Id {request.CategoryId} not found or has been deleted."
@@ -64,7 +63,7 @@ public sealed class UpdateProductCommandHandler(
             if(brand == null)
             {
                 errors.Add(
-                    new ErrorDetail
+                    new Common.Models.ErrorDetail
                     {
                         Field = nameof(request.BrandId),
                         Message = $"Brand with Id {request.BrandId} not found or has been deleted."
@@ -82,7 +81,11 @@ public sealed class UpdateProductCommandHandler(
             if(slugs.Count != slugs.Distinct(StringComparer.OrdinalIgnoreCase).Count())
             {
                 errors.Add(
-                    new ErrorDetail { Field = "Variants", Message = "Duplicate slugs found within the request." });
+                    new Common.Models.ErrorDetail
+                    {
+                        Field = "Variants",
+                        Message = "Duplicate slugs found within the request."
+                    });
             }
 
             foreach(var variantReq in request.Variants.Where(v => !string.IsNullOrWhiteSpace(v.UrlSlug)))
@@ -99,7 +102,7 @@ public sealed class UpdateProductCommandHandler(
                     }
 
                     errors.Add(
-                        new ErrorDetail
+                        new Common.Models.ErrorDetail
                         {
                             Field = "Variants.UrlSlug",
                             Message = $"Slug '{variantReq.UrlSlug}' is already in use."
@@ -111,7 +114,7 @@ public sealed class UpdateProductCommandHandler(
 
         if(errors.Count > 0)
         {
-            return (null, new ErrorResponse { Errors = errors });
+            return (null, new Common.Models.ErrorResponse { Errors = errors });
         }
 
         product.Name = request.Name?.Trim();

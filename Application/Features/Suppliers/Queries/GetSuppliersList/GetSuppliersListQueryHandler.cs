@@ -1,14 +1,13 @@
 using Application.ApiContracts.Supplier.Responses;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Supplier;
-using Domain.Shared;
 using MediatR;
 
 namespace Application.Features.Suppliers.Queries.GetSuppliersList;
 
-public sealed class GetSuppliersListQueryHandler(ISupplierReadRepository repository, IPaginator paginator) : IRequestHandler<GetSuppliersListQuery, PagedResult<SupplierResponse>>
+public sealed class GetSuppliersListQueryHandler(ISupplierReadRepository repository, IPaginator paginator) : IRequestHandler<GetSuppliersListQuery, Domain.Primitives.PagedResult<SupplierResponse>>
 {
-    public Task<PagedResult<SupplierResponse>> Handle(
+    public Task<Domain.Primitives.PagedResult<SupplierResponse>> Handle(
         GetSuppliersListQuery request,
         CancellationToken cancellationToken)
     {

@@ -2,7 +2,6 @@ using Application.ApiContracts.ProductCategory.Responses;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductCategory;
 using Domain.Constants;
-using Domain.Shared;
 using MediatR;
 using ProductCategoryEntity = Domain.Entities.ProductCategory;
 
@@ -10,9 +9,9 @@ namespace Application.Features.ProductCategories.Queries.GetDeletedProductCatego
 
 public sealed class GetDeletedProductCategoriesListQueryHandler(
     IProductCategoryReadRepository repository,
-    IPaginator paginator) : IRequestHandler<GetDeletedProductCategoriesListQuery, PagedResult<ProductCategoryResponse>>
+    IPaginator paginator) : IRequestHandler<GetDeletedProductCategoriesListQuery, Domain.Primitives.PagedResult<ProductCategoryResponse>>
 {
-    public Task<PagedResult<ProductCategoryResponse>> Handle(
+    public Task<Domain.Primitives.PagedResult<ProductCategoryResponse>> Handle(
         GetDeletedProductCategoriesListQuery request,
         CancellationToken cancellationToken)
     {

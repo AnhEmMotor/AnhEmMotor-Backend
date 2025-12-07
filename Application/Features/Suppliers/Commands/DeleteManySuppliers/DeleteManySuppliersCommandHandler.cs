@@ -1,7 +1,6 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Supplier;
 using Domain.Constants;
-using Domain.Helpers;
 using MediatR;
 
 namespace Application.Features.Suppliers.Commands.DeleteManySuppliers;
@@ -9,9 +8,11 @@ namespace Application.Features.Suppliers.Commands.DeleteManySuppliers;
 public sealed class DeleteManySuppliersCommandHandler(
     ISupplierReadRepository readRepository,
     ISupplierDeleteRepository deleteRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<DeleteManySuppliersCommand, ErrorResponse?>
+    IUnitOfWork unitOfWork) : IRequestHandler<DeleteManySuppliersCommand, Common.Models.ErrorResponse?>
 {
-    public async Task<ErrorResponse?> Handle(DeleteManySuppliersCommand request, CancellationToken cancellationToken)
+    public async Task<Common.Models.ErrorResponse?> Handle(
+        DeleteManySuppliersCommand request,
+        CancellationToken cancellationToken)
     {
         if(request.Ids.Count == 0)
         {
@@ -19,7 +20,7 @@ public sealed class DeleteManySuppliersCommandHandler(
         }
 
         var uniqueIds = request.Ids.Distinct().ToList();
-        var errorDetails = new List<ErrorDetail>();
+        var errorDetails = new List<Common.Models.ErrorDetail>();
 
         var allSuppliers = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.All)
             .ConfigureAwait(false);
@@ -32,17 +33,22 @@ public sealed class DeleteManySuppliersCommandHandler(
         {
             if(!allSupplierMap.ContainsKey(id))
             {
-                errorDetails.Add(new ErrorDetail { Field = "Id", Message = $"Supplier with Id {id} not found." });
+                errorDetails.Add(
+                    new Common.Models.ErrorDetail { Field = "Id", Message = $"Supplier with Id {id} not found." });
             } else if(!activeSupplierSet.Contains(id))
             {
                 errorDetails.Add(
-                    new ErrorDetail { Field = "Id", Message = $"Supplier with Id {id} has already been deleted." });
+                    new Common.Models.ErrorDetail
+                    {
+                        Field = "Id",
+                        Message = $"Supplier with Id {id} has already been deleted."
+                    });
             }
         }
 
         if(errorDetails.Count > 0)
         {
-            return new ErrorResponse { Errors = errorDetails };
+            return new Common.Models.ErrorResponse { Errors = errorDetails };
         }
 
         if(activeSuppliers.ToList().Count > 0)

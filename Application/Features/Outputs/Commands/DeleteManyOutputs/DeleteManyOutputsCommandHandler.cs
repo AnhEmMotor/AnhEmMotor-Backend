@@ -1,6 +1,5 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
-using Domain.Helpers;
 using MediatR;
 
 namespace Application.Features.Outputs.Commands.DeleteManyOutputs;
@@ -8,9 +7,11 @@ namespace Application.Features.Outputs.Commands.DeleteManyOutputs;
 public sealed class DeleteManyOutputsCommandHandler(
     IOutputReadRepository readRepository,
     IOutputDeleteRepository deleteRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<DeleteManyOutputsCommand, ErrorResponse?>
+    IUnitOfWork unitOfWork) : IRequestHandler<DeleteManyOutputsCommand, Common.Models.ErrorResponse?>
 {
-    public async Task<ErrorResponse?> Handle(DeleteManyOutputsCommand request, CancellationToken cancellationToken)
+    public async Task<Common.Models.ErrorResponse?> Handle(
+        DeleteManyOutputsCommand request,
+        CancellationToken cancellationToken)
     {
         var outputs = await readRepository.GetByIdAsync(request.Ids, cancellationToken).ConfigureAwait(false);
 
@@ -20,10 +21,10 @@ public sealed class DeleteManyOutputsCommandHandler(
         {
             var foundIds = outputsList.Select(o => o.Id).ToList();
             var missingIds = request.Ids.Except(foundIds).ToList();
-            return new ErrorResponse
+            return new Common.Models.ErrorResponse
             {
                 Errors =
-                    [ new ErrorDetail
+                    [ new Common.Models.ErrorDetail
                     {
                         Field = "Ids",
                         Message = $"Không tìm thấy {missingIds.Count} đơn hàng: {string.Join(", ", missingIds)}"
@@ -31,20 +32,24 @@ public sealed class DeleteManyOutputsCommandHandler(
             };
         }
 
-        var errors = new List<ErrorDetail>();
+        var errors = new List<Common.Models.ErrorDetail>();
 
         foreach(var output in outputsList)
         {
             if(Domain.Constants.OrderStatus.IsCannotDelete(output.StatusId))
             {
                 errors.Add(
-                    new ErrorDetail { Field = "Ids", Message = $"Đơn hàng với Id {output.Id} đã bị xóa trước đó" });
+                    new Common.Models.ErrorDetail
+                    {
+                        Field = "Ids",
+                        Message = $"Đơn hàng với Id {output.Id} đã bị xóa trước đó"
+                    });
             }
         }
 
         if(errors.Count > 0)
         {
-            return new ErrorResponse { Errors = errors };
+            return new Common.Models.ErrorResponse { Errors = errors };
         }
 
         deleteRepository.Delete(outputsList);

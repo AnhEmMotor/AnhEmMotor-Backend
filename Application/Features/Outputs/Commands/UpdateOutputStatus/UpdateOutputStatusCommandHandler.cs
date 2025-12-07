@@ -2,7 +2,6 @@ using Application.ApiContracts.Output.Responses;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Domain.Constants;
-using Domain.Helpers;
 using Mapster;
 using MediatR;
 
@@ -11,9 +10,9 @@ namespace Application.Features.Outputs.Commands.UpdateOutputStatus;
 public sealed class UpdateOutputStatusCommandHandler(
     IOutputReadRepository readRepository,
     IOutputUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateOutputStatusCommand, (OutputResponse? Data, ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateOutputStatusCommand, (OutputResponse? Data, Common.Models.ErrorResponse? Error)>
 {
-    public async Task<(OutputResponse? Data, ErrorResponse? Error)> Handle(
+    public async Task<(OutputResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
         UpdateOutputStatusCommand request,
         CancellationToken cancellationToken)
     {
@@ -25,28 +24,37 @@ public sealed class UpdateOutputStatusCommandHandler(
 
         if(output is null)
         {
-            return (null, new ErrorResponse
+            return (null, new Common.Models.ErrorResponse
             {
-                Errors = [ new ErrorDetail { Field = "Id", Message = $"Không tìm thấy đơn hàng có ID {request.Id}." } ]
+                Errors =
+                    [ new Common.Models.ErrorDetail
+                    {
+                        Field = "Id",
+                        Message = $"Không tìm thấy đơn hàng có ID {request.Id}."
+                    } ]
             });
         }
 
         if(!OrderStatus.IsValid(request.StatusId))
         {
-            return (null, new ErrorResponse
+            return (null, new Common.Models.ErrorResponse
             {
                 Errors =
-                    [ new ErrorDetail { Field = "StatusId", Message = $"Trạng thái '{request.StatusId}' không hợp lệ." } ]
+                    [ new Common.Models.ErrorDetail
+                    {
+                        Field = "StatusId",
+                        Message = $"Trạng thái '{request.StatusId}' không hợp lệ."
+                    } ]
             });
         }
 
         if(!OrderStatusTransitions.IsTransitionAllowed(output.StatusId, request.StatusId))
         {
             var allowed = OrderStatusTransitions.GetAllowedTransitions(output.StatusId);
-            return (null, new ErrorResponse
+            return (null, new Common.Models.ErrorResponse
             {
                 Errors =
-                    [ new ErrorDetail
+                    [ new Common.Models.ErrorDetail
                     {
                         Field = "StatusId",
                         Message =
@@ -68,10 +76,10 @@ public sealed class UpdateOutputStatusCommandHandler(
 
                     if(stock < outputInfo.Count.Value)
                     {
-                        return (null, new ErrorResponse
+                        return (null, new Common.Models.ErrorResponse
                         {
                             Errors =
-                                [ new ErrorDetail
+                                [ new Common.Models.ErrorDetail
                                 {
                                     Field = "Products",
                                     Message =

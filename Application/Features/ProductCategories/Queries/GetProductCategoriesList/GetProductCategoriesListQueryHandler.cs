@@ -1,7 +1,6 @@
 using Application.ApiContracts.ProductCategory.Responses;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductCategory;
-using Domain.Shared;
 using MediatR;
 using ProductCategoryEntity = Domain.Entities.ProductCategory;
 
@@ -9,9 +8,9 @@ namespace Application.Features.ProductCategories.Queries.GetProductCategoriesLis
 
 public sealed class GetProductCategoriesListQueryHandler(
     IProductCategoryReadRepository repository,
-    IPaginator paginator) : IRequestHandler<GetProductCategoriesListQuery, PagedResult<ProductCategoryResponse>>
+    IPaginator paginator) : IRequestHandler<GetProductCategoriesListQuery, Domain.Primitives.PagedResult<ProductCategoryResponse>>
 {
-    public Task<PagedResult<ProductCategoryResponse>> Handle(
+    public Task<Domain.Primitives.PagedResult<ProductCategoryResponse>> Handle(
         GetProductCategoriesListQuery request,
         CancellationToken cancellationToken)
     {

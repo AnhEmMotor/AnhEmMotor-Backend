@@ -1,7 +1,6 @@
 ﻿using Application.ApiContracts.User.Responses;
 using Application.Interfaces.Repositories.Authentication;
 using Domain.Entities;
-using Domain.Shared;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
@@ -11,7 +10,7 @@ namespace Infrastructure.Repositories.User;
 
 public class UserRepository(UserManager<ApplicationUser> userManager, ISieveProcessor sieveProcessor) : IUserRepository
 {
-    public async Task<PagedResult<UserResponse>> GetPagedListAsync(
+    public async Task<Domain.Primitives.PagedResult<UserResponse>> GetPagedListAsync(
         SieveModel sieveModel,
         CancellationToken cancellationToken)
     {
@@ -46,6 +45,10 @@ public class UserRepository(UserManager<ApplicationUser> userManager, ISieveProc
             userResponses.Add(response);
         }
 
-        return new PagedResult<UserResponse>(userResponses, totalCount, sieveModel.Page ?? 1, sieveModel.PageSize ?? 10);
+        return new Domain.Primitives.PagedResult<UserResponse>(
+            userResponses,
+            totalCount,
+            sieveModel.Page ?? 1,
+            sieveModel.PageSize ?? 10);
     }
 }

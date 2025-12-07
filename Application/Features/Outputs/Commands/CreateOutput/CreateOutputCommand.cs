@@ -1,10 +1,9 @@
 using Application.ApiContracts.Output.Responses;
-using Domain.Helpers;
 using MediatR;
 
 namespace Application.Features.Outputs.Commands.CreateOutput;
 
-public sealed record CreateOutputCommand : IRequest<(OutputResponse? Data, ErrorResponse? Error)>
+public sealed record CreateOutputCommand : IRequest<(OutputResponse? Data, Common.Models.ErrorResponse? Error)>
 {
     public string? StatusId { get; init; }
 

@@ -4,10 +4,10 @@ namespace Application.ApiContracts.Auth.Responses
 {
     public class GetAccessTokenFromRefreshTokenResponse
     {
-/// <summary>
+        /// <summary>
         /// Access Token (JWT)
         /// </summary>
-                public string AccessToken { get; set; } = string.Empty;
+        public string AccessToken { get; set; } = string.Empty;
 
         /// <summary>
         /// Thời gian hết hạn của Access Token

@@ -1,7 +1,6 @@
 using Application.ApiContracts.Product.Common;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductVariant;
-using Domain.Helpers;
 using Mapster;
 using MediatR;
 
@@ -10,9 +9,9 @@ namespace Application.Features.Products.Commands.UpdateVariantPrice;
 public sealed class UpdateVariantPriceCommandHandler(
     IProductVariantReadRepository variantReadRepository,
     IProductVariantUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateVariantPriceCommand, (ProductVariantLiteResponse? Data, ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateVariantPriceCommand, (ProductVariantLiteResponse? Data, Common.Models.ErrorResponse? Error)>
 {
-    public async Task<(ProductVariantLiteResponse? Data, ErrorResponse? Error)> Handle(
+    public async Task<(ProductVariantLiteResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
         UpdateVariantPriceCommand command,
         CancellationToken cancellationToken)
     {
@@ -21,9 +20,10 @@ public sealed class UpdateVariantPriceCommandHandler(
 
         if(variant == null)
         {
-            return (null, new ErrorResponse
+            return (null, new Common.Models.ErrorResponse
             {
-                Errors = [ new ErrorDetail { Message = $"Biến thể với Id {command.VariantId} không tồn tại." } ]
+                Errors =
+                    [ new Common.Models.ErrorDetail { Message = $"Biến thể với Id {command.VariantId} không tồn tại." } ]
             });
         }
 

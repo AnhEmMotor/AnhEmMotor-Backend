@@ -1,7 +1,6 @@
 using Application.ApiContracts.Supplier.Responses;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Supplier;
-using Domain.Helpers;
 using Mapster;
 using MediatR;
 using SupplierStatusConstants = Domain.Constants.SupplierStatus;
@@ -11,9 +10,9 @@ namespace Application.Features.Suppliers.Commands.UpdateManySupplierStatus;
 public sealed class UpdateManySupplierStatusCommandHandler(
     ISupplierReadRepository readRepository,
     ISupplierUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateManySupplierStatusCommand, (List<SupplierResponse>? Data, ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateManySupplierStatusCommand, (List<SupplierResponse>? Data, Common.Models.ErrorResponse? Error)>
 {
-    public async Task<(List<SupplierResponse>? Data, ErrorResponse? Error)> Handle(
+    public async Task<(List<SupplierResponse>? Data, Common.Models.ErrorResponse? Error)> Handle(
         UpdateManySupplierStatusCommand request,
         CancellationToken cancellationToken)
     {
@@ -24,10 +23,10 @@ public sealed class UpdateManySupplierStatusCommandHandler(
 
         if(!SupplierStatusConstants.IsValid(request.StatusId))
         {
-            return (null, new ErrorResponse
+            return (null, new Common.Models.ErrorResponse
             {
                 Errors =
-                    [ new ErrorDetail
+                    [ new Common.Models.ErrorDetail
                     {
                         Field = "StatusId",
                         Message =
@@ -36,7 +35,7 @@ public sealed class UpdateManySupplierStatusCommandHandler(
             });
         }
 
-        var errorDetails = new List<ErrorDetail>();
+        var errorDetails = new List<Common.Models.ErrorDetail>();
         var ids = request.Ids.Distinct().ToList();
 
         var suppliers = await readRepository.GetByIdAsync(ids, cancellationToken).ConfigureAwait(false);
@@ -46,13 +45,14 @@ public sealed class UpdateManySupplierStatusCommandHandler(
         {
             if(!supplierMap.ContainsKey(id))
             {
-                errorDetails.Add(new ErrorDetail { Field = "Id", Message = $"Supplier with Id {id} not found." });
+                errorDetails.Add(
+                    new Common.Models.ErrorDetail { Field = "Id", Message = $"Supplier with Id {id} not found." });
             }
         }
 
         if(errorDetails.Count > 0)
         {
-            return (null, new ErrorResponse { Errors = errorDetails });
+            return (null, new Common.Models.ErrorResponse { Errors = errorDetails });
         }
 
         foreach(var supplier in suppliers)

@@ -6,7 +6,6 @@ using Application.Features.Statistical.Queries.GetOrderStatusCounts;
 using Application.Features.Statistical.Queries.GetProductReportLastMonth;
 using Application.Features.Statistical.Queries.GetProductStockAndPrice;
 using Asp.Versioning;
-using Domain.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -21,7 +20,7 @@ namespace WebAPI.Controllers.V1;
 [SwaggerTag("Thống kê và báo cáo")]
 [ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
-[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
+[ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status500InternalServerError)]
 public class StatisticsController(IMediator mediator) : ControllerBase
 {
     /// <summary>
@@ -97,7 +96,7 @@ public class StatisticsController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpGet("product-stock-price/{variantId:int}")]
     [ProducesResponseType(typeof(ProductStockPriceResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetProductStockAndPrice(int variantId, CancellationToken cancellationToken)
     {
         var query = new GetProductStockAndPriceQuery(variantId);
@@ -105,9 +104,13 @@ public class StatisticsController(IMediator mediator) : ControllerBase
         if(result is null)
         {
             return NotFound(
-                new ErrorResponse
+                new Application.Common.Models.ErrorResponse
                 {
-                    Errors = [ new ErrorDetail { Message = $"Không tìm thấy sản phẩm có ID {variantId}." } ]
+                    Errors =
+                        [ new Application.Common.Models.ErrorDetail
+                            {
+                                Message = $"Không tìm thấy sản phẩm có ID {variantId}."
+                            } ]
                 });
         }
         return Ok(result);

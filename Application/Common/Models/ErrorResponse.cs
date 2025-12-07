@@ -1,4 +1,4 @@
-﻿namespace Domain.Helpers
+﻿namespace Application.Common.Models
 {
     public class ErrorResponse
     {

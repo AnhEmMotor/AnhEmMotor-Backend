@@ -4,7 +4,6 @@ using Application.Interfaces.Repositories.Input;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Supplier;
 using Domain.Constants;
-using Domain.Helpers;
 using Mapster;
 using MediatR;
 using InputEntity = Domain.Entities.Input;
@@ -17,9 +16,9 @@ public sealed class CreateInputCommandHandler(
     IInputReadRepository readRepository,
     ISupplierReadRepository supplierRepository,
     IProductVariantReadRepository variantRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateInputCommand, (InputResponse? Data, ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<CreateInputCommand, (InputResponse? Data, Common.Models.ErrorResponse? Error)>
 {
-    public async Task<(InputResponse? Data, ErrorResponse? Error)> Handle(
+    public async Task<(InputResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
         CreateInputCommand request,
         CancellationToken cancellationToken)
     {
@@ -33,10 +32,10 @@ public sealed class CreateInputCommandHandler(
 
             if(supplier is null)
             {
-                return (null, new ErrorResponse
+                return (null, new Common.Models.ErrorResponse
                 {
                     Errors =
-                        [ new ErrorDetail
+                        [ new Common.Models.ErrorDetail
                         {
                             Field = "SupplierId",
                             Message = $"Nhà cung cấp {request.SupplierId} không tồn tại hoặc đã bị xóa."
@@ -46,10 +45,10 @@ public sealed class CreateInputCommandHandler(
 
             if(string.Compare(supplier.StatusId, SupplierStatus.Active) != 0)
             {
-                return (null, new ErrorResponse
+                return (null, new Common.Models.ErrorResponse
                 {
                     Errors =
-                        [ new ErrorDetail
+                        [ new Common.Models.ErrorDetail
                         {
                             Field = "SupplierId",
                             Message = $"Nhà cung cấp {supplier.Name} không ở trạng thái 'active'."
@@ -72,10 +71,10 @@ public sealed class CreateInputCommandHandler(
 
                 if(variant is null)
                 {
-                    return (null, new ErrorResponse
+                    return (null, new Common.Models.ErrorResponse
                     {
                         Errors =
-                            [ new ErrorDetail
+                            [ new Common.Models.ErrorDetail
                             {
                                 Field = "Products",
                                 Message = $"Sản phẩm {product.ProductId} không tồn tại hoặc đã bị xóa."
@@ -85,10 +84,10 @@ public sealed class CreateInputCommandHandler(
 
                 if(string.Compare(variant.Product?.StatusId, ProductStatus.ForSale) != 0)
                 {
-                    return (null, new ErrorResponse
+                    return (null, new Common.Models.ErrorResponse
                     {
                         Errors =
-                            [ new ErrorDetail
+                            [ new Common.Models.ErrorDetail
                             {
                                 Field = "Products",
                                 Message = $"Sản phẩm {variant.Product?.Name} không ở trạng thái 'for-sale'."

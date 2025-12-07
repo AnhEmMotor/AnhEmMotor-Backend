@@ -2,7 +2,6 @@ using Application.Common.Extensions;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Product;
 using Domain.Constants;
-using Domain.Helpers;
 using Mapster;
 using MediatR;
 
@@ -11,9 +10,9 @@ namespace Application.Features.Products.Commands.RestoreProduct;
 public sealed class RestoreProductCommandHandler(
     IProductReadRepository readRepository,
     IProductUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<RestoreProductCommand, (ApiContracts.Product.Responses.ProductDetailResponse? Data, ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<RestoreProductCommand, (ApiContracts.Product.Responses.ProductDetailResponse? Data, Common.Models.ErrorResponse? Error)>
 {
-    public async Task<(ApiContracts.Product.Responses.ProductDetailResponse? Data, ErrorResponse? Error)> Handle(
+    public async Task<(ApiContracts.Product.Responses.ProductDetailResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
         RestoreProductCommand command,
         CancellationToken cancellationToken)
     {
@@ -21,9 +20,10 @@ public sealed class RestoreProductCommandHandler(
             .ConfigureAwait(false);
         if(deletedProduct == null)
         {
-            return (null, new ErrorResponse
+            return (null, new Common.Models.ErrorResponse
             {
-                Errors = [ new ErrorDetail { Message = $"Deleted product with Id {command.Id} not found." } ]
+                Errors =
+                    [ new Common.Models.ErrorDetail { Message = $"Deleted product with Id {command.Id} not found." } ]
             });
         }
 

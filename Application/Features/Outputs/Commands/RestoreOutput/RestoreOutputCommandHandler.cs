@@ -2,7 +2,6 @@ using Application.ApiContracts.Output.Responses;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Domain.Constants;
-using Domain.Helpers;
 using Mapster;
 using MediatR;
 
@@ -11,9 +10,9 @@ namespace Application.Features.Outputs.Commands.RestoreOutput;
 public sealed class RestoreOutputCommandHandler(
     IOutputReadRepository readRepository,
     IOutputUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<RestoreOutputCommand, (OutputResponse? Data, ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<RestoreOutputCommand, (OutputResponse? Data, Common.Models.ErrorResponse? Error)>
 {
-    public async Task<(OutputResponse? Data, ErrorResponse? Error)> Handle(
+    public async Task<(OutputResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
         RestoreOutputCommand request,
         CancellationToken cancellationToken)
     {
@@ -22,10 +21,14 @@ public sealed class RestoreOutputCommandHandler(
 
         if(output is null)
         {
-            return (null, new ErrorResponse
+            return (null, new Common.Models.ErrorResponse
             {
                 Errors =
-                    [ new ErrorDetail { Field = "Id", Message = $"Không tìm thấy đơn hàng đã xóa có ID {request.Id}." } ]
+                    [ new Common.Models.ErrorDetail
+                    {
+                        Field = "Id",
+                        Message = $"Không tìm thấy đơn hàng đã xóa có ID {request.Id}."
+                    } ]
             });
         }
 

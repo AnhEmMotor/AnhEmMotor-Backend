@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using System;
 
-namespace Infrastructure.Authorization;
+namespace Infrastructure.Authorization.Attribute;
 
 /// <summary>
 /// Attribute that allows only anonymous requests to access an endpoint. If the current request is already
@@ -10,7 +9,7 @@ namespace Infrastructure.Authorization;
 /// should not call them.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-public sealed class AnonymousOnlyAttribute : Attribute, IAsyncAuthorizationFilter
+public sealed class AnonymousOnlyAttribute : System.Attribute, IAsyncAuthorizationFilter
 {
     public Task OnAuthorizationAsync(AuthorizationFilterContext context)
     {

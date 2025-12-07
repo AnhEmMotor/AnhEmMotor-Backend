@@ -1,6 +1,6 @@
+using Application.ApiContracts.File.Responses;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.MediaFile;
-using Domain.Shared;
 using MediatR;
 using MediaFileEntity = Domain.Entities.MediaFile;
 
@@ -9,15 +9,15 @@ namespace Application.Features.Files.Queries.GetFilesList;
 public sealed class GetFilesListQueryHandler(
     IMediaFileReadRepository repository,
     Interfaces.Repositories.LocalFile.IFileStorageService fileStorageService,
-    IPaginator paginator) : IRequestHandler<GetFilesListQuery, PagedResult<ApiContracts.File.Responses.MediaFileResponse>>
+    IPaginator paginator) : IRequestHandler<GetFilesListQuery, Domain.Primitives.PagedResult<MediaFileResponse>>
 {
-    public async Task<PagedResult<ApiContracts.File.Responses.MediaFileResponse>> Handle(
+    public async Task<Domain.Primitives.PagedResult<MediaFileResponse>> Handle(
         GetFilesListQuery request,
         CancellationToken cancellationToken)
     {
         var query = repository.GetQueryable();
 
-        var result = await paginator.ApplyAsync<MediaFileEntity, ApiContracts.File.Responses.MediaFileResponse>(
+        var result = await paginator.ApplyAsync<MediaFileEntity, MediaFileResponse>(
             query,
             request.SieveModel,
             cancellationToken: cancellationToken)

@@ -1,4 +1,5 @@
 using Domain.Entities;
+using Infrastructure.Authorization.Requirement;
 using Infrastructure.DBContexts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -7,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System.Security.Claims;
 
-namespace Infrastructure.Authorization;
+namespace Infrastructure.Authorization.Hander;
 
 public class AllPermissionsHandler(
     ApplicationDBContext dbContext,

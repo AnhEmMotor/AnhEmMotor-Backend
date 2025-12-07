@@ -1,7 +1,6 @@
 ﻿using Application.Interfaces.Repositories;
 using Application.Sieve;
 using Domain.Constants;
-using Domain.Shared;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
@@ -11,7 +10,7 @@ namespace Infrastructure.Repositories
 {
     public class SievePaginator(ISieveProcessor sieveProcessor) : IPaginator
     {
-        public async Task<PagedResult<TResponse>> ApplyAsync<TEntity, TResponse>(
+        public async Task<Domain.Primitives.PagedResult<TResponse>> ApplyAsync<TEntity, TResponse>(
             IQueryable<TEntity> query,
             SieveModel sieveModel,
             DataFetchMode? defaultSortMode = DataFetchMode.ActiveOnly,
@@ -36,7 +35,11 @@ namespace Infrastructure.Repositories
 
             var responses = entities.Adapt<List<TResponse>>();
 
-            return new PagedResult<TResponse>(responses, totalCount, sieveModel.Page ?? 1, sieveModel.PageSize ?? 10);
+            return new Domain.Primitives.PagedResult<TResponse>(
+                responses,
+                totalCount,
+                sieveModel.Page ?? 1,
+                sieveModel.PageSize ?? 10);
         }
     }
 }

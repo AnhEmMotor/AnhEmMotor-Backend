@@ -1,14 +1,13 @@
 using Application.ApiContracts.ProductCategory.Responses;
 using Application.Interfaces.Repositories.ProductCategory;
-using Domain.Helpers;
 using Mapster;
 using MediatR;
 
 namespace Application.Features.ProductCategories.Queries.GetProductCategoryById;
 
-public sealed class GetProductCategoryByIdQueryHandler(IProductCategoryReadRepository repository) : IRequestHandler<GetProductCategoryByIdQuery, (ProductCategoryResponse? Data, ErrorResponse? Error)>
+public sealed class GetProductCategoryByIdQueryHandler(IProductCategoryReadRepository repository) : IRequestHandler<GetProductCategoryByIdQuery, (ProductCategoryResponse? Data, Common.Models.ErrorResponse? Error)>
 {
-    public async Task<(ProductCategoryResponse? Data, ErrorResponse? Error)> Handle(
+    public async Task<(ProductCategoryResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
         GetProductCategoryByIdQuery request,
         CancellationToken cancellationToken)
     {
@@ -16,9 +15,10 @@ public sealed class GetProductCategoryByIdQueryHandler(IProductCategoryReadRepos
 
         if(category == null)
         {
-            return (null, new ErrorResponse
+            return (null, new Common.Models.ErrorResponse
             {
-                Errors = [ new ErrorDetail { Message = $"Product category with Id {request.Id} not found." } ]
+                Errors =
+                    [ new Common.Models.ErrorDetail { Message = $"Product category with Id {request.Id} not found." } ]
             });
         }
 

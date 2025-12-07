@@ -4,7 +4,6 @@ using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.ProductVariant;
 using Domain.Constants;
 using Domain.Entities;
-using Domain.Helpers;
 using Mapster;
 using MediatR;
 
@@ -15,9 +14,9 @@ public sealed class UpdateOutputCommandHandler(
     IOutputUpdateRepository updateRepository,
     IOutputDeleteRepository deleteRepository,
     IProductVariantReadRepository variantRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateOutputCommand, (OutputResponse? Data, ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateOutputCommand, (OutputResponse? Data, Common.Models.ErrorResponse? Error)>
 {
-    public async Task<(OutputResponse? Data, ErrorResponse? Error)> Handle(
+    public async Task<(OutputResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
         UpdateOutputCommand request,
         CancellationToken cancellationToken)
     {
@@ -29,9 +28,14 @@ public sealed class UpdateOutputCommandHandler(
 
         if(output is null)
         {
-            return (null, new ErrorResponse
+            return (null, new Common.Models.ErrorResponse
             {
-                Errors = [ new ErrorDetail { Field = "Id", Message = $"Không tìm thấy đơn hàng có ID {request.Id}." } ]
+                Errors =
+                    [ new Common.Models.ErrorDetail
+                    {
+                        Field = "Id",
+                        Message = $"Không tìm thấy đơn hàng có ID {request.Id}."
+                    } ]
             });
         }
 
@@ -54,10 +58,10 @@ public sealed class UpdateOutputCommandHandler(
             {
                 var foundIds = variantsList.Select(v => v.Id).ToList();
                 var missingIds = variantIds.Except(foundIds).ToList();
-                return (null, new ErrorResponse
+                return (null, new Common.Models.ErrorResponse
                 {
                     Errors =
-                        [ new ErrorDetail
+                        [ new Common.Models.ErrorDetail
                         {
                             Field = "Products",
                             Message = $"Không tìm thấy {missingIds.Count} sản phẩm: {string.Join(", ", missingIds)}"
@@ -69,10 +73,10 @@ public sealed class UpdateOutputCommandHandler(
             {
                 if(string.Compare(variant.Product?.StatusId, Domain.Constants.ProductStatus.ForSale) != 0)
                 {
-                    return (null, new ErrorResponse
+                    return (null, new Common.Models.ErrorResponse
                     {
                         Errors =
-                            [ new ErrorDetail
+                            [ new Common.Models.ErrorDetail
                             {
                                 Field = "Products",
                                 Message =
