@@ -1,80 +1,67 @@
-using Application.ApiContracts.Auth.Responses;
+﻿using Application.ApiContracts.Auth.Responses;
 using Application.Common.Exceptions;
-using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.Authentication;
-using Domain.Entities;
+using Application.Interfaces.Services;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 
 namespace Application.Features.Auth.Commands.RefreshToken;
 
 public class RefreshTokenCommandHandler(
-    UserManager<ApplicationUser> userManager,
-    ITokenService tokenService,
-    ICurrentUserService currentUserService,
-    IAsyncQueryableExecuter asyncExecuter,
-    IConfiguration configuration) : IRequestHandler<RefreshTokenCommand, GetAccessTokenFromRefreshTokenResponse>
+    IIdentityService identityService,
+    ITokenManagerService tokenService,
+    IHttpTokenAccessorService httpTokenAccessor)
+    : IRequestHandler<RefreshTokenCommand, GetAccessTokenFromRefreshTokenResponse>
 {
     public async Task<GetAccessTokenFromRefreshTokenResponse> Handle(
         RefreshTokenCommand request,
         CancellationToken cancellationToken)
     {
-        var refreshToken = currentUserService.GetRefreshToken();
-        if(string.IsNullOrEmpty(refreshToken))
+        // 1. Lấy Token từ Cookie
+        var currentRefreshToken = httpTokenAccessor.GetRefreshTokenFromCookie();
+        if (string.IsNullOrEmpty(currentRefreshToken))
         {
             throw new UnauthorizedException("Refresh token is missing.");
         }
 
-        var user = await asyncExecuter.FirstOrDefaultAsync(
-                userManager.Users,
-                u => string.Compare(u.RefreshToken, refreshToken) == 0,
-                cancellationToken)
-                .ConfigureAwait(false) ??
-            throw new UnauthorizedException("Invalid refresh token.");
-        if(string.Compare(user.Status, "Active") != 0)
-        {
-            throw new ForbiddenException("Please login again.");
-        }
+        // 2. Validate Token & User (Logic check status/deleted/expired đẩy hết vào đây)
+        var user = await identityService.GetUserByRefreshTokenAsync(currentRefreshToken);
 
-        if(string.Compare(user.Status, "Active") == 0 && user.DeletedAt != null)
+        // 3. Security Check: So sánh Status trong Access Token cũ (nếu có) với Status hiện tại
+        // Để ngăn chặn trường hợp user bị lock nhưng vẫn dùng Access Token cũ để request
+        var authHeader = httpTokenAccessor.GetAuthorizationValueFromHeader();
+        if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer "))
         {
-            throw new ForbiddenException("Please login again.");
-        }
+            var oldAccessToken = authHeader["Bearer ".Length..];
+            var oldStatusClaim = tokenService.GetClaimFromToken(oldAccessToken, "status");
 
-        if(user.RefreshTokenExpiryTime <= DateTimeOffset.UtcNow)
-        {
-            throw new UnauthorizedException("Refresh token has expired. Please login again.");
-        }
-
-        var authHeader = currentUserService.GetAuthorizationHeader();
-        if(!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer "))
-        {
-            var token = authHeader["Bearer ".Length..];
-            var tokenStatusClaim = tokenService.GetClaimFromToken(token, "status");
-
-            if(!string.IsNullOrEmpty(tokenStatusClaim) && string.Compare(tokenStatusClaim, user.Status) != 0)
+            if (!string.IsNullOrEmpty(oldStatusClaim) &&
+                !string.Equals(oldStatusClaim, user.Status, StringComparison.OrdinalIgnoreCase))
             {
                 throw new UnauthorizedException("User status has changed. Please login again.");
             }
         }
 
-        var expiryDays = configuration.GetValue<int>("Jwt:RefreshTokenExpiryInDays");
+        // 4. Tính toán thời gian (Đồng bộ tuyệt đối)
+        var accessExpiryMinutes = tokenService.GetAccessTokenExpiryMinutes();
+        var refreshExpiryDays = tokenService.GetRefreshTokenExpiryDays();
 
-        var newAccessToken = await tokenService.CreateAccessTokenAsync(user, [ "pwd" ], cancellationToken)
-            .ConfigureAwait(false);
+        var now = DateTimeOffset.UtcNow;
+        var accessTokenExpiresAt = now.AddMinutes(accessExpiryMinutes);
+        var refreshTokenExpiresAt = now.AddDays(refreshExpiryDays);
+
+        // 5. Tạo Token mới
+        var newAccessToken = await tokenService.CreateAccessTokenAsync(user, accessTokenExpiresAt, cancellationToken);
         var newRefreshToken = tokenService.CreateRefreshToken();
 
-        user.RefreshToken = newRefreshToken;
-        user.RefreshTokenExpiryTime = DateTimeOffset.UtcNow.AddDays(expiryDays);
-        await userManager.UpdateAsync(user).ConfigureAwait(false);
+        // 6. Lưu xuống DB
+        await identityService.UpdateRefreshTokenAsync(user.Id, newRefreshToken, refreshTokenExpiresAt);
 
-        currentUserService.SetRefreshToken(newRefreshToken);
+        // 7. Lưu xuống Cookie (Dùng đúng thời gian của DB)
+        httpTokenAccessor.SetRefreshTokenFromCookie(newRefreshToken, refreshTokenExpiresAt);
 
         return new GetAccessTokenFromRefreshTokenResponse
         {
             AccessToken = newAccessToken,
-            ExpiresAt = DateTimeOffset.UtcNow.AddMinutes(15)
+            ExpiresAt = accessTokenExpiresAt
         };
     }
 }

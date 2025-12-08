@@ -1,11 +1,8 @@
 ﻿using Application.DependencyInjection;
-using Application.Interfaces.Repositories.Authentication;
-using Application.Interfaces.Repositories.Authorization;
 using Asp.Versioning;
 using Domain.Entities;
 using Infrastructure.DBContexts;
 using Infrastructure.DependencyInjection;
-using Infrastructure.Repositories.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -88,12 +85,8 @@ namespace WebAPI.StartupExtensions
                         };
                     });
             services.AddHttpContextAccessor();
-            services.AddScoped<ICurrentUserService, Infrastructure.Services.CurrentUserService>();
             services.AddScoped<Application.Interfaces.Repositories.IAsyncQueryableExecuter, Infrastructure.Repositories.AsyncQueryableExecuter>(
                 );
-            services.AddScoped<IPermissionRepository, PermissionRepository>();
-            services.AddScoped<IRolePermissionRepository, RolePermissionRepository>();
-            services.AddScoped<IApplicationRoleRepository, ApplicationRoleRepository>();
             services.AddMapsterConfiguration(typeof(ApplicationServices).Assembly);
             services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(
                 options =>

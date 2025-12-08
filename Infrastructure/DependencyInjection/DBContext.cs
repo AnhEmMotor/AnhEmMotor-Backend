@@ -1,5 +1,4 @@
 ﻿using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.Authentication;
 using Application.Interfaces.Repositories.Brand;
 using Application.Interfaces.Repositories.Input;
 using Application.Interfaces.Repositories.LocalFile;
@@ -7,13 +6,17 @@ using Application.Interfaces.Repositories.MediaFile;
 using Application.Interfaces.Repositories.Option;
 using Application.Interfaces.Repositories.OptionValue;
 using Application.Interfaces.Repositories.Output;
+using Application.Interfaces.Repositories.Permission;
 using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.ProductCategory;
 using Application.Interfaces.Repositories.ProductVariant;
+using Application.Interfaces.Repositories.Role;
 using Application.Interfaces.Repositories.Setting;
 using Application.Interfaces.Repositories.Statistical;
 using Application.Interfaces.Repositories.Supplier;
+using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Repositories.VariantOptionValue;
+using Application.Interfaces.Services;
 using Infrastructure.Authorization;
 using Infrastructure.Authorization.Hander;
 using Infrastructure.DBContexts;
@@ -25,12 +28,15 @@ using Infrastructure.Repositories.MediaFile;
 using Infrastructure.Repositories.Option;
 using Infrastructure.Repositories.OptionValue;
 using Infrastructure.Repositories.Output;
+using Infrastructure.Repositories.Permission;
 using Infrastructure.Repositories.Product;
 using Infrastructure.Repositories.ProductCategory;
 using Infrastructure.Repositories.ProductVariant;
+using Infrastructure.Repositories.Role;
 using Infrastructure.Repositories.Setting;
 using Infrastructure.Repositories.Statistical;
 using Infrastructure.Repositories.Supplier;
+using Infrastructure.Repositories.User;
 using Infrastructure.Repositories.VariantOptionValue;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -63,9 +69,10 @@ public static class DBContext
         services.AddScoped<IAuthorizationHandler, AllPermissionsHandler>();
         services.AddScoped<IAuthorizationHandler, AnyPermissionsHandler>();
 
-        services.AddScoped<ITokenService, TokenService>();
-        services.AddScoped<TokenService>();
-        services.AddScoped<ISignInService, SignInService>();
+        services.AddScoped<ITokenManagerService, TokenManagerService>();
+        services.AddScoped<IHttpTokenAccessorService, HttpTokenAccessorService>();
+        services.AddScoped<IIdentityService, IdentityService>();
+
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         services.AddScoped<IBrandInsertRepository, BrandInsertRepository>();
@@ -122,9 +129,22 @@ public static class DBContext
         services.AddScoped<IOutputUpdateRepository, OutputUpdateRepository>();
         services.AddScoped<IOutputDeleteRepository, OutputDeleteRepository>();
 
-        services.AddScoped<IStatisticalReadRepository, StatisticalReadRepository>();
+        services.AddScoped<IPermissionReadRepository, PermissionReadRepository>();
+        services.AddScoped<IPermissionInsertRepository, PermissionInsertRepository>();
+        services.AddScoped<IPermissionUpdateRepository, PermissionUpdateRepository>();
+        services.AddScoped<IPermissionDeleteRepository, PermissionDeleteRepository>();
 
-        services.AddScoped<IUserRepository, Repositories.User.UserRepository>();
+        services.AddScoped<IRoleReadRepository, RoleReadRepository>();
+        services.AddScoped<IRoleInsertRepository, RoleInsertRepository>();
+        services.AddScoped<IRoleUpdateRepository, RoleUpdateRepository>();
+        services.AddScoped<IRoleDeleteRepository, RoleDeleteRepository>();
+
+        services.AddScoped<IUserDeleteRepository, UserDeleteRepository>();
+        services.AddScoped<IUserInsertRepository, UserInsertRepository>();
+        services.AddScoped<IUserUpdateRepository, UserUpdateRepository>();
+        services.AddScoped<IUserReadRepository, UserReadRepository>();
+
+        services.AddScoped<IStatisticalReadRepository, StatisticalReadRepository>();
 
         return services;
     }

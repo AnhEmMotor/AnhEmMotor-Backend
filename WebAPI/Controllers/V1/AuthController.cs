@@ -31,6 +31,7 @@ public class AuthController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpPost("register")]
     [AnonymousOnly]
+    [SwaggerOperation(Summary = "Đăng ký tài khoản mới", Description = "Tạo 1 tài khoản mới (với email và password)")]
     [ProducesResponseType(typeof(RegistrationSuccessResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Register(

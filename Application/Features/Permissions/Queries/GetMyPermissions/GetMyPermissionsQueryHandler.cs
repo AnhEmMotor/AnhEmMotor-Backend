@@ -1,6 +1,6 @@
 using Application.ApiContracts.Permission.Responses;
 using Application.Common.Exceptions;
-using Application.Interfaces.Repositories.Authorization;
+using Application.Interfaces.Repositories.Role;
 using Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
@@ -9,8 +9,7 @@ namespace Application.Features.Permissions.Queries.GetMyPermissions;
 
 public class GetMyPermissionsQueryHandler(
     UserManager<ApplicationUser> userManager,
-    IApplicationRoleRepository applicationRoleRepository,
-    IRolePermissionRepository rolePermissionRepository) : IRequestHandler<GetMyPermissionsQuery, PermissionAndRoleOfUserResponse>
+    IRoleReadRepository roleReadRepository) : IRequestHandler<GetMyPermissionsQuery, PermissionAndRoleOfUserResponse>
 {
     public async Task<PermissionAndRoleOfUserResponse> Handle(
         GetMyPermissionsQuery request,
@@ -24,11 +23,11 @@ public class GetMyPermissionsQueryHandler(
         var user = await userManager.FindByIdAsync(userId.ToString()).ConfigureAwait(false) ??
             throw new NotFoundException("User not found.");
         var userRoles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
-        var roleEntities = await applicationRoleRepository.GetRolesByNamesAsync(userRoles!, cancellationToken)
+        var roleEntities = await roleReadRepository.GetRolesByNamesAsync(userRoles!, cancellationToken)
             .ConfigureAwait(false);
 
         var roleIds = roleEntities.Select(r => r.Id).ToList();
-        var userPermissionNames = await rolePermissionRepository.GetPermissionNamesByRoleIdsAsync(
+        var userPermissionNames = await roleReadRepository.GetPermissionNamesByRoleIdsAsync(
             roleIds,
             cancellationToken)
             .ConfigureAwait(false);

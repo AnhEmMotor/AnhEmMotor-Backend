@@ -1,7 +1,8 @@
 using Application.ApiContracts.Permission.Responses;
 using Application.Common.Exceptions;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.Authorization;
+using Application.Interfaces.Repositories.Permission;
+using Application.Interfaces.Repositories.Role;
 using Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
@@ -11,8 +12,8 @@ namespace Application.Features.Permissions.Commands.CreateRole;
 
 public class CreateRoleCommandHandler(
     RoleManager<ApplicationRole> roleManager,
-    IPermissionRepository permissionRepository,
-    IRolePermissionRepository rolePermissionRepository,
+    IPermissionReadRepository permissionRepository,
+    IRoleUpdateRepository roleUpdateRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateRoleCommand, RoleCreateResponse>
 {
     public async Task<RoleCreateResponse> Handle(CreateRoleCommand request, CancellationToken cancellationToken)
@@ -63,7 +64,7 @@ public class CreateRoleCommandHandler(
             .Select(p => new RolePermission { RoleId = role.Id, PermissionId = p.Id })
             .ToList();
 
-        await rolePermissionRepository.AddRangeAsync(rolePermissions, cancellationToken).ConfigureAwait(false);
+        await roleUpdateRepository.AddPermissionsToRoleAsync(rolePermissions, cancellationToken).ConfigureAwait(false);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         return new RoleCreateResponse()

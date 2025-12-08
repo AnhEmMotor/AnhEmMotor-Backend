@@ -1,0 +1,15 @@
+﻿using Domain.Entities;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Application.Interfaces.Repositories.Role
+{
+    public interface IRoleReadRepository
+    {
+        Task<List<ApplicationRole>> GetRolesByNamesAsync(IEnumerable<string> names, CancellationToken cancellationToken = default);
+        Task<List<RolePermission>> GetRolePermissionsByRoleIdAsync(Guid roleId, CancellationToken cancellationToken = default);
+        Task<List<string>> GetPermissionNamesByRoleIdsAsync(IEnumerable<Guid> roleIds, CancellationToken cancellationToken = default);
+        Task<List<string>> GetPermissionNamesByRoleIdAsync(Guid roleId, CancellationToken cancellationToken = default);
+    }
+}
