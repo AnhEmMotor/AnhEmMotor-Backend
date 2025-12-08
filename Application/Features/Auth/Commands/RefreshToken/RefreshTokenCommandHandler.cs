@@ -1,13 +1,15 @@
 ﻿using Application.ApiContracts.Auth.Responses;
 using Application.Common.Exceptions;
+using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Services;
 using MediatR;
 
 namespace Application.Features.Auth.Commands.RefreshToken;
 
 public class RefreshTokenCommandHandler(
-    IIdentityService identityService,
     ITokenManagerService tokenService,
+    IUserReadRepository userReadRepository,
+    IUserUpdateRepository userUpdateRepository,
     IHttpTokenAccessorService httpTokenAccessor)
     : IRequestHandler<RefreshTokenCommand, GetAccessTokenFromRefreshTokenResponse>
 {
@@ -23,7 +25,7 @@ public class RefreshTokenCommandHandler(
         }
 
         // 2. Validate Token & User (Logic check status/deleted/expired đẩy hết vào đây)
-        var user = await identityService.GetUserByRefreshTokenAsync(currentRefreshToken);
+        var user = await userReadRepository.GetUserByRefreshTokenAsync(currentRefreshToken);
 
         // 3. Security Check: So sánh Status trong Access Token cũ (nếu có) với Status hiện tại
         // Để ngăn chặn trường hợp user bị lock nhưng vẫn dùng Access Token cũ để request
@@ -53,10 +55,10 @@ public class RefreshTokenCommandHandler(
         var newRefreshToken = tokenService.CreateRefreshToken();
 
         // 6. Lưu xuống DB
-        await identityService.UpdateRefreshTokenAsync(user.Id, newRefreshToken, refreshTokenExpiresAt);
+        await userUpdateRepository.UpdateRefreshTokenAsync(user.Id, newRefreshToken, refreshTokenExpiresAt);
 
         // 7. Lưu xuống Cookie (Dùng đúng thời gian của DB)
-        httpTokenAccessor.SetRefreshTokenFromCookie(newRefreshToken, refreshTokenExpiresAt);
+        httpTokenAccessor.SetRefreshTokenToCookie(newRefreshToken, refreshTokenExpiresAt);
 
         return new GetAccessTokenFromRefreshTokenResponse
         {

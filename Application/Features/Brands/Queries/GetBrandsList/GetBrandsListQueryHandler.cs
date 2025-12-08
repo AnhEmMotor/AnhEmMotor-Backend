@@ -6,7 +6,7 @@ using BrandEntity = Domain.Entities.Brand;
 
 namespace Application.Features.Brands.Queries.GetBrandsList;
 
-public sealed class GetBrandsListQueryHandler(IBrandReadRepository repository, IPaginator paginator) : IRequestHandler<GetBrandsListQuery, Domain.Primitives.PagedResult<BrandResponse>>
+public sealed class GetBrandsListQueryHandler(IBrandReadRepository repository, ISievePaginator paginator) : IRequestHandler<GetBrandsListQuery, Domain.Primitives.PagedResult<BrandResponse>>
 {
     public Task<Domain.Primitives.PagedResult<BrandResponse>> Handle(
         GetBrandsListQuery request,

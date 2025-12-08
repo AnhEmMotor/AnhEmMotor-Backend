@@ -1,4 +1,5 @@
-﻿using Domain.Entities;
+﻿using Application.ApiContracts.Permission.Responses;
+using Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -11,5 +12,6 @@ namespace Application.Interfaces.Repositories.Role
         Task<List<RolePermission>> GetRolePermissionsByRoleIdAsync(Guid roleId, CancellationToken cancellationToken = default);
         Task<List<string>> GetPermissionNamesByRoleIdsAsync(IEnumerable<Guid> roleIds, CancellationToken cancellationToken = default);
         Task<List<string>> GetPermissionNamesByRoleIdAsync(Guid roleId, CancellationToken cancellationToken = default);
+        Task<List<RoleSelectResponse>> GetAllRoleSelectsAsync(CancellationToken cancellationToken = default);
     }
 }

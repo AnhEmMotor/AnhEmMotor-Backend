@@ -1,19 +1,19 @@
 using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Exceptions;
+using Application.Interfaces.Services;
 using Domain.Constants;
 using Domain.Entities;
 using FluentValidation;
 using FluentValidation.Results;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 
 namespace Application.Features.UserManager.Commands.AssignRoles;
 
 public class AssignRolesCommandHandler(
     UserManager<ApplicationUser> userManager,
     RoleManager<ApplicationRole> roleManager,
-    IConfiguration configuration) : IRequestHandler<AssignRolesCommand, AssignRoleResponse>
+    IProtectedEntityManagerService protectedEntityManagerService) : IRequestHandler<AssignRolesCommand, AssignRoleResponse>
 {
     public async Task<AssignRoleResponse> Handle(AssignRolesCommand request, CancellationToken cancellationToken)
     {
@@ -54,7 +54,7 @@ public class AssignRolesCommandHandler(
         cancellationToken.ThrowIfCancellationRequested();
 
         var currentRoles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
-        var superRoles = configuration.GetSection("ProtectedAuthorizationEntities:SuperRoles").Get<List<string>>() ?? [];
+        var superRoles = protectedEntityManagerService.GetSuperRoles() ?? [];
 
         var rolesToRemove = currentRoles.Except(request.Model.RoleNames).ToList();
         foreach(var roleToRemove in rolesToRemove)

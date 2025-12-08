@@ -8,7 +8,7 @@ namespace Application.Features.ProductCategories.Queries.GetProductCategoriesLis
 
 public sealed class GetProductCategoriesListQueryHandler(
     IProductCategoryReadRepository repository,
-    IPaginator paginator) : IRequestHandler<GetProductCategoriesListQuery, Domain.Primitives.PagedResult<ProductCategoryResponse>>
+    ISievePaginator paginator) : IRequestHandler<GetProductCategoriesListQuery, Domain.Primitives.PagedResult<ProductCategoryResponse>>
 {
     public Task<Domain.Primitives.PagedResult<ProductCategoryResponse>> Handle(
         GetProductCategoriesListQuery request,

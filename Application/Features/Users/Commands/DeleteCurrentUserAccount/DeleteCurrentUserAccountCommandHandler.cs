@@ -1,17 +1,17 @@
 using Application.ApiContracts.User.Responses;
 using Application.Common.Exceptions;
+using Application.Interfaces.Services;
 using Domain.Entities;
 using FluentValidation;
 using FluentValidation.Results;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 
 namespace Application.Features.Users.Commands.DeleteCurrentUserAccount;
 
 public class DeleteCurrentUserAccountCommandHandler(
     UserManager<ApplicationUser> userManager,
-    IConfiguration configuration) : IRequestHandler<DeleteCurrentUserAccountCommand, DeleteUserByUserReponse>
+    IProtectedEntityManagerService protectedEntityManagerService) : IRequestHandler<DeleteCurrentUserAccountCommand, DeleteUserByUserReponse>
 {
     public async Task<DeleteUserByUserReponse> Handle(
         DeleteCurrentUserAccountCommand request,
@@ -32,9 +32,7 @@ public class DeleteCurrentUserAccountCommandHandler(
                 [ new ValidationFailure("DeletedAt", "This account has already been deleted.") ]);
         }
 
-        var protectedUsers = configuration.GetSection("ProtectedAuthorizationEntities:ProtectedUsers")
-                .Get<List<string>>() ??
-            [];
+        var protectedUsers = protectedEntityManagerService.GetProtectedUsers() ?? [];
         var protectedEmails = protectedUsers.Select(entry => entry.Split(':')[0].Trim()).ToList();
 
         if(!string.IsNullOrEmpty(user.Email) && protectedEmails.Contains(user.Email))

@@ -9,7 +9,7 @@ namespace Application.Features.Files.Queries.GetFilesList;
 public sealed class GetFilesListQueryHandler(
     IMediaFileReadRepository repository,
     Interfaces.Repositories.LocalFile.IFileStorageService fileStorageService,
-    IPaginator paginator) : IRequestHandler<GetFilesListQuery, Domain.Primitives.PagedResult<MediaFileResponse>>
+    ISievePaginator paginator) : IRequestHandler<GetFilesListQuery, Domain.Primitives.PagedResult<MediaFileResponse>>
 {
     public async Task<Domain.Primitives.PagedResult<MediaFileResponse>> Handle(
         GetFilesListQuery request,

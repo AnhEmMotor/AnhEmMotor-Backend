@@ -1,11 +1,13 @@
-﻿using Application.ApiContracts.User.Responses;
+﻿using Application.ApiContracts.Auth.Requests;
+using Application.ApiContracts.User.Responses;
+using Application.Common.Exceptions;
 using Application.Interfaces.Repositories.User;
 using Domain.Entities;
+using Domain.Primitives;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
 using Sieve.Services;
-using Domain.Primitives;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -54,6 +56,39 @@ namespace Infrastructure.Repositories.User
                 totalCount,
                 sieveModel.Page ?? 1,
                 sieveModel.PageSize ?? 10);
+        }
+
+        public async Task<UserAuthDTO> GetUserByRefreshTokenAsync(string refreshToken)
+        {
+            // Dùng UserManager để tìm user có token khớp (EF Core sẽ tự translate câu query này)
+            // Lưu ý: UserManager không có hàm FindByRefreshToken, bạn phải query qua Users.
+            // Nếu tuân thủ Clean Arc cực đoan, đoạn này nên gọi qua UserReadRepository, 
+            // nhưng vì IdentityService nằm ở Infra nên chấp nhận dùng UserManager.
+
+            var user = await userManager.Users.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken) ?? throw new UnauthorizedException("Invalid refresh token.");
+            if (user.RefreshTokenExpiryTime <= DateTimeOffset.UtcNow)
+            {
+                throw new UnauthorizedException("Refresh token has expired. Please login again.");
+            }
+
+            if (user.Status != "Active" || user.DeletedAt != null)
+            {
+                throw new ForbiddenException("Account is not available.");
+            }
+
+            var roles = await userManager.GetRolesAsync(user);
+
+            // Mapping sang DTO
+            return new UserAuthDTO()
+            {
+                Id = user.Id,
+                Username = user.UserName,
+                Roles = [.. roles],
+                Email = user.Email,
+                FullName = user.FullName,
+                Status = user.Status,
+                AuthMethods = ["pwd"]
+            };
         }
     }
 }

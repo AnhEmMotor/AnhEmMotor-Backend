@@ -72,6 +72,7 @@ public static class DBContext
         services.AddScoped<ITokenManagerService, TokenManagerService>();
         services.AddScoped<IHttpTokenAccessorService, HttpTokenAccessorService>();
         services.AddScoped<IIdentityService, IdentityService>();
+        services.AddScoped<IProtectedEntityManagerService, ProtectedEntityManagerService>();
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
@@ -117,7 +118,7 @@ public static class DBContext
 
         services.AddScoped<IFileStorageService, LocalFileStorageService>();
 
-        services.AddScoped<IPaginator, SievePaginator>();
+        services.AddScoped<ISievePaginator, SievePaginator>();
 
         services.AddScoped<IInputReadRepository, InputReadRepository>();
         services.AddScoped<IInputInsertRepository, InputInsertRepository>();

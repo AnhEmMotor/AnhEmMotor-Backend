@@ -3,7 +3,7 @@ using Sieve.Models;
 
 namespace Application.Interfaces.Repositories
 {
-    public interface IPaginator
+    public interface ISievePaginator
     {
         Task<Domain.Primitives.PagedResult<TResponse>> ApplyAsync<TEntity, TResponse>(
             IQueryable<TEntity> query,

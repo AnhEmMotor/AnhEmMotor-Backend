@@ -85,8 +85,6 @@ namespace WebAPI.StartupExtensions
                         };
                     });
             services.AddHttpContextAccessor();
-            services.AddScoped<Application.Interfaces.Repositories.IAsyncQueryableExecuter, Infrastructure.Repositories.AsyncQueryableExecuter>(
-                );
             services.AddMapsterConfiguration(typeof(ApplicationServices).Assembly);
             services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(
                 options =>

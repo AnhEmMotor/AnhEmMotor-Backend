@@ -10,7 +10,7 @@ namespace Application.Features.Files.Queries.GetDeletedFilesList;
 public sealed class GetDeletedFilesListQueryHandler(
     IMediaFileReadRepository repository,
     Interfaces.Repositories.LocalFile.IFileStorageService fileStorageService,
-    IPaginator paginator) : IRequestHandler<GetDeletedFilesListQuery, Domain.Primitives.PagedResult<MediaFileResponse>>
+    ISievePaginator paginator) : IRequestHandler<GetDeletedFilesListQuery, Domain.Primitives.PagedResult<MediaFileResponse>>
 {
     public async Task<Domain.Primitives.PagedResult<MediaFileResponse>> Handle(
         GetDeletedFilesListQuery request,

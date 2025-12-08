@@ -1,6 +1,7 @@
 ﻿using Application.Interfaces.Repositories;
+using Infrastructure.DBContexts;
 
-namespace Infrastructure.DBContexts;
+namespace Infrastructure.Repositories;
 
 public class UnitOfWork(ApplicationDBContext context) : IUnitOfWork
 {

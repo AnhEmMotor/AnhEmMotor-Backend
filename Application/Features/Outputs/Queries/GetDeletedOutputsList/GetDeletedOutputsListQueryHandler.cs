@@ -7,7 +7,7 @@ using OutputEntity = Domain.Entities.Output;
 
 namespace Application.Features.Outputs.Queries.GetDeletedOutputsList;
 
-public sealed class GetDeletedOutputsListQueryHandler(IOutputReadRepository repository, IPaginator paginator) : IRequestHandler<GetDeletedOutputsListQuery, Domain.Primitives.PagedResult<OutputResponse>>
+public sealed class GetDeletedOutputsListQueryHandler(IOutputReadRepository repository, ISievePaginator paginator) : IRequestHandler<GetDeletedOutputsListQuery, Domain.Primitives.PagedResult<OutputResponse>>
 {
     public Task<Domain.Primitives.PagedResult<OutputResponse>> Handle(
         GetDeletedOutputsListQuery request,

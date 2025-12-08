@@ -12,7 +12,7 @@ namespace Infrastructure.Services
     {
         public string? GetRefreshTokenFromCookie() { return httpContextAccessor.HttpContext?.Request.Cookies["refreshToken"]; }
 
-        public void SetRefreshTokenFromCookie(string token, DateTimeOffset expiresAt)
+        public void SetRefreshTokenToCookie(string token, DateTimeOffset expiresAt)
         {
             var cookieOptions = new CookieOptions
             {

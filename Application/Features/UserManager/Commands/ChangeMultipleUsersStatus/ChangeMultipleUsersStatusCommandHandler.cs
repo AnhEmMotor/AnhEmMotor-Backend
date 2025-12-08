@@ -1,17 +1,17 @@
 using Application.ApiContracts.UserManager.Responses;
+using Application.Interfaces.Services;
 using Domain.Constants;
 using Domain.Entities;
 using FluentValidation;
 using FluentValidation.Results;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 
 namespace Application.Features.UserManager.Commands.ChangeMultipleUsersStatus;
 
 public class ChangeMultipleUsersStatusCommandHandler(
     UserManager<ApplicationUser> userManager,
-    IConfiguration configuration) : IRequestHandler<ChangeMultipleUsersStatusCommand, ChangeStatusMultiUserByManagerResponse>
+    IProtectedEntityManagerService protectedEntityManagerService) : IRequestHandler<ChangeMultipleUsersStatusCommand, ChangeStatusMultiUserByManagerResponse>
 {
     public async Task<ChangeStatusMultiUserByManagerResponse> Handle(
         ChangeMultipleUsersStatusCommand request,
@@ -24,11 +24,9 @@ public class ChangeMultipleUsersStatusCommandHandler(
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        var protectedUsers = configuration.GetSection("ProtectedAuthorizationEntities:ProtectedUsers")
-                .Get<List<string>>() ??
-            [];
+        var protectedUsers = protectedEntityManagerService.GetProtectedUsers() ?? [];
         var protectedEmails = protectedUsers.Select(entry => entry.Split(':')[0].Trim()).ToList();
-        var superRoles = configuration.GetSection("ProtectedAuthorizationEntities:SuperRoles").Get<List<string>>() ?? [];
+        var superRoles = protectedEntityManagerService.GetSuperRoles() ?? [];
 
         var usersToUpdate = new List<ApplicationUser>();
         var errorMessages = new List<ValidationFailure>();

@@ -1,16 +1,16 @@
 using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Exceptions;
+using Application.Interfaces.Services;
 using Domain.Constants;
 using Domain.Entities;
 using FluentValidation;
 using FluentValidation.Results;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 
 namespace Application.Features.UserManager.Commands.ChangeUserStatus;
 
-public class ChangeUserStatusCommandHandler(UserManager<ApplicationUser> userManager, IConfiguration configuration) : IRequestHandler<ChangeUserStatusCommand, ChangeStatusUserByManagerResponse>
+public class ChangeUserStatusCommandHandler(UserManager<ApplicationUser> userManager, IProtectedEntityManagerService protectedEntityManagerService) : IRequestHandler<ChangeUserStatusCommand, ChangeStatusUserByManagerResponse>
 {
     public async Task<ChangeStatusUserByManagerResponse> Handle(
         ChangeUserStatusCommand request,
@@ -28,9 +28,7 @@ public class ChangeUserStatusCommandHandler(UserManager<ApplicationUser> userMan
 
         if(string.Compare(request.Model.Status, UserStatus.Inactive) == 0)
         {
-            var protectedUsers = configuration.GetSection("ProtectedAuthorizationEntities:ProtectedUsers")
-                    .Get<List<string>>() ??
-                [];
+            var protectedUsers = protectedEntityManagerService.GetProtectedUsers() ?? [];
             var protectedEmails = protectedUsers.Select(entry => entry.Split(':')[0].Trim()).ToList();
 
             if(!string.IsNullOrEmpty(user.Email) && protectedEmails.Contains(user.Email))
@@ -38,8 +36,7 @@ public class ChangeUserStatusCommandHandler(UserManager<ApplicationUser> userMan
                 throw new ValidationException([ new ValidationFailure("Email", "Cannot deactivate protected user.") ]);
             }
 
-            var superRoles = configuration.GetSection("ProtectedAuthorizationEntities:SuperRoles").Get<List<string>>() ??
-                [];
+            var superRoles = protectedEntityManagerService.GetSuperRoles() ?? [];
             var userRoles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
 
             foreach(var userRole in userRoles)

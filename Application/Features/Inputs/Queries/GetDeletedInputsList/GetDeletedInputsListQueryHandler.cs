@@ -7,7 +7,7 @@ using InputEntity = Domain.Entities.Input;
 
 namespace Application.Features.Inputs.Queries.GetDeletedInputsList;
 
-public sealed class GetDeletedInputsListQueryHandler(IInputReadRepository repository, IPaginator paginator) : IRequestHandler<GetDeletedInputsListQuery, Domain.Primitives.PagedResult<InputResponse>>
+public sealed class GetDeletedInputsListQueryHandler(IInputReadRepository repository, ISievePaginator paginator) : IRequestHandler<GetDeletedInputsListQuery, Domain.Primitives.PagedResult<InputResponse>>
 {
     public Task<Domain.Primitives.PagedResult<InputResponse>> Handle(
         GetDeletedInputsListQuery request,

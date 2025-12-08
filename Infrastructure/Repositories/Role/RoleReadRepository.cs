@@ -1,4 +1,5 @@
-﻿using Application.Interfaces.Repositories.Role;
+﻿using Application.ApiContracts.Permission.Responses;
+using Application.Interfaces.Repositories.Role;
 using Domain.Entities;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
@@ -46,5 +47,11 @@ namespace Infrastructure.Repositories.Role
                 .ToListAsync(cancellationToken);
         }
 
+        public Task<List<RoleSelectResponse>> GetAllRoleSelectsAsync(CancellationToken cancellationToken = default)
+        {
+            return context.Roles
+                .Select(r => new RoleSelectResponse { ID = r.Id, Name = r.Name })
+                .ToListAsync(cancellationToken);
+        }
     }
 }

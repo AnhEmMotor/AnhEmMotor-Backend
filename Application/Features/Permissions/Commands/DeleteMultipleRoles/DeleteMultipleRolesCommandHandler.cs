@@ -1,23 +1,23 @@
 using Application.ApiContracts.Permission.Responses;
 using Application.Common.Exceptions;
+using Application.Interfaces.Services;
 using Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 
 namespace Application.Features.Permissions.Commands.DeleteMultipleRoles;
 
 public class DeleteMultipleRolesCommandHandler(
     RoleManager<ApplicationRole> roleManager,
     UserManager<ApplicationUser> userManager,
-    IConfiguration configuration) : IRequestHandler<DeleteMultipleRolesCommand, RoleDeleteResponse>
+    IProtectedEntityManagerService protectedEntityManagerService) : IRequestHandler<DeleteMultipleRolesCommand, RoleDeleteResponse>
 {
     public async Task<RoleDeleteResponse> Handle(
         DeleteMultipleRolesCommand request,
         CancellationToken cancellationToken)
     {
         var roleNames = request.RoleNames;
-        var superRoles = configuration.GetSection("ProtectedAuthorizationEntities:SuperRoles").Get<List<string>>() ?? [];
+        var superRoles = protectedEntityManagerService.GetSuperRoles() ?? [];
         var skippedRoles = new List<string>();
         var deletedCount = 0;
 

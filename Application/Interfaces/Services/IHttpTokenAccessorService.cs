@@ -3,7 +3,7 @@
     public interface IHttpTokenAccessorService
     {
         string? GetRefreshTokenFromCookie();
-        void SetRefreshTokenFromCookie(string token, DateTimeOffset expiresAt);
+        void SetRefreshTokenToCookie(string token, DateTimeOffset expiresAt);
         string? GetAuthorizationValueFromHeader();
     }
 }

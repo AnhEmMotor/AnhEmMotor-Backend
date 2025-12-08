@@ -7,7 +7,7 @@ using BrandEntity = Domain.Entities.Brand;
 
 namespace Application.Features.Brands.Queries.GetDeletedBrandsList;
 
-public sealed class GetDeletedBrandsListQueryHandler(IBrandReadRepository repository, IPaginator paginator) : IRequestHandler<GetDeletedBrandsListQuery, Domain.Primitives.PagedResult<BrandResponse>>
+public sealed class GetDeletedBrandsListQueryHandler(IBrandReadRepository repository, ISievePaginator paginator) : IRequestHandler<GetDeletedBrandsListQuery, Domain.Primitives.PagedResult<BrandResponse>>
 {
     public Task<Domain.Primitives.PagedResult<BrandResponse>> Handle(
         GetDeletedBrandsListQuery request,

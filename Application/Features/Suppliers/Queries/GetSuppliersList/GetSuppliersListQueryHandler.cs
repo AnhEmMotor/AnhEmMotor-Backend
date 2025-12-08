@@ -5,7 +5,7 @@ using MediatR;
 
 namespace Application.Features.Suppliers.Queries.GetSuppliersList;
 
-public sealed class GetSuppliersListQueryHandler(ISupplierReadRepository repository, IPaginator paginator) : IRequestHandler<GetSuppliersListQuery, Domain.Primitives.PagedResult<SupplierResponse>>
+public sealed class GetSuppliersListQueryHandler(ISupplierReadRepository repository, ISievePaginator paginator) : IRequestHandler<GetSuppliersListQuery, Domain.Primitives.PagedResult<SupplierResponse>>
 {
     public Task<Domain.Primitives.PagedResult<SupplierResponse>> Handle(
         GetSuppliersListQuery request,

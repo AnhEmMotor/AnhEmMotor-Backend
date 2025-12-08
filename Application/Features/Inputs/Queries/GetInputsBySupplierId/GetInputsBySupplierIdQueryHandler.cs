@@ -6,7 +6,7 @@ using InputEntity = Domain.Entities.Input;
 
 namespace Application.Features.Inputs.Queries.GetInputsBySupplierId;
 
-public sealed class GetInputsBySupplierIdQueryHandler(IInputReadRepository repository, IPaginator paginator) : IRequestHandler<GetInputsBySupplierIdQuery, Domain.Primitives.PagedResult<InputResponse>>
+public sealed class GetInputsBySupplierIdQueryHandler(IInputReadRepository repository, ISievePaginator paginator) : IRequestHandler<GetInputsBySupplierIdQuery, Domain.Primitives.PagedResult<InputResponse>>
 {
     public Task<Domain.Primitives.PagedResult<InputResponse>> Handle(
         GetInputsBySupplierIdQuery request,

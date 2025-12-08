@@ -1,16 +1,16 @@
 using Application.ApiContracts.Permission.Responses;
 using Application.Common.Exceptions;
+using Application.Interfaces.Services;
 using Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 
 namespace Application.Features.Permissions.Commands.DeleteRole;
 
 public class DeleteRoleCommandHandler(
     RoleManager<ApplicationRole> roleManager,
     UserManager<ApplicationUser> userManager,
-    IConfiguration configuration) : IRequestHandler<DeleteRoleCommand, RoleDeleteResponse>
+    IProtectedEntityManagerService protectedEntityManagerService) : IRequestHandler<DeleteRoleCommand, RoleDeleteResponse>
 {
     public async Task<RoleDeleteResponse> Handle(DeleteRoleCommand request, CancellationToken cancellationToken)
     {
@@ -19,7 +19,7 @@ public class DeleteRoleCommandHandler(
         var role = await roleManager.FindByNameAsync(roleName).ConfigureAwait(false) ??
             throw new NotFoundException("Role not found.");
 
-        var superRoles = configuration.GetSection("ProtectedAuthorizationEntities:SuperRoles").Get<List<string>>() ?? [];
+        var superRoles = protectedEntityManagerService.GetSuperRoles() ?? [];
         if(superRoles.Contains(roleName))
         {
             throw new BadRequestException("Cannot delete SuperRole.");

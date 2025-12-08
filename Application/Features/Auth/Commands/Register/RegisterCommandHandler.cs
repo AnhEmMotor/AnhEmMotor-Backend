@@ -1,15 +1,15 @@
 using Application.ApiContracts.Auth.Responses;
+using Application.Interfaces.Services;
 using Domain.Constants;
 using Domain.Entities;
 using FluentValidation;
 using FluentValidation.Results;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 
 namespace Application.Features.Auth.Commands.Register;
 
-public class RegisterCommandHandler(UserManager<ApplicationUser> userManager, IConfiguration configuration) : IRequestHandler<RegisterCommand, RegistrationSuccessResponse>
+public class RegisterCommandHandler(UserManager<ApplicationUser> userManager, IProtectedEntityManagerService protectedEntityManagerService) : IRequestHandler<RegisterCommand, RegistrationSuccessResponse>
 {
     public async Task<RegistrationSuccessResponse> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
@@ -38,9 +38,7 @@ public class RegisterCommandHandler(UserManager<ApplicationUser> userManager, IC
             throw new ValidationException(failures);
         }
 
-        var defaultRoles = configuration.GetSection("ProtectedAuthorizationEntities:DefaultRolesForNewUsers")
-                .Get<List<string>>() ??
-            [];
+        var defaultRoles = protectedEntityManagerService.GetDefaultRolesForNewUsers() ?? [];
         if(defaultRoles.Count > 0)
         {
             var randomRole = defaultRoles[Random.Shared.Next(defaultRoles.Count)];

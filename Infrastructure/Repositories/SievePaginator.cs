@@ -8,7 +8,7 @@ using Sieve.Services;
 
 namespace Infrastructure.Repositories
 {
-    public class SievePaginator(ISieveProcessor sieveProcessor) : IPaginator
+    public class SievePaginator(ISieveProcessor sieveProcessor) : ISievePaginator
     {
         public async Task<Domain.Primitives.PagedResult<TResponse>> ApplyAsync<TEntity, TResponse>(
             IQueryable<TEntity> query,
