@@ -25,6 +25,8 @@ public static class PermissionsList
         public const string Create = "Permissions.Products.Create";
         public const string Edit = "Permissions.Products.Edit";
         public const string Delete = "Permissions.Products.Delete";
+        public const string EditPrice = "Permissions.Products.EditPrice";
+        public const string ChangeStatus = "Permissions.Products.ChangeStatus";
     }
 
     /// <summary>
@@ -58,7 +60,7 @@ public static class PermissionsList
         public const string Create = "Permissions.Inputs.Create";
         public const string Edit = "Permissions.Inputs.Edit";
         public const string Delete = "Permissions.Inputs.Delete";
-        public const string Approve = "Permissions.Inputs.Approve";
+        public const string ChangeStatus = "Permissions.Inputs.ChangeStatus";
     }
 
     /// <summary>
@@ -70,7 +72,7 @@ public static class PermissionsList
         public const string Create = "Permissions.Outputs.Create";
         public const string Edit = "Permissions.Outputs.Edit";
         public const string Delete = "Permissions.Outputs.Delete";
-        public const string Approve = "Permissions.Outputs.Approve";
+        public const string ChangeStatus = "Permissions.Outputs.ChangeStatus";
     }
 
     /// <summary>
@@ -123,6 +125,7 @@ public static class PermissionsList
         public const string Edit = "Permissions.Users.Edit";
         public const string Delete = "Permissions.Users.Delete";
         public const string AssignRoles = "Permissions.Users.AssignRoles";
+        public const string ChangePassword = "Permissions.Users.ChangePassword";
     }
 
     /// <summary>
@@ -139,6 +142,8 @@ public static class PermissionsList
         { Products.Create, new PermissionMetadata("Create Product", "Tạo sản phẩm mới") },
         { Products.Edit, new PermissionMetadata("Edit Product", "Chỉnh sửa sản phẩm") },
         { Products.Delete, new PermissionMetadata("Delete Product", "Xóa sản phẩm") },
+        { Products.EditPrice, new PermissionMetadata("Edit Price", "Chỉnh giá của sản phẩm") },
+        { Products.ChangeStatus, new PermissionMetadata("Change Status", "Chỉnh trạng thái của sản phẩm (đang bán hoặc ngưng bán)") },
 
         { ProductCategories.View, new PermissionMetadata("View Product Categories", "Xem danh mục sản phẩm") },
         { ProductCategories.Create, new PermissionMetadata("Create Product Category", "Tạo danh mục sản phẩm mới") },
@@ -154,13 +159,13 @@ public static class PermissionsList
         { Inputs.Create, new PermissionMetadata("Create Input", "Tạo đơn nhập hàng mới") },
         { Inputs.Edit, new PermissionMetadata("Edit Input", "Chỉnh sửa đơn nhập hàng") },
         { Inputs.Delete, new PermissionMetadata("Delete Input", "Xóa đơn nhập hàng") },
-        { Inputs.Approve, new PermissionMetadata("Approve Input", "Phê duyệt đơn nhập hàng") },
+        { Inputs.ChangeStatus, new PermissionMetadata("Change Status", "Thay đổi trạng thái đơn nhập hàng (hoàn tất hoặc huỷ bỏ)") },
 
         { Outputs.View, new PermissionMetadata("View Outputs", "Xem danh sách đơn xuất hàng") },
         { Outputs.Create, new PermissionMetadata("Create Output", "Tạo đơn xuất hàng mới") },
         { Outputs.Edit, new PermissionMetadata("Edit Output", "Chỉnh sửa đơn xuất hàng") },
         { Outputs.Delete, new PermissionMetadata("Delete Output", "Xóa đơn xuất hàng") },
-        { Outputs.Approve, new PermissionMetadata("Approve Output", "Phê duyệt đơn xuất hàng") },
+        { Outputs.ChangeStatus, new PermissionMetadata("Change Status", "Thay đổi trạng thái đơn hàng") },
 
         { Files.View, new PermissionMetadata("View Files", "Xem danh sách tệp tin") },
         { Files.Upload, new PermissionMetadata("Upload File", "Tải lên tệp tin") },
@@ -183,6 +188,7 @@ public static class PermissionsList
         { Users.Edit, new PermissionMetadata("Edit User", "Chỉnh sửa thông tin người dùng") },
         { Users.Delete, new PermissionMetadata("Delete User", "Xóa người dùng") },
         { Users.AssignRoles, new PermissionMetadata("Assign Roles", "Gán vai trò cho người dùng") },
+        { Users.ChangePassword, new PermissionMetadata("Change Password", "Đổi mật khẩu người dùng")  },
     };
 
     /// <summary>

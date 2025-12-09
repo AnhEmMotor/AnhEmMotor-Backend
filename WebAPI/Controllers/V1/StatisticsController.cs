@@ -6,9 +6,11 @@ using Application.Features.Statistical.Queries.GetOrderStatusCounts;
 using Application.Features.Statistical.Queries.GetProductReportLastMonth;
 using Application.Features.Statistical.Queries.GetProductStockAndPrice;
 using Asp.Versioning;
+using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using static Domain.Constants.Permission.PermissionsList;
 
 namespace WebAPI.Controllers.V1;
 
@@ -29,6 +31,7 @@ public class StatisticsController(IMediator mediator) : ControllerBase
     /// <param name="days">Số ngày tính từ hiện tại trở về trước</param>
     /// <param name="cancellationToken"></param>
     [HttpGet("daily-revenue")]
+    [HasPermission(Statistical.View)]
     [ProducesResponseType(typeof(IEnumerable<DailyRevenueResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetDailyRevenue(
         [FromQuery] int days = 7,
@@ -43,6 +46,7 @@ public class StatisticsController(IMediator mediator) : ControllerBase
     /// Lấy các chỉ số tổng hợp cho Dashboard.
     /// </summary>
     [HttpGet("dashboard-stats")]
+    [HasPermission(Statistical.View)]
     [ProducesResponseType(typeof(DashboardStatsResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetDashboardStats(CancellationToken cancellationToken)
     {
@@ -57,6 +61,7 @@ public class StatisticsController(IMediator mediator) : ControllerBase
     /// <param name="months">Số tháng tính từ hiện tại trở về trước</param>
     /// <param name="cancellationToken"></param>
     [HttpGet("monthly-revenue-profit")]
+    [HasPermission(Statistical.View)]
     [ProducesResponseType(typeof(IEnumerable<MonthlyRevenueProfitResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetMonthlyRevenueProfit(
         [FromQuery] int months = 12,
@@ -71,6 +76,7 @@ public class StatisticsController(IMediator mediator) : ControllerBase
     /// Lấy số lượng đơn hàng theo từng trạng thái.
     /// </summary>
     [HttpGet("order-status-counts")]
+    [HasPermission(Statistical.View)]
     [ProducesResponseType(typeof(IEnumerable<OrderStatusCountResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetOrderStatusCounts(CancellationToken cancellationToken)
     {
@@ -83,6 +89,7 @@ public class StatisticsController(IMediator mediator) : ControllerBase
     /// Lấy báo cáo sản phẩm của tháng trước.
     /// </summary>
     [HttpGet("product-report-last-month")]
+    [HasPermission(Statistical.View)]
     [ProducesResponseType(typeof(IEnumerable<ProductReportResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetProductReportLastMonth(CancellationToken cancellationToken)
     {
@@ -95,6 +102,7 @@ public class StatisticsController(IMediator mediator) : ControllerBase
     /// Lấy giá và tồn kho của một sản phẩm cụ thể.
     /// </summary>
     [HttpGet("product-stock-price/{variantId:int}")]
+    [HasPermission(Statistical.View)]
     [ProducesResponseType(typeof(ProductStockPriceResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetProductStockAndPrice(int variantId, CancellationToken cancellationToken)

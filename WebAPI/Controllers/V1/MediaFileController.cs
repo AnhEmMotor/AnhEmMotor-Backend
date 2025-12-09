@@ -10,11 +10,13 @@ using Application.Features.Files.Queries.GetFileById;
 using Application.Features.Files.Queries.GetFilesList;
 using Application.Features.Files.Queries.ViewImage;
 using Asp.Versioning;
+using Infrastructure.Authorization.Attribute;
 using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
+using static Domain.Constants.Permission.PermissionsList;
 
 namespace WebAPI.Controllers.V1;
 
@@ -90,6 +92,7 @@ public class MediaFileController(IMediator mediator) : ControllerBase
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpPost("upload-image")]
+    [RequiresAnyPermissions(Products.Edit, Products.Create)]
     [ProducesResponseType(typeof(MediaFileResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UploadImage(IFormFile file, CancellationToken cancellationToken)
@@ -108,6 +111,7 @@ public class MediaFileController(IMediator mediator) : ControllerBase
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpPost("upload-images")]
+    [RequiresAnyPermissions(Products.Edit, Products.Create)]
     [ProducesResponseType(typeof(List<MediaFileResponse>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UploadManyImages(List<IFormFile> files, CancellationToken cancellationToken)
@@ -136,6 +140,7 @@ public class MediaFileController(IMediator mediator) : ControllerBase
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpDelete("{storagePath}")]
+    [RequiresAnyPermissions(Products.Edit, Products.Create)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteFile(string storagePath, CancellationToken cancellationToken)
@@ -156,6 +161,7 @@ public class MediaFileController(IMediator mediator) : ControllerBase
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpDelete("delete-many")]
+    [RequiresAnyPermissions(Products.Edit, Products.Create)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteFiles(
@@ -180,6 +186,7 @@ public class MediaFileController(IMediator mediator) : ControllerBase
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpPost("restore/{storagePath}")]
+    [RequiresAnyPermissions(Products.Edit, Products.Create)]
     [ProducesResponseType(typeof(MediaFileResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RestoreFile(string storagePath, CancellationToken cancellationToken)
@@ -202,6 +209,7 @@ public class MediaFileController(IMediator mediator) : ControllerBase
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpPost("restore-many")]
+    [RequiresAnyPermissions(Products.Edit, Products.Create)]
     [ProducesResponseType(typeof(List<MediaFileResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RestoreFiles(

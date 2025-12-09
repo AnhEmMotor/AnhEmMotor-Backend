@@ -10,11 +10,13 @@ using Application.Features.ProductCategories.Queries.GetDeletedProductCategories
 using Application.Features.ProductCategories.Queries.GetProductCategoriesList;
 using Application.Features.ProductCategories.Queries.GetProductCategoryById;
 using Asp.Versioning;
+using Infrastructure.Authorization.Attribute;
 using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
+using static Domain.Constants.Permission.PermissionsList;
 
 namespace WebAPI.Controllers.V1;
 
@@ -33,6 +35,7 @@ public class ProductCategoryController(IMediator mediator) : ControllerBase
     /// Lấy danh sách danh mục sản phẩm (có phân trang, lọc, sắp xếp).
     /// </summary>
     [HttpGet]
+    [HasPermission(ProductCategories.View)]
     [ProducesResponseType(typeof(Domain.Primitives.PagedResult<ProductCategoryResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetProductCategories(
         [FromQuery] SieveModel sieveModel,
@@ -47,6 +50,7 @@ public class ProductCategoryController(IMediator mediator) : ControllerBase
     /// Lấy danh sách danh mục sản phẩm đã bị xoá (có phân trang, lọc, sắp xếp).
     /// </summary>
     [HttpGet("deleted")]
+    [HasPermission(ProductCategories.View)]
     [ProducesResponseType(typeof(Domain.Primitives.PagedResult<ProductCategoryResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetDeletedProductCategories(
         [FromQuery] SieveModel sieveModel,
@@ -61,6 +65,7 @@ public class ProductCategoryController(IMediator mediator) : ControllerBase
     /// Lấy thông tin danh mục sản phẩm theo Id.
     /// </summary>
     [HttpGet("{id:int}")]
+    [HasPermission(ProductCategories.View)]
     [ProducesResponseType(typeof(ProductCategoryResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetProductCategoryById(int id, CancellationToken cancellationToken)
@@ -82,6 +87,7 @@ public class ProductCategoryController(IMediator mediator) : ControllerBase
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpPost]
+    [HasPermission(ProductCategories.Create)]
     [ProducesResponseType(typeof(ProductCategoryResponse), StatusCodes.Status201Created)]
     public async Task<IActionResult> CreateProductCategory(
         [FromBody] CreateProductCategoryRequest request,
@@ -96,6 +102,7 @@ public class ProductCategoryController(IMediator mediator) : ControllerBase
     /// Cập nhật danh mục sản phẩm.
     /// </summary>
     [HttpPut("{id:int}")]
+    [HasPermission(ProductCategories.Edit)]
     [ProducesResponseType(typeof(ProductCategoryResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateProductCategory(
@@ -117,6 +124,7 @@ public class ProductCategoryController(IMediator mediator) : ControllerBase
     /// Xoá danh mục sản phẩm (soft delete).
     /// </summary>
     [HttpDelete("{id:int}")]
+    [HasPermission(ProductCategories.Delete)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteProductCategory(int id, CancellationToken cancellationToken)
@@ -135,6 +143,7 @@ public class ProductCategoryController(IMediator mediator) : ControllerBase
     /// Xoá nhiều danh mục sản phẩm cùng lúc.
     /// </summary>
     [HttpDelete("delete-many")]
+    [HasPermission(ProductCategories.Delete)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteProductCategories(
@@ -156,6 +165,7 @@ public class ProductCategoryController(IMediator mediator) : ControllerBase
     /// Khôi phục 1 danh mục sản phẩm đã bị xoá.
     /// </summary>
     [HttpPatch("restore/{id:int}")]
+    [HasPermission(ProductCategories.Delete)]
     [ProducesResponseType(typeof(ProductCategoryResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
@@ -176,6 +186,7 @@ public class ProductCategoryController(IMediator mediator) : ControllerBase
     /// Khôi phục nhiều danh mục sản phẩm cùng lúc.
     /// </summary>
     [HttpPost("restore-many")]
+    [HasPermission(ProductCategories.Delete)]
     [ProducesResponseType(typeof(List<ProductCategoryResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RestoreProductCategories(

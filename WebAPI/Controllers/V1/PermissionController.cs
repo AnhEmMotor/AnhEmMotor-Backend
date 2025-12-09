@@ -145,7 +145,7 @@ public class PermissionController(IMediator mediator) : ControllerBase
     }
 
     /// <summary>
-    /// Xóa vai trò (hard delete)
+    /// Xóa vai trò
     /// </summary>
     [HttpDelete("roles/{roleName}")]
     [HasPermission(Domain.Constants.Permission.PermissionsList.Roles.Delete)]
@@ -159,7 +159,7 @@ public class PermissionController(IMediator mediator) : ControllerBase
     }
 
     /// <summary>
-    /// Xóa nhiều vai trò (hard delete)
+    /// Xóa nhiều vai trò
     /// </summary>
     [HttpPost("roles/delete-multiple")]
     [HasPermission(Domain.Constants.Permission.PermissionsList.Roles.Delete)]

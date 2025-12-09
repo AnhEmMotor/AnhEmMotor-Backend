@@ -2,9 +2,11 @@
 using Application.Features.Settings.Commands.SetSettings;
 using Application.Features.Settings.Queries.GetAllSettings;
 using Asp.Versioning;
+using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using static Domain.Constants.Permission.PermissionsList;
 
 namespace WebAPI.Controllers.V1;
 
@@ -26,6 +28,7 @@ public class SettingController(IMediator mediator) : ControllerBase
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpPut]
+    [HasPermission(Settings.Edit)]
     [ProducesResponseType(typeof(Dictionary<string, long?>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> SetSettings(
@@ -47,6 +50,7 @@ public class SettingController(IMediator mediator) : ControllerBase
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpGet]
+    [HasPermission(Settings.View)]
     [ProducesResponseType(typeof(Dictionary<string, long?>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllSettings(CancellationToken cancellationToken)
     {
