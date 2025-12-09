@@ -1,69 +1,46 @@
-﻿using Domain.Entities;
-using Infrastructure.DBContexts;
-using Infrastructure.Seeders;
-using Microsoft.AspNetCore.Identity;
-using Swashbuckle.AspNetCore.SwaggerUI;
+﻿using Swashbuckle.AspNetCore.SwaggerUI;
+using WebAPI.Extensions;
 using WebAPI.StartupExtensions;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Đăng ký services (Giữ nguyên logic trong ConfigureServicesExtension của bạn)
 builder.Services.ConfigureServices(builder.Configuration, builder.Environment);
 
 var app = builder.Build();
 
-var hostLifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
-var cancellationToken = hostLifetime.ApplicationStopping;
+// Xử lý Middleware
+app.UseExceptionHandler(); // Đưa lên đầu để bắt lỗi sớm
+app.UseOpenTelemetryPrometheusScrapingEndpoint();
 
-using(var scope = app.Services.CreateScope())
-{
-    var serviceProvider = scope.ServiceProvider;
-    var dbContext = serviceProvider.GetRequiredService<ApplicationDBContext>();
-    var roleManager = serviceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
-    var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-    var configuration = serviceProvider.GetRequiredService<IConfiguration>();
-
-    var shouldSeed = configuration.GetValue<bool>("SeedingOptions:RunDataSeedingOnStartup");
-
-    if(shouldSeed)
-    {
-        await PermissionDataSeeder.SeedPermissionsAsync(dbContext, cancellationToken).ConfigureAwait(false);
-        await ProtectedEntitiesSeeder.SeedProtectedEntitiesAsync(
-            dbContext,
-            roleManager,
-            userManager,
-            configuration,
-            cancellationToken)
-            .ConfigureAwait(false);
-    }
-}
-
+// Swagger config
 try
 {
     app.UseSwagger();
-    app.UseSwaggerUI(
-        options =>
-        {
-            var provider = app.Services.GetRequiredService<Asp.Versioning.ApiExplorer.IApiVersionDescriptionProvider>();
-            foreach(var description in provider.ApiVersionDescriptions)
-            {
-                options.SwaggerEndpoint(
-                    $"/swagger/{description.GroupName}/swagger.json",
-                    description.GroupName.ToUpperInvariant());
-            }
-            options.DocExpansion(DocExpansion.None);
-        });
-} catch(System.Reflection.ReflectionTypeLoadException ex)
-{
-    foreach(var loaderException in ex.LoaderExceptions)
+    app.UseSwaggerUI(options =>
     {
-        Console.WriteLine(loaderException?.Message);
-    }
-    throw;
+        var provider = app.Services.GetRequiredService<Asp.Versioning.ApiExplorer.IApiVersionDescriptionProvider>();
+        foreach (var description in provider.ApiVersionDescriptions)
+        {
+            options.SwaggerEndpoint(
+                $"/swagger/{description.GroupName}/swagger.json",
+                description.GroupName.ToUpperInvariant());
+        }
+        options.DocExpansion(DocExpansion.None);
+    });
+}
+catch (Exception ex)
+{
+    // Log lỗi Swagger nhưng không chết app nếu chỉ lỗi docs
+    Console.WriteLine($"Swagger configuration error: {ex.Message}");
 }
 
-app.UseOpenTelemetryPrometheusScrapingEndpoint();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseExceptionHandler();
 app.MapControllers();
+
+// Chạy Seeding/Migration (Code gọn gàng nhờ Extension method)
+await app.ApplyMigrationsAndSeedAsync();
+
 app.Run();

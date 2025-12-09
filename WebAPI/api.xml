@@ -1008,6 +1008,161 @@
             <param name="value">The string value to write. If null or empty, no value is written.</param>
             <param name="options">Options to control JSON serialization behavior. This parameter can be used to customize serialization features.</param>
         </member>
+        <member name="T:WebAPI.StartupExtensions.AuthExtensions">
+            <summary>
+            Provides extension methods for configuring custom authentication services, including ASP.NET Core Identity and JWT
+            bearer authentication, in an application's dependency injection container.
+            </summary>
+            <remarks>This class is intended to be used in the application's startup configuration to simplify the setup of
+            authentication and authorization. The extension method configures password requirements, unique email enforcement,
+            and JWT token validation parameters based on the provided configuration. It should be called during service
+            registration to ensure authentication is properly set up before the application starts handling requests.</remarks>
+        </member>
+        <member name="M:WebAPI.StartupExtensions.AuthExtensions.AddCustomAuthentication(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Configures ASP.NET Core Identity and JWT-based authentication for the application using the specified
+            configuration settings.
+            </summary>
+            <remarks>This method sets up password requirements, unique email enforcement, and configures JWT
+            authentication schemes and token validation parameters. Ensure that the configuration contains valid values for
+            'Jwt:Key', 'Jwt:Issuer', and 'Jwt:Audience'.</remarks>
+            <param name="services">The service collection to which authentication and identity services will be added.</param>
+            <param name="configuration">The application configuration containing JWT settings such as issuer, audience, and signing key.</param>
+            <returns>The same service collection instance with authentication and identity services configured.</returns>
+            <exception cref="T:System.InvalidOperationException">Thrown if the JWT signing key is not specified in the configuration.</exception>
+        </member>
+        <member name="T:WebAPI.StartupExtensions.MvcExtensions">
+            <summary>
+            Provides extension methods for configuring MVC services with custom conventions, API versioning, validation error
+            handling, and JSON serialization options in an ASP.NET Core application.
+            </summary>
+            <remarks>This static class is intended to be used in the application's service registration phase, typically
+            within the Startup class or Program file. The provided extension methods streamline the setup of common MVC
+            features, including routing conventions, API versioning, standardized validation error responses, global exception
+            handling, and JSON serialization settings. Using these extensions helps ensure consistent behavior and reduces
+            boilerplate code across the application.</remarks>
+        </member>
+        <member name="M:WebAPI.StartupExtensions.MvcExtensions.AddCustomMvc(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Adds and configures custom MVC, API versioning, routing, validation response, exception handling, and JSON
+            serialization settings to the application's service collection.
+            </summary>
+            <remarks>This method configures routing to use lowercase URLs and query strings, sets up API
+            versioning with URL segment support, customizes validation error responses, registers a global exception
+            handler, and applies JSON serialization options. It is intended to be called during application startup to
+            standardize API behavior across the application.</remarks>
+            <param name="services">The <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> to which the MVC and related services will be added. Cannot be null.</param>
+            <returns>The same <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> instance so that additional calls can be chained.</returns>
+        </member>
+        <member name="T:WebAPI.StartupExtensions.ObservabilityExtensions">
+            <summary>
+            Provides extension methods for configuring OpenTelemetry tracing and metrics with custom service information in an
+            ASP.NET Core application.
+            </summary>
+            <remarks>This static class contains extension methods that simplify the setup of OpenTelemetry instrumentation
+            and exporting for services. The extensions are intended to be used during application startup to enable distributed
+            tracing and metrics collection with minimal configuration. All methods are thread-safe and designed for use in
+            dependency injection scenarios.</remarks>
+        </member>
+        <member name="M:WebAPI.StartupExtensions.ObservabilityExtensions.AddCustomOpenTelemetry(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration,System.String,System.String)">
+            <summary>
+            Adds OpenTelemetry tracing and metrics to the service collection using the specified configuration, service
+            name, and service version.
+            </summary>
+            <remarks>This method configures both tracing and metrics for ASP.NET Core and HTTP client
+            instrumentation, sets up resource information, and exports telemetry data using OTLP and Prometheus exporters.
+            The OTLP endpoint is read from the configuration key 'OpenTelemetry:OtlpEndpoint'; if not specified, it defaults
+            to 'http://localhost:4317'.</remarks>
+            <param name="services">The service collection to which OpenTelemetry services will be added.</param>
+            <param name="configuration">The application configuration used to retrieve OpenTelemetry settings, such as the OTLP endpoint.</param>
+            <param name="serviceName">The name of the service to be used for OpenTelemetry resource identification and instrumentation.</param>
+            <param name="serviceVersion">The version of the service to be used for OpenTelemetry resource identification.</param>
+            <returns>The same service collection instance with OpenTelemetry tracing and metrics configured.</returns>
+        </member>
+        <member name="T:WebAPI.StartupExtensions.SwaggerExtensions">
+            <summary>
+            Provides extension methods for configuring custom Swagger/OpenAPI services in an ASP.NET Core application.
+            </summary>
+            <remarks>This class contains static methods that extend the service collection to add Swagger generation and
+            configuration, including JWT bearer authentication support and XML documentation integration. Use these extensions
+            during application startup to enable API documentation and security definitions for your web APIs.</remarks>
+        </member>
+        <member name="M:WebAPI.StartupExtensions.SwaggerExtensions.AddCustomSwagger(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.AspNetCore.Hosting.IWebHostEnvironment)">
+            <summary>
+            Adds and configures Swagger services for API documentation, including JWT bearer authentication support and XML
+            comments integration based on the hosting environment.
+            </summary>
+            <remarks>XML comments are included in the Swagger documentation only if the environment is not set to
+            "Test" and the XML file exists. JWT bearer authentication is configured for API security. This method enables
+            Swagger annotations and registers additional Swagger options.</remarks>
+            <param name="services">The service collection to which Swagger services will be added.</param>
+            <param name="environment">The current web hosting environment, used to determine whether to include XML comments in the Swagger
+            configuration.</param>
+            <returns>The same service collection instance, allowing for method chaining.</returns>
+        </member>
+        <member name="T:WebAPI.StartupExtensions.ConfigureServicesExtension">
+            <summary>
+            Provides extension methods for configuring application services in an ASP.NET Core application.
+            </summary>
+            <remarks>This class contains methods that extend the IServiceCollection interface to register core framework,
+            authentication, documentation, observability, application, and infrastructure services. It is intended to be used
+            during application startup to centralize and standardize service registration.</remarks>
+        </member>
+        <member name="M:WebAPI.StartupExtensions.ConfigureServicesExtension.ConfigureServices(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration,Microsoft.AspNetCore.Hosting.IWebHostEnvironment)">
+            <summary>
+            Configures application services, including MVC, authentication, documentation, observability, application, and
+            infrastructure layers, for the ASP.NET Core dependency injection container.
+            </summary>
+            <remarks>This extension method centralizes the registration of core framework, authentication,
+            documentation, observability, application, and infrastructure services. Infrastructure services are not
+            registered when the environment is set to "Test". Call this method during application startup to ensure all
+            required services are available for dependency injection.</remarks>
+            <param name="services">The service collection to which application services will be added. Must not be null.</param>
+            <param name="configuration">The application configuration used to retrieve settings for service registration. Must not be null.</param>
+            <param name="environment">The web hosting environment that determines environment-specific service registration. Must not be null.</param>
+            <returns>The same <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> instance with the configured services added.</returns>
+        </member>
+        <member name="T:WebAPI.StartupExtensions.ConfigureSwaggerOptions">
+            <summary>
+            Cấu hình các tài liệu Swagger cho từng phiên bản API.
+            </summary>
+            <param name="provider">Cung cấp mô tả về các phiên bản API đã khám phá.</param>
+        </member>
+        <member name="M:WebAPI.StartupExtensions.ConfigureSwaggerOptions.#ctor(Asp.Versioning.ApiExplorer.IApiVersionDescriptionProvider)">
+            <summary>
+            Cấu hình các tài liệu Swagger cho từng phiên bản API.
+            </summary>
+            <param name="provider">Cung cấp mô tả về các phiên bản API đã khám phá.</param>
+        </member>
+        <member name="M:WebAPI.StartupExtensions.ConfigureSwaggerOptions.Configure(Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenOptions)">
+            <summary>
+            Cấu hình các tùy chọn SwaggerGen.
+            </summary>
+            <param name="options">Các tùy chọn cho SwaggerGen.</param>
+        </member>
+        <member name="T:WebAPI.Extensions.MigrationExtensions">
+            <summary>
+            Provides extension methods for applying database migrations and seeding initial data to an ASP.NET Core application
+            at startup.
+            </summary>
+            <remarks>These extensions are intended to be used during application startup to ensure the database schema is
+            up to date and required seed data is present. The seeding operation is controlled by the configuration setting
+            'SeedingOptions:RunDataSeedingOnStartup'. If enabled, roles, users, permissions, and protected entities are seeded
+            using the application's registered services. This class is typically used in the Program.cs file as part of the
+            application's initialization pipeline.</remarks>
+        </member>
+        <member name="M:WebAPI.Extensions.MigrationExtensions.ApplyMigrationsAndSeedAsync(Microsoft.AspNetCore.Builder.WebApplication)">
+            <summary>
+            Applies any pending database migrations and seeds initial data for the application if configured to do so.
+            </summary>
+            <remarks>This method should be called during application startup to ensure the database schema is up
+            to date and required seed data is present. Data seeding is performed only if the configuration value
+            'SeedingOptions:RunDataSeedingOnStartup' is set to <see langword="true"/>. If an error occurs during migration
+            or seeding, the exception is logged and rethrown, which may terminate the application.</remarks>
+            <param name="app">The <see cref="T:Microsoft.AspNetCore.Builder.WebApplication"/> instance whose services will be used to perform migrations and data seeding.
+            Must not be null.</param>
+            <returns>A task that represents the asynchronous operation.</returns>
+        </member>
         <member name="T:WebAPI.Middleware.GlobalExceptionHandler">
             <summary>
             Provides a centralized exception handler for HTTP requests, generating standardized API error responses and logging
@@ -1052,39 +1207,6 @@
             A value indicating whether the exception was handled and an error response was written. Always returns <see
             langword="true"/>.
             </returns>
-        </member>
-        <member name="T:WebAPI.StartupExtensions.ConfigureServicesExtension">
-            <summary>
-            Cài đặt DI cho dự án: Route luôn in thường, DB Context, bật API Versioning, tạo file api.xml để hướng dẫn route.
-            </summary>
-        </member>
-        <member name="M:WebAPI.StartupExtensions.ConfigureServicesExtension.ConfigureServices(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration,Microsoft.AspNetCore.Hosting.IWebHostEnvironment)">
-            <summary>
-            Cấu hình các dịch vụ cho ứng dụng, bao gồm tùy chọn Route, DI tầng Infrastructure, API Versioning và
-            Swagger/OpenAPI.
-            </summary>
-            <param name="services">Bộ sưu tập các dịch vụ (IServiceCollection).</param>
-            <param name="configuration">Cấu hình ứng dụng (IConfiguration).</param>
-            <param name="environment">Môi trường web hosting (IWebHostEnvironment).</param>
-            <returns>Bộ sưu tập các dịch vụ đã được cấu hình (IServiceCollection).</returns>
-        </member>
-        <member name="T:WebAPI.StartupExtensions.ConfigureSwaggerOptions">
-            <summary>
-            Cấu hình các tài liệu Swagger cho từng phiên bản API.
-            </summary>
-            <param name="provider">Cung cấp mô tả về các phiên bản API đã khám phá.</param>
-        </member>
-        <member name="M:WebAPI.StartupExtensions.ConfigureSwaggerOptions.#ctor(Asp.Versioning.ApiExplorer.IApiVersionDescriptionProvider)">
-            <summary>
-            Cấu hình các tài liệu Swagger cho từng phiên bản API.
-            </summary>
-            <param name="provider">Cung cấp mô tả về các phiên bản API đã khám phá.</param>
-        </member>
-        <member name="M:WebAPI.StartupExtensions.ConfigureSwaggerOptions.Configure(Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenOptions)">
-            <summary>
-            Cấu hình các tùy chọn SwaggerGen.
-            </summary>
-            <param name="options">Các tùy chọn cho SwaggerGen.</param>
         </member>
         <member name="T:Program">
             <summary>
