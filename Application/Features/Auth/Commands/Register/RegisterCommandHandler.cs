@@ -9,7 +9,9 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Application.Features.Auth.Commands.Register;
 
-public class RegisterCommandHandler(UserManager<ApplicationUser> userManager, IProtectedEntityManagerService protectedEntityManagerService) : IRequestHandler<RegisterCommand, RegistrationSuccessResponse>
+public class RegisterCommandHandler(
+    UserManager<ApplicationUser> userManager,
+    IProtectedEntityManagerService protectedEntityManagerService) : IRequestHandler<RegisterCommand, RegistrationSuccessResponse>
 {
     public async Task<RegistrationSuccessResponse> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {

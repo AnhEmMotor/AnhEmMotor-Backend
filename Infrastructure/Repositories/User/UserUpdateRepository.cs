@@ -6,14 +6,19 @@ namespace Infrastructure.Repositories.User
 {
     public class UserUpdateRepository(UserManager<ApplicationUser> userManager) : IUserUpdateRepository
     {
-        public async Task UpdateRefreshTokenAsync(Guid userId, string refreshToken, DateTimeOffset expiryTime)
+        public async Task UpdateRefreshTokenAsync(
+            Guid userId,
+            string refreshToken,
+            DateTimeOffset expiryTime,
+            CancellationToken cancellationToken)
         {
-            var user = await userManager.FindByIdAsync(userId.ToString());
-            if (user is not null)
+            cancellationToken.ThrowIfCancellationRequested();
+            var user = await userManager.FindByIdAsync(userId.ToString()).ConfigureAwait(false);
+            if(user is not null)
             {
                 user.RefreshToken = refreshToken;
                 user.RefreshTokenExpiryTime = expiryTime;
-                await userManager.UpdateAsync(user);
+                await userManager.UpdateAsync(user).ConfigureAwait(false);
             }
         }
     }

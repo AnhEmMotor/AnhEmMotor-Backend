@@ -10,7 +10,9 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Application.Features.UserManager.Commands.ChangeUserStatus;
 
-public class ChangeUserStatusCommandHandler(UserManager<ApplicationUser> userManager, IProtectedEntityManagerService protectedEntityManagerService) : IRequestHandler<ChangeUserStatusCommand, ChangeStatusUserByManagerResponse>
+public class ChangeUserStatusCommandHandler(
+    UserManager<ApplicationUser> userManager,
+    IProtectedEntityManagerService protectedEntityManagerService) : IRequestHandler<ChangeUserStatusCommand, ChangeStatusUserByManagerResponse>
 {
     public async Task<ChangeStatusUserByManagerResponse> Handle(
         ChangeUserStatusCommand request,

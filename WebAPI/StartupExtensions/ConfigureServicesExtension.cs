@@ -1,15 +1,18 @@
 ﻿using Application.DependencyInjection;
-using Infrastructure.DependencyInjection; // Nơi chứa AddInfrastructureServices
+using Infrastructure.DependencyInjection;
 using Sieve.Models;
+using WebAPI.Extensions;
 
 namespace WebAPI.StartupExtensions;
 
 /// <summary>
 /// Provides extension methods for configuring application services in an ASP.NET Core application.
 /// </summary>
-/// <remarks>This class contains methods that extend the IServiceCollection interface to register core framework,
-/// authentication, documentation, observability, application, and infrastructure services. It is intended to be used
-/// during application startup to centralize and standardize service registration.</remarks>
+/// <remarks>
+/// This class contains methods that extend the IServiceCollection interface to register core framework, authentication,
+/// documentation, observability, application, and infrastructure services. It is intended to be used during application
+/// startup to centralize and standardize service registration.
+/// </remarks>
 public static class ConfigureServicesExtension
 {
     private static readonly string ServiceName = "AnhEmMotor API";
@@ -19,10 +22,12 @@ public static class ConfigureServicesExtension
     /// Configures application services, including MVC, authentication, documentation, observability, application, and
     /// infrastructure layers, for the ASP.NET Core dependency injection container.
     /// </summary>
-    /// <remarks>This extension method centralizes the registration of core framework, authentication,
-    /// documentation, observability, application, and infrastructure services. Infrastructure services are not
-    /// registered when the environment is set to "Test". Call this method during application startup to ensure all
-    /// required services are available for dependency injection.</remarks>
+    /// <remarks>
+    /// This extension method centralizes the registration of core framework, authentication, documentation,
+    /// observability, application, and infrastructure services. Infrastructure services are not registered when the
+    /// environment is set to "Test". Call this method during application startup to ensure all required services are
+    /// available for dependency injection.
+    /// </remarks>
     /// <param name="services">The service collection to which application services will be added. Must not be null.</param>
     /// <param name="configuration">The application configuration used to retrieve settings for service registration. Must not be null.</param>
     /// <param name="environment">The web hosting environment that determines environment-specific service registration. Must not be null.</param>
@@ -32,27 +37,21 @@ public static class ConfigureServicesExtension
         IConfiguration configuration,
         IWebHostEnvironment environment)
     {
-        // 1. Core Framework & MVC
         services.AddCustomMvc();
         services.AddHttpContextAccessor();
 
-        // 2. Authentication & Authorization
         services.AddCustomAuthentication(configuration);
 
-        // 3. Documentation (Swagger)
         services.AddCustomSwagger(environment);
         services.ConfigureOptions<ConfigureSwaggerOptions>();
 
-        // 4. Observability (Logs, Metrics, Tracing)
         services.AddCustomOpenTelemetry(configuration, ServiceName, ServiceVersion);
 
-        // 5. Application Layer (MediatR, Mapster, Validators...)
         services.AddApplicationServices();
         services.AddMapsterConfiguration(typeof(ApplicationServices).Assembly);
         services.Configure<SieveOptions>(configuration.GetSection("Sieve"));
 
-        // 6. Infrastructure Layer (DB, Repositories...)
-        if (!environment.IsEnvironment("Test"))
+        if(!environment.IsEnvironment("Test"))
         {
             services.AddInfrastructureServices(configuration);
         }

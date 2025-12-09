@@ -8,7 +8,9 @@ namespace Application.Features.Inputs.Queries.GetInputsList;
 
 public sealed class GetInputsListQueryHandler(IInputReadRepository repository, ISievePaginator paginator) : IRequestHandler<GetInputsListQuery, Domain.Primitives.PagedResult<InputResponse>>
 {
-    public Task<Domain.Primitives.PagedResult<InputResponse>> Handle(GetInputsListQuery request, CancellationToken cancellationToken)
+    public Task<Domain.Primitives.PagedResult<InputResponse>> Handle(
+        GetInputsListQuery request,
+        CancellationToken cancellationToken)
     {
         var query = repository.GetQueryable();
 

@@ -2,6 +2,7 @@
 using Application.ApiContracts.User.Responses;
 using Application.Common.Exceptions;
 using Application.Interfaces.Repositories.User;
+using Domain.Constants;
 using Domain.Entities;
 using Domain.Primitives;
 using Microsoft.AspNetCore.Identity;
@@ -9,16 +10,14 @@ using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
 using Sieve.Services;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Infrastructure.Repositories.User
 {
     public class UserReadRepository(UserManager<ApplicationUser> userManager, ISieveProcessor sieveProcessor) : IUserReadRepository
     {
         public async Task<PagedResult<UserResponse>> GetPagedListAsync(
-        SieveModel sieveModel,
-        CancellationToken cancellationToken)
+            SieveModel sieveModel,
+            CancellationToken cancellationToken)
         {
             var query = userManager.Users.AsNoTracking();
 
@@ -30,7 +29,7 @@ namespace Infrastructure.Repositories.User
 
             var userResponses = new List<UserResponse>();
 
-            foreach (var user in entities)
+            foreach(var user in entities)
             {
                 var roles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
 
@@ -45,49 +44,48 @@ namespace Infrastructure.Repositories.User
                     EmailConfirmed = user.EmailConfirmed,
                     Status = user.Status ?? "Active",
                     DeletedAt = user.DeletedAt,
-                    Roles = [.. roles]
+                    Roles = [ .. roles ]
                 };
 
                 userResponses.Add(response);
             }
 
-            return new Domain.Primitives.PagedResult<UserResponse>(
+            return new PagedResult<UserResponse>(
                 userResponses,
                 totalCount,
                 sieveModel.Page ?? 1,
                 sieveModel.PageSize ?? 10);
         }
 
-        public async Task<UserAuthDTO> GetUserByRefreshTokenAsync(string refreshToken)
+        public async Task<UserAuthDTO> GetUserByRefreshTokenAsync(
+            string refreshToken,
+            CancellationToken cancellationToken)
         {
-            // Dùng UserManager để tìm user có token khớp (EF Core sẽ tự translate câu query này)
-            // Lưu ý: UserManager không có hàm FindByRefreshToken, bạn phải query qua Users.
-            // Nếu tuân thủ Clean Arc cực đoan, đoạn này nên gọi qua UserReadRepository, 
-            // nhưng vì IdentityService nằm ở Infra nên chấp nhận dùng UserManager.
-
-            var user = await userManager.Users.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken) ?? throw new UnauthorizedException("Invalid refresh token.");
-            if (user.RefreshTokenExpiryTime <= DateTimeOffset.UtcNow)
+            var user = await userManager.Users
+                    .FirstOrDefaultAsync(u => string.Compare(u.RefreshToken, refreshToken) == 0, cancellationToken)
+                    .ConfigureAwait(false) ??
+                throw new UnauthorizedException("Invalid refresh token.");
+            if(user.RefreshTokenExpiryTime <= DateTimeOffset.UtcNow)
             {
                 throw new UnauthorizedException("Refresh token has expired. Please login again.");
             }
 
-            if (user.Status != "Active" || user.DeletedAt != null)
+            if(string.Compare(user.Status, UserStatus.Active) != 0 || user.DeletedAt != null)
             {
                 throw new ForbiddenException("Account is not available.");
             }
 
-            var roles = await userManager.GetRolesAsync(user);
+            var roles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
 
-            // Mapping sang DTO
             return new UserAuthDTO()
             {
                 Id = user.Id,
                 Username = user.UserName,
-                Roles = [.. roles],
+                Roles = [ .. roles ],
                 Email = user.Email,
                 FullName = user.FullName,
                 Status = user.Status,
-                AuthMethods = ["pwd"]
+                AuthMethods = [ "pwd" ]
             };
         }
     }

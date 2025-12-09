@@ -1,6 +1,5 @@
 using Application.ApiContracts.Auth.Requests;
 using Application.Interfaces.Services;
-using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -12,39 +11,42 @@ using System.Text.Json;
 
 namespace Infrastructure.Services;
 
-public class TokenManagerService(IConfiguration configuration): ITokenManagerService
+public class TokenManagerService(IConfiguration configuration) : ITokenManagerService
 {
-    public Task<string> CreateAccessTokenAsync(UserAuthDTO user, DateTimeOffset expiryTime, CancellationToken cancellationToken)
+    public Task<string> CreateAccessTokenAsync(
+        UserAuthDTO user,
+        DateTimeOffset expiryTime,
+        CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
         var claims = new List<Claim>
-            {
-                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
-                new(JwtRegisteredClaimNames.Name, user.Username ?? string.Empty),
-                new("full_name", user.FullName ?? string.Empty),
-                new("status", user.Status ?? string.Empty)
-            };
+        {
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
+            new(JwtRegisteredClaimNames.Name, user.Username ?? string.Empty),
+            new("full_name", user.FullName ?? string.Empty),
+            new("status", user.Status ?? string.Empty)
+        };
 
-        if (user.AuthMethods is { Length: > 0 })
+        if(user.AuthMethods is { Length: > 0 })
         {
             claims.Add(new Claim("amr", JsonSerializer.Serialize(user.AuthMethods), JsonClaimValueTypes.JsonArray));
         }
 
-        if (user.Roles is null)
+        if(user.Roles is null)
         {
             throw new InvalidOperationException("User roles cannot be null.");
         }
 
-        foreach (var role in user.Roles)
+        foreach(var role in user.Roles)
         {
             claims.Add(new Claim("role", role));
         }
 
         var jwtKey = configuration["Jwt:Key"];
-        if (string.IsNullOrEmpty(jwtKey))
+        if(string.IsNullOrEmpty(jwtKey))
         {
             throw new InvalidOperationException("Jwt:Key is missing in configuration.");
         }
@@ -57,8 +59,7 @@ public class TokenManagerService(IConfiguration configuration): ITokenManagerSer
             audience: configuration["Jwt:Audience"],
             expires: expiryTime.UtcDateTime,
             claims: claims,
-            signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
-        );
+            signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256));
 
         var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 

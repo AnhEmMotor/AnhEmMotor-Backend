@@ -21,18 +21,19 @@ public class UpdateRolePermissionsCommandHandler(
         UpdateRolePermissionsCommand request,
         CancellationToken cancellationToken)
     {
-        var role = await roleManager.FindByNameAsync(request.RoleName).ConfigureAwait(false) ?? throw new NotFoundException("Role not found.");
+        var role = await roleManager.FindByNameAsync(request.RoleName).ConfigureAwait(false) ??
+            throw new NotFoundException("Role not found.");
         var isRoleUpdated = false;
 
-        if (request.Model.Description is not null && string.Compare(role.Description, request.Model.Description) != 0)
+        if(request.Model.Description is not null && string.Compare(role.Description, request.Model.Description) != 0)
         {
             role.Description = request.Model.Description;
             isRoleUpdated = true;
         }
 
-        if (request.Model.Permissions.Count == 0)
+        if(request.Model.Permissions.Count == 0)
         {
-            if (isRoleUpdated)
+            if(isRoleUpdated)
             {
                 await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
@@ -48,12 +49,14 @@ public class UpdateRolePermissionsCommandHandler(
             .ToHashSet();
 
         var invalidPermissions = request.Model.Permissions.Where(p => !validSystemPermissions.Contains(p)).ToList();
-        if (invalidPermissions.Count != 0)
+        if(invalidPermissions.Count != 0)
         {
             throw new BadRequestException($"Invalid permissions: {string.Join(", ", invalidPermissions)}");
         }
 
-        var currentRolePermissions = await roleReadRepository.GetRolePermissionsByRoleIdAsync(role.Id, cancellationToken)
+        var currentRolePermissions = await roleReadRepository.GetRolePermissionsByRoleIdAsync(
+            role.Id,
+            cancellationToken)
             .ConfigureAwait(false);
 
         var currentPermissionNames = currentRolePermissions
@@ -61,19 +64,19 @@ public class UpdateRolePermissionsCommandHandler(
             .Select(rp => rp.Permission!.Name)
             .ToHashSet();
 
-        var permissionNamesToAdd = request.Model.Permissions
-            .Where(p => !currentPermissionNames.Contains(p))
-            .ToList();
+        var permissionNamesToAdd = request.Model.Permissions.Where(p => !currentPermissionNames.Contains(p)).ToList();
 
         var rolePermissionsToRemove = currentRolePermissions
             .Where(rp => rp.Permission is not null && !request.Model.Permissions.Contains(rp.Permission.Name))
             .ToList();
 
-        if (rolePermissionsToRemove.Count != 0)
+        if(rolePermissionsToRemove.Count != 0)
         {
             var permissionIdsToRemove = rolePermissionsToRemove.Select(rp => rp.PermissionId).ToHashSet();
 
-            var existingAssignments = await permissionReadRepository.GetRolePermissionsByPermissionIdsAsync(permissionIdsToRemove, cancellationToken)
+            var existingAssignments = await permissionReadRepository.GetRolePermissionsByPermissionIdsAsync(
+                permissionIdsToRemove,
+                cancellationToken)
                 .ConfigureAwait(false);
 
             var orphanedPermissions = existingAssignments
@@ -82,18 +85,21 @@ public class UpdateRolePermissionsCommandHandler(
                 .Select(g => g.First().Permission!.Name)
                 .ToList();
 
-            if (orphanedPermissions.Count != 0)
+            if(orphanedPermissions.Count != 0)
             {
-                throw new BadRequestException($"Cannot remove last role assignment for: {string.Join(", ", orphanedPermissions)}.");
+                throw new BadRequestException(
+                    $"Cannot remove last role assignment for: {string.Join(", ", orphanedPermissions)}.");
             }
 
             roleUpdateRepository.RemovePermissionsFromRole(rolePermissionsToRemove);
             isRoleUpdated = true;
         }
 
-        if (permissionNamesToAdd.Count != 0)
+        if(permissionNamesToAdd.Count != 0)
         {
-            var permissionsEntities = await permissionReadRepository.GetPermissionsByNamesAsync(permissionNamesToAdd, cancellationToken)
+            var permissionsEntities = await permissionReadRepository.GetPermissionsByNamesAsync(
+                permissionNamesToAdd,
+                cancellationToken)
                 .ConfigureAwait(false);
 
             var newRolePermissions = permissionsEntities
@@ -106,7 +112,7 @@ public class UpdateRolePermissionsCommandHandler(
             isRoleUpdated = true;
         }
 
-        if (isRoleUpdated)
+        if(isRoleUpdated)
         {
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }

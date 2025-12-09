@@ -15,7 +15,7 @@ public sealed class GetDeletedBrandsListQueryHandler(IBrandReadRepository reposi
     {
         var query = repository.GetQueryable(DataFetchMode.DeletedOnly);
 
-        return paginator.ApplyAsync<BrandEntity, ApiContracts.Brand.Responses.BrandResponse>(
+        return paginator.ApplyAsync<BrandEntity, BrandResponse>(
             query,
             request.SieveModel,
             DataFetchMode.DeletedOnly,

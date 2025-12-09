@@ -22,9 +22,7 @@ public class GetUserPermissionsByIdQueryHandler(
             .ConfigureAwait(false);
 
         var roleIds = roleEntities.Select(r => r.Id).ToList();
-        var userPermissionNames = await roleReadRepository.GetPermissionNamesByRoleIdsAsync(
-            roleIds,
-            cancellationToken)
+        var userPermissionNames = await roleReadRepository.GetPermissionNamesByRoleIdsAsync(roleIds, cancellationToken)
             .ConfigureAwait(false);
 
         var userPermissions = userPermissionNames

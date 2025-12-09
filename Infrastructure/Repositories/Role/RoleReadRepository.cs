@@ -4,20 +4,19 @@ using Domain.Entities;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Infrastructure.Repositories.Role
 {
-    public class RoleReadRepository(ApplicationDBContext context): IRoleReadRepository
+    public class RoleReadRepository(ApplicationDBContext context) : IRoleReadRepository
     {
-
         public Task<List<ApplicationRole>> GetRolesByNamesAsync(
-        IEnumerable<string> names,
-        CancellationToken cancellationToken = default)
+            IEnumerable<string> names,
+            CancellationToken cancellationToken = default)
         { return context.Roles.Where(r => names.Contains(r.Name!)).ToListAsync(cancellationToken); }
 
-        public Task<List<RolePermission>> GetRolePermissionsByRoleIdAsync(Guid roleId, CancellationToken cancellationToken = default)
+        public Task<List<RolePermission>> GetRolePermissionsByRoleIdAsync(
+            Guid roleId,
+            CancellationToken cancellationToken = default)
         {
             return context.RolePermissions
                 .Include(rp => rp.Permission)
@@ -37,8 +36,8 @@ namespace Infrastructure.Repositories.Role
         }
 
         public Task<List<string>> GetPermissionNamesByRoleIdAsync(
-        Guid roleId,
-        CancellationToken cancellationToken = default)
+            Guid roleId,
+            CancellationToken cancellationToken = default)
         {
             return context.RolePermissions
                 .Where(rp => rp.RoleId == roleId)

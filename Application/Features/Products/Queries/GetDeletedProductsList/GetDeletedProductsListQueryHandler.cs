@@ -17,12 +17,8 @@ public sealed class GetDeletedProductsListQueryHandler(IProductReadRepository re
         var (products, totalCount) = await repository.GetPagedDeletedProductsAsync(page, pageSize, cancellationToken)
             .ConfigureAwait(false);
 
-        var responses = products.Select(p => p.Adapt<ApiContracts.Product.Responses.ProductDetailResponse>()).ToList();
+        var responses = products.Select(p => p.Adapt<ProductDetailResponse>()).ToList();
 
-        return new Domain.Primitives.PagedResult<ProductDetailResponse>(
-            responses,
-            totalCount,
-            page,
-            pageSize);
+        return new Domain.Primitives.PagedResult<ProductDetailResponse>(responses, totalCount, page, pageSize);
     }
 }

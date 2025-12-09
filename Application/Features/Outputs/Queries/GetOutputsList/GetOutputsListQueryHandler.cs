@@ -8,7 +8,9 @@ namespace Application.Features.Outputs.Queries.GetOutputsList;
 
 public sealed class GetOutputsListQueryHandler(IOutputReadRepository repository, ISievePaginator paginator) : IRequestHandler<GetOutputsListQuery, Domain.Primitives.PagedResult<OutputResponse>>
 {
-    public Task<Domain.Primitives.PagedResult<OutputResponse>> Handle(GetOutputsListQuery request, CancellationToken cancellationToken)
+    public Task<Domain.Primitives.PagedResult<OutputResponse>> Handle(
+        GetOutputsListQuery request,
+        CancellationToken cancellationToken)
     {
         var query = repository.GetQueryable();
 
