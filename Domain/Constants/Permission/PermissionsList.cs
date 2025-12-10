@@ -128,6 +128,11 @@ public static class PermissionsList
         public const string ChangePassword = "Permissions.Users.ChangePassword";
     }
 
+    public static class Test
+    {
+        public const string DoAnything = "Permissions.Test.DoAnything";
+    }
+
     /// <summary>
     /// Metadata của các permissions (tên hiển thị, mô tả)
     /// </summary>
@@ -189,6 +194,8 @@ public static class PermissionsList
         { Users.Delete, new PermissionMetadata("Delete User", "Xóa người dùng") },
         { Users.AssignRoles, new PermissionMetadata("Assign Roles", "Gán vai trò cho người dùng") },
         { Users.ChangePassword, new PermissionMetadata("Change Password", "Đổi mật khẩu người dùng")  },
+
+        { Test.DoAnything, new PermissionMetadata("Do Anything", "Thực hiện bất cứ việc gì") },
     };
 
     /// <summary>

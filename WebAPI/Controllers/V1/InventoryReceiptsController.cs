@@ -19,6 +19,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Security.Claims;
 using static Domain.Constants.Permission.PermissionsList;
 
 namespace WebAPI.Controllers.V1;
@@ -172,7 +173,12 @@ public class InventoryReceiptsController(IMediator mediator) : ControllerBase
         [FromBody] Application.ApiContracts.Input.Requests.UpdateInputStatusRequest request,
         CancellationToken cancellationToken)
     {
-        var command = request.Adapt<UpdateInputStatusCommand>() with { Id = id };
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var command = request.Adapt<UpdateInputStatusCommand>() with 
+        { 
+            Id = id,
+            CurrentUserId = Guid.TryParse(currentUserId, out var guid) ? guid : null
+        };
         var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         if(error != null)
         {

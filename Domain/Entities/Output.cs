@@ -13,8 +13,13 @@ namespace Domain.Entities
         [Column("CustomerName")]
         public string? CustomerName { get; set; }
 
-        [Column("EmpCode")]
-        public int? EmpCode { get; set; }
+        [Column("BuyerId")]
+        [ForeignKey("Buyer")]
+        public Guid? BuyerId { get; set; }
+
+        [Column("CompletedByUserId")]
+        [ForeignKey("CompletedByUser")]
+        public Guid? CompletedByUserId { get; set; }
 
         [Column("StatusId")]
         [ForeignKey("OutputStatus")]
@@ -22,6 +27,10 @@ namespace Domain.Entities
 
         [Column("Notes", TypeName = "nvarchar(MAX)")]
         public string? Notes { get; set; }
+
+        public ApplicationUser? Buyer { get; set; }
+
+        public ApplicationUser? CompletedByUser { get; set; }
 
         public OutputStatus? OutputStatus { get; set; }
 

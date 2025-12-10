@@ -14,6 +14,10 @@ public class InputResponse
 
     public string? SupplierName { get; set; }
 
+    public Guid? CreatedByUserId { get; set; }
+
+    public string? CreatedByUserName { get; set; }
+
     public long? TotalPayable { get; set; }
 
     public List<InputInfoResponse> Products { get; set; } = [];

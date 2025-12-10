@@ -40,7 +40,7 @@ public class SupplierController(IMediator mediator) : ControllerBase
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpGet]
-    [HasPermission(Suppliers.View)]
+    [RequiresAnyPermissions(Suppliers.View, Inputs.Edit, Inputs.Create)]
     [ProducesResponseType(typeof(Domain.Primitives.PagedResult<SupplierResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetSuppliers(
         [FromQuery] SieveModel sieveModel,

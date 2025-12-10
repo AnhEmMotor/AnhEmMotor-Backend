@@ -3,7 +3,6 @@ using Application.ApiContracts.Permission.Responses;
 using Application.Features.Permissions.Commands.CreateRole;
 using Application.Features.Permissions.Commands.DeleteMultipleRoles;
 using Application.Features.Permissions.Commands.DeleteRole;
-using Application.Features.Permissions.Commands.UpdateRole;
 using Application.Features.Permissions.Commands.UpdateRolePermissions;
 using Application.Features.Permissions.Queries.GetAllPermissions;
 using Application.Features.Permissions.Queries.GetAllRoles;
@@ -31,7 +30,7 @@ namespace WebAPI.Controllers.V1;
 public class PermissionController(IMediator mediator) : ControllerBase
 {
     /// <summary>
-    /// Lấy tất cả các permissions có trong hệ thống với mô tả và trạng thái truy cập của người dùng hiện tại
+    /// Lấy tất cả các permissions có trong hệ thống với mô tả
     /// </summary>
     [HttpGet("permissions")]
     [HasPermission(Domain.Constants.Permission.PermissionsList.Roles.View)]
@@ -140,7 +139,7 @@ public class PermissionController(IMediator mediator) : ControllerBase
         [FromBody] UpdateRoleRequest model,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new UpdateRoleCommand(roleName, model), cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(new UpdateRolePermissionsCommand(roleName, model), cancellationToken).ConfigureAwait(true);
         return Ok(result);
     }
 

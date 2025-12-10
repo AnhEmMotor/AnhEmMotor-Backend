@@ -4,6 +4,7 @@ using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20251210084448_ChangeNameColumnUserReferencesToInvoices")]
+    partial class ChangeNameColumnUserReferencesToInvoices
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -183,12 +186,12 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid?>("CreatedByUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("CreatedByUserId");
-
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("FinishedByUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("FinishedByUserId");
 
                     b.Property<DateTimeOffset?>("InputDate")
                         .HasColumnType("datetimeoffset")
@@ -211,7 +214,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatedByUserId");
+                    b.HasIndex("FinishedByUserId");
 
                     b.HasIndex("StatusId");
 
@@ -406,10 +409,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("BuyerId");
 
-                    b.Property<Guid?>("CompletedByUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("CompletedByUserId");
-
                     b.Property<DateTimeOffset?>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
@@ -419,6 +418,14 @@ namespace Infrastructure.Migrations
 
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("EmpCode")
+                        .HasColumnType("int")
+                        .HasColumnName("EmpCode");
+
+                    b.Property<Guid?>("EmployeeCompletedId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("EmployeeCompletedId");
 
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(MAX)")
@@ -435,7 +442,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("BuyerId");
 
-                    b.HasIndex("CompletedByUserId");
+                    b.HasIndex("EmployeeCompletedId");
 
                     b.HasIndex("StatusId");
 
@@ -1029,9 +1036,9 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Input", b =>
                 {
-                    b.HasOne("Domain.Entities.ApplicationUser", "CreatedByUser")
+                    b.HasOne("Domain.Entities.ApplicationUser", "FinishedByUser")
                         .WithMany()
-                        .HasForeignKey("CreatedByUserId");
+                        .HasForeignKey("FinishedByUserId");
 
                     b.HasOne("Domain.Entities.InputStatus", "InputStatus")
                         .WithMany("InputReceipts")
@@ -1041,7 +1048,7 @@ namespace Infrastructure.Migrations
                         .WithMany("InputReceipts")
                         .HasForeignKey("SupplierId");
 
-                    b.Navigation("CreatedByUser");
+                    b.Navigation("FinishedByUser");
 
                     b.Navigation("InputStatus");
 
@@ -1082,7 +1089,7 @@ namespace Infrastructure.Migrations
 
                     b.HasOne("Domain.Entities.ApplicationUser", "CompletedByUser")
                         .WithMany()
-                        .HasForeignKey("CompletedByUserId");
+                        .HasForeignKey("EmployeeCompletedId");
 
                     b.HasOne("Domain.Entities.OutputStatus", "OutputStatus")
                         .WithMany("OutputOrders")

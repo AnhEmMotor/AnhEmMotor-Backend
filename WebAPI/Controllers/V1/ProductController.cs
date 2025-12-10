@@ -19,6 +19,7 @@ using Application.Features.Products.Queries.GetProductById;
 using Application.Features.Products.Queries.GetProductsList;
 using Application.Features.Products.Queries.GetVariantLiteByProductId;
 using Asp.Versioning;
+using Domain.Entities;
 using Infrastructure.Authorization.Attribute;
 using Mapster;
 using MediatR;
@@ -71,7 +72,7 @@ public class ProductController(ISender sender) : ControllerBase
     /// Lấy danh sách biến thể sản phẩm của tất cả sản phẩm (có phân trang, lọc, tìm kiếm).
     /// </summary>
     [HttpGet("variants-lite")]
-    [HasPermission(Products.View)]
+    [RequiresAnyPermissions(Products.View, Inputs.Edit, Inputs.Create, Outputs.Edit, Outputs.Create)]
     [ProducesResponseType(typeof(Domain.Primitives.PagedResult<ProductVariantLiteResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetActiveVariantLiteProducts(
         [FromQuery] SieveModel request,

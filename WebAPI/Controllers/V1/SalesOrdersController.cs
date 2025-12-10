@@ -10,6 +10,7 @@ using Application.Features.Outputs.Commands.UpdateOutputStatus;
 using Application.Features.Outputs.Queries.GetDeletedOutputsList;
 using Application.Features.Outputs.Queries.GetOutputById;
 using Application.Features.Outputs.Queries.GetOutputsList;
+using Application.Features.Outputs.Queries.GetOutputsByBuyerId;
 using Asp.Versioning;
 using Infrastructure.Authorization.Attribute;
 using Mapster;
@@ -18,6 +19,7 @@ using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using Domain.Primitives;
+using System.Security.Claims;
 using static Domain.Constants.Permission.PermissionsList;
 
 namespace WebAPI.Controllers.V1;
@@ -33,6 +35,33 @@ namespace WebAPI.Controllers.V1;
 [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status500InternalServerError)]
 public class SalesOrdersController(IMediator mediator) : ControllerBase
 {
+    /// <summary>
+    /// Lấy danh sách đơn hàng của khách hàng hiện tại (dựa trên JWT token).
+    /// </summary>
+    [HttpGet("my-purchases")]
+    [ProducesResponseType(typeof(PagedResult<OutputResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> GetMyPurchases([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
+    {
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if(string.IsNullOrEmpty(currentUserId) || !Guid.TryParse(currentUserId, out var buyerId))
+        {
+            return Unauthorized(new Application.Common.Models.ErrorResponse
+            {
+                Errors =
+                    [ new Application.Common.Models.ErrorDetail
+                    {
+                        Field = "Authorization",
+                        Message = "Không thể lấy thông tin người dùng từ token."
+                    } ]
+            });
+        }
+
+        var query = new GetOutputsByBuyerIdQuery(buyerId, sieveModel);
+        var pagedResult = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return Ok(pagedResult);
+    }
+
     /// <summary>
     /// Lấy danh sách đơn hàng (có phân trang, lọc, sắp xếp).
     /// </summary>
@@ -134,7 +163,12 @@ public class SalesOrdersController(IMediator mediator) : ControllerBase
         [FromBody] Application.ApiContracts.Output.Requests.UpdateOutputStatusRequest request,
         CancellationToken cancellationToken)
     {
-        var command = request.Adapt<UpdateOutputStatusCommand>() with { Id = id };
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var command = request.Adapt<UpdateOutputStatusCommand>() with 
+        { 
+            Id = id,
+            CurrentUserId = Guid.TryParse(currentUserId, out var guid) ? guid : null
+        };
         var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         if(error != null)
         {

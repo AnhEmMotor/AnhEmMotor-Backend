@@ -9,5 +9,7 @@ public sealed record CreateOutputCommand : IRequest<(OutputResponse? Data, Commo
 
     public string? Notes { get; init; }
 
+    public Guid? BuyerId { get; init; }
+
     public ICollection<OutputInfoResponse> OutputInfos { get; init; } = [];
 }

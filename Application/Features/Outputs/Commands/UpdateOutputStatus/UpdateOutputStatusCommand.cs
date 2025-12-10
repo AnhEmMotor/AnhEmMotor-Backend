@@ -8,4 +8,6 @@ public sealed record UpdateOutputStatusCommand : IRequest<(OutputResponse? Data,
     public int Id { get; init; }
 
     public string StatusId { get; init; } = string.Empty;
+
+    public Guid? CurrentUserId { get; init; }
 }

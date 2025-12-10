@@ -63,7 +63,11 @@ public sealed class UpdateOutputStatusCommandHandler(
             });
         }
 
-        if(string.Compare(request.StatusId, OrderStatus.Completed) != 0)
+        if(string.Compare(request.StatusId, OrderStatus.Completed) == 0)
+        {
+            output.CompletedByUserId = request.CurrentUserId;
+        }
+        else
         {
             foreach(var outputInfo in output.OutputInfos)
             {

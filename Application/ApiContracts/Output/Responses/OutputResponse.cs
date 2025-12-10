@@ -8,6 +8,14 @@ public class OutputResponse
 
     public string? Notes { get; set; }
 
+    public Guid? BuyerId { get; set; }
+
+    public string? BuyerName { get; set; }
+
+    public Guid? CompletedByUserId { get; set; }
+
+    public string? CompletedByUserName { get; set; }
+
     public long? Total { get; set; }
 
     public List<OutputInfoResponse> Products { get; set; } = [];

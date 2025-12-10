@@ -24,9 +24,15 @@ namespace Domain.Entities
         [ForeignKey("Supplier")]
         public int? SupplierId { get; set; }
 
+        [Column("CreatedByUserId")]
+        [ForeignKey("CreatedByUser")]
+        public Guid? CreatedByUserId { get; set; }
+
         public InputStatus? InputStatus { get; set; }
 
         public Supplier? Supplier { get; set; }
+
+        public ApplicationUser? CreatedByUser { get; set; }
 
         public ICollection<InputInfo> InputInfos { get; set; } = [];
     }

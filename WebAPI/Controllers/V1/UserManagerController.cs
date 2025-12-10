@@ -16,7 +16,7 @@ using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
-using Domain.Constants.Permission;
+using static Domain.Constants.Permission.PermissionsList;
 
 namespace WebAPI.Controllers.V1;
 
@@ -44,7 +44,7 @@ public class UserManagerController(IMediator mediator) : ControllerBase
     /// <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
     /// <param name="cancellationToken"></param>
     [HttpGet]
-    [HasPermission(PermissionsList.Users.View)]
+    [RequiresAnyPermissions(Users.View, Outputs.Edit, Outputs.Create)]
     [ProducesResponseType(typeof(Domain.Primitives.PagedResult<UserResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllUsers([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
     {
@@ -57,7 +57,7 @@ public class UserManagerController(IMediator mediator) : ControllerBase
     /// Lấy thông tin người dùng theo ID
     /// </summary>
     [HttpGet("{userId:guid}")]
-    [HasPermission(PermissionsList.Users.View)]
+    [HasPermission(Users.View)]
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetUserById(Guid userId, CancellationToken cancellationToken)
@@ -70,7 +70,7 @@ public class UserManagerController(IMediator mediator) : ControllerBase
     /// Cập nhật thông tin người dùng
     /// </summary>
     [HttpPut("{userId:guid}")]
-    [HasPermission(PermissionsList.Users.Edit)]
+    [HasPermission(Users.Edit)]
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
@@ -87,7 +87,7 @@ public class UserManagerController(IMediator mediator) : ControllerBase
     /// Đổi mật khẩu người dùng theo ID
     /// </summary>
     [HttpPost("{userId:guid}/change-password")]
-    [HasPermission(PermissionsList.Users.ChangePassword)]
+    [HasPermission(Users.ChangePassword)]
     [ProducesResponseType(typeof(ChangePasswordByManagerResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status403Forbidden)]
@@ -113,7 +113,7 @@ public class UserManagerController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
-    [HasPermission(PermissionsList.Users.AssignRoles)]
+    [HasPermission(Users.AssignRoles)]
     public async Task<IActionResult> AssignRoles(
         Guid userId,
         [FromBody] AssignRolesRequest model,
@@ -127,7 +127,7 @@ public class UserManagerController(IMediator mediator) : ControllerBase
     /// Thay đổi trạng thái của người dùng
     /// </summary>
     [HttpPatch("{userId:guid}/status")]
-    [HasPermission(PermissionsList.Users.Edit)]
+    [HasPermission(Users.Edit)]
     [ProducesResponseType(typeof(ChangeStatusUserByManagerResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
@@ -149,7 +149,7 @@ public class UserManagerController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(ChangeStatusMultiUserByManagerResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
-    [HasPermission(PermissionsList.Users.Edit)]
+    [HasPermission(Users.Edit)]
     public async Task<IActionResult> ChangeMultipleUsersStatus(
         [FromBody] ChangeMultipleUsersStatusRequest model,
         CancellationToken cancellationToken)

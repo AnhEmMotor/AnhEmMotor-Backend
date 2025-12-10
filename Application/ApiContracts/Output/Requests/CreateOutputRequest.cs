@@ -4,6 +4,8 @@ namespace Application.ApiContracts.Output.Requests;
 
 public class CreateOutputRequest
 {
+    public Guid? BuyerId { get; set; }
+
     public string? Notes { get; set; }
 
     [JsonPropertyName("products")]

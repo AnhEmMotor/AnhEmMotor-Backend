@@ -4,6 +4,7 @@ using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20251210065204_AddUserReferencesToInvoices")]
+    partial class AddUserReferencesToInvoices
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -406,12 +409,12 @@ namespace Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("BuyerId");
 
-                    b.Property<Guid?>("CompletedByUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("CompletedByUserId");
-
                     b.Property<DateTimeOffset?>("CreatedAt")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("CreatedByUserId");
 
                     b.Property<string>("CustomerName")
                         .HasColumnType("nvarchar(max)")
@@ -419,6 +422,10 @@ namespace Infrastructure.Migrations
 
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("EmpCode")
+                        .HasColumnType("int")
+                        .HasColumnName("EmpCode");
 
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(MAX)")
@@ -435,7 +442,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("BuyerId");
 
-                    b.HasIndex("CompletedByUserId");
+                    b.HasIndex("CreatedByUserId");
 
                     b.HasIndex("StatusId");
 
@@ -1082,7 +1089,7 @@ namespace Infrastructure.Migrations
 
                     b.HasOne("Domain.Entities.ApplicationUser", "CompletedByUser")
                         .WithMany()
-                        .HasForeignKey("CompletedByUserId");
+                        .HasForeignKey("CreatedByUserId");
 
                     b.HasOne("Domain.Entities.OutputStatus", "OutputStatus")
                         .WithMany("OutputOrders")

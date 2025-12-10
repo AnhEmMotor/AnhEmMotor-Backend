@@ -8,4 +8,7 @@ public sealed record UpdateInputStatusCommand : IRequest<(InputResponse? Data, C
     public int Id { get; init; }
 
     public string StatusId { get; init; } = string.Empty;
+
+    public Guid? CurrentUserId { get; init; }
 }
+

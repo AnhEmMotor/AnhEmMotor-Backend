@@ -19,7 +19,7 @@ public class RegisterCommandHandler(
         {
             UserName = string.IsNullOrEmpty(request.Username) ? request.Email : request.Username,
             Email = request.Email,
-            FullName = request.FullName,
+            FullName = string.IsNullOrEmpty(request.FullName) ? request.Email : request.FullName,
             PhoneNumber = request.PhoneNumber,
             Gender = request.Gender ?? GenderStatus.Male,
             Status = UserStatus.Active

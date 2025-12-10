@@ -428,7 +428,7 @@
         </member>
         <member name="M:WebAPI.Controllers.V1.PermissionController.GetAllPermissions(System.Threading.CancellationToken)">
             <summary>
-            Lấy tất cả các permissions có trong hệ thống với mô tả và trạng thái truy cập của người dùng hiện tại
+            Lấy tất cả các permissions có trong hệ thống với mô tả
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.PermissionController.GetMyPermissions(System.Threading.CancellationToken)">
@@ -647,6 +647,11 @@
             Quản lý đơn hàng/phiếu xuất.
             </summary>
             <param name="mediator"></param>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetMyPurchases(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+            <summary>
+            Lấy danh sách đơn hàng của khách hàng hiện tại (dựa trên JWT token).
+            </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetOutputs(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
