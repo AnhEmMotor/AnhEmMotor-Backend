@@ -4,5 +4,5 @@ namespace Application.Interfaces.Repositories.Output;
 
 public interface IOutputInsertRepository
 {
-    void Add(OutputEntity output);
+    public void Add(OutputEntity output);
 }

@@ -5,7 +5,7 @@ namespace Application.Interfaces.Repositories
 {
     public interface ISievePaginator
     {
-        Task<Domain.Primitives.PagedResult<TResponse>> ApplyAsync<TEntity, TResponse>(
+        public Task<Domain.Primitives.PagedResult<TResponse>> ApplyAsync<TEntity, TResponse>(
             IQueryable<TEntity> query,
             SieveModel sieveModel,
             DataFetchMode? defaultSortMode = DataFetchMode.ActiveOnly,

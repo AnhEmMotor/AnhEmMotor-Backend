@@ -5,9 +5,9 @@ namespace Application.Interfaces.Repositories.Output;
 
 public interface IOutputDeleteRepository
 {
-    void Delete(OutputEntity output);
+    public void Delete(OutputEntity output);
 
-    void Delete(IEnumerable<OutputEntity> outputs);
+    public void Delete(IEnumerable<OutputEntity> outputs);
 
-    void DeleteOutputInfo(OutputInfoEntity outputInfo);
+    public void DeleteOutputInfo(OutputInfoEntity outputInfo);
 }

@@ -4,7 +4,7 @@ namespace Application.Interfaces.Repositories.Product;
 
 public interface IProductDeleteRepository
 {
-    void Delete(ProductEntity product);
+    public void Delete(ProductEntity product);
 
-    void Delete(IEnumerable<ProductEntity> products);
+    public void Delete(IEnumerable<ProductEntity> products);
 }

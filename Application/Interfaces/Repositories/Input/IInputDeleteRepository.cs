@@ -5,9 +5,9 @@ namespace Application.Interfaces.Repositories.Input;
 
 public interface IInputDeleteRepository
 {
-    void Delete(InputEntity input);
+    public void Delete(InputEntity input);
 
-    void Delete(IEnumerable<InputEntity> inputs);
+    public void Delete(IEnumerable<InputEntity> inputs);
 
-    void DeleteInputInfo(InputInfoEntity inputInfo);
+    public void DeleteInputInfo(InputInfoEntity inputInfo);
 }

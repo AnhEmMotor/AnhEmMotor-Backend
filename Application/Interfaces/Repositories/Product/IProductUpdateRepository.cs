@@ -4,9 +4,9 @@ namespace Application.Interfaces.Repositories.Product;
 
 public interface IProductUpdateRepository
 {
-    void Update(ProductEntity product);
+    public void Update(ProductEntity product);
 
-    void Restore(ProductEntity product);
+    public void Restore(ProductEntity product);
 
-    void Restore(IEnumerable<ProductEntity> products);
+    public void Restore(IEnumerable<ProductEntity> products);
 }

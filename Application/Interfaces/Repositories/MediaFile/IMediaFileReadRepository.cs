@@ -5,28 +5,28 @@ namespace Application.Interfaces.Repositories.MediaFile;
 
 public interface IMediaFileReadRepository
 {
-    IQueryable<MediaFileEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly);
+    public IQueryable<MediaFileEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-    Task<IEnumerable<MediaFileEntity>> GetAllAsync(
+    public Task<IEnumerable<MediaFileEntity>> GetAllAsync(
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-    Task<MediaFileEntity?> GetByIdAsync(
+    public Task<MediaFileEntity?> GetByIdAsync(
         int id,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-    Task<MediaFileEntity?> GetByStoragePathAsync(
+    public Task<MediaFileEntity?> GetByStoragePathAsync(
         string storagePath,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-    Task<IEnumerable<MediaFileEntity>> GetByStoragePathsAsync(
+    public Task<IEnumerable<MediaFileEntity>> GetByStoragePathsAsync(
         IEnumerable<string> storagePaths,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-    Task<IEnumerable<MediaFileEntity>> GetByIdAsync(
+    public Task<IEnumerable<MediaFileEntity>> GetByIdAsync(
         IEnumerable<int> ids,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);

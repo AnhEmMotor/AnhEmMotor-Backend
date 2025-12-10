@@ -5,6 +5,6 @@ namespace Application.Interfaces.Repositories.VariantOptionValue
 {
     public interface IVariantOptionValueDeleteRepository
     {
-        void Delete(VariantOptionValueEntity variantOptionValue);
+        public void Delete(VariantOptionValueEntity variantOptionValue);
     }
 }

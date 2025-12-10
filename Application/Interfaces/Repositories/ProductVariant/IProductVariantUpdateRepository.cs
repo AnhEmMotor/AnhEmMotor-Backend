@@ -4,8 +4,8 @@ namespace Application.Interfaces.Repositories.ProductVariant
 {
     public interface IProductVariantUpdateRepository
     {
-        void Restore(ProductVariantEntity variant);
+        public void Restore(ProductVariantEntity variant);
 
-        void Update(ProductVariantEntity variant);
+        public void Update(ProductVariantEntity variant);
     }
 }

@@ -4,6 +4,6 @@ namespace Application.Interfaces.Repositories.Supplier
 {
     public interface ISupplierInsertRepository
     {
-        void Add(SupplierEntity supplier);
+        public void Add(SupplierEntity supplier);
     }
 }

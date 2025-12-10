@@ -5,18 +5,18 @@ namespace Application.Interfaces.Repositories.ProductCategory;
 
 public interface IProductCategoryReadRepository
 {
-    IQueryable<CategoryEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly);
+    public IQueryable<CategoryEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-    Task<IEnumerable<CategoryEntity>> GetAllAsync(
+    public Task<IEnumerable<CategoryEntity>> GetAllAsync(
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-    Task<CategoryEntity?> GetByIdAsync(
+    public Task<CategoryEntity?> GetByIdAsync(
         int id,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-    Task<IEnumerable<CategoryEntity>> GetByIdAsync(
+    public Task<IEnumerable<CategoryEntity>> GetByIdAsync(
         IEnumerable<int> ids,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);

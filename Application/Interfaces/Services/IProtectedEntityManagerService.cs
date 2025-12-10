@@ -4,10 +4,10 @@ namespace Application.Interfaces.Services
 {
     public interface IProtectedEntityManagerService
     {
-        IReadOnlyList<string> GetDefaultRolesForNewUsers();
+        public IReadOnlyList<string> GetDefaultRolesForNewUsers();
 
-        IReadOnlyList<string> GetSuperRoles();
+        public IReadOnlyList<string> GetSuperRoles();
 
-        IReadOnlyList<string> GetProtectedUsers();
+        public IReadOnlyList<string> GetProtectedUsers();
     }
 }

@@ -6,21 +6,21 @@ namespace Application.Interfaces.Repositories.Supplier
 {
     public interface ISupplierReadRepository
     {
-        IQueryable<SupplierEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly);
+        public IQueryable<SupplierEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-        IQueryable<SupplierWithTotalInputResponse> GetQueryableWithTotalInput(
+        public IQueryable<SupplierWithTotalInputResponse> GetQueryableWithTotalInput(
             DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-        Task<IEnumerable<SupplierEntity>> GetAllAsync(
+        public Task<IEnumerable<SupplierEntity>> GetAllAsync(
             CancellationToken cancellationToken,
             DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-        Task<SupplierEntity?> GetByIdAsync(
+        public Task<SupplierEntity?> GetByIdAsync(
             int id,
             CancellationToken cancellationToken,
             DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-        Task<IEnumerable<SupplierEntity>> GetByIdAsync(
+        public Task<IEnumerable<SupplierEntity>> GetByIdAsync(
             IEnumerable<int> ids,
             CancellationToken cancellationToken,
             DataFetchMode mode = DataFetchMode.ActiveOnly);

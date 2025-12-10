@@ -4,8 +4,8 @@ namespace Application.Interfaces.Repositories.Setting
 {
     public interface ISettingRepository
     {
-        Task<IEnumerable<SettingEntity>> GetAllAsync(CancellationToken cancellationToken);
+        public Task<IEnumerable<SettingEntity>> GetAllAsync(CancellationToken cancellationToken);
 
-        void Update(IEnumerable<SettingEntity> settings);
+        public void Update(IEnumerable<SettingEntity> settings);
     }
 }

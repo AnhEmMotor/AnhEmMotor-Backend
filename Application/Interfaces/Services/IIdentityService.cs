@@ -4,7 +4,7 @@ namespace Application.Interfaces.Services
 {
     public interface IIdentityService
     {
-        Task<UserAuthDTO> AuthenticateAsync(
+        public Task<UserAuthDTO> AuthenticateAsync(
             string usernameOrEmail,
             string password,
             CancellationToken cancellationToken);

@@ -5,26 +5,26 @@ namespace Application.Interfaces.Repositories.Output;
 
 public interface IOutputReadRepository
 {
-    IQueryable<OutputEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly);
+    public IQueryable<OutputEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-    Task<IEnumerable<OutputEntity>> GetAllAsync(
+    public Task<IEnumerable<OutputEntity>> GetAllAsync(
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-    Task<OutputEntity?> GetByIdAsync(
+    public Task<OutputEntity?> GetByIdAsync(
         int id,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-    Task<IEnumerable<OutputEntity>> GetByIdAsync(
+    public Task<IEnumerable<OutputEntity>> GetByIdAsync(
         IEnumerable<int> ids,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-    Task<OutputEntity?> GetByIdWithDetailsAsync(
+    public Task<OutputEntity?> GetByIdWithDetailsAsync(
         int id,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-    Task<long> GetStockQuantityByVariantIdAsync(int variantId, CancellationToken cancellationToken);
+    public Task<long> GetStockQuantityByVariantIdAsync(int variantId, CancellationToken cancellationToken);
 }

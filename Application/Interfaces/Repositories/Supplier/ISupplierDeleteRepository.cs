@@ -4,8 +4,8 @@ namespace Application.Interfaces.Repositories.Supplier
 {
     public interface ISupplierDeleteRepository
     {
-        void Delete(SupplierEntity supplier);
+        public void Delete(SupplierEntity supplier);
 
-        void Delete(IEnumerable<SupplierEntity> suppliers);
+        public void Delete(IEnumerable<SupplierEntity> suppliers);
     }
 }

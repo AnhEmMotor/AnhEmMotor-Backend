@@ -4,12 +4,12 @@ namespace Application.Interfaces.Repositories.Supplier
 {
     public interface ISupplierUpdateRepository
     {
-        void Update(SupplierEntity supplier);
+        public void Update(SupplierEntity supplier);
 
-        void Update(IEnumerable<SupplierEntity> suppliers);
+        public void Update(IEnumerable<SupplierEntity> suppliers);
 
-        void Restore(SupplierEntity supplier);
+        public void Restore(SupplierEntity supplier);
 
-        void Restore(IEnumerable<SupplierEntity> suppliers);
+        public void Restore(IEnumerable<SupplierEntity> suppliers);
     }
 }

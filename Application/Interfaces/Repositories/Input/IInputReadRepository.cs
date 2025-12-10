@@ -5,28 +5,28 @@ namespace Application.Interfaces.Repositories.Input;
 
 public interface IInputReadRepository
 {
-    IQueryable<InputEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly);
+    public IQueryable<InputEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-    Task<IEnumerable<InputEntity>> GetAllAsync(
+    public Task<IEnumerable<InputEntity>> GetAllAsync(
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-    Task<InputEntity?> GetByIdAsync(
+    public Task<InputEntity?> GetByIdAsync(
         int id,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-    Task<IEnumerable<InputEntity>> GetByIdAsync(
+    public Task<IEnumerable<InputEntity>> GetByIdAsync(
         IEnumerable<int> ids,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-    Task<InputEntity?> GetByIdWithDetailsAsync(
+    public Task<InputEntity?> GetByIdWithDetailsAsync(
         int id,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-    IQueryable<InputEntity> GetBySupplierIdAsync(
+    public IQueryable<InputEntity> GetBySupplierIdAsync(
         int supplierId,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);

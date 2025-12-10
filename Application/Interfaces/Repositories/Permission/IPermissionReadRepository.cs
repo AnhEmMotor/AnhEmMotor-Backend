@@ -6,11 +6,11 @@ namespace Application.Interfaces.Repositories.Permission
 {
     public interface IPermissionReadRepository
     {
-        Task<List<PermissionEntity>> GetPermissionsByNamesAsync(
+        public Task<List<PermissionEntity>> GetPermissionsByNamesAsync(
             IEnumerable<string> names,
             CancellationToken cancellationToken = default);
 
-        Task<List<RolePermission>> GetRolePermissionsByPermissionIdsAsync(
+        public Task<List<RolePermission>> GetRolePermissionsByPermissionIdsAsync(
             IEnumerable<int> permissionIds,
             CancellationToken cancellationToken = default);
     }

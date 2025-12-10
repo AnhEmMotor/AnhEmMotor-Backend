@@ -668,9 +668,9 @@
             Lấy thông tin chi tiết của đơn hàng.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.CreateOutput(Application.ApiContracts.Output.Requests.CreateOutputRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.CreateOutputByAdmin(Application.ApiContracts.Output.Requests.CreateOutputRequest,System.Threading.CancellationToken)">
             <summary>
-            Tạo đơn hàng mới.
+            Tạo đơn hàng mới (dành trên trang Admin)
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.SalesOrdersController.UpdateOutput(System.Int32,Application.ApiContracts.Output.Requests.UpdateOutputRequest,System.Threading.CancellationToken)">

@@ -5,29 +5,29 @@ namespace Application.Interfaces.Repositories.ProductVariant
 {
     public interface IProductVariantReadRepository
     {
-        IQueryable<ProductVariantEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly);
+        public IQueryable<ProductVariantEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-        Task<ProductVariantEntity?> GetByIdWithDetailsAsync(
+        public Task<ProductVariantEntity?> GetByIdWithDetailsAsync(
             int id,
             CancellationToken cancellationToken,
             DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-        Task<ProductVariantEntity?> GetBySlugAsync(
+        public Task<ProductVariantEntity?> GetBySlugAsync(
             string slug,
             CancellationToken cancellationToken,
             DataFetchMode mode = DataFetchMode.All);
 
-        Task<IEnumerable<ProductVariantEntity>> GetByProductIdAsync(
+        public Task<IEnumerable<ProductVariantEntity>> GetByProductIdAsync(
             int productId,
             CancellationToken cancellationToken,
             DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-        Task<IEnumerable<ProductVariantEntity>> GetByIdAsync(
+        public Task<IEnumerable<ProductVariantEntity>> GetByIdAsync(
             IEnumerable<int> ids,
             CancellationToken cancellationToken,
             DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-        Task<(List<ProductVariantEntity> Items, int TotalCount)> GetPagedVariantsAsync(
+        public Task<(List<ProductVariantEntity> Items, int TotalCount)> GetPagedVariantsAsync(
             int page,
             int pageSize,
             CancellationToken cancellationToken,

@@ -4,5 +4,5 @@ namespace Application.Interfaces.Repositories.Input;
 
 public interface IInputInsertRepository
 {
-    void Add(InputEntity input);
+    public void Add(InputEntity input);
 }

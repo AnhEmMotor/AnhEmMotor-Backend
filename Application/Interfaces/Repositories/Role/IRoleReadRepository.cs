@@ -6,20 +6,20 @@ namespace Application.Interfaces.Repositories.Role
 {
     public interface IRoleReadRepository
     {
-        Task<List<ApplicationRole>> GetRolesByNamesAsync(
+        public Task<List<ApplicationRole>> GetRolesByNamesAsync(
             IEnumerable<string> names,
             CancellationToken cancellationToken = default);
 
-        Task<List<RolePermission>> GetRolePermissionsByRoleIdAsync(
+        public Task<List<RolePermission>> GetRolePermissionsByRoleIdAsync(
             Guid roleId,
             CancellationToken cancellationToken = default);
 
-        Task<List<string>> GetPermissionNamesByRoleIdsAsync(
+        public Task<List<string>> GetPermissionNamesByRoleIdsAsync(
             IEnumerable<Guid> roleIds,
             CancellationToken cancellationToken = default);
 
-        Task<List<string>> GetPermissionNamesByRoleIdAsync(Guid roleId, CancellationToken cancellationToken = default);
+        public Task<List<string>> GetPermissionNamesByRoleIdAsync(Guid roleId, CancellationToken cancellationToken = default);
 
-        Task<List<RoleSelectResponse>> GetAllRoleSelectsAsync(CancellationToken cancellationToken = default);
+        public Task<List<RoleSelectResponse>> GetAllRoleSelectsAsync(CancellationToken cancellationToken = default);
     }
 }

@@ -4,6 +4,6 @@ namespace Application.Interfaces.Repositories.ProductVariant
 {
     public interface IProductVariantInsertRepository
     {
-        void Add(ProductVariantEntity variant);
+        public void Add(ProductVariantEntity variant);
     }
 }

@@ -4,9 +4,9 @@ namespace Application.Interfaces.Repositories.Input;
 
 public interface IInputUpdateRepository
 {
-    void Update(InputEntity input);
+    public void Update(InputEntity input);
 
-    void Restore(InputEntity input);
+    public void Restore(InputEntity input);
 
-    void Restore(IEnumerable<InputEntity> inputs);
+    public void Restore(IEnumerable<InputEntity> inputs);
 }

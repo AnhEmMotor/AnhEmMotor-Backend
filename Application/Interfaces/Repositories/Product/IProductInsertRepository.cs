@@ -4,5 +4,5 @@ namespace Application.Interfaces.Repositories.Product;
 
 public interface IProductInsertRepository
 {
-    void Add(ProductEntity product);
+    public void Add(ProductEntity product);
 }

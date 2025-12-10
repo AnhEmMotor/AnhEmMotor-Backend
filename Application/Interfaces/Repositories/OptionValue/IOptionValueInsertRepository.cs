@@ -5,6 +5,6 @@ namespace Application.Interfaces.Repositories.OptionValue
 {
     public interface IOptionValueInsertRepository
     {
-        void Add(OptionValueEntity optionValue);
+        public void Add(OptionValueEntity optionValue);
     }
 }

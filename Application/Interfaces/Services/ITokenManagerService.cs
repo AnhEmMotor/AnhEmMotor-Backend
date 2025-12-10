@@ -4,16 +4,16 @@ namespace Application.Interfaces.Services;
 
 public interface ITokenManagerService
 {
-    Task<string> CreateAccessTokenAsync(
+    public Task<string> CreateAccessTokenAsync(
         UserAuthDTO user,
         DateTimeOffset expiryTime,
         CancellationToken cancellationToken);
 
-    string CreateRefreshToken();
+    public string CreateRefreshToken();
 
-    string? GetClaimFromToken(string token, string claimType);
+    public string? GetClaimFromToken(string token, string claimType);
 
-    int GetRefreshTokenExpiryDays();
+    public int GetRefreshTokenExpiryDays();
 
-    int GetAccessTokenExpiryMinutes();
+    public int GetAccessTokenExpiryMinutes();
 }

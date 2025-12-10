@@ -6,18 +6,18 @@ namespace Application.Interfaces.Repositories.Option
 {
     public interface IOptionReadRepository
     {
-        IQueryable<OptionEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly);
+        public IQueryable<OptionEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-        Task<IEnumerable<OptionEntity>> GetAllAsync(
+        public Task<IEnumerable<OptionEntity>> GetAllAsync(
             CancellationToken cancellationToken,
             DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-        Task<OptionEntity?> GetByIdAsync(
+        public Task<OptionEntity?> GetByIdAsync(
             int id,
             CancellationToken cancellationToken,
             DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-        Task<IEnumerable<OptionEntity>> GetByIdAsync(
+        public Task<IEnumerable<OptionEntity>> GetByIdAsync(
             IEnumerable<int> ids,
             CancellationToken cancellationToken,
             DataFetchMode mode = DataFetchMode.ActiveOnly);

@@ -4,6 +4,6 @@ namespace Application.Interfaces.Repositories.Brand
 {
     public interface IBrandInsertRepository
     {
-        void Add(BrandEntity brand);
+        public void Add(BrandEntity brand);
     }
 }

@@ -4,11 +4,11 @@ namespace Application.Interfaces.Repositories.Output;
 
 public interface IOutputUpdateRepository
 {
-    void Update(OutputEntity output);
+    public void Update(OutputEntity output);
 
-    void Restore(OutputEntity output);
+    public void Restore(OutputEntity output);
 
-    void Restore(IEnumerable<OutputEntity> outputs);
+    public void Restore(IEnumerable<OutputEntity> outputs);
 
-    Task ProcessCOGSForCompletedOrderAsync(int outputId, CancellationToken cancellationToken);
+    public Task ProcessCOGSForCompletedOrderAsync(int outputId, CancellationToken cancellationToken);
 }
