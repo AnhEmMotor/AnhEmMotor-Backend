@@ -12,7 +12,7 @@ public class OutputResponse
 
     public string? BuyerName { get; set; }
 
-    public Guid? CompletedByUserId { get; set; }
+    public Guid? CreatedByUserId { get; set; }
 
     public string? CompletedByUserName { get; set; }
 

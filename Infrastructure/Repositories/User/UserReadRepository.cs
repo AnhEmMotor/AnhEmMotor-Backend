@@ -88,5 +88,27 @@ namespace Infrastructure.Repositories.User
                 AuthMethods = [ "pwd" ]
             };
         }
+
+        public async Task<UserAuthDTO?> GetUserByIDAsync(Guid? idUser, CancellationToken cancellationToken)
+        {
+            if (idUser == null) return null;
+            var user = await userManager.Users
+                .FirstOrDefaultAsync(u => u.Id == idUser
+                                       && u.Status == UserStatus.Active 
+                                       && u.DeletedAt == null,          
+                cancellationToken)
+                .ConfigureAwait(false);
+            if (user == null) return null;
+            var roles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
+            return new UserAuthDTO()
+            {
+                Id = user.Id,
+                Username = user.UserName,
+                Roles = [ .. roles ],
+                Email = user.Email,
+                FullName = user.FullName,
+                Status = user.Status,
+            };
+        }
     }
 }

@@ -34,7 +34,7 @@ public static class PermissionDataSeeder
             .Select(name => new Permission { Name = name! })
             .ToList();
 
-        if(newPermissions.Count != 0)
+        if(newPermissions.Any())
         {
             await context.Permissions.AddRangeAsync(newPermissions, cancellationToken).ConfigureAwait(false);
             await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -45,7 +45,7 @@ public static class PermissionDataSeeder
             .Where(p => !allPermissions.Contains(p.Name))
             .ToList();
 
-        if(permissionsToDelete.Count != 0)
+        if(permissionsToDelete.Any())
         {
             // Xóa tất cả các RolePermission liên kết trước
             var permissionIds = permissionsToDelete.Select(p => p.Id).ToList();
@@ -54,7 +54,7 @@ public static class PermissionDataSeeder
                 .ToListAsync(cancellationToken)
                 .ConfigureAwait(false);
 
-            if(rolePermissionsToDelete.Count != 0)
+            if(rolePermissionsToDelete.Any())
             {
                 context.Set<RolePermission>().RemoveRange(rolePermissionsToDelete);
             }

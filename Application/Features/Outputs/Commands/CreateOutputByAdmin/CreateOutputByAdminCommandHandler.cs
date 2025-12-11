@@ -1,7 +1,8 @@
-﻿using Application.ApiContracts.Output.Responses;
+using Application.ApiContracts.Output.Responses;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.ProductVariant;
+using Application.Interfaces.Repositories.User;
 using Domain.Constants;
 using Domain.Entities;
 using Mapster;
@@ -9,17 +10,18 @@ using MediatR;
 
 namespace Application.Features.Outputs.Commands.CreateOutput;
 
-public sealed class CreateOutputCommandHandler(
+public sealed class CreateOutputByAdminCommandHandler(
     IOutputReadRepository readRepository,
     IOutputInsertRepository insertRepository,
     IProductVariantReadRepository variantRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateOutputCommand, (OutputResponse? Data, Common.Models.ErrorResponse? Error)>
+    IUserReadRepository userReadRepository,
+    IUnitOfWork unitOfWork) : IRequestHandler<CreateOutputByAdminCommand, (OutputResponse? Data, Common.Models.ErrorResponse? Error)>
 {
     public async Task<(OutputResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
-        CreateOutputCommand request,
+        CreateOutputByAdminCommand request,
         CancellationToken cancellationToken)
     {
-        if (request.OutputInfos.Count == 0)
+        if(request.OutputInfos.Count == 0)
         {
             return (null, new Common.Models.ErrorResponse
             {
@@ -28,6 +30,20 @@ public sealed class CreateOutputCommandHandler(
                     {
                         Field = "Products",
                         Message = "Đơn hàng phải có ít nhất một sản phẩm."
+                    } ]
+            });
+        }
+
+        var userData = await userReadRepository.GetUserByIDAsync(request.BuyerId!.Value, cancellationToken).ConfigureAwait(false);
+        if (userData == null)
+        {
+            return (null, new Common.Models.ErrorResponse
+            {
+                Errors =
+                    [ new Common.Models.ErrorDetail
+                    {
+                        Field = "BuyerId",
+                        Message = "ID này là 1 tài khoản không tồn tại/đã bị xoá/đã bị cấm. Vui lòng kiểm tra lại."
                     } ]
             });
         }
@@ -43,7 +59,7 @@ public sealed class CreateOutputCommandHandler(
 
         var variantsList = variants.ToList();
 
-        if (variantsList.Count != variantIds.Count)
+        if(variantsList.Count != variantIds.Count)
         {
             var foundIds = variantsList.Select(v => v.Id).ToList();
             var missingIds = variantIds.Except(foundIds).ToList();
@@ -58,9 +74,9 @@ public sealed class CreateOutputCommandHandler(
             });
         }
 
-        foreach (var variant in variantsList)
+        foreach(var variant in variantsList)
         {
-            if (string.Compare(variant.Product?.StatusId, Domain.Constants.ProductStatus.ForSale) != 0)
+            if(string.Compare(variant.Product?.StatusId, Domain.Constants.ProductStatus.ForSale) != 0)
             {
                 return (null, new Common.Models.ErrorResponse
                 {
@@ -75,21 +91,19 @@ public sealed class CreateOutputCommandHandler(
         }
         var output = request.Adapt<Output>();
 
-        foreach (var info in output.OutputInfos)
+        foreach(var info in output.OutputInfos)
         {
             var matchingVariant = variantsList.FirstOrDefault(v => v.Id == info.ProductId);
-            if (matchingVariant != null)
+            if(matchingVariant != null)
             {
                 info.Price = matchingVariant.Price;
             }
         }
 
-        if (string.IsNullOrWhiteSpace(output.StatusId))
+        if(string.IsNullOrWhiteSpace(output.StatusId))
         {
             output.StatusId = OrderStatus.Pending;
         }
-
-        output.BuyerId = request.CurrentUserId;
 
         insertRepository.Add(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

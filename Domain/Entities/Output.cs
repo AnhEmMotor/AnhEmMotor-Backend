@@ -17,9 +17,12 @@ namespace Domain.Entities
         [ForeignKey("Buyer")]
         public Guid? BuyerId { get; set; }
 
-        [Column("CompletedByUserId")]
+        [Column("EmpCode")]
+        public int? EmpCode { get; set; }
+
+        [Column("CreatedByUserId")]
         [ForeignKey("CompletedByUser")]
-        public Guid? CompletedByUserId { get; set; }
+        public Guid? CreatedByUserId { get; set; }
 
         [Column("StatusId")]
         [ForeignKey("OutputStatus")]

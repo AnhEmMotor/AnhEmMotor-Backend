@@ -21,7 +21,6 @@ using Swashbuckle.AspNetCore.Annotations;
 using Domain.Primitives;
 using System.Security.Claims;
 using static Domain.Constants.Permission.PermissionsList;
-using Microsoft.AspNetCore.Authorization;
 
 namespace WebAPI.Controllers.V1;
 
@@ -108,15 +107,15 @@ public class SalesOrdersController(IMediator mediator) : ControllerBase
         }
         return Ok(data);
     }
-    
+
     /// <summary>
-    /// Tạo đơn hàng mới (dành trên trang Admin)
+    /// Tạo đơn hàng mới.
     /// </summary>
     [HttpPost]
     [HasPermission(Outputs.Create)]
     [ProducesResponseType(typeof(OutputResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> CreateOutputByAdmin(
+    public async Task<IActionResult> CreateOutput(
         [FromBody] Application.ApiContracts.Output.Requests.CreateOutputRequest request,
         CancellationToken cancellationToken)
     {
