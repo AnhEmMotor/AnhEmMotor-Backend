@@ -3,11 +3,9 @@ using MediatR;
 
 namespace Application.Features.Outputs.Commands.UpdateOutput;
 
-public sealed record UpdateOutputCommand : IRequest<(OutputResponse? Data, Common.Models.ErrorResponse? Error)>
+public sealed record UpdateOutputForManagerCommand : IRequest<(OutputResponse? Data, Common.Models.ErrorResponse? Error)>
 {
     public int Id { get; init; }
-
-    public Guid? CurrentUserId { get; init; }
 
     public string? StatusId { get; init; }
 

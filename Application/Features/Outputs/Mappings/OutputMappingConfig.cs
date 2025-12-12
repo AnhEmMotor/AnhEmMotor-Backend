@@ -22,12 +22,12 @@ public sealed class OutputMappingConfig : IRegister
                     ? src.ProductVariant.Product.Name
                     : null);
 
-        config.NewConfig<ApiContracts.Output.Requests.UpdateOutputRequest, Output>().IgnoreNullValues(true);
+        config.NewConfig<ApiContracts.Output.Requests.UpdateOutputForManagerRequest, Output>().IgnoreNullValues(true);
 
         config.NewConfig<ApiContracts.Output.Requests.UpdateOutputInfoRequest, OutputInfo>().IgnoreNullValues(true);
 
-        config.NewConfig<ApiContracts.Output.Requests.UpdateOutputRequest, Output>().IgnoreNullValues(true);
+        config.NewConfig<ApiContracts.Output.Requests.UpdateOutputForManagerRequest, Output>().IgnoreNullValues(true);
         config.NewConfig<ApiContracts.Output.Requests.UpdateOutputInfoRequest, OutputInfo>().IgnoreNullValues(true);
-        config.NewConfig<UpdateOutputCommand, Output>().IgnoreNullValues(true).Ignore(dest => dest.OutputInfos);
+        config.NewConfig<UpdateOutputForManagerCommand, Output>().IgnoreNullValues(true).Ignore(dest => dest.OutputInfos);
     }
 }

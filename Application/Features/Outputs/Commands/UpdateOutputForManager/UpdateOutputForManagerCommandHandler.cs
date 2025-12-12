@@ -9,30 +9,17 @@ using MediatR;
 
 namespace Application.Features.Outputs.Commands.UpdateOutput;
 
-public sealed class UpdateOutputCommandHandler(
+public sealed class UpdateOutputForManagerCommandHandler(
     IOutputReadRepository readRepository,
     IOutputUpdateRepository updateRepository,
     IOutputDeleteRepository deleteRepository,
     IProductVariantReadRepository variantRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateOutputCommand, (OutputResponse? Data, Common.Models.ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateOutputForManagerCommand, (OutputResponse? Data, Common.Models.ErrorResponse? Error)>
 {
     public async Task<(OutputResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
-        UpdateOutputCommand request,
+        UpdateOutputForManagerCommand request,
         CancellationToken cancellationToken)
     {
-        if (request.CurrentUserId is null)
-        {
-            return (null, new Common.Models.ErrorResponse
-            {
-                Errors =
-                    [ new Common.Models.ErrorDetail
-                    {
-                        Field = "CurrentUserId",
-                        Message = "CurrentUserId không được để trống."
-                    } ]
-            });
-        }
-
         var output = await readRepository.GetByIdWithDetailsAsync(
             request.Id,
             cancellationToken,
@@ -48,32 +35,6 @@ public sealed class UpdateOutputCommandHandler(
                     {
                         Field = "Id",
                         Message = $"Không tìm thấy đơn hàng có ID {request.Id}."
-                    } ]
-            });
-        }
-
-        if (output.Buyer is null)
-        {
-            return (null, new Common.Models.ErrorResponse
-            {
-                Errors =
-                    [ new Common.Models.ErrorDetail
-                    {
-                        Field = "Buyer",
-                        Message = "Đơn hàng không có thông tin người mua. Vui lòng kiểm tra lại"
-                    } ]
-            });
-        }
-
-        if (output.Buyer.Id != request.CurrentUserId)
-        {
-            return (null, new Common.Models.ErrorResponse
-            {
-                Errors =
-                    [ new Common.Models.ErrorDetail
-                    {
-                        Field = "CurrentUserId",
-                        Message = "Người dùng hiện tại không có quyền cập nhật đơn hàng này."
                     } ]
             });
         }

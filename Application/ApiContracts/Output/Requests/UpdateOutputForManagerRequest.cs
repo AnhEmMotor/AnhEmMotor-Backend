@@ -1,11 +1,9 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Application.ApiContracts.Output.Requests;
 
-public class UpdateOutputRequest
+public class UpdateOutputForManagerRequest
 {
-    public Guid? UserIdToEdit { get; set; }
-
     public string? Notes { get; set; }
 
     [JsonPropertyName("products")]

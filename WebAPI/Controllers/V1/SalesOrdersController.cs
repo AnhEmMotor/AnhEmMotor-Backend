@@ -16,6 +16,7 @@ using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using Mapster;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
@@ -168,19 +169,24 @@ public class SalesOrdersController(IMediator mediator) : ControllerBase
     }
 
     /// <summary>
-    /// Cập nhật đơn hàng.
+    /// Cập nhật đơn hàng (Cho phép sửa đơn hàng do chính mình tạo ra)
     /// </summary>
     [HttpPut("{id:int}")]
-    [HasPermission(Outputs.Edit)]
+    [Authorize]
     [ProducesResponseType(typeof(OutputResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> UpdateOutput(
+    public async Task<IActionResult> UpdateOutputForManager(
         int id,
-        [FromBody] Application.ApiContracts.Output.Requests.UpdateOutputRequest request,
+        [FromBody] Application.ApiContracts.Output.Requests.UpdateOutputForManagerRequest request,
         CancellationToken cancellationToken)
     {
-        var command = request.Adapt<UpdateOutputCommand>() with { Id = id };
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var command = request.Adapt<UpdateOutputCommand>() with
+        {
+            Id = id,
+            CurrentUserId = Guid.TryParse(currentUserId, out var guid) ? guid : null
+        };
         var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         if(error != null)
         {
@@ -188,6 +194,29 @@ public class SalesOrdersController(IMediator mediator) : ControllerBase
         }
         return Ok(data);
     }
+
+    /// <summary>
+    /// Cập nhật đơn hàng (Cho phép sửa tất cả đơn hàng, nhưng chỉ cho phép cập nhật khi và chỉ khi có quyền chỉnh sửa đơn hàng)
+    /// </summary>
+    [HttpPut("for-manager/{id:int}")]
+    [HasPermission(Outputs.Edit)]
+    [ProducesResponseType(typeof(OutputResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UpdateOutput(
+        int id,
+        [FromBody] Application.ApiContracts.Output.Requests.UpdateOutputForManagerRequest request,
+        CancellationToken cancellationToken)
+    {
+        var command = request.Adapt<UpdateOutputForManagerCommand>() with { Id = id };
+        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        if (error != null)
+        {
+            return BadRequest(error);
+        }
+        return Ok(data);
+    }
+
 
     /// <summary>
     /// Cập nhật trạng thái của đơn hàng.

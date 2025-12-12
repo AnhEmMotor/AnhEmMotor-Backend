@@ -17,6 +17,7 @@ namespace Infrastructure.Services
                 Expires = expiresAt,
                 Secure = true,
                 SameSite = SameSiteMode.Strict,
+                Path = "/api/v1/auth/refresh-token"
             };
 
             httpContextAccessor.HttpContext?.Response.Cookies.Append("refreshToken", token, cookieOptions);

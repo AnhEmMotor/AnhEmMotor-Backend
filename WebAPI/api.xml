@@ -730,9 +730,14 @@
             Tạo đơn hàng mới (dành cho các tài khoản đã đăng nhập).
             </summary>
         </member>
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.UpdateOutputForManager(System.Int32,Application.ApiContracts.Output.Requests.UpdateOutputRequest,System.Threading.CancellationToken)">
+            <summary>
+            Cập nhật đơn hàng (Cho phép sửa tất cả đơn hàng, nhưng chỉ cho phép cập nhật khi và chỉ khi có quyền chỉnh sửa đơn hàng)
+            </summary>
+        </member>
         <member name="M:WebAPI.Controllers.V1.SalesOrdersController.UpdateOutput(System.Int32,Application.ApiContracts.Output.Requests.UpdateOutputRequest,System.Threading.CancellationToken)">
             <summary>
-            Cập nhật đơn hàng.
+            Cập nhật đơn hàng (Cho phép sửa tất cả đơn hàng, nhưng chỉ cho phép cập nhật khi và chỉ khi có quyền chỉnh sửa đơn hàng)
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.SalesOrdersController.UpdateOutputStatus(System.Int32,Application.ApiContracts.Output.Requests.UpdateOutputStatusRequest,System.Threading.CancellationToken)">
