@@ -9,6 +9,7 @@ using Application.Features.UserManager.Commands.ChangeUserStatus;
 using Application.Features.UserManager.Commands.UpdateUser;
 using Application.Features.UserManager.Queries.GetUserById;
 using Application.Features.UserManager.Queries.GetUsersList;
+using Application.Features.UserManager.Queries.GetUsersListForOutput;
 using Asp.Versioning;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
@@ -39,16 +40,31 @@ namespace WebAPI.Controllers.V1;
 public class UserManagerController(IMediator mediator) : ControllerBase
 {
     /// <summary>
-    /// Lấy danh sách tất cả người dùng (có phân trang, lọc, sắp xếp).
+    /// Lấy danh sách tất cả người dùng (có phân trang, lọc, sắp xếp - chỉ vào được khi người dùng có quyền xem danh sách người dùng).
     /// </summary>
     /// <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
     /// <param name="cancellationToken"></param>
     [HttpGet]
-    [RequiresAnyPermissions(Users.View, Outputs.Edit, Outputs.Create)]
-    [ProducesResponseType(typeof(Domain.Primitives.PagedResult<UserResponse>), StatusCodes.Status200OK)]
+    [RequiresAnyPermissions(Users.View)]
+    [ProducesResponseType(typeof(Domain.Primitives.PagedResult<UserDTOForManagerResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllUsers([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
     {
         var query = new GetUsersListQuery(sieveModel);
+        var pagedResult = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return Ok(pagedResult);
+    }
+
+    /// <summary>
+    /// Lấy danh sách tất cả người dùng (có phân trang, lọc, sắp xếp - chỉ vào được khi người dùng có quyền sửa hoặc xoá phiếu bán hàng).
+    /// </summary>
+    /// <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
+    /// <param name="cancellationToken"></param>
+    [HttpGet("for-output")]
+    [RequiresAnyPermissions(Outputs.Edit, Outputs.Create)]
+    [ProducesResponseType(typeof(Domain.Primitives.PagedResult<UserDTOForManagerResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAllUsersForOutput([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
+    {
+        var query = new GetUsersListForOutputQuery(sieveModel);
         var pagedResult = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return Ok(pagedResult);
     }
@@ -58,7 +74,7 @@ public class UserManagerController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpGet("{userId:guid}")]
     [HasPermission(Users.View)]
-    [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(UserDTOForManagerResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetUserById(Guid userId, CancellationToken cancellationToken)
     {
@@ -71,7 +87,7 @@ public class UserManagerController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpPut("{userId:guid}")]
     [HasPermission(Users.Edit)]
-    [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(UserDTOForManagerResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateUser(

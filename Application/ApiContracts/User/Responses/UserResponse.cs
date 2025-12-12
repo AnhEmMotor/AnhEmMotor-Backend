@@ -13,12 +13,4 @@ public class UserResponse
     public string? Gender { get; set; } = string.Empty;
 
     public string? PhoneNumber { get; set; } = string.Empty;
-
-    public bool? EmailConfirmed { get; set; }
-
-    public string? Status { get; set; } = string.Empty;
-
-    public DateTimeOffset? DeletedAt { get; set; }
-
-    public IEnumerable<string>? Roles { get; set; } = [];
 }

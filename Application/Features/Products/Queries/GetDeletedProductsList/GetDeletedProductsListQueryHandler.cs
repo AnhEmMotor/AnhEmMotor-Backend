@@ -5,9 +5,9 @@ using MediatR;
 
 namespace Application.Features.Products.Queries.GetDeletedProductsList;
 
-public sealed class GetDeletedProductsListQueryHandler(IProductReadRepository repository) : IRequestHandler<GetDeletedProductsListQuery, Domain.Primitives.PagedResult<ProductDetailResponse>>
+public sealed class GetDeletedProductsListQueryHandler(IProductReadRepository repository) : IRequestHandler<GetDeletedProductsListQuery, Domain.Primitives.PagedResult<ProductDetailForManagerResponse>>
 {
-    public async Task<Domain.Primitives.PagedResult<ProductDetailResponse>> Handle(
+    public async Task<Domain.Primitives.PagedResult<ProductDetailForManagerResponse>> Handle(
         GetDeletedProductsListQuery request,
         CancellationToken cancellationToken)
     {
@@ -17,8 +17,8 @@ public sealed class GetDeletedProductsListQueryHandler(IProductReadRepository re
         var (products, totalCount) = await repository.GetPagedDeletedProductsAsync(page, pageSize, cancellationToken)
             .ConfigureAwait(false);
 
-        var responses = products.Select(p => p.Adapt<ProductDetailResponse>()).ToList();
+        var responses = products.Select(p => p.Adapt<ProductDetailForManagerResponse>()).ToList();
 
-        return new Domain.Primitives.PagedResult<ProductDetailResponse>(responses, totalCount, page, pageSize);
+        return new Domain.Primitives.PagedResult<ProductDetailForManagerResponse>(responses, totalCount, page, pageSize);
     }
 }

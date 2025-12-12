@@ -1,14 +1,14 @@
-﻿using Application.ApiContracts.Product.Common;
+﻿using Application.ApiContracts.Product.Responses;
 using Application.Interfaces.Repositories.ProductVariant;
 using Mapster;
 using MediatR;
 
 namespace Application.Features.Products.Queries.GetActiveVariantLiteList;
 
-public sealed class GetActiveVariantLiteListQueryHandler(IProductVariantReadRepository repository) : IRequestHandler<GetActiveVariantLiteListQuery, Domain.Primitives.PagedResult<ProductVariantLiteResponse>>
+public sealed class GetActiveVariantLiteListForManagerQueryHandler(IProductVariantReadRepository repository) : IRequestHandler<GetActiveVariantLiteListForManagerQuery, Domain.Primitives.PagedResult<ProductVariantLiteResponse>>
 {
     public async Task<Domain.Primitives.PagedResult<ProductVariantLiteResponse>> Handle(
-        GetActiveVariantLiteListQuery request,
+        GetActiveVariantLiteListForManagerQuery request,
         CancellationToken cancellationToken)
     {
         var page = Math.Max(request.Page, 1);

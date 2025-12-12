@@ -1,10 +1,10 @@
-using Application.ApiContracts.Product.Common;
+using Application.ApiContracts.Product.Responses;
 using MediatR;
 using Sieve.Models;
 
-namespace Application.Features.Products.Queries.GetActiveVariantLiteList;
+namespace Application.Features.Products.Queries.GetProductsList;
 
-public sealed record GetActiveVariantLiteListQuery : IRequest<Domain.Primitives.PagedResult<ProductVariantLiteResponse>>
+public sealed record GetProductsListForManagerQuery : IRequest<Domain.Primitives.PagedResult<ProductDetailForManagerResponse>>
 {
     public int Page { get; init; } = 1;
 
@@ -16,7 +16,7 @@ public sealed record GetActiveVariantLiteListQuery : IRequest<Domain.Primitives.
 
     public string? Sorts { get; init; }
 
-    public static GetActiveVariantLiteListQuery FromRequest(SieveModel request)
+    public static GetProductsListForManagerQuery FromRequest(SieveModel request)
     {
         var search = ExtractFilterValue(request.Filters, "search");
         var statusIds = ExtractFilterValue(request.Filters, "statusIds")?.Split(
@@ -25,7 +25,7 @@ public sealed record GetActiveVariantLiteListQuery : IRequest<Domain.Primitives.
                 .ToList() ??
             [];
 
-        return new GetActiveVariantLiteListQuery
+        return new GetProductsListForManagerQuery
         {
             Page = request.Page ?? 1,
             PageSize = request.PageSize ?? 10,

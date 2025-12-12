@@ -3,9 +3,9 @@ using FluentValidation;
 
 namespace Application.Features.Outputs.Commands.CreateOutput
 {
-    public sealed class CreateOutputProductByAdminCommandValidator : AbstractValidator<OutputInfoResponse>
+    public sealed class CreateOutputProductByManagerCommandValidator : AbstractValidator<OutputInfoResponse>
     {
-        public CreateOutputProductByAdminCommandValidator()
+        public CreateOutputProductByManagerCommandValidator()
         {
             RuleFor(x => x.ProductId).NotNull().GreaterThan(0);
 

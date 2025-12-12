@@ -9,16 +9,17 @@ using Application.Features.Outputs.Commands.UpdateOutput;
 using Application.Features.Outputs.Commands.UpdateOutputStatus;
 using Application.Features.Outputs.Queries.GetDeletedOutputsList;
 using Application.Features.Outputs.Queries.GetOutputById;
-using Application.Features.Outputs.Queries.GetOutputsList;
 using Application.Features.Outputs.Queries.GetOutputsByBuyerId;
+using Application.Features.Outputs.Queries.GetOutputsList;
 using Asp.Versioning;
+using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
-using Domain.Primitives;
+using System.Runtime.ConstrainedExecution;
 using System.Security.Claims;
 using static Domain.Constants.Permission.PermissionsList;
 
@@ -57,7 +58,21 @@ public class SalesOrdersController(IMediator mediator) : ControllerBase
             });
         }
 
-        var query = new GetOutputsByBuyerIdQuery(buyerId, sieveModel);
+        var query = new GetOutputsByUserIdQuery(buyerId, sieveModel);
+        var pagedResult = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return Ok(pagedResult);
+    }
+
+    /// <summary>
+    /// Lấy danh sách đơn hàng của id khách hàng (chỉ cho phép vào khi có quyền xem đơn hàng).
+    /// </summary>
+    [HttpGet("get-purchases/{id:Guid}")]
+    [HasPermission(Outputs.View)]
+    [ProducesResponseType(typeof(PagedResult<OutputResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> GetPurchasesByID([FromQuery] SieveModel sieveModel, Guid id, CancellationToken cancellationToken)
+    {
+        var query = new GetOutputsByUserIdQuery(id, sieveModel);
         var pagedResult = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return Ok(pagedResult);
     }
@@ -109,7 +124,27 @@ public class SalesOrdersController(IMediator mediator) : ControllerBase
     }
 
     /// <summary>
-    /// Tạo đơn hàng mới.
+    /// Tạo đơn hàng mới (dành cho người có quyền tạo đơn hàng).
+    /// </summary>
+    [HttpPost("by-manager")]
+    [HasPermission(Outputs.Create)]
+    [ProducesResponseType(typeof(OutputResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> CreateOutputForAdmin(
+        [FromBody] Application.ApiContracts.Output.Requests.CreateOutputByAdminRequest request,
+        CancellationToken cancellationToken)
+    {
+        var command = request.Adapt<CreateOutputByManagerCommand>();
+        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        if(error != null)
+        {
+            return BadRequest(error);
+        }
+        return CreatedAtAction(nameof(GetOutputById), new { id = data!.Id }, data);
+    }
+
+    /// <summary>
+    /// Tạo đơn hàng mới (dành cho các tài khoản đã đăng nhập).
     /// </summary>
     [HttpPost]
     [HasPermission(Outputs.Create)]
@@ -119,9 +154,13 @@ public class SalesOrdersController(IMediator mediator) : ControllerBase
         [FromBody] Application.ApiContracts.Output.Requests.CreateOutputRequest request,
         CancellationToken cancellationToken)
     {
-        var command = request.Adapt<CreateOutputCommand>();
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var command = request.Adapt<CreateOutputCommand>() with
+        {
+            CurrentUserId = Guid.TryParse(currentUserId, out var guid) ? guid : null
+        };
         var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if(error != null)
+        if (error != null)
         {
             return BadRequest(error);
         }

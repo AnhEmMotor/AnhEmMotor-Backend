@@ -1,4 +1,5 @@
 using Application.ApiContracts.User.Responses;
+using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Exceptions;
 using Domain.Entities;
 using MediatR;
@@ -6,9 +7,9 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Application.Features.UserManager.Queries.GetUserById;
 
-public class GetUserByIdQueryHandler(UserManager<ApplicationUser> userManager) : IRequestHandler<GetUserByIdQuery, UserResponse>
+public class GetUserByIdQueryHandler(UserManager<ApplicationUser> userManager) : IRequestHandler<GetUserByIdQuery, UserDTOForManagerResponse>
 {
-    public async Task<UserResponse> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
+    public async Task<UserDTOForManagerResponse> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
     {
         var user = await userManager.FindByIdAsync(request.UserId.ToString()).ConfigureAwait(false) ??
             throw new NotFoundException("User not found.");
@@ -16,7 +17,7 @@ public class GetUserByIdQueryHandler(UserManager<ApplicationUser> userManager) :
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        return new UserResponse()
+        return new UserDTOForManagerResponse()
         {
             Id = user.Id,
             UserName = user.UserName,

@@ -1,4 +1,4 @@
-using Application.ApiContracts.Product.Common;
+using Application.ApiContracts.Product.Responses;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductVariant;
 using Mapster;

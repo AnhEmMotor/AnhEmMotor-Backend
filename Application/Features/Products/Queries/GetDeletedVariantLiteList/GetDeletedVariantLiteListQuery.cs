@@ -1,4 +1,4 @@
-using Application.ApiContracts.Product.Common;
+using Application.ApiContracts.Product.Responses;
 using MediatR;
 using Sieve.Models;
 

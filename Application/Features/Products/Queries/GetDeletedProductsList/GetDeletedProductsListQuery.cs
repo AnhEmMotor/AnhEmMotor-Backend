@@ -4,7 +4,7 @@ using Sieve.Models;
 
 namespace Application.Features.Products.Queries.GetDeletedProductsList;
 
-public sealed record GetDeletedProductsListQuery : IRequest<Domain.Primitives.PagedResult<ProductDetailResponse>>
+public sealed record GetDeletedProductsListQuery : IRequest<Domain.Primitives.PagedResult<ProductDetailForManagerResponse>>
 {
     public int Page { get; init; } = 1;
 

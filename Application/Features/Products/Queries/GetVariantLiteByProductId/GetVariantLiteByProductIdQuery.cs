@@ -1,4 +1,4 @@
-using Application.ApiContracts.Product.Common;
+using Application.ApiContracts.Product.Responses;
 using MediatR;
 
 namespace Application.Features.Products.Queries.GetVariantLiteByProductId;

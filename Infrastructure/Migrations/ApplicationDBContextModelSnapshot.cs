@@ -406,12 +406,12 @@ namespace Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("BuyerId");
 
-                    b.Property<Guid?>("CompletedByUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("CompletedByUserId");
-
                     b.Property<DateTimeOffset?>("CreatedAt")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("CreatedByUserId");
 
                     b.Property<string>("CustomerName")
                         .HasColumnType("nvarchar(max)")
@@ -419,6 +419,10 @@ namespace Infrastructure.Migrations
 
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<int?>("EmpCode")
+                        .HasColumnType("int")
+                        .HasColumnName("EmpCode");
 
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(MAX)")
@@ -435,7 +439,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("BuyerId");
 
-                    b.HasIndex("CompletedByUserId");
+                    b.HasIndex("CreatedByUserId");
 
                     b.HasIndex("StatusId");
 
@@ -1082,7 +1086,7 @@ namespace Infrastructure.Migrations
 
                     b.HasOne("Domain.Entities.ApplicationUser", "CompletedByUser")
                         .WithMany()
-                        .HasForeignKey("CompletedByUserId");
+                        .HasForeignKey("CreatedByUserId");
 
                     b.HasOne("Domain.Entities.OutputStatus", "OutputStatus")
                         .WithMany("OutputOrders")

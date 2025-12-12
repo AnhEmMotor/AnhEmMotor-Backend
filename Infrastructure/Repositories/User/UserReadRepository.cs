@@ -1,5 +1,6 @@
 ﻿using Application.ApiContracts.Auth.Requests;
 using Application.ApiContracts.User.Responses;
+using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Exceptions;
 using Application.Interfaces.Repositories.User;
 using Domain.Constants;
@@ -15,7 +16,7 @@ namespace Infrastructure.Repositories.User
 {
     public class UserReadRepository(UserManager<ApplicationUser> userManager, ISieveProcessor sieveProcessor) : IUserReadRepository
     {
-        public async Task<PagedResult<UserResponse>> GetPagedListAsync(
+        public async Task<PagedResult<UserDTOForManagerResponse>> GetPagedListAsync(
             SieveModel sieveModel,
             CancellationToken cancellationToken)
         {
@@ -27,13 +28,13 @@ namespace Infrastructure.Repositories.User
             var pagedQuery = sieveProcessor.Apply(sieveModel, query);
             var entities = await pagedQuery.ToListAsync(cancellationToken).ConfigureAwait(false);
 
-            var userResponses = new List<UserResponse>();
+            var userResponses = new List<UserDTOForManagerResponse>();
 
             foreach(var user in entities)
             {
                 var roles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
 
-                var response = new UserResponse
+                var response = new UserDTOForManagerResponse
                 {
                     Id = user.Id,
                     UserName = user.UserName ?? string.Empty,
@@ -50,7 +51,39 @@ namespace Infrastructure.Repositories.User
                 userResponses.Add(response);
             }
 
-            return new PagedResult<UserResponse>(
+            return new PagedResult<UserDTOForManagerResponse>(
+                userResponses,
+                totalCount,
+                sieveModel.Page ?? 1,
+                sieveModel.PageSize ?? 10);
+        }
+
+        public async Task<PagedResult<UserDTOForOutputResponse>> GetPagedListForOutputAsync(SieveModel sieveModel, CancellationToken cancellationToken)
+        {
+            var query = userManager.Users.AsNoTracking();
+
+            var countQuery = sieveProcessor.Apply(sieveModel, query, applyPagination: false);
+            var totalCount = await countQuery.CountAsync(cancellationToken).ConfigureAwait(false);
+
+            var pagedQuery = sieveProcessor.Apply(sieveModel, query);
+            var entities = await pagedQuery.ToListAsync(cancellationToken).ConfigureAwait(false);
+
+            var userResponses = new List<UserDTOForOutputResponse>();
+
+            foreach (var user in entities)
+            {
+                var roles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
+
+                var response = new UserDTOForOutputResponse
+                {
+                    Id = user.Id,
+                    FullName = user.FullName ?? string.Empty,
+                };
+
+                userResponses.Add(response);
+            }
+
+            return new PagedResult<UserDTOForOutputResponse>(
                 userResponses,
                 totalCount,
                 sieveModel.Page ?? 1,

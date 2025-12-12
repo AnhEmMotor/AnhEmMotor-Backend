@@ -1,4 +1,5 @@
 using Application.ApiContracts.User.Responses;
+using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Exceptions;
 using Domain.Constants;
 using Domain.Entities;
@@ -9,9 +10,9 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Application.Features.UserManager.Commands.UpdateUser;
 
-public class UpdateUserCommandHandler(UserManager<ApplicationUser> userManager) : IRequestHandler<UpdateUserCommand, UserResponse>
+public class UpdateUserCommandHandler(UserManager<ApplicationUser> userManager) : IRequestHandler<UpdateUserCommand, UserDTOForManagerResponse>
 {
-    public async Task<UserResponse> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
+    public async Task<UserDTOForManagerResponse> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
     {
         var user = await userManager.FindByIdAsync(request.UserId.ToString()).ConfigureAwait(false) ??
             throw new NotFoundException("User not found.");
@@ -53,7 +54,7 @@ public class UpdateUserCommandHandler(UserManager<ApplicationUser> userManager) 
 
         var roles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
 
-        return new UserResponse
+        return new UserDTOForManagerResponse
         {
             Id = user.Id,
             UserName = user.UserName,

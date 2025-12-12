@@ -9,9 +9,9 @@ namespace Application.Features.Products.Commands.RestoreManyProducts;
 public sealed class RestoreManyProductsCommandHandler(
     IProductReadRepository readRepository,
     IProductUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<RestoreManyProductsCommand, (List<ApiContracts.Product.Responses.ProductDetailResponse>? Data, Common.Models.ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<RestoreManyProductsCommand, (List<ApiContracts.Product.Responses.ProductDetailForManagerResponse>? Data, Common.Models.ErrorResponse? Error)>
 {
-    public async Task<(List<ApiContracts.Product.Responses.ProductDetailResponse>? Data, Common.Models.ErrorResponse? Error)> Handle(
+    public async Task<(List<ApiContracts.Product.Responses.ProductDetailForManagerResponse>? Data, Common.Models.ErrorResponse? Error)> Handle(
         RestoreManyProductsCommand command,
         CancellationToken cancellationToken)
     {
@@ -60,7 +60,7 @@ public sealed class RestoreManyProductsCommandHandler(
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        var responses = deletedProducts.Select(p => p.Adapt<ApiContracts.Product.Responses.ProductDetailResponse>())
+        var responses = deletedProducts.Select(p => p.Adapt<ApiContracts.Product.Responses.ProductDetailForManagerResponse>())
             .ToList();
         return (responses, null);
     }

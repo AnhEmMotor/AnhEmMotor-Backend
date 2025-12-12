@@ -2,7 +2,7 @@
 
 namespace Application.Features.Outputs.Commands.CreateOutput;
 
-public sealed class CreateOutputCommandValidator : AbstractValidator<CreateOutputByAdminCommand>
+public sealed class CreateOutputCommandValidator : AbstractValidator<CreateOutputByManagerCommand>
 {
     public CreateOutputCommandValidator()
     {

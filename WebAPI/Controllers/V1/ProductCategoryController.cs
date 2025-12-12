@@ -32,12 +32,26 @@ namespace WebAPI.Controllers.V1;
 public class ProductCategoryController(IMediator mediator) : ControllerBase
 {
     /// <summary>
-    /// Lấy danh sách danh mục sản phẩm (có phân trang, lọc, sắp xếp).
+    /// Lấy danh sách danh mục sản phẩm (có phân trang, lọc, sắp xếp - vào được cho mọi người dùng).
     /// </summary>
     [HttpGet]
-    [HasPermission(ProductCategories.View)]
     [ProducesResponseType(typeof(Domain.Primitives.PagedResult<ProductCategoryResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetProductCategories(
+        [FromQuery] SieveModel sieveModel,
+        CancellationToken cancellationToken)
+    {
+        var query = new GetProductCategoriesListQuery(sieveModel);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Lấy danh sách danh mục sản phẩm (có phân trang, lọc, sắp xếp - chỉ được vào khi có quyền xem danh mục sản phẩm).
+    /// </summary>
+    [HttpGet("for-manager")]
+    [HasPermission(ProductCategories.View)]
+    [ProducesResponseType(typeof(Domain.Primitives.PagedResult<ProductCategoryResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetProductCategoriesForManager(
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
     {

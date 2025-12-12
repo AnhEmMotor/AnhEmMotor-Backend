@@ -1,4 +1,6 @@
 ﻿using Application.ApiContracts.Product.Common;
+using Application.ApiContracts.Product.Requests;
+using Application.ApiContracts.Product.Responses;
 using Domain.Constants;
 using Mapster;
 using ProductEntity = Domain.Entities.Product;
@@ -10,15 +12,18 @@ public class ProductMappingConfig : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {
-        config.NewConfig<ApiContracts.Product.Requests.CreateProductRequest, Commands.CreateProduct.CreateProductCommand>(
+        config.NewConfig<CreateProductRequest, Commands.CreateProduct.CreateProductCommand>(
             )
             .Map(dest => dest.Variants, src => src.Variants ?? new List<ProductVariantWriteRequest>());
 
-        config.NewConfig<ApiContracts.Product.Requests.UpdateProductRequest, Commands.UpdateProduct.UpdateProductCommand>(
+        config.NewConfig<UpdateProductRequest, Commands.UpdateProduct.UpdateProductCommand>(
             )
             .MapWith(src => new Commands.UpdateProduct.UpdateProductCommand(0, src));
 
-        config.NewConfig<ProductEntity, ApiContracts.Product.Responses.ProductDetailResponse>()
+        config.NewConfig<ProductEntity, ProductDetailForManagerResponse>()
+            .MapWith(src => MapProductToDetailForManagerResponse(src));
+
+        config.NewConfig<ProductEntity, ProductDetailResponse>()
             .MapWith(src => MapProductToDetailResponse(src));
 
         config.NewConfig<ProductEntity, ProductListRow>()
@@ -58,7 +63,7 @@ public class ProductMappingConfig : IRegister
                         .Sum(oi => (long?)oi.Count) ??
                     0);
 
-        config.NewConfig<VariantRow, ApiContracts.Product.Responses.ProductVariantDetailResponse>()
+        config.NewConfig<VariantRow, ProductVariantDetailForManagerResponse>()
             .Map(
                 dest => dest.OptionValues,
                 src => src.OptionPairs
@@ -70,17 +75,28 @@ public class ProductMappingConfig : IRegister
             .Map(dest => dest.PhotoCollection, src => src.Photos)
             .Map(dest => dest.StatusStockId, src => GetStockStatus(src.Stock - src.HasBeenBooked));
 
+        config.NewConfig<VariantRow, ProductVariantDetailResponse>()
+            .Map(
+                dest => dest.OptionValues,
+                src => src.OptionPairs
+                    .Where(
+                        pair => !string.IsNullOrWhiteSpace(pair.OptionName) &&
+                                !string.IsNullOrWhiteSpace(pair.OptionValue))
+                    .GroupBy(pair => pair.OptionName!, StringComparer.OrdinalIgnoreCase)
+                    .ToDictionary(g => g.Key, g => g.First().OptionValue!, StringComparer.OrdinalIgnoreCase))
+            .Map(dest => dest.PhotoCollection, src => src.Photos);
+
         config.NewConfig<ProductVariantEntity, ProductVariantLiteResponse>()
             .MapWith(src => BuildVariantLiteResponse(src));
     }
 
-    private static ApiContracts.Product.Responses.ProductDetailResponse MapProductToDetailResponse(
+    private static ProductDetailForManagerResponse MapProductToDetailForManagerResponse(
         ProductEntity product)
     {
         var variantRows = product.ProductVariants.Select(variant => variant.Adapt<VariantRow>()).ToList();
 
         var variantResponses = variantRows
-            .Select(variant => variant.Adapt<ApiContracts.Product.Responses.ProductVariantDetailResponse>())
+            .Select(variant => variant.Adapt<ProductVariantDetailForManagerResponse>())
             .OrderBy(v => v.Stock - v.HasBeenBooked)
             .ThenBy(v => v.UrlSlug)
             .ToList();
@@ -89,7 +105,7 @@ public class ProductMappingConfig : IRegister
         var totalBooked = variantRows.Sum(v => v.HasBeenBooked);
         var availableStock = totalStock - totalBooked;
 
-        return new ApiContracts.Product.Responses.ProductDetailResponse
+        return new ProductDetailForManagerResponse
         {
             Id = product.Id,
             Name = product.Name,
@@ -122,6 +138,51 @@ public class ProductMappingConfig : IRegister
             Stock = totalStock,
             HasBeenBooked = totalBooked,
             StatusStockId = GetStockStatus(availableStock),
+            Variants = variantResponses
+        };
+    }
+
+    private static ProductDetailResponse MapProductToDetailResponse(
+        ProductEntity product)
+    {
+        var variantRows = product.ProductVariants.Select(variant => variant.Adapt<VariantRow>()).ToList();
+
+        var variantResponses = variantRows
+            .Select(variant => variant.Adapt<ProductVariantDetailResponse>())
+            .ToList();
+
+        var totalStock = variantRows.Sum(v => v.Stock);
+        var totalBooked = variantRows.Sum(v => v.HasBeenBooked);
+        var availableStock = totalStock - totalBooked;
+
+        return new ProductDetailResponse
+        {
+            Id = product.Id,
+            Name = product.Name,
+            CategoryName = product.ProductCategory?.Name,
+            BrandId = product.BrandId,
+            BrandName = product.Brand?.Name,
+            Description = product.Description,
+            Weight = product.Weight,
+            Dimensions = product.Dimensions,
+            Wheelbase = product.Wheelbase,
+            SeatHeight = product.SeatHeight,
+            GroundClearance = product.GroundClearance,
+            FuelCapacity = product.FuelCapacity,
+            TireSize = product.TireSize,
+            FrontSuspension = product.FrontSuspension,
+            RearSuspension = product.RearSuspension,
+            EngineType = product.EngineType,
+            MaxPower = product.MaxPower,
+            OilCapacity = product.OilCapacity,
+            FuelConsumption = product.FuelConsumption,
+            TransmissionType = product.TransmissionType,
+            StarterSystem = product.StarterSystem,
+            MaxTorque = product.MaxTorque,
+            Displacement = product.Displacement,
+            BoreStroke = product.BoreStroke,
+            CompressionRatio = product.CompressionRatio,
+            CoverImageUrl = variantResponses.FirstOrDefault()?.CoverImageUrl,
             Variants = variantResponses
         };
     }

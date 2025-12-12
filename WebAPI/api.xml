@@ -175,7 +175,15 @@
         </member>
         <member name="M:WebAPI.Controllers.V1.BrandController.GetBrands(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
-            Lấy danh sách thương hiệu (có phân trang, lọc, sắp xếp).
+            Lấy danh sách thương hiệu (có phân trang, lọc, sắp xếp - vào được cho mọi người dùng).
+            </summary>
+            <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.BrandController.GetBrandsForManager(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+            <summary>
+            Lấy danh sách thương hiệu (có phân trang, lọc, sắp xếp - vào được khi có quyền xem danh sách thương hiệu).
             </summary>
             <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
             <param name="cancellationToken"></param>
@@ -490,7 +498,12 @@
         </member>
         <member name="M:WebAPI.Controllers.V1.ProductCategoryController.GetProductCategories(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
-            Lấy danh sách danh mục sản phẩm (có phân trang, lọc, sắp xếp).
+            Lấy danh sách danh mục sản phẩm (có phân trang, lọc, sắp xếp - vào được cho mọi người dùng).
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductCategoryController.GetProductCategoriesForManager(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+            <summary>
+            Lấy danh sách danh mục sản phẩm (có phân trang, lọc, sắp xếp - chỉ được vào khi có quyền xem danh mục sản phẩm).
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.ProductCategoryController.GetDeletedProductCategories(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
@@ -548,8 +561,16 @@
         </member>
         <member name="M:WebAPI.Controllers.V1.ProductController.GetProducts(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
-            Lấy danh sách sản phẩm đầy đủ (có phân trang, lọc, tìm kiếm).
+            Lấy danh sách sản phẩm đầy đủ dành cho khách hàng (có phân trang, lọc, tìm kiếm).
             </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetProductsForManager(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+            <summary>
+            Lấy danh sách sản phẩm đầy đủ dành cho người quản lý (có phân trang, lọc, tìm kiếm).
+            </summary>
+            <param name="request"></param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
         </member>
         <member name="M:WebAPI.Controllers.V1.ProductController.GetDeletedProducts(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
@@ -558,12 +579,38 @@
         </member>
         <member name="M:WebAPI.Controllers.V1.ProductController.GetActiveVariantLiteProducts(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
-            Lấy danh sách biến thể sản phẩm của tất cả sản phẩm (có phân trang, lọc, tìm kiếm).
+            Lấy danh sách biến thể sản phẩm của tất cả sản phẩm (có phân trang, lọc, tìm kiếm - chỉ có thể vào khi và chỉ khi có quyền xem danh sách sản phẩm).
             </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetActiveVariantLiteProductsPublic(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+            <summary>
+            Lấy danh sách biến thể sản phẩm của tất cả sản phẩm (có phân trang, lọc, tìm kiếm - cho phép vào với mọi user).
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetActiveVariantLiteProductsForInput(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+            <summary>
+            `Lấy danh sách biến thể sản phẩm của tất cả sản phẩm (có phân trang, lọc, tìm kiếm - chỉ có thể vào khi và chỉ khi có quyền thêm hoặc sửa phiếu nhập).
+            </summary>
+            <param name="request"></param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetActiveVariantLiteProductsForOutput(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+            <summary>
+            Lấy danh sách biến thể sản phẩm của tất cả sản phẩm (có phân trang, lọc, tìm kiếm - chỉ có thể vào khi và chỉ khi có quyền thêm hoặc sửa phiếu bán hàng).
+            </summary>
+            <param name="request"></param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
         </member>
         <member name="M:WebAPI.Controllers.V1.ProductController.GetVarientById(System.Int32,System.Threading.CancellationToken)">
             <summary>
-            Lấy thông tin chi tiết sản phẩm theo Id.
+            Lấy thông tin chi tiết sản phẩm theo Id (dành cho toàn bộ người dùng khách)
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetVarientByIdForManager(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Lấy thông tin chi tiết sản phẩm theo Id (dành cho người quản lý)
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.ProductController.GetVariantLiteByProductIdActive(System.Int32,System.Threading.CancellationToken)">
@@ -653,6 +700,11 @@
             Lấy danh sách đơn hàng của khách hàng hiện tại (dựa trên JWT token).
             </summary>
         </member>
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetPurchasesByID(Sieve.Models.SieveModel,System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Lấy danh sách đơn hàng của id khách hàng (chỉ cho phép vào khi có quyền xem đơn hàng).
+            </summary>
+        </member>
         <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetOutputs(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách đơn hàng (có phân trang, lọc, sắp xếp).
@@ -668,9 +720,14 @@
             Lấy thông tin chi tiết của đơn hàng.
             </summary>
         </member>
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.CreateOutputForAdmin(Application.ApiContracts.Output.Requests.CreateOutputByAdminRequest,System.Threading.CancellationToken)">
+            <summary>
+            Tạo đơn hàng mới (dành cho người có quyền tạo đơn hàng).
+            </summary>
+        </member>
         <member name="M:WebAPI.Controllers.V1.SalesOrdersController.CreateOutput(Application.ApiContracts.Output.Requests.CreateOutputRequest,System.Threading.CancellationToken)">
             <summary>
-            Tạo đơn hàng mới.
+            Tạo đơn hàng mới (dành cho các tài khoản đã đăng nhập).
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.SalesOrdersController.UpdateOutput(System.Int32,Application.ApiContracts.Output.Requests.UpdateOutputRequest,System.Threading.CancellationToken)">
@@ -946,7 +1003,14 @@
         </member>
         <member name="M:WebAPI.Controllers.V1.UserManagerController.GetAllUsers(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
-            Lấy danh sách tất cả người dùng (có phân trang, lọc, sắp xếp).
+            Lấy danh sách tất cả người dùng (có phân trang, lọc, sắp xếp - chỉ vào được khi người dùng có quyền xem danh sách người dùng).
+            </summary>
+            <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
+            <param name="cancellationToken"></param>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.UserManagerController.GetAllUsersForOutput(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+            <summary>
+            Lấy danh sách tất cả người dùng (có phân trang, lọc, sắp xếp - chỉ vào được khi người dùng có quyền sửa hoặc xoá phiếu bán hàng).
             </summary>
             <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
             <param name="cancellationToken"></param>

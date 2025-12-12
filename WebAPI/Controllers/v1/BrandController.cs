@@ -31,15 +31,30 @@ namespace WebAPI.Controllers.V1;
 public class BrandController(IMediator mediator) : ControllerBase
 {
     /// <summary>
-    /// Lấy danh sách thương hiệu (có phân trang, lọc, sắp xếp).
+    /// Lấy danh sách thương hiệu (có phân trang, lọc, sắp xếp - vào được cho mọi người dùng).
     /// </summary>
     /// <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpGet]
-    [HasPermission(Brands.View)]
     [ProducesResponseType(typeof(Domain.Primitives.PagedResult<BrandResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetBrands([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
+    {
+        var query = new GetBrandsListQuery(sieveModel);
+        var pagedResult = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return Ok(pagedResult);
+    }
+
+    /// <summary>
+    /// Lấy danh sách thương hiệu (có phân trang, lọc, sắp xếp - vào được khi có quyền xem danh sách thương hiệu).
+    /// </summary>
+    /// <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    [HttpGet("for-manager")]
+    [HasPermission(Brands.View)]
+    [ProducesResponseType(typeof(Domain.Primitives.PagedResult<BrandResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetBrandsForManager([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
     {
         var query = new GetBrandsListQuery(sieveModel);
         var pagedResult = await mediator.Send(query, cancellationToken).ConfigureAwait(true);

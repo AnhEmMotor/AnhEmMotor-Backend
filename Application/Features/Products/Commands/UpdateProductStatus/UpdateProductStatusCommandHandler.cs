@@ -8,9 +8,9 @@ namespace Application.Features.Products.Commands.UpdateProductStatus;
 public sealed class UpdateProductStatusCommandHandler(
     IProductReadRepository readRepository,
     IProductUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateProductStatusCommand, (ApiContracts.Product.Responses.ProductDetailResponse? Data, Common.Models.ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateProductStatusCommand, (ApiContracts.Product.Responses.ProductDetailForManagerResponse? Data, Common.Models.ErrorResponse? Error)>
 {
-    public async Task<(ApiContracts.Product.Responses.ProductDetailResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
+    public async Task<(ApiContracts.Product.Responses.ProductDetailForManagerResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
         UpdateProductStatusCommand command,
         CancellationToken cancellationToken)
     {
@@ -28,7 +28,7 @@ public sealed class UpdateProductStatusCommandHandler(
         updateRepository.Update(product);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        var response = product.Adapt<ApiContracts.Product.Responses.ProductDetailResponse>();
+        var response = product.Adapt<ApiContracts.Product.Responses.ProductDetailForManagerResponse>();
         return (response, null);
     }
 }

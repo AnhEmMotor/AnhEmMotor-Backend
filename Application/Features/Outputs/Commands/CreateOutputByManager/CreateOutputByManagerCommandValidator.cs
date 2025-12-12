@@ -2,9 +2,9 @@
 
 namespace Application.Features.Outputs.Commands.CreateOutput;
 
-public sealed class CreateOutputByAdminCommandValidator : AbstractValidator<CreateOutputByAdminCommand>
+public sealed class CreateOutputByManagerCommandValidator : AbstractValidator<CreateOutputByManagerCommand>
 {
-    public CreateOutputByAdminCommandValidator()
+    public CreateOutputByManagerCommandValidator()
     {
         RuleFor(x => x.OutputInfos).NotEmpty().WithMessage("Input must contain at least one product.");
 
@@ -25,6 +25,6 @@ public sealed class CreateOutputByAdminCommandValidator : AbstractValidator<Crea
                 })
             .WithMessage("Product ID cannot be duplicated in a single output.");
 
-        RuleForEach(x => x.OutputInfos).SetValidator(new CreateOutputProductByAdminCommandValidator());
+        RuleForEach(x => x.OutputInfos).SetValidator(new CreateOutputProductByManagerCommandValidator());
     }
 }

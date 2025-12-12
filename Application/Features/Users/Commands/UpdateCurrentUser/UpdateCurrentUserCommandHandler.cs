@@ -1,4 +1,5 @@
 using Application.ApiContracts.User.Responses;
+using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Exceptions;
 using Domain.Constants;
 using Domain.Entities;
@@ -9,9 +10,9 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Application.Features.Users.Commands.UpdateCurrentUser;
 
-public class UpdateCurrentUserCommandHandler(UserManager<ApplicationUser> userManager) : IRequestHandler<UpdateCurrentUserCommand, UserResponse>
+public class UpdateCurrentUserCommandHandler(UserManager<ApplicationUser> userManager) : IRequestHandler<UpdateCurrentUserCommand, UserDTOForManagerResponse>
 {
-    public async Task<UserResponse> Handle(UpdateCurrentUserCommand request, CancellationToken cancellationToken)
+    public async Task<UserDTOForManagerResponse> Handle(UpdateCurrentUserCommand request, CancellationToken cancellationToken)
     {
         if(!GenderStatus.IsValid(request.Model.Gender))
         {
@@ -58,7 +59,7 @@ public class UpdateCurrentUserCommandHandler(UserManager<ApplicationUser> userMa
 
         var roles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
 
-        return new UserResponse()
+        return new UserDTOForManagerResponse()
         {
             Id = user.Id,
             UserName = user.UserName,

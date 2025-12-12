@@ -3,7 +3,7 @@ using MediatR;
 
 namespace Application.Features.Outputs.Commands.CreateOutput;
 
-public sealed record CreateOutputByAdminCommand : IRequest<(OutputResponse? Data, Common.Models.ErrorResponse? Error)>
+public sealed record CreateOutputByManagerCommand : IRequest<(OutputResponse? Data, Common.Models.ErrorResponse? Error)>
 {
     public string? StatusId { get; init; }
 

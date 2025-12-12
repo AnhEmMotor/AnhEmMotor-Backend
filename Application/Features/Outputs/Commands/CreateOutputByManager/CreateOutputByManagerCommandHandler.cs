@@ -10,15 +10,15 @@ using MediatR;
 
 namespace Application.Features.Outputs.Commands.CreateOutput;
 
-public sealed class CreateOutputByAdminCommandHandler(
+public sealed class CreateOutputByManagerCommandHandler(
     IOutputReadRepository readRepository,
     IOutputInsertRepository insertRepository,
     IProductVariantReadRepository variantRepository,
     IUserReadRepository userReadRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateOutputByAdminCommand, (OutputResponse? Data, Common.Models.ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<CreateOutputByManagerCommand, (OutputResponse? Data, Common.Models.ErrorResponse? Error)>
 {
     public async Task<(OutputResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
-        CreateOutputByAdminCommand request,
+        CreateOutputByManagerCommand request,
         CancellationToken cancellationToken)
     {
         if(request.OutputInfos.Count == 0)

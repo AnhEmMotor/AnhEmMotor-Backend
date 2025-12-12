@@ -19,7 +19,6 @@ public class GetCurrentUserQueryHandler(UserManager<ApplicationUser> userManager
 
         var user = await userManager.FindByIdAsync(userId.ToString()).ConfigureAwait(false) ??
             throw new NotFoundException("User not found.");
-        var roles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
 
         return new UserResponse()
         {
@@ -29,10 +28,6 @@ public class GetCurrentUserQueryHandler(UserManager<ApplicationUser> userManager
             FullName = user.FullName,
             Gender = user.Gender,
             PhoneNumber = user.PhoneNumber,
-            EmailConfirmed = user.EmailConfirmed,
-            Status = user.Status,
-            DeletedAt = user.DeletedAt,
-            Roles = roles
         };
     }
 }
