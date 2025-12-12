@@ -24,7 +24,9 @@ public class OutputReadRepository(ApplicationDBContext context) : IOutputReadRep
             .Include(x => x.OutputInfos.Where(y => y.DeletedAt == null))
             .ThenInclude(x => x.ProductVariant)
             .ThenInclude(x => x!.Product)
-            .Include(x => x.OutputStatus);
+            .Include(x => x.OutputStatus)
+            .Include(x => x.Buyer)
+            .Include(x => x.CompletedByUser);
     }
 
     public Task<IEnumerable<OutputEntity>> GetAllAsync(
@@ -76,6 +78,8 @@ public class OutputReadRepository(ApplicationDBContext context) : IOutputReadRep
             .ThenInclude(vov => vov.OptionValue)
             .ThenInclude(ov => ov!.Option)
             .Include(o => o.OutputStatus)
+            .Include(o => o.Buyer)
+            .Include(o => o.CompletedByUser)
             .FirstOrDefaultAsync(o => o.Id == id, cancellationToken)
             .ContinueWith(t => t.Result, cancellationToken);
     }

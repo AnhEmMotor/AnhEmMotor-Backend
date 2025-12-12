@@ -94,6 +94,7 @@ namespace Infrastructure.Repositories.ProductVariant
                 .ThenInclude(ov => ov!.Option)
 
                 .Include(v => v.InputInfos.Where(ii => ii.DeletedAt == null && ii.InputReceipt!.DeletedAt == null))
+                .ThenInclude(ii => ii.InputReceipt)
 
                 .Include(v => v.OutputInfos.Where(oi => oi.DeletedAt == null && oi.OutputOrder!.DeletedAt == null))
                 .ThenInclude(oi => oi.OutputOrder)

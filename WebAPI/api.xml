@@ -730,12 +730,12 @@
             Tạo đơn hàng mới (dành cho các tài khoản đã đăng nhập).
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.UpdateOutputForManager(System.Int32,Application.ApiContracts.Output.Requests.UpdateOutputRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.UpdateOutputForManager(System.Int32,Application.ApiContracts.Output.Requests.UpdateOutputForManagerRequest,System.Threading.CancellationToken)">
             <summary>
-            Cập nhật đơn hàng (Cho phép sửa tất cả đơn hàng, nhưng chỉ cho phép cập nhật khi và chỉ khi có quyền chỉnh sửa đơn hàng)
+            Cập nhật đơn hàng (Cho phép sửa đơn hàng do chính mình tạo ra)
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.UpdateOutput(System.Int32,Application.ApiContracts.Output.Requests.UpdateOutputRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.UpdateOutput(System.Int32,Application.ApiContracts.Output.Requests.UpdateOutputForManagerRequest,System.Threading.CancellationToken)">
             <summary>
             Cập nhật đơn hàng (Cho phép sửa tất cả đơn hàng, nhưng chỉ cho phép cập nhật khi và chỉ khi có quyền chỉnh sửa đơn hàng)
             </summary>
@@ -1082,32 +1082,25 @@
             <param name="value">The string value to write. If null or empty, no value is written.</param>
             <param name="options">Options to control JSON serialization behavior. This parameter can be used to customize serialization features.</param>
         </member>
-        <member name="T:WebAPI.Extensions.AuthExtensions">
+        <member name="T:WebAPI.Extensions.AuthenticationExtensions">
             <summary>
-            Provides extension methods for configuring custom authentication services, including ASP.NET Core Identity and JWT
-            bearer authentication, in an application's dependency injection container.
+            Provides extension methods for configuring JWT bearer authentication in an ASP.NET Core application.
             </summary>
-            <remarks>
-            This class is intended to be used in the application's startup configuration to simplify the setup of authentication
-            and authorization. The extension method configures password requirements, unique email enforcement, and JWT token
-            validation parameters based on the provided configuration. It should be called during service registration to ensure
-            authentication is properly set up before the application starts handling requests.
-            </remarks>
+            <remarks>This class contains methods that extend the functionality of IServiceCollection to simplify the setup
+            of JWT authentication using configuration values. It is intended to be used during application startup when
+            configuring authentication services.</remarks>
         </member>
-        <member name="M:WebAPI.Extensions.AuthExtensions.AddCustomAuthentication(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration)">
+        <member name="M:WebAPI.Extensions.AuthenticationExtensions.AddJwtAuthentication(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration)">
             <summary>
-            Configures ASP.NET Core Identity and JWT-based authentication for the application using the specified
-            configuration settings.
+            Adds JWT bearer authentication to the application's service collection using configuration settings.
             </summary>
-            <remarks>
-            This method sets up password requirements, unique email enforcement, and configures JWT authentication schemes
-            and token validation parameters. Ensure that the configuration contains valid values for 'Jwt:Key',
-            'Jwt:Issuer', and 'Jwt:Audience'.
-            </remarks>
-            <param name="services">The service collection to which authentication and identity services will be added.</param>
+            <remarks>This method configures JWT authentication with validation for issuer, audience, lifetime, and
+            signing key. The relevant JWT settings must be present in the configuration under the 'Jwt' section. The method
+            sets the default authentication scheme to JWT bearer.</remarks>
+            <param name="services">The service collection to which authentication services will be added.</param>
             <param name="configuration">The application configuration containing JWT settings such as issuer, audience, and signing key.</param>
-            <returns>The same service collection instance with authentication and identity services configured.</returns>
-            <exception cref="T:System.InvalidOperationException">Thrown if the JWT signing key is not specified in the configuration.</exception>
+            <returns>The same <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> instance so that additional calls can be chained.</returns>
+            <exception cref="T:System.InvalidOperationException">Thrown if the required JWT signing key ('Jwt:Key') is missing from the configuration.</exception>
         </member>
         <member name="T:WebAPI.Extensions.MigrationExtensions">
             <summary>
@@ -1262,32 +1255,6 @@
             A value indicating whether the exception was handled and an error response was written. Always returns <see
             langword="true"/>.
             </returns>
-        </member>
-        <member name="T:WebAPI.StartupExtensions.ConfigureServicesExtension">
-            <summary>
-            Provides extension methods for configuring application services in an ASP.NET Core application.
-            </summary>
-            <remarks>
-            This class contains methods that extend the IServiceCollection interface to register core framework, authentication,
-            documentation, observability, application, and infrastructure services. It is intended to be used during application
-            startup to centralize and standardize service registration.
-            </remarks>
-        </member>
-        <member name="M:WebAPI.StartupExtensions.ConfigureServicesExtension.ConfigureServices(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration,Microsoft.AspNetCore.Hosting.IWebHostEnvironment)">
-            <summary>
-            Configures application services, including MVC, authentication, documentation, observability, application, and
-            infrastructure layers, for the ASP.NET Core dependency injection container.
-            </summary>
-            <remarks>
-            This extension method centralizes the registration of core framework, authentication, documentation,
-            observability, application, and infrastructure services. Infrastructure services are not registered when the
-            environment is set to "Test". Call this method during application startup to ensure all required services are
-            available for dependency injection.
-            </remarks>
-            <param name="services">The service collection to which application services will be added. Must not be null.</param>
-            <param name="configuration">The application configuration used to retrieve settings for service registration. Must not be null.</param>
-            <param name="environment">The web hosting environment that determines environment-specific service registration. Must not be null.</param>
-            <returns>The same <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> instance with the configured services added.</returns>
         </member>
         <member name="T:WebAPI.StartupExtensions.ConfigureSwaggerOptions">
             <summary>
