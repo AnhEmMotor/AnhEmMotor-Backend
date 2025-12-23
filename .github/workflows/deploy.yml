@@ -23,7 +23,8 @@ jobs:
       - name: Prepare AppSettings
         run: |
           cp WebAPI/appsettings.Template.json appsettings.Production.json
-          sed -i 's|//.*||g' appsettings.Production.json
+          sed -i '/^[[:blank:]]*\/\//d' appsettings.Production.json
+          sed -i 's|[[:blank:]]\+//.*||g' appsettings.Production.json
 
       - name: Inject Secrets
         uses: microsoft/variable-substitution@v1
@@ -55,7 +56,7 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
-          password: ${{ secrets.SSH_PRIVATE_KEY }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           source: "./publish/*"
           target: "/home/anhemmot/projects/my-webapp"
@@ -66,7 +67,7 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
-          password: ${{ secrets.SSH_PRIVATE_KEY }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
             bash /home/anhemmot/scripts/restart_app.sh
