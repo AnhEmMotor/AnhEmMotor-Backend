@@ -59,7 +59,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           source: "./publish/*"
-          target: "/home/anhemmot/projects/my-webapp"
+          target: "/home/anhemmot/projects/anhemmotor-backend"
           strip_components: 1
 
       - name: Execute Remote SSH Commands
