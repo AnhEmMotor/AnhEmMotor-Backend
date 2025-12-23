@@ -70,4 +70,6 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
+            sed -i 's/\r$//' /home/anhemmot/scripts/restart_app.sh
+            chmod +x /home/anhemmot/scripts/restart_app.sh
             bash /home/anhemmot/scripts/restart_app.sh
