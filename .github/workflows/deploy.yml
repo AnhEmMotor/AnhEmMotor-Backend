@@ -22,7 +22,7 @@ jobs:
 
       - name: Prepare AppSettings
         run: |
-          cp appsettings.Template.json appsettings.Production.json
+          cp WebAPI/appsettings.Template.json appsettings.Production.json
           sed -i 's|//.*||g' appsettings.Production.json
 
       - name: Inject Secrets
