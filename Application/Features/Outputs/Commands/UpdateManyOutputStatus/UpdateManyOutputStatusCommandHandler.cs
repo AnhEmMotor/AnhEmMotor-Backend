@@ -71,14 +71,14 @@ public sealed class UpdateManyOutputStatusCommandHandler(
 
                 foreach(var info in output.OutputInfos)
                 {
-                    if(info.ProductId.HasValue && info.Count.HasValue)
+                    if(info.ProductVarientId.HasValue && info.Count.HasValue)
                     {
-                        if(productDemands.ContainsKey(info.ProductId.Value))
+                        if(productDemands.ContainsKey(info.ProductVarientId.Value))
                         {
-                            productDemands[info.ProductId.Value] += info.Count.Value;
+                            productDemands[info.ProductVarientId.Value] += info.Count.Value;
                         } else
                         {
-                            productDemands[info.ProductId.Value] = info.Count.Value;
+                            productDemands[info.ProductVarientId.Value] = info.Count.Value;
                         }
                     }
                 }

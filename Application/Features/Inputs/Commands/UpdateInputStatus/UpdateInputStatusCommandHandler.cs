@@ -66,7 +66,7 @@ public sealed class UpdateInputStatusCommandHandler(
         if(string.Equals(request.StatusId, InputStatus.Finish, StringComparison.OrdinalIgnoreCase))
         {
             input.InputDate = DateTimeOffset.UtcNow;
-            input.CreatedByUserId = request.CurrentUserId;
+            input.CreatedBy = request.CurrentUserId;
         }
 
         updateRepository.Update(input);

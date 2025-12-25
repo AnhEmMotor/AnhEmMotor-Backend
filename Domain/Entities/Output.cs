@@ -13,16 +13,26 @@ namespace Domain.Entities
         [Column("CustomerName")]
         public string? CustomerName { get; set; }
 
+        [Column("CustomerAddress")]
+        public string? CustomerAddress { get; set; }
+
+        [Column("CustomerPhone")]
+        public string? CustomerPhone { get; set; }
+
+        [Column("LastStatusChangedAt")]
+        public DateTimeOffset? LastStatusChangedAt { get; set; }
+
         [Column("BuyerId")]
         [ForeignKey("Buyer")]
         public Guid? BuyerId { get; set; }
 
-        [Column("EmpCode")]
-        public int? EmpCode { get; set; }
+        [Column("CreatedBy")]
+        [ForeignKey("CreatedByUser")]
+        public Guid? CreatedBy { get; set; }
 
-        [Column("CreatedByUserId")]
-        [ForeignKey("CompletedByUser")]
-        public Guid? CreatedByUserId { get; set; }
+        [Column("FinishedBy")]
+        [ForeignKey("FinishedByUser")]
+        public Guid? FinishedBy { get; set; }
 
         [Column("StatusId")]
         [ForeignKey("OutputStatus")]
@@ -33,7 +43,9 @@ namespace Domain.Entities
 
         public ApplicationUser? Buyer { get; set; }
 
-        public ApplicationUser? CompletedByUser { get; set; }
+        public ApplicationUser? CreatedByUser { get; set; }
+
+        public ApplicationUser? FinishedByUser { get; set; }
 
         public OutputStatus? OutputStatus { get; set; }
 

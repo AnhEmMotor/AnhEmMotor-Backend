@@ -58,8 +58,8 @@
 
         public DateTimeOffset? CreatedAt { get; set; }
 
-        public long TotalStock { get; set; }
+        public int TotalStock { get; set; }
 
-        public long TotalBooked { get; set; }
+        public int TotalBooked { get; set; }
     }
 }

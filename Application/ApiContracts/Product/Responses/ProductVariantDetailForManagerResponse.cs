@@ -12,7 +12,7 @@ public class ProductVariantDetailForManagerResponse
     [JsonPropertyName("url")]
     public string? UrlSlug { get; set; }
 
-    public long? Price { get; set; }
+    public decimal? Price { get; set; }
 
     [JsonPropertyName("cover_image_url")]
     public string? CoverImageUrl { get; set; }
@@ -23,10 +23,10 @@ public class ProductVariantDetailForManagerResponse
     [JsonPropertyName("photo_collection")]
     public List<string> PhotoCollection { get; set; } = [];
 
-    public long Stock { get; set; }
+    public int Stock { get; set; }
 
     [JsonPropertyName("has_been_booked")]
-    public long HasBeenBooked { get; set; }
+    public int HasBeenBooked { get; set; }
 
     [JsonPropertyName("status_stock_id")]
     public string StatusStockId { get; set; } = string.Empty;

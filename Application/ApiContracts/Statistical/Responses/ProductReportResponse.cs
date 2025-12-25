@@ -6,8 +6,8 @@ namespace Application.ApiContracts.Statistical.Responses
 
         public int VariantId { get; set; }
 
-        public long StockQuantity { get; set; }
+        public int StockQuantity { get; set; }
 
-        public long SoldLastMonth { get; set; }
+        public int SoldLastMonth { get; set; }
     }
 }

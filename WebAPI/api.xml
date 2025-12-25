@@ -161,12 +161,6 @@
             Đăng nhập bằng Facebook (placeholder - cần cấu hình Facebook OAuth)
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.AuthController.PingTest">
-            <summary>
-            Handles a test request to verify that the authentication service is reachable.
-            </summary>
-            <returns>An <see cref="T:Microsoft.AspNetCore.Mvc.OkObjectResult"/> containing a greeting message if the service is available.</returns>
-        </member>
         <member name="T:WebAPI.Controllers.V1.BrandController">
             <summary>
             Quản lý danh sách các thương hiệu sản phẩm (ví dụ: Honda, Yamaha, Suzuki).

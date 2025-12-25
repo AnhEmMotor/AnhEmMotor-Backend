@@ -4,8 +4,8 @@ namespace Application.ApiContracts.Statistical.Responses
     {
         public DateOnly ReportMonth { get; set; }
 
-        public long TotalRevenue { get; set; }
+        public decimal TotalRevenue { get; set; }
 
-        public long TotalProfit { get; set; }
+        public decimal TotalProfit { get; set; }
     }
 }

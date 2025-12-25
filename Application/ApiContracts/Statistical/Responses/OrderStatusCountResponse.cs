@@ -4,6 +4,6 @@ namespace Application.ApiContracts.Statistical.Responses
     {
         public string? StatusName { get; set; }
 
-        public long OrderCount { get; set; }
+        public int OrderCount { get; set; }
     }
 }

@@ -2,8 +2,8 @@ namespace Application.ApiContracts.Statistical.Responses
 {
     public class ProductStockPriceResponse
     {
-        public long UnitPrice { get; set; }
+        public decimal UnitPrice { get; set; }
 
-        public long StockQuantity { get; set; }
+        public int StockQuantity { get; set; }
     }
 }

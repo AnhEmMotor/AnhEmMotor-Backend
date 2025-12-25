@@ -29,8 +29,13 @@ namespace Domain.Entities
         [Column("Address", TypeName = "nvarchar(255)")]
         public string? Address { get; set; }
 
+        [Column("TaxIdentificationNumber", TypeName = "varchar(20)")]
+        public string? TaxIdentificationNumber { get; set; }
+
         public SupplierStatus? SupplierStatus { get; set; }
 
         public ICollection<Input> InputReceipts { get; set; } = [];
+
+        public ICollection<SupplierContact> SupplierContacts { get; set; } = [];
     }
 }

@@ -162,7 +162,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         var soldOutputsAll = await context.OutputInfos
             .Join(context.OutputOrders, oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
             .Where(x => x.o.StatusId != OrderStatus.Cancelled)
-            .GroupBy(x => x.oi.ProductId)
+            .GroupBy(x => x.oi.ProductVarientId)
             .Select(g => new { VariantId = g.Key, TotalOut = g.Sum(x => (long)(x.oi.Count ?? 0)) })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
@@ -173,7 +173,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                 x => x.o.StatusId != OrderStatus.Cancelled &&
                     x.o.CreatedAt >= lastMonthStart &&
                     x.o.CreatedAt < currentMonthStart)
-            .GroupBy(x => x.oi.ProductId)
+            .GroupBy(x => x.oi.ProductVarientId)
             .Select(g => new { VariantId = g.Key, TotalSold = g.Sum(x => (long)(x.oi.Count ?? 0)) })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
@@ -189,9 +189,9 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                 ProductName = pv.Product?.Name,
                 VariantId = pv.Id,
                 StockQuantity =
-                    (confirmedInputs.FirstOrDefault(x => x.VariantId == pv.Id)?.TotalIn ?? 0) -
-                            (soldOutputsAll.FirstOrDefault(x => x.VariantId == pv.Id)?.TotalOut ?? 0),
-                SoldLastMonth = soldLastMonth.FirstOrDefault(x => x.VariantId == pv.Id)?.TotalSold ?? 0
+                    (int)((confirmedInputs.FirstOrDefault(x => x.VariantId == pv.Id)?.TotalIn ?? 0) -
+                            (soldOutputsAll.FirstOrDefault(x => x.VariantId == pv.Id)?.TotalOut ?? 0)),
+                SoldLastMonth = (int)(soldLastMonth.FirstOrDefault(x => x.VariantId == pv.Id)?.TotalSold ?? 0)
             });
     }
 
@@ -217,7 +217,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
 
         var totalOutput = await context.OutputInfos
                 .Join(context.OutputOrders, oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
-                .Where(x => x.oi.ProductId == variantId && x.o.StatusId != OrderStatus.Cancelled)
+                .Where(x => x.oi.ProductVarientId == variantId && x.o.StatusId != OrderStatus.Cancelled)
                 .SumAsync(x => (long?)(x.oi.Count ?? 0), cancellationToken)
                 .ConfigureAwait(false) ??
             0;
@@ -225,7 +225,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         return new ProductStockPriceResponse
         {
             UnitPrice = variant.Price ?? 0,
-            StockQuantity = totalInput - totalOutput
+            StockQuantity = (int)totalInput - (int)totalOutput
         };
     }
 }

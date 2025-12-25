@@ -4,5 +4,5 @@ public class UpdateManyVariantPricesRequest
 {
     public List<int>? Ids { get; set; }
 
-    public long Price { get; set; }
+    public decimal Price { get; set; }
 }

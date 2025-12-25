@@ -13,6 +13,15 @@ namespace Domain.Entities
         [Column("Name", TypeName = "nvarchar(100)")]
         public string? Name { get; set; }
 
+        [Column("ShortDescription", TypeName = "nvarchar(255)")]
+        public string? ShortDescription { get; set; }
+
+        [Column("MetaTitle", TypeName = "nvarchar(100)")]
+        public string? MetaTitle { get; set; }
+
+        [Column("MetaDescription", TypeName = "nvarchar(255)")]
+        public string? MetaDescription { get; set; }
+
         [Column("CategoryId")]
         [ForeignKey("ProductCategory")]
         public int? CategoryId { get; set; }

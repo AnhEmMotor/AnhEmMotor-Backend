@@ -10,7 +10,7 @@ namespace Domain.Entities
         [Column("Key")]
         public string Key { get; set; } = string.Empty;
 
-        [Column("Value")]
-        public long? Value { get; set; }
+        [Column("Value", TypeName = "decimal(18, 2)")]
+        public decimal? Value { get; set; }
     }
 }

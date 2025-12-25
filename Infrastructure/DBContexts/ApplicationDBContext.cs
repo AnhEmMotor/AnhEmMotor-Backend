@@ -47,6 +47,8 @@ public class ApplicationDBContext(DbContextOptions<ApplicationDBContext> options
 
     public virtual DbSet<Supplier> Suppliers { get; set; }
 
+    public virtual DbSet<SupplierContact> SupplierContacts { get; set; }
+
     public virtual DbSet<SupplierStatus> SupplierStatuses { get; set; }
 
     public virtual DbSet<VariantOptionValue> VariantOptionValues { get; set; }

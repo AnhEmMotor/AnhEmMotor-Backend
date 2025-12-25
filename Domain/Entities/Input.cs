@@ -24,9 +24,13 @@ namespace Domain.Entities
         [ForeignKey("Supplier")]
         public int? SupplierId { get; set; }
 
-        [Column("CreatedByUserId")]
+        [Column("CreatedBy")]
         [ForeignKey("CreatedByUser")]
-        public Guid? CreatedByUserId { get; set; }
+        public Guid? CreatedBy { get; set; }
+
+        [Column("ConfirmedBy")]
+        [ForeignKey("ConfirmedByUser")]
+        public Guid? ConfirmedBy { get; set; }
 
         [Column("SourceOrderId")]
         [ForeignKey("Output")]
@@ -39,6 +43,8 @@ namespace Domain.Entities
         public Supplier? Supplier { get; set; }
 
         public ApplicationUser? CreatedByUser { get; set; }
+
+        public ApplicationUser? ConfirmedByUser { get; set; }
 
         public ICollection<InputInfo> InputInfos { get; set; } = [];
     }

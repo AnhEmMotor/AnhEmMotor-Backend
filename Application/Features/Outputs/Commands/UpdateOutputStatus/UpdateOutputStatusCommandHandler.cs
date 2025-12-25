@@ -65,15 +65,15 @@ public sealed class UpdateOutputStatusCommandHandler(
 
         if(string.Compare(request.StatusId, OrderStatus.Completed) == 0)
         {
-            output.CreatedByUserId = request.CurrentUserId;
+            output.CreatedBy = request.CurrentUserId;
         } else
         {
             foreach(var outputInfo in output.OutputInfos)
             {
-                if(outputInfo.ProductId.HasValue && outputInfo.Count.HasValue)
+                if(outputInfo.ProductVarientId.HasValue && outputInfo.Count.HasValue)
                 {
                     var stock = await readRepository.GetStockQuantityByVariantIdAsync(
-                        outputInfo.ProductId.Value,
+                        outputInfo.ProductVarientId.Value,
                         cancellationToken)
                         .ConfigureAwait(false);
 
@@ -86,7 +86,7 @@ public sealed class UpdateOutputStatusCommandHandler(
                                 {
                                     Field = "Products",
                                     Message =
-                                        $"Sản phẩm ID {outputInfo.ProductId} không đủ tồn kho. Hiện có: {stock}, cần: {outputInfo.Count.Value}"
+                                        $"Sản phẩm ID {outputInfo.ProductVarientId} không đủ tồn kho. Hiện có: {stock}, cần: {outputInfo.Count.Value}"
                                 } ]
                         });
                     }

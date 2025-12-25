@@ -13,7 +13,7 @@ namespace Application.ApiContracts.Product.Responses
         [JsonPropertyName("url")]
         public string? UrlSlug { get; set; }
 
-        public long? Price { get; set; }
+        public decimal? Price { get; set; }
 
         [JsonPropertyName("cover_image_url")]
         public string? CoverImageUrl { get; set; }

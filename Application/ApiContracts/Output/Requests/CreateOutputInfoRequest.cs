@@ -4,6 +4,6 @@ namespace Application.ApiContracts.Output.Requests
     {
         public int? ProductId { get; set; }
 
-        public short? Count { get; set; }
+        public int? Count { get; set; }
     }
 }

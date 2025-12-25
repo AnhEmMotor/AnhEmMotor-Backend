@@ -77,7 +77,7 @@ public sealed class CreateOutputCommandHandler(
 
         foreach(var info in output.OutputInfos)
         {
-            var matchingVariant = variantsList.FirstOrDefault(v => v.Id == info.ProductId);
+            var matchingVariant = variantsList.FirstOrDefault(v => v.Id == info.ProductVarientId);
             if(matchingVariant != null)
             {
                 info.Price = matchingVariant.Price;

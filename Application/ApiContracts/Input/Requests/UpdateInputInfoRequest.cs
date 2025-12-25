@@ -6,8 +6,8 @@ namespace Application.ApiContracts.Input.Requests
 
         public int? ProductId { get; set; }
 
-        public short? Count { get; set; }
+        public int? Count { get; set; }
 
-        public long? InputPrice { get; set; }
+        public decimal? InputPrice { get; set; }
     }
 }

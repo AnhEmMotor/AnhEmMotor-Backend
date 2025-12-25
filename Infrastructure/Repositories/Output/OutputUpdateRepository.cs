@@ -23,12 +23,12 @@ public class OutputUpdateRepository(ApplicationDBContext context) : IOutputUpdat
 
         foreach(var outputInfo in outputInfos)
         {
-            if(outputInfo.ProductId is null || outputInfo.Count is null)
+            if(outputInfo.ProductVarientId is null || outputInfo.Count is null)
             {
                 continue;
             }
 
-            var batches = await GetAvailableBatchesAsync(outputInfo.ProductId.Value, cancellationToken)
+            var batches = await GetAvailableBatchesAsync(outputInfo.ProductVarientId.Value, cancellationToken)
                 .ConfigureAwait(false);
 
             var unitCost = Domain.DomainServices.InventoryValuationService

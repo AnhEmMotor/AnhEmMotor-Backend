@@ -19,13 +19,13 @@ namespace Domain.Entities
         public int? ProductId { get; set; }
 
         [Column("Count")]
-        public short? Count { get; set; }
+        public int? Count { get; set; }
 
-        [Column("InputPrice")]
-        public long? InputPrice { get; set; }
+        [Column("InputPrice", TypeName = "decimal(18, 2)")]
+        public decimal? InputPrice { get; set; }
 
         [Column("RemainingCount")]
-        public long? RemainingCount { get; set; }
+        public int? RemainingCount { get; set; }
 
         [Column("ParentOutputInfoId")]
         [ForeignKey("ParentOutputInfo")]

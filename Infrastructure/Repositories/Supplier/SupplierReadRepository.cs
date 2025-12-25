@@ -15,31 +15,29 @@ public class SupplierReadRepository(ApplicationDBContext context) : ISupplierRea
     public IQueryable<SupplierWithTotalInputResponse> GetQueryableWithTotalInput(
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return context.GetQuery<SupplierEntity>(mode)
+        var query = context.GetQuery<SupplierEntity>(mode)
             .GroupJoin(
                 context.GetQuery<Domain.Entities.Input>(DataFetchMode.ActiveOnly)
                     .Where(i => i.StatusId == InputStatus.Finish),
                 supplier => supplier.Id,
                 input => input.SupplierId,
-                (supplier, inputs) => new { Supplier = supplier, Inputs = inputs })
-            .SelectMany(x => x.Inputs.DefaultIfEmpty(), (x, input) => new { x.Supplier, Input = input })
-            .GroupBy(x => x.Supplier)
+                (supplier, inputs) => new { supplier, inputs })
             .Select(
-                g => new SupplierWithTotalInputResponse
+                x => new SupplierWithTotalInputResponse
                 {
-                    Id = g.Key.Id,
-                    Name = g.Key.Name!,
-                    Phone = g.Key.Phone,
-                    Email = g.Key.Email,
-                    Address = g.Key.Address,
-                    StatusId = g.Key.StatusId!,
-                    CreatedAt = g.Key.CreatedAt,
-                    UpdatedAt = g.Key.UpdatedAt,
-                    DeletedAt = g.Key.DeletedAt,
+                    Id = x.supplier.Id,
+                    Name = x.supplier.Name!,
+                    Phone = x.supplier.Phone,
+                    Email = x.supplier.Email,
+                    Address = x.supplier.Address,
+                    StatusId = x.supplier.StatusId!,
+                    CreatedAt = x.supplier.CreatedAt,
+                    UpdatedAt = x.supplier.UpdatedAt,
+                    DeletedAt = x.supplier.DeletedAt,
                     TotalInput =
-                        g.Where(x => x.Input != null)
-                                .Sum(x => x.Input!.InputInfos.Sum(ii => (long)(ii.Count ?? 0) * (ii.InputPrice ?? 0)))
+                        x.inputs.SelectMany(i => i.InputInfos).Sum(ii => (ii.Count ?? 0) * (ii.InputPrice ?? 0))
                 });
+        return query;
     }
 
     public Task<IEnumerable<SupplierEntity>> GetAllAsync(

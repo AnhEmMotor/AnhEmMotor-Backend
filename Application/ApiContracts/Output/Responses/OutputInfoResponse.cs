@@ -8,9 +8,9 @@ public class OutputInfoResponse
 
     public string? ProductName { get; set; }
 
-    public short? Count { get; set; }
+    public int? Count { get; set; }
 
-    public long? Price { get; set; }
+    public decimal? Price { get; set; }
 
-    public long? CostPrice { get; set; }
+    public decimal? CostPrice { get; set; }
 }

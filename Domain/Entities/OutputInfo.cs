@@ -10,22 +10,22 @@ namespace Domain.Entities
         [Column("id")]
         public int Id { get; set; }
 
-        [Column("ProductId")]
+        [Column("ProductVarientId")]
         [ForeignKey("ProductVariant")]
-        public int? ProductId { get; set; }
+        public int? ProductVarientId { get; set; }
 
         [Column("Count")]
-        public short? Count { get; set; }
+        public int? Count { get; set; }
 
         [Column("OutputId")]
         [ForeignKey("OutputOrder")]
         public int OutputId { get; set; }
 
-        [Column("Price")]
-        public long? Price { get; set; }
+        [Column("Price", TypeName = "decimal(18, 2)")]
+        public decimal? Price { get; set; }
 
-        [Column("CostPrice")]
-        public long? CostPrice { get; set; }
+        [Column("CostPrice", TypeName = "decimal(18, 2)")]
+        public decimal? CostPrice { get; set; }
 
         public Output? OutputOrder { get; set; }
 

@@ -8,9 +8,9 @@ public class InputInfoResponse
 
     public string? ProductName { get; set; }
 
-    public short? Count { get; set; }
+    public int? Count { get; set; }
 
-    public long? InputPrice { get; set; }
+    public decimal? InputPrice { get; set; }
 
-    public long? RemainingCount { get; set; }
+    public int? RemainingCount { get; set; }
 }

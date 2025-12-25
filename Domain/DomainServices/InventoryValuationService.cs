@@ -4,9 +4,9 @@ namespace Domain.DomainServices;
 
 public class InventoryValuationService
 {
-    public static long CalculateUnitCostAndDeductInventory(List<InputInfo> availableBatches, short quantityToSell)
+    public static long CalculateUnitCostAndDeductInventory(List<InputInfo> availableBatches, int quantityToSell)
     {
-        long totalCost = 0;
+        decimal totalCost = 0;
         var quantityNeeded = quantityToSell;
 
         foreach(var batch in availableBatches)
@@ -38,6 +38,6 @@ public class InventoryValuationService
         if(quantityToSell == 0)
             return 0;
 
-        return (long)Math.Round((decimal)totalCost / quantityToSell);
+        return (long)Math.Round(totalCost / quantityToSell);
     }
 }

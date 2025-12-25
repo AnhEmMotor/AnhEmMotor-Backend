@@ -6,7 +6,7 @@ public class ProductVariantWriteRequest
 {
     public int? Id { get; set; }
 
-    public long? Price { get; set; }
+    public decimal? Price { get; set; }
 
     [JsonPropertyName("url")]
     public string? UrlSlug { get; set; }

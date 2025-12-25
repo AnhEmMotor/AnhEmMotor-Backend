@@ -10,6 +10,6 @@ namespace Application.ApiContracts.Product.Responses
 
         public string? CoverImageUrl { get; set; }
 
-        public long? Price { get; set; }
+        public decimal? Price { get; set; }
     }
 }

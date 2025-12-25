@@ -127,12 +127,4 @@ public class AuthController(IMediator mediator) : ControllerBase
                     [ new Application.Common.Models.ErrorDetail() { Message = "Facebook login not implemented yet." } ]
             });
     }
-
-    /// <summary>
-    /// Handles a test request to verify that the authentication service is reachable.
-    /// </summary>
-    /// <returns>An <see cref="OkObjectResult"/> containing a greeting message if the service is available.</returns>
-    [HttpGet("ping")]
-    [AnonymousOnly]
-    public IActionResult PingTest() { return Ok("Xin chào từ AuthController!"); }
 }

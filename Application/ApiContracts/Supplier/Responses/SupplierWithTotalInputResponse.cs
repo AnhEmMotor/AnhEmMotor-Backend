@@ -20,6 +20,6 @@ namespace Application.ApiContracts.Supplier.Responses
 
         public DateTimeOffset? DeletedAt { get; set; }
 
-        public long TotalInput { get; set; }
+        public decimal TotalInput { get; set; }
     }
 }

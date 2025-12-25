@@ -14,11 +14,11 @@ public class ProductVariantLiteResponse
 
     public string? VariantName { get; set; }
 
-    public long? Price { get; set; }
+    public decimal? Price { get; set; }
 
     public string? CoverImageUrl { get; set; }
 
-    public long Stock { get; set; }
+    public int Stock { get; set; }
 
     public List<string> Photos { get; set; } = [];
 }

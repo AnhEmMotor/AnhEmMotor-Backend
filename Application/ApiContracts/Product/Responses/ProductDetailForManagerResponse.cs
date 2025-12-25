@@ -81,7 +81,7 @@ public class ProductDetailForManagerResponse
     [JsonPropertyName("cover_image_url")]
     public string? CoverImageUrl { get; set; }
 
-    public long Stock { get; set; }
+    public int Stock { get; set; }
 
     [JsonPropertyName("has_been_booked")]
     public long HasBeenBooked { get; set; }
