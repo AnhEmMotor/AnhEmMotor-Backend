@@ -28,7 +28,13 @@ namespace Domain.Entities
         [ForeignKey("CreatedByUser")]
         public Guid? CreatedByUserId { get; set; }
 
+        [Column("SourceOrderId")]
+        [ForeignKey("Output")]
+        public int? SourceOrderId { get; set; }
+
         public InputStatus? InputStatus { get; set; }
+
+        public Output? Output { get; set; }
 
         public Supplier? Supplier { get; set; }
 

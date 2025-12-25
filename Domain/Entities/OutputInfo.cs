@@ -30,5 +30,7 @@ namespace Domain.Entities
         public Output? OutputOrder { get; set; }
 
         public ProductVariant? ProductVariant { get; set; }
+
+        public ICollection<InputInfo> Returns { get; set; } = [];
     }
 }

@@ -40,7 +40,7 @@ public class ChangeMultipleUsersStatusCommandHandler(
                 continue;
             }
 
-            if(string.Compare(request.Model.Status, UserStatus.Inactive) == 0)
+            if(string.Compare(request.Model.Status, UserStatus.Banned) == 0)
             {
                 if(!string.IsNullOrEmpty(user.Email) && protectedEmails.Contains(user.Email))
                 {

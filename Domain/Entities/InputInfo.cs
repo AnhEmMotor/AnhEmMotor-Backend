@@ -27,8 +27,14 @@ namespace Domain.Entities
         [Column("RemainingCount")]
         public long? RemainingCount { get; set; }
 
+        [Column("ParentOutputInfoId")]
+        [ForeignKey("ParentOutputInfo")]
+        public int? ParentOutputInfoId { get; set; }
+
         public Input? InputReceipt { get; set; }
 
         public ProductVariant? ProductVariant { get; set; }
+
+        public OutputInfo? ParentOutputInfo { get; set; }
     }
 }

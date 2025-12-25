@@ -28,7 +28,7 @@ public class ChangeUserStatusCommandHandler(
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        if(string.Compare(request.Model.Status, UserStatus.Inactive) == 0)
+        if(string.Compare(request.Model.Status, UserStatus.Banned) == 0)
         {
             var protectedUsers = protectedEntityManagerService.GetProtectedUsers() ?? [];
             var protectedEmails = protectedUsers.Select(entry => entry.Split(':')[0].Trim()).ToList();

@@ -38,5 +38,8 @@ namespace Domain.Entities
         public OutputStatus? OutputStatus { get; set; }
 
         public ICollection<OutputInfo> OutputInfos { get; set; } = [];
+
+        [InverseProperty("Output")]
+        public ICollection<Input> Returns { get; set; } = [];
     }
 }
