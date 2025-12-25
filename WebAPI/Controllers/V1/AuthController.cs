@@ -134,8 +134,5 @@ public class AuthController(IMediator mediator) : ControllerBase
     /// <returns>An <see cref="OkObjectResult"/> containing a greeting message if the service is available.</returns>
     [HttpGet("ping")]
     [AnonymousOnly]
-    public IActionResult PingTest()
-    {
-        return Ok("Xin chào từ AuthController!");
-    }
+    public IActionResult PingTest() { return Ok("Xin chào từ AuthController!"); }
 }

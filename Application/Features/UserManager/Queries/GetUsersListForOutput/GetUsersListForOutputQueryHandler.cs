@@ -1,12 +1,6 @@
-﻿using Application.ApiContracts.User.Responses;
-using Application.ApiContracts.UserManager.Responses;
+﻿using Application.ApiContracts.UserManager.Responses;
 using Application.Interfaces.Repositories.User;
 using MediatR;
-using Application.Features.UserManager.Queries.GetUsersList;
-using Application;
-using Application.Features;
-using Application.Features.UserManager;
-using Application.Features.UserManager.Queries;
 
 namespace Application.Features.UserManager.Queries.GetUsersListForOutput;
 

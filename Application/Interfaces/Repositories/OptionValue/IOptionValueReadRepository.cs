@@ -9,7 +9,10 @@ namespace Application.Interfaces.Repositories.OptionValue
 
         public Task<List<OptionValueEntity>> GetByIdAsync(List<int> optionValueIds, CancellationToken cancellationToken);
 
-        public Task<OptionValueEntity?> GetByIdAndNameAsync(int optionId, string name, CancellationToken cancellationToken);
+        public Task<OptionValueEntity?> GetByIdAndNameAsync(
+            int optionId,
+            string name,
+            CancellationToken cancellationToken);
 
         public Task<List<OptionValueEntity>> GetByIdAndNameAsync(
             List<int> optionIds,

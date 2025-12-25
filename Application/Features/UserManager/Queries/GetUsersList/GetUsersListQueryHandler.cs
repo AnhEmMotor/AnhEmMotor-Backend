@@ -1,5 +1,4 @@
 ﻿using Application.ApiContracts.User.Responses;
-using Application.ApiContracts.UserManager.Responses;
 using Application.Interfaces.Repositories.User;
 using MediatR;
 

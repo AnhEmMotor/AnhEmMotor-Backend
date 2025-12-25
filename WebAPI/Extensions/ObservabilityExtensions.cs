@@ -2,8 +2,6 @@
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using WebAPI.StartupExtensions;
-using WebAPI;
 
 namespace WebAPI.Extensions;
 

@@ -2,7 +2,7 @@ using Application.ApiContracts.Product.Responses;
 using MediatR;
 using Sieve.Models;
 
-namespace Application.Features.Products.Queries.GetActiveVariantLiteList;
+namespace Application.Features.Products.Queries.GetActiveVariantLiteListForManager;
 
 public sealed record GetActiveVariantLiteListForManagerQuery : IRequest<Domain.Primitives.PagedResult<ProductVariantLiteResponse>>
 {

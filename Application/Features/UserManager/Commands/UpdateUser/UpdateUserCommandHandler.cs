@@ -1,5 +1,4 @@
 using Application.ApiContracts.User.Responses;
-using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Exceptions;
 using Domain.Constants;
 using Domain.Entities;

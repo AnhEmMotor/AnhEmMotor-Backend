@@ -20,7 +20,7 @@ public sealed class UpdateOutputCommandHandler(
         UpdateOutputCommand request,
         CancellationToken cancellationToken)
     {
-        if (request.CurrentUserId is null)
+        if(request.CurrentUserId is null)
         {
             return (null, new Common.Models.ErrorResponse
             {
@@ -52,7 +52,7 @@ public sealed class UpdateOutputCommandHandler(
             });
         }
 
-        if (output.Buyer is null)
+        if(output.Buyer is null)
         {
             return (null, new Common.Models.ErrorResponse
             {
@@ -65,7 +65,7 @@ public sealed class UpdateOutputCommandHandler(
             });
         }
 
-        if (output.Buyer.Id != request.CurrentUserId)
+        if(output.Buyer.Id != request.CurrentUserId)
         {
             return (null, new Common.Models.ErrorResponse
             {

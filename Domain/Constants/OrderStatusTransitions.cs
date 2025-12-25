@@ -23,9 +23,9 @@ public static class OrderStatusTransitions
         },
         { OrderStatus.Delivering, [ OrderStatus.Completed, OrderStatus.Refunding ] },
         { OrderStatus.WaitingPickup, [ OrderStatus.Completed, OrderStatus.Refunding ] },
-        { OrderStatus.Cancelled, [ ] },
+        { OrderStatus.Cancelled, [] },
         { OrderStatus.Refunding, [ OrderStatus.Refunded ] },
-        { OrderStatus.Refunded, [ ] },
+        { OrderStatus.Refunded, [] },
         { OrderStatus.Completed, [] }
     };
 

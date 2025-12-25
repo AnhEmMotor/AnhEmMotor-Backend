@@ -16,5 +16,7 @@ public interface IStatisticalReadRepository
 
     public Task<IEnumerable<ProductReportResponse>> GetProductReportLastMonthAsync(CancellationToken cancellationToken);
 
-    public Task<ProductStockPriceResponse?> GetProductStockAndPriceAsync(int variantId, CancellationToken cancellationToken);
+    public Task<ProductStockPriceResponse?> GetProductStockAndPriceAsync(
+        int variantId,
+        CancellationToken cancellationToken);
 }

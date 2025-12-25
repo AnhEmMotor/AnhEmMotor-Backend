@@ -8,7 +8,7 @@ using Domain.Entities;
 using Mapster;
 using MediatR;
 
-namespace Application.Features.Outputs.Commands.CreateOutput;
+namespace Application.Features.Outputs.Commands.CreateOutputByManager;
 
 public sealed class CreateOutputByManagerCommandHandler(
     IOutputReadRepository readRepository,
@@ -34,8 +34,9 @@ public sealed class CreateOutputByManagerCommandHandler(
             });
         }
 
-        var userData = await userReadRepository.GetUserByIDAsync(request.BuyerId!.Value, cancellationToken).ConfigureAwait(false);
-        if (userData == null)
+        var userData = await userReadRepository.GetUserByIDAsync(request.BuyerId!.Value, cancellationToken)
+            .ConfigureAwait(false);
+        if(userData == null)
         {
             return (null, new Common.Models.ErrorResponse
             {

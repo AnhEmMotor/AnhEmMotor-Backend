@@ -18,7 +18,9 @@ namespace Application.Interfaces.Repositories.Role
             IEnumerable<Guid> roleIds,
             CancellationToken cancellationToken = default);
 
-        public Task<List<string>> GetPermissionNamesByRoleIdAsync(Guid roleId, CancellationToken cancellationToken = default);
+        public Task<List<string>> GetPermissionNamesByRoleIdAsync(
+            Guid roleId,
+            CancellationToken cancellationToken = default);
 
         public Task<List<RoleSelectResponse>> GetAllRoleSelectsAsync(CancellationToken cancellationToken = default);
     }

@@ -4,38 +4,26 @@
 
 namespace Infrastructure.Migrations
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public partial class ChangeNameColumnUserReferencesToOutput : Migration
     {
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Input_Users_FinishedByUserId",
-                table: "Input");
+            migrationBuilder.DropForeignKey(name: "FK_Input_Users_FinishedByUserId", table: "Input");
 
-            migrationBuilder.DropForeignKey(
-                name: "FK_Output_Users_EmployeeCompletedId",
-                table: "Output");
+            migrationBuilder.DropForeignKey(name: "FK_Output_Users_EmployeeCompletedId", table: "Output");
 
-            migrationBuilder.DropColumn(
-                name: "EmpCode",
-                table: "Output");
+            migrationBuilder.DropColumn(name: "EmpCode", table: "Output");
 
-            migrationBuilder.RenameColumn(
-                name: "EmployeeCompletedId",
-                table: "Output",
-                newName: "CompletedByUserId");
+            migrationBuilder.RenameColumn(name: "EmployeeCompletedId", table: "Output", newName: "CompletedByUserId");
 
             migrationBuilder.RenameIndex(
                 name: "IX_Output_EmployeeCompletedId",
                 table: "Output",
                 newName: "IX_Output_CompletedByUserId");
 
-            migrationBuilder.RenameColumn(
-                name: "FinishedByUserId",
-                table: "Input",
-                newName: "CreatedByUserId");
+            migrationBuilder.RenameColumn(name: "FinishedByUserId", table: "Input", newName: "CreatedByUserId");
 
             migrationBuilder.RenameIndex(
                 name: "IX_Input_FinishedByUserId",
@@ -57,42 +45,28 @@ namespace Infrastructure.Migrations
                 principalColumn: "Id");
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Input_Users_CreatedByUserId",
-                table: "Input");
+            migrationBuilder.DropForeignKey(name: "FK_Input_Users_CreatedByUserId", table: "Input");
 
-            migrationBuilder.DropForeignKey(
-                name: "FK_Output_Users_CompletedByUserId",
-                table: "Output");
+            migrationBuilder.DropForeignKey(name: "FK_Output_Users_CompletedByUserId", table: "Output");
 
-            migrationBuilder.RenameColumn(
-                name: "CompletedByUserId",
-                table: "Output",
-                newName: "EmployeeCompletedId");
+            migrationBuilder.RenameColumn(name: "CompletedByUserId", table: "Output", newName: "EmployeeCompletedId");
 
             migrationBuilder.RenameIndex(
                 name: "IX_Output_CompletedByUserId",
                 table: "Output",
                 newName: "IX_Output_EmployeeCompletedId");
 
-            migrationBuilder.RenameColumn(
-                name: "CreatedByUserId",
-                table: "Input",
-                newName: "FinishedByUserId");
+            migrationBuilder.RenameColumn(name: "CreatedByUserId", table: "Input", newName: "FinishedByUserId");
 
             migrationBuilder.RenameIndex(
                 name: "IX_Input_CreatedByUserId",
                 table: "Input",
                 newName: "IX_Input_FinishedByUserId");
 
-            migrationBuilder.AddColumn<int>(
-                name: "EmpCode",
-                table: "Output",
-                type: "int",
-                nullable: true);
+            migrationBuilder.AddColumn<int>(name: "EmpCode", table: "Output", type: "int", nullable: true);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Input_Users_FinishedByUserId",

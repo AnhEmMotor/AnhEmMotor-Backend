@@ -66,8 +66,7 @@ public sealed class UpdateOutputStatusCommandHandler(
         if(string.Compare(request.StatusId, OrderStatus.Completed) == 0)
         {
             output.CreatedByUserId = request.CurrentUserId;
-        }
-        else
+        } else
         {
             foreach(var outputInfo in output.OutputInfos)
             {

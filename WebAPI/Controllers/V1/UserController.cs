@@ -1,6 +1,5 @@
 using Application.ApiContracts.User.Requests;
 using Application.ApiContracts.User.Responses;
-using Application.ApiContracts.UserManager.Responses;
 using Application.Features.Users.Commands.ChangePasswordCurrentUser;
 using Application.Features.Users.Commands.DeleteCurrentUserAccount;
 using Application.Features.Users.Commands.RestoreUserAccount;

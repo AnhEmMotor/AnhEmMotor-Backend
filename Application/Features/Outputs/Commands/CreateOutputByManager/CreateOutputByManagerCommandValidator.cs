@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Application.Features.Outputs.Commands.CreateOutput;
+namespace Application.Features.Outputs.Commands.CreateOutputByManager;
 
 public sealed class CreateOutputByManagerCommandValidator : AbstractValidator<CreateOutputByManagerCommand>
 {

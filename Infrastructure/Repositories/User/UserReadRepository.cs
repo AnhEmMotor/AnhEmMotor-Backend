@@ -58,7 +58,9 @@ namespace Infrastructure.Repositories.User
                 sieveModel.PageSize ?? 10);
         }
 
-        public async Task<PagedResult<UserDTOForOutputResponse>> GetPagedListForOutputAsync(SieveModel sieveModel, CancellationToken cancellationToken)
+        public async Task<PagedResult<UserDTOForOutputResponse>> GetPagedListForOutputAsync(
+            SieveModel sieveModel,
+            CancellationToken cancellationToken)
         {
             var query = userManager.Users.AsNoTracking();
 
@@ -70,15 +72,9 @@ namespace Infrastructure.Repositories.User
 
             var userResponses = new List<UserDTOForOutputResponse>();
 
-            foreach (var user in entities)
+            foreach(var user in entities)
             {
-                var roles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
-
-                var response = new UserDTOForOutputResponse
-                {
-                    Id = user.Id,
-                    FullName = user.FullName ?? string.Empty,
-                };
+                var response = new UserDTOForOutputResponse { Id = user.Id, FullName = user.FullName ?? string.Empty, };
 
                 userResponses.Add(response);
             }
@@ -124,14 +120,15 @@ namespace Infrastructure.Repositories.User
 
         public async Task<UserAuthDTO?> GetUserByIDAsync(Guid? idUser, CancellationToken cancellationToken)
         {
-            if (idUser == null) return null;
+            if(idUser == null)
+                return null;
             var user = await userManager.Users
-                .FirstOrDefaultAsync(u => u.Id == idUser
-                                       && u.Status == UserStatus.Active 
-                                       && u.DeletedAt == null,          
-                cancellationToken)
+                .FirstOrDefaultAsync(
+                    u => u.Id == idUser && string.Compare(u.Status, UserStatus.Active) == 0 && u.DeletedAt == null,
+                    cancellationToken)
                 .ConfigureAwait(false);
-            if (user == null) return null;
+            if(user == null)
+                return null;
             var roles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
             return new UserAuthDTO()
             {

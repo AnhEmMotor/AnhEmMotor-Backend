@@ -9,9 +9,13 @@ namespace Application.Interfaces.Repositories.User
 {
     public interface IUserReadRepository
     {
-        public Task<PagedResult<UserDTOForManagerResponse>> GetPagedListAsync(SieveModel sieveModel, CancellationToken cancellationToken);
-        
-        public Task<PagedResult<UserDTOForOutputResponse>> GetPagedListForOutputAsync(SieveModel sieveModel, CancellationToken cancellationToken);
+        public Task<PagedResult<UserDTOForManagerResponse>> GetPagedListAsync(
+            SieveModel sieveModel,
+            CancellationToken cancellationToken);
+
+        public Task<PagedResult<UserDTOForOutputResponse>> GetPagedListForOutputAsync(
+            SieveModel sieveModel,
+            CancellationToken cancellationToken);
 
         public Task<UserAuthDTO> GetUserByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken);
 

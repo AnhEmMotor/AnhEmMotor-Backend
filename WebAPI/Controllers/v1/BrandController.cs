@@ -54,7 +54,9 @@ public class BrandController(IMediator mediator) : ControllerBase
     [HttpGet("for-manager")]
     [HasPermission(Brands.View)]
     [ProducesResponseType(typeof(Domain.Primitives.PagedResult<BrandResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetBrandsForManager([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetBrandsForManager(
+        [FromQuery] SieveModel sieveModel,
+        CancellationToken cancellationToken)
     {
         var query = new GetBrandsListQuery(sieveModel);
         var pagedResult = await mediator.Send(query, cancellationToken).ConfigureAwait(true);

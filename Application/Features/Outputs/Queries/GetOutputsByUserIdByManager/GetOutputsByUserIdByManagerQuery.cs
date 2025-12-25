@@ -2,6 +2,6 @@
 using MediatR;
 using Sieve.Models;
 
-namespace Application.Features.Outputs.Queries.GetOutputsByBuyerId;
+namespace Application.Features.Outputs.Queries.GetOutputsByUserIdByManager;
 
 public sealed record GetOutputsByUserIdByManagerQuery(Guid BuyerId, SieveModel SieveModel) : IRequest<Domain.Primitives.PagedResult<OutputResponse>>;

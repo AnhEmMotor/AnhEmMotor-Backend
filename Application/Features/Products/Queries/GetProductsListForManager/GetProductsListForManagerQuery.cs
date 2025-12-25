@@ -2,7 +2,7 @@ using Application.ApiContracts.Product.Responses;
 using MediatR;
 using Sieve.Models;
 
-namespace Application.Features.Products.Queries.GetProductsList;
+namespace Application.Features.Products.Queries.GetProductsListForManager;
 
 public sealed record GetProductsListForManagerQuery : IRequest<Domain.Primitives.PagedResult<ProductDetailForManagerResponse>>
 {

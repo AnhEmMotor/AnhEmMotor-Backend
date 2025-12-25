@@ -1,6 +1,4 @@
 ﻿using Microsoft.OpenApi;
-using WebAPI.StartupExtensions;
-using WebAPI;
 
 namespace WebAPI.Extensions;
 

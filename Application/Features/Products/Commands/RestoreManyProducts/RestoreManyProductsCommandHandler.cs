@@ -60,7 +60,8 @@ public sealed class RestoreManyProductsCommandHandler(
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        var responses = deletedProducts.Select(p => p.Adapt<ApiContracts.Product.Responses.ProductDetailForManagerResponse>())
+        var responses = deletedProducts.Select(
+            p => p.Adapt<ApiContracts.Product.Responses.ProductDetailForManagerResponse>())
             .ToList();
         return (responses, null);
     }

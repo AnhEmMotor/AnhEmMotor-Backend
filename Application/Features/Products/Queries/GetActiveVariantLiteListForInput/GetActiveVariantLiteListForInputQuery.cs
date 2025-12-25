@@ -1,12 +1,11 @@
-﻿using Application.Features.Products.Queries.GetActiveVariantLiteList;
+﻿using Application.ApiContracts.Product.Responses;
+using Domain.Primitives;
+using MediatR;
 using Sieve.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace Application.Features.Products.Queries.GetActiveVariantLiteListForInvoices
+namespace Application.Features.Products.Queries.GetActiveVariantLiteListForInput
 {
-    public class GetActiveVariantLiteListForInputQuery
+    public class GetActiveVariantLiteListForInputQuery : IRequest<PagedResult<ProductVariantLiteResponseForInput>>
     {
         public int Page { get; init; } = 1;
 
@@ -18,7 +17,7 @@ namespace Application.Features.Products.Queries.GetActiveVariantLiteListForInvoi
 
         public string? Sorts { get; init; }
 
-        public static GetActiveVariantLiteListForManagerQuery FromRequest(SieveModel request)
+        public static GetActiveVariantLiteListForInputQuery FromRequest(SieveModel request)
         {
             var search = ExtractFilterValue(request.Filters, "search");
             var statusIds = ExtractFilterValue(request.Filters, "statusIds")?.Split(
@@ -27,7 +26,7 @@ namespace Application.Features.Products.Queries.GetActiveVariantLiteListForInvoi
                     .ToList() ??
                 [];
 
-            return new GetActiveVariantLiteListForManagerQuery
+            return new GetActiveVariantLiteListForInputQuery
             {
                 Page = request.Page ?? 1,
                 PageSize = request.PageSize ?? 10,
@@ -39,16 +38,16 @@ namespace Application.Features.Products.Queries.GetActiveVariantLiteListForInvoi
 
         private static string? ExtractFilterValue(string? filters, string key)
         {
-            if (string.IsNullOrWhiteSpace(filters))
+            if(string.IsNullOrWhiteSpace(filters))
             {
                 return null;
             }
 
             var parts = filters.Split(',');
-            foreach (var part in parts)
+            foreach(var part in parts)
             {
-                var keyValue = part.Split(['=', '@', '!'], 2);
-                if (keyValue.Length == 2 && keyValue[0].Trim().Equals(key, StringComparison.OrdinalIgnoreCase))
+                var keyValue = part.Split([ '=', '@', '!' ], 2);
+                if(keyValue.Length == 2 && keyValue[0].Trim().Equals(key, StringComparison.OrdinalIgnoreCase))
                 {
                     return keyValue[1].Trim();
                 }

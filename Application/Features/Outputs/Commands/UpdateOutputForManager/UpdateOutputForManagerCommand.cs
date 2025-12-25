@@ -1,7 +1,7 @@
 using Application.ApiContracts.Output.Responses;
 using MediatR;
 
-namespace Application.Features.Outputs.Commands.UpdateOutput;
+namespace Application.Features.Outputs.Commands.UpdateOutputForManager;
 
 public sealed record UpdateOutputForManagerCommand : IRequest<(OutputResponse? Data, Common.Models.ErrorResponse? Error)>
 {

@@ -2,8 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using WebAPI.Converters;
 using WebAPI.Middleware;
-using WebAPI.StartupExtensions;
-using WebAPI;
 
 namespace WebAPI.Extensions;
 

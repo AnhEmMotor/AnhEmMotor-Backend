@@ -1,7 +1,7 @@
 ﻿using Application.ApiContracts.Output.Responses;
 using FluentValidation;
 
-namespace Application.Features.Outputs.Commands.UpdateOutput
+namespace Application.Features.Outputs.Commands.UpdateOutputForManager
 {
     public sealed class UpdateOutputProductForManagerCommandValidator : AbstractValidator<OutputInfoResponse>
     {

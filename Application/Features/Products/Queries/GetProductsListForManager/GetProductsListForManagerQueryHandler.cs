@@ -3,7 +3,7 @@ using Application.Interfaces.Repositories.Product;
 using Mapster;
 using MediatR;
 
-namespace Application.Features.Products.Queries.GetProductsList;
+namespace Application.Features.Products.Queries.GetProductsListForManager;
 
 public sealed class GetProductsListForManagerQueryHandler(IProductReadRepository readRepository) : IRequestHandler<GetProductsListForManagerQuery, Domain.Primitives.PagedResult<ProductDetailForManagerResponse>>
 {

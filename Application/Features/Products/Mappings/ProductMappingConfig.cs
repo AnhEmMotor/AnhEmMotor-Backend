@@ -12,19 +12,16 @@ public class ProductMappingConfig : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {
-        config.NewConfig<CreateProductRequest, Commands.CreateProduct.CreateProductCommand>(
-            )
+        config.NewConfig<CreateProductRequest, Commands.CreateProduct.CreateProductCommand>()
             .Map(dest => dest.Variants, src => src.Variants ?? new List<ProductVariantWriteRequest>());
 
-        config.NewConfig<UpdateProductRequest, Commands.UpdateProduct.UpdateProductCommand>(
-            )
+        config.NewConfig<UpdateProductRequest, Commands.UpdateProduct.UpdateProductCommand>()
             .MapWith(src => new Commands.UpdateProduct.UpdateProductCommand(0, src));
 
         config.NewConfig<ProductEntity, ProductDetailForManagerResponse>()
             .MapWith(src => MapProductToDetailForManagerResponse(src));
 
-        config.NewConfig<ProductEntity, ProductDetailResponse>()
-            .MapWith(src => MapProductToDetailResponse(src));
+        config.NewConfig<ProductEntity, ProductDetailResponse>().MapWith(src => MapProductToDetailResponse(src));
 
         config.NewConfig<ProductEntity, ProductListRow>()
             .Map(dest => dest.CategoryName, src => src.ProductCategory != null ? src.ProductCategory.Name : null)
@@ -90,8 +87,7 @@ public class ProductMappingConfig : IRegister
             .MapWith(src => BuildVariantLiteResponse(src));
     }
 
-    private static ProductDetailForManagerResponse MapProductToDetailForManagerResponse(
-        ProductEntity product)
+    private static ProductDetailForManagerResponse MapProductToDetailForManagerResponse(ProductEntity product)
     {
         var variantRows = product.ProductVariants.Select(variant => variant.Adapt<VariantRow>()).ToList();
 
@@ -142,18 +138,13 @@ public class ProductMappingConfig : IRegister
         };
     }
 
-    private static ProductDetailResponse MapProductToDetailResponse(
-        ProductEntity product)
+    private static ProductDetailResponse MapProductToDetailResponse(ProductEntity product)
     {
         var variantRows = product.ProductVariants.Select(variant => variant.Adapt<VariantRow>()).ToList();
 
         var variantResponses = variantRows
             .Select(variant => variant.Adapt<ProductVariantDetailResponse>())
             .ToList();
-
-        var totalStock = variantRows.Sum(v => v.Stock);
-        var totalBooked = variantRows.Sum(v => v.HasBeenBooked);
-        var availableStock = totalStock - totalBooked;
 
         return new ProductDetailResponse
         {

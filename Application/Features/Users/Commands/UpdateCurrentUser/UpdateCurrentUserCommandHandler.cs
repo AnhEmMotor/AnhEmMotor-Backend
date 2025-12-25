@@ -1,5 +1,4 @@
 using Application.ApiContracts.User.Responses;
-using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Exceptions;
 using Domain.Constants;
 using Domain.Entities;
@@ -12,7 +11,9 @@ namespace Application.Features.Users.Commands.UpdateCurrentUser;
 
 public class UpdateCurrentUserCommandHandler(UserManager<ApplicationUser> userManager) : IRequestHandler<UpdateCurrentUserCommand, UserDTOForManagerResponse>
 {
-    public async Task<UserDTOForManagerResponse> Handle(UpdateCurrentUserCommand request, CancellationToken cancellationToken)
+    public async Task<UserDTOForManagerResponse> Handle(
+        UpdateCurrentUserCommand request,
+        CancellationToken cancellationToken)
     {
         if(!GenderStatus.IsValid(request.Model.Gender))
         {

@@ -139,7 +139,8 @@ public class PermissionController(IMediator mediator) : ControllerBase
         [FromBody] UpdateRoleRequest model,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new UpdateRolePermissionsCommand(roleName, model), cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(new UpdateRolePermissionsCommand(roleName, model), cancellationToken)
+            .ConfigureAwait(true);
         return Ok(result);
     }
 

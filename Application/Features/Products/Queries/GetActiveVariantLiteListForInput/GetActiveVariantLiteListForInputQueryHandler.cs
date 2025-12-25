@@ -1,16 +1,16 @@
-﻿using Application.Features.Products.Queries.GetActiveVariantLiteList;
+﻿using Application.ApiContracts.Product.Responses;
 using Application.Interfaces.Repositories.ProductVariant;
-using Sieve.Models;
+using Domain.Primitives;
 using Mapster;
-using Application.ApiContracts.Product.Responses;
+using MediatR;
 
-namespace Application.Features.Products.Queries.GetActiveVariantLiteListForInvoices
+namespace Application.Features.Products.Queries.GetActiveVariantLiteListForInput
 {
-    public class GetActiveVariantLiteListForInputQueryHandler(IProductVariantReadRepository repository)
+    public class GetActiveVariantLiteListForInputQueryHandler(IProductVariantReadRepository repository) : IRequestHandler<GetActiveVariantLiteListForInputQuery, PagedResult<ProductVariantLiteResponseForInput>>
     {
-        public async Task<Domain.Primitives.PagedResult<ProductVariantLiteResponseForInput>> Handle(
-        GetActiveVariantLiteListForManagerQuery request,
-        CancellationToken cancellationToken)
+        public async Task<PagedResult<ProductVariantLiteResponseForInput>> Handle(
+            GetActiveVariantLiteListForInputQuery request,
+            CancellationToken cancellationToken)
         {
             var page = Math.Max(request.Page, 1);
             var pageSize = Math.Max(request.PageSize, 1);
@@ -20,7 +20,7 @@ namespace Application.Features.Products.Queries.GetActiveVariantLiteListForInvoi
 
             var responses = variants.Select(v => v.Adapt<ProductVariantLiteResponseForInput>()).ToList();
 
-            return new Domain.Primitives.PagedResult<ProductVariantLiteResponseForInput>(responses, totalCount, page, pageSize);
+            return new PagedResult<ProductVariantLiteResponseForInput>(responses, totalCount, page, pageSize);
         }
     }
 }

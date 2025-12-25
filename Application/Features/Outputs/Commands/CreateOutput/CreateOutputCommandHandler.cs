@@ -19,7 +19,7 @@ public sealed class CreateOutputCommandHandler(
         CreateOutputCommand request,
         CancellationToken cancellationToken)
     {
-        if (request.OutputInfos.Count == 0)
+        if(request.OutputInfos.Count == 0)
         {
             return (null, new Common.Models.ErrorResponse
             {
@@ -43,7 +43,7 @@ public sealed class CreateOutputCommandHandler(
 
         var variantsList = variants.ToList();
 
-        if (variantsList.Count != variantIds.Count)
+        if(variantsList.Count != variantIds.Count)
         {
             var foundIds = variantsList.Select(v => v.Id).ToList();
             var missingIds = variantIds.Except(foundIds).ToList();
@@ -58,9 +58,9 @@ public sealed class CreateOutputCommandHandler(
             });
         }
 
-        foreach (var variant in variantsList)
+        foreach(var variant in variantsList)
         {
-            if (string.Compare(variant.Product?.StatusId, Domain.Constants.ProductStatus.ForSale) != 0)
+            if(string.Compare(variant.Product?.StatusId, Domain.Constants.ProductStatus.ForSale) != 0)
             {
                 return (null, new Common.Models.ErrorResponse
                 {
@@ -75,16 +75,16 @@ public sealed class CreateOutputCommandHandler(
         }
         var output = request.Adapt<Output>();
 
-        foreach (var info in output.OutputInfos)
+        foreach(var info in output.OutputInfos)
         {
             var matchingVariant = variantsList.FirstOrDefault(v => v.Id == info.ProductId);
-            if (matchingVariant != null)
+            if(matchingVariant != null)
             {
                 info.Price = matchingVariant.Price;
             }
         }
 
-        if (string.IsNullOrWhiteSpace(output.StatusId))
+        if(string.IsNullOrWhiteSpace(output.StatusId))
         {
             output.StatusId = OrderStatus.Pending;
         }

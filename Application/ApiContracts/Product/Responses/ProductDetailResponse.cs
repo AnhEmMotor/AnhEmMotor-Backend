@@ -77,6 +77,4 @@ namespace Application.ApiContracts.Product.Responses
 
         public List<ProductVariantDetailResponse> Variants { get; set; } = [];
     }
-
-
 }

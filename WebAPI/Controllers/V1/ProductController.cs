@@ -12,15 +12,12 @@ using Application.Features.Products.Commands.UpdateProductPrice;
 using Application.Features.Products.Commands.UpdateProductStatus;
 using Application.Features.Products.Commands.UpdateVariantPrice;
 using Application.Features.Products.Queries.CheckSlugAvailability;
-using Application.Features.Products.Queries.GetActiveVariantLiteList;
-using Application.Features.Products.Queries.GetActiveVariantLiteListForInvoices;
 using Application.Features.Products.Queries.GetActiveVariantLiteListForOutput;
 using Application.Features.Products.Queries.GetDeletedProductsList;
 using Application.Features.Products.Queries.GetProductById;
 using Application.Features.Products.Queries.GetProductsList;
 using Application.Features.Products.Queries.GetVariantLiteByProductId;
 using Asp.Versioning;
-using Domain.Entities;
 using Infrastructure.Authorization.Attribute;
 using Mapster;
 using MediatR;
@@ -61,10 +58,15 @@ public class ProductController(ISender sender) : ControllerBase
     /// <returns></returns>
     [HttpGet("for-manager")]
     [HasPermission(Products.View)]
-    [ProducesResponseType(typeof(Domain.Primitives.PagedResult<ProductDetailForManagerResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetProductsForManager([FromQuery] SieveModel request, CancellationToken cancellationToken)
+    [ProducesResponseType(
+        typeof(Domain.Primitives.PagedResult<ProductDetailForManagerResponse>),
+        StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetProductsForManager(
+        [FromQuery] SieveModel request,
+        CancellationToken cancellationToken)
     {
-        var query = GetProductsListForManagerQuery.FromRequest(request);
+        var query = Application.Features.Products.Queries.GetProductsListForManager.GetProductsListForManagerQuery
+            .FromRequest(request);
         var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
         return Ok(result);
     }
@@ -74,7 +76,9 @@ public class ProductController(ISender sender) : ControllerBase
     /// </summary>
     [HttpGet("deleted")]
     [HasPermission(Products.View)]
-    [ProducesResponseType(typeof(Domain.Primitives.PagedResult<ProductDetailForManagerResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(
+        typeof(Domain.Primitives.PagedResult<ProductDetailForManagerResponse>),
+        StatusCodes.Status200OK)]
     public async Task<IActionResult> GetDeletedProducts(
         [FromQuery] SieveModel request,
         CancellationToken cancellationToken)
@@ -85,7 +89,8 @@ public class ProductController(ISender sender) : ControllerBase
     }
 
     /// <summary>
-    /// Lấy danh sách biến thể sản phẩm của tất cả sản phẩm (có phân trang, lọc, tìm kiếm - chỉ có thể vào khi và chỉ khi có quyền xem danh sách sản phẩm).
+    /// Lấy danh sách biến thể sản phẩm của tất cả sản phẩm (có phân trang, lọc, tìm kiếm - chỉ có thể vào khi và chỉ
+    /// khi có quyền xem danh sách sản phẩm).
     /// </summary>
     [HttpGet("variants-lite/for-product-manager")]
     [RequiresAnyPermissions(Products.View)]
@@ -94,7 +99,8 @@ public class ProductController(ISender sender) : ControllerBase
         [FromQuery] SieveModel request,
         CancellationToken cancellationToken = default)
     {
-        var query = GetActiveVariantLiteListForManagerQuery.FromRequest(request);
+        var query = Application.Features.Products.Queries.GetActiveVariantLiteListForManager.GetActiveVariantLiteListForManagerQuery
+            .FromRequest(request);
         var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
         return Ok(result);
     }
@@ -108,38 +114,46 @@ public class ProductController(ISender sender) : ControllerBase
         [FromQuery] SieveModel request,
         CancellationToken cancellationToken = default)
     {
-        var query = GetActiveVariantLiteListForManagerQuery.FromRequest(request);
+        var query = Application.Features.Products.Queries.GetActiveVariantLiteListForManager.GetActiveVariantLiteListForManagerQuery
+            .FromRequest(request);
         var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
         return Ok(result);
     }
 
     /// <summary>
-    /// `Lấy danh sách biến thể sản phẩm của tất cả sản phẩm (có phân trang, lọc, tìm kiếm - chỉ có thể vào khi và chỉ khi có quyền thêm hoặc sửa phiếu nhập).
+    /// `Lấy danh sách biến thể sản phẩm của tất cả sản phẩm (có phân trang, lọc, tìm kiếm - chỉ có thể vào khi và chỉ
+    /// khi có quyền thêm hoặc sửa phiếu nhập).
     /// </summary>
     /// <param name="request"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpGet("variants-lite/for-input")]
     [RequiresAnyPermissions(Inputs.Edit, Inputs.Create)]
-    [ProducesResponseType(typeof(Domain.Primitives.PagedResult<ProductVariantLiteResponseForInput>), StatusCodes.Status200OK)]
+    [ProducesResponseType(
+        typeof(Domain.Primitives.PagedResult<ProductVariantLiteResponseForInput>),
+        StatusCodes.Status200OK)]
     public async Task<IActionResult> GetActiveVariantLiteProductsForInput(
         [FromQuery] SieveModel request,
         CancellationToken cancellationToken = default)
     {
-        var query = GetActiveVariantLiteListForInputQuery.FromRequest(request);
+        var query = Application.Features.Products.Queries.GetActiveVariantLiteListForInput.GetActiveVariantLiteListForInputQuery
+            .FromRequest(request);
         var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
         return Ok(result);
     }
 
     /// <summary>
-    /// Lấy danh sách biến thể sản phẩm của tất cả sản phẩm (có phân trang, lọc, tìm kiếm - chỉ có thể vào khi và chỉ khi có quyền thêm hoặc sửa phiếu bán hàng).
+    /// Lấy danh sách biến thể sản phẩm của tất cả sản phẩm (có phân trang, lọc, tìm kiếm - chỉ có thể vào khi và chỉ
+    /// khi có quyền thêm hoặc sửa phiếu bán hàng).
     /// </summary>
     /// <param name="request"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpGet("variants-lite/for-output")]
     [RequiresAnyPermissions(Outputs.Edit, Outputs.Create)]
-    [ProducesResponseType(typeof(Domain.Primitives.PagedResult<ProductVariantLiteResponseForOutput>), StatusCodes.Status200OK)]
+    [ProducesResponseType(
+        typeof(Domain.Primitives.PagedResult<ProductVariantLiteResponseForOutput>),
+        StatusCodes.Status200OK)]
     public async Task<IActionResult> GetActiveVariantLiteProductsForOutput(
         [FromQuery] SieveModel request,
         CancellationToken cancellationToken = default)
@@ -175,7 +189,7 @@ public class ProductController(ISender sender) : ControllerBase
     public async Task<IActionResult> GetVarientByIdForManager(int id, CancellationToken cancellationToken = default)
     {
         var (data, error) = await sender.Send(new GetProductByIdQuery(id), cancellationToken).ConfigureAwait(true);
-        if (error != null)
+        if(error != null)
         {
             return NotFound(error);
         }

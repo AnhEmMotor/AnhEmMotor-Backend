@@ -161,6 +161,12 @@
             Đăng nhập bằng Facebook (placeholder - cần cấu hình Facebook OAuth)
             </summary>
         </member>
+        <member name="M:WebAPI.Controllers.V1.AuthController.PingTest">
+            <summary>
+            Handles a test request to verify that the authentication service is reachable.
+            </summary>
+            <returns>An <see cref="T:Microsoft.AspNetCore.Mvc.OkObjectResult"/> containing a greeting message if the service is available.</returns>
+        </member>
         <member name="T:WebAPI.Controllers.V1.BrandController">
             <summary>
             Quản lý danh sách các thương hiệu sản phẩm (ví dụ: Honda, Yamaha, Suzuki).
@@ -579,7 +585,8 @@
         </member>
         <member name="M:WebAPI.Controllers.V1.ProductController.GetActiveVariantLiteProducts(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
-            Lấy danh sách biến thể sản phẩm của tất cả sản phẩm (có phân trang, lọc, tìm kiếm - chỉ có thể vào khi và chỉ khi có quyền xem danh sách sản phẩm).
+            Lấy danh sách biến thể sản phẩm của tất cả sản phẩm (có phân trang, lọc, tìm kiếm - chỉ có thể vào khi và chỉ
+            khi có quyền xem danh sách sản phẩm).
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.ProductController.GetActiveVariantLiteProductsPublic(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
@@ -589,7 +596,8 @@
         </member>
         <member name="M:WebAPI.Controllers.V1.ProductController.GetActiveVariantLiteProductsForInput(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
-            `Lấy danh sách biến thể sản phẩm của tất cả sản phẩm (có phân trang, lọc, tìm kiếm - chỉ có thể vào khi và chỉ khi có quyền thêm hoặc sửa phiếu nhập).
+            `Lấy danh sách biến thể sản phẩm của tất cả sản phẩm (có phân trang, lọc, tìm kiếm - chỉ có thể vào khi và chỉ
+            khi có quyền thêm hoặc sửa phiếu nhập).
             </summary>
             <param name="request"></param>
             <param name="cancellationToken"></param>
@@ -597,7 +605,8 @@
         </member>
         <member name="M:WebAPI.Controllers.V1.ProductController.GetActiveVariantLiteProductsForOutput(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
-            Lấy danh sách biến thể sản phẩm của tất cả sản phẩm (có phân trang, lọc, tìm kiếm - chỉ có thể vào khi và chỉ khi có quyền thêm hoặc sửa phiếu bán hàng).
+            Lấy danh sách biến thể sản phẩm của tất cả sản phẩm (có phân trang, lọc, tìm kiếm - chỉ có thể vào khi và chỉ
+            khi có quyền thêm hoặc sửa phiếu bán hàng).
             </summary>
             <param name="request"></param>
             <param name="cancellationToken"></param>
@@ -737,7 +746,8 @@
         </member>
         <member name="M:WebAPI.Controllers.V1.SalesOrdersController.UpdateOutput(System.Int32,Application.ApiContracts.Output.Requests.UpdateOutputForManagerRequest,System.Threading.CancellationToken)">
             <summary>
-            Cập nhật đơn hàng (Cho phép sửa tất cả đơn hàng, nhưng chỉ cho phép cập nhật khi và chỉ khi có quyền chỉnh sửa đơn hàng)
+            Cập nhật đơn hàng (Cho phép sửa tất cả đơn hàng, nhưng chỉ cho phép cập nhật khi và chỉ khi có quyền chỉnh sửa
+            đơn hàng)
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.SalesOrdersController.UpdateOutputStatus(System.Int32,Application.ApiContracts.Output.Requests.UpdateOutputStatusRequest,System.Threading.CancellationToken)">
@@ -1008,14 +1018,16 @@
         </member>
         <member name="M:WebAPI.Controllers.V1.UserManagerController.GetAllUsers(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
-            Lấy danh sách tất cả người dùng (có phân trang, lọc, sắp xếp - chỉ vào được khi người dùng có quyền xem danh sách người dùng).
+            Lấy danh sách tất cả người dùng (có phân trang, lọc, sắp xếp - chỉ vào được khi người dùng có quyền xem danh
+            sách người dùng).
             </summary>
             <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
             <param name="cancellationToken"></param>
         </member>
         <member name="M:WebAPI.Controllers.V1.UserManagerController.GetAllUsersForOutput(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
-            Lấy danh sách tất cả người dùng (có phân trang, lọc, sắp xếp - chỉ vào được khi người dùng có quyền sửa hoặc xoá phiếu bán hàng).
+            Lấy danh sách tất cả người dùng (có phân trang, lọc, sắp xếp - chỉ vào được khi người dùng có quyền sửa hoặc xoá
+            phiếu bán hàng).
             </summary>
             <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
             <param name="cancellationToken"></param>
@@ -1086,17 +1098,21 @@
             <summary>
             Provides extension methods for configuring JWT bearer authentication in an ASP.NET Core application.
             </summary>
-            <remarks>This class contains methods that extend the functionality of IServiceCollection to simplify the setup
-            of JWT authentication using configuration values. It is intended to be used during application startup when
-            configuring authentication services.</remarks>
+            <remarks>
+            This class contains methods that extend the functionality of IServiceCollection to simplify the setup of JWT
+            authentication using configuration values. It is intended to be used during application startup when configuring
+            authentication services.
+            </remarks>
         </member>
         <member name="M:WebAPI.Extensions.AuthenticationExtensions.AddJwtAuthentication(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration)">
             <summary>
             Adds JWT bearer authentication to the application's service collection using configuration settings.
             </summary>
-            <remarks>This method configures JWT authentication with validation for issuer, audience, lifetime, and
-            signing key. The relevant JWT settings must be present in the configuration under the 'Jwt' section. The method
-            sets the default authentication scheme to JWT bearer.</remarks>
+            <remarks>
+            This method configures JWT authentication with validation for issuer, audience, lifetime, and signing key. The
+            relevant JWT settings must be present in the configuration under the 'Jwt' section. The method sets the default
+            authentication scheme to JWT bearer.
+            </remarks>
             <param name="services">The service collection to which authentication services will be added.</param>
             <param name="configuration">The application configuration containing JWT settings such as issuer, audience, and signing key.</param>
             <returns>The same <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> instance so that additional calls can be chained.</returns>
