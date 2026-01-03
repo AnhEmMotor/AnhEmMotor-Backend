@@ -1,16 +1,16 @@
 using Application.ApiContracts.Auth.Responses;
+using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Services;
 using Domain.Constants;
 using Domain.Entities;
 using FluentValidation;
 using FluentValidation.Results;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 
 namespace Application.Features.Auth.Commands.Register;
 
 public class RegisterCommandHandler(
-    UserManager<ApplicationUser> userManager,
+    IUserCreateRepository userCreateRepository,
     IProtectedEntityManagerService protectedEntityManagerService) : IRequestHandler<RegisterCommand, RegistrationSuccessResponse>
 {
     public async Task<RegistrationSuccessResponse> Handle(RegisterCommand request, CancellationToken cancellationToken)
@@ -27,15 +27,14 @@ public class RegisterCommandHandler(
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        var result = await userManager.CreateAsync(user, request.Password).ConfigureAwait(false);
+        var (succeeded, errors) = await userCreateRepository.CreateUserAsync(user, request.Password, cancellationToken).ConfigureAwait(false);
 
-        if(!result.Succeeded)
+        if(!succeeded)
         {
             var failures = new List<ValidationFailure>();
-            foreach(var error in result.Errors)
+            foreach(var error in errors)
             {
-                string fieldName = Common.Helper.IdentityHelper.GetFieldForIdentityError(error.Code);
-                failures.Add(new ValidationFailure(fieldName, error.Description));
+                failures.Add(new ValidationFailure(string.Empty, error));
             }
             throw new ValidationException(failures);
         }
@@ -44,7 +43,7 @@ public class RegisterCommandHandler(
         if(defaultRoles.Count > 0)
         {
             var randomRole = defaultRoles[Random.Shared.Next(defaultRoles.Count)];
-            await userManager.AddToRoleAsync(user, randomRole).ConfigureAwait(false);
+            await userCreateRepository.AddUserToRoleAsync(user, randomRole, cancellationToken).ConfigureAwait(false);
         }
 
         return new RegistrationSuccessResponse();

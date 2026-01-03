@@ -1,23 +1,16 @@
-using Domain.Entities;
+using Application.Interfaces.Repositories.User;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 
 namespace Application.Features.Auth.Commands.Logout;
 
-public class LogoutCommandHandler(UserManager<ApplicationUser> userManager) : IRequestHandler<LogoutCommand>
+public class LogoutCommandHandler(IUserUpdateRepository userUpdateRepository) : IRequestHandler<LogoutCommand>
 {
     public async Task Handle(LogoutCommand request, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        if(request.UserId is not null)
+        if(request.UserId is not null && Guid.TryParse(request.UserId, out var userId))
         {
-            var user = await userManager.FindByIdAsync(request.UserId).ConfigureAwait(false);
-            if(user is not null)
-            {
-                user.RefreshToken = null;
-                user.RefreshTokenExpiryTime = DateTimeOffset.MinValue;
-                await userManager.UpdateAsync(user).ConfigureAwait(false);
-            }
+            await userUpdateRepository.ClearRefreshTokenAsync(userId, cancellationToken).ConfigureAwait(false);
         }
     }
 }

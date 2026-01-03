@@ -9,6 +9,7 @@ using Application.Features.UserManager.Commands.UpdateUser;
 using Application.Features.UserManager.Queries.GetUserById;
 using Application.Features.UserManager.Queries.GetUsersList;
 using Application.Features.UserManager.Queries.GetUsersListForOutput;
+using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Repositories.UserManager;
 using Application.Interfaces.Services;
 using Domain.Constants;
@@ -23,22 +24,20 @@ namespace UnitTests;
 
 public class UserManager
 {
-    private readonly Mock<UserManager<ApplicationUser>> _userManagerMock;
-    private readonly Mock<RoleManager<ApplicationRole>> _roleManagerMock;
-    private readonly Mock<IUserManagerReadRepository> _userManagerRepositoryMock;
+    private readonly Mock<IUserReadRepository> _userReadRepositoryMock;
+    private readonly Mock<IUserUpdateRepository> _userUpdateRepositoryMock;
+    private readonly Mock<IUserCreateRepository> _userCreateRepositoryMock;
+    private readonly Mock<IUserDeleteRepository> _userDeleteRepositoryMock;
+    private readonly Mock<IUserManagerReadRepository> _userManagerReadRepositoryMock;
     private readonly Mock<IProtectedEntityManagerService> _protectedEntityManagerServiceMock;
 
     public UserManager()
     {
-        var userStoreMock = new Mock<IUserStore<ApplicationUser>>();
-        _userManagerMock = new Mock<UserManager<ApplicationUser>>(
-            userStoreMock.Object, null, null, null, null, null, null, null, null);
-
-        var roleStoreMock = new Mock<IRoleStore<ApplicationRole>>();
-        _roleManagerMock = new Mock<RoleManager<ApplicationRole>>(
-            roleStoreMock.Object, null, null, null, null);
-
-        _userManagerRepositoryMock = new Mock<IUserManagerReadRepository>();
+        _userReadRepositoryMock = new Mock<IUserReadRepository>();
+        _userUpdateRepositoryMock = new Mock<IUserUpdateRepository>();
+        _userCreateRepositoryMock = new Mock<IUserCreateRepository>();
+        _userDeleteRepositoryMock = new Mock<IUserDeleteRepository>();
+        _userManagerReadRepositoryMock = new Mock<IUserManagerReadRepository>();
         _protectedEntityManagerServiceMock = new Mock<IProtectedEntityManagerService>();
     }
 

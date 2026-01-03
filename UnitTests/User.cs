@@ -6,6 +6,7 @@ using Application.Features.Users.Commands.DeleteCurrentUserAccount;
 using Application.Features.Users.Commands.RestoreUserAccount;
 using Application.Features.Users.Commands.UpdateCurrentUser;
 using Application.Features.Users.Queries.GetCurrentUser;
+using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Services;
 using Domain.Constants;
 using Domain.Entities;
@@ -18,14 +19,16 @@ namespace UnitTests;
 
 public class User
 {
-    private readonly Mock<UserManager<ApplicationUser>> _userManagerMock;
+    private readonly Mock<IUserReadRepository> _userReadRepositoryMock;
+    private readonly Mock<IUserUpdateRepository> _userUpdateRepositoryMock;
+    private readonly Mock<IUserDeleteRepository> _userDeleteRepositoryMock;
     private readonly Mock<IProtectedEntityManagerService> _protectedEntityManagerServiceMock;
 
     public User()
     {
-        var userStoreMock = new Mock<IUserStore<ApplicationUser>>();
-        _userManagerMock = new Mock<UserManager<ApplicationUser>>(
-            userStoreMock.Object, null, null, null, null, null, null, null, null);
+        _userReadRepositoryMock = new Mock<IUserReadRepository>();
+        _userUpdateRepositoryMock = new Mock<IUserUpdateRepository>();
+        _userDeleteRepositoryMock = new Mock<IUserDeleteRepository>();
         _protectedEntityManagerServiceMock = new Mock<IProtectedEntityManagerService>();
     }
 
@@ -46,10 +49,10 @@ public class User
             DeletedAt = null
         };
 
-        _userManagerMock.Setup(x => x.FindByIdAsync(userId.ToString()))
+        _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
 
-        var handler = new GetCurrentUserQueryHandler(_userManagerMock.Object);
+        var handler = new GetCurrentUserQueryHandler(_userReadRepositoryMock.Object);
         var query = new GetCurrentUserQuery(userId.ToString());
 
         // Act
@@ -69,10 +72,10 @@ public class User
     public async Task GetCurrentUser_InvalidJWT_ThrowsUnauthorizedException()
     {
         // Arrange
-        _userManagerMock.Setup(x => x.FindByIdAsync(It.IsAny<string>()))
+        _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((ApplicationUser?)null);
 
-        var handler = new GetCurrentUserQueryHandler(_userManagerMock.Object);
+        var handler = new GetCurrentUserQueryHandler(_userReadRepositoryMock.Object);
         var query = new GetCurrentUserQuery(null);
 
         // Act & Assert
@@ -92,10 +95,10 @@ public class User
             DeletedAt = DateTimeOffset.UtcNow.AddDays(-1)
         };
 
-        _userManagerMock.Setup(x => x.FindByIdAsync(userId.ToString()))
+        _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
 
-        var handler = new GetCurrentUserQueryHandler(_userManagerMock.Object);
+        var handler = new GetCurrentUserQueryHandler(_userReadRepositoryMock.Object);
         var query = new GetCurrentUserQuery(userId.ToString());
 
         // Act & Assert
@@ -116,10 +119,10 @@ public class User
             DeletedAt = null
         };
 
-        _userManagerMock.Setup(x => x.FindByIdAsync(userId.ToString()))
+        _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
 
-        var handler = new GetCurrentUserQueryHandler(_userManagerMock.Object);
+        var handler = new GetCurrentUserQueryHandler(_userReadRepositoryMock.Object);
         var query = new GetCurrentUserQuery(userId.ToString());
 
         // Act & Assert
@@ -145,12 +148,12 @@ public class User
             DeletedAt = null
         };
 
-        _userManagerMock.Setup(x => x.FindByIdAsync(userId.ToString()))
+        _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
-        _userManagerMock.Setup(x => x.UpdateAsync(It.IsAny<ApplicationUser>()))
-            .ReturnsAsync(IdentityResult.Success);
+        _userUpdateRepositoryMock.Setup(x => x.UpdateUserAsync(It.IsAny<ApplicationUser>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((true, Array.Empty<string>()));
 
-        var handler = new UpdateCurrentUserCommandHandler(_userManagerMock.Object);
+        var handler = new UpdateCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
         var request = new UpdateUserRequest
         {
             FullName = "New Name",
@@ -184,12 +187,12 @@ public class User
             DeletedAt = null
         };
 
-        _userManagerMock.Setup(x => x.FindByIdAsync(userId.ToString()))
+        _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
-        _userManagerMock.Setup(x => x.UpdateAsync(It.IsAny<ApplicationUser>()))
-            .ReturnsAsync(IdentityResult.Success);
+        _userUpdateRepositoryMock.Setup(x => x.UpdateUserAsync(It.IsAny<ApplicationUser>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((true, Array.Empty<string>()));
 
-        var handler = new UpdateCurrentUserCommandHandler(_userManagerMock.Object);
+        var handler = new UpdateCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
         var request = new UpdateUserRequest
         {
             FullName = null,
@@ -220,12 +223,12 @@ public class User
             DeletedAt = null
         };
 
-        _userManagerMock.Setup(x => x.FindByIdAsync(userId.ToString()))
+        _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
-        _userManagerMock.Setup(x => x.UpdateAsync(It.IsAny<ApplicationUser>()))
-            .ReturnsAsync(IdentityResult.Success);
+        _userUpdateRepositoryMock.Setup(x => x.UpdateUserAsync(It.IsAny<ApplicationUser>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((true, Array.Empty<string>()));
 
-        var handler = new UpdateCurrentUserCommandHandler(_userManagerMock.Object);
+        var handler = new UpdateCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
         var request = new UpdateUserRequest
         {
             FullName = "  Trimmed Name  ",
@@ -254,12 +257,12 @@ public class User
             DeletedAt = null
         };
 
-        _userManagerMock.Setup(x => x.FindByIdAsync(userId.ToString()))
+        _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
-        _userManagerMock.Setup(x => x.UpdateAsync(It.IsAny<ApplicationUser>()))
-            .ReturnsAsync(IdentityResult.Success);
+        _userUpdateRepositoryMock.Setup(x => x.UpdateUserAsync(It.IsAny<ApplicationUser>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((true, Array.Empty<string>()));
 
-        var handler = new UpdateCurrentUserCommandHandler(_userManagerMock.Object);
+        var handler = new UpdateCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
         var request = new UpdateUserRequest
         {
             FullName = "<script>alert('XSS')</script>",
@@ -287,10 +290,10 @@ public class User
             DeletedAt = null
         };
 
-        _userManagerMock.Setup(x => x.FindByIdAsync(userId.ToString()))
+        _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
 
-        var handler = new UpdateCurrentUserCommandHandler(_userManagerMock.Object);
+        var handler = new UpdateCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
         var request = new UpdateUserRequest
         {
             Gender = "InvalidGender"
@@ -315,10 +318,10 @@ public class User
             DeletedAt = null
         };
 
-        _userManagerMock.Setup(x => x.FindByIdAsync(userId.ToString()))
+        _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
 
-        var handler = new UpdateCurrentUserCommandHandler(_userManagerMock.Object);
+        var handler = new UpdateCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
         var request = new UpdateUserRequest
         {
             PhoneNumber = "abcd1234"
@@ -342,10 +345,10 @@ public class User
             DeletedAt = DateTimeOffset.UtcNow.AddDays(-1)
         };
 
-        _userManagerMock.Setup(x => x.FindByIdAsync(userId.ToString()))
+        _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
 
-        var handler = new UpdateCurrentUserCommandHandler(_userManagerMock.Object);
+        var handler = new UpdateCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
         var request = new UpdateUserRequest { FullName = "Test" };
         var command = new UpdateCurrentUserCommand(userId.ToString(), request);
 
@@ -367,10 +370,10 @@ public class User
             DeletedAt = null
         };
 
-        _userManagerMock.Setup(x => x.FindByIdAsync(userId.ToString()))
+        _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
 
-        var handler = new UpdateCurrentUserCommandHandler(_userManagerMock.Object);
+        var handler = new UpdateCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
         var request = new UpdateUserRequest { FullName = "Test" };
         var command = new UpdateCurrentUserCommand(userId.ToString(), request);
 
@@ -393,12 +396,12 @@ public class User
             DeletedAt = null
         };
 
-        _userManagerMock.Setup(x => x.FindByIdAsync(userId.ToString()))
+        _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
-        _userManagerMock.Setup(x => x.UpdateAsync(It.IsAny<ApplicationUser>()))
-            .ReturnsAsync(IdentityResult.Success);
+        _userUpdateRepositoryMock.Setup(x => x.UpdateUserAsync(It.IsAny<ApplicationUser>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((true, Array.Empty<string>()));
 
-        var handler = new UpdateCurrentUserCommandHandler(_userManagerMock.Object);
+        var handler = new UpdateCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
         var request = new UpdateUserRequest { FullName = "Test" };
         var command = new UpdateCurrentUserCommand(userId.ToString(), request);
 
@@ -408,7 +411,7 @@ public class User
         // Assert
         result.Should().NotBeNull();
         // Verify Email không bị thay đổi (vì không có trong UpdateUserRequest)
-        _userManagerMock.Verify(x => x.UpdateAsync(It.Is<ApplicationUser>(u => u.Email == "old@example.com")), Times.Once);
+        _userUpdateRepositoryMock.Verify(x => x.UpdateUserAsync(It.Is<ApplicationUser>(u => u.Email == "old@example.com")), Times.Once);
     }
 
     [Fact(DisplayName = "USER_014 - Đổi mật khẩu thành công")]
@@ -424,16 +427,14 @@ public class User
             SecurityStamp = "old-stamp"
         };
 
-        _userManagerMock.Setup(x => x.FindByIdAsync(userId.ToString()))
+        _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
-        _userManagerMock.Setup(x => x.CheckPasswordAsync(user, "OldPass123!"))
+        _userReadRepositoryMock.Setup(x => x.CheckPasswordAsync(user, "OldPass123!", It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
-        _userManagerMock.Setup(x => x.ChangePasswordAsync(user, "OldPass123!", "NewPass456!"))
-            .ReturnsAsync(IdentityResult.Success);
-        _userManagerMock.Setup(x => x.UpdateSecurityStampAsync(user))
-            .ReturnsAsync(IdentityResult.Success);
+        _userUpdateRepositoryMock.Setup(x => x.ChangePasswordAsync(user, "OldPass123!", "NewPass456!", It.IsAny<CancellationToken>()))
+            .ReturnsAsync((true, Array.Empty<string>()));
 
-        var handler = new ChangePasswordCurrentUserCommandHandler(_userManagerMock.Object);
+        var handler = new ChangePasswordCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
         var request = new ChangePasswordRequest
         {
             CurrentPassword = "OldPass123!",
@@ -447,8 +448,7 @@ public class User
         // Assert
         result.Should().NotBeNull();
         result.Message.Should().Be("Password changed successfully");
-        _userManagerMock.Verify(x => x.ChangePasswordAsync(user, "OldPass123!", "NewPass456!"), Times.Once);
-        _userManagerMock.Verify(x => x.UpdateSecurityStampAsync(user), Times.Once);
+        _userUpdateRepositoryMock.Verify(x => x.ChangePasswordAsync(user, "OldPass123!", "NewPass456!", It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact(DisplayName = "USER_015 - Đổi mật khẩu với CurrentPassword sai")]
@@ -463,12 +463,12 @@ public class User
             DeletedAt = null
         };
 
-        _userManagerMock.Setup(x => x.FindByIdAsync(userId.ToString()))
+        _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
-        _userManagerMock.Setup(x => x.CheckPasswordAsync(user, "WrongPass"))
+        _userReadRepositoryMock.Setup(x => x.CheckPasswordAsync(user, "WrongPass", It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
 
-        var handler = new ChangePasswordCurrentUserCommandHandler(_userManagerMock.Object);
+        var handler = new ChangePasswordCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
         var request = new ChangePasswordRequest
         {
             CurrentPassword = "WrongPass",
@@ -494,12 +494,12 @@ public class User
             DeletedAt = null
         };
 
-        _userManagerMock.Setup(x => x.FindByIdAsync(userId.ToString()))
+        _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
-        _userManagerMock.Setup(x => x.CheckPasswordAsync(user, "OldPass123!"))
+        _userReadRepositoryMock.Setup(x => x.CheckPasswordAsync(user, "OldPass123!", It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
-        var handler = new ChangePasswordCurrentUserCommandHandler(_userManagerMock.Object);
+        var handler = new ChangePasswordCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
         var request = new ChangePasswordRequest
         {
             CurrentPassword = "OldPass123!",
@@ -524,10 +524,10 @@ public class User
             DeletedAt = DateTimeOffset.UtcNow.AddDays(-1)
         };
 
-        _userManagerMock.Setup(x => x.FindByIdAsync(userId.ToString()))
+        _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
 
-        var handler = new ChangePasswordCurrentUserCommandHandler(_userManagerMock.Object);
+        var handler = new ChangePasswordCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
         var request = new ChangePasswordRequest
         {
             CurrentPassword = "OldPass123!",
@@ -554,16 +554,12 @@ public class User
             SecurityStamp = "old-stamp"
         };
 
-        _userManagerMock.Setup(x => x.FindByIdAsync(userId.ToString()))
+        _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
-        _userManagerMock.Setup(x => x.UpdateAsync(It.IsAny<ApplicationUser>()))
-            .ReturnsAsync(IdentityResult.Success);
-        _userManagerMock.Setup(x => x.UpdateSecurityStampAsync(user))
-            .ReturnsAsync(IdentityResult.Success);
+        _userDeleteRepositoryMock.Setup(x => x.SoftDeleteUserAsync(It.IsAny<ApplicationUser>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((true, Array.Empty<string>()));
 
-        var handler = new DeleteCurrentUserAccountCommandHandler(
-            _userManagerMock.Object, 
-            _protectedEntityManagerServiceMock.Object);
+        var handler = new DeleteCurrentUserAccountCommandHandler(_userReadRepositoryMock.Object, _userDeleteRepositoryMock.Object, _protectedEntityManagerServiceMock.Object);
         var command = new DeleteCurrentUserAccountCommand(userId.ToString());
 
         // Act
@@ -572,8 +568,7 @@ public class User
         // Assert
         result.Should().NotBeNull();
         result.Message.Should().Be("Account deleted successfully");
-        _userManagerMock.Verify(x => x.UpdateAsync(It.Is<ApplicationUser>(u => u.DeletedAt != null)), Times.Once);
-        _userManagerMock.Verify(x => x.UpdateSecurityStampAsync(user), Times.Once);
+        _userDeleteRepositoryMock.Verify(x => x.SoftDeleteUserAsync(It.IsAny<ApplicationUser>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact(DisplayName = "USER_019 - Xóa tài khoản khi đã bị Ban (không cho phép)")]
@@ -588,12 +583,10 @@ public class User
             DeletedAt = null
         };
 
-        _userManagerMock.Setup(x => x.FindByIdAsync(userId.ToString()))
+        _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
 
-        var handler = new DeleteCurrentUserAccountCommandHandler(
-            _userManagerMock.Object, 
-            _protectedEntityManagerServiceMock.Object);
+        var handler = new DeleteCurrentUserAccountCommandHandler(_userReadRepositoryMock.Object, _userDeleteRepositoryMock.Object, _protectedEntityManagerServiceMock.Object);
         var command = new DeleteCurrentUserAccountCommand(userId.ToString());
 
         // Act & Assert
@@ -613,12 +606,10 @@ public class User
             DeletedAt = DateTimeOffset.UtcNow.AddDays(-2)
         };
 
-        _userManagerMock.Setup(x => x.FindByIdAsync(userId.ToString()))
+        _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
 
-        var handler = new DeleteCurrentUserAccountCommandHandler(
-            _userManagerMock.Object, 
-            _protectedEntityManagerServiceMock.Object);
+        var handler = new DeleteCurrentUserAccountCommandHandler(_userReadRepositoryMock.Object, _userDeleteRepositoryMock.Object, _protectedEntityManagerServiceMock.Object);
         var command = new DeleteCurrentUserAccountCommand(userId.ToString());
 
         // Act & Assert
@@ -627,3 +618,4 @@ public class User
         exception.Message.Should().Contain("Account already deleted");
     }
 }
+

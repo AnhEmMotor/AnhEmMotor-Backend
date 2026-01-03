@@ -1,16 +1,16 @@
 using Application.ApiContracts.User.Responses;
 using Application.Common.Exceptions;
+using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Services;
-using Domain.Entities;
 using FluentValidation;
 using FluentValidation.Results;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 
 namespace Application.Features.Users.Commands.DeleteCurrentUserAccount;
 
 public class DeleteCurrentUserAccountCommandHandler(
-    UserManager<ApplicationUser> userManager,
+    IUserReadRepository userReadRepository,
+    IUserDeleteRepository userDeleteRepository,
     IProtectedEntityManagerService protectedEntityManagerService) : IRequestHandler<DeleteCurrentUserAccountCommand, DeleteUserByUserReponse>
 {
     public async Task<DeleteUserByUserReponse> Handle(
@@ -22,7 +22,7 @@ public class DeleteCurrentUserAccountCommandHandler(
             throw new UnauthorizedException("Invalid user token.");
         }
 
-        var user = await userManager.FindByIdAsync(userId.ToString()).ConfigureAwait(false) ??
+        var user = await userReadRepository.FindUserByIdAsync(userId, cancellationToken).ConfigureAwait(false) ??
             throw new NotFoundException("User not found.");
 
 
@@ -43,15 +43,13 @@ public class DeleteCurrentUserAccountCommandHandler(
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        user.DeletedAt = DateTimeOffset.UtcNow;
-        var result = await userManager.UpdateAsync(user).ConfigureAwait(false);
-        if(!result.Succeeded)
+        var (succeeded, errors) = await userDeleteRepository.SoftDeleteUserAsync(user, cancellationToken).ConfigureAwait(false);
+        if(!succeeded)
         {
             var failures = new List<ValidationFailure>();
-            foreach(var error in result.Errors)
+            foreach(var error in errors)
             {
-                string fieldName = Common.Helper.IdentityHelper.GetFieldForIdentityError(error.Code);
-                failures.Add(new ValidationFailure(fieldName, error.Description));
+                failures.Add(new ValidationFailure(string.Empty, error));
             }
             throw new ValidationException(failures);
         }
