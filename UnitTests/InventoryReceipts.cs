@@ -2,7 +2,10 @@ using Application.ApiContracts.Input.Requests;
 using Application.Features.Inputs.Commands.CreateInput;
 using Application.Features.Inputs.Commands.UpdateInput;
 using Application.Features.Inputs.Commands.UpdateInputStatus;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
+using Application.Interfaces.Repositories.ProductVariant;
+using Application.Interfaces.Repositories.Supplier;
 using Domain.Constants;
 using Domain.Entities;
 using FluentAssertions;
@@ -229,7 +232,12 @@ public class InventoryReceipts
         mockInsertRepo.Setup(x => x.Add(It.IsAny<Input>()))
             .Throws(new Exception("DB Connection Failed"));
 
-        var handler = new CreateInputCommandHandler(mockInsertRepo.Object, mockReadRepo.Object, null, null, null);
+        var handler = new CreateInputCommandHandler(
+            mockInsertRepo.Object, 
+            mockReadRepo.Object, 
+            Mock.Of<ISupplierReadRepository>(), 
+            Mock.Of<IProductVariantReadRepository>(), 
+            Mock.Of<IUnitOfWork>());
         var command = new CreateInputCommand
         {
             Notes = "Test",
@@ -254,7 +262,13 @@ public class InventoryReceipts
         mockReadRepo.Setup(x => x.GetByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((Input?)null);
 
-        var handler = new UpdateInputCommandHandler(mockReadRepo.Object, mockUpdateRepo.Object, null, null, null, null);
+        var handler = new UpdateInputCommandHandler(
+            mockReadRepo.Object, 
+            mockUpdateRepo.Object, 
+            Mock.Of<IInputDeleteRepository>(), 
+            Mock.Of<ISupplierReadRepository>(), 
+            Mock.Of<IProductVariantReadRepository>(), 
+            Mock.Of<IUnitOfWork>());
         var command = new UpdateInputCommand
         {
             Id = 9999,
