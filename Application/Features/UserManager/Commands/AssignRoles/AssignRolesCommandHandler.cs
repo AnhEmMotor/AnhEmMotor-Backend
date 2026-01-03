@@ -1,18 +1,20 @@
 using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Exceptions;
+using Application.Interfaces.Repositories.User;
+using Application.Interfaces.Repositories.UserManager;
 using Application.Interfaces.Services;
 using Domain.Constants;
-using Domain.Entities;
 using FluentValidation;
 using FluentValidation.Results;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 
 namespace Application.Features.UserManager.Commands.AssignRoles;
 
 public class AssignRolesCommandHandler(
-    UserManager<ApplicationUser> userManager,
-    RoleManager<ApplicationRole> roleManager,
+    IUserReadRepository userReadRepository,
+    IUserUpdateRepository userUpdateRepository,
+    IUserCreateRepository userCreateRepository,
+    IUserManagerReadRepository userManagerReadRepository,
     IProtectedEntityManagerService protectedEntityManagerService) : IRequestHandler<AssignRolesCommand, AssignRoleResponse>
 {
     public async Task<AssignRoleResponse> Handle(AssignRolesCommand request, CancellationToken cancellationToken)
@@ -30,13 +32,13 @@ public class AssignRolesCommandHandler(
             }
         }
 
-        var user = await userManager.FindByIdAsync(request.UserId.ToString()).ConfigureAwait(false) ??
+        var user = await userReadRepository.FindUserByIdAsync(request.UserId, cancellationToken).ConfigureAwait(false) ??
             throw new NotFoundException("User not found.");
 
         var invalidRoles = new List<string>();
         foreach(var roleName in request.Model.RoleNames)
         {
-            var roleExists = await roleManager.RoleExistsAsync(roleName).ConfigureAwait(false);
+            var roleExists = await userManagerReadRepository.RoleExistsAsync(roleName, cancellationToken).ConfigureAwait(false);
             if(!roleExists)
             {
                 invalidRoles.Add(roleName);
@@ -53,7 +55,7 @@ public class AssignRolesCommandHandler(
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        var currentRoles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
+        var currentRoles = await userReadRepository.GetUserRolesAsync(user, cancellationToken).ConfigureAwait(false);
         var superRoles = protectedEntityManagerService.GetSuperRoles() ?? [];
 
         var rolesToRemove = currentRoles.Except(request.Model.RoleNames).ToList();
@@ -61,7 +63,7 @@ public class AssignRolesCommandHandler(
         {
             if(superRoles.Contains(roleToRemove))
             {
-                var usersWithThisRole = await userManager.GetUsersInRoleAsync(roleToRemove).ConfigureAwait(false);
+                var usersWithThisRole = await userReadRepository.GetUsersInRoleAsync(roleToRemove, cancellationToken).ConfigureAwait(false);
                 if(usersWithThisRole.Count == 1 && usersWithThisRole[0].Id == request.UserId)
                 {
                     throw new ValidationException(
@@ -74,14 +76,13 @@ public class AssignRolesCommandHandler(
 
         if(currentRoles.Count > 0)
         {
-            var removeResult = await userManager.RemoveFromRolesAsync(user, currentRoles).ConfigureAwait(false);
-            if(!removeResult.Succeeded)
+            var (removeSucceeded, removeErrors) = await userUpdateRepository.RemoveUserFromRolesAsync(user, currentRoles, cancellationToken).ConfigureAwait(false);
+            if(!removeSucceeded)
             {
                 var failures = new List<ValidationFailure>();
-                foreach(var error in removeResult.Errors)
+                foreach(var error in removeErrors)
                 {
-                    string fieldName = Common.Helper.IdentityHelper.GetFieldForIdentityError(error.Code);
-                    failures.Add(new ValidationFailure(fieldName, error.Description));
+                    failures.Add(new ValidationFailure(string.Empty, error));
                 }
                 throw new ValidationException(failures);
             }
@@ -89,20 +90,19 @@ public class AssignRolesCommandHandler(
 
         if(request.Model.RoleNames.Count > 0)
         {
-            var addResult = await userManager.AddToRolesAsync(user, request.Model.RoleNames).ConfigureAwait(false);
-            if(!addResult.Succeeded)
+            var (addSucceeded, addErrors) = await userCreateRepository.AddUserToRolesAsync(user, request.Model.RoleNames, cancellationToken).ConfigureAwait(false);
+            if(!addSucceeded)
             {
                 var failures = new List<ValidationFailure>();
-                foreach(var error in addResult.Errors)
+                foreach(var error in addErrors)
                 {
-                    string fieldName = Common.Helper.IdentityHelper.GetFieldForIdentityError(error.Code);
-                    failures.Add(new ValidationFailure(fieldName, error.Description));
+                    failures.Add(new ValidationFailure(string.Empty, error));
                 }
                 throw new ValidationException(failures);
             }
         }
 
-        var updatedRoles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
+        var updatedRoles = await userReadRepository.GetUserRolesAsync(user, cancellationToken).ConfigureAwait(false);
 
         return new AssignRoleResponse()
         {

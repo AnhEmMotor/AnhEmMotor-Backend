@@ -1,14 +1,15 @@
 using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Exceptions;
-using Domain.Entities;
+using Application.Interfaces.Repositories.User;
 using FluentValidation;
 using FluentValidation.Results;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 
 namespace Application.Features.UserManager.Commands.ChangePassword;
 
-public class ChangePasswordCommandHandler(UserManager<ApplicationUser> userManager) : IRequestHandler<ChangePasswordCommand, ChangePasswordByManagerResponse>
+public class ChangePasswordCommandHandler(
+    IUserReadRepository userReadRepository,
+    IUserUpdateRepository userUpdateRepository) : IRequestHandler<ChangePasswordCommand, ChangePasswordByManagerResponse>
 {
     public async Task<ChangePasswordByManagerResponse> Handle(
         ChangePasswordCommand request,
@@ -24,7 +25,7 @@ public class ChangePasswordCommandHandler(UserManager<ApplicationUser> userManag
             throw new ForbiddenException("Invalid user token.");
         }
 
-        var user = await userManager.FindByIdAsync(request.UserId.ToString()).ConfigureAwait(false) ??
+        var user = await userReadRepository.FindUserByIdAsync(request.UserId, cancellationToken).ConfigureAwait(false) ??
             throw new NotFoundException("User not found.");
 
         if(string.Compare(request.Model.CurrentPassword, request.Model.NewPassword) == 0)
@@ -35,18 +36,19 @@ public class ChangePasswordCommandHandler(UserManager<ApplicationUser> userManag
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        var result = await userManager.ChangePasswordAsync(
+        var (succeeded, errors) = await userUpdateRepository.ChangePasswordAsync(
             user,
             request.Model.CurrentPassword,
-            request.Model.NewPassword)
+            request.Model.NewPassword,
+            cancellationToken)
             .ConfigureAwait(false);
-        if(!result.Succeeded)
+
+        if(!succeeded)
         {
             var failures = new List<ValidationFailure>();
-            foreach(var error in result.Errors)
+            foreach(var error in errors)
             {
-                string fieldName = Common.Helper.IdentityHelper.GetFieldForIdentityError(error.Code);
-                failures.Add(new ValidationFailure(fieldName, error.Description));
+                failures.Add(new ValidationFailure(string.Empty, error));
             }
             throw new ValidationException(failures);
         }

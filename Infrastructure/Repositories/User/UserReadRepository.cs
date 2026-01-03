@@ -140,5 +140,48 @@ namespace Infrastructure.Repositories.User
                 Status = user.Status,
             };
         }
+
+        public async Task<ApplicationUser?> FindUserByIdAsync(
+            Guid userId,
+            CancellationToken cancellationToken = default)
+        {
+            return await userManager.FindByIdAsync(userId.ToString()).ConfigureAwait(false);
+        }
+
+        public async Task<ApplicationUser?> FindUserByEmailAsync(
+            string email,
+            CancellationToken cancellationToken = default)
+        {
+            return await userManager.FindByEmailAsync(email).ConfigureAwait(false);
+        }
+
+        public async Task<ApplicationUser?> FindUserByUsernameAsync(
+            string username,
+            CancellationToken cancellationToken = default)
+        {
+            return await userManager.FindByNameAsync(username).ConfigureAwait(false);
+        }
+
+        public async Task<bool> CheckPasswordAsync(
+            ApplicationUser user,
+            string password,
+            CancellationToken cancellationToken = default)
+        {
+            return await userManager.CheckPasswordAsync(user, password).ConfigureAwait(false);
+        }
+
+        public async Task<IList<string>> GetUserRolesAsync(
+            ApplicationUser user,
+            CancellationToken cancellationToken = default)
+        {
+            return await userManager.GetRolesAsync(user).ConfigureAwait(false);
+        }
+
+        public async Task<IList<ApplicationUser>> GetUsersInRoleAsync(
+            string roleName,
+            CancellationToken cancellationToken = default)
+        {
+            return await userManager.GetUsersInRoleAsync(roleName).ConfigureAwait(false);
+        }
     }
 }

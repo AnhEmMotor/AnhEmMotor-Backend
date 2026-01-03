@@ -1,17 +1,17 @@
 using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Exceptions;
+using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Services;
 using Domain.Constants;
-using Domain.Entities;
 using FluentValidation;
 using FluentValidation.Results;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 
 namespace Application.Features.UserManager.Commands.ChangeUserStatus;
 
 public class ChangeUserStatusCommandHandler(
-    UserManager<ApplicationUser> userManager,
+    IUserReadRepository userReadRepository,
+    IUserUpdateRepository userUpdateRepository,
     IProtectedEntityManagerService protectedEntityManagerService) : IRequestHandler<ChangeUserStatusCommand, ChangeStatusUserByManagerResponse>
 {
     public async Task<ChangeStatusUserByManagerResponse> Handle(
@@ -23,7 +23,7 @@ public class ChangeUserStatusCommandHandler(
             throw new ValidationException([ new ValidationFailure("Status", "Status not vaild, please check.") ]);
         }
 
-        var user = await userManager.FindByIdAsync(request.UserId.ToString()).ConfigureAwait(false) ??
+        var user = await userReadRepository.FindUserByIdAsync(request.UserId, cancellationToken).ConfigureAwait(false) ??
             throw new NotFoundException("User not found.");
 
         cancellationToken.ThrowIfCancellationRequested();
@@ -39,13 +39,13 @@ public class ChangeUserStatusCommandHandler(
             }
 
             var superRoles = protectedEntityManagerService.GetSuperRoles() ?? [];
-            var userRoles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
+            var userRoles = await userReadRepository.GetUserRolesAsync(user, cancellationToken).ConfigureAwait(false);
 
             foreach(var userRole in userRoles)
             {
                 if(superRoles.Contains(userRole))
                 {
-                    var usersInRole = await userManager.GetUsersInRoleAsync(userRole).ConfigureAwait(false);
+                    var usersInRole = await userReadRepository.GetUsersInRoleAsync(userRole, cancellationToken).ConfigureAwait(false);
                     var activeUsersInRole = usersInRole.Where(u => string.Compare(u.Status, UserStatus.Active) == 0)
                         .ToList();
 
@@ -61,14 +61,13 @@ public class ChangeUserStatusCommandHandler(
         }
 
         user.Status = request.Model.Status;
-        var result = await userManager.UpdateAsync(user).ConfigureAwait(false);
-        if(!result.Succeeded)
+        var (succeeded, errors) = await userUpdateRepository.UpdateUserAsync(user, cancellationToken).ConfigureAwait(false);
+        if(!succeeded)
         {
             var failures = new List<ValidationFailure>();
-            foreach(var error in result.Errors)
+            foreach(var error in errors)
             {
-                string fieldName = Common.Helper.IdentityHelper.GetFieldForIdentityError(error.Code);
-                failures.Add(new ValidationFailure(fieldName, error.Description));
+                failures.Add(new ValidationFailure(string.Empty, error));
             }
             throw new ValidationException(failures);
         }

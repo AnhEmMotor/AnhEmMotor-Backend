@@ -1,13 +1,12 @@
+using Application.Interfaces.Repositories.User;
 using Domain.Constants;
-using Domain.Entities;
 using FluentValidation;
-using Microsoft.AspNetCore.Identity;
 
 namespace Application.Features.Auth.Commands.Register;
 
 public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
 {
-    public RegisterCommandValidator(UserManager<ApplicationUser> userManager)
+    public RegisterCommandValidator(IUserReadRepository userReadRepository)
     {
         RuleFor(x => x.Gender)
             .Must(gender => GenderStatus.IsValid(gender))
@@ -17,7 +16,7 @@ public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
             .MustAsync(
                 async (username, cancellation) =>
                 {
-                    var existingUser = await userManager.FindByNameAsync(username).ConfigureAwait(false);
+                    var existingUser = await userReadRepository.FindUserByUsernameAsync(username, cancellation).ConfigureAwait(false);
                     return existingUser is null;
                 })
             .WithMessage("Username already exists.");
@@ -28,7 +27,7 @@ public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
             .MustAsync(
                 async (email, cancellation) =>
                 {
-                    var existingUser = await userManager.FindByEmailAsync(email).ConfigureAwait(false);
+                    var existingUser = await userReadRepository.FindUserByEmailAsync(email, cancellation).ConfigureAwait(false);
                     return existingUser is null;
                 })
             .WithMessage("Email already exists.");

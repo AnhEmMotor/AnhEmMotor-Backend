@@ -13,4 +13,8 @@ public interface IUserManagerReadRepository
     public Task<bool> ValidateAllUsersExistAsync(List<Guid> userIds);
 
     public Task<List<ApplicationUser>> GetAllUsersAsync();
+
+    public Task<bool> RoleExistsAsync(
+        string roleName,
+        CancellationToken cancellationToken = default);
 }

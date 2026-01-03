@@ -1,12 +1,13 @@
 ﻿using Application.Interfaces.Repositories.UserManager;
 using Domain.Entities;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Infrastructure.Repositories.UserManager
 {
-    public class UserManagerReadRepository : IUserManagerReadRepository
+    public class UserManagerReadRepository(RoleManager<ApplicationRole> roleManager) : IUserManagerReadRepository
     {
         Task<List<ApplicationUser>> IUserManagerReadRepository.GetAllUsersAsync()
         {
@@ -31,6 +32,13 @@ namespace Infrastructure.Repositories.UserManager
         Task<bool> IUserManagerReadRepository.ValidateAllUsersExistAsync(List<Guid> userIds)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<bool> RoleExistsAsync(
+            string roleName,
+            CancellationToken cancellationToken = default)
+        {
+            return await roleManager.RoleExistsAsync(roleName).ConfigureAwait(false);
         }
     }
 }
