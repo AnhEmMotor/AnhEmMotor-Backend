@@ -95,7 +95,7 @@ public class UserController(IMediator mediator) : ControllerBase
     }
 
     /// <summary>
-    /// Khôi phục tài khoản người dùng (soft delete recovery - set DeletedAt to null)
+    /// Khôi phục tài khoản người dùng
     /// </summary>
     [HttpPost("{userId:guid}/restore")]
     [ProducesResponseType(typeof(RestoreUserResponse), StatusCodes.Status200OK)]

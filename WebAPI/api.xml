@@ -161,6 +161,11 @@
             Đăng nhập bằng Facebook (placeholder - cần cấu hình Facebook OAuth)
             </summary>
         </member>
+        <member name="M:WebAPI.Controllers.V1.AuthController.LoginForManager(Application.ApiContracts.Auth.Requests.LoginRequest,System.Threading.CancellationToken)">
+            <summary>
+            Đăng nhập bằng Username/Email và Password - Dành cho quản lý
+            </summary>
+        </member>
         <member name="T:WebAPI.Controllers.V1.BrandController">
             <summary>
             Quản lý danh sách các thương hiệu sản phẩm (ví dụ: Honda, Yamaha, Suzuki).
@@ -786,7 +791,7 @@
             </summary>
             <param name="mediator"></param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SettingController.SetSettings(System.Collections.Generic.Dictionary{System.String,System.Nullable{System.Int64}},System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SettingController.SetSettings(System.Collections.Generic.Dictionary{System.String,System.String},System.Threading.CancellationToken)">
             <summary>
             Sửa các cài đặt hệ thống (cập nhật số lượng cảnh báo tồn kho, số lượng mua tối đa, ...)
             </summary>
@@ -891,6 +896,14 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
+        <member name="M:WebAPI.Controllers.V1.SupplierController.GetSuppliersForInput(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+            <summary>
+            Lấy danh sách nhà cung cấp (có phân trang, lọc, sắp xếp - chỉ được vào khi người dùng có quyền thêm và xoá phiếu bán hàng).
+            </summary>
+            <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
         <member name="M:WebAPI.Controllers.V1.SupplierController.UpdateSupplier(System.Int32,Application.ApiContracts.Supplier.Requests.UpdateSupplierRequest,System.Threading.CancellationToken)">
             <summary>
             Cập nhật thông tin nhà cung cấp.
@@ -981,7 +994,7 @@
         </member>
         <member name="M:WebAPI.Controllers.V1.UserController.RestoreUserAccount(System.Guid,System.Threading.CancellationToken)">
             <summary>
-            Khôi phục tài khoản người dùng (soft delete recovery - set DeletedAt to null)
+            Khôi phục tài khoản người dùng
             </summary>
         </member>
         <member name="T:WebAPI.Controllers.V1.UserManagerController">

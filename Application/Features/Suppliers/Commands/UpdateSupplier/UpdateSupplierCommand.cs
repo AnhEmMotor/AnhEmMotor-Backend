@@ -16,4 +16,6 @@ public sealed record UpdateSupplierCommand : IRequest<(SupplierResponse? Data, C
     public string? Email { get; init; }
 
     public string? Notes { get; init; }
+
+    public string? TaxIdentificationNumber { get; set; }
 }

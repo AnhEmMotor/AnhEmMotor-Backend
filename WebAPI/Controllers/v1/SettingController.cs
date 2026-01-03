@@ -32,7 +32,7 @@ public class SettingController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(Dictionary<string, long?>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> SetSettings(
-        [FromBody][ValidSettingKeys] Dictionary<string, long?> request,
+        [FromBody][ValidSettingKeys] Dictionary<string, string?> request,
         CancellationToken cancellationToken)
     {
         var command = new SetSettingsCommand(request);

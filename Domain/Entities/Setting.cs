@@ -11,6 +11,6 @@ namespace Domain.Entities
         public string Key { get; set; } = string.Empty;
 
         [Column("Value", TypeName = "decimal(18, 2)")]
-        public decimal? Value { get; set; }
+        public string? Value { get; set; }
     }
 }

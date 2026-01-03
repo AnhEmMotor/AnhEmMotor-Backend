@@ -109,6 +109,18 @@ public class SupplierController(IMediator mediator) : ControllerBase
     }
 
     /// <summary>
+    /// Lấy danh sách nhà cung cấp (có phân trang, lọc, sắp xếp - chỉ được vào khi người dùng có quyền thêm và xoá phiếu bán hàng).
+    /// </summary>
+    /// <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    [HttpGet("for-input")]
+    public async Task<IActionResult> GetSuppliersForInput(
+        [FromQuery] SieveModel sieveModel,
+        CancellationToken cancellationToken)
+    { throw new NotImplementedException(); }
+
+    /// <summary>
     /// Cập nhật thông tin nhà cung cấp.
     /// </summary>
     /// <param name="id">Id nhà cung cấp cần cập nhật.</param>

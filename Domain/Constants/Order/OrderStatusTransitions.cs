@@ -1,4 +1,4 @@
-namespace Domain.Constants;
+namespace Domain.Constants.Order;
 
 public static class OrderStatusTransitions
 {

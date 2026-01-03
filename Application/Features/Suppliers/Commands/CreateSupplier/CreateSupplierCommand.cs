@@ -14,4 +14,6 @@ public sealed record CreateSupplierCommand : IRequest<SupplierResponse>
     public string? Email { get; init; }
 
     public string? Notes { get; init; }
+
+    public string? TaxIdentificationNumber { get; set; }
 }

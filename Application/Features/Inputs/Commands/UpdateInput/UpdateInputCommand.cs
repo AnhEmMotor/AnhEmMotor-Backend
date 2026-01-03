@@ -13,5 +13,5 @@ public sealed record UpdateInputCommand : IRequest<(InputResponse? Data, Common.
 
     public string? Notes { get; init; }
 
-    public ICollection<InputInfoResponse> Products { get; init; } = [];
+    public ICollection<UpdateInputProductCommand> Products { get; init; } = [];
 }

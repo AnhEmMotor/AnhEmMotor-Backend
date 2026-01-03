@@ -1,5 +1,6 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
+using Domain.Constants.Order;
 using MediatR;
 
 namespace Application.Features.Outputs.Commands.DeleteManyOutputs;
@@ -36,7 +37,7 @@ public sealed class DeleteManyOutputsCommandHandler(
 
         foreach(var output in outputsList)
         {
-            if(Domain.Constants.OrderStatus.IsCannotDelete(output.StatusId))
+            if(OrderStatus.IsCannotDelete(output.StatusId))
             {
                 errors.Add(
                     new Common.Models.ErrorDetail

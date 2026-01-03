@@ -127,4 +127,13 @@ public class AuthController(IMediator mediator) : ControllerBase
                     [ new Application.Common.Models.ErrorDetail() { Message = "Facebook login not implemented yet." } ]
             });
     }
+
+    /// <summary>
+    /// Đăng nhập bằng Username/Email và Password - Dành cho quản lý
+    /// </summary>
+    [HttpPost("login/for-manager")]
+    public async Task<IActionResult> LoginForManager(
+        [FromBody] Application.ApiContracts.Auth.Requests.LoginRequest model,
+        CancellationToken cancellationToken)
+    { throw new NotImplementedException(); }
 }

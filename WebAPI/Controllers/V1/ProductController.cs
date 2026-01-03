@@ -92,7 +92,7 @@ public class ProductController(ISender sender) : ControllerBase
     /// Lấy danh sách biến thể sản phẩm của tất cả sản phẩm (có phân trang, lọc, tìm kiếm - chỉ có thể vào khi và chỉ
     /// khi có quyền xem danh sách sản phẩm).
     /// </summary>
-    [HttpGet("variants-lite/for-product-manager")]
+    [HttpGet("variants-lite/for-manager")]
     [RequiresAnyPermissions(Products.View)]
     [ProducesResponseType(typeof(Domain.Primitives.PagedResult<ProductVariantLiteResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetActiveVariantLiteProducts(
@@ -182,7 +182,7 @@ public class ProductController(ISender sender) : ControllerBase
     /// <summary>
     /// Lấy thông tin chi tiết sản phẩm theo Id (dành cho người quản lý)
     /// </summary>
-    [HttpGet("/for-manager/{id:int}")]
+    [HttpGet("{id:int}/for-manager")]
     [HasPermission(Products.View)]
     [ProducesResponseType(typeof(ProductDetailForManagerResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]

@@ -3,9 +3,9 @@ using MediatR;
 
 namespace Application.Features.Settings.Queries.GetAllSettings;
 
-public sealed class GetAllSettingsQueryHandler(ISettingRepository settingRepository) : IRequestHandler<GetAllSettingsQuery, Dictionary<string, decimal?>>
+public sealed class GetAllSettingsQueryHandler(ISettingRepository settingRepository) : IRequestHandler<GetAllSettingsQuery, Dictionary<string, string?>>
 {
-    public async Task<Dictionary<string, decimal?>> Handle(
+    public async Task<Dictionary<string, string?>> Handle(
         GetAllSettingsQuery request,
         CancellationToken cancellationToken)
     {
