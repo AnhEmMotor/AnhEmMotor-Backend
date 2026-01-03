@@ -18,6 +18,8 @@ using Domain.Constants.Permission;
 using Domain.Entities;
 using FluentAssertions;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
 using PermissionEntity = Domain.Entities.Permission;
@@ -26,6 +28,32 @@ namespace UnitTests;
 
 public class PermissionAndRole
 {
+    private static Mock<UserManager<ApplicationUser>> CreateUserManagerMock()
+    {
+        var userStoreMock = new Mock<IUserStore<ApplicationUser>>();
+        return new Mock<UserManager<ApplicationUser>>(
+            userStoreMock.Object,
+            Mock.Of<IOptions<IdentityOptions>>(),
+            Mock.Of<IPasswordHasher<ApplicationUser>>(),
+            Array.Empty<IUserValidator<ApplicationUser>>(),
+            Array.Empty<IPasswordValidator<ApplicationUser>>(),
+            Mock.Of<ILookupNormalizer>(),
+            Mock.Of<IdentityErrorDescriber>(),
+            Mock.Of<IServiceProvider>(),
+            Mock.Of<ILogger<UserManager<ApplicationUser>>>());
+    }
+
+    private static Mock<RoleManager<ApplicationRole>> CreateRoleManagerMock()
+    {
+        var roleStoreMock = new Mock<IRoleStore<ApplicationRole>>();
+        return new Mock<RoleManager<ApplicationRole>>(
+            roleStoreMock.Object,
+            Array.Empty<IRoleValidator<ApplicationRole>>(),
+            Mock.Of<ILookupNormalizer>(),
+            Mock.Of<IdentityErrorDescriber>(),
+            Mock.Of<ILogger<RoleManager<ApplicationRole>>>());
+    }
+
     [Fact(DisplayName = "PERM_001 - Lấy tất cả permissions thành công")]
     public async Task GetAllPermissions_NoParams_ReturnsGroupedPermissions()
     {
@@ -51,9 +79,7 @@ public class PermissionAndRole
         var userId = Guid.NewGuid();
         var roleId = Guid.NewGuid();
 
-        var userStoreMock = new Mock<IUserStore<ApplicationUser>>();
-        var userManagerMock = new Mock<UserManager<ApplicationUser>>(
-            userStoreMock.Object, null, null, null, null, null, null, null, null);
+        var userManagerMock = CreateUserManagerMock();
 
         var roleReadRepoMock = new Mock<IRoleReadRepository>();
 
@@ -93,9 +119,7 @@ public class PermissionAndRole
         // Arrange
         var userId = Guid.NewGuid();
 
-        var userStoreMock = new Mock<IUserStore<ApplicationUser>>();
-        var userManagerMock = new Mock<UserManager<ApplicationUser>>(
-            userStoreMock.Object, null, null, null, null, null, null, null, null);
+        var userManagerMock = CreateUserManagerMock();
 
         var roleReadRepoMock = new Mock<IRoleReadRepository>();
 
@@ -124,9 +148,7 @@ public class PermissionAndRole
         var userId = Guid.NewGuid();
         var roleId = Guid.NewGuid();
 
-        var userStoreMock = new Mock<IUserStore<ApplicationUser>>();
-        var userManagerMock = new Mock<UserManager<ApplicationUser>>(
-            userStoreMock.Object, null, null, null, null, null, null, null, null);
+        var userManagerMock = CreateUserManagerMock();
 
         var roleReadRepoMock = new Mock<IRoleReadRepository>();
 
@@ -165,9 +187,7 @@ public class PermissionAndRole
         // Arrange
         var userId = Guid.NewGuid();
 
-        var userStoreMock = new Mock<IUserStore<ApplicationUser>>();
-        var userManagerMock = new Mock<UserManager<ApplicationUser>>(
-            userStoreMock.Object, null, null, null, null, null, null, null, null);
+        var userManagerMock = CreateUserManagerMock();
 
         var roleReadRepoMock = new Mock<IRoleReadRepository>();
 
@@ -190,9 +210,7 @@ public class PermissionAndRole
     {
         // Arrange
         var roleId = Guid.NewGuid();
-        var roleStoreMock = new Mock<IRoleStore<ApplicationRole>>();
-        var roleManagerMock = new Mock<RoleManager<ApplicationRole>>(
-            roleStoreMock.Object, null, null, null, null);
+        var roleManagerMock = CreateRoleManagerMock();
 
         var roleReadRepoMock = new Mock<IRoleReadRepository>();
 
@@ -226,9 +244,7 @@ public class PermissionAndRole
     public async Task GetRolePermissions_InvalidRoleName_ThrowsNotFoundException()
     {
         // Arrange
-        var roleStoreMock = new Mock<IRoleStore<ApplicationRole>>();
-        var roleManagerMock = new Mock<RoleManager<ApplicationRole>>(
-            roleStoreMock.Object, null, null, null, null);
+        var roleManagerMock = CreateRoleManagerMock();
 
         var roleReadRepoMock = new Mock<IRoleReadRepository>();
 
@@ -251,9 +267,7 @@ public class PermissionAndRole
     {
         // Arrange
         var roleId = Guid.NewGuid();
-        var roleStoreMock = new Mock<IRoleStore<ApplicationRole>>();
-        var roleManagerMock = new Mock<RoleManager<ApplicationRole>>(
-            roleStoreMock.Object, null, null, null, null);
+        var roleManagerMock = CreateRoleManagerMock();
 
         var roleReadRepoMock = new Mock<IRoleReadRepository>();
 
@@ -285,9 +299,7 @@ public class PermissionAndRole
     public async Task CreateRole_ValidData_ReturnsSuccess()
     {
         // Arrange
-        var roleStoreMock = new Mock<IRoleStore<ApplicationRole>>();
-        var roleManagerMock = new Mock<RoleManager<ApplicationRole>>(
-            roleStoreMock.Object, null, null, null, null);
+        var roleManagerMock = CreateRoleManagerMock();
 
         var permissionRepoMock = new Mock<IPermissionReadRepository>();
         var roleUpdateRepoMock = new Mock<IRoleUpdateRepository>();
@@ -335,9 +347,7 @@ public class PermissionAndRole
     public async Task CreateRole_DuplicateName_ThrowsException()
     {
         // Arrange
-        var roleStoreMock = new Mock<IRoleStore<ApplicationRole>>();
-        var roleManagerMock = new Mock<RoleManager<ApplicationRole>>(
-            roleStoreMock.Object, null, null, null, null);
+        var roleManagerMock = CreateRoleManagerMock();
 
         var permissionRepoMock = new Mock<IPermissionReadRepository>();
         var roleUpdateRepoMock = new Mock<IRoleUpdateRepository>();
@@ -367,9 +377,7 @@ public class PermissionAndRole
     public async Task CreateRole_EmptyRoleName_ThrowsValidationException()
     {
         // Arrange
-        var roleStoreMock = new Mock<IRoleStore<ApplicationRole>>();
-        var roleManagerMock = new Mock<RoleManager<ApplicationRole>>(
-            roleStoreMock.Object, null, null, null, null);
+        var roleManagerMock = CreateRoleManagerMock();
 
         var permissionRepoMock = new Mock<IPermissionReadRepository>();
         var roleUpdateRepoMock = new Mock<IRoleUpdateRepository>();
@@ -396,9 +404,7 @@ public class PermissionAndRole
     public async Task CreateRole_NullRoleName_ThrowsValidationException()
     {
         // Arrange
-        var roleStoreMock = new Mock<IRoleStore<ApplicationRole>>();
-        var roleManagerMock = new Mock<RoleManager<ApplicationRole>>(
-            roleStoreMock.Object, null, null, null, null);
+        var roleManagerMock = CreateRoleManagerMock();
 
         var permissionRepoMock = new Mock<IPermissionReadRepository>();
         var roleUpdateRepoMock = new Mock<IRoleUpdateRepository>();
@@ -425,9 +431,7 @@ public class PermissionAndRole
     public async Task CreateRole_EmptyPermissions_ThrowsValidationException()
     {
         // Arrange
-        var roleStoreMock = new Mock<IRoleStore<ApplicationRole>>();
-        var roleManagerMock = new Mock<RoleManager<ApplicationRole>>(
-            roleStoreMock.Object, null, null, null, null);
+        var roleManagerMock = CreateRoleManagerMock();
 
         var permissionRepoMock = new Mock<IPermissionReadRepository>();
         var roleUpdateRepoMock = new Mock<IRoleUpdateRepository>();
@@ -454,9 +458,7 @@ public class PermissionAndRole
     public async Task CreateRole_InvalidPermissions_ThrowsValidationException()
     {
         // Arrange
-        var roleStoreMock = new Mock<IRoleStore<ApplicationRole>>();
-        var roleManagerMock = new Mock<RoleManager<ApplicationRole>>(
-            roleStoreMock.Object, null, null, null, null);
+        var roleManagerMock = CreateRoleManagerMock();
 
         var permissionRepoMock = new Mock<IPermissionReadRepository>();
         var roleUpdateRepoMock = new Mock<IRoleUpdateRepository>();
@@ -490,9 +492,7 @@ public class PermissionAndRole
     public async Task CreateRole_RoleNameWithSpecialCharacters_ThrowsValidationException()
     {
         // Arrange
-        var roleStoreMock = new Mock<IRoleStore<ApplicationRole>>();
-        var roleManagerMock = new Mock<RoleManager<ApplicationRole>>(
-            roleStoreMock.Object, null, null, null, null);
+        var roleManagerMock = CreateRoleManagerMock();
 
         var permissionRepoMock = new Mock<IPermissionReadRepository>();
         var roleUpdateRepoMock = new Mock<IRoleUpdateRepository>();
@@ -520,9 +520,7 @@ public class PermissionAndRole
     {
         // Arrange
         var roleId = Guid.NewGuid();
-        var roleStoreMock = new Mock<IRoleStore<ApplicationRole>>();
-        var roleManagerMock = new Mock<RoleManager<ApplicationRole>>(
-            roleStoreMock.Object, null, null, null, null);
+        var roleManagerMock = CreateRoleManagerMock();
 
         var permissionRepoMock = new Mock<IPermissionReadRepository>();
         var roleUpdateRepoMock = new Mock<IRoleUpdateRepository>();
@@ -556,9 +554,7 @@ public class PermissionAndRole
     {
         // Arrange
         var roleId = Guid.NewGuid();
-        var roleStoreMock = new Mock<IRoleStore<ApplicationRole>>();
-        var roleManagerMock = new Mock<RoleManager<ApplicationRole>>(
-            roleStoreMock.Object, null, null, null, null);
+        var roleManagerMock = CreateRoleManagerMock();
 
         var permissionRepoMock = new Mock<IPermissionReadRepository>();
         var roleUpdateRepoMock = new Mock<IRoleUpdateRepository>();
@@ -611,9 +607,7 @@ public class PermissionAndRole
     {
         // Arrange
         var roleId = Guid.NewGuid();
-        var roleStoreMock = new Mock<IRoleStore<ApplicationRole>>();
-        var roleManagerMock = new Mock<RoleManager<ApplicationRole>>(
-            roleStoreMock.Object, null, null, null, null);
+        var roleManagerMock = CreateRoleManagerMock();
 
         var permissionRepoMock = new Mock<IPermissionReadRepository>();
         var roleUpdateRepoMock = new Mock<IRoleUpdateRepository>();
@@ -646,9 +640,7 @@ public class PermissionAndRole
     public async Task UpdateRole_NonExistentRole_ThrowsNotFoundException()
     {
         // Arrange
-        var roleStoreMock = new Mock<IRoleStore<ApplicationRole>>();
-        var roleManagerMock = new Mock<RoleManager<ApplicationRole>>(
-            roleStoreMock.Object, null, null, null, null);
+        var roleManagerMock = CreateRoleManagerMock();
 
         var permissionRepoMock = new Mock<IPermissionReadRepository>();
         var roleUpdateRepoMock = new Mock<IRoleUpdateRepository>();
@@ -674,13 +666,9 @@ public class PermissionAndRole
     {
         // Arrange
         var roleId = Guid.NewGuid();
-        var roleStoreMock = new Mock<IRoleStore<ApplicationRole>>();
-        var roleManagerMock = new Mock<RoleManager<ApplicationRole>>(
-            roleStoreMock.Object, null, null, null, null);
+        var roleManagerMock = CreateRoleManagerMock();
 
-        var userStoreMock = new Mock<IUserStore<ApplicationUser>>();
-        var userManagerMock = new Mock<UserManager<ApplicationUser>>(
-            userStoreMock.Object, null, null, null, null, null, null, null, null);
+        var userManagerMock = CreateUserManagerMock();
 
         var protectedEntityServiceMock = new Mock<IProtectedEntityManagerService>();
 
@@ -706,13 +694,9 @@ public class PermissionAndRole
     public async Task DeleteMultipleRoles_ValidRoles_ReturnsSuccess()
     {
         // Arrange
-        var roleStoreMock = new Mock<IRoleStore<ApplicationRole>>();
-        var roleManagerMock = new Mock<RoleManager<ApplicationRole>>(
-            roleStoreMock.Object, null, null, null, null);
+        var roleManagerMock = CreateRoleManagerMock();
 
-        var userStoreMock = new Mock<IUserStore<ApplicationUser>>();
-        var userManagerMock = new Mock<UserManager<ApplicationUser>>(
-            userStoreMock.Object, null, null, null, null, null, null, null, null);
+        var userManagerMock = CreateUserManagerMock();
 
         var protectedEntityServiceMock = new Mock<IProtectedEntityManagerService>();
 
