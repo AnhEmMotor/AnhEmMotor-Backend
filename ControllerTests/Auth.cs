@@ -32,7 +32,7 @@ public class Auth
         };
     }
 
-    [Fact]
+    [Fact(DisplayName = "AUTH_REG_002 - Đăng ký thất bại (Validation) - TH1: Thiếu Password")]
     public async Task AUTH_REG_002_1_Register_MissingPassword()
     {
         // Arrange
@@ -51,7 +51,7 @@ public class Auth
         await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _controller.Register(request, CancellationToken.None));
     }
 
-    [Fact]
+    [Fact(DisplayName = "AUTH_REG_002 - Đăng ký thất bại (Validation) - TH2: Thiếu Email và Username")]
     public async Task AUTH_REG_002_2_Register_MissingEmailAndUsername()
     {
         // Arrange
@@ -70,7 +70,7 @@ public class Auth
         await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _controller.Register(request, CancellationToken.None));
     }
 
-    [Fact]
+    [Fact(DisplayName = "AUTH_REG_002 - Đăng ký thất bại (Validation) - TH3: Thiếu FullName")]
     public async Task AUTH_REG_002_3_Register_MissingFullName()
     {
         // Arrange
@@ -89,7 +89,7 @@ public class Auth
         await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _controller.Register(request, CancellationToken.None));
     }
 
-    [Fact]
+    [Fact(DisplayName = "AUTH_LOG_002 - Đăng nhập sai thông tin")]
     public async Task AUTH_LOG_002_Login_Fail_WrongCreds()
     {
         // Arrange
@@ -113,7 +113,7 @@ public class Auth
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _controller.Login(request, CancellationToken.None));
     }
 
-    [Fact]
+    [Fact(DisplayName = "AUTH_MGR_002 - Manager Login Fail (Quyền)")]
     public async Task AUTH_MGR_002_Login_Manager_Fail_Forbidden()
     {
         // Arrange
@@ -126,7 +126,7 @@ public class Auth
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _controller.LoginForManager(request, CancellationToken.None));
     }
 
-    [Fact]
+    [Fact(DisplayName = "AUTH_OUT_001 - Đăng xuất")]
     public async Task AUTH_OUT_001_Logout_Success()
     {
         // Arrange
