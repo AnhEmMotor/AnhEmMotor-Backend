@@ -10,7 +10,7 @@ namespace Domain.Entities
         [Column("Key")]
         public string Key { get; set; } = string.Empty;
 
-        [Column("Value", TypeName = "decimal(18, 2)")]
+        [Column("Value", TypeName = "nvarchar(MAX)")]
         public string? Value { get; set; }
     }
 }
