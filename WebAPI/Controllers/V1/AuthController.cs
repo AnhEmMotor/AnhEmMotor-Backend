@@ -5,7 +5,7 @@ using Application.Features.Auth.Commands.Logout;
 using Application.Features.Auth.Commands.RefreshToken;
 using Application.Features.Auth.Commands.Register;
 using Asp.Versioning;
-using Domain.Common.Models;
+
 using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;

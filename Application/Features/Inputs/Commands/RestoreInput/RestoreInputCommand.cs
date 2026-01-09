@@ -1,5 +1,5 @@
 using Application.ApiContracts.Input.Responses;
-using Domain.Common.Models;
+
 using MediatR;
 
 namespace Application.Features.Inputs.Commands.RestoreInput;

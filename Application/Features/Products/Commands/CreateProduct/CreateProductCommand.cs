@@ -1,5 +1,5 @@
 using Application.ApiContracts.Product.Requests;
-using Domain.Common.Models;
+
 using MediatR;
 
 namespace Application.Features.Products.Commands.CreateProduct;

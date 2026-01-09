@@ -10,7 +10,7 @@ using Application.Features.Files.Queries.GetFileById;
 using Application.Features.Files.Queries.GetFilesList;
 using Application.Features.Files.Queries.ViewImage;
 using Asp.Versioning;
-using Domain.Common.Models;
+
 using Infrastructure.Authorization.Attribute;
 using Mapster;
 using MediatR;

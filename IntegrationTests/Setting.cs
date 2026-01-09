@@ -1,6 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
-using Domain.Common.Models;
+
 using Domain.Entities;
 using FluentAssertions;
 using Infrastructure.DBContexts;

@@ -10,7 +10,7 @@ using Application.Features.Permissions.Queries.GetMyPermissions;
 using Application.Features.Permissions.Queries.GetRolePermissions;
 using Application.Features.Permissions.Queries.GetUserPermissionsById;
 using Asp.Versioning;
-using Domain.Common.Models;
+
 using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;

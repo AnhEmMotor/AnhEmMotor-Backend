@@ -16,7 +16,7 @@ using Application.Features.Outputs.Queries.GetOutputById;
 using Application.Features.Outputs.Queries.GetOutputsByUserId;
 using Application.Features.Outputs.Queries.GetOutputsByUserIdByManager;
 using Application.Features.Outputs.Queries.GetOutputsList;
-using Domain.Common.Models;
+
 using Domain.Primitives;
 using FluentAssertions;
 using MediatR;

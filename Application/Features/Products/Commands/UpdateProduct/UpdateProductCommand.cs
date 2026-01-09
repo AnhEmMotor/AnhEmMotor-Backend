@@ -1,4 +1,4 @@
-using Domain.Common.Models;
+
 using MediatR;
 
 namespace Application.Features.Products.Commands.UpdateProduct;

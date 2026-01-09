@@ -1,6 +1,6 @@
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
-using Domain.Common.Models;
 using MediatR;
 
 namespace Application.Features.Brands.Commands.DeleteBrand;
@@ -8,9 +8,9 @@ namespace Application.Features.Brands.Commands.DeleteBrand;
 public sealed class DeleteBrandCommandHandler(
     IBrandReadRepository readRepository,
     IBrandDeleteRepository deleteRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<DeleteBrandCommand, Common.Models.ErrorResponse?>
+    IUnitOfWork unitOfWork) : IRequestHandler<DeleteBrandCommand, ErrorResponse?>
 {
-    public async Task<Common.Models.ErrorResponse?> Handle(
+    public async Task<ErrorResponse?> Handle(
         DeleteBrandCommand request,
         CancellationToken cancellationToken)
     {
@@ -18,10 +18,10 @@ public sealed class DeleteBrandCommandHandler(
 
         if(brand == null)
         {
-            return new Common.Models.ErrorResponse
+            return new ErrorResponse
             {
                 Errors =
-                    [ new Common.Models.ErrorDetail { Field = "Id", Message = $"Brand with Id {request.Id} not found." } ]
+                    [ new ErrorDetail { Field = "Id", Message = $"Brand with Id {request.Id} not found." } ]
             };
         }
 

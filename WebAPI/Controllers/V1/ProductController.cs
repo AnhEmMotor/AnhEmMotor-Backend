@@ -18,7 +18,7 @@ using Application.Features.Products.Queries.GetProductById;
 using Application.Features.Products.Queries.GetProductsList;
 using Application.Features.Products.Queries.GetVariantLiteByProductId;
 using Asp.Versioning;
-using Domain.Common.Models;
+
 using Infrastructure.Authorization.Attribute;
 using Mapster;
 using MediatR;
