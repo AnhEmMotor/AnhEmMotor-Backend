@@ -14,7 +14,7 @@ namespace UnitTests;
 
 public class Auth
 {
-    [Fact]
+    [Fact(DisplayName = "AUTH_REG_004 - Validate Format (Unit) - TH1: Email sai định dạng")]
     public void AUTH_REG_004_1_Register_InvalidEmail()
     {
         // Arrange
@@ -27,7 +27,7 @@ public class Auth
         result.ShouldHaveValidationErrorFor(x => x.Email);
     }
 
-    [Fact]
+    [Fact(DisplayName = "AUTH_REG_004 - Validate Format (Unit) - TH2: Password ngắn")]
     public void AUTH_REG_004_2_Register_PasswordTooShort()
     {
         // Arrange
@@ -40,7 +40,7 @@ public class Auth
         result.ShouldHaveValidationErrorFor(x => x.Password);
     }
 
-    [Fact]
+    [Fact(DisplayName = "AUTH_REG_004 - Validate Format (Unit) - TH3: Username chứa ký tự đặc biệt")]
     public void AUTH_REG_004_3_Register_UsernameSpecialChars()
     {
         // Arrange
@@ -53,7 +53,7 @@ public class Auth
         result.ShouldHaveValidationErrorFor(x => x.Username);
     }
 
-    [Fact]
+    [Fact(DisplayName = "AUTH_UNI_001 - Xử lý Exception")]
     public async Task AUTH_UNI_001_Exception_Handling()
     {
         // Arrange

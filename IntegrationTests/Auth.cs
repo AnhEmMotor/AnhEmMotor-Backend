@@ -23,7 +23,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         _client = _factory.CreateClient();
     }
 
-    [Fact]
+    [Fact(DisplayName = "AUTH_REG_001 - Đăng ký thành công")]
     public async Task AUTH_REG_001_Register_Success()
     {
         // Arrange
@@ -53,7 +53,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         user!.Status.Should().Be(UserStatus.Active);
     }
 
-    [Fact]
+    [Fact(DisplayName = "AUTH_REG_003 - Đăng ký trùng lặp")]
     public async Task AUTH_REG_003_Register_Duplicate_Fail()
     {
         // Arrange
@@ -83,7 +83,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest); // Or 409 depending on implementation
     }
 
-    [Fact]
+    [Fact(DisplayName = "AUTH_REG_005 - Security (XSS/SQLi)")]
     public async Task AUTH_REG_005_Register_Sanitization()
     {
         // Arrange
@@ -119,7 +119,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         }
     }
 
-    [Fact]
+    [Fact(DisplayName = "AUTH_REG_006 - Đăng ký Email đã Xóa mềm")]
     public async Task AUTH_REG_006_Register_SoftDeleted_Email_Fail()
     {
         // Arrange
@@ -154,7 +154,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
-    [Fact]
+    [Fact(DisplayName = "AUTH_LOG_001 - Đăng nhập thành công")]
     public async Task AUTH_LOG_001_Login_Success()
     {
         // Arrange
@@ -180,7 +180,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         content.RefreshToken.Should().NotBeNullOrEmpty();
     }
 
-    [Fact]
+    [Fact(DisplayName = "AUTH_LOG_003 - Đăng nhập User bị cấm")]
     public async Task AUTH_LOG_003_Login_Banned_Fail()
     {
         // Arrange
@@ -202,7 +202,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
-    [Fact]
+    [Fact(DisplayName = "AUTH_MGR_001 - Đăng nhập Manager")]
     public async Task AUTH_MGR_001_Login_Manager_Success()
     {
         // Arrange
@@ -230,7 +230,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
-    [Fact]
+    [Fact(DisplayName = "AUTH_REF_001 - Refresh Token thành công")]
     public async Task AUTH_REF_001_RefreshToken_Success()
     {
         // Arrange
@@ -282,7 +282,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         }
     }
 
-    [Fact]
+    [Fact(DisplayName = "AUTH_REF_003 - Refresh Token User bị cấm")]
     public async Task AUTH_REF_003_RefreshToken_Banned_Fail()
     {
         // Arrange
@@ -318,7 +318,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         response.StatusCode.Should().BeOneOf(HttpStatusCode.Forbidden, HttpStatusCode.Unauthorized, HttpStatusCode.BadRequest);
     }
 
-    [Fact]
+    [Fact(DisplayName = "AUTH_VAL_001 - Trimming dữ liệu")]
     public async Task AUTH_VAL_001_Trimming()
     {
         // Arrange
