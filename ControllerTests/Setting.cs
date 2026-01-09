@@ -1,7 +1,7 @@
 using System.Reflection;
-using Application.Common.Models;
 using Application.Features.Settings.Commands.SetSettings;
 using Application.Features.Settings.Queries.GetAllSettings;
+using Domain.Common.Models;
 using FluentAssertions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -33,11 +33,11 @@ public class Setting
     public async Task SETTING_013_SetSettings_InvalidKey_BadRequest()
     {
         // Arrange
-        var errorResponse = new ErrorResponse
+        var errorResponse = new Application.Common.Models.ErrorResponse
         {
             Errors =
             [
-                new ErrorDetail { Message = "Invalid setting key", Field = "Invalid_Key" }
+                new Application.Common.Models.ErrorDetail { Message = "Invalid setting key", Field = "Invalid_Key" }
             ]
         };
 
@@ -51,7 +51,7 @@ public class Setting
 
         // Assert
         var badRequestResult = result.Should().BeOfType<BadRequestObjectResult>().Subject;
-        var returnedError = badRequestResult.Value.Should().BeOfType<ErrorResponse>().Subject;
+        var returnedError = badRequestResult.Value.Should().BeOfType<Application.Common.Models.ErrorResponse>().Subject;
         returnedError.Errors.Should().Contain(e => e.Message.Contains("Invalid setting key"));
     }
 
@@ -118,11 +118,11 @@ public class Setting
     public async Task SETTING_032_Controller_SetSettings_ValidationFail_ReturnsBadRequest()
     {
         // Arrange
-        var errorResponse = new ErrorResponse
+        var errorResponse = new Application.Common.Models.ErrorResponse
         {
             Errors =
             [
-                new ErrorDetail { Message = "Validation failed", Field = "Settings" }
+                new Application.Common.Models.ErrorDetail { Message = "Validation failed", Field = "Settings" }
             ]
         };
 
@@ -136,7 +136,7 @@ public class Setting
 
         // Assert
         var badRequestResult = result.Should().BeOfType<BadRequestObjectResult>().Subject;
-        var returnedError = badRequestResult.Value.Should().BeOfType<ErrorResponse>().Subject;
+        var returnedError = badRequestResult.Value.Should().BeOfType<Application.Common.Models.ErrorResponse>().Subject;
         returnedError.Errors.Should().Contain(e => e.Message == "Validation failed");
     }
 
@@ -173,11 +173,11 @@ public class Setting
     public async Task SETTING_036_SetSettings_KeyWithSpecialChars_BadRequest()
     {
         // Arrange
-        var errorResponse = new ErrorResponse
+        var errorResponse = new Application.Common.Models.ErrorResponse
         {
             Errors =
             [
-                new ErrorDetail { Message = "Invalid setting key", Field = "Deposit<script>" }
+                new Application.Common.Models.ErrorDetail { Message = "Invalid setting key", Field = "Deposit<script>" }
             ]
         };
 
@@ -191,7 +191,7 @@ public class Setting
 
         // Assert
         var badRequestResult = result.Should().BeOfType<BadRequestObjectResult>().Subject;
-        var returnedError = badRequestResult.Value.Should().BeOfType<ErrorResponse>().Subject;
+        var returnedError = badRequestResult.Value.Should().BeOfType<Application.Common.Models.ErrorResponse>().Subject;
         returnedError.Errors.Should().Contain(e => e.Message.Contains("Invalid setting key"));
     }
 
@@ -222,11 +222,11 @@ public class Setting
     public async Task SETTING_038_SetSettings_MultipleKeysOneInvalid_BadRequest()
     {
         // Arrange
-        var errorResponse = new ErrorResponse
+        var errorResponse = new Application.Common.Models.ErrorResponse
         {
             Errors =
             [
-                new ErrorDetail { Message = "Invalid setting key", Field = "Invalid_Key" }
+                new Application.Common.Models.ErrorDetail { Message = "Invalid setting key", Field = "Invalid_Key" }
             ]
         };
 
@@ -244,7 +244,7 @@ public class Setting
 
         // Assert
         var badRequestResult = result.Should().BeOfType<BadRequestObjectResult>().Subject;
-        var returnedError = badRequestResult.Value.Should().BeOfType<ErrorResponse>().Subject;
+        var returnedError = badRequestResult.Value.Should().BeOfType<Application.Common.Models.ErrorResponse>().Subject;
         returnedError.Errors.Should().Contain(e => e.Message.Contains("Invalid setting key"));
     }
 
@@ -275,11 +275,11 @@ public class Setting
     public async Task SETTING_040_SetSettings_IntegerOverflow_BadRequest()
     {
         // Arrange
-        var errorResponse = new ErrorResponse
+        var errorResponse = new Application.Common.Models.ErrorResponse
         {
             Errors =
             [
-                new ErrorDetail { Message = "Value out of range for integer field", Field = "Inventory_alert_level" }
+                new Application.Common.Models.ErrorDetail { Message = "Value out of range for integer field", Field = "Inventory_alert_level" }
             ]
         };
 
@@ -293,7 +293,7 @@ public class Setting
 
         // Assert
         var badRequestResult = result.Should().BeOfType<BadRequestObjectResult>().Subject;
-        var returnedError = badRequestResult.Value.Should().BeOfType<ErrorResponse>().Subject;
+        var returnedError = badRequestResult.Value.Should().BeOfType<Application.Common.Models.ErrorResponse>().Subject;
         returnedError.Errors.Should().Contain(e => 
             e.Message.Contains("out of range") || e.Message.Contains("overflow"));
     }

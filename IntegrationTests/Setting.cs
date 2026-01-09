@@ -1,6 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
-using Application.Common.Models;
+using Domain.Common.Models;
 using Domain.Entities;
 using FluentAssertions;
 using Infrastructure.DBContexts;
@@ -285,7 +285,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var content = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+        var content = await response.Content.ReadFromJsonAsync<Application.Common.Models.ErrorResponse>();
         content.Should().NotBeNull();
         content!.Errors.Should().Contain(e => 
             e.Field == "Deposit_ratio" && 
@@ -319,7 +319,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var content = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+        var content = await response.Content.ReadFromJsonAsync<Application.Common.Models.ErrorResponse>();
         content.Should().NotBeNull();
         content!.Errors.Should().Contain(e => 
             e.Field == "Deposit_ratio" && 
@@ -355,7 +355,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var content = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+        var content = await response.Content.ReadFromJsonAsync<Application.Common.Models.ErrorResponse>();
         content.Should().NotBeNull();
         content!.Errors.Should().Contain(e => e.Message.Contains("decimal place"));
     }
@@ -379,7 +379,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var content = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+        var content = await response.Content.ReadFromJsonAsync<Application.Common.Models.ErrorResponse>();
         content.Should().NotBeNull();
         content!.Errors.Should().Contain(e => e.Message.Contains("cannot be empty"));
     }

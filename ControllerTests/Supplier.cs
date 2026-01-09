@@ -1,6 +1,5 @@
 using Application.ApiContracts.Supplier.Requests;
 using Application.ApiContracts.Supplier.Responses;
-using Application.Common.Models;
 using Application.Features.Suppliers.Commands.CreateSupplier;
 using Application.Features.Suppliers.Commands.DeleteManySuppliers;
 using Application.Features.Suppliers.Commands.DeleteSupplier;
@@ -12,6 +11,7 @@ using Application.Features.Suppliers.Commands.UpdateSupplierStatus;
 using Application.Features.Suppliers.Queries.GetDeletedSuppliersList;
 using Application.Features.Suppliers.Queries.GetSupplierById;
 using Application.Features.Suppliers.Queries.GetSuppliersList;
+using Domain.Common.Models;
 using Domain.Primitives;
 using FluentAssertions;
 using MediatR;
@@ -204,7 +204,7 @@ public class Supplier
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetSupplierByIdQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((expectedResponse, (ErrorResponse?)null));
+            .ReturnsAsync((expectedResponse, (Application.Common.Models.ErrorResponse?)null));
 
         // Act
         var result = await _controller.GetSupplierById(1, CancellationToken.None);
@@ -229,7 +229,7 @@ public class Supplier
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetSupplierByIdQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((expectedResponse, (ErrorResponse?)null));
+            .ReturnsAsync((expectedResponse, (Application.Common.Models.ErrorResponse?)null));
 
         // Act
         var result = await _controller.GetSupplierById(1, CancellationToken.None);

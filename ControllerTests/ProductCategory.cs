@@ -1,7 +1,6 @@
 using System.Reflection;
 using Application.ApiContracts.ProductCategory.Requests;
 using Application.ApiContracts.ProductCategory.Responses;
-using Application.Common.Models;
 using Application.Features.ProductCategories.Commands.CreateProductCategory;
 using Application.Features.ProductCategories.Commands.DeleteProductCategory;
 using Application.Features.ProductCategories.Commands.DeleteManyProductCategories;
@@ -21,6 +20,7 @@ using Moq;
 using Sieve.Models;
 using WebAPI.Controllers.V1;
 using Xunit;
+using Domain.Common.Models;
 
 namespace ControllerTests;
 
@@ -233,7 +233,7 @@ public class ProductCategory
     public async Task GetProductCategoryById_AnonymousUser_ShouldSucceed()
     {
         // Arrange
-        var expectedResult = (Data: new ProductCategoryResponse { Id = 35, Name = "Public Category", Description = "Desc" }, Error: (ErrorResponse?)null);
+        var expectedResult = (Data: new ProductCategoryResponse { Id = 35, Name = "Public Category", Description = "Desc" }, Error: (Application.Common.Models.ErrorResponse?)null);
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetProductCategoryByIdQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResult);
 
@@ -252,8 +252,8 @@ public class ProductCategory
         var request1 = new UpdateProductCategoryRequest { Name = "Update A" };
         var request2 = new UpdateProductCategoryRequest { Name = "Update B" };
 
-        var response1 = (Data: new ProductCategoryResponse { Id = 36, Name = "Update A", Description = "Desc" }, Error: (ErrorResponse?)null);
-        var response2 = (Data: new ProductCategoryResponse { Id = 36, Name = "Update B", Description = "Desc" }, Error: (ErrorResponse?)null);
+        var response1 = (Data: new ProductCategoryResponse { Id = 36, Name = "Update A", Description = "Desc" }, Error: (Application.Common.Models.ErrorResponse?)null);
+        var response2 = (Data: new ProductCategoryResponse { Id = 36, Name = "Update B", Description = "Desc" }, Error: (Application.Common.Models.ErrorResponse?)null);
 
         _mediatorMock.SetupSequence(m => m.Send(It.IsAny<UpdateProductCategoryCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(response1)

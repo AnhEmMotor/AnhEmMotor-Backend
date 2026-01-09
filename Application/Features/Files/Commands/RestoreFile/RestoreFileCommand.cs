@@ -1,3 +1,4 @@
+using Domain.Common.Models;
 using MediatR;
 
 namespace Application.Features.Files.Commands.RestoreFile;

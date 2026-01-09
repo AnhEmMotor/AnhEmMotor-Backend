@@ -1,5 +1,6 @@
 using Application.ApiContracts.ProductCategory.Responses;
 using Application.Interfaces.Repositories.ProductCategory;
+using Domain.Common.Models;
 using Mapster;
 using MediatR;
 
