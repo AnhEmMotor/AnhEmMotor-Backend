@@ -2,6 +2,7 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.ProductVariant;
+using Domain.Common.Models;
 using Domain.Constants;
 using Domain.Constants.Order;
 using Domain.Entities;

@@ -1,8 +1,8 @@
 ﻿using Application.Common.Exceptions;
+using Application.Common.Models;
 using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using System.Net;
-using WebAPI.Contracts.Errors;
 
 namespace WebAPI.Middleware;
 
@@ -58,10 +58,10 @@ public class GlobalExceptionHandler(IWebHostEnvironment environment, ILogger<Glo
         }
 
         var errorResponse = exception is ValidationException valEx
-            ? ApiErrorResponse.CreateValidationError(valEx.Errors)
+            ? ErrorResponse.CreateValidationError(valEx.Errors)
             : (environment.IsDevelopment() && statusCode == 500 
-                ? ApiErrorResponse.CreateDevelopmentError(exception)
-                : ApiErrorResponse.CreateProductionError(message ?? "An unexpected error occurred. Please try again later."));
+                ? ErrorResponse.CreateDevelopmentError(exception)
+                : ErrorResponse.CreateProductionError(message ?? "An unexpected error occurred. Please try again later."));
 
         httpContext.Response.ContentType = "application/json";
         httpContext.Response.StatusCode = statusCode;

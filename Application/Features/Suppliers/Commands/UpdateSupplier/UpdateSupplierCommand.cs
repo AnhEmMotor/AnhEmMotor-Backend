@@ -1,4 +1,5 @@
 using Application.ApiContracts.Supplier.Responses;
+using Domain.Common.Models;
 using MediatR;
 
 namespace Application.Features.Suppliers.Commands.UpdateSupplier;

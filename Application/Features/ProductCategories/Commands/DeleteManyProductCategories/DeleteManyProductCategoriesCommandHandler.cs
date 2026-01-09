@@ -1,5 +1,6 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductCategory;
+using Domain.Common.Models;
 using Domain.Constants;
 using MediatR;
 

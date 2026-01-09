@@ -1,5 +1,6 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Setting;
+using Domain.Common.Models;
 using MediatR;
 using SettingEntity = Domain.Entities.Setting;
 

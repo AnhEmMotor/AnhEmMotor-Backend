@@ -11,6 +11,7 @@ using Application.Features.Outputs.Queries.GetDeletedOutputsList;
 using Application.Features.Outputs.Queries.GetOutputById;
 using Application.Features.Outputs.Queries.GetOutputsList;
 using Asp.Versioning;
+using Domain.Common.Models;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using Mapster;
