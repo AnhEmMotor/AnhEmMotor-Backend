@@ -13,7 +13,7 @@ public class RolePermission
     /// <summary>
     /// Vai trò
     /// </summary>
-    public virtual ApplicationRole? Role { get; set; }
+    public ApplicationRole? Role { get; set; }
 
     /// <summary>
     /// ID của quyền
@@ -23,5 +23,5 @@ public class RolePermission
     /// <summary>
     /// Quyền
     /// </summary>
-    public virtual Permission? Permission { get; set; }
+    public Permission? Permission { get; set; }
 }

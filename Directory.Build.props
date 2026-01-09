@@ -1,8 +1,0 @@
-<Project>
-  <PropertyGroup Condition="'$(Configuration)' == 'Debug' And '$(GITHUB_ACTIONS)' != 'true'">
-    <RootFolder>$(SolutionName)</RootFolder>
-    <RootFolder Condition="'$(RootFolder)' == ''">StandaloneBuilds</RootFolder>
-    <BaseOutputPath>$(Temp)\$(RootFolder)\$(MSBuildProjectName)\bin\</BaseOutputPath>
-    <BaseIntermediateOutputPath>$(Temp)\$(RootFolder)\$(MSBuildProjectName)\obj\</BaseIntermediateOutputPath>
-  </PropertyGroup>
-</Project>

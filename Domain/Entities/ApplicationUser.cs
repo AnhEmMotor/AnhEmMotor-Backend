@@ -41,5 +41,5 @@ public class ApplicationUser : IdentityUser<Guid>
     /// <summary>
     /// Các vai trò của người dùng
     /// </summary>
-    public virtual ICollection<IdentityUserRole<Guid>> UserRoles { get; set; } = [];
+    public ICollection<IdentityUserRole<Guid>> UserRoles { get; set; } = [];
 }

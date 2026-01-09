@@ -18,5 +18,5 @@ public class Permission
     /// <summary>
     /// Các vai trò có quyền này
     /// </summary>
-    public virtual ICollection<RolePermission> RolePermissions { get; set; } = [];
+    public ICollection<RolePermission> RolePermissions { get; set; } = [];
 }
