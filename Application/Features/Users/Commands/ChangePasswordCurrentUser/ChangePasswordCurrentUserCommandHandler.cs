@@ -1,14 +1,15 @@
 using Application.ApiContracts.User.Responses;
 using Application.Common.Exceptions;
-using Domain.Entities;
+using Application.Interfaces.Repositories.User;
 using FluentValidation;
 using FluentValidation.Results;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 
 namespace Application.Features.Users.Commands.ChangePasswordCurrentUser;
 
-public class ChangePasswordCurrentUserCommandHandler(UserManager<ApplicationUser> userManager) : IRequestHandler<ChangePasswordCurrentUserCommand, ChangePasswordUserByUserResponse>
+public class ChangePasswordCurrentUserCommandHandler(
+    IUserReadRepository userReadRepository,
+    IUserUpdateRepository userUpdateRepository) : IRequestHandler<ChangePasswordCurrentUserCommand, ChangePasswordUserByUserResponse>
 {
     public async Task<ChangePasswordUserByUserResponse> Handle(
         ChangePasswordCurrentUserCommand request,
@@ -27,20 +28,22 @@ public class ChangePasswordCurrentUserCommandHandler(UserManager<ApplicationUser
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        var user = await userManager.FindByIdAsync(userId.ToString()).ConfigureAwait(false) ??
+        var user = await userReadRepository.FindUserByIdAsync(userId, cancellationToken).ConfigureAwait(false) ??
             throw new NotFoundException("User not found.");
-        var result = await userManager.ChangePasswordAsync(
+
+        var (succeeded, errors) = await userUpdateRepository.ChangePasswordAsync(
             user,
             request.Model.CurrentPassword,
-            request.Model.NewPassword)
+            request.Model.NewPassword,
+            cancellationToken)
             .ConfigureAwait(false);
-        if(!result.Succeeded)
+
+        if(!succeeded)
         {
             var failures = new List<ValidationFailure>();
-            foreach(var error in result.Errors)
+            foreach(var error in errors)
             {
-                string fieldName = Common.Helper.IdentityHelper.GetFieldForIdentityError(error.Code);
-                failures.Add(new ValidationFailure(fieldName, error.Description));
+                failures.Add(new ValidationFailure(string.Empty, error));
             }
             throw new ValidationException(failures);
         }

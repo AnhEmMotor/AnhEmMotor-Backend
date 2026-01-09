@@ -1,4 +1,5 @@
 using Application.ApiContracts.Supplier.Responses;
+using Domain.Common.Models;
 using MediatR;
 
 namespace Application.Features.Suppliers.Commands.UpdateSupplier;
@@ -16,4 +17,6 @@ public sealed record UpdateSupplierCommand : IRequest<(SupplierResponse? Data, C
     public string? Email { get; init; }
 
     public string? Notes { get; init; }
+
+    public string? TaxIdentificationNumber { get; set; }
 }

@@ -6,7 +6,7 @@ using BrandEntity = Domain.Entities.Brand;
 
 namespace Application.Features.Brands.Commands.CreateBrand;
 
-public sealed class CreateBrandCommandHandler(IBrandInsertRepository repository, IUnitOfWork unitOfWork) : IRequestHandler<CreateBrandCommand, ApiContracts.Brand.Responses.BrandResponse>
+public sealed class CreateBrandCommandHandler(IBrandInsertRepository repository, IBrandReadRepository readRepository, IUnitOfWork unitOfWork) : IRequestHandler<CreateBrandCommand, ApiContracts.Brand.Responses.BrandResponse>
 {
     public async Task<ApiContracts.Brand.Responses.BrandResponse> Handle(
         CreateBrandCommand request,

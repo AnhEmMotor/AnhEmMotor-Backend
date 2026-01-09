@@ -14,38 +14,39 @@ public class LocalFileStorageService(IWebHostEnvironment environment, IHttpConte
     private const long MaxFileSize = 10 * 1024 * 1024;
     private readonly string _uploadFolder = Path.Combine(environment.WebRootPath, "uploads");
 
-    private readonly List<string> _allowedMimeTypes = [ "image/jpeg", "image/png", "image/gif", "image/webp" ];
+    private readonly List<string> _allowedMimeTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
 
     public async Task<(string StoragePath, string FileExtension)> SaveFileAsync(
         Stream file,
         CancellationToken cancellationToken)
     {
-        if(file == null || file.Length == 0)
+        if (file == null || file.Length == 0)
             throw new ArgumentException("File is empty.");
 
-        if(file.Length > MaxFileSize)
+        if (file.Length > MaxFileSize)
             throw new ArgumentException("File size exceeds 10MB limit.");
 
-        if(!Directory.Exists(_uploadFolder))
+        if (!Directory.Exists(_uploadFolder))
             Directory.CreateDirectory(_uploadFolder);
 
         IImageFormat format;
         try
         {
-            if(file.CanSeek)
+            if (file.CanSeek)
                 file.Position = 0;
 
             format = await Image.DetectFormatAsync(file, cancellationToken).ConfigureAwait(false);
 
-            if(format == null)
+            if (format == null)
                 throw new ArgumentException("File is not a recognized image format.");
 
-            if(!_allowedMimeTypes.Contains(format.DefaultMimeType))
+            if (!_allowedMimeTypes.Contains(format.DefaultMimeType))
             {
                 throw new ArgumentException(
                     $"File type {format.DefaultMimeType} is not allowed. Only JPG, PNG, GIF, WEBP.");
             }
-        } catch(Exception)
+        }
+        catch (Exception)
         {
             throw new ArgumentException("File is corrupted or not a valid image.");
         }
@@ -55,22 +56,13 @@ public class LocalFileStorageService(IWebHostEnvironment environment, IHttpConte
 
         try
         {
-            if(file.CanSeek)
-                file.Position = 0;
-
-            using var image = await Image.LoadAsync(file, cancellationToken).ConfigureAwait(false);
-
-            if(image.Width > DefaultMaxWidth)
-            {
-                var newHeight = (int)((double)DefaultMaxWidth / image.Width * image.Height);
-                image.Mutate(x => x.Resize(DefaultMaxWidth, newHeight));
-            }
-
-            await image.SaveAsWebpAsync(fullPath, new WebpEncoder { Quality = 75 }, cancellationToken)
-                .ConfigureAwait(false);
+            using var compressedStream = await CompressImageAsync(file, 75, DefaultMaxWidth, cancellationToken).ConfigureAwait(false);
+            using var fileStream = new FileStream(fullPath, FileMode.Create);
+            await compressedStream.CopyToAsync(fileStream, cancellationToken).ConfigureAwait(false);
 
             return (storagePath, ".webp");
-        } catch(Exception ex)
+        }
+        catch (Exception ex)
         {
             throw new InvalidOperationException("Failed to process image.", ex);
         }
@@ -81,7 +73,7 @@ public class LocalFileStorageService(IWebHostEnvironment environment, IHttpConte
         CancellationToken cancellationToken)
     {
         var results = new List<(string, string)>();
-        foreach(var file in files)
+        foreach (var file in files)
         {
             results.Add(await SaveFileAsync(file, cancellationToken).ConfigureAwait(false));
         }
@@ -91,13 +83,14 @@ public class LocalFileStorageService(IWebHostEnvironment environment, IHttpConte
     public bool DeleteFile(string storagePath)
     {
         var fullPath = Path.Combine(_uploadFolder, storagePath);
-        if(File.Exists(fullPath))
+        if (File.Exists(fullPath))
         {
             try
             {
                 File.Delete(fullPath);
                 return true;
-            } catch
+            }
+            catch
             {
                 return false;
             }
@@ -108,8 +101,8 @@ public class LocalFileStorageService(IWebHostEnvironment environment, IHttpConte
     public bool DeleteFile(IEnumerable<string> storagePaths)
     {
         var allDeleted = true;
-        foreach(var path in storagePaths)
-            if(!DeleteFile(path))
+        foreach (var path in storagePaths)
+            if (!DeleteFile(path))
                 allDeleted = false;
         return allDeleted;
     }
@@ -117,7 +110,7 @@ public class LocalFileStorageService(IWebHostEnvironment environment, IHttpConte
     public string GetPublicUrl(string storagePath)
     {
         var request = httpContextAccessor.HttpContext?.Request;
-        if(request == null)
+        if (request == null)
             return $"/api/v1/mediafile/view-image/{storagePath}";
         return $"{request.Scheme}://{request.Host.Value}/api/v1/mediafile/view-image/{storagePath}";
     }
@@ -127,7 +120,7 @@ public class LocalFileStorageService(IWebHostEnvironment environment, IHttpConte
         CancellationToken cancellationToken)
     {
         var fullPath = Path.Combine(_uploadFolder, storagePath);
-        if(!File.Exists(fullPath))
+        if (!File.Exists(fullPath))
             return null;
 
         var fileBytes = await File.ReadAllBytesAsync(fullPath, cancellationToken).ConfigureAwait(false);
@@ -136,20 +129,28 @@ public class LocalFileStorageService(IWebHostEnvironment environment, IHttpConte
 
     public async Task<Stream> ReadImageAsync(Stream inputStream, int? width, CancellationToken cancellationToken)
     {
-        if(inputStream.CanSeek)
+        return await CompressImageAsync(inputStream, 75, width, cancellationToken).ConfigureAwait(false);
+    }
+
+    public async Task<Stream> CompressImageAsync(Stream inputStream, int quality, int? maxWidth, CancellationToken cancellationToken)
+    {
+        if (inputStream.CanSeek)
             inputStream.Position = 0;
+
         using var image = await Image.LoadAsync(inputStream, cancellationToken).ConfigureAwait(false);
 
-        var targetWidth = width ?? DefaultMaxWidth;
-        if(image.Width > targetWidth)
+        var targetWidth = maxWidth ?? DefaultMaxWidth;
+
+        if (image.Width > targetWidth)
         {
             var newHeight = (int)((double)targetWidth / image.Width * image.Height);
             image.Mutate(x => x.Resize(targetWidth, newHeight));
         }
 
         var outputStream = new MemoryStream();
-        await image.SaveAsWebpAsync(outputStream, new WebpEncoder { Quality = 75 }, cancellationToken)
+        await image.SaveAsWebpAsync(outputStream, new WebpEncoder { Quality = quality }, cancellationToken)
             .ConfigureAwait(false);
+
         outputStream.Position = 0;
         return outputStream;
     }

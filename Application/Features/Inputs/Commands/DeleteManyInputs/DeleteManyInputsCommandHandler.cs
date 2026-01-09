@@ -1,5 +1,6 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
+using Domain.Common.Models;
 using MediatR;
 
 namespace Application.Features.Inputs.Commands.DeleteManyInputs;

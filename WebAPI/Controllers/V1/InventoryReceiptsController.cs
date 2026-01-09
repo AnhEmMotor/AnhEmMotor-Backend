@@ -13,6 +13,7 @@ using Application.Features.Inputs.Queries.GetInputById;
 using Application.Features.Inputs.Queries.GetInputsBySupplierId;
 using Application.Features.Inputs.Queries.GetInputsList;
 using Asp.Versioning;
+using Domain.Common.Models;
 using Infrastructure.Authorization.Attribute;
 using Mapster;
 using MediatR;

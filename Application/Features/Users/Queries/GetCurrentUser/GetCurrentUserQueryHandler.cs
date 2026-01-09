@@ -1,12 +1,11 @@
 using Application.ApiContracts.User.Responses;
 using Application.Common.Exceptions;
-using Domain.Entities;
+using Application.Interfaces.Repositories.User;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 
 namespace Application.Features.Users.Queries.GetCurrentUser;
 
-public class GetCurrentUserQueryHandler(UserManager<ApplicationUser> userManager) : IRequestHandler<GetCurrentUserQuery, UserResponse>
+public class GetCurrentUserQueryHandler(IUserReadRepository userReadRepository) : IRequestHandler<GetCurrentUserQuery, UserResponse>
 {
     public async Task<UserResponse> Handle(GetCurrentUserQuery request, CancellationToken cancellationToken)
     {
@@ -17,7 +16,7 @@ public class GetCurrentUserQueryHandler(UserManager<ApplicationUser> userManager
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        var user = await userManager.FindByIdAsync(userId.ToString()).ConfigureAwait(false) ??
+        var user = await userReadRepository.FindUserByIdAsync(userId, cancellationToken).ConfigureAwait(false) ??
             throw new NotFoundException("User not found.");
 
         return new UserResponse()

@@ -2,6 +2,7 @@
 using Application.ApiContracts.Product.Requests;
 using Application.ApiContracts.Product.Responses;
 using Domain.Constants;
+using Domain.Constants.Order;
 using Mapster;
 using ProductEntity = Domain.Entities.Product;
 using ProductVariantEntity = Domain.Entities.ProductVariant;

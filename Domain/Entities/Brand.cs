@@ -16,6 +16,10 @@ namespace Domain.Entities
         [Column("Description", TypeName = "nvarchar(MAX)")]
         public string? Description { get; set; }
 
+        [Column("RowVersion", TypeName = "rowversion")]
+        [Timestamp]
+        public byte[]? RowVersion { get; set; }
+
         public ICollection<Product> Products { get; set; } = [];
     }
 }

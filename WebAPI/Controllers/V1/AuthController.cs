@@ -5,6 +5,7 @@ using Application.Features.Auth.Commands.Logout;
 using Application.Features.Auth.Commands.RefreshToken;
 using Application.Features.Auth.Commands.Register;
 using Asp.Versioning;
+using Domain.Common.Models;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -38,6 +39,7 @@ public class AuthController(IMediator mediator) : ControllerBase
         [FromBody] Application.ApiContracts.Auth.Requests.RegisterRequest model,
         CancellationToken cancellationToken)
     {
+        //throw new Exception("Xin chào các bạn");
         var result = await mediator.Send(
             new RegisterCommand(
                 model.Username,
@@ -127,4 +129,13 @@ public class AuthController(IMediator mediator) : ControllerBase
                     [ new Application.Common.Models.ErrorDetail() { Message = "Facebook login not implemented yet." } ]
             });
     }
+
+    /// <summary>
+    /// Đăng nhập bằng Username/Email và Password - Dành cho quản lý
+    /// </summary>
+    [HttpPost("login/for-manager")]
+    public async Task<IActionResult> LoginForManager(
+        [FromBody] Application.ApiContracts.Auth.Requests.LoginRequest model,
+        CancellationToken cancellationToken)
+    { throw new NotImplementedException(); }
 }

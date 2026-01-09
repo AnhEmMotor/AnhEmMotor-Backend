@@ -1,8 +1,8 @@
 ﻿using Application.Common.Exceptions;
+using Application.Common.Models;
 using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using System.Net;
-using WebAPI.Contracts.Errors;
 
 namespace WebAPI.Middleware;
 
@@ -41,42 +41,27 @@ public class GlobalExceptionHandler(IWebHostEnvironment environment, ILogger<Glo
         Exception exception,
         CancellationToken cancellationToken)
     {
-        ApiErrorResponse errorResponse;
-        int statusCode;
+        var (statusCode, message) = exception switch
+        {
+            ValidationException _ => ((int)HttpStatusCode.BadRequest, null),
+            UnauthorizedException ex => ((int)HttpStatusCode.Unauthorized, ex.Message),
+            ForbiddenException ex => ((int)HttpStatusCode.Forbidden, ex.Message),
+            NotFoundException ex => ((int)HttpStatusCode.NotFound, ex.Message),
+            BadHttpRequestException ex => ((int)HttpStatusCode.BadRequest, ex.Message),
+            NotImplementedException ex => ((int)HttpStatusCode.NotImplemented, ex.Message),
+            _ => ((int)HttpStatusCode.InternalServerError, "An unexpected error occurred. Please try again later.")
+        };
 
-        if(exception is ValidationException validationException)
+        if (statusCode == (int)HttpStatusCode.InternalServerError)
         {
-            statusCode = (int)HttpStatusCode.BadRequest;
-            errorResponse = ApiErrorResponse.CreateValidationError(validationException.Errors);
-        } else if(exception is UnauthorizedException unauthorizedException)
-        {
-            statusCode = (int)HttpStatusCode.Unauthorized;
-            errorResponse = ApiErrorResponse.CreateProductionError(unauthorizedException.Message);
-        } else if(exception is ForbiddenException forbiddenException)
-        {
-            statusCode = (int)HttpStatusCode.Forbidden;
-            errorResponse = ApiErrorResponse.CreateProductionError(forbiddenException.Message);
-        } else if(exception is NotFoundException notFoundException)
-        {
-            statusCode = (int)HttpStatusCode.NotFound;
-            errorResponse = ApiErrorResponse.CreateProductionError(notFoundException.Message);
-        } else if(exception is BadHttpRequestException badRequestException)
-        {
-            statusCode = (int)HttpStatusCode.BadRequest;
-            errorResponse = ApiErrorResponse.CreateProductionError(badRequestException.Message);
-        } else if(exception is NotImplementedException notImplementedException)
-        {
-            statusCode = (int)HttpStatusCode.NotImplemented;
-            errorResponse = ApiErrorResponse.CreateProductionError(notImplementedException.Message);
-        } else
-        {
-            statusCode = (int)HttpStatusCode.InternalServerError;
-            logger.LogError(exception, "Unhandled exception: {Message}", exception.Message);
-
-            errorResponse = environment.IsDevelopment()
-                ? ApiErrorResponse.CreateDevelopmentError(exception)
-                : ApiErrorResponse.CreateProductionError("An unexpected error occurred. Please try again later.");
+            logger.LogError(exception, "An unhandled exception occurred while processing the request");
         }
+
+        var errorResponse = exception is ValidationException valEx
+            ? ErrorResponse.CreateValidationError(valEx.Errors)
+            : (environment.IsDevelopment() && statusCode == 500 
+                ? ErrorResponse.CreateDevelopmentError(exception)
+                : ErrorResponse.CreateProductionError(message ?? "An unexpected error occurred. Please try again later."));
 
         httpContext.Response.ContentType = "application/json";
         httpContext.Response.StatusCode = statusCode;

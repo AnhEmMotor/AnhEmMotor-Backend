@@ -1,19 +1,20 @@
 using Application.ApiContracts.User.Responses;
 using Application.Common.Exceptions;
+using Application.Interfaces.Repositories.User;
 using Domain.Constants;
-using Domain.Entities;
 using FluentValidation;
 using FluentValidation.Results;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 
 namespace Application.Features.UserManager.Commands.UpdateUser;
 
-public class UpdateUserCommandHandler(UserManager<ApplicationUser> userManager) : IRequestHandler<UpdateUserCommand, UserDTOForManagerResponse>
+public class UpdateUserCommandHandler(
+    IUserReadRepository userReadRepository,
+    IUserUpdateRepository userUpdateRepository) : IRequestHandler<UpdateUserCommand, UserDTOForManagerResponse>
 {
     public async Task<UserDTOForManagerResponse> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
     {
-        var user = await userManager.FindByIdAsync(request.UserId.ToString()).ConfigureAwait(false) ??
+        var user = await userReadRepository.FindUserByIdAsync(request.UserId, cancellationToken).ConfigureAwait(false) ??
             throw new NotFoundException("User not found.");
         if(!string.IsNullOrWhiteSpace(request.Model.FullName))
         {
@@ -39,19 +40,18 @@ public class UpdateUserCommandHandler(UserManager<ApplicationUser> userManager) 
             user.PhoneNumber = request.Model.PhoneNumber;
         }
 
-        var result = await userManager.UpdateAsync(user).ConfigureAwait(false);
-        if(!result.Succeeded)
+        var (succeeded, errors) = await userUpdateRepository.UpdateUserAsync(user, cancellationToken).ConfigureAwait(false);
+        if(!succeeded)
         {
             var failures = new List<ValidationFailure>();
-            foreach(var error in result.Errors)
+            foreach(var error in errors)
             {
-                string fieldName = Common.Helper.IdentityHelper.GetFieldForIdentityError(error.Code);
-                failures.Add(new ValidationFailure(fieldName, error.Description));
+                failures.Add(new ValidationFailure(string.Empty, error));
             }
             throw new ValidationException(failures);
         }
 
-        var roles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
+        var roles = await userReadRepository.GetUserRolesAsync(user, cancellationToken).ConfigureAwait(false);
 
         return new UserDTOForManagerResponse
         {

@@ -12,6 +12,7 @@ using Application.Features.Suppliers.Queries.GetDeletedSuppliersList;
 using Application.Features.Suppliers.Queries.GetSupplierById;
 using Application.Features.Suppliers.Queries.GetSuppliersList;
 using Asp.Versioning;
+using Domain.Common.Models;
 using Infrastructure.Authorization.Attribute;
 using Mapster;
 using MediatR;
@@ -107,6 +108,18 @@ public class SupplierController(IMediator mediator) : ControllerBase
         var response = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return StatusCode(StatusCodes.Status201Created, response);
     }
+
+    /// <summary>
+    /// Lấy danh sách nhà cung cấp (có phân trang, lọc, sắp xếp - chỉ được vào khi người dùng có quyền thêm và xoá phiếu bán hàng).
+    /// </summary>
+    /// <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    [HttpGet("for-input")]
+    public async Task<IActionResult> GetSuppliersForInput(
+        [FromQuery] SieveModel sieveModel,
+        CancellationToken cancellationToken)
+    { throw new NotImplementedException(); }
 
     /// <summary>
     /// Cập nhật thông tin nhà cung cấp.

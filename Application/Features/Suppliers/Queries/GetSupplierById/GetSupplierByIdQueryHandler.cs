@@ -1,5 +1,6 @@
 using Application.ApiContracts.Supplier.Responses;
 using Application.Interfaces.Repositories.Supplier;
+using Domain.Common.Models;
 using Mapster;
 using MediatR;
 

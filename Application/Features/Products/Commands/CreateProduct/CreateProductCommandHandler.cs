@@ -5,6 +5,7 @@ using Application.Interfaces.Repositories.OptionValue;
 using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.ProductCategory;
 using Application.Interfaces.Repositories.ProductVariant;
+using Domain.Common.Models;
 using Domain.Entities;
 using Mapster;
 using MediatR;

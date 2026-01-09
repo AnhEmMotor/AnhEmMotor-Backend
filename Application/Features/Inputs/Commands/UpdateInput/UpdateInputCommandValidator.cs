@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace Application.Features.Inputs.Commands.UpdateInput;
 
-public sealed class UpdateInputCommandValidator : AbstractValidator<CreateInputCommand>
+public sealed class UpdateInputCommandValidator : AbstractValidator<UpdateInputCommand>
 {
     public UpdateInputCommandValidator()
     {

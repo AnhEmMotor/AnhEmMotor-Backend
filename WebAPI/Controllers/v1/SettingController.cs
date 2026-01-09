@@ -2,6 +2,7 @@
 using Application.Features.Settings.Commands.SetSettings;
 using Application.Features.Settings.Queries.GetAllSettings;
 using Asp.Versioning;
+using Domain.Common.Models;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -32,7 +33,7 @@ public class SettingController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(Dictionary<string, long?>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> SetSettings(
-        [FromBody][ValidSettingKeys] Dictionary<string, long?> request,
+        [FromBody][ValidSettingKeys] Dictionary<string, string?> request,
         CancellationToken cancellationToken)
     {
         var command = new SetSettingsCommand(request);

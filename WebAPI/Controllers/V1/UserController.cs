@@ -6,6 +6,7 @@ using Application.Features.Users.Commands.RestoreUserAccount;
 using Application.Features.Users.Commands.UpdateCurrentUser;
 using Application.Features.Users.Queries.GetCurrentUser;
 using Asp.Versioning;
+using Domain.Common.Models;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -95,7 +96,7 @@ public class UserController(IMediator mediator) : ControllerBase
     }
 
     /// <summary>
-    /// Khôi phục tài khoản người dùng (soft delete recovery - set DeletedAt to null)
+    /// Khôi phục tài khoản người dùng
     /// </summary>
     [HttpPost("{userId:guid}/restore")]
     [ProducesResponseType(typeof(RestoreUserResponse), StatusCodes.Status200OK)]

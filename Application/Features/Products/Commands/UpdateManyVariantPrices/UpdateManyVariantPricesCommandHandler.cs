@@ -1,5 +1,6 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductVariant;
+using Domain.Common.Models;
 using MediatR;
 
 namespace Application.Features.Products.Commands.UpdateManyVariantPrices;

@@ -17,5 +17,7 @@ namespace Application.ApiContracts.Supplier.Responses
         public string? Address { get; set; }
 
         public long? TotalInput { get; set; }
+
+        public string? TaxIdentificationNumber { get; set; }
     }
 }

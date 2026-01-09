@@ -1,13 +1,14 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Setting;
+using Domain.Common.Models;
 using MediatR;
 using SettingEntity = Domain.Entities.Setting;
 
 namespace Application.Features.Settings.Commands.SetSettings;
 
-public sealed class SetSettingsCommandHandler(ISettingRepository settingRepository, IUnitOfWork unitOfWork) : IRequestHandler<SetSettingsCommand, (Dictionary<string, long?>? Data, Common.Models.ErrorResponse? Error)>
+public sealed class SetSettingsCommandHandler(ISettingRepository settingRepository, IUnitOfWork unitOfWork) : IRequestHandler<SetSettingsCommand, (Dictionary<string, string?>? Data, Common.Models.ErrorResponse? Error)>
 {
-    public async Task<(Dictionary<string, long?>? Data, Common.Models.ErrorResponse? Error)> Handle(
+    public async Task<(Dictionary<string, string?>? Data, Common.Models.ErrorResponse? Error)> Handle(
         SetSettingsCommand request,
         CancellationToken cancellationToken)
     {

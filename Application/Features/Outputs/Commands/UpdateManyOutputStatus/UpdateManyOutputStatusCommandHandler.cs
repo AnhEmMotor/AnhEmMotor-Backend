@@ -1,7 +1,8 @@
 using Application.ApiContracts.Output.Responses;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
-using Domain.Constants;
+using Domain.Common.Models;
+using Domain.Constants.Order;
 using Mapster;
 using MediatR;
 

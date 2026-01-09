@@ -1,6 +1,7 @@
 using Application.ApiContracts.Input.Responses;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
+using Domain.Common.Models;
 using Domain.Constants;
 using Mapster;
 using MediatR;

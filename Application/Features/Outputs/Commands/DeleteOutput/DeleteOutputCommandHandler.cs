@@ -1,5 +1,7 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
+using Domain.Common.Models;
+using Domain.Constants.Order;
 using MediatR;
 
 namespace Application.Features.Outputs.Commands.DeleteOutput;
@@ -28,7 +30,7 @@ public sealed class DeleteOutputCommandHandler(
             };
         }
 
-        if(Domain.Constants.OrderStatus.IsCannotDelete(output.StatusId))
+        if(OrderStatus.IsCannotDelete(output.StatusId))
         {
             return new Common.Models.ErrorResponse
             {
