@@ -1,0 +1,8 @@
+<Project>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <RootFolder>$(SolutionName)</RootFolder>
+    <RootFolder Condition="'$(RootFolder)' == ''">StandaloneBuilds</RootFolder>
+    <BaseOutputPath>$(Temp)\$(RootFolder)\$(MSBuildProjectName)\bin\</BaseOutputPath>
+    <BaseIntermediateOutputPath>$(Temp)\$(RootFolder)\$(MSBuildProjectName)\obj\</BaseIntermediateOutputPath>
+  </PropertyGroup>
+</Project>
