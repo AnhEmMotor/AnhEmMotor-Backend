@@ -1,7 +1,7 @@
 using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Exceptions;
+using Application.Interfaces.Repositories.Role;
 using Application.Interfaces.Repositories.User;
-using Application.Interfaces.Repositories.UserManager;
 using Application.Interfaces.Services;
 using Domain.Constants;
 using FluentValidation;
@@ -12,9 +12,9 @@ namespace Application.Features.UserManager.Commands.AssignRoles;
 
 public class AssignRolesCommandHandler(
     IUserReadRepository userReadRepository,
+    IRoleReadRepository roleReadRepository, 
     IUserUpdateRepository userUpdateRepository,
     IUserCreateRepository userCreateRepository,
-    IUserManagerReadRepository userManagerReadRepository,
     IProtectedEntityManagerService protectedEntityManagerService) : IRequestHandler<AssignRolesCommand, AssignRoleResponse>
 {
     public async Task<AssignRoleResponse> Handle(AssignRolesCommand request, CancellationToken cancellationToken)
@@ -38,7 +38,7 @@ public class AssignRolesCommandHandler(
         var invalidRoles = new List<string>();
         foreach(var roleName in request.Model.RoleNames)
         {
-            var roleExists = await userManagerReadRepository.RoleExistsAsync(roleName, cancellationToken).ConfigureAwait(false);
+            var roleExists = await roleReadRepository.IsRoleExistsAsync(roleName, cancellationToken).ConfigureAwait(false);
             if(!roleExists)
             {
                 invalidRoles.Add(roleName);

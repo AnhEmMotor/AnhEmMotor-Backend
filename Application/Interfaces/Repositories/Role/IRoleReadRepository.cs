@@ -23,5 +23,9 @@ namespace Application.Interfaces.Repositories.Role
             CancellationToken cancellationToken = default);
 
         public Task<List<RoleSelectResponse>> GetAllRoleSelectsAsync(CancellationToken cancellationToken = default);
+
+        public Task<bool> IsRoleExistsAsync(
+            string roleName,
+            CancellationToken cancellationToken = default);
     }
 }

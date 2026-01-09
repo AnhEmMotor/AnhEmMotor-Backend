@@ -10,7 +10,6 @@ using Application.Features.UserManager.Queries.GetUserById;
 using Application.Features.UserManager.Queries.GetUsersList;
 using Application.Features.UserManager.Queries.GetUsersListForOutput;
 using Application.Interfaces.Repositories.User;
-using Application.Interfaces.Repositories.UserManager;
 using Application.Interfaces.Services;
 using Domain.Constants;
 using Domain.Entities;
@@ -28,7 +27,7 @@ public class UserManager
     private readonly Mock<IUserUpdateRepository> _userUpdateRepositoryMock;
     private readonly Mock<IUserCreateRepository> _userCreateRepositoryMock;
     private readonly Mock<IUserDeleteRepository> _userDeleteRepositoryMock;
-    private readonly Mock<IUserManagerReadRepository> _userManagerReadRepositoryMock;
+
     private readonly Mock<IProtectedEntityManagerService> _protectedEntityManagerServiceMock;
 
     public UserManager()
@@ -37,7 +36,7 @@ public class UserManager
         _userUpdateRepositoryMock = new Mock<IUserUpdateRepository>();
         _userCreateRepositoryMock = new Mock<IUserCreateRepository>();
         _userDeleteRepositoryMock = new Mock<IUserDeleteRepository>();
-        _userManagerReadRepositoryMock = new Mock<IUserManagerReadRepository>();
+
         _protectedEntityManagerServiceMock = new Mock<IProtectedEntityManagerService>();
     }
 

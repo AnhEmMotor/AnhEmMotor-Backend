@@ -3,6 +3,7 @@ using Application.ApiContracts.User.Responses;
 using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Exceptions;
 using Application.Interfaces.Repositories.User;
+using Application.Interfaces.Repositories.Role;
 using Domain.Constants;
 using Domain.Entities;
 using Domain.Primitives;
@@ -14,7 +15,9 @@ using System;
 
 namespace Infrastructure.Repositories.User
 {
-    public class UserReadRepository(UserManager<ApplicationUser> userManager, ISieveProcessor sieveProcessor) : IUserReadRepository
+    public class UserReadRepository(
+        UserManager<ApplicationUser> userManager,
+        ISieveProcessor sieveProcessor) : IUserReadRepository
     {
         public async Task<PagedResult<UserDTOForManagerResponse>> GetPagedListAsync(
             SieveModel sieveModel,

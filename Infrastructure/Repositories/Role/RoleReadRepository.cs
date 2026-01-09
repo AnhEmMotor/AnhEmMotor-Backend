@@ -2,12 +2,12 @@
 using Application.Interfaces.Repositories.Role;
 using Domain.Entities;
 using Infrastructure.DBContexts;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System;
 
 namespace Infrastructure.Repositories.Role
 {
-    public class RoleReadRepository(ApplicationDBContext context) : IRoleReadRepository
+    public class RoleReadRepository(ApplicationDBContext context, RoleManager<ApplicationRole> roleManager) : IRoleReadRepository
     {
         public Task<List<ApplicationRole>> GetRolesByNamesAsync(
             IEnumerable<string> names,
@@ -51,6 +51,13 @@ namespace Infrastructure.Repositories.Role
             return context.Roles
                 .Select(r => new RoleSelectResponse { ID = r.Id, Name = r.Name })
                 .ToListAsync(cancellationToken);
+        }
+
+        public async Task<bool> IsRoleExistsAsync(
+            string roleName,
+            CancellationToken cancellationToken = default)
+        {
+            return await roleManager.RoleExistsAsync(roleName).ConfigureAwait(false);
         }
     }
 }
