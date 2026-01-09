@@ -9,7 +9,7 @@ using Application.Features.Brands.Queries.GetBrandById;
 using Application.Features.Brands.Queries.GetBrandsList;
 using Application.Features.Brands.Queries.GetDeletedBrandsList;
 using Asp.Versioning;
-using Domain.Common.Models;
+
 using Infrastructure.Authorization.Attribute;
 using Mapster;
 using MediatR;

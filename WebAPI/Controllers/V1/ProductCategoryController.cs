@@ -10,7 +10,7 @@ using Application.Features.ProductCategories.Queries.GetDeletedProductCategories
 using Application.Features.ProductCategories.Queries.GetProductCategoriesList;
 using Application.Features.ProductCategories.Queries.GetProductCategoryById;
 using Asp.Versioning;
-using Domain.Common.Models;
+
 using Infrastructure.Authorization.Attribute;
 using Mapster;
 using MediatR;

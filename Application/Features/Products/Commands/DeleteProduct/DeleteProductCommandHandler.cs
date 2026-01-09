@@ -1,6 +1,6 @@
 ﻿using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Product;
-using Domain.Common.Models;
+
 using MediatR;
 
 namespace Application.Features.Products.Commands.DeleteProduct;

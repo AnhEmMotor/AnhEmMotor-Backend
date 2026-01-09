@@ -1,7 +1,7 @@
 using System.Reflection;
 using Application.Features.Settings.Commands.SetSettings;
 using Application.Features.Settings.Queries.GetAllSettings;
-using Domain.Common.Models;
+
 using FluentAssertions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;

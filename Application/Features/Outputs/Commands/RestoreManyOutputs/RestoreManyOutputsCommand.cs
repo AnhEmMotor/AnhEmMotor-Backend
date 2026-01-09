@@ -1,5 +1,5 @@
 using Application.ApiContracts.Output.Responses;
-using Domain.Common.Models;
+
 using MediatR;
 
 namespace Application.Features.Outputs.Commands.RestoreManyOutputs;

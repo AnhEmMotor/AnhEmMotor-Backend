@@ -11,7 +11,7 @@ using Application.Features.Suppliers.Commands.UpdateSupplierStatus;
 using Application.Features.Suppliers.Queries.GetDeletedSuppliersList;
 using Application.Features.Suppliers.Queries.GetSupplierById;
 using Application.Features.Suppliers.Queries.GetSuppliersList;
-using Domain.Common.Models;
+
 using Domain.Primitives;
 using FluentAssertions;
 using MediatR;

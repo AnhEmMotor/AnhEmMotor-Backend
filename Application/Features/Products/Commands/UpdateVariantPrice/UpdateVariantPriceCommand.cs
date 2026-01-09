@@ -1,5 +1,5 @@
 using Application.ApiContracts.Product.Responses;
-using Domain.Common.Models;
+
 using MediatR;
 
 namespace Application.Features.Products.Commands.UpdateVariantPrice;

@@ -1,6 +1,5 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
-using Domain.Common.Models;
 using Domain.Constants;
 using MediatR;
 

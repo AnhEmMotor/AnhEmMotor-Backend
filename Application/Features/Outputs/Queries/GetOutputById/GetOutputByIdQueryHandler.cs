@@ -1,6 +1,6 @@
 using Application.ApiContracts.Output.Responses;
 using Application.Interfaces.Repositories.Output;
-using Domain.Common.Models;
+
 using Mapster;
 using MediatR;
 

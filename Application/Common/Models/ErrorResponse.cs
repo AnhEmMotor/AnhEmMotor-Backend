@@ -2,9 +2,9 @@
 
 namespace Application.Common.Models
 {
-    public class ErrorResponse(string message)
+    public class ErrorResponse(string? message = null)
     {
-        public string Message { get; set; } = message;
+        public string? Message { get; set; } = message;
         public string? Type { get; set; }
         public string? Details { get; set; }
         public List<ErrorDetail>? Errors { get; set; }

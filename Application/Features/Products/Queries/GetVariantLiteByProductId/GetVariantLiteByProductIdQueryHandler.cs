@@ -1,7 +1,7 @@
 ﻿using Application.ApiContracts.Product.Responses;
 using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.ProductVariant;
-using Domain.Common.Models;
+
 using Domain.Constants;
 using Mapster;
 using MediatR;
