@@ -60,3 +60,6 @@ appsettings.*.json
 
 **/wwwroot/uploads
 tree.txt
+
+# Auto Claude data directory
+.auto-claude/
