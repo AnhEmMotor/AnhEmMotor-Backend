@@ -31,6 +31,6 @@ public sealed class DeleteOutputCommandHandler(
         deleteRepository.Delete(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return null;
+        return Result.Success();
     }
 }

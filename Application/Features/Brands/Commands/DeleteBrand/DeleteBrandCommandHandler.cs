@@ -24,6 +24,6 @@ public sealed class DeleteBrandCommandHandler(
         deleteRepository.Delete(brand);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return null;
+        return Result.Success();
     }
 }

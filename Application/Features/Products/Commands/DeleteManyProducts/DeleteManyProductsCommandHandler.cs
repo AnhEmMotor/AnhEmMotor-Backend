@@ -1,4 +1,4 @@
-using Application.Common.Models;
+﻿using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Product;
 
@@ -18,7 +18,7 @@ public sealed class DeleteManyProductsCommandHandler(
     {
         if(command.Ids == null || command.Ids.Count == 0)
         {
-            return null;
+            return Result.Failure(Error.BadRequest("Bạn chưa truyền danh sách Product ID để xoá"));
         }
 
         var uniqueIds = command.Ids.Distinct().ToList();
