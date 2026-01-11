@@ -16,6 +16,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
+using WebAPI.Controllers.Base;
 using static Domain.Constants.Permission.PermissionsList;
 
 namespace WebAPI.Controllers.V1;

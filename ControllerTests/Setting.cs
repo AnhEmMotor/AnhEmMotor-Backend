@@ -1,4 +1,5 @@
 using System.Reflection;
+using Application.Common.Models;
 using Application.Features.Settings.Commands.SetSettings;
 using Application.Features.Settings.Queries.GetAllSettings;
 
@@ -33,16 +34,16 @@ public class Setting
     public async Task SETTING_013_SetSettings_InvalidKey_BadRequest()
     {
         // Arrange
-        var errorResponse = new Application.Common.Models.ErrorResponse
+        var errorResponse = new ErrorResponse
         {
             Errors =
             [
-                new Application.Common.Models.ErrorDetail { Message = "Invalid setting key", Field = "Invalid_Key" }
+                new ErrorDetail { Message = "Invalid setting key", Field = "Invalid_Key" }
             ]
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<SetSettingsCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((null, errorResponse));
+            .ReturnsAsync(Result<Dictionary<string, string>>.Failure(Error.Validation("Settings", "Validation failed")));
 
         var request = new Dictionary<string, string?> { { "Invalid_Key", "100" } };
 
@@ -51,7 +52,7 @@ public class Setting
 
         // Assert
         var badRequestResult = result.Should().BeOfType<BadRequestObjectResult>().Subject;
-        var returnedError = badRequestResult.Value.Should().BeOfType<Application.Common.Models.ErrorResponse>().Subject;
+        var returnedError = badRequestResult.Value.Should().BeOfType<ErrorResponse>().Subject;
         returnedError.Errors.Should().Contain(e => e.Message.Contains("Invalid setting key"));
     }
 
@@ -66,7 +67,7 @@ public class Setting
 };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetAllSettingsQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(expectedSettings);
+            .ReturnsAsync(Result<Dictionary<string, string?>>.Success(expectedSettings));
 
         var result = await _controller.GetAllSettings(CancellationToken.None);
 
@@ -95,7 +96,7 @@ public class Setting
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<SetSettingsCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((expectedResponse, null));
+            .ReturnsAsync(Result<Dictionary<string, string?>>.Success(expectedResponse));
 
         // Act
         var result = await _controller.SetSettings(request, CancellationToken.None);
@@ -118,16 +119,16 @@ public class Setting
     public async Task SETTING_032_Controller_SetSettings_ValidationFail_ReturnsBadRequest()
     {
         // Arrange
-        var errorResponse = new Application.Common.Models.ErrorResponse
+        var errorResponse = new ErrorResponse
         {
             Errors =
             [
-                new Application.Common.Models.ErrorDetail { Message = "Validation failed", Field = "Settings" }
+                new ErrorDetail { Message = "Validation failed", Field = "Settings" }
             ]
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<SetSettingsCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((null, errorResponse));
+            .ReturnsAsync(Result<Dictionary<string, string>>.Failure(Error.Validation("Settings", "Validation failed")));
 
         var request = new Dictionary<string, string?> { { "Deposit_ratio", "0" } };
 
@@ -136,7 +137,7 @@ public class Setting
 
         // Assert
         var badRequestResult = result.Should().BeOfType<BadRequestObjectResult>().Subject;
-        var returnedError = badRequestResult.Value.Should().BeOfType<Application.Common.Models.ErrorResponse>().Subject;
+        var returnedError = badRequestResult.Value.Should().BeOfType<ErrorResponse>().Subject;
         returnedError.Errors.Should().Contain(e => e.Message == "Validation failed");
     }
 
@@ -173,16 +174,16 @@ public class Setting
     public async Task SETTING_036_SetSettings_KeyWithSpecialChars_BadRequest()
     {
         // Arrange
-        var errorResponse = new Application.Common.Models.ErrorResponse
+        var errorResponse = new ErrorResponse
         {
             Errors =
             [
-                new Application.Common.Models.ErrorDetail { Message = "Invalid setting key", Field = "Deposit<script>" }
+                new ErrorDetail { Message = "Invalid setting key", Field = "Deposit<script>" }
             ]
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<SetSettingsCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((null, errorResponse));
+            .ReturnsAsync(Result<Dictionary<string, string>>.Failure(Error.Validation("Deposit<script>", "Invalid setting key")));
 
         var request = new Dictionary<string, string?> { { "Deposit<script>", "50" } };
 
@@ -191,7 +192,7 @@ public class Setting
 
         // Assert
         var badRequestResult = result.Should().BeOfType<BadRequestObjectResult>().Subject;
-        var returnedError = badRequestResult.Value.Should().BeOfType<Application.Common.Models.ErrorResponse>().Subject;
+        var returnedError = badRequestResult.Value.Should().BeOfType<ErrorResponse>().Subject;
         returnedError.Errors.Should().Contain(e => e.Message.Contains("Invalid setting key"));
     }
 
@@ -205,7 +206,7 @@ public class Setting
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<SetSettingsCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((expectedResponse, null));
+            .ReturnsAsync(Result<Dictionary<string, string?>>.Success(expectedResponse));
 
         var request = new Dictionary<string, string?> { { "Deposit_ratio", null } };
 
@@ -222,16 +223,16 @@ public class Setting
     public async Task SETTING_038_SetSettings_MultipleKeysOneInvalid_BadRequest()
     {
         // Arrange
-        var errorResponse = new Application.Common.Models.ErrorResponse
+        var errorResponse = new ErrorResponse
         {
             Errors =
             [
-                new Application.Common.Models.ErrorDetail { Message = "Invalid setting key", Field = "Invalid_Key" }
+                new ErrorDetail { Message = "Invalid setting key", Field = "Invalid_Key" }
             ]
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<SetSettingsCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((null, errorResponse));
+            .ReturnsAsync(Result<Dictionary<string, string>?>.Failure(Error.Validation("Invalid_Key", "Invalid setting key")));
 
         var request = new Dictionary<string, string?>
         {
@@ -244,7 +245,7 @@ public class Setting
 
         // Assert
         var badRequestResult = result.Should().BeOfType<BadRequestObjectResult>().Subject;
-        var returnedError = badRequestResult.Value.Should().BeOfType<Application.Common.Models.ErrorResponse>().Subject;
+        var returnedError = badRequestResult.Value.Should().BeOfType<ErrorResponse>().Subject;
         returnedError.Errors.Should().Contain(e => e.Message.Contains("Invalid setting key"));
     }
 
@@ -258,7 +259,7 @@ public class Setting
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<SetSettingsCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((expectedResponse, null));
+            .ReturnsAsync(Result<Dictionary<string, string?>?>.Success(expectedResponse));
 
         var request = new Dictionary<string, string?> { { "Inventory_alert_level", "2147483647" } };
 
@@ -275,16 +276,16 @@ public class Setting
     public async Task SETTING_040_SetSettings_IntegerOverflow_BadRequest()
     {
         // Arrange
-        var errorResponse = new Application.Common.Models.ErrorResponse
+        var errorResponse = new ErrorResponse
         {
             Errors =
             [
-                new Application.Common.Models.ErrorDetail { Message = "Value out of range for integer field", Field = "Inventory_alert_level" }
+                new ErrorDetail { Message = "Value out of range for integer field", Field = "Inventory_alert_level" }
             ]
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<SetSettingsCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((null, errorResponse));
+            .ReturnsAsync(Result<Dictionary<string, string>?>.Failure(Error.Validation("Inventory_alert_level", "Value out of range for integer field")));
 
         var request = new Dictionary<string, string?> { { "Inventory_alert_level", "9999999999999" } };
 
@@ -293,7 +294,7 @@ public class Setting
 
         // Assert
         var badRequestResult = result.Should().BeOfType<BadRequestObjectResult>().Subject;
-        var returnedError = badRequestResult.Value.Should().BeOfType<Application.Common.Models.ErrorResponse>().Subject;
+        var returnedError = badRequestResult.Value.Should().BeOfType<ErrorResponse>().Subject;
         returnedError.Errors.Should().Contain(e => 
             e.Message.Contains("out of range") || e.Message.Contains("overflow"));
     }
