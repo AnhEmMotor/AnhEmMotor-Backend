@@ -1,3 +1,4 @@
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductCategory;
 
@@ -8,9 +9,9 @@ namespace Application.Features.ProductCategories.Commands.DeleteProductCategory;
 public sealed class DeleteProductCategoryCommandHandler(
     IProductCategoryReadRepository readRepository,
     IProductCategoryDeleteRepository deleteRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<DeleteProductCategoryCommand, Common.Models.ErrorResponse?>
+    IUnitOfWork unitOfWork) : IRequestHandler<DeleteProductCategoryCommand, Result>
 {
-    public async Task<Common.Models.ErrorResponse?> Handle(
+    public async Task<Result> Handle(
         DeleteProductCategoryCommand request,
         CancellationToken cancellationToken)
     {
@@ -18,16 +19,12 @@ public sealed class DeleteProductCategoryCommandHandler(
 
         if(category == null)
         {
-            return new Common.Models.ErrorResponse
-            {
-                Errors =
-                    [ new Common.Models.ErrorDetail { Message = $"Product category with Id {request.Id} not found." } ]
-            };
+            return Result.Failure(Error.NotFound($"Product category with Id {request.Id} not found."));
         }
 
         deleteRepository.Delete(category);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return null;
+        return Result.Success();
     }
 }

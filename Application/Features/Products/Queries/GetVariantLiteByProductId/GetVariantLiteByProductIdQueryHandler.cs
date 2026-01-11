@@ -1,4 +1,5 @@
 ﻿using Application.ApiContracts.Product.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.ProductVariant;
 
@@ -10,9 +11,9 @@ namespace Application.Features.Products.Queries.GetVariantLiteByProductId;
 
 public sealed class GetVariantLiteByProductIdQueryHandler(
     IProductReadRepository productReadRepository,
-    IProductVariantReadRepository variantReadRepository) : IRequestHandler<GetVariantLiteByProductIdQuery, (List<ProductVariantLiteResponse>? Data, Common.Models.ErrorResponse? Error)>
+    IProductVariantReadRepository variantReadRepository) : IRequestHandler<GetVariantLiteByProductIdQuery, Result<List<ProductVariantLiteResponse>?>>
 {
-    public async Task<(List<ProductVariantLiteResponse>? Data, Common.Models.ErrorResponse? Error)> Handle(
+    public async Task<Result<List<ProductVariantLiteResponse>?>> Handle(
         GetVariantLiteByProductIdQuery request,
         CancellationToken cancellationToken)
     {
@@ -21,11 +22,7 @@ public sealed class GetVariantLiteByProductIdQueryHandler(
 
         if(product == null)
         {
-            return (null, new Common.Models.ErrorResponse
-            {
-                Errors =
-                    [ new Common.Models.ErrorDetail { Message = $"Product with Id {request.ProductId} not found." } ]
-            });
+            return Error.NotFound($"Product with Id {request.ProductId} not found.");
         }
 
         var mode = request.IncludeDeleted ? DataFetchMode.All : DataFetchMode.ActiveOnly;
@@ -35,6 +32,6 @@ public sealed class GetVariantLiteByProductIdQueryHandler(
 
         var responses = variants.Select(v => v.Adapt<ProductVariantLiteResponse>()).ToList();
 
-        return (responses, null);
+        return responses;
     }
 }

@@ -1,4 +1,5 @@
 using Application.ApiContracts.Product.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductVariant;
 
@@ -10,9 +11,9 @@ namespace Application.Features.Products.Commands.UpdateVariantPrice;
 public sealed class UpdateVariantPriceCommandHandler(
     IProductVariantReadRepository variantReadRepository,
     IProductVariantUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateVariantPriceCommand, (ProductVariantLiteResponse? Data, Common.Models.ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateVariantPriceCommand,Result<ProductVariantLiteResponse?>>
 {
-    public async Task<(ProductVariantLiteResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
+    public async Task<Result<ProductVariantLiteResponse?>> Handle(
         UpdateVariantPriceCommand command,
         CancellationToken cancellationToken)
     {
@@ -21,11 +22,7 @@ public sealed class UpdateVariantPriceCommandHandler(
 
         if(variant == null)
         {
-            return (null, new Common.Models.ErrorResponse
-            {
-                Errors =
-                    [ new Common.Models.ErrorDetail { Message = $"Biến thể với Id {command.VariantId} không tồn tại." } ]
-            });
+            return Error.NotFound($"Biến thể với Id {command.VariantId} không tồn tại.");
         }
 
         variant.Price = command.Price;
@@ -33,6 +30,6 @@ public sealed class UpdateVariantPriceCommandHandler(
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         var response = variant.Adapt<ProductVariantLiteResponse>();
-        return (response, null);
+        return response;
     }
 }

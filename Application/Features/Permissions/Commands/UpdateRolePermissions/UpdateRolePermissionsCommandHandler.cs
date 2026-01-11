@@ -1,5 +1,6 @@
 using Application.ApiContracts.Permission.Responses;
 using Application.Common.Exceptions;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Permission;
 using Application.Interfaces.Repositories.Role;
@@ -15,9 +16,9 @@ public class UpdateRolePermissionsCommandHandler(
     IRoleReadRepository roleReadRepository,
     IRoleUpdateRepository roleUpdateRepository,
     IPermissionReadRepository permissionReadRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateRolePermissionsCommand, PermissionRoleUpdateResponse>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateRolePermissionsCommand, Result<PermissionRoleUpdateResponse>>
 {
-    public async Task<PermissionRoleUpdateResponse> Handle(
+    public async Task<Result<PermissionRoleUpdateResponse>> Handle(
         UpdateRolePermissionsCommand request,
         CancellationToken cancellationToken)
     {

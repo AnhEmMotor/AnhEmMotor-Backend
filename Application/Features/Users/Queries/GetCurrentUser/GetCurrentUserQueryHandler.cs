@@ -1,13 +1,14 @@
 using Application.ApiContracts.User.Responses;
 using Application.Common.Exceptions;
+using Application.Common.Models;
 using Application.Interfaces.Repositories.User;
 using MediatR;
 
 namespace Application.Features.Users.Queries.GetCurrentUser;
 
-public class GetCurrentUserQueryHandler(IUserReadRepository userReadRepository) : IRequestHandler<GetCurrentUserQuery, UserResponse>
+public class GetCurrentUserQueryHandler(IUserReadRepository userReadRepository) : IRequestHandler<GetCurrentUserQuery, Result<UserResponse>>
 {
-    public async Task<UserResponse> Handle(GetCurrentUserQuery request, CancellationToken cancellationToken)
+    public async Task<Result<UserResponse>> Handle(GetCurrentUserQuery request, CancellationToken cancellationToken)
     {
         if(string.IsNullOrEmpty(request.UserId) || !Guid.TryParse(request.UserId, out var userId))
         {

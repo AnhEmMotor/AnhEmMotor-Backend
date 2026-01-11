@@ -1,5 +1,6 @@
 using Application.ApiContracts.Permission.Responses;
 using Application.Common.Exceptions;
+using Application.Common.Models;
 using Application.Interfaces.Repositories.Role;
 using Domain.Entities;
 using MediatR;
@@ -9,9 +10,9 @@ namespace Application.Features.Permissions.Queries.GetUserPermissionsById;
 
 public class GetUserPermissionsByIdQueryHandler(
     UserManager<ApplicationUser> userManager,
-    IRoleReadRepository roleReadRepository) : IRequestHandler<GetUserPermissionsByIdQuery, PermissionAndRoleOfUserResponse>
+    IRoleReadRepository roleReadRepository) : IRequestHandler<GetUserPermissionsByIdQuery, Result<PermissionAndRoleOfUserResponse>>
 {
-    public async Task<PermissionAndRoleOfUserResponse> Handle(
+    public async Task<Result<PermissionAndRoleOfUserResponse>> Handle(
         GetUserPermissionsByIdQuery request,
         CancellationToken cancellationToken)
     {

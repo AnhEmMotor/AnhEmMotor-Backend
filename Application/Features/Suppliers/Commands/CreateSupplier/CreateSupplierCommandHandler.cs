@@ -1,4 +1,5 @@
 using Application.ApiContracts.Supplier.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Supplier;
 using Domain.Entities;
@@ -7,9 +8,9 @@ using MediatR;
 
 namespace Application.Features.Suppliers.Commands.CreateSupplier;
 
-public sealed class CreateSupplierCommandHandler(ISupplierInsertRepository repository, ISupplierReadRepository supplierReadRepository, IUnitOfWork unitOfWork) : IRequestHandler<CreateSupplierCommand, SupplierResponse>
+public sealed class CreateSupplierCommandHandler(ISupplierInsertRepository repository, IUnitOfWork unitOfWork) : IRequestHandler<CreateSupplierCommand, Result<SupplierResponse>>
 {
-    public async Task<SupplierResponse> Handle(CreateSupplierCommand request, CancellationToken cancellationToken)
+    public async Task<Result<SupplierResponse>> Handle(CreateSupplierCommand request, CancellationToken cancellationToken)
     {
         var supplier = request.Adapt<Supplier>();
 

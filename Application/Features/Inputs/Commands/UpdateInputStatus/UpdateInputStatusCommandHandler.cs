@@ -1,4 +1,5 @@
 using Application.ApiContracts.Input.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
 
@@ -11,9 +12,9 @@ namespace Application.Features.Inputs.Commands.UpdateInputStatus;
 public sealed class UpdateInputStatusCommandHandler(
     IInputReadRepository readRepository,
     IInputUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateInputStatusCommand, (InputResponse? Data, Common.Models.ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateInputStatusCommand, Result<InputResponse>>
 {
-    public async Task<(InputResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
+    public async Task<Result<InputResponse>> Handle(
         UpdateInputStatusCommand request,
         CancellationToken cancellationToken)
     {
@@ -25,41 +26,17 @@ public sealed class UpdateInputStatusCommandHandler(
 
         if(input is null)
         {
-            return (null, new Common.Models.ErrorResponse
-            {
-                Errors =
-                    [ new Common.Models.ErrorDetail
-                    {
-                        Field = "Id",
-                        Message = $"Không tìm thấy phiếu nhập có ID {request.Id}."
-                    } ]
-            });
+            return Error.NotFound($"Không tìm thấy phiếu nhập có ID {request.Id}.", "Id");
         }
 
         if(InputStatus.IsCannotEdit(input.StatusId))
         {
-            return (null, new Common.Models.ErrorResponse
-            {
-                Errors =
-                    [ new Common.Models.ErrorDetail
-                    {
-                        Field = "StatusId",
-                        Message = "Không thể sửa trạng thái phiếu nhập đã hoàn thành hoặc đã hủy."
-                    } ]
-            });
+            return Error.BadRequest("Không thể sửa trạng thái phiếu nhập đã hoàn thành hoặc đã hủy.", "StatusId");
         }
 
         if(!InputStatus.IsValid(request.StatusId))
         {
-            return (null, new Common.Models.ErrorResponse
-            {
-                Errors =
-                    [ new Common.Models.ErrorDetail
-                    {
-                        Field = "StatusId",
-                        Message = $"Trạng thái '{request.StatusId}' không hợp lệ."
-                    } ]
-            });
+            return Error.BadRequest($"Trạng thái '{request.StatusId}' không hợp lệ.", "StatusId");
         }
 
         input.StatusId = request.StatusId;
@@ -75,6 +52,6 @@ public sealed class UpdateInputStatusCommandHandler(
 
         var updated = await readRepository.GetByIdWithDetailsAsync(input.Id, cancellationToken).ConfigureAwait(false);
 
-        return (updated!.Adapt<InputResponse>(), null);
+        return updated.Adapt<InputResponse>();
     }
 }

@@ -1,3 +1,4 @@
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
 using Domain.Constants;
@@ -8,19 +9,19 @@ namespace Application.Features.Brands.Commands.DeleteManyBrands;
 public sealed class DeleteManyBrandsCommandHandler(
     IBrandReadRepository readRepository,
     IBrandDeleteRepository deleteRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<DeleteManyBrandsCommand, Common.Models.ErrorResponse?>
+    IUnitOfWork unitOfWork) : IRequestHandler<DeleteManyBrandsCommand, Result>
 {
-    public async Task<Common.Models.ErrorResponse?> Handle(
+    public async Task<Result> Handle(
         DeleteManyBrandsCommand request,
         CancellationToken cancellationToken)
     {
         if(request.Ids == null || request.Ids.Count == 0)
         {
-            return null;
+            return Result.Failure(Error.BadRequest("You not pass ID to requests"));
         }
 
         var uniqueIds = request.Ids.Distinct().ToList();
-        var errorDetails = new List<Common.Models.ErrorDetail>();
+        var errorDetails = new List<Error>();
 
         var allBrands = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.All)
             .ConfigureAwait(false);
@@ -33,22 +34,17 @@ public sealed class DeleteManyBrandsCommandHandler(
         {
             if(!allBrandMap.ContainsKey(id))
             {
-                errorDetails.Add(
-                    new Common.Models.ErrorDetail { Field = "Id", Message = $"Brand with Id {id} not found." });
-            } else if(!activeBrandSet.Contains(id))
+                errorDetails.Add(Error.NotFound($"Brand with Id {id} not found.", "Id"));
+            } 
+            else if(!activeBrandSet.Contains(id))
             {
-                errorDetails.Add(
-                    new Common.Models.ErrorDetail
-                    {
-                        Field = "Id",
-                        Message = $"Brand with Id {id} has already been deleted."
-                    });
+                errorDetails.Add(Error.BadRequest($"Brand with Id {id} has already been deleted.", "Id"));
             }
         }
 
         if(errorDetails.Count > 0)
         {
-            return new Common.Models.ErrorResponse { Errors = errorDetails };
+            return Result.Failure(errorDetails);
         }
 
         if(activeBrands.ToList().Count > 0)
@@ -57,6 +53,6 @@ public sealed class DeleteManyBrandsCommandHandler(
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        return null;
+        return Result.Success();
     }
 }

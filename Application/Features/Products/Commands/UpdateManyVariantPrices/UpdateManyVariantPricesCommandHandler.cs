@@ -1,3 +1,4 @@
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductVariant;
 
@@ -8,13 +9,13 @@ namespace Application.Features.Products.Commands.UpdateManyVariantPrices;
 public sealed class UpdateManyVariantPricesCommandHandler(
     IProductVariantReadRepository readRepository,
     IProductVariantUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateManyVariantPricesCommand, (List<int>? Data, Common.Models.ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateManyVariantPricesCommand, Result<List<int>>>
 {
-    public async Task<(List<int>? Data, Common.Models.ErrorResponse? Error)> Handle(
+    public async Task<Result<List<int>>> Handle(
         UpdateManyVariantPricesCommand command,
         CancellationToken cancellationToken)
     {
-        var errors = new List<Common.Models.ErrorDetail>();
+        var errors = new List<Error>();
         var variantIds = command.Ids;
         var newPrice = command.Price;
 
@@ -27,18 +28,13 @@ public sealed class UpdateManyVariantPricesCommandHandler(
 
             foreach(var missingId in missingIds)
             {
-                errors.Add(
-                    new Common.Models.ErrorDetail
-                    {
-                        Field = missingId.ToString(),
-                        Message = $"Biến thể với Id {missingId} không tồn tại."
-                    });
+                errors.Add(Error.NotFound($"Biến thể với Id {missingId} không tồn tại.", missingId.ToString()));
             }
         }
 
         if(errors.Count > 0)
         {
-            return (null, new Common.Models.ErrorResponse { Errors = errors });
+            return errors;
         }
 
         foreach(var variant in allVariants)
@@ -49,6 +45,6 @@ public sealed class UpdateManyVariantPricesCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return (variantIds, null);
+        return variantIds;
     }
 }

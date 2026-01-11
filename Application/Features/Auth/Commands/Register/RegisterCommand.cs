@@ -1,4 +1,5 @@
 using Application.ApiContracts.Auth.Responses;
+using Application.Common.Models;
 using MediatR;
 
 namespace Application.Features.Auth.Commands.Register;
@@ -10,4 +11,4 @@ public record RegisterCommand(
     string FullName,
     string? PhoneNumber,
     string Gender
-) : IRequest<RegistrationSuccessResponse>;
+) : IRequest<Result<RegistrationSuccessResponse>>;

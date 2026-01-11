@@ -1,3 +1,5 @@
+using Application.ApiContracts.Product.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Product;
 
@@ -10,15 +12,15 @@ namespace Application.Features.Products.Commands.RestoreManyProducts;
 public sealed class RestoreManyProductsCommandHandler(
     IProductReadRepository readRepository,
     IProductUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<RestoreManyProductsCommand, (List<ApiContracts.Product.Responses.ProductDetailForManagerResponse>? Data, Common.Models.ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<RestoreManyProductsCommand, Result<List<ProductDetailForManagerResponse>?>>
 {
-    public async Task<(List<ApiContracts.Product.Responses.ProductDetailForManagerResponse>? Data, Common.Models.ErrorResponse? Error)> Handle(
+    public async Task<Result<List<ProductDetailForManagerResponse>?>> Handle(
         RestoreManyProductsCommand command,
         CancellationToken cancellationToken)
     {
         if(command.Ids == null || command.Ids.Count == 0)
         {
-            return ([], null);
+            return Error.BadRequest("You not pass Product ID to restore");
         }
 
         var uniqueIds = command.Ids.Distinct().ToList();
@@ -31,28 +33,25 @@ public sealed class RestoreManyProductsCommandHandler(
         var allProductsMap = allProducts.ToDictionary(p => p.Id);
         var deletedProductsSet = deletedProducts.Select(p => p.Id).ToHashSet();
 
-        var errorDetails = new List<Common.Models.ErrorDetail>();
+        var errorDetails = new List<Error>();
 
         foreach(var id in uniqueIds)
         {
             if(!allProductsMap.ContainsKey(id))
             {
-                errorDetails.Add(
-                    new Common.Models.ErrorDetail { Message = "Product not found", Field = $"Product ID: {id}" });
-                continue;
+                errorDetails.Add(Error.NotFound($"Product not found, Product ID: {id}"));
             }
 
             if(!deletedProductsSet.Contains(id))
             {
                 var productName = allProductsMap[id].Name;
-                errorDetails.Add(
-                    new Common.Models.ErrorDetail { Message = "Product is not deleted", Field = productName });
+                errorDetails.Add(Error.BadRequest($"Product is not deleted, Product ID: {id}, Product Name: {productName}"));
             }
         }
 
         if(errorDetails.Count > 0)
         {
-            return (null, new Common.Models.ErrorResponse { Errors = errorDetails });
+            return errorDetails;
         }
 
         if(deletedProducts.ToList().Count > 0)
@@ -62,8 +61,8 @@ public sealed class RestoreManyProductsCommandHandler(
         }
 
         var responses = deletedProducts.Select(
-            p => p.Adapt<ApiContracts.Product.Responses.ProductDetailForManagerResponse>())
+            p => p.Adapt<ProductDetailForManagerResponse>())
             .ToList();
-        return (responses, null);
+        return responses;
     }
 }

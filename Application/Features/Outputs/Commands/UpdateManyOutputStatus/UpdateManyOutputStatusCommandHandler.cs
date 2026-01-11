@@ -1,4 +1,5 @@
 using Application.ApiContracts.Output.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 
@@ -11,22 +12,17 @@ namespace Application.Features.Outputs.Commands.UpdateManyOutputStatus;
 public sealed class UpdateManyOutputStatusCommandHandler(
     IOutputReadRepository readRepository,
     IOutputUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateManyOutputStatusCommand, (List<OutputResponse>? Data, Common.Models.ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateManyOutputStatusCommand, Result<List<OutputResponse>?>>
 {
-    public async Task<(List<OutputResponse>? Data, Common.Models.ErrorResponse? Error)> Handle(
+    public async Task<Result<List<OutputResponse>?>> Handle(
         UpdateManyOutputStatusCommand request,
         CancellationToken cancellationToken)
     {
-        var errors = new List<Common.Models.ErrorDetail>();
+        var errors = new List<Error>();
 
         if(!OrderStatus.IsValid(request.StatusId))
         {
-            errors.Add(
-                new Common.Models.ErrorDetail
-                {
-                    Field = "StatusId",
-                    Message = $"Trạng thái '{request.StatusId}' không hợp lệ."
-                });
+            errors.Add(Error.BadRequest($"Trạng thái '{request.StatusId}' không hợp lệ.", "StatusId"));
         }
 
         var outputs = await readRepository.GetByIdAsync(request.Ids, cancellationToken).ConfigureAwait(false);
@@ -38,12 +34,7 @@ public sealed class UpdateManyOutputStatusCommandHandler(
 
         if(missingIds.Count != 0)
         {
-            errors.Add(
-                new Common.Models.ErrorDetail
-                {
-                    Field = "Ids",
-                    Message = $"Không tìm thấy {missingIds.Count} đơn hàng: {string.Join(", ", missingIds)}"
-                });
+            errors.Add(Error.NotFound($"Không tìm thấy {missingIds.Count} đơn hàng: {string.Join(", ", missingIds)}", "Ids"));
         }
 
         foreach(var output in outputsList)
@@ -51,13 +42,7 @@ public sealed class UpdateManyOutputStatusCommandHandler(
             if(!OrderStatusTransitions.IsTransitionAllowed(output.StatusId, request.StatusId))
             {
                 var allowed = OrderStatusTransitions.GetAllowedTransitions(output.StatusId);
-                errors.Add(
-                    new Common.Models.ErrorDetail
-                    {
-                        Field = "StatusId",
-                        Message =
-                            $"Đơn hàng ID {output.Id}: Không thể chuyển từ '{output.StatusId}' sang '{request.StatusId}'. Chỉ được chuyển sang: {string.Join(", ", allowed)}"
-                    });
+                errors.Add(Error.BadRequest($"Đơn hàng ID {output.Id}: Không thể chuyển từ '{output.StatusId}' sang '{request.StatusId}'. Chỉ được chuyển sang: {string.Join(", ", allowed)}", "StatusId"));
             }
         }
 
@@ -95,20 +80,14 @@ public sealed class UpdateManyOutputStatusCommandHandler(
 
                 if(currentStock < totalNeeded)
                 {
-                    errors.Add(
-                        new Common.Models.ErrorDetail
-                        {
-                            Field = "Products",
-                            Message =
-                                $"Sản phẩm ID {variantId} không đủ tồn kho. Tổng kho hiện có: {currentStock}, Tổng đơn hàng cần: {totalNeeded}, Thiếu: {totalNeeded - currentStock}"
-                        });
+                    errors.Add(Error.BadRequest($"Sản phẩm ID {variantId} không đủ tồn kho. Tổng kho hiện có: {currentStock}, Tổng đơn hàng cần: {totalNeeded}, Thiếu: {totalNeeded - currentStock}", "Products"));
                 }
             }
         }
 
         if(errors.Count > 0)
         {
-            return (null, new Common.Models.ErrorResponse { Errors = errors });
+            return errors;
         }
 
         if(string.Compare(request.StatusId, OrderStatus.Completed) == 0)
@@ -128,6 +107,6 @@ public sealed class UpdateManyOutputStatusCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return (outputsList.Adapt<List<OutputResponse>>(), null);
+        return outputsList.Adapt<List<OutputResponse>>();
     }
 }

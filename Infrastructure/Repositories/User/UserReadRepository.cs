@@ -112,7 +112,7 @@ namespace Infrastructure.Repositories.User
             return new UserAuthDTO()
             {
                 Id = user.Id,
-                Username = user.UserName,
+                UserName = user.UserName,
                 Roles = [ .. roles ],
                 Email = user.Email,
                 FullName = user.FullName,
@@ -136,7 +136,7 @@ namespace Infrastructure.Repositories.User
             return new UserAuthDTO()
             {
                 Id = user.Id,
-                Username = user.UserName,
+                UserName = user.UserName,
                 Roles = [ .. roles ],
                 Email = user.Email,
                 FullName = user.FullName,

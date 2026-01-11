@@ -1,5 +1,5 @@
 ﻿using Application.ApiContracts.Auth.Responses;
-using Application.Common.Exceptions;
+using Application.Common.Models;
 using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Services;
 using MediatR;
@@ -10,16 +10,16 @@ public class RefreshTokenCommandHandler(
     ITokenManagerService tokenService,
     IUserReadRepository userReadRepository,
     IUserUpdateRepository userUpdateRepository,
-    IHttpTokenAccessorService httpTokenAccessor) : IRequestHandler<RefreshTokenCommand, GetAccessTokenFromRefreshTokenResponse>
+    IHttpTokenAccessorService httpTokenAccessor) : IRequestHandler<RefreshTokenCommand, Result<GetAccessTokenFromRefreshTokenResponse>>
 {
-    public async Task<GetAccessTokenFromRefreshTokenResponse> Handle(
+    public async Task<Result<GetAccessTokenFromRefreshTokenResponse>> Handle(
         RefreshTokenCommand request,
         CancellationToken cancellationToken)
     {
         var currentRefreshToken = httpTokenAccessor.GetRefreshTokenFromCookie();
         if(string.IsNullOrEmpty(currentRefreshToken))
         {
-            throw new UnauthorizedException("Refresh token is missing.");
+            return Error.Unauthorized("Refresh token is missing.");
         }
 
         var user = await userReadRepository.GetUserByRefreshTokenAsync(currentRefreshToken, cancellationToken)
@@ -34,7 +34,7 @@ public class RefreshTokenCommandHandler(
             if(!string.IsNullOrEmpty(oldStatusClaim) &&
                 !string.Equals(oldStatusClaim, user.Status, StringComparison.OrdinalIgnoreCase))
             {
-                throw new UnauthorizedException("User status has changed. Please login again.");
+                return Error.Unauthorized("User status has changed. Please login again.");
             }
         }
 

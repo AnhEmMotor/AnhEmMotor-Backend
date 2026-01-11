@@ -1,10 +1,10 @@
 using Application.ApiContracts.Input.Responses;
-
+using Application.Common.Models;
 using MediatR;
 
 namespace Application.Features.Inputs.Commands.UpdateInputStatus;
 
-public sealed record UpdateInputStatusCommand : IRequest<(InputResponse? Data, Common.Models.ErrorResponse? Error)>
+public sealed record UpdateInputStatusCommand : IRequest<Result<InputResponse>>
 {
     public int Id { get; init; }
 

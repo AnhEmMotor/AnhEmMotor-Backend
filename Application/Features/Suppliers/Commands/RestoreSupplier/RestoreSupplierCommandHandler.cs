@@ -1,4 +1,5 @@
 using Application.ApiContracts.Supplier.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Supplier;
 
@@ -11,9 +12,9 @@ namespace Application.Features.Suppliers.Commands.RestoreSupplier;
 public sealed class RestoreSupplierCommandHandler(
     ISupplierReadRepository readRepository,
     ISupplierUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<RestoreSupplierCommand, (SupplierResponse? Data, Common.Models.ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<RestoreSupplierCommand, Result<SupplierResponse?>>
 {
-    public async Task<(SupplierResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
+    public async Task<Result<SupplierResponse?>> Handle(
         RestoreSupplierCommand request,
         CancellationToken cancellationToken)
     {
@@ -22,16 +23,12 @@ public sealed class RestoreSupplierCommandHandler(
 
         if(supplier == null)
         {
-            return (null, new Common.Models.ErrorResponse
-            {
-                Errors =
-                    [ new Common.Models.ErrorDetail { Message = $"Deleted supplier with Id {request.Id} not found." } ]
-            });
+            return Error.NotFound($"Deleted supplier with Id {request.Id} not found.");
         }
 
         updateRepository.Restore(supplier);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return (supplier.Adapt<SupplierResponse>(), null);
+        return supplier.Adapt<SupplierResponse>();
     }
 }

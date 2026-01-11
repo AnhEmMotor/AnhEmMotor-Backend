@@ -1,4 +1,5 @@
 using Application.ApiContracts.Output.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.ProductVariant;
@@ -17,38 +18,22 @@ public sealed class CreateOutputByManagerCommandHandler(
     IOutputInsertRepository insertRepository,
     IProductVariantReadRepository variantRepository,
     IUserReadRepository userReadRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateOutputByManagerCommand, (OutputResponse? Data, Common.Models.ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<CreateOutputByManagerCommand, Result<OutputResponse?>>
 {
-    public async Task<(OutputResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
+    public async Task<Result<OutputResponse?>> Handle(
         CreateOutputByManagerCommand request,
         CancellationToken cancellationToken)
     {
         if(request.OutputInfos.Count == 0)
         {
-            return (null, new Common.Models.ErrorResponse
-            {
-                Errors =
-                    [ new Common.Models.ErrorDetail
-                    {
-                        Field = "Products",
-                        Message = "Đơn hàng phải có ít nhất một sản phẩm."
-                    } ]
-            });
+            return Error.BadRequest("Đơn hàng phải có ít nhất một sản phẩm.", "Products");
         }
 
         var userData = await userReadRepository.GetUserByIDAsync(request.BuyerId!.Value, cancellationToken)
             .ConfigureAwait(false);
         if(userData == null)
         {
-            return (null, new Common.Models.ErrorResponse
-            {
-                Errors =
-                    [ new Common.Models.ErrorDetail
-                    {
-                        Field = "BuyerId",
-                        Message = "ID này là 1 tài khoản không tồn tại/đã bị xoá/đã bị cấm. Vui lòng kiểm tra lại."
-                    } ]
-            });
+            return Error.Forbidden("ID này là 1 tài khoản không tồn tại/đã bị xoá/đã bị cấm. Vui lòng kiểm tra lại.", "BuyerId");
         }
 
         var variantIds = request.OutputInfos
@@ -66,30 +51,14 @@ public sealed class CreateOutputByManagerCommandHandler(
         {
             var foundIds = variantsList.Select(v => v.Id).ToList();
             var missingIds = variantIds.Except(foundIds).ToList();
-            return (null, new Common.Models.ErrorResponse
-            {
-                Errors =
-                    [ new Common.Models.ErrorDetail
-                    {
-                        Field = "Products",
-                        Message = $"Không tìm thấy {missingIds.Count} sản phẩm: {string.Join(", ", missingIds)}"
-                    } ]
-            });
+            return Error.NotFound($"Không tìm thấy {missingIds.Count} sản phẩm: {string.Join(", ", missingIds)}", "Products");
         }
 
         foreach(var variant in variantsList)
         {
             if(string.Compare(variant.Product?.StatusId, Domain.Constants.ProductStatus.ForSale) != 0)
             {
-                return (null, new Common.Models.ErrorResponse
-                {
-                    Errors =
-                        [ new Common.Models.ErrorDetail
-                        {
-                            Field = "Products",
-                            Message = $"Sản phẩm '{variant.Product?.Name ?? variant.Id.ToString()}' không còn được bán."
-                        } ]
-                });
+                return Error.BadRequest($"Sản phẩm '{variant.Product?.Name ?? variant.Id.ToString()}' không còn được bán.", "Products");
             }
         }
         var output = request.Adapt<Output>();
@@ -113,6 +82,6 @@ public sealed class CreateOutputByManagerCommandHandler(
 
         var created = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
 
-        return (created!.Adapt<OutputResponse>(), null);
+        return created!.Adapt<OutputResponse>();
     }
 }

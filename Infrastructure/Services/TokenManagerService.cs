@@ -25,7 +25,7 @@ public class TokenManagerService(IConfiguration configuration) : ITokenManagerSe
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
-            new(JwtRegisteredClaimNames.Name, user.Username ?? string.Empty),
+            new(JwtRegisteredClaimNames.Name, user.UserName ?? string.Empty),
             new("full_name", user.FullName ?? string.Empty),
             new("status", user.Status ?? string.Empty)
         };

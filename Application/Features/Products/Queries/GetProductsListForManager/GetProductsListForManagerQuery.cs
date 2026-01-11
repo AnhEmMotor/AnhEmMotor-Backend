@@ -1,10 +1,12 @@
 using Application.ApiContracts.Product.Responses;
 using MediatR;
 using Sieve.Models;
+using Domain.Primitives;
+using Application.Common.Models;
 
 namespace Application.Features.Products.Queries.GetProductsListForManager;
 
-public sealed record GetProductsListForManagerQuery : IRequest<Domain.Primitives.PagedResult<ProductDetailForManagerResponse>>
+public sealed record GetProductsListForManagerQuery : IRequest<Result<PagedResult<ProductDetailForManagerResponse>>>
 {
     public int Page { get; init; } = 1;
 

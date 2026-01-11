@@ -1,4 +1,5 @@
 using Application.ApiContracts.Supplier.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Supplier;
 
@@ -10,9 +11,9 @@ namespace Application.Features.Suppliers.Commands.UpdateSupplier;
 public sealed class UpdateSupplierCommandHandler(
     ISupplierReadRepository readRepository,
     ISupplierUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateSupplierCommand, (SupplierResponse? Data, Common.Models.ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateSupplierCommand, Result<SupplierResponse?>>
 {
-    public async Task<(SupplierResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
+    public async Task<Result<SupplierResponse?>> Handle(
         UpdateSupplierCommand request,
         CancellationToken cancellationToken)
     {
@@ -20,10 +21,7 @@ public sealed class UpdateSupplierCommandHandler(
 
         if(supplier == null)
         {
-            return (null, new Common.Models.ErrorResponse
-            {
-                Errors = [ new Common.Models.ErrorDetail { Message = $"Supplier with Id {request.Id} not found." } ]
-            });
+            return Error.NotFound($"Supplier with Id {request.Id} not found.");
         }
 
         request.Adapt(supplier);
@@ -31,6 +29,6 @@ public sealed class UpdateSupplierCommandHandler(
         updateRepository.Update(supplier);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return (supplier.Adapt<SupplierResponse>(), null);
+        return supplier.Adapt<SupplierResponse>();
     }
 }

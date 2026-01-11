@@ -1,11 +1,9 @@
 using Application.ApiContracts.UserManager.Responses;
-using Application.Common.Exceptions;
+using Application.Common.Models;
 using Application.Interfaces.Repositories.Role;
 using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Services;
 using Domain.Constants;
-using FluentValidation;
-using FluentValidation.Results;
 using MediatR;
 
 namespace Application.Features.UserManager.Commands.AssignRoles;
@@ -15,25 +13,27 @@ public class AssignRolesCommandHandler(
     IRoleReadRepository roleReadRepository, 
     IUserUpdateRepository userUpdateRepository,
     IUserCreateRepository userCreateRepository,
-    IProtectedEntityManagerService protectedEntityManagerService) : IRequestHandler<AssignRolesCommand, AssignRoleResponse>
+    IProtectedEntityManagerService protectedEntityManagerService) : IRequestHandler<AssignRolesCommand, Result<AssignRoleResponse>>
 {
-    public async Task<AssignRoleResponse> Handle(AssignRolesCommand request, CancellationToken cancellationToken)
+    public async Task<Result<AssignRoleResponse>> Handle(AssignRolesCommand request, CancellationToken cancellationToken)
     {
         foreach(string role in request.Model.RoleNames)
         {
             if(string.IsNullOrWhiteSpace(role))
             {
-                throw new ValidationException(
-                    [ new ValidationFailure("RoleNames", "Role names cannot contain empty or whitespace values.") ]);
+                return Error.Validation("Role names cannot contain empty or whitespace values.", "RoleNames");
             }
             if(UserStatus.IsValid(role))
             {
-                throw new ValidationException([ new ValidationFailure("RoleNames", "Role names not vaild.") ]);
+                return Error.Validation("Role names not valid.", "RoleNames");
             }
         }
 
-        var user = await userReadRepository.FindUserByIdAsync(request.UserId, cancellationToken).ConfigureAwait(false) ??
-            throw new NotFoundException("User not found.");
+        var user = await userReadRepository.FindUserByIdAsync(request.UserId, cancellationToken).ConfigureAwait(false);
+        if(user is null)
+        {
+            return Error.NotFound("User not found.");
+        }
 
         var invalidRoles = new List<string>();
         foreach(var roleName in request.Model.RoleNames)
@@ -47,10 +47,7 @@ public class AssignRolesCommandHandler(
 
         if(invalidRoles.Count > 0)
         {
-            throw new ValidationException(
-                [ new ValidationFailure(
-                    "RoleNames",
-                    $"The following roles do not exist: {string.Join(", ", invalidRoles)}") ]);
+            return Error.Validation($"The following roles do not exist: {string.Join(", ", invalidRoles)}", "RoleNames");
         }
 
         cancellationToken.ThrowIfCancellationRequested();
@@ -66,10 +63,7 @@ public class AssignRolesCommandHandler(
                 var usersWithThisRole = await userReadRepository.GetUsersInRoleAsync(roleToRemove, cancellationToken).ConfigureAwait(false);
                 if(usersWithThisRole.Count == 1 && usersWithThisRole[0].Id == request.UserId)
                 {
-                    throw new ValidationException(
-                        [ new ValidationFailure(
-                            "RoleNames",
-                            $"Cannot remove SuperRole '{roleToRemove}' from user. This is the last user with this role.") ]);
+                    return Error.Validation($"Cannot remove SuperRole '{roleToRemove}' from user. This is the last user with this role.", "RoleNames");
                 }
             }
         }
@@ -79,12 +73,8 @@ public class AssignRolesCommandHandler(
             var (removeSucceeded, removeErrors) = await userUpdateRepository.RemoveUserFromRolesAsync(user, currentRoles, cancellationToken).ConfigureAwait(false);
             if(!removeSucceeded)
             {
-                var failures = new List<ValidationFailure>();
-                foreach(var error in removeErrors)
-                {
-                    failures.Add(new ValidationFailure(string.Empty, error));
-                }
-                throw new ValidationException(failures);
+                var errors = removeErrors.Select(e => Error.Failure(e)).ToList();
+                return Result<AssignRoleResponse>.Failure(errors);
             }
         }
 
@@ -93,12 +83,8 @@ public class AssignRolesCommandHandler(
             var (addSucceeded, addErrors) = await userCreateRepository.AddUserToRolesAsync(user, request.Model.RoleNames, cancellationToken).ConfigureAwait(false);
             if(!addSucceeded)
             {
-                var failures = new List<ValidationFailure>();
-                foreach(var error in addErrors)
-                {
-                    failures.Add(new ValidationFailure(string.Empty, error));
-                }
-                throw new ValidationException(failures);
+                var errors = addErrors.Select(e => Error.Failure(e)).ToList();
+                return Result<AssignRoleResponse>.Failure(errors);
             }
         }
 

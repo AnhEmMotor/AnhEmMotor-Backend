@@ -1,3 +1,4 @@
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.MediaFile;
 
@@ -9,19 +10,19 @@ namespace Application.Features.Files.Commands.DeleteManyFiles;
 public sealed class DeleteManyFilesCommandHandler(
     IMediaFileReadRepository readRepository,
     IMediaFileDeleteRepository deleteRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<DeleteManyFilesCommand, Common.Models.ErrorResponse?>
+    IUnitOfWork unitOfWork) : IRequestHandler<DeleteManyFilesCommand, Result>
 {
-    public async Task<Common.Models.ErrorResponse?> Handle(
+    public async Task<Result> Handle(
         DeleteManyFilesCommand request,
         CancellationToken cancellationToken)
     {
         if(request.StoragePaths == null || request.StoragePaths.Count == 0)
         {
-            return null;
+            return Result.Failure("You not pass storage path to delete");
         }
 
         var uniquePaths = request.StoragePaths.Distinct().ToList();
-        var errorDetails = new List<Common.Models.ErrorDetail>();
+        var errorDetails = new List<Error>();
 
         var allFiles = await readRepository.GetByStoragePathsAsync(uniquePaths, cancellationToken, DataFetchMode.All)
             .ConfigureAwait(false);
@@ -35,22 +36,17 @@ public sealed class DeleteManyFilesCommandHandler(
         {
             if(!allFileMap.ContainsKey(path))
             {
-                errorDetails.Add(
-                    new Common.Models.ErrorDetail { Field = "StoragePath", Message = $"File '{path}' not found." });
-            } else if(!activeFileSet.Contains(path))
+                errorDetails.Add(Error.NotFound($"File '{path}' not found.", "StoragePath"));
+            } 
+            else if(!activeFileSet.Contains(path))
             {
-                errorDetails.Add(
-                    new Common.Models.ErrorDetail
-                    {
-                        Field = "StoragePath",
-                        Message = $"File '{path}' has already been deleted."
-                    });
+                errorDetails.Add(Error.BadRequest($"File '{path}' has already been deleted.", "StoragePath"));
             }
         }
 
         if(errorDetails.Count > 0)
         {
-            return new Common.Models.ErrorResponse { Errors = errorDetails };
+            return Result.Failure(errorDetails);
         }
 
         if(activeFiles.ToList().Count > 0)
@@ -59,6 +55,6 @@ public sealed class DeleteManyFilesCommandHandler(
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        return null;
+        return Result.Success();
     }
 }

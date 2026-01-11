@@ -1,11 +1,12 @@
 ﻿using Application.ApiContracts.Product.Responses;
+using Application.Common.Models;
 using Domain.Primitives;
 using MediatR;
 using Sieve.Models;
 
 namespace Application.Features.Products.Queries.GetActiveVariantLiteListForOutput
 {
-    public class GetActiveVariantLiteListForOutputQuery : IRequest<PagedResult<ProductVariantLiteResponseForInput>>
+    public class GetActiveVariantLiteListForOutputQuery : IRequest<Result<PagedResult<ProductVariantLiteResponseForInput>>>
     {
         public int Page { get; init; } = 1;
 

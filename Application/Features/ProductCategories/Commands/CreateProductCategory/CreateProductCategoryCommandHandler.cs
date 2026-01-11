@@ -1,4 +1,5 @@
 using Application.ApiContracts.ProductCategory.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductCategory;
 using Mapster;
@@ -9,9 +10,9 @@ namespace Application.Features.ProductCategories.Commands.CreateProductCategory;
 
 public sealed class CreateProductCategoryCommandHandler(
     IProductCategoryInsertRepository repository,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateProductCategoryCommand, ProductCategoryResponse>
+    IUnitOfWork unitOfWork) : IRequestHandler<CreateProductCategoryCommand, Result<ProductCategoryResponse>>
 {
-    public async Task<ProductCategoryResponse> Handle(
+    public async Task<Result<ProductCategoryResponse>> Handle(
         CreateProductCategoryCommand request,
         CancellationToken cancellationToken)
     {

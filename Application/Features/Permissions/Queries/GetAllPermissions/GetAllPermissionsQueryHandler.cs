@@ -1,12 +1,13 @@
 using Application.ApiContracts.Permission.Responses;
+using Application.Common.Models;
 using MediatR;
 using System.Reflection;
 
 namespace Application.Features.Permissions.Queries.GetAllPermissions;
 
-public class GetAllPermissionsQueryHandler : IRequestHandler<GetAllPermissionsQuery, Dictionary<string, List<PermissionResponse>>>
+public class GetAllPermissionsQueryHandler : IRequestHandler<GetAllPermissionsQuery, Result<Dictionary<string, List<PermissionResponse>>>>
 {
-    public Task<Dictionary<string, List<PermissionResponse>>> Handle(
+    public Task<Result<Dictionary<string, List<PermissionResponse>>>> Handle(
         GetAllPermissionsQuery request,
         CancellationToken cancellationToken)
     {

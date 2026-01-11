@@ -3,18 +3,20 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
 using MediatR;
 using BrandEntity = Domain.Entities.Brand;
+using Domain.Primitives;
+using Application.Common.Models;
 
 namespace Application.Features.Brands.Queries.GetBrandsList;
 
-public sealed class GetBrandsListQueryHandler(IBrandReadRepository repository, ISievePaginator paginator) : IRequestHandler<GetBrandsListQuery, Domain.Primitives.PagedResult<BrandResponse>>
+public sealed class GetBrandsListQueryHandler(IBrandReadRepository repository, ISievePaginator paginator) : IRequestHandler<GetBrandsListQuery, Result<PagedResult<BrandResponse>>>
 {
-    public Task<Domain.Primitives.PagedResult<BrandResponse>> Handle(
+    public async Task<Result<PagedResult<BrandResponse>>> Handle(
         GetBrandsListQuery request,
         CancellationToken cancellationToken)
     {
         var query = repository.GetQueryable();
 
-        return paginator.ApplyAsync<BrandEntity, BrandResponse>(
+        return await paginator.ApplyAsync<BrandEntity, BrandResponse>(
             query,
             request.SieveModel,
             cancellationToken: cancellationToken);

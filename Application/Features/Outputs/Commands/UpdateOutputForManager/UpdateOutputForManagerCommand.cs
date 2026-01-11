@@ -1,10 +1,10 @@
 using Application.ApiContracts.Output.Responses;
-
+using Application.Common.Models;
 using MediatR;
 
 namespace Application.Features.Outputs.Commands.UpdateOutputForManager;
 
-public sealed record UpdateOutputForManagerCommand : IRequest<(OutputResponse? Data, Common.Models.ErrorResponse? Error)>
+public sealed record UpdateOutputForManagerCommand : IRequest<Result<OutputResponse?>>
 {
     public int Id { get; init; }
 

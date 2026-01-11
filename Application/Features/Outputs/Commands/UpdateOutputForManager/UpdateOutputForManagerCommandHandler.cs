@@ -1,4 +1,5 @@
 using Application.ApiContracts.Output.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.ProductVariant;
@@ -15,9 +16,9 @@ public sealed class UpdateOutputForManagerCommandHandler(
     IOutputUpdateRepository updateRepository,
     IOutputDeleteRepository deleteRepository,
     IProductVariantReadRepository variantRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateOutputForManagerCommand, (OutputResponse? Data, Common.Models.ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateOutputForManagerCommand, Result<OutputResponse?>>
 {
-    public async Task<(OutputResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
+    public async Task< Result<OutputResponse?>> Handle(
         UpdateOutputForManagerCommand request,
         CancellationToken cancellationToken)
     {
@@ -29,15 +30,7 @@ public sealed class UpdateOutputForManagerCommandHandler(
 
         if(output is null)
         {
-            return (null, new Common.Models.ErrorResponse
-            {
-                Errors =
-                    [ new Common.Models.ErrorDetail
-                    {
-                        Field = "Id",
-                        Message = $"Không tìm thấy đơn hàng có ID {request.Id}."
-                    } ]
-            });
+            return Error.NotFound($"Không tìm thấy đơn hàng có ID {request.Id}.", "Id");
         }
 
         var variantIds = request.OutputInfos
@@ -59,31 +52,14 @@ public sealed class UpdateOutputForManagerCommandHandler(
             {
                 var foundIds = variantsList.Select(v => v.Id).ToList();
                 var missingIds = variantIds.Except(foundIds).ToList();
-                return (null, new Common.Models.ErrorResponse
-                {
-                    Errors =
-                        [ new Common.Models.ErrorDetail
-                        {
-                            Field = "Products",
-                            Message = $"Không tìm thấy {missingIds.Count} sản phẩm: {string.Join(", ", missingIds)}"
-                        } ]
-                });
+                return Error.NotFound($"Không tìm thấy {missingIds.Count} sản phẩm: {string.Join(", ", missingIds)}", "Products");
             }
 
             foreach(var variant in variantsList)
             {
                 if(string.Compare(variant.Product?.StatusId, Domain.Constants.ProductStatus.ForSale) != 0)
                 {
-                    return (null, new Common.Models.ErrorResponse
-                    {
-                        Errors =
-                            [ new Common.Models.ErrorDetail
-                            {
-                                Field = "Products",
-                                Message =
-                                    $"Sản phẩm '{variant.Product?.Name ?? variant.Id.ToString()}' không còn được bán."
-                            } ]
-                    });
+                    return Error.BadRequest($"Sản phẩm '{variant.Product?.Name ?? variant.Id.ToString()}' không còn được bán.", "Products");
                 }
             }
         }
@@ -133,6 +109,6 @@ public sealed class UpdateOutputForManagerCommandHandler(
 
         var updated = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
 
-        return (updated!.Adapt<OutputResponse>(), null);
+        return updated.Adapt<OutputResponse>();
     }
 }

@@ -1,4 +1,6 @@
+using Application.ApiContracts.Product.Responses;
 using Application.Common.Extensions;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Product;
 
@@ -11,9 +13,9 @@ namespace Application.Features.Products.Commands.RestoreProduct;
 public sealed class RestoreProductCommandHandler(
     IProductReadRepository readRepository,
     IProductUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<RestoreProductCommand, (ApiContracts.Product.Responses.ProductDetailForManagerResponse? Data, Common.Models.ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<RestoreProductCommand, Result<ProductDetailForManagerResponse?>>
 {
-    public async Task<(ApiContracts.Product.Responses.ProductDetailForManagerResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
+    public async Task<Result<ProductDetailForManagerResponse?>> Handle(
         RestoreProductCommand command,
         CancellationToken cancellationToken)
     {
@@ -21,11 +23,7 @@ public sealed class RestoreProductCommandHandler(
             .ConfigureAwait(false);
         if(deletedProduct == null)
         {
-            return (null, new Common.Models.ErrorResponse
-            {
-                Errors =
-                    [ new Common.Models.ErrorDetail { Message = $"Deleted product with Id {command.Id} not found." } ]
-            });
+            return Error.NotFound($"Deleted product with Id {command.Id} not found.");
         }
 
         var imageFileNames = new List<string>();
@@ -49,7 +47,7 @@ public sealed class RestoreProductCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        var response = deletedProduct.Adapt<ApiContracts.Product.Responses.ProductDetailForManagerResponse>();
-        return (response, null);
+        var response = deletedProduct.Adapt<ProductDetailForManagerResponse>();
+        return response;
     }
 }

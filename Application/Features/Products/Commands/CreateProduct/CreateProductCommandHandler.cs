@@ -1,3 +1,5 @@
+using Application.ApiContracts.Product.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
 using Application.Interfaces.Repositories.Option;
@@ -22,24 +24,19 @@ public sealed class CreateProductCommandHandler(
     IOptionReadRepository optionReadRepository,
     IProductInsertRepository productInsertRepository,
     IOptionValueInsertRepository optionValueInsertRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateProductCommand, (ApiContracts.Product.Responses.ProductDetailForManagerResponse? Data, Common.Models.ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<CreateProductCommand, Result<ProductDetailForManagerResponse?>>
 {
-    public async Task<(ApiContracts.Product.Responses.ProductDetailForManagerResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
+    public async Task<Result<ProductDetailForManagerResponse?>> Handle(
         CreateProductCommand request,
         CancellationToken cancellationToken)
     {
-        var errors = new List<Common.Models.ErrorDetail>();
+        var errors = new List<Error>();
 
         var category = await productCategoryReadRepository.GetByIdAsync(request.CategoryId!.Value, cancellationToken)
             .ConfigureAwait(false);
         if(category == null)
         {
-            errors.Add(
-                new Common.Models.ErrorDetail
-                {
-                    Field = nameof(request.CategoryId),
-                    Message = $"Product category with Id {request.CategoryId} not found or has been deleted."
-                });
+            errors.Add(Error.NotFound($"Product category with Id {request.CategoryId} not found or has been deleted.", nameof(request.CategoryId)));
         }
 
         if(request.BrandId.HasValue)
@@ -48,12 +45,7 @@ public sealed class CreateProductCommandHandler(
                 .ConfigureAwait(false);
             if(brand == null)
             {
-                errors.Add(
-                    new Common.Models.ErrorDetail
-                    {
-                        Field = nameof(request.BrandId),
-                        Message = $"Brand with Id {request.BrandId} not found or has been deleted."
-                    });
+                errors.Add(Error.BadRequest($"Brand with Id {request.BrandId} not found or has been deleted.", nameof(request.BrandId)));
             }
         }
 
@@ -65,12 +57,7 @@ public sealed class CreateProductCommandHandler(
                 .ToList();
             if(slugs.Count != slugs.Distinct(StringComparer.OrdinalIgnoreCase).Count())
             {
-                errors.Add(
-                    new Common.Models.ErrorDetail
-                    {
-                        Field = "Variants",
-                        Message = "Duplicate slugs found within the request."
-                    });
+                errors.Add(Error.BadRequest("Duplicate slugs found within the request.", "Varients"));
             }
 
             foreach(var slug in slugs)
@@ -79,12 +66,7 @@ public sealed class CreateProductCommandHandler(
                     .ConfigureAwait(false);
                 if(existing != null)
                 {
-                    errors.Add(
-                        new Common.Models.ErrorDetail
-                        {
-                            Field = "Variants.UrlSlug",
-                            Message = $"Slug '{slug}' is already in use."
-                        });
+                    errors.Add(Error.BadRequest($"Slug '{slug}' is already in use.", "Variants.UrlSlug"));
                 }
             }
         }
@@ -127,12 +109,7 @@ public sealed class CreateProductCommandHandler(
                 var option = await optionReadRepository.GetByIdAsync(optionId, cancellationToken).ConfigureAwait(false);
                 if(option == null)
                 {
-                    errors.Add(
-                        new Common.Models.ErrorDetail
-                        {
-                            Field = "Variants.OptionValues",
-                            Message = $"Option with Id {optionId} not found."
-                        });
+                    errors.Add(Error.NotFound($"Option with Id {optionId} not found.", "Variants.OptionValues"));
                     continue;
                 }
 
@@ -165,7 +142,7 @@ public sealed class CreateProductCommandHandler(
 
         if(errors.Count > 0)
         {
-            return (null, new Common.Models.ErrorResponse { Errors = errors });
+            return errors;
         }
 
         var product = new ProductEntity
@@ -242,7 +219,6 @@ public sealed class CreateProductCommandHandler(
         productInsertRepository.Add(product);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        var response = product.Adapt<ApiContracts.Product.Responses.ProductDetailForManagerResponse>();
-        return (response, null);
+        return product.Adapt<ProductDetailForManagerResponse>();
     }
 }

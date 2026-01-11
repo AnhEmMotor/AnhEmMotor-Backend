@@ -1,4 +1,5 @@
 using Application.ApiContracts.Permission.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Permission;
 using Application.Interfaces.Repositories.Role;
@@ -12,8 +13,8 @@ public class UpdateRoleCommandHandler(
     RoleManager<ApplicationRole> roleManager,
     IPermissionReadRepository permissionRepository,
     IRoleUpdateRepository roleUpdateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateRoleCommand, RoleUpdateResponse>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateRoleCommand, Result<RoleUpdateResponse>>
 {
-    public async Task<RoleUpdateResponse> Handle(UpdateRoleCommand request, CancellationToken cancellationToken)
+    public async Task<Result<RoleUpdateResponse>> Handle(UpdateRoleCommand request, CancellationToken cancellationToken)
     { throw new NotImplementedException(); }
 }

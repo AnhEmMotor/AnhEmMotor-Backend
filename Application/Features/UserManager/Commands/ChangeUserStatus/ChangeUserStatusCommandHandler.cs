@@ -1,10 +1,8 @@
 using Application.ApiContracts.UserManager.Responses;
-using Application.Common.Exceptions;
+using Application.Common.Models;
 using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Services;
 using Domain.Constants;
-using FluentValidation;
-using FluentValidation.Results;
 using MediatR;
 
 namespace Application.Features.UserManager.Commands.ChangeUserStatus;
@@ -12,19 +10,22 @@ namespace Application.Features.UserManager.Commands.ChangeUserStatus;
 public class ChangeUserStatusCommandHandler(
     IUserReadRepository userReadRepository,
     IUserUpdateRepository userUpdateRepository,
-    IProtectedEntityManagerService protectedEntityManagerService) : IRequestHandler<ChangeUserStatusCommand, ChangeStatusUserByManagerResponse>
+    IProtectedEntityManagerService protectedEntityManagerService) : IRequestHandler<ChangeUserStatusCommand, Result<ChangeStatusUserByManagerResponse>>
 {
-    public async Task<ChangeStatusUserByManagerResponse> Handle(
+    public async Task<Result<ChangeStatusUserByManagerResponse>> Handle(
         ChangeUserStatusCommand request,
         CancellationToken cancellationToken)
     {
         if(!UserStatus.IsValid(request.Model.Status))
         {
-            throw new ValidationException([ new ValidationFailure("Status", "Status not vaild, please check.") ]);
+            return Error.Validation("Status not vaild, please check.", "Status");
         }
 
-        var user = await userReadRepository.FindUserByIdAsync(request.UserId, cancellationToken).ConfigureAwait(false) ??
-            throw new NotFoundException("User not found.");
+        var user = await userReadRepository.FindUserByIdAsync(request.UserId, cancellationToken).ConfigureAwait(false);
+        if(user is null)
+        {
+            return Error.NotFound("User not found.");
+        }
 
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -35,7 +36,7 @@ public class ChangeUserStatusCommandHandler(
 
             if(!string.IsNullOrEmpty(user.Email) && protectedEmails.Contains(user.Email))
             {
-                throw new ValidationException([ new ValidationFailure("Email", "Cannot deactivate protected user.") ]);
+                return Error.Validation("Cannot deactivate protected user.", "Email");
             }
 
             var superRoles = protectedEntityManagerService.GetSuperRoles() ?? [];
@@ -51,10 +52,7 @@ public class ChangeUserStatusCommandHandler(
 
                     if(activeUsersInRole.Count == 1 && activeUsersInRole[0].Id == request.UserId)
                     {
-                        throw new ValidationException(
-                            [ new ValidationFailure(
-                                "Status",
-                                $"Cannot deactivate user. This is the last active user with SuperRole '{userRole}'.") ]);
+                        return Error.Validation($"Cannot deactivate user. This is the last active user with SuperRole '{userRole}'.", "Status");
                     }
                 }
             }
@@ -64,12 +62,8 @@ public class ChangeUserStatusCommandHandler(
         var (succeeded, errors) = await userUpdateRepository.UpdateUserAsync(user, cancellationToken).ConfigureAwait(false);
         if(!succeeded)
         {
-            var failures = new List<ValidationFailure>();
-            foreach(var error in errors)
-            {
-                failures.Add(new ValidationFailure(string.Empty, error));
-            }
-            throw new ValidationException(failures);
+            var validationErrors = errors.Select(e => Error.Validation(e)).ToList();
+            return Result<ChangeStatusUserByManagerResponse>.Failure(validationErrors);
         }
 
         return new ChangeStatusUserByManagerResponse()

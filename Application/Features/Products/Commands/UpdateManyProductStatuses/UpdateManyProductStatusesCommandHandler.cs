@@ -1,3 +1,4 @@
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Product;
 
@@ -9,9 +10,9 @@ namespace Application.Features.Products.Commands.UpdateManyProductStatuses;
 public sealed class UpdateManyProductStatusesCommandHandler(
     IProductReadRepository readRepository,
     IProductUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateManyProductStatusesCommand, (List<int>? Data, Common.Models.ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateManyProductStatusesCommand, Result<List<int>?>>
 {
-    public async Task<(List<int>? Data, Common.Models.ErrorResponse? Error)> Handle(
+    public async Task<Result<List<int>?>> Handle(
         UpdateManyProductStatusesCommand command,
         CancellationToken cancellationToken)
     {
@@ -27,14 +28,10 @@ public sealed class UpdateManyProductStatusesCommandHandler(
             var missingErrors = productIds
                 .Where(id => !foundIds.Contains(id))
                 .Select(
-                    id => new Common.Models.ErrorDetail
-                    {
-                        Field = id.ToString(),
-                        Message = $"Sản phẩm với Id {id} không tồn tại."
-                    })
+                    id => Error.NotFound($"Sản phẩm với Id {id} không tồn tại."))
                 .ToList();
 
-            return (null, new Common.Models.ErrorResponse { Errors = missingErrors });
+            return missingErrors;
         }
 
         foreach(var product in productList)
@@ -45,6 +42,6 @@ public sealed class UpdateManyProductStatusesCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return (productIds, null);
+        return productIds;
     }
 }

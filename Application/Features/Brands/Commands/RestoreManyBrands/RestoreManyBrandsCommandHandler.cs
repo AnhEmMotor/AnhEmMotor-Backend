@@ -1,7 +1,9 @@
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
 using Domain.Constants;
 using Mapster;
+using Application.ApiContracts.Brand.Responses;
 using MediatR;
 
 namespace Application.Features.Brands.Commands.RestoreManyBrands;
@@ -9,19 +11,13 @@ namespace Application.Features.Brands.Commands.RestoreManyBrands;
 public sealed class RestoreManyBrandsCommandHandler(
     IBrandReadRepository readRepository,
     IBrandUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<RestoreManyBrandsCommand, (List<ApiContracts.Brand.Responses.BrandResponse>? Data, Common.Models.ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<RestoreManyBrandsCommand, Result<List<BrandResponse>?>>
 {
-    public async Task<(List<ApiContracts.Brand.Responses.BrandResponse>? Data, Common.Models.ErrorResponse? Error)> Handle(
+    public async Task<Result<List<BrandResponse>?>> Handle(
         RestoreManyBrandsCommand request,
         CancellationToken cancellationToken)
     {
-        if(request.Ids == null || request.Ids.Count == 0)
-        {
-            return ([], null);
-        }
-
         var uniqueIds = request.Ids.Distinct().ToList();
-        var errorDetails = new List<Common.Models.ErrorDetail>();
 
         var allBrands = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.All)
             .ConfigureAwait(false);
@@ -35,18 +31,12 @@ public sealed class RestoreManyBrandsCommandHandler(
         {
             if(!allBrandMap.ContainsKey(id))
             {
-                errorDetails.Add(
-                    new Common.Models.ErrorDetail { Field = "Id", Message = $"Brand with Id {id} not found." });
-            } else if(!deletedBrandSet.Contains(id))
+                return Error.NotFound($"Brand with Id {id} not found.", "Id");
+            } 
+            else if(!deletedBrandSet.Contains(id))
             {
-                errorDetails.Add(
-                    new Common.Models.ErrorDetail { Field = "Id", Message = $"Brand with Id {id} is not deleted." });
+                return Error.NotFound($"Brand with Id {id} is not deleted.", "Id");
             }
-        }
-
-        if(errorDetails.Count > 0)
-        {
-            return (null, new Common.Models.ErrorResponse { Errors = errorDetails });
         }
 
         if(deletedBrands.ToList().Count > 0)
@@ -55,6 +45,6 @@ public sealed class RestoreManyBrandsCommandHandler(
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        return (deletedBrands.Adapt<List<ApiContracts.Brand.Responses.BrandResponse>>(), null);
+        return deletedBrands.Adapt<List<BrandResponse>>();
     }
 }

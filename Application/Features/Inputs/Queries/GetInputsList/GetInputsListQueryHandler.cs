@@ -1,20 +1,22 @@
 using Application.ApiContracts.Input.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
+using Domain.Primitives;
 using MediatR;
 using InputEntity = Domain.Entities.Input;
 
 namespace Application.Features.Inputs.Queries.GetInputsList;
 
-public sealed class GetInputsListQueryHandler(IInputReadRepository repository, ISievePaginator paginator) : IRequestHandler<GetInputsListQuery, Domain.Primitives.PagedResult<InputResponse>>
+public sealed class GetInputsListQueryHandler(IInputReadRepository repository, ISievePaginator paginator) : IRequestHandler<GetInputsListQuery, Result<PagedResult<InputResponse>>>
 {
-    public Task<Domain.Primitives.PagedResult<InputResponse>> Handle(
+    public async Task<Result<PagedResult<InputResponse>>> Handle(
         GetInputsListQuery request,
         CancellationToken cancellationToken)
     {
         var query = repository.GetQueryable();
 
-        return paginator.ApplyAsync<InputEntity, InputResponse>(
+        return await paginator.ApplyAsync<InputEntity, InputResponse>(
             query,
             request.SieveModel,
             cancellationToken: cancellationToken);

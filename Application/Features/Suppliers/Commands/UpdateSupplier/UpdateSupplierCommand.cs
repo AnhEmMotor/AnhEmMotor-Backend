@@ -1,10 +1,10 @@
 using Application.ApiContracts.Supplier.Responses;
-
+using Application.Common.Models;
 using MediatR;
 
 namespace Application.Features.Suppliers.Commands.UpdateSupplier;
 
-public sealed record UpdateSupplierCommand : IRequest<(SupplierResponse? Data, Common.Models.ErrorResponse? Error)>
+public sealed record UpdateSupplierCommand : IRequest<Result<SupplierResponse?>>
 {
     public int Id { get; init; }
 

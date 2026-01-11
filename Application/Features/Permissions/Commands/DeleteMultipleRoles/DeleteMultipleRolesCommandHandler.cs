@@ -1,5 +1,6 @@
 using Application.ApiContracts.Permission.Responses;
 using Application.Common.Exceptions;
+using Application.Common.Models;
 using Application.Interfaces.Services;
 using Domain.Entities;
 using MediatR;
@@ -10,9 +11,9 @@ namespace Application.Features.Permissions.Commands.DeleteMultipleRoles;
 public class DeleteMultipleRolesCommandHandler(
     RoleManager<ApplicationRole> roleManager,
     UserManager<ApplicationUser> userManager,
-    IProtectedEntityManagerService protectedEntityManagerService) : IRequestHandler<DeleteMultipleRolesCommand, RoleDeleteResponse>
+    IProtectedEntityManagerService protectedEntityManagerService) : IRequestHandler<DeleteMultipleRolesCommand, Result<RoleDeleteResponse>>
 {
-    public async Task<RoleDeleteResponse> Handle(
+    public async Task<Result<RoleDeleteResponse>> Handle(
         DeleteMultipleRolesCommand request,
         CancellationToken cancellationToken)
     {

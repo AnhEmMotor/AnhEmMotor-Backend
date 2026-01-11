@@ -1,4 +1,5 @@
 using Application.ApiContracts.Auth.Responses;
+using Application.Common.Models;
 using Application.Features.Auth.Commands.GoogleLogin;
 using Application.Features.Auth.Commands.Login;
 using Application.Features.Auth.Commands.Logout;
@@ -23,7 +24,7 @@ namespace WebAPI.Controllers.V1;
 [ApiVersion("1.0")]
 [SwaggerTag("Controller xử lý xác thực và đăng nhập")]
 [Route("api/v{version:apiVersion}/[controller]")]
-[ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status500InternalServerError)]
+[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
 [ApiController]
 public class AuthController(IMediator mediator) : ControllerBase
 {
@@ -34,12 +35,11 @@ public class AuthController(IMediator mediator) : ControllerBase
     [AnonymousOnly]
     [SwaggerOperation(Summary = "Đăng ký tài khoản mới", Description = "Tạo 1 tài khoản mới (với email và password)")]
     [ProducesResponseType(typeof(RegistrationSuccessResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Register(
         [FromBody] Application.ApiContracts.Auth.Requests.RegisterRequest model,
         CancellationToken cancellationToken)
     {
-        //throw new Exception("Xin chào các bạn");
         var result = await mediator.Send(
             new RegisterCommand(
                 model.Username,
@@ -50,7 +50,17 @@ public class AuthController(IMediator mediator) : ControllerBase
                 model.Gender),
             cancellationToken)
             .ConfigureAwait(false);
-        return Ok(result);
+
+        if(result.IsFailure)
+        {
+            return result.Error?.Code switch
+            {
+                "Validation" => BadRequest(ErrorResponse.FromErrors(result.Errors!)),
+                _ => BadRequest(ErrorResponse.FromError(result.Error!))
+            };
+        }
+
+        return Ok(result.Value);
     }
 
     /// <summary>
@@ -59,14 +69,25 @@ public class AuthController(IMediator mediator) : ControllerBase
     [HttpPost("login")]
     [AnonymousOnly]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Login(
         [FromBody] Application.ApiContracts.Auth.Requests.LoginRequest model,
         CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new LoginCommand(model.UsernameOrEmail, model.Password), cancellationToken)
             .ConfigureAwait(true);
-        return Ok(result);
+
+        if(result.IsFailure)
+        {
+            return result.Error?.Code switch
+            {
+                "Unauthorized" => Unauthorized(ErrorResponse.FromError(result.Error)),
+                "NotFound" => NotFound(ErrorResponse.FromError(result.Error)),
+                _ => BadRequest(ErrorResponse.FromError(result.Error!))
+            };
+        }
+
+        return Ok(result.Value);
     }
 
     /// <summary>
@@ -75,12 +96,23 @@ public class AuthController(IMediator mediator) : ControllerBase
     [HttpPost("refresh-token")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(GetAccessTokenFromRefreshTokenResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> RefreshToken(CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new RefreshTokenCommand(), cancellationToken).ConfigureAwait(true);
-        return Ok(result);
+        
+        if(result.IsFailure)
+        {
+            return result.Error?.Code switch
+            {
+                "Unauthorized" => Unauthorized(ErrorResponse.FromError(result.Error)),
+                "Forbidden" => StatusCode(StatusCodes.Status403Forbidden, ErrorResponse.FromError(result.Error)),
+                _ => BadRequest(ErrorResponse.FromError(result.Error!))
+            };
+        }
+
+        return Ok(result.Value);
     }
 
     /// <summary>
@@ -103,12 +135,18 @@ public class AuthController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpPost("google")]
     [AnonymousOnly]
-    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status501NotImplemented)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status501NotImplemented)]
     public async Task<IActionResult> GoogleLogin(
         [FromBody] Application.ApiContracts.Auth.Requests.GoogleLoginRequest model,
         CancellationToken cancellationToken)
     {
-        await mediator.Send(new GoogleLoginCommand(model), cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(new GoogleLoginCommand(model), cancellationToken).ConfigureAwait(true);
+        
+        if(result.IsFailure)
+        {
+            return BadRequest(ErrorResponse.FromError(result.Error!));
+        }
+
         return Ok();
     }
 
@@ -117,16 +155,16 @@ public class AuthController(IMediator mediator) : ControllerBase
     /// </summary>
     [HttpPost("facebook")]
     [AnonymousOnly]
-    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status501NotImplemented)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status501NotImplemented)]
     public IActionResult FacebookLogin()
     {
         // TODO: Implement Facebook OAuth login
         return StatusCode(
             501,
-            new Application.Common.Models.ErrorResponse()
+            new ErrorResponse()
             {
                 Errors =
-                    [ new Application.Common.Models.ErrorDetail() { Message = "Facebook login not implemented yet." } ]
+                    [ new ErrorDetail() { Message = "Facebook login not implemented yet." } ]
             });
     }
 

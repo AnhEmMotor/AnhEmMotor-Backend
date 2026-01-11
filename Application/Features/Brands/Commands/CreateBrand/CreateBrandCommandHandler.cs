@@ -1,3 +1,5 @@
+using Application.ApiContracts.Brand.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
 using Mapster;
@@ -6,9 +8,9 @@ using BrandEntity = Domain.Entities.Brand;
 
 namespace Application.Features.Brands.Commands.CreateBrand;
 
-public sealed class CreateBrandCommandHandler(IBrandInsertRepository repository, IBrandReadRepository readRepository, IUnitOfWork unitOfWork) : IRequestHandler<CreateBrandCommand, ApiContracts.Brand.Responses.BrandResponse>
+public sealed class CreateBrandCommandHandler(IBrandInsertRepository repository, IUnitOfWork unitOfWork) : IRequestHandler<CreateBrandCommand, Result<BrandResponse>>
 {
-    public async Task<ApiContracts.Brand.Responses.BrandResponse> Handle(
+    public async Task<Result<BrandResponse>> Handle(
         CreateBrandCommand request,
         CancellationToken cancellationToken)
     {
@@ -17,6 +19,6 @@ public sealed class CreateBrandCommandHandler(IBrandInsertRepository repository,
         repository.Add(brand);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return brand.Adapt<ApiContracts.Brand.Responses.BrandResponse>();
+        return brand.Adapt<BrandResponse>();
     }
 }

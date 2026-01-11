@@ -1,10 +1,10 @@
 using Application.ApiContracts.Input.Responses;
-
+using Application.Common.Models;
 using MediatR;
 
 namespace Application.Features.Inputs.Commands.CreateInput;
 
-public sealed record CreateInputCommand : IRequest<(InputResponse? Data, Common.Models.ErrorResponse? Error)>
+public sealed record CreateInputCommand : IRequest<Result<InputResponse?>>
 {
     public string? Notes { get; init; }
 

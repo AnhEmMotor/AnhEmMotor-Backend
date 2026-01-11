@@ -131,7 +131,7 @@ public class Auth
     {
         // Arrange
         _mediatorMock.Setup(m => m.Send(It.IsAny<LogoutCommand>(), It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
+            .ReturnsAsync(Result.Success());
 
         // Act
         var result = await _controller.Logout(CancellationToken.None);

@@ -41,32 +41,30 @@ public class GlobalExceptionHandler(IWebHostEnvironment environment, ILogger<Glo
         Exception exception,
         CancellationToken cancellationToken)
     {
-        var (statusCode, message) = exception switch
-        {
-            ValidationException _ => ((int)HttpStatusCode.BadRequest, null),
-            UnauthorizedException ex => ((int)HttpStatusCode.Unauthorized, ex.Message),
-            ForbiddenException ex => ((int)HttpStatusCode.Forbidden, ex.Message),
-            NotFoundException ex => ((int)HttpStatusCode.NotFound, ex.Message),
-            BadHttpRequestException ex => ((int)HttpStatusCode.BadRequest, ex.Message),
-            NotImplementedException ex => ((int)HttpStatusCode.NotImplemented, ex.Message),
-            _ => ((int)HttpStatusCode.InternalServerError, "An unexpected error occurred. Please try again later.")
-        };
+        // 1. Log ngay lập tức. Đây là lỗi hệ thống nghiêm trọng.
+        // Ghi lại StackTrace đầy đủ để debug.
+        logger.LogError(exception,
+            "CRITICAL: An unhandled exception occurred. TraceId: {TraceId}",
+            httpContext.TraceIdentifier);
 
-        if (statusCode == (int)HttpStatusCode.InternalServerError)
-        {
-            logger.LogError(exception, "An unhandled exception occurred while processing the request");
-        }
+        // 2. Xác định response
+        // Trong môi trường Dev, có thể bạn muốn nhìn thấy lỗi chi tiết (Stack Trace)
+        // Trong Prod, TUYỆT ĐỐI KHÔNG lộ Stack Trace, chỉ báo lỗi chung.
 
-        var errorResponse = exception is ValidationException valEx
-            ? ErrorResponse.CreateValidationError(valEx.Errors)
-            : (environment.IsDevelopment() && statusCode == 500 
-                ? ErrorResponse.CreateDevelopmentError(exception)
-                : ErrorResponse.CreateProductionError(message ?? "An unexpected error occurred. Please try again later."));
+        var errorResponse = environment.IsDevelopment()
+            ? ErrorResponse.CreateDevelopmentError(exception) // Method cũ của bạn
+            : ErrorResponse.CreateProductionError("An unexpected system error occurred. Please contact support.");
 
         httpContext.Response.ContentType = "application/json";
-        httpContext.Response.StatusCode = statusCode;
 
-        await httpContext.Response.WriteAsJsonAsync(errorResponse, cancellationToken).ConfigureAwait(false);
+        // 3. Luôn luôn là 500 Internal Server Error
+        // Vì nếu là 400/404 thì lẽ ra tầng Application phải bắt bằng Result Pattern rồi.
+        httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
+
+        await httpContext.Response
+            .WriteAsJsonAsync(errorResponse, cancellationToken)
+            .ConfigureAwait(false);
+
         return true;
     }
 }

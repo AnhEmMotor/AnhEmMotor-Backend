@@ -1,5 +1,6 @@
 using Application.ApiContracts.Permission.Responses;
 using Application.Common.Exceptions;
+using Application.Common.Models;
 using Application.Interfaces.Repositories.Role;
 using Domain.Entities;
 using MediatR;
@@ -9,9 +10,9 @@ namespace Application.Features.Permissions.Queries.GetRolePermissions;
 
 public class GetRolePermissionsQueryHandler(
     RoleManager<ApplicationRole> roleManager,
-    IRoleReadRepository rolePermissionRepository) : IRequestHandler<GetRolePermissionsQuery, List<PermissionResponse>>
+    IRoleReadRepository rolePermissionRepository) : IRequestHandler<GetRolePermissionsQuery, Result<List<PermissionResponse>>>
 {
-    public async Task<List<PermissionResponse>> Handle(
+    public async Task<Result<List<PermissionResponse>>> Handle(
         GetRolePermissionsQuery request,
         CancellationToken cancellationToken)
     {

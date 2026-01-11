@@ -1,19 +1,18 @@
 using Application.ApiContracts.Auth.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Services;
 using Domain.Constants;
 using Domain.Entities;
-using FluentValidation;
-using FluentValidation.Results;
 using MediatR;
 
 namespace Application.Features.Auth.Commands.Register;
 
 public class RegisterCommandHandler(
     IUserCreateRepository userCreateRepository,
-    IProtectedEntityManagerService protectedEntityManagerService) : IRequestHandler<RegisterCommand, RegistrationSuccessResponse>
+    IProtectedEntityManagerService protectedEntityManagerService) : IRequestHandler<RegisterCommand, Result<RegistrationSuccessResponse>>
 {
-    public async Task<RegistrationSuccessResponse> Handle(RegisterCommand request, CancellationToken cancellationToken)
+    public async Task<Result<RegistrationSuccessResponse>> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
         var user = new ApplicationUser
         {
@@ -31,12 +30,8 @@ public class RegisterCommandHandler(
 
         if(!succeeded)
         {
-            var failures = new List<ValidationFailure>();
-            foreach(var error in errors)
-            {
-                failures.Add(new ValidationFailure(string.Empty, error));
-            }
-            throw new ValidationException(failures);
+            var validationErrors = errors.Select(e => Error.Validation(e)).ToList();
+            return Result<RegistrationSuccessResponse>.Failure(validationErrors);
         }
 
         var defaultRoles = protectedEntityManagerService.GetDefaultRolesForNewUsers() ?? [];

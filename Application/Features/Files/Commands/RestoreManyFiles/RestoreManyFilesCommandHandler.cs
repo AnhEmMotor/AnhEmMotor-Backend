@@ -1,6 +1,7 @@
+using Application.ApiContracts.File.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.MediaFile;
-
 using Domain.Constants;
 using Mapster;
 using MediatR;
@@ -11,19 +12,19 @@ public sealed class RestoreManyFilesCommandHandler(
     IMediaFileReadRepository readRepository,
     IMediaFileUpdateRepository updateRepository,
     Interfaces.Repositories.LocalFile.IFileStorageService fileStorageService,
-    IUnitOfWork unitOfWork) : IRequestHandler<RestoreManyFilesCommand, (List<ApiContracts.File.Responses.MediaFileResponse>? Data, Common.Models.ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<RestoreManyFilesCommand, Result<List<MediaFileResponse>?>>
 {
-    public async Task<(List<ApiContracts.File.Responses.MediaFileResponse>? Data, Common.Models.ErrorResponse? Error)> Handle(
+    public async Task<Result<List<MediaFileResponse>?>> Handle(
         RestoreManyFilesCommand request,
         CancellationToken cancellationToken)
     {
         if(request.StoragePaths == null || request.StoragePaths.Count == 0)
         {
-            return ([], null);
+            return Error.BadRequest("You not passed Storage Path to restore");
         }
 
         var uniquePaths = request.StoragePaths.Distinct().ToList();
-        var errorDetails = new List<Common.Models.ErrorDetail>();
+        var errorDetails = new List<Error>();
 
         var allFiles = await readRepository.GetByStoragePathsAsync(uniquePaths, cancellationToken, DataFetchMode.All)
             .ConfigureAwait(false);
@@ -40,18 +41,17 @@ public sealed class RestoreManyFilesCommandHandler(
         {
             if(!allFileMap.ContainsKey(path))
             {
-                errorDetails.Add(
-                    new Common.Models.ErrorDetail { Field = "StoragePath", Message = $"File '{path}' not found." });
-            } else if(!deletedFileSet.Contains(path))
+                errorDetails.Add(Error.NotFound($"File '{path}' not found.", "StoragePath");
+            } 
+            else if(!deletedFileSet.Contains(path))
             {
-                errorDetails.Add(
-                    new Common.Models.ErrorDetail { Field = "StoragePath", Message = $"File '{path}' is not deleted." });
+                errorDetails.Add(Error.BadRequest($"File '{path}' is not deleted.", "StoragePath");
             }
         }
 
         if(errorDetails.Count > 0)
         {
-            return (null, new Common.Models.ErrorResponse { Errors = errorDetails });
+            return errorDetails;
         }
 
         if(deletedFiles.ToList().Count > 0)
@@ -60,7 +60,7 @@ public sealed class RestoreManyFilesCommandHandler(
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        var responses = deletedFiles.Adapt<List<ApiContracts.File.Responses.MediaFileResponse>>();
+        var responses = deletedFiles.Adapt<List<MediaFileResponse>>();
         foreach(var response in responses)
         {
             if(!string.IsNullOrEmpty(response.StoragePath))
@@ -69,6 +69,6 @@ public sealed class RestoreManyFilesCommandHandler(
             }
         }
 
-        return (responses, null);
+        return responses;
     }
 }

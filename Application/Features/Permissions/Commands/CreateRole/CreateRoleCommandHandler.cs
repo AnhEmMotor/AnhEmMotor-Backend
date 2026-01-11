@@ -1,5 +1,6 @@
 using Application.ApiContracts.Permission.Responses;
 using Application.Common.Exceptions;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Permission;
 using Application.Interfaces.Repositories.Role;
@@ -14,9 +15,9 @@ public class CreateRoleCommandHandler(
     RoleManager<ApplicationRole> roleManager,
     IPermissionReadRepository permissionRepository,
     IRoleUpdateRepository roleUpdateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateRoleCommand, RoleCreateResponse>
+    IUnitOfWork unitOfWork) : IRequestHandler<CreateRoleCommand, Result<RoleCreateResponse>>
 {
-    public async Task<RoleCreateResponse> Handle(CreateRoleCommand request, CancellationToken cancellationToken)
+    public async Task<Result<RoleCreateResponse>> Handle(CreateRoleCommand request, CancellationToken cancellationToken)
     {
         var model = request.Model;
 

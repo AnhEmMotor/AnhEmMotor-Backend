@@ -1,4 +1,5 @@
 using Application.ApiContracts.ProductCategory.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductCategory;
 
@@ -11,19 +12,19 @@ namespace Application.Features.ProductCategories.Commands.RestoreManyProductCate
 public sealed class RestoreManyProductCategoriesCommandHandler(
     IProductCategoryReadRepository readRepository,
     IProductCategoryUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<RestoreManyProductCategoriesCommand, (List<ProductCategoryResponse>? Data, Common.Models.ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<RestoreManyProductCategoriesCommand, Result<List<ProductCategoryResponse>?>>
 {
-    public async Task<(List<ProductCategoryResponse>? Data, Common.Models.ErrorResponse? Error)> Handle(
+    public async Task<Result<List<ProductCategoryResponse>?>> Handle(
         RestoreManyProductCategoriesCommand request,
         CancellationToken cancellationToken)
     {
         if(request.Ids == null || request.Ids.Count == 0)
         {
-            return ([], null);
+            return Error.BadRequest("You not pass Ids to restore.");
         }
 
         var uniqueIds = request.Ids.Distinct().ToList();
-        var errorDetails = new List<Common.Models.ErrorDetail>();
+        var errorDetails = new List<Error>();
 
         var allCategories = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.All)
             .ConfigureAwait(false);
@@ -40,26 +41,17 @@ public sealed class RestoreManyProductCategoriesCommandHandler(
         {
             if(!allCategoryMap.ContainsKey(id))
             {
-                errorDetails.Add(
-                    new Common.Models.ErrorDetail
-                    {
-                        Field = "Id",
-                        Message = $"Product category with Id {id} not found."
-                    });
-            } else if(!deletedCategorySet.Contains(id))
+                errorDetails.Add(Error.NotFound($"Product category with Id {id} not found.", "Id"));
+            } 
+            else if(!deletedCategorySet.Contains(id))
             {
-                errorDetails.Add(
-                    new Common.Models.ErrorDetail
-                    {
-                        Field = "Id",
-                        Message = $"Product category with Id {id} is not deleted."
-                    });
+                errorDetails.Add(Error.BadRequest($"Product category with Id {id} is not deleted.", "Id"));
             }
         }
 
         if(errorDetails.Count > 0)
         {
-            return (null, new Common.Models.ErrorResponse { Errors = errorDetails });
+            return errorDetails;
         }
 
         if(deletedCategories.ToList().Count > 0)
@@ -68,6 +60,6 @@ public sealed class RestoreManyProductCategoriesCommandHandler(
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        return (deletedCategories.Adapt<List<ProductCategoryResponse>>(), null);
+        return deletedCategories.Adapt<List<ProductCategoryResponse>>();
     }
 }

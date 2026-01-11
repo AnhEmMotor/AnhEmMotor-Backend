@@ -1,3 +1,5 @@
+using Application.ApiContracts.Product.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
 using Application.Interfaces.Repositories.OptionValue;
@@ -22,13 +24,13 @@ public sealed class UpdateProductCommandHandler(
     IOptionValueInsertRepository optionValueInsertRepository,
     IProductUpdateRepository updateRepository,
     IProductVarientDeleteRepository productVarientDeleteRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateProductCommand, (ApiContracts.Product.Responses.ProductDetailForManagerResponse? Data, Common.Models.ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateProductCommand, Result<ProductDetailForManagerResponse?>>
 {
-    public async Task<(ApiContracts.Product.Responses.ProductDetailForManagerResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
+    public async Task<Result<ProductDetailForManagerResponse?>> Handle(
         UpdateProductCommand command,
         CancellationToken cancellationToken)
     {
-        var errors = new List<Common.Models.ErrorDetail>();
+        var errors = new List<Error>();
         var request = command.Request;
 
         var product = await productReadRepository.GetByIdWithDetailsAsync(command.Id, cancellationToken)
@@ -36,10 +38,7 @@ public sealed class UpdateProductCommandHandler(
 
         if(product == null)
         {
-            return (null, new Common.Models.ErrorResponse
-            {
-                Errors = [ new Common.Models.ErrorDetail { Message = $"Product with Id {command.Id} not found." } ]
-            });
+            return Error.NotFound($"Product with Id {command.Id} not found.");
         }
 
         if(request.CategoryId.HasValue)
@@ -48,12 +47,7 @@ public sealed class UpdateProductCommandHandler(
                 .ConfigureAwait(false);
             if(category == null)
             {
-                errors.Add(
-                    new Common.Models.ErrorDetail
-                    {
-                        Field = nameof(request.CategoryId),
-                        Message = $"Product category with Id {request.CategoryId} not found or has been deleted."
-                    });
+                errors.Add(Error.NotFound($"Product category with Id {request.CategoryId} not found or has been deleted.", nameof(request.CategoryId));
             }
         }
 
@@ -63,12 +57,7 @@ public sealed class UpdateProductCommandHandler(
                 .ConfigureAwait(false);
             if(brand == null)
             {
-                errors.Add(
-                    new Common.Models.ErrorDetail
-                    {
-                        Field = nameof(request.BrandId),
-                        Message = $"Brand with Id {request.BrandId} not found or has been deleted."
-                    });
+                errors.Add(Error.NotFound($"Brand with Id {request.BrandId} not found or has been deleted.", nameof(request.BrandId)));
             }
         }
 
@@ -81,12 +70,7 @@ public sealed class UpdateProductCommandHandler(
 
             if(slugs.Count != slugs.Distinct(StringComparer.OrdinalIgnoreCase).Count())
             {
-                errors.Add(
-                    new Common.Models.ErrorDetail
-                    {
-                        Field = "Variants",
-                        Message = "Duplicate slugs found within the request."
-                    });
+                errors.Add(Error.BadRequest("Duplicate slugs found within the request.", "Varients"));
             }
 
             foreach(var variantReq in request.Variants.Where(v => !string.IsNullOrWhiteSpace(v.UrlSlug)))
@@ -102,12 +86,7 @@ public sealed class UpdateProductCommandHandler(
                         continue;
                     }
 
-                    errors.Add(
-                        new Common.Models.ErrorDetail
-                        {
-                            Field = "Variants.UrlSlug",
-                            Message = $"Slug '{variantReq.UrlSlug}' is already in use."
-                        });
+                    errors.Add(Error.BadRequest($"Slug '{variantReq.UrlSlug}' is already in use.", "Variants.UrlSlug"));
                 }
             }
         }
@@ -115,7 +94,7 @@ public sealed class UpdateProductCommandHandler(
 
         if(errors.Count > 0)
         {
-            return (null, new Common.Models.ErrorResponse { Errors = errors });
+            return errors;
         }
 
         product.Name = request.Name?.Trim();
@@ -205,8 +184,8 @@ public sealed class UpdateProductCommandHandler(
         updateRepository.Update(product);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        var response = product.Adapt<ApiContracts.Product.Responses.ProductDetailForManagerResponse>();
-        return (response, null);
+        var response = product.Adapt<ProductDetailForManagerResponse>();
+        return response;
     }
 
     private static async Task ProcessOptionValuesInMemoryAsync(

@@ -1,5 +1,6 @@
 using Application.ApiContracts.Permission.Responses;
 using Application.Common.Exceptions;
+using Application.Common.Models;
 using Application.Interfaces.Services;
 using Domain.Entities;
 using MediatR;
@@ -10,9 +11,9 @@ namespace Application.Features.Permissions.Commands.DeleteRole;
 public class DeleteRoleCommandHandler(
     RoleManager<ApplicationRole> roleManager,
     UserManager<ApplicationUser> userManager,
-    IProtectedEntityManagerService protectedEntityManagerService) : IRequestHandler<DeleteRoleCommand, RoleDeleteResponse>
+    IProtectedEntityManagerService protectedEntityManagerService) : IRequestHandler<DeleteRoleCommand, Result<RoleDeleteResponse>>
 {
-    public async Task<RoleDeleteResponse> Handle(DeleteRoleCommand request, CancellationToken cancellationToken)
+    public async Task<Result<RoleDeleteResponse>> Handle(DeleteRoleCommand request, CancellationToken cancellationToken)
     {
         var roleName = request.RoleName;
 
