@@ -21,8 +21,11 @@ public class GetMyPermissionsQueryHandler(
             return Error.Unauthorized("Invalid user token.");
         }
 
-        var user = await userManager.FindByIdAsync(userId.ToString()).ConfigureAwait(false) ?? 
+        var user = await userManager.FindByIdAsync(userId.ToString()).ConfigureAwait(false);
+        if (user is null)
+        {
             return Error.NotFound("User not found.");
+        }
         var userRoles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
         var roleEntities = await roleReadRepository.GetRolesByNamesAsync(userRoles!, cancellationToken)
             .ConfigureAwait(false);

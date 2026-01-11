@@ -4,9 +4,9 @@ namespace Application.Interfaces.Services;
 
 public interface ITokenManagerService
 {
-    string CreateAccessToken(UserAuthDTO user, DateTimeOffset expiryTime);
-    string CreateRefreshToken();
-    string? GetClaimFromToken(string token, string claimType);
-    int GetRefreshTokenExpiryDays();
-    int GetAccessTokenExpiryMinutes();
+    public string CreateAccessToken(UserAuthDTO user, DateTimeOffset expiryTime);
+    public string CreateRefreshToken();
+    public string? GetClaimFromToken(string token, string claimType);
+    public int GetRefreshTokenExpiryDays();
+    public int GetAccessTokenExpiryMinutes();
 }

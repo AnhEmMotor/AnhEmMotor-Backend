@@ -17,8 +17,11 @@ public class GetCurrentUserQueryHandler(IUserReadRepository userReadRepository) 
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        var user = await userReadRepository.FindUserByIdAsync(userId, cancellationToken).ConfigureAwait(false) ??
+        var user = await userReadRepository.FindUserByIdAsync(userId, cancellationToken).ConfigureAwait(false);
+        if (user is null)
+        {
             return Error.NotFound("Invalid user token.");
+        }
 
         return new UserResponse()
         {

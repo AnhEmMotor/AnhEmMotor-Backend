@@ -22,7 +22,11 @@ public class UpdateRolePermissionsCommandHandler(
         UpdateRolePermissionsCommand request,
         CancellationToken cancellationToken)
     {
-        var role = await roleManager.FindByNameAsync(request.RoleName).ConfigureAwait(false) ?? return Error.NotFound("Role not found.");
+        var role = await roleManager.FindByNameAsync(request.RoleName).ConfigureAwait(false);
+        if (role is null)
+        {
+            return Error.NotFound("Role not found.");
+        }
         var isRoleUpdated = false;
 
         if(request.Model.Description is not null && string.Compare(role.Description, request.Model.Description) != 0)

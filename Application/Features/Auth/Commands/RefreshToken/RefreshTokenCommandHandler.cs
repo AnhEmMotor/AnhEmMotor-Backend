@@ -1,4 +1,6 @@
-﻿using Application.ApiContracts.Auth.Responses;
+﻿using Application.ApiContracts.Auth.Requests;
+using Application.ApiContracts.Auth.Responses;
+using Application.Common.Constants;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Services;
@@ -45,7 +47,7 @@ public sealed class RefreshTokenCommandHandler(
         if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer "))
         {
             var oldAccessToken = authHeader["Bearer ".Length..];
-            var oldStatusClaim = tokenService.GetClaimFromToken(oldAccessToken, ClaimConstants.Status);
+            var oldStatusClaim = tokenService.GetClaimFromToken(oldAccessToken, ClaimJWTPayload.Status);
 
             if (!string.IsNullOrEmpty(oldStatusClaim) &&
                 !string.Equals(oldStatusClaim, user.Status, StringComparison.OrdinalIgnoreCase))

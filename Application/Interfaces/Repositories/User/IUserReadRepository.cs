@@ -1,6 +1,7 @@
 ﻿using Application.ApiContracts.Auth.Requests;
 using Application.ApiContracts.User.Responses;
 using Application.ApiContracts.UserManager.Responses;
+using Application.Common.Models;
 using Domain.Entities;
 using Domain.Primitives;
 using Sieve.Models;
@@ -20,7 +21,7 @@ namespace Application.Interfaces.Repositories.User
 
         public Task<Result<UserAuthDTO>> GetUserByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken);
 
-        public Task<UserEntity?> GetByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken);
+        public Task<ApplicationUser?> GetByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken);
 
         public Task<UserAuthDTO?> GetUserByIDAsync(Guid? idUser, CancellationToken cancellationToken);
 

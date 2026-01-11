@@ -24,12 +24,12 @@ public class CreateRoleCommandHandler(
         var roleExists = await roleManager.RoleExistsAsync(model.RoleName).ConfigureAwait(false);
         if(roleExists)
         {
-            return Result.BadRequest("Role already exists.");
+            return Error.BadRequest("Role already exists.");
         }
 
         if(model.Permissions is null || model.Permissions.Count == 0)
         {
-            return Result.BadRequest("At least one permission must be assigned to the role.");
+            return Error.BadRequest("At least one permission must be assigned to the role.");
         }
 
         var allPermissions = typeof(Domain.Constants.Permission.PermissionsList)
@@ -44,7 +44,7 @@ public class CreateRoleCommandHandler(
         var invalidPermissions = model.Permissions.Except(allPermissions!).ToList();
         if(invalidPermissions.Count != 0)
         {
-            return Result.BadRequest($"Invalid permissions: {string.Join(", ", invalidPermissions)}");
+            return Error.BadRequest($"Invalid permissions: {string.Join(", ", invalidPermissions)}");
         }
 
         var role = new ApplicationRole { Name = model.RoleName, Description = model.Description };
@@ -53,7 +53,7 @@ public class CreateRoleCommandHandler(
         if(!createResult.Succeeded)
         {
             var errors = string.Join(", ", createResult.Errors.Select(e => e.Description));
-            return Result.BadRequest(errors);
+            return Error.BadRequest(errors);
         }
 
         var permissionsInDb = await permissionRepository.GetPermissionsByNamesAsync(

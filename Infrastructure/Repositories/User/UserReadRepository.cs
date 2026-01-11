@@ -2,6 +2,7 @@
 using Application.ApiContracts.User.Responses;
 using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Exceptions;
+using Application.Common.Models;
 using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Repositories.Role;
 using Domain.Constants;
@@ -89,7 +90,7 @@ namespace Infrastructure.Repositories.User
                 sieveModel.PageSize ?? 10);
         }
 
-        public async Task<UserEntity?> GetByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken)
+        public async Task<ApplicationUser?> GetByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken)
         {
             return await userManager.Users
                 .AsNoTracking()
@@ -101,6 +102,16 @@ namespace Infrastructure.Repositories.User
             string refreshToken,
             CancellationToken cancellationToken)
         {
+            var user = await userManager.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.RefreshToken == refreshToken, cancellationToken)
+                .ConfigureAwait(false);
+
+            if (user is null)
+            {
+                return Error.NotFound("User with refresh token not found.");
+            }
+
             var roles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
 
             var userAuthDto = new UserAuthDTO

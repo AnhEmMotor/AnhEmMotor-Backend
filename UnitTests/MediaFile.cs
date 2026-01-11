@@ -1,4 +1,5 @@
 using Application.Common.Exceptions;
+using Application.Common.Models;
 using Application.Features.Files.Commands.DeleteFile;
 using Application.Features.Files.Commands.DeleteManyFiles;
 using Application.Features.Files.Commands.RestoreFile;
@@ -33,7 +34,7 @@ public class MediaFile
         var expectedFileExtension = ".webp";
         fileStorageServiceMock
             .Setup(x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((expectedStoragePath, expectedFileExtension));
+            .ReturnsAsync(Result<FileUpload>.Success(new FileUpload(expectedStoragePath, expectedFileExtension, 1024)));
 
         var handler = new UploadImageCommandHandler(
             fileStorageServiceMock.Object,
@@ -471,7 +472,7 @@ public class MediaFile
         var expectedFileExtension = ".webp";
         fileStorageServiceMock
             .Setup(x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((expectedStoragePath, expectedFileExtension));
+            .ReturnsAsync(Result<FileUpload>.Success(new FileUpload(expectedStoragePath, expectedFileExtension, 1024)));
 
         var handler = new UploadImageCommandHandler(
             fileStorageServiceMock.Object,
@@ -506,7 +507,7 @@ public class MediaFile
         var expectedFileExtension = ".webp";
         fileStorageServiceMock
             .Setup(x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((expectedStoragePath, expectedFileExtension));
+            .ReturnsAsync(Result<FileUpload>.Success(new FileUpload(expectedStoragePath, expectedFileExtension, 1024)));
 
         var handler = new UploadImageCommandHandler(
             fileStorageServiceMock.Object,
@@ -647,7 +648,7 @@ public class MediaFile
         var expectedFileExtension = ".webp";
         fileStorageServiceMock
             .Setup(x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((expectedStoragePath, expectedFileExtension));
+            .ReturnsAsync(Result<FileUpload>.Success(new FileUpload(expectedStoragePath, expectedFileExtension, 1024)));
 
         var handler = new UploadImageCommandHandler(
             fileStorageServiceMock.Object,
@@ -685,10 +686,10 @@ public class MediaFile
     };
 
         fileStorageServiceMock
-            .Setup(x => x.SaveFilesAsync(
-                It.IsAny<IEnumerable<Stream>>(),
+            .Setup(x => x.SaveFileAsync(
+                It.IsAny<Stream>(),
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync(savedResults);
+            .ReturnsAsync(Result<FileUpload>.Success(new FileUpload("img1.webp", ".webp", 1024)));
 
         var handler = new UploadManyImageCommandHandler(
             fileStorageServiceMock.Object,
@@ -714,9 +715,9 @@ public class MediaFile
         // Assert
         result.Value.Should().HaveCount(2);
 
-        fileStorageServiceMock.Verify(x => x.SaveFilesAsync(
-            It.Is<IEnumerable<Stream>>(list => list.Count() == 2),
-            It.IsAny<CancellationToken>()), Times.Once());
+        fileStorageServiceMock.Verify(x => x.SaveFileAsync(
+            It.IsAny<Stream>(),
+            It.IsAny<CancellationToken>()), Times.Exactly(2));
     }
 
     [Fact(DisplayName = "MF_043 - Single Upload - Should delegate to SaveFileAsync")]
@@ -735,7 +736,7 @@ public class MediaFile
             .Setup(x => x.SaveFileAsync(
                 It.IsAny<Stream>(),
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync((expectedStoragePath, expectedFileExtension));
+            .ReturnsAsync(Result<FileUpload>.Success(new FileUpload(expectedStoragePath, expectedFileExtension, 1024)));
 
         var handler = new UploadImageCommandHandler(
             fileStorageServiceMock.Object,

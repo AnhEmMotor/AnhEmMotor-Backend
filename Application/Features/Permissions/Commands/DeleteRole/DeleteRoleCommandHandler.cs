@@ -17,7 +17,11 @@ public class DeleteRoleCommandHandler(
     {
         var roleName = request.RoleName;
 
-        var role = await roleManager.FindByNameAsync(roleName).ConfigureAwait(false) ?? return Error.BadRequest("Role not found.");
+        var role = await roleManager.FindByNameAsync(roleName).ConfigureAwait(false);
+        if (role is null)
+        {
+            return Error.BadRequest("Role not found.");
+        }
 
         var superRoles = protectedEntityManagerService.GetSuperRoles() ?? [];
         if(superRoles.Contains(roleName))
