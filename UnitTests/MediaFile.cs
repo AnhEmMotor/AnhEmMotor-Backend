@@ -784,10 +784,10 @@ public class MediaFile
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
-        result.IsFailure.Should().BeTrue();
 
         // Assert - Validation sẽ catch null stream
-        
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("stream");
     }
 
     [Fact(DisplayName = "MF_049 - Upload file với empty stream")]
@@ -812,10 +812,10 @@ public class MediaFile
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
-        result.IsFailure.Should().BeTrue();
 
         // Assert - Validation sẽ catch empty stream
-        
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("empty");
     }
 
     [Fact(DisplayName = "MF_050 - Upload file với FileName rỗng")]
@@ -840,9 +840,9 @@ public class MediaFile
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
-        result.IsFailure.Should().BeTrue();
 
         // Assert - Validation sẽ catch empty filename
-        
+        result.IsFailure.Should().BeTrue();
+        result.Error.Message.Should().Contain("filename");
     }
 }
