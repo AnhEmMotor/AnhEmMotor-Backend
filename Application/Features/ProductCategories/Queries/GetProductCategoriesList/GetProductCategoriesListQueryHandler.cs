@@ -12,7 +12,7 @@ public sealed class GetProductCategoriesListQueryHandler(
     IProductCategoryReadRepository repository,
     ISievePaginator paginator) : IRequestHandler<GetProductCategoriesListQuery, Result<PagedResult<ProductCategoryResponse>>>
 {
-    public async Task<Result<PagedResult<ProductCategoryResponse>> Handle(
+    public async Task<Result<PagedResult<ProductCategoryResponse>>> Handle(
         GetProductCategoriesListQuery request,
         CancellationToken cancellationToken)
     {

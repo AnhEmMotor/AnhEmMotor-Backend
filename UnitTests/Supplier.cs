@@ -40,7 +40,7 @@ public class Supplier
     public async Task CreateSupplier_WithFullInformation_Success()
     {
         // Arrange
-        var handler = new CreateSupplierCommandHandler(_insertRepoMock.Object, _readRepoMock.Object, _unitOfWorkMock.Object);
+        var handler = new CreateSupplierCommandHandler(_insertRepoMock.Object, _unitOfWorkMock.Object);
         var command = new CreateSupplierCommand
         {
             Name = "Supplier A",
@@ -58,7 +58,7 @@ public class Supplier
         _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
         _insertRepoMock.Verify(x => x.Add(It.IsAny<SupplierEntity>()), Times.Once);
@@ -69,7 +69,7 @@ public class Supplier
     public async Task CreateSupplier_WithMinimalInfo_Success()
     {
         // Arrange
-        var handler = new CreateSupplierCommandHandler(_insertRepoMock.Object, _readRepoMock.Object, _unitOfWorkMock.Object);
+        var handler = new CreateSupplierCommandHandler(_insertRepoMock.Object, _unitOfWorkMock.Object);
         var command = new CreateSupplierCommand
         {
             Name = "Supplier B",
@@ -84,7 +84,7 @@ public class Supplier
         _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
         _insertRepoMock.Verify(x => x.Add(It.IsAny<SupplierEntity>()), Times.Once);
@@ -95,7 +95,7 @@ public class Supplier
     public async Task CreateSupplier_WithEmailInsteadOfPhone_Success()
     {
         // Arrange
-        var handler = new CreateSupplierCommandHandler(_insertRepoMock.Object, _readRepoMock.Object, _unitOfWorkMock.Object);
+        var handler = new CreateSupplierCommandHandler(_insertRepoMock.Object, _unitOfWorkMock.Object);
         var command = new CreateSupplierCommand
         {
             Name = "Supplier C",
@@ -110,7 +110,7 @@ public class Supplier
         _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
         _insertRepoMock.Verify(x => x.Add(It.IsAny<SupplierEntity>()), Times.Once);
@@ -176,7 +176,7 @@ public class Supplier
     public async Task CreateSupplier_DuplicateName_ThrowsException()
     {
         // Arrange
-        var handler = new CreateSupplierCommandHandler(_insertRepoMock.Object, _readRepoMock.Object, _unitOfWorkMock.Object);
+        var handler = new CreateSupplierCommandHandler(_insertRepoMock.Object, _unitOfWorkMock.Object);
         var command = new CreateSupplierCommand
         {
             Name = "Supplier Existing",
@@ -191,14 +191,15 @@ public class Supplier
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(existingSuppliers);
 
         // Act & Assert
-        await Assert.ThrowsAsync<BadRequestException>(() => handler.Handle(command, CancellationToken.None));
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "SUP_008 - Tạo Supplier thất bại khi Phone đã tồn tại")]
     public async Task CreateSupplier_DuplicatePhone_ThrowsException()
     {
         // Arrange
-        var handler = new CreateSupplierCommandHandler(_insertRepoMock.Object, _readRepoMock.Object, _unitOfWorkMock.Object);
+        var handler = new CreateSupplierCommandHandler(_insertRepoMock.Object, _unitOfWorkMock.Object);
         var command = new CreateSupplierCommand
         {
             Name = "Supplier New",
@@ -213,14 +214,15 @@ public class Supplier
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(existingSuppliers);
 
         // Act & Assert
-        await Assert.ThrowsAsync<BadRequestException>(() => handler.Handle(command, CancellationToken.None));
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "SUP_009 - Tạo Supplier thất bại khi TaxIdentificationNumber đã tồn tại")]
     public async Task CreateSupplier_DuplicateTaxId_ThrowsException()
     {
         // Arrange
-        var handler = new CreateSupplierCommandHandler(_insertRepoMock.Object, _readRepoMock.Object, _unitOfWorkMock.Object);
+        var handler = new CreateSupplierCommandHandler(_insertRepoMock.Object, _unitOfWorkMock.Object);
         var command = new CreateSupplierCommand
         {
             Name = "Supplier Tax",
@@ -236,14 +238,15 @@ public class Supplier
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(existingSuppliers);
 
         // Act & Assert
-        await Assert.ThrowsAsync<BadRequestException>(() => handler.Handle(command, CancellationToken.None));
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "SUP_010 - Tạo Supplier với Name có khoảng trắng đầu cuối")]
     public async Task CreateSupplier_NameWithWhitespace_TrimmedSuccessfully()
     {
         // Arrange
-        var handler = new CreateSupplierCommandHandler(_insertRepoMock.Object, _readRepoMock.Object, _unitOfWorkMock.Object);
+        var handler = new CreateSupplierCommandHandler(_insertRepoMock.Object, _unitOfWorkMock.Object);
         var command = new CreateSupplierCommand
         {
             Name = "  Supplier Trim  ",
@@ -258,7 +261,7 @@ public class Supplier
         _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
         _insertRepoMock.Verify(x => x.Add(It.Is<SupplierEntity>(s => s.Name != null && !s.Name.StartsWith(' ') && !s.Name.EndsWith(' '))), Times.Once);
@@ -353,11 +356,11 @@ public class Supplier
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(emptySuppliers);
 
         // Act
-        var (Data, Error) = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        Data.Should().NotBeNull();
-        Data!.Name.Should().Be("Updated Name");
+        result.Value.Should().NotBeNull();
+        result.Value!.Name.Should().Be("Updated Name");
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -388,13 +391,13 @@ public class Supplier
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(emptySuppliers);
 
         // Act
-        var (Data, Error) = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        Data.Should().NotBeNull();
-        Data!.Name.Should().Be("Only Name Updated");
-        Data.Phone.Should().Be("0123456789");
-        Data.Email.Should().Be("original@test.com");
+        result.Value.Should().NotBeNull();
+        result.Value!.Name.Should().Be("Only Name Updated");
+        result.Value.Phone.Should().Be("0123456789");
+        result.Value.Email.Should().Be("original@test.com");
     }
 
     [Fact(DisplayName = "SUP_017 - Cập nhật Supplier thất bại khi body rỗng")]
@@ -415,7 +418,8 @@ public class Supplier
             .ReturnsAsync(existingSupplier);
 
         // Act & Assert
-        await Assert.ThrowsAsync<BadRequestException>(() => handler.Handle(command, CancellationToken.None));
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "SUP_018 - Cập nhật Supplier thất bại khi Name trùng với Supplier khác")]
@@ -446,7 +450,8 @@ public class Supplier
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(existingSuppliers);
 
         // Act & Assert
-        await Assert.ThrowsAsync<BadRequestException>(() => handler.Handle(command, CancellationToken.None));
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "SUP_019 - Cập nhật Supplier thất bại khi Supplier đã bị xóa")]
@@ -464,7 +469,8 @@ public class Supplier
             .ReturnsAsync((SupplierEntity?)null);
 
         // Act & Assert
-        await Assert.ThrowsAsync<KeyNotFoundException>(() => handler.Handle(command, CancellationToken.None));
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "SUP_021 - Cập nhật trạng thái Supplier từ active sang inactive thành công")]
@@ -558,7 +564,8 @@ public class Supplier
             .ReturnsAsync((SupplierEntity?)null);
 
         // Act & Assert
-        await Assert.ThrowsAsync<KeyNotFoundException>(() => handler.Handle(command, CancellationToken.None));
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "SUP_025 - Xóa Supplier thành công khi không có Input Receipt nào")]
@@ -580,7 +587,7 @@ public class Supplier
             .ReturnsAsync(existingSupplier);
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -608,7 +615,8 @@ public class Supplier
             .ReturnsAsync(existingSupplier);
 
         // Act & Assert
-        await Assert.ThrowsAsync<BadRequestException>(() => handler.Handle(command, CancellationToken.None));
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "SUP_027 - Xóa Supplier thành công khi có Input Receipt nhưng không ở trạng thái Working")]
@@ -633,7 +641,7 @@ public class Supplier
             .ReturnsAsync(existingSupplier);
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -650,7 +658,8 @@ public class Supplier
             .ReturnsAsync((SupplierEntity?)null);
 
         // Act & Assert
-        await Assert.ThrowsAsync<KeyNotFoundException>(() => handler.Handle(command, CancellationToken.None));
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "SUP_029 - Khôi phục Supplier thành công")]
@@ -672,7 +681,7 @@ public class Supplier
             .ReturnsAsync(deletedSupplier);
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -697,6 +706,7 @@ public class Supplier
             .ReturnsAsync(activeSupplier);
 
         // Act & Assert
-        await Assert.ThrowsAsync<BadRequestException>(() => handler.Handle(command, CancellationToken.None));
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 }

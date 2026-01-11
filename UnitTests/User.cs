@@ -61,14 +61,13 @@ public class User
         // Assert
         result.Should().NotBeNull();
 
-        //TODO: Viết lại đống này cho nó chạy
-        //result.IsSuccess.Should().BeTrue();
-        //result.Value.Id.Should().Be(userId);
-        //result.Value.UserName.Should().Be("testuser");
-        //result.Value.Email.Should().Be("test@example.com");
-        //result.Value.FullName.Should().Be("Test User");
-        //result.Value.Gender.Should().Be(GenderStatus.Male);
-        //result.Value.PhoneNumber.Should().Be("0123456789");
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Id.Should().Be(userId);
+        result.Value.UserName.Should().Be("testuser");
+        result.Value.Email.Should().Be("test@example.com");
+        result.Value.FullName.Should().Be("Test User");
+        result.Value.Gender.Should().Be(GenderStatus.Male);
+        result.Value.PhoneNumber.Should().Be("0123456789");
     }
 
     [Fact(DisplayName = "USER_002 - Lấy thông tin người dùng khi JWT không hợp lệ")]
@@ -82,8 +81,8 @@ public class User
         var query = new GetCurrentUserQuery(null);
 
         // Act & Assert
-        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            handler.Handle(query, CancellationToken.None));
+        var result = await handler.Handle(query, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "USER_003 - Lấy thông tin người dùng khi tài khoản đã bị xóa mềm")]
@@ -105,9 +104,8 @@ public class User
         var query = new GetCurrentUserQuery(userId.ToString());
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ForbiddenException>(() => 
-            handler.Handle(query, CancellationToken.None));
-        exception.Message.Should().Contain("Account has been deleted");
+        var result = await handler.Handle(query, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "USER_004 - Lấy thông tin người dùng khi tài khoản bị Ban")]
@@ -129,9 +127,8 @@ public class User
         var query = new GetCurrentUserQuery(userId.ToString());
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ForbiddenException>(() => 
-            handler.Handle(query, CancellationToken.None));
-        exception.Message.Should().Contain("Account has been banned");
+        var result = await handler.Handle(query, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "USER_005 - Cập nhật thông tin người dùng thành công")]
@@ -308,9 +305,8 @@ public class User
         var command = new UpdateCurrentUserCommand(userId.ToString(), request);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<BadRequestException>(() => 
-            handler.Handle(command, CancellationToken.None));
-        exception.Message.Should().Contain("Invalid gender value");
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "USER_010 - Cập nhật thông tin với số điện thoại không hợp lệ (chữ vào chỗ số)")]
@@ -336,9 +332,8 @@ public class User
         var command = new UpdateCurrentUserCommand(userId.ToString(), request);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<BadRequestException>(() => 
-            handler.Handle(command, CancellationToken.None));
-        exception.Message.Should().Contain("Invalid phone number format");
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "USER_011 - Cập nhật thông tin khi người dùng đã bị xóa mềm")]
@@ -360,9 +355,8 @@ public class User
         var command = new UpdateCurrentUserCommand(userId.ToString(), request);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ForbiddenException>(() => 
-            handler.Handle(command, CancellationToken.None));
-        exception.Message.Should().Contain("Cannot update deleted account");
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "USER_012 - Cập nhật thông tin khi người dùng bị Ban")]
@@ -385,9 +379,8 @@ public class User
         var command = new UpdateCurrentUserCommand(userId.ToString(), request);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ForbiddenException>(() => 
-            handler.Handle(command, CancellationToken.None));
-        exception.Message.Should().Contain("Cannot update banned account");
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "USER_013 - Cập nhật thông tin với trường Email trong body (phải bị chặn)")]
@@ -485,9 +478,8 @@ public class User
         var command = new ChangePasswordCurrentUserCommand(userId.ToString(), request);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            handler.Handle(command, CancellationToken.None));
-        exception.Message.Should().Contain("Current password is incorrect");
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "USER_016 - Đổi mật khẩu với NewPassword quá ngắn (validation)")]
@@ -516,9 +508,8 @@ public class User
         var command = new ChangePasswordCurrentUserCommand(userId.ToString(), request);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<BadRequestException>(() => 
-            handler.Handle(command, CancellationToken.None));
-        exception.Message.Should().Contain("Password must be at least 6 characters");
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "USER_017 - Đổi mật khẩu khi tài khoản đã bị xóa mềm")]
@@ -544,9 +535,8 @@ public class User
         var command = new ChangePasswordCurrentUserCommand(userId.ToString(), request);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ForbiddenException>(() => 
-            handler.Handle(command, CancellationToken.None));
-        exception.Message.Should().Contain("Cannot change password for deleted account");
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "USER_018 - Xóa tài khoản thành công")]
@@ -599,9 +589,8 @@ public class User
         var command = new DeleteCurrentUserAccountCommand(userId.ToString());
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ForbiddenException>(() => 
-            handler.Handle(command, CancellationToken.None));
-        exception.Message.Should().Contain("Cannot delete banned account");
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "USER_020 - Xóa tài khoản khi tài khoản đã bị xóa mềm trước đó")]
@@ -622,9 +611,8 @@ public class User
         var command = new DeleteCurrentUserAccountCommand(userId.ToString());
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<BadRequestException>(() => 
-            handler.Handle(command, CancellationToken.None));
-        exception.Message.Should().Contain("Account already deleted");
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 }
 

@@ -7,6 +7,9 @@ namespace Application.Features.Permissions.Queries.GetAllRoles;
 
 public class GetAllRolesQueryHandler(IRoleReadRepository roleReadRepository) : IRequestHandler<GetAllRolesQuery, Result<List<RoleSelectResponse>>>
 {
-    public Task<Result<List<RoleSelectResponse>>> Handle(GetAllRolesQuery request, CancellationToken cancellationToken)
-    { return roleReadRepository.GetAllRoleSelectsAsync(cancellationToken); }
+    public async Task<Result<List<RoleSelectResponse>>> Handle(GetAllRolesQuery request, CancellationToken cancellationToken)
+    {
+        var result = await roleReadRepository.GetAllRoleSelectsAsync(cancellationToken);
+        return result;
+    }
 }

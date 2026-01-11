@@ -7,8 +7,11 @@ namespace Application.Features.Statistical.Queries.GetOrderStatusCounts;
 
 public sealed class GetOrderStatusCountsQueryHandler(IStatisticalReadRepository repository) : IRequestHandler<GetOrderStatusCountsQuery, Result<IEnumerable<OrderStatusCountResponse>>>
 {
-    public Task<Result<IEnumerable<OrderStatusCountResponse>>> Handle(
+    public async Task<Result<IEnumerable<OrderStatusCountResponse>>> Handle(
         GetOrderStatusCountsQuery request,
         CancellationToken cancellationToken)
-    { return repository.GetOrderStatusCountsAsync(cancellationToken); }
+    {
+        var result = await repository.GetOrderStatusCountsAsync(cancellationToken);
+        return Result<IEnumerable<OrderStatusCountResponse>>.Success(result);
+    }
 }

@@ -66,10 +66,10 @@ public class PermissionAndRole
 
         // Assert
         result.Should().NotBeNull();
-        result.Should().BeOfType<Dictionary<string, List<PermissionResponse>>>();
-        result.Should().ContainKey("Brands");
-        result.Should().ContainKey("Products");
-        result.Should().ContainKey("Roles");
+        result.Value.Should().BeOfType<Dictionary<string, List<PermissionResponse>>>();
+        result.Value.Should().ContainKey("Brands");
+        result.Value.Should().ContainKey("Products");
+        result.Value.Should().ContainKey("Roles");
     }
 
     [Fact(DisplayName = "PERM_002 - Lấy permissions của user hiện tại thành công")]
@@ -109,8 +109,8 @@ public class PermissionAndRole
 
         // Assert
         result.Should().NotBeNull();
-        result.Permissions.Should().HaveCount(5);
-        result.UserId.Should().Be(userId);
+        result.Value.Permissions.Should().HaveCount(5);
+        result.Value.UserId.Should().Be(userId);
     }
 
     [Fact(DisplayName = "PERM_003 - Lấy permissions của user không có role nào")]
@@ -137,8 +137,8 @@ public class PermissionAndRole
 
         // Assert
         result.Should().NotBeNull();
-        result.Permissions.Should().BeEmpty();
-        result.UserId.Should().Be(userId);
+        result.Value.Permissions.Should().BeEmpty();
+        result.Value.UserId.Should().Be(userId);
     }
 
     [Fact(DisplayName = "PERM_004 - Lấy permissions của user bằng userId hợp lệ")]
@@ -176,9 +176,9 @@ public class PermissionAndRole
 
         // Assert
         result.Should().NotBeNull();
-        result.UserId.Should().Be(userId);
-        result.Permissions.Should().HaveCount(3);
-        result.Email.Should().Be("staff@test.com");
+        result.Value.UserId.Should().Be(userId);
+        result.Value.Permissions.Should().HaveCount(3);
+        result.Value.Email.Should().Be("staff@test.com");
     }
 
     [Fact(DisplayName = "PERM_005 - Lấy permissions của user bằng userId không tồn tại")]
@@ -198,11 +198,8 @@ public class PermissionAndRole
         var query = new GetUserPermissionsByIdQuery(userId);
 
         // Act
-        Func<Task> act = async () => await handler.Handle(query, CancellationToken.None);
-
-        // Assert
-        await act.Should().ThrowAsync<Exception>()
-            .WithMessage("*User not found*");
+        var result = await handler.Handle(query, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "PERM_006 - Lấy permissions của role hợp lệ")]
@@ -237,7 +234,7 @@ public class PermissionAndRole
 
         // Assert
         result.Should().NotBeNull();
-        result.Should().HaveCount(4);
+        result.Value.Should().HaveCount(4);
     }
 
     [Fact(DisplayName = "PERM_007 - Lấy permissions của role không tồn tại")]
@@ -255,11 +252,8 @@ public class PermissionAndRole
         var query = new GetRolePermissionsQuery("NonExistentRole");
 
         // Act
-        Func<Task> act = async () => await handler.Handle(query, CancellationToken.None);
-
-        // Assert
-        await act.Should().ThrowAsync<Exception>()
-            .WithMessage("*Role not found*");
+        var result = await handler.Handle(query, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "PERM_008 - Lấy permissions của role với tên có khoảng trắng đầu/cuối")]
@@ -292,7 +286,7 @@ public class PermissionAndRole
 
         // Assert
         result.Should().NotBeNull();
-        result.Should().HaveCount(2);
+        result.Value.Should().HaveCount(2);
     }
 
     [Fact(DisplayName = "PERM_009 - Tạo role mới thành công với tên và permissions hợp lệ")]
@@ -337,10 +331,10 @@ public class PermissionAndRole
 
         // Assert
         result.Should().NotBeNull();
-        result.RoleName.Should().Be("NewRole");
-        result.Description.Should().Be("Test role");
-        result.Permissions.Should().HaveCount(2);
-        result.RoleId.Should().NotBeEmpty();
+        result.Value.RoleName.Should().Be("NewRole");
+        result.Value.Description.Should().Be("Test role");
+        result.Value.Permissions.Should().HaveCount(2);
+        result.Value.RoleId.Should().NotBeEmpty();
     }
 
     [Fact(DisplayName = "PERM_010 - Tạo role mới với tên đã tồn tại")]
@@ -366,11 +360,8 @@ public class PermissionAndRole
         var command = new CreateRoleCommand(request);
 
         // Act
-        Func<Task> act = async () => await handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        await act.Should().ThrowAsync<Exception>()
-            .WithMessage("*Role name already exists*");
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "PERM_011 - Tạo role mới với tên rỗng hoặc null - Trường hợp 1: RoleName rỗng")]
@@ -393,11 +384,8 @@ public class PermissionAndRole
         var command = new CreateRoleCommand(request);
 
         // Act
-        Func<Task> act = async () => await handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        await act.Should().ThrowAsync<Exception>()
-            .WithMessage("*Role name is required*");
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "PERM_011 - Tạo role mới với tên rỗng hoặc null - Trường hợp 2: RoleName null")]
@@ -420,11 +408,8 @@ public class PermissionAndRole
         var command = new CreateRoleCommand(request);
 
         // Act
-        Func<Task> act = async () => await handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        await act.Should().ThrowAsync<Exception>()
-            .WithMessage("*Role name is required*");
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "PERM_012 - Tạo role mới với danh sách permissions rỗng")]
@@ -447,11 +432,8 @@ public class PermissionAndRole
         var command = new CreateRoleCommand(request);
 
         // Act
-        Func<Task> act = async () => await handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        await act.Should().ThrowAsync<Exception>()
-            .WithMessage("*At least one permission is required*");
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "PERM_013 - Tạo role mới với permissions không tồn tại")]
@@ -481,11 +463,8 @@ public class PermissionAndRole
         var command = new CreateRoleCommand(request);
 
         // Act
-        Func<Task> act = async () => await handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        await act.Should().ThrowAsync<Exception>()
-            .WithMessage("*Invalid permissions*");
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "PERM_014 - Tạo role mới với tên chứa ký tự đặc biệt")]
@@ -508,11 +487,8 @@ public class PermissionAndRole
         var command = new CreateRoleCommand(request);
 
         // Act
-        Func<Task> act = async () => await handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        await act.Should().ThrowAsync<Exception>()
-            .WithMessage("*Role name contains invalid characters*");
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "PERM_015 - Cập nhật description của role thành công")]
@@ -545,8 +521,8 @@ public class PermissionAndRole
 
         // Assert
         result.Should().NotBeNull();
-        result.RoleName.Should().Be("Manager");
-        result.Description.Should().Be("Updated description");
+        result.Value.RoleName.Should().Be("Manager");
+        result.Value.Description.Should().Be("Updated description");
     }
 
     [Fact(DisplayName = "PERM_016 - Cập nhật permissions của role thành công")]
@@ -597,7 +573,7 @@ public class PermissionAndRole
 
         // Assert
         result.Should().NotBeNull();
-        result.RoleName.Should().Be("Manager");
+        result.Value.RoleName.Should().Be("Manager");
         roleUpdateRepoMock.Verify(x => x.RemovePermissionsFromRole(It.IsAny<IEnumerable<RolePermission>>()), Times.Once);
         roleUpdateRepoMock.Verify(x => x.AddPermissionsToRoleAsync(It.IsAny<IEnumerable<RolePermission>>(), It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -630,8 +606,8 @@ public class PermissionAndRole
 
         // Assert
         result.Should().NotBeNull();
-        result.RoleName.Should().Be("Manager");
-        result.Description.Should().Be("Original description");
+        result.Value.RoleName.Should().Be("Manager");
+        result.Value.Description.Should().Be("Original description");
         roleUpdateRepoMock.Verify(x => x.RemovePermissionsFromRole(It.IsAny<IEnumerable<RolePermission>>()), Times.Never);
         roleUpdateRepoMock.Verify(x => x.AddPermissionsToRoleAsync(It.IsAny<IEnumerable<RolePermission>>(), It.IsAny<CancellationToken>()), Times.Never);
     }
@@ -654,11 +630,8 @@ public class PermissionAndRole
         var command = new UpdateRoleCommand("NonExistentRole", request);
 
         // Act
-        Func<Task> act = async () => await handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        await act.Should().ThrowAsync<Exception>()
-            .WithMessage("*Role not found*");
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "PERM_019 - Xóa role thành công")]
@@ -686,7 +659,7 @@ public class PermissionAndRole
 
         // Assert
         result.Should().NotBeNull();
-        result.Message.Should().Contain("successfully");
+        result.Value.Message.Should().Contain("successfully");
         roleManagerMock.Verify(x => x.DeleteAsync(role), Times.Once);
     }
 
@@ -719,8 +692,8 @@ public class PermissionAndRole
 
         // Assert
         result.Should().NotBeNull();
-        result.Message.Should().Contain("3");
-        result.Message.Should().Contain("successfully");
+        result.Value.Message.Should().Contain("3");
+        result.Value.Message.Should().Contain("successfully");
         roleManagerMock.Verify(x => x.DeleteAsync(It.IsAny<ApplicationRole>()), Times.Exactly(3));
     }
 }

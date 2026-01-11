@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
+using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1;
 
@@ -22,8 +23,7 @@ namespace WebAPI.Controllers.V1;
 [SwaggerTag("Quản lý người dùng (Bất cứ người dùng nào đã đăng nhập đều có quyền vào đây)")]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status500InternalServerError)]
-[ApiController]
-public class UserController(IMediator mediator) : ControllerBase
+public class UserController(IMediator mediator) : ApiController
 {
     /// <summary>
     /// Lấy thông tin người dùng hiện tại từ JWT
@@ -37,7 +37,7 @@ public class UserController(IMediator mediator) : ControllerBase
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var result = await mediator.Send(new GetCurrentUserQuery(userId), cancellationToken).ConfigureAwait(false);
-        return Ok(result);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -56,7 +56,7 @@ public class UserController(IMediator mediator) : ControllerBase
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var result = await mediator.Send(new UpdateCurrentUserCommand(userId, model), cancellationToken)
             .ConfigureAwait(false);
-        return Ok(result);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -75,7 +75,7 @@ public class UserController(IMediator mediator) : ControllerBase
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var result = await mediator.Send(new ChangePasswordCurrentUserCommand(userId, model), cancellationToken)
             .ConfigureAwait(false);
-        return Ok(result);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -92,7 +92,7 @@ public class UserController(IMediator mediator) : ControllerBase
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var result = await mediator.Send(new DeleteCurrentUserAccountCommand(userId), cancellationToken)
             .ConfigureAwait(false);
-        return Ok(result);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -105,6 +105,6 @@ public class UserController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> RestoreUserAccount(Guid userId, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new RestoreUserAccountCommand(userId), cancellationToken).ConfigureAwait(false);
-        return Ok(result);
+        return HandleResult(result);
     }
 }

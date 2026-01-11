@@ -7,8 +7,11 @@ namespace Application.Features.Statistical.Queries.GetProductStockAndPrice;
 
 public sealed class GetProductStockAndPriceQueryHandler(IStatisticalReadRepository repository) : IRequestHandler<GetProductStockAndPriceQuery, Result<ProductStockPriceResponse?>>
 {
-    public Task<Result<ProductStockPriceResponse?>> Handle(
+    public async Task<Result<ProductStockPriceResponse?>> Handle(
         GetProductStockAndPriceQuery request,
         CancellationToken cancellationToken)
-    { return repository.GetProductStockAndPriceAsync(request.VariantId, cancellationToken); }
+    {
+        var result = await repository.GetProductStockAndPriceAsync(request.VariantId, cancellationToken);
+        return result;
+    }
 }

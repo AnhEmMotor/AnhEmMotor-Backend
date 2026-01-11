@@ -47,7 +47,7 @@ public sealed class UpdateProductCommandHandler(
                 .ConfigureAwait(false);
             if(category == null)
             {
-                errors.Add(Error.NotFound($"Product category with Id {request.CategoryId} not found or has been deleted.", nameof(request.CategoryId));
+                errors.Add(Error.NotFound($"Product category with Id {request.CategoryId} not found or has been deleted.", nameof(request.CategoryId)));
             }
         }
 

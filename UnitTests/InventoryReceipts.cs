@@ -249,7 +249,8 @@ public class InventoryReceipts
         };
 
         // Act & Assert
-        await Assert.ThrowsAsync<Exception>(() => handler.Handle(command, CancellationToken.None));
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "INPUT_054 - Handler xử lý UpdateInput ném ngoại lệ khi không tìm thấy Input")]
@@ -278,11 +279,9 @@ public class InventoryReceipts
         };
 
         // Act
-        var (Data, Error) = await handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        Data.Should().BeNull();
-        Error.Should().NotBeNull();
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.Value.Should().BeNull();
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "INPUT_055 - Handler xử lý UpdateInputStatus kiểm tra transition hợp lệ")]

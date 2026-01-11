@@ -9,7 +9,7 @@ namespace Application.Features.Suppliers.Queries.GetSuppliersList;
 
 public sealed class GetSuppliersListQueryHandler(ISupplierReadRepository repository, ISievePaginator paginator) : IRequestHandler<GetSuppliersListQuery, Result<PagedResult<SupplierResponse>>>
 {
-    public async Task<Result<PagedResult<SupplierResponse>> Handle(
+    public async Task<Result<PagedResult<SupplierResponse>>> Handle(
         GetSuppliersListQuery request,
         CancellationToken cancellationToken)
     {

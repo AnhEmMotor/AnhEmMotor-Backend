@@ -35,7 +35,7 @@ public sealed class DeleteManySuppliersCommandHandler(
         {
             if(!allSupplierMap.ContainsKey(id))
             {
-                errorDetails.Add(Error.NotFound($"Supplier with Id {id} not found.", "Id");
+                errorDetails.Add(Error.NotFound($"Supplier with Id {id} not found.", "Id"));
             } 
             else if(!activeSupplierSet.Contains(id))
             {

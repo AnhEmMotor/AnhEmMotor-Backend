@@ -7,8 +7,11 @@ namespace Application.Features.Statistical.Queries.GetMonthlyRevenueProfit;
 
 public sealed class GetMonthlyRevenueProfitQueryHandler(IStatisticalReadRepository repository) : IRequestHandler<GetMonthlyRevenueProfitQuery, Result<IEnumerable<MonthlyRevenueProfitResponse>>>
 {
-    public Task<Result<IEnumerable<MonthlyRevenueProfitResponse>>> Handle(
+    public async Task<Result<IEnumerable<MonthlyRevenueProfitResponse>>> Handle(
         GetMonthlyRevenueProfitQuery request,
         CancellationToken cancellationToken)
-    { return repository.GetMonthlyRevenueProfitAsync(request.Months, cancellationToken); }
+    {
+        var result = await repository.GetMonthlyRevenueProfitAsync(request.Months, cancellationToken);
+        return Result<IEnumerable<MonthlyRevenueProfitResponse>>.Success(result);
+    }
 }

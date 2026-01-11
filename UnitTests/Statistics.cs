@@ -47,7 +47,7 @@ public class Statistics
 
         // Assert
         result.Should().NotBeNull();
-        result.Should().HaveCount(7);
+        result.Value.Should().HaveCount(7);
     }
 
     [Fact(DisplayName = "STAT_042 - Unit - GetDailyRevenueQueryHandler với days = 1")]
@@ -69,8 +69,8 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.Should().HaveCount(1);
-        result.First().TotalRevenue.Should().Be(5000000);
+        result.Value.Should().HaveCount(1);
+        result.Value.First().TotalRevenue.Should().Be(5000000);
     }
 
     [Fact(DisplayName = "STAT_043 - Unit - GetDailyRevenueQueryHandler tính tổng doanh thu đúng")]
@@ -94,7 +94,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        var total = result.Sum(x => x.TotalRevenue);
+        var total = result.Value.Sum(x => x.TotalRevenue);
         total.Should().Be(4500000m);
     }
 
@@ -122,8 +122,8 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.Should().HaveCount(5);
-        result.All(x => x.TotalRevenue == 0).Should().BeTrue();
+        result.Value.Should().HaveCount(5);
+        result.Value.All(x => x.TotalRevenue == 0).Should().BeTrue();
     }
 
     [Fact(DisplayName = "STAT_045 - Unit - GetDailyRevenueQueryHandler với số thập phân")]
@@ -146,8 +146,8 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.First().TotalRevenue.Should().Be(1234567.89m);
-        result.Last().TotalRevenue.Should().Be(9876543.21m);
+        result.Value.First().TotalRevenue.Should().Be(1234567.89m);
+        result.Value.Last().TotalRevenue.Should().Be(9876543.21m);
     }
 
     [Fact(DisplayName = "STAT_046 - Unit - GetDailyRevenueQueryHandler gọi repository đúng tham số")]
@@ -181,7 +181,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.Should().BeNull();
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "STAT_048 - Unit - GetDailyRevenueQueryHandler format ngày đúng")]
@@ -209,9 +209,9 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.Should().HaveCount(3);
-        result.First().ReportDay.Should().Be(date1);
-        result.Last().ReportDay.Should().Be(date3);
+        result.Value.Should().HaveCount(3);
+        result.Value.First().ReportDay.Should().Be(date1);
+        result.Value.Last().ReportDay.Should().Be(date3);
     }
 
     [Fact(DisplayName = "STAT_049 - Unit - GetDashboardStatsQueryHandler tính lastMonthRevenue")]
@@ -237,7 +237,7 @@ public class Statistics
 
         // Assert
         result.Should().NotBeNull();
-        result!.LastMonthRevenue.Should().Be(50000000);
+        result.Value!.LastMonthRevenue.Should().Be(50000000);
     }
 
     [Fact(DisplayName = "STAT_050 - Unit - GetDashboardStatsQueryHandler tính lastMonthProfit")]
@@ -262,7 +262,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result!.LastMonthProfit.Should().Be(12000000);
+        result.Value!.LastMonthProfit.Should().Be(12000000);
     }
 
     [Fact(DisplayName = "STAT_051 - Unit - GetDashboardStatsQueryHandler tính pendingOrderCount")]
@@ -287,7 +287,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result!.PendingOrdersCount.Should().Be(15);
+        result.Value!.PendingOrdersCount.Should().Be(15);
     }
 
     [Fact(DisplayName = "STAT_052 - Unit - GetDashboardStatsQueryHandler tính newUserCount")]
@@ -312,7 +312,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result!.NewCustomersCount.Should().Be(25);
+        result.Value!.NewCustomersCount.Should().Be(25);
     }
 
     [Fact(DisplayName = "STAT_053 - Unit - GetDashboardStatsQueryHandler với lợi nhuận âm")]
@@ -337,7 +337,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result!.LastMonthProfit.Should().Be(-5000000);
+        result.Value!.LastMonthProfit.Should().Be(-5000000);
     }
 
     [Fact(DisplayName = "STAT_054 - Unit - GetDashboardStatsQueryHandler với tất cả = 0")]
@@ -362,10 +362,10 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result!.LastMonthRevenue.Should().Be(0);
-        result.LastMonthProfit.Should().Be(0);
-        result.PendingOrdersCount.Should().Be(0);
-        result.NewCustomersCount.Should().Be(0);
+        result.Value!.LastMonthRevenue.Should().Be(0);
+        result.Value.LastMonthProfit.Should().Be(0);
+        result.Value.PendingOrdersCount.Should().Be(0);
+        result.Value.NewCustomersCount.Should().Be(0);
     }
 
     [Fact(DisplayName = "STAT_055 - Unit - GetDashboardStatsQueryHandler gọi nhiều repository methods")]
@@ -410,7 +410,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.Should().HaveCount(12);
+        result.Value.Should().HaveCount(12);
     }
 
     [Fact(DisplayName = "STAT_057 - Unit - GetMonthlyRevenueProfitQueryHandler với months = 1")]
@@ -437,8 +437,8 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.Should().HaveCount(1);
-        result.First().TotalRevenue.Should().Be(10000000);
+        result.Value.Should().HaveCount(1);
+        result.Value.First().TotalRevenue.Should().Be(10000000);
     }
 
     [Fact(DisplayName = "STAT_058 - Unit - GetMonthlyRevenueProfitQueryHandler tính profit chính xác")]
@@ -462,9 +462,9 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.ElementAt(0).TotalProfit.Should().Be(4000000);
-        result.ElementAt(1).TotalProfit.Should().Be(3000000);
-        result.ElementAt(2).TotalProfit.Should().Be(5000000);
+        result.Value.ElementAt(0).TotalProfit.Should().Be(4000000);
+        result.Value.ElementAt(1).TotalProfit.Should().Be(3000000);
+        result.Value.ElementAt(2).TotalProfit.Should().Be(5000000);
     }
 
     [Fact(DisplayName = "STAT_059 - Unit - GetMonthlyRevenueProfitQueryHandler với tháng không có doanh thu")]
@@ -487,8 +487,8 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.First().TotalProfit.Should().Be(0);
-        result.Last().TotalProfit.Should().Be(2000000);
+        result.Value.First().TotalProfit.Should().Be(0);
+        result.Value.Last().TotalProfit.Should().Be(2000000);
     }
 
     [Fact(DisplayName = "STAT_060 - Unit - GetMonthlyRevenueProfitQueryHandler format tháng đúng")]
@@ -517,8 +517,8 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.Should().HaveCount(6);
-        result.All(x => x.ReportMonth.Day == 1).Should().BeTrue();
+        result.Value.Should().HaveCount(6);
+        result.Value.All(x => x.ReportMonth.Day == 1).Should().BeTrue();
     }
 
     [Fact(DisplayName = "STAT_061 - Unit - GetMonthlyRevenueProfitQueryHandler sắp xếp theo thứ tự")]
@@ -546,8 +546,8 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.Should().HaveCount(5);
-        result.Should().BeInAscendingOrder(x => x.ReportMonth);
+        result.Value.Should().HaveCount(5);
+        result.Value.Should().BeInAscendingOrder(x => x.ReportMonth);
     }
 
     [Fact(DisplayName = "STAT_062 - Unit - GetMonthlyRevenueProfitQueryHandler với số thập phân")]
@@ -570,8 +570,8 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.First().TotalProfit.Should().Be(1000000.77m);
-        result.Last().TotalProfit.Should().Be(7000000.10m);
+        result.Value.First().TotalProfit.Should().Be(1000000.77m);
+        result.Value.Last().TotalProfit.Should().Be(7000000.10m);
     }
 
     [Fact(DisplayName = "STAT_063 - Unit - GetMonthlyRevenueProfitQueryHandler gọi repository đúng")]
@@ -611,7 +611,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        var pendingCount = result.First(x => x.StatusName == OrderStatus.Pending);
+        var pendingCount = result.Value.First(x => x.StatusName == OrderStatus.Pending);
         pendingCount.OrderCount.Should().Be(10);
     }
 
@@ -634,7 +634,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.First().OrderCount.Should().Be(15);
+        result.Value.First().OrderCount.Should().Be(15);
     }
 
     [Fact(DisplayName = "STAT_066 - Unit - GetOrderStatusCountsQueryHandler đếm Delivering")]
@@ -656,7 +656,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.First().OrderCount.Should().Be(8);
+        result.Value.First().OrderCount.Should().Be(8);
     }
 
     [Fact(DisplayName = "STAT_067 - Unit - GetOrderStatusCountsQueryHandler đếm WaitingPickup")]
@@ -678,7 +678,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.First().OrderCount.Should().Be(5);
+        result.Value.First().OrderCount.Should().Be(5);
     }
 
     [Fact(DisplayName = "STAT_068 - Unit - GetOrderStatusCountsQueryHandler đếm Completed")]
@@ -700,7 +700,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.First().OrderCount.Should().Be(50);
+        result.Value.First().OrderCount.Should().Be(50);
     }
 
     [Fact(DisplayName = "STAT_069 - Unit - GetOrderStatusCountsQueryHandler đếm Cancelled")]
@@ -722,7 +722,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.First().OrderCount.Should().Be(3);
+        result.Value.First().OrderCount.Should().Be(3);
     }
 
     [Fact(DisplayName = "STAT_070 - Unit - GetOrderStatusCountsQueryHandler tất cả = 0")]
@@ -746,7 +746,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.All(x => x.OrderCount == 0).Should().BeTrue();
+        result.Value.All(x => x.OrderCount == 0).Should().BeTrue();
     }
 
     [Fact(DisplayName = "STAT_071 - Unit - GetOrderStatusCountsQueryHandler tổng số đúng")]
@@ -770,7 +770,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        var total = result.Sum(x => x.OrderCount);
+        var total = result.Value.Sum(x => x.OrderCount);
         total.Should().Be(30);
     }
 
@@ -817,7 +817,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.Should().HaveCount(10);
+        result.Value.Should().HaveCount(10);
     }
 
     [Fact(DisplayName = "STAT_074 - Unit - GetProductReportLastMonthQueryHandler tính soldQuantity")]
@@ -839,7 +839,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.First().SoldLastMonth.Should().Be(25);
+        result.Value.First().SoldLastMonth.Should().Be(25);
     }
 
     [Fact(DisplayName = "STAT_075 - Unit - GetProductReportLastMonthQueryHandler hiển thị stockQuantity")]
@@ -861,7 +861,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.First().StockQuantity.Should().Be(150);
+        result.Value.First().StockQuantity.Should().Be(150);
     }
 
     [Fact(DisplayName = "STAT_076 - Unit - GetProductReportLastMonthQueryHandler với sản phẩm chưa bán")]
@@ -883,8 +883,8 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.First().SoldLastMonth.Should().Be(0);
-        result.First().StockQuantity.Should().Be(200);
+        result.Value.First().SoldLastMonth.Should().Be(0);
+        result.Value.First().StockQuantity.Should().Be(200);
     }
 
     [Fact(DisplayName = "STAT_077 - Unit - GetProductReportLastMonthQueryHandler với sản phẩm hết hàng")]
@@ -906,8 +906,8 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.First().SoldLastMonth.Should().Be(50);
-        result.First().StockQuantity.Should().Be(0);
+        result.Value.First().SoldLastMonth.Should().Be(50);
+        result.Value.First().StockQuantity.Should().Be(0);
     }
 
     [Fact(DisplayName = "STAT_078 - Unit - GetProductReportLastMonthQueryHandler hiển thị tên sản phẩm")]
@@ -929,7 +929,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.First().ProductName.Should().Be("Xe máy Honda Wave");
+        result.Value.First().ProductName.Should().Be("Xe máy Honda Wave");
     }
 
     [Fact(DisplayName = "STAT_079 - Unit - GetProductReportLastMonthQueryHandler bao gồm sản phẩm xóa")]
@@ -952,8 +952,8 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.Should().HaveCount(2);
-        result.Any(x => x.ProductName == "Deleted Product").Should().BeTrue();
+        result.Value.Should().HaveCount(2);
+        result.Value.Any(x => x.ProductName == "Deleted Product").Should().BeTrue();
     }
 
     [Fact(DisplayName = "STAT_080 - Unit - GetProductReportLastMonthQueryHandler sắp xếp theo số lượng bán")]
@@ -977,7 +977,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.Should().BeInDescendingOrder(x => x.SoldLastMonth);
+        result.Value.Should().BeInDescendingOrder(x => x.SoldLastMonth);
     }
 
     [Fact(DisplayName = "STAT_081 - Unit - GetProductReportLastMonthQueryHandler gọi repository")]
@@ -1018,8 +1018,8 @@ public class Statistics
 
         // Assert
         result.Should().NotBeNull();
-        result!.UnitPrice.Should().Be(2500000);
-        result.StockQuantity.Should().Be(50);
+        result.Value!.UnitPrice.Should().Be(2500000);
+        result.Value.StockQuantity.Should().Be(50);
     }
 
     [Fact(DisplayName = "STAT_083 - Unit - GetProductStockAndPriceQueryHandler với giá = 0")]
@@ -1042,8 +1042,8 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result!.UnitPrice.Should().Be(0);
-        result.StockQuantity.Should().Be(100);
+        result.Value!.UnitPrice.Should().Be(0);
+        result.Value.StockQuantity.Should().Be(100);
     }
 
     [Fact(DisplayName = "STAT_084 - Unit - GetProductStockAndPriceQueryHandler với tồn kho = 0")]
@@ -1066,8 +1066,8 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result!.UnitPrice.Should().Be(1000000);
-        result.StockQuantity.Should().Be(0);
+        result.Value!.UnitPrice.Should().Be(1000000);
+        result.Value.StockQuantity.Should().Be(0);
     }
 
     [Fact(DisplayName = "STAT_085 - Unit - GetProductStockAndPriceQueryHandler với giá thập phân")]
@@ -1090,7 +1090,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result!.UnitPrice.Should().Be(1234567.89m);
+        result.Value!.UnitPrice.Should().Be(1234567.89m);
     }
 
     [Fact(DisplayName = "STAT_086 - Unit - GetProductStockAndPriceQueryHandler gọi repository đúng ID")]
@@ -1124,7 +1124,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.Should().BeNull();
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "STAT_088 - Unit - GetProductStockAndPriceQueryHandler với variant đã xóa")]
@@ -1148,6 +1148,6 @@ public class Statistics
 
         // Assert
         result.Should().NotBeNull();
-        result!.UnitPrice.Should().Be(500000);
+        result.Value!.UnitPrice.Should().Be(500000);
     }
 }

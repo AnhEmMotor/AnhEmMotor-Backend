@@ -10,7 +10,6 @@ using Application.Features.ProductCategories.Queries.GetDeletedProductCategories
 using Application.Features.ProductCategories.Queries.GetProductCategoriesList;
 using Application.Features.ProductCategories.Queries.GetProductCategoryById;
 using Asp.Versioning;
-
 using Infrastructure.Authorization.Attribute;
 using Mapster;
 using MediatR;
@@ -18,19 +17,18 @@ using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using static Domain.Constants.Permission.PermissionsList;
+using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1;
 
 /// <summary>
 /// Quản lý danh mục sản phẩm.
 /// </summary>
-/// <param name="mediator"></param>
 [ApiVersion("1.0")]
 [SwaggerTag(" Quản lý danh mục sản phẩm")]
-[ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status500InternalServerError)]
-public class ProductCategoryController(IMediator mediator) : ControllerBase
+public class ProductCategoryController(IMediator mediator) : ApiController
 {
     /// <summary>
     /// Lấy danh sách danh mục sản phẩm (có phân trang, lọc, sắp xếp - vào được cho mọi người dùng).
@@ -43,7 +41,7 @@ public class ProductCategoryController(IMediator mediator) : ControllerBase
     {
         var query = new GetProductCategoriesListQuery(sieveModel);
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-        return Ok(result);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -58,7 +56,7 @@ public class ProductCategoryController(IMediator mediator) : ControllerBase
     {
         var query = new GetProductCategoriesListQuery(sieveModel);
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-        return Ok(result);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -73,7 +71,7 @@ public class ProductCategoryController(IMediator mediator) : ControllerBase
     {
         var query = new GetDeletedProductCategoriesListQuery(sieveModel);
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-        return Ok(result);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -86,21 +84,13 @@ public class ProductCategoryController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetProductCategoryById(int id, CancellationToken cancellationToken)
     {
         var query = new GetProductCategoryByIdQuery(id);
-        var (data, error) = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-        if(error != null)
-        {
-            return NotFound(error);
-        }
-
-        return Ok(data);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
     /// Tạo mới danh mục sản phẩm.
     /// </summary>
-    /// <param name="request"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
     [HttpPost]
     [HasPermission(ProductCategories.Create)]
     [ProducesResponseType(typeof(ProductCategoryResponse), StatusCodes.Status201Created)]
@@ -109,8 +99,8 @@ public class ProductCategoryController(IMediator mediator) : ControllerBase
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<CreateProductCategoryCommand>();
-        var response = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return StatusCode(StatusCodes.Status201Created, response);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -126,13 +116,8 @@ public class ProductCategoryController(IMediator mediator) : ControllerBase
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<UpdateProductCategoryCommand>() with { Id = id };
-        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if(error != null)
-        {
-            return NotFound(error);
-        }
-
-        return Ok(data);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -145,13 +130,8 @@ public class ProductCategoryController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> DeleteProductCategory(int id, CancellationToken cancellationToken)
     {
         var command = new DeleteProductCategoryCommand() with { Id = id };
-        var error = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if(error != null)
-        {
-            return NotFound(error);
-        }
-
-        return NoContent();
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -166,14 +146,8 @@ public class ProductCategoryController(IMediator mediator) : ControllerBase
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<DeleteManyProductCategoriesCommand>();
-        var error = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-
-        if(error != null)
-        {
-            return BadRequest(error);
-        }
-
-        return NoContent();
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -187,14 +161,8 @@ public class ProductCategoryController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> RestoreProductCategory(int id, CancellationToken cancellationToken)
     {
         var command = new RestoreProductCategoryCommand() with { Id = id };
-        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-
-        if(error != null)
-        {
-            return NotFound(error);
-        }
-
-        return Ok(data);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -209,13 +177,7 @@ public class ProductCategoryController(IMediator mediator) : ControllerBase
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<RestoreManyProductCategoriesCommand>();
-        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-
-        if(error != null)
-        {
-            return BadRequest(error);
-        }
-
-        return Ok(data);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 }

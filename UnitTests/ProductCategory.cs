@@ -41,12 +41,12 @@ public class ProductCategory
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>())).Returns(new List<ProductCategoryEntity>().AsQueryable());
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        result.Should().NotBeNull();
-        result.Name.Should().Be("Điện thoại");
-        result.Description.Should().Be("Các sản phẩm điện thoại");
+        resultObj.Value.Should().NotBeNull();
+        resultObj.Value.Name.Should().Be("Điện thoại");
+        resultObj.Value.Description.Should().Be("Các sản phẩm điện thoại");
         _insertRepoMock.Verify(x => x.Add(It.Is<ProductCategoryEntity>(c => c.Name == "Điện thoại")), Times.Once);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -61,12 +61,12 @@ public class ProductCategory
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>())).Returns(new List<ProductCategoryEntity>().AsQueryable());
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        result.Should().NotBeNull();
-        result.Name.Should().Be("Laptop");
-        result.Description.Should().BeNull();
+        resultObj.Value.Should().NotBeNull();
+        resultObj.Value.Name.Should().Be("Laptop");
+        resultObj.Value.Description.Should().BeNull();
         _insertRepoMock.Verify(x => x.Add(It.IsAny<ProductCategoryEntity>()), Times.Once);
     }
 
@@ -80,12 +80,12 @@ public class ProductCategory
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>())).Returns(new List<ProductCategoryEntity>().AsQueryable());
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        result.Should().NotBeNull();
-        result.Name.Should().Be("Tablet");
-        result.Description.Should().BeNull();
+        resultObj.Value.Should().NotBeNull();
+        resultObj.Value.Name.Should().Be("Tablet");
+        resultObj.Value.Description.Should().BeNull();
     }
 
     [Fact(DisplayName = "PC_004 - Tạo danh mục sản phẩm với Name có khoảng trắng đầu/cuối")]
@@ -98,11 +98,11 @@ public class ProductCategory
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>())).Returns(new List<ProductCategoryEntity>().AsQueryable());
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        result.Should().NotBeNull();
-        result.Name.Should().Be("Phụ kiện");
+        resultObj.Value.Should().NotBeNull();
+        resultObj.Value.Name.Should().Be("Phụ kiện");
     }
 
     [Fact(DisplayName = "PC_005 - Tạo danh mục sản phẩm với Description có khoảng trắng đầu/cuối")]
@@ -115,11 +115,11 @@ public class ProductCategory
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>())).Returns(new List<ProductCategoryEntity>().AsQueryable());
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        result.Should().NotBeNull();
-        result.Description.Should().Be("Mô tả test");
+        resultObj.Value.Should().NotBeNull();
+        resultObj.Value.Description.Should().Be("Mô tả test");
     }
 
     [Fact(DisplayName = "PC_006 - Tạo danh mục sản phẩm với Name chứa ký tự đặc biệt")]
@@ -132,11 +132,11 @@ public class ProductCategory
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>())).Returns(new List<ProductCategoryEntity>().AsQueryable());
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        result.Should().NotBeNull();
-        result.Name.Should().Be("Đồ điện tử & Công nghệ <Tag>");
+        resultObj.Value.Should().NotBeNull();
+        resultObj.Value.Name.Should().Be("Đồ điện tử & Công nghệ <Tag>");
     }
 
     [Fact(DisplayName = "PC_007 - Tạo danh mục sản phẩm thiếu Name (Name null)")]
@@ -181,7 +181,8 @@ public class ProductCategory
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>())).Returns(existingCategories);
 
         // Act & Assert
-        await Assert.ThrowsAsync<BadRequestException>(() => handler.Handle(command, CancellationToken.None));
+        var resultObj = await handler.Handle(command, CancellationToken.None);
+        resultObj.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "PC_010 - Tạo danh mục sản phẩm với Name trùng (case-insensitive)")]
@@ -198,7 +199,8 @@ public class ProductCategory
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>())).Returns(existingCategories);
 
         // Act & Assert
-        await Assert.ThrowsAsync<BadRequestException>(() => handler.Handle(command, CancellationToken.None));
+        var resultObj = await handler.Handle(command, CancellationToken.None);
+        resultObj.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "PC_011 - Tạo danh mục sản phẩm với Name trùng bản ghi đã xóa")]
@@ -215,7 +217,8 @@ public class ProductCategory
         _readRepoMock.Setup(x => x.GetQueryable(Domain.Constants.DataFetchMode.All)).Returns(existingCategories);
 
         // Act & Assert
-        await Assert.ThrowsAsync<BadRequestException>(() => handler.Handle(command, CancellationToken.None));
+        var resultObj = await handler.Handle(command, CancellationToken.None);
+        resultObj.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "PC_012 - Tạo danh mục sản phẩm với dữ liệu rác trong request")]
@@ -228,12 +231,12 @@ public class ProductCategory
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>())).Returns(new List<ProductCategoryEntity>().AsQueryable());
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        result.Should().NotBeNull();
-        result.Name.Should().Be("Valid");
-        result.Description.Should().Be("Valid");
+        resultObj.Value.Should().NotBeNull();
+        resultObj.Value.Name.Should().Be("Valid");
+        resultObj.Value.Description.Should().Be("Valid");
     }
 
     [Fact(DisplayName = "PC_013 - Cập nhật danh mục sản phẩm thành công (cả Name và Description)")]
@@ -248,13 +251,13 @@ public class ProductCategory
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>())).Returns(new List<ProductCategoryEntity>().AsQueryable());
 
         // Act
-        var (result, error) = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        result.Should().NotBeNull();
-        result!.Name.Should().Be("Updated Name");
-        result.Description.Should().Be("Updated Description");
-        error.Should().BeNull();
+        resultObj.Value.Should().NotBeNull();
+        resultObj.Value!.Name.Should().Be("Updated Name");
+        resultObj.Value.Description.Should().Be("Updated Description");
+        resultObj.IsSuccess.Should().BeTrue();
         _updateRepoMock.Verify(x => x.Update(It.Is<ProductCategoryEntity>(c => c.Name == "Updated Name")), Times.Once);
     }
 
@@ -270,13 +273,13 @@ public class ProductCategory
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>())).Returns(new List<ProductCategoryEntity>().AsQueryable());
 
         // Act
-        var (result, error) = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        result.Should().NotBeNull();
-        result!.Name.Should().Be("Only Name Updated");
-        result.Description.Should().Be("Keep This");
-        error.Should().BeNull();
+        resultObj.Value.Should().NotBeNull();
+        resultObj.Value!.Name.Should().Be("Only Name Updated");
+        resultObj.Value.Description.Should().Be("Keep This");
+        resultObj.IsSuccess.Should().BeTrue();
     }
 
     [Fact(DisplayName = "PC_015 - Cập nhật danh mục sản phẩm chỉ Description")]
@@ -291,13 +294,13 @@ public class ProductCategory
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>())).Returns(new List<ProductCategoryEntity>().AsQueryable());
 
         // Act
-        var (result, error) = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        result.Should().NotBeNull();
-        result!.Name.Should().Be("Keep This");
-        result.Description.Should().Be("Only Description Updated");
-        error.Should().BeNull();
+        resultObj.Value.Should().NotBeNull();
+        resultObj.Value!.Name.Should().Be("Keep This");
+        resultObj.Value.Description.Should().Be("Only Description Updated");
+        resultObj.IsSuccess.Should().BeTrue();
     }
 
     [Fact(DisplayName = "PC_016 - Cập nhật danh mục sản phẩm với body rỗng")]
@@ -331,10 +334,10 @@ public class ProductCategory
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>())).Returns(existingCategories);
 
         // Act
-        var (result, error) = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        error.Should().NotBeNull();
+        resultObj.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "PC_018 - Cập nhật danh mục sản phẩm không tồn tại")]
@@ -348,10 +351,10 @@ public class ProductCategory
             .ReturnsAsync((ProductCategoryEntity?)null);
 
         // Act
-        var (result, error) = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        error.Should().NotBeNull();
+        resultObj.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "PC_019 - Cập nhật danh mục sản phẩm đã bị xóa")]
@@ -365,10 +368,10 @@ public class ProductCategory
             .ReturnsAsync(new ProductCategoryEntity { Id = 7, Name = "Deleted", DeletedAt = DateTime.UtcNow });
 
         // Act
-        var (result, error) = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        error.Should().NotBeNull();
+        resultObj.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "PC_020 - Xóa danh mục sản phẩm thành công")]
@@ -382,10 +385,10 @@ public class ProductCategory
             .ReturnsAsync(new ProductCategoryEntity { Id = 8, Name = "To Delete", DeletedAt = null });
 
         // Act
-        var error = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        error.Should().BeNull();
+        resultObj.IsSuccess.Should().BeTrue();
         _deleteRepoMock.Verify(x => x.Delete(It.Is<ProductCategoryEntity>(c => c.Id == 8)), Times.Once);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -401,10 +404,10 @@ public class ProductCategory
             .ReturnsAsync((ProductCategoryEntity?)null);
 
         // Act
-        var error = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        error.Should().NotBeNull();
+        resultObj.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "PC_022 - Xóa danh mục sản phẩm đã bị xóa")]
@@ -418,10 +421,10 @@ public class ProductCategory
             .ReturnsAsync(new ProductCategoryEntity { Id = 9, Name = "Already Deleted", DeletedAt = DateTime.UtcNow });
 
         // Act
-        var error = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        error.Should().NotBeNull();
+        resultObj.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "PC_023 - Khôi phục danh mục sản phẩm thành công")]
@@ -435,11 +438,11 @@ public class ProductCategory
             .ReturnsAsync(new ProductCategoryEntity { Id = 10, Name = "To Restore", DeletedAt = DateTime.UtcNow });
 
         // Act
-        var (result, error) = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        error.Should().BeNull();
-        result.Should().NotBeNull();
+        resultObj.IsSuccess.Should().BeTrue();
+        resultObj.Value.Should().NotBeNull();
         _updateRepoMock.Verify(x => x.Restore(It.Is<ProductCategoryEntity>(c => c.Id == 10)), Times.Once);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -455,9 +458,9 @@ public class ProductCategory
             .ReturnsAsync((ProductCategoryEntity?)null);
 
         // Act
-        var (result, error) = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        error.Should().NotBeNull();
+        resultObj.IsFailure.Should().BeTrue();
     }
 }

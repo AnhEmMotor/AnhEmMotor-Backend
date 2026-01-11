@@ -1,13 +1,18 @@
 ﻿using Application.ApiContracts.User.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories.User;
+using Domain.Primitives;
 using MediatR;
 
 namespace Application.Features.UserManager.Queries.GetUsersList;
 
-public sealed class GetUsersListQueryHandler(IUserReadRepository userReadRepository) : IRequestHandler<GetUsersListQuery, Domain.Primitives.PagedResult<UserDTOForManagerResponse>>
+public sealed class GetUsersListQueryHandler(IUserReadRepository userReadRepository) : IRequestHandler<GetUsersListQuery, Result<PagedResult<UserDTOForManagerResponse>>>
 {
-    public Task<Domain.Primitives.PagedResult<UserDTOForManagerResponse>> Handle(
+    public async Task<Result<PagedResult<UserDTOForManagerResponse>>> Handle(
         GetUsersListQuery request,
         CancellationToken cancellationToken)
-    { return userReadRepository.GetPagedListAsync(request.SieveModel, cancellationToken); }
+    {
+        var result = await userReadRepository.GetPagedListAsync(request.SieveModel, cancellationToken);
+        return result;
+    }
 }

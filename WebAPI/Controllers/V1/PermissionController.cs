@@ -10,13 +10,13 @@ using Application.Features.Permissions.Queries.GetMyPermissions;
 using Application.Features.Permissions.Queries.GetRolePermissions;
 using Application.Features.Permissions.Queries.GetUserPermissionsById;
 using Asp.Versioning;
-
 using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
+using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1;
 
@@ -27,8 +27,7 @@ namespace WebAPI.Controllers.V1;
 [SwaggerTag("Controller quản lý quyền hạn và vai trò")]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status500InternalServerError)]
-[ApiController]
-public class PermissionController(IMediator mediator) : ControllerBase
+public class PermissionController(IMediator mediator) : ApiController
 {
     /// <summary>
     /// Lấy tất cả các permissions có trong hệ thống với mô tả
@@ -39,7 +38,7 @@ public class PermissionController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetAllPermissions(CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetAllPermissionsQuery(), cancellationToken).ConfigureAwait(true);
-        return Ok(result);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -54,7 +53,7 @@ public class PermissionController(IMediator mediator) : ControllerBase
     {
         var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var result = await mediator.Send(new GetMyPermissionsQuery(userIdClaim), cancellationToken).ConfigureAwait(true);
-        return Ok(result);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -68,7 +67,7 @@ public class PermissionController(IMediator mediator) : ControllerBase
     {
         var result = await mediator.Send(new GetUserPermissionsByIdQuery(userId), cancellationToken)
             .ConfigureAwait(true);
-        return Ok(result);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -81,7 +80,7 @@ public class PermissionController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetRolePermissions(string roleName, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetRolePermissionsQuery(roleName), cancellationToken).ConfigureAwait(true);
-        return Ok(result);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -99,7 +98,7 @@ public class PermissionController(IMediator mediator) : ControllerBase
     {
         var result = await mediator.Send(new UpdateRolePermissionsCommand(roleName, model), cancellationToken)
             .ConfigureAwait(true);
-        return Ok(result);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -111,7 +110,7 @@ public class PermissionController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetAllRoles(CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetAllRolesQuery(), cancellationToken).ConfigureAwait(true);
-        return Ok(result);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -124,7 +123,7 @@ public class PermissionController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> CreateRole([FromBody] CreateRoleRequest model, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new CreateRoleCommand(model), cancellationToken).ConfigureAwait(true);
-        return Ok(result);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -142,7 +141,7 @@ public class PermissionController(IMediator mediator) : ControllerBase
     {
         var result = await mediator.Send(new UpdateRolePermissionsCommand(roleName, model), cancellationToken)
             .ConfigureAwait(true);
-        return Ok(result);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -156,7 +155,7 @@ public class PermissionController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> DeleteRole(string roleName, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new DeleteRoleCommand(roleName), cancellationToken).ConfigureAwait(true);
-        return Ok(result);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -172,6 +171,6 @@ public class PermissionController(IMediator mediator) : ControllerBase
     {
         var result = await mediator.Send(new DeleteMultipleRolesCommand(roleNames), cancellationToken)
             .ConfigureAwait(true);
-        return Ok(result);
+        return HandleResult(result);
     }
 }

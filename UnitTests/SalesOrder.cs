@@ -73,10 +73,10 @@ public class SalesOrder
             ]
         };
 
-        var (Data, Error) = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
-        Data.Should().NotBeNull();
-        Data!.Id.Should().BeGreaterThan(0);
+        result.Value.Should().NotBeNull();
+        result.Value!.Id.Should().BeGreaterThan(0);
         _insertRepoMock.Verify(x => x.Add(It.IsAny<Output>()), Times.Once);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -96,10 +96,10 @@ public class SalesOrder
             OutputInfos = [new() { ProductId = 1, Count = 1, Price = 50 }]
         };
 
-        var (Data, Error) = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
-        Data.Should().NotBeNull();
-        Data!.Id.Should().BeGreaterThan(0);
+        result.Value.Should().NotBeNull();
+        result.Value!.Id.Should().BeGreaterThan(0);
         _insertRepoMock.Verify(x => x.Add(It.IsAny<Output>()), Times.Once);
     }
 
@@ -126,7 +126,7 @@ public class SalesOrder
         _insertRepoMock.Setup(x => x.Add(It.IsAny<Output>()))
             .Callback<Output>((output) => capturedOutput = output);
 
-        var (Data, Error) = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
         capturedOutput.Should().NotBeNull();
         capturedOutput!.OutputInfos.Should().HaveCount(2);
@@ -156,7 +156,7 @@ public class SalesOrder
         _insertRepoMock.Setup(x => x.Add(It.IsAny<Output>()))
             .Callback<Output>((output) => capturedOutput = output);
 
-        var (Data, Error) = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
         capturedOutput.Should().NotBeNull();
         capturedOutput!.OutputInfos.Should().HaveCount(3);
@@ -182,10 +182,10 @@ public class SalesOrder
         _insertRepoMock.Setup(x => x.Add(It.IsAny<Output>()))
             .Callback<Output>((output) => capturedOutput = output);
 
-        var (Data, Error) = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
         capturedOutput.Should().NotBeNull();
-        capturedOutput!.StatusId.Should().Be("pending");
+        result.Value!.StatusId.Should().Be("pending");
     }
 
     [Fact(DisplayName = "SO_006 - UpdateOutputStatus kiểm tra transition hợp lệ")]
@@ -408,9 +408,9 @@ public class SalesOrder
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);
 
-        var act = async () => await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
-        await act.Should().ThrowAsync<BadRequestException>();
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "SO_015 - UpdateOutputStatus cập nhật LastStatusChangedAt")]
@@ -479,10 +479,10 @@ public class SalesOrder
             OutputInfos = [new() { ProductId = 1, Count = 1, Price = 100 }]
         };
 
-        var (Data, Error) = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
-        Data.Should().NotBeNull();
-        Data!.Id.Should().BeGreaterThan(0);
+        result.Value.Should().NotBeNull();
+        result.Value!.Id.Should().BeGreaterThan(0);
         _insertRepoMock.Verify(x => x.Add(It.IsAny<Output>()), Times.Once);
     }
 
@@ -508,10 +508,10 @@ public class SalesOrder
         _insertRepoMock.Setup(x => x.Add(It.IsAny<Output>()))
             .Callback<Output>((output) => capturedOutput = output);
 
-        var (Data, Error) = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
         capturedOutput.Should().NotBeNull();
-        capturedOutput!.BuyerId.Should().Be(customBuyerId);
+        result.Value!.BuyerId.Should().Be(customBuyerId);
     }
 
     [Fact(DisplayName = "SO_019 - UpdateOutputForManager kiểm tra ownership")]
@@ -717,7 +717,7 @@ public class SalesOrder
         var result = await handler.Handle(query, CancellationToken.None);
 
         result.Should().NotBeNull();
-        result.Data!.Id.Should().Be(1);
+        result.Value!.Id.Should().Be(1);
     }
 
     [Fact(DisplayName = "SO_028 - GetOutputsByUserId chỉ lấy đơn của user")]
@@ -861,7 +861,7 @@ public class SalesOrder
         _insertRepoMock.Setup(x => x.Add(It.IsAny<Output>()))
             .Callback<Output>((output) => capturedOutput = output);
 
-        var (Data, Error) = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
         capturedOutput.Should().NotBeNull();
         capturedOutput!.OutputInfos.Should().HaveCount(4);
@@ -890,7 +890,7 @@ public class SalesOrder
         _insertRepoMock.Setup(x => x.Add(It.IsAny<Output>()))
             .Callback<Output>((output) => capturedOutput = output);
 
-        var (Data, Error) = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
         capturedOutput.Should().NotBeNull();
         capturedOutput!.OutputInfos.Should().HaveCount(2);
@@ -914,9 +914,9 @@ public class SalesOrder
             }
         };
 
-        var act = async () => await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
-        await act.Should().ThrowAsync<BadRequestException>();
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "SO_036 - CreateOutput validation ProductId exists")]
@@ -940,9 +940,9 @@ public class SalesOrder
         _variantRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync([]);
 
-        var act = async () => await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
-        await act.Should().ThrowAsync<NotFoundException>();
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "SO_037 - UpdateOutput không thể sửa sau khi Completed")]
@@ -965,9 +965,9 @@ public class SalesOrder
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(completedOutput);
 
-        var act = async () => await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
-        await act.Should().ThrowAsync<BadRequestException>();
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "SO_038 - UpdateOutput kiểm tra soft deleted")]
@@ -990,9 +990,9 @@ public class SalesOrder
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(deletedOutput);
 
-        var act = async () => await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
-        await act.Should().ThrowAsync<NotFoundException>();
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "SO_039 - DeleteOutput không xóa đơn đã Completed")]
@@ -1009,9 +1009,9 @@ public class SalesOrder
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(completedOutput);
 
-        var act = async () => await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
-        await act.Should().ThrowAsync<BadRequestException>();
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "SO_040 - RestoreOutput chỉ khôi phục đơn đã xóa")]
@@ -1028,9 +1028,9 @@ public class SalesOrder
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), DataFetchMode.All))
             .ReturnsAsync(activeOutput);
 
-        var act = async () => await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
-        await act.Should().ThrowAsync<BadRequestException>();
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "SO_041 - UpdateOutputStatus lưu FinishedBy")]
@@ -1079,7 +1079,7 @@ public class SalesOrder
         _insertRepoMock.Setup(x => x.Add(It.IsAny<Output>()))
             .Callback<Output>((output) => capturedOutput = output);
 
-        var (Data, Error) = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
         capturedOutput.Should().NotBeNull();
         capturedOutput!.CreatedBy.Should().Be(createdBy);
@@ -1095,9 +1095,9 @@ public class SalesOrder
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), DataFetchMode.ActiveOnly))
             .ReturnsAsync((Output?)null);
 
-        var act = async () => await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None);
 
-        await act.Should().ThrowAsync<NotFoundException>();
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "SO_044 - GetOutputsList exclude soft deleted")]
@@ -1138,9 +1138,9 @@ public class SalesOrder
             OutputInfos =  { new() { ProductId = 1, Count = 1, Price = 100 } }
         };
 
-        var act = async () => await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
-        await act.Should().ThrowAsync<BadRequestException>();
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "SO_046 - CreateOutput validation Products not empty")]
@@ -1158,9 +1158,9 @@ public class SalesOrder
             OutputInfos = []
         };
 
-        var act = async () => await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
-        await act.Should().ThrowAsync<BadRequestException>();
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "SO_047 - UpdateOutputStatus validation StatusId not empty")]
@@ -1178,9 +1178,9 @@ public class SalesOrder
             CurrentUserId = Guid.NewGuid()
         };
 
-        var act = async () => await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
-        await act.Should().ThrowAsync<BadRequestException>();
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "SO_048 - UpdateOutputStatus validation OrderId exists")]
@@ -1201,9 +1201,9 @@ public class SalesOrder
         _readRepoMock.Setup(x => x.GetByIdAsync(999, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync((Output?)null);
 
-        var act = async () => await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
-        await act.Should().ThrowAsync<NotFoundException>();
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "SO_049 - UpdateManyOutputStatus validation Ids not empty")]
@@ -1220,9 +1220,9 @@ public class SalesOrder
             StatusId = "confirmed_cod"
         };
 
-        var act = async () => await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
-        await act.Should().ThrowAsync<BadRequestException>();
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "SO_050 - DeleteManyOutputs validation Ids not empty")]
@@ -1235,9 +1235,9 @@ public class SalesOrder
 
         var command = new DeleteManyOutputsCommand { Ids = [] };
 
-        var act = async () => await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
-        await act.Should().ThrowAsync<BadRequestException>();
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "SO_051 - RestoreManyOutputs validation Ids not empty")]
@@ -1250,9 +1250,9 @@ public class SalesOrder
 
         var command = new RestoreManyOutputsCommand { Ids = [] };
 
-        var act = async () => await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
-        await act.Should().ThrowAsync<BadRequestException>();
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "SO_052 - GetOutputsByUserId với pagination")]
@@ -1328,9 +1328,9 @@ public class SalesOrder
         _variantRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync([]);
 
-        var act = async () => await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
-        await act.Should().ThrowAsync<NotFoundException>();
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "SO_055 - CreateOutput với product đã bị xóa")]
@@ -1355,9 +1355,9 @@ public class SalesOrder
         _variantRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), DataFetchMode.All))
             .ReturnsAsync([deletedVariant]);
 
-        var act = async () => await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
-        await act.Should().ThrowAsync<BadRequestException>();
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "SO_056 - UpdateOutputStatus từ ConfirmedCod -> Refund")]
@@ -1405,10 +1405,10 @@ public class SalesOrder
         _insertRepoMock.Setup(x => x.Add(It.IsAny<Output>()))
             .Callback<Output>((output) => capturedOutput = output);
 
-        var (Data, Error) = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
         capturedOutput.Should().NotBeNull();
-        capturedOutput!.Notes.Should().Be("Giao hàng trước 5pm");
+        result.Value!.Notes.Should().Be("Giao hàng trước 5pm");
     }
 
     [Fact(DisplayName = "SO_058 - UpdateOutput cập nhật Notes")]

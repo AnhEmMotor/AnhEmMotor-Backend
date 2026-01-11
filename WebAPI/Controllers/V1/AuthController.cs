@@ -6,15 +6,13 @@ using Application.Features.Auth.Commands.Logout;
 using Application.Features.Auth.Commands.RefreshToken;
 using Application.Features.Auth.Commands.Register;
 using Asp.Versioning;
-
 using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
+using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1;
 
@@ -25,8 +23,7 @@ namespace WebAPI.Controllers.V1;
 [SwaggerTag("Controller xử lý xác thực và đăng nhập")]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
-[ApiController]
-public class AuthController(IMediator mediator) : ControllerBase
+public class AuthController(IMediator mediator) : ApiController
 {
     /// <summary>
     /// Đăng ký tài khoản mới
@@ -51,16 +48,7 @@ public class AuthController(IMediator mediator) : ControllerBase
             cancellationToken)
             .ConfigureAwait(false);
 
-        if(result.IsFailure)
-        {
-            return result.Error?.Code switch
-            {
-                "Validation" => BadRequest(ErrorResponse.FromErrors(result.Errors!)),
-                _ => BadRequest(ErrorResponse.FromError(result.Error!))
-            };
-        }
-
-        return Ok(result.Value);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -77,17 +65,7 @@ public class AuthController(IMediator mediator) : ControllerBase
         var result = await mediator.Send(new LoginCommand(model.UsernameOrEmail, model.Password), cancellationToken)
             .ConfigureAwait(true);
 
-        if(result.IsFailure)
-        {
-            return result.Error?.Code switch
-            {
-                "Unauthorized" => Unauthorized(ErrorResponse.FromError(result.Error)),
-                "NotFound" => NotFound(ErrorResponse.FromError(result.Error)),
-                _ => BadRequest(ErrorResponse.FromError(result.Error!))
-            };
-        }
-
-        return Ok(result.Value);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -101,18 +79,7 @@ public class AuthController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> RefreshToken(CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new RefreshTokenCommand(), cancellationToken).ConfigureAwait(true);
-        
-        if(result.IsFailure)
-        {
-            return result.Error?.Code switch
-            {
-                "Unauthorized" => Unauthorized(ErrorResponse.FromError(result.Error)),
-                "Forbidden" => StatusCode(StatusCodes.Status403Forbidden, ErrorResponse.FromError(result.Error)),
-                _ => BadRequest(ErrorResponse.FromError(result.Error!))
-            };
-        }
-
-        return Ok(result.Value);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -124,7 +91,11 @@ public class AuthController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> Logout(CancellationToken cancellationToken)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        await mediator.Send(new LogoutCommand(userId), cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(new LogoutCommand(userId), cancellationToken).ConfigureAwait(true);
+        // Assuming LogoutCommand returns Result/Result<Unit>
+        // Manually creating success response if needed, or if LogoutCommand returns Result
+        // If LogoutCommand returns Result:
+        if (result.IsFailure) return HandleResult(result);
 
         Response.Cookies.Delete("refreshToken");
         return Ok(new LogoutSuccessResponse());
@@ -141,13 +112,7 @@ public class AuthController(IMediator mediator) : ControllerBase
         CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GoogleLoginCommand(model), cancellationToken).ConfigureAwait(true);
-        
-        if(result.IsFailure)
-        {
-            return BadRequest(ErrorResponse.FromError(result.Error!));
-        }
-
-        return Ok();
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -158,7 +123,6 @@ public class AuthController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status501NotImplemented)]
     public IActionResult FacebookLogin()
     {
-        // TODO: Implement Facebook OAuth login
         return StatusCode(
             501,
             new ErrorResponse()

@@ -220,11 +220,11 @@ public class Setting
 
         // Assert
         result.Should().NotBeNull();
-        result.Should().HaveCount(4);
-        result["Deposit_ratio"].Should().Be("50.5");
-        result["Inventory_alert_level"].Should().Be("10");
-        result["Order_value_exceeds"].Should().Be("50000000");
-        result["Z-bike_threshold_for_meeting"].Should().Be("5");
+        result.Value.Should().HaveCount(4);
+        result.Value["Deposit_ratio"].Should().Be("50.5");
+        result.Value["Inventory_alert_level"].Should().Be("10");
+        result.Value["Order_value_exceeds"].Should().Be("50000000");
+        result.Value["Z-bike_threshold_for_meeting"].Should().Be("5");
     }
 
     [Fact(DisplayName = "SETTING_027 - Handler SetSettings - Gọi Update repository với đúng data")]
@@ -248,7 +248,7 @@ public class Setting
         });
 
         // Act
-        var (Data, Error) = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
         _settingRepoMock.Verify(x => x.Update(It.Is<IEnumerable<SettingEntity>>(s => 

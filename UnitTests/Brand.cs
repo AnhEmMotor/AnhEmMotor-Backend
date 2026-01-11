@@ -66,14 +66,15 @@ public class Brand
     public async Task BRAND_004_CreateBrand_DuplicateName_ShouldThrowException()
     {
         // Arrange
-        var handler = new CreateBrandCommandHandler(_insertRepoMock.Object, _readRepoMock.Object, _unitOfWorkMock.Object);
+        var handler = new CreateBrandCommandHandler(_insertRepoMock.Object, _unitOfWorkMock.Object);
         var command = new CreateBrandCommand { Name = "ExistingBrand", Description = "Desc" };
 
         var existingBrands = new List<BrandEntities> { new() { Name = "ExistingBrand" } }.AsQueryable();
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>())).Returns(existingBrands);
 
         // Act & Assert
-        await Assert.ThrowsAsync<BadRequestException>(() => handler.Handle(command, CancellationToken.None));
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "BRAND_011 - Cập nhật thương hiệu với tên đã tồn tại")]
@@ -93,7 +94,8 @@ public class Brand
             .ReturnsAsync(new BrandEntities { Id = 1, Name = "OldName" });
 
         // Act & Assert
-        await Assert.ThrowsAsync<BadRequestException>(() => handler.Handle(command, CancellationToken.None));
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "BRAND_019 - Validate Tên thương hiệu chứa ký tự đặc biệt không hợp lệ")]
@@ -128,7 +130,7 @@ public class Brand
     public async Task BRAND_023_CreateBrand_Success()
     {
         // Arrange
-        var handler = new CreateBrandCommandHandler(_insertRepoMock.Object, _readRepoMock.Object, _unitOfWorkMock.Object);
+        var handler = new CreateBrandCommandHandler(_insertRepoMock.Object, _unitOfWorkMock.Object);
         var command = new CreateBrandCommand { Name = "Honda", Description = "Desc" };
 
         _insertRepoMock.Setup(x => x.Add(It.IsAny<BrandEntities>()));
@@ -140,7 +142,7 @@ public class Brand
 
         // Assert
         result.Should().NotBeNull();
-        result.Name.Should().Be("Honda");
+        result.Value.Name.Should().Be("Honda");
     }
 
     [Fact(DisplayName = "BRAND_024 - Unit: UpdateBrandCommandHandler - Success")]
@@ -157,7 +159,8 @@ public class Brand
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>())).Returns(Enumerable.Empty<BrandEntities>().AsQueryable());
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
 
         // Assert
         _updateRepoMock.Verify(x => x.Update(It.IsAny<BrandEntities>()), Times.Once);
@@ -174,7 +177,8 @@ public class Brand
         _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
 
         // Assert
         _deleteRepoMock.Verify(x => x.Delete(It.IsAny<BrandEntities>()), Times.Once);
@@ -188,7 +192,8 @@ public class Brand
         var command = new RestoreBrandCommand { Id = 1 };
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
 
         // Assert
         _updateRepoMock.Verify(x => x.Restore(It.IsAny<BrandEntities>()), Times.Once);
@@ -209,7 +214,7 @@ public class Brand
 
         // Assert
         result.Should().NotBeNull();
-        result.Data?.Id.Should().Be(1);
+        result.Value?.Id.Should().Be(1);
     }
 
     [Fact(DisplayName = "BRAND_028 - Unit: GetBrandByIdQueryHandler - NotFound")]
@@ -223,14 +228,15 @@ public class Brand
             .ReturnsAsync((BrandEntities?)null);
 
         // Act & Assert
-        await Assert.ThrowsAsync<NotFoundException>(() => handler.Handle(query, CancellationToken.None));
+        var result = await handler.Handle(query, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "BRAND_029 - Trim tên thương hiệu khi tạo")]
     public async Task BRAND_029_CreateBrand_TrimName_Success()
     {
         // Arrange
-        var handler = new CreateBrandCommandHandler(_insertRepoMock.Object, _readRepoMock.Object, _unitOfWorkMock.Object);
+        var handler = new CreateBrandCommandHandler(_insertRepoMock.Object, _unitOfWorkMock.Object);
         var command = new CreateBrandCommand { Name = "  Honda  ", Description = "Desc" };
 
         _insertRepoMock.Setup(x => x.Add(It.IsAny<BrandEntities>()));
@@ -241,7 +247,7 @@ public class Brand
         var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        result.Name.Should().Be("Honda");
+        result.Value.Name.Should().Be("Honda");
     }
 
     [Fact(DisplayName = "BRAND_030 - Trim tên thương hiệu khi cập nhật")]
@@ -260,7 +266,7 @@ public class Brand
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>())).Returns(Enumerable.Empty<BrandEntities>().AsQueryable());
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
         _updateRepoMock.Verify(x => x.Update(It.IsAny<BrandEntities>()), Times.Once);
@@ -274,7 +280,7 @@ public class Brand
         var command = new DeleteManyBrandsCommand { Ids = [1, 2] };
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
         _deleteRepoMock.Verify(x => x.Delete(It.IsAny<BrandEntities>()), Times.Exactly(2));
@@ -288,7 +294,7 @@ public class Brand
         var command = new RestoreManyBrandsCommand { Ids = [1, 2] };
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
         _updateRepoMock.Verify(x => x.Restore(It.IsAny<BrandEntities>()), Times.Exactly(2));

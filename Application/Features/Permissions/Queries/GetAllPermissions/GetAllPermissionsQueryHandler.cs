@@ -44,6 +44,6 @@ public class GetAllPermissionsQueryHandler : IRequestHandler<GetAllPermissionsQu
                     })
                     .ToList());
 
-        return Task.FromResult(result);
+        return Task.FromResult<Result<Dictionary<string, List<PermissionResponse>>>>(result);
     }
 }

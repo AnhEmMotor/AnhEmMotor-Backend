@@ -11,7 +11,6 @@ using Application.Features.Outputs.Queries.GetDeletedOutputsList;
 using Application.Features.Outputs.Queries.GetOutputById;
 using Application.Features.Outputs.Queries.GetOutputsList;
 using Asp.Versioning;
-
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using Mapster;
@@ -22,19 +21,18 @@ using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
 using static Domain.Constants.Permission.PermissionsList;
+using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1;
 
 /// <summary>
 /// Quản lý đơn hàng/phiếu xuất.
 /// </summary>
-/// <param name="mediator"></param>
 [ApiVersion("1.0")]
 [SwaggerTag("Quản lý đơn hàng/phiếu xuất")]
-[ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status500InternalServerError)]
-public class SalesOrdersController(IMediator mediator) : ControllerBase
+public class SalesOrdersController(IMediator mediator) : ApiController
 {
     /// <summary>
     /// Lấy danh sách đơn hàng của khách hàng hiện tại (dựa trên JWT token).
@@ -64,8 +62,8 @@ public class SalesOrdersController(IMediator mediator) : ControllerBase
         var query = new Application.Features.Outputs.Queries.GetOutputsByUserId.GetOutputsByUserIdQuery(
             buyerId,
             sieveModel);
-        var pagedResult = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-        return Ok(pagedResult);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -81,8 +79,8 @@ public class SalesOrdersController(IMediator mediator) : ControllerBase
         CancellationToken cancellationToken)
     {
         var query = new Application.Features.Outputs.Queries.GetOutputsByUserId.GetOutputsByUserIdQuery(id, sieveModel);
-        var pagedResult = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-        return Ok(pagedResult);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -94,8 +92,8 @@ public class SalesOrdersController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetOutputs([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
     {
         var query = new GetOutputsListQuery(sieveModel);
-        var pagedResult = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-        return Ok(pagedResult);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -109,8 +107,8 @@ public class SalesOrdersController(IMediator mediator) : ControllerBase
         CancellationToken cancellationToken)
     {
         var query = new GetDeletedOutputsListQuery(sieveModel);
-        var pagedResult = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-        return Ok(pagedResult);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -123,12 +121,8 @@ public class SalesOrdersController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetOutputById(int id, CancellationToken cancellationToken)
     {
         var query = new GetOutputByIdQuery(id);
-        var (data, error) = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-        if(error != null)
-        {
-            return NotFound(error);
-        }
-        return Ok(data);
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -144,12 +138,8 @@ public class SalesOrdersController(IMediator mediator) : ControllerBase
     {
         var command = request.Adapt<Application.Features.Outputs.Commands.CreateOutputByManager.CreateOutputByManagerCommand>(
             );
-        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if(error != null)
-        {
-            return BadRequest(error);
-        }
-        return CreatedAtAction(nameof(GetOutputById), new { id = data!.Id }, data);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -168,12 +158,8 @@ public class SalesOrdersController(IMediator mediator) : ControllerBase
         {
             CurrentUserId = Guid.TryParse(currentUserId, out var guid) ? guid : null
         };
-        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if(error != null)
-        {
-            return BadRequest(error);
-        }
-        return CreatedAtAction(nameof(GetOutputById), new { id = data!.Id }, data);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -195,12 +181,8 @@ public class SalesOrdersController(IMediator mediator) : ControllerBase
             Id = id,
             CurrentUserId = Guid.TryParse(currentUserId, out var guid) ? guid : null
         };
-        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if(error != null)
-        {
-            return BadRequest(error);
-        }
-        return Ok(data);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -219,12 +201,8 @@ public class SalesOrdersController(IMediator mediator) : ControllerBase
     {
         var command = request.Adapt<Application.Features.Outputs.Commands.UpdateOutputForManager.UpdateOutputForManagerCommand>(
             ) with { Id = id };
-        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if(error != null)
-        {
-            return BadRequest(error);
-        }
-        return Ok(data);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
 
@@ -247,12 +225,8 @@ public class SalesOrdersController(IMediator mediator) : ControllerBase
             Id = id,
             CurrentUserId = Guid.TryParse(currentUserId, out var guid) ? guid : null
         };
-        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if(error != null)
-        {
-            return BadRequest(error);
-        }
-        return Ok(data);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -267,12 +241,8 @@ public class SalesOrdersController(IMediator mediator) : ControllerBase
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<UpdateManyOutputStatusCommand>();
-        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if(error != null)
-        {
-            return BadRequest(error);
-        }
-        return Ok(data);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -284,12 +254,8 @@ public class SalesOrdersController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> DeleteOutput(int id, CancellationToken cancellationToken)
     {
         var command = new DeleteOutputCommand(id);
-        var error = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if(error != null)
-        {
-            return NotFound(error);
-        }
-        return NoContent();
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -303,12 +269,8 @@ public class SalesOrdersController(IMediator mediator) : ControllerBase
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<DeleteManyOutputsCommand>();
-        var error = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if(error != null)
-        {
-            return NotFound(error);
-        }
-        return NoContent();
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -320,12 +282,8 @@ public class SalesOrdersController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> RestoreOutput(int id, CancellationToken cancellationToken)
     {
         var command = new RestoreOutputCommand(id);
-        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if(error != null)
-        {
-            return NotFound(error);
-        }
-        return Ok(data);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -339,11 +297,7 @@ public class SalesOrdersController(IMediator mediator) : ControllerBase
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<RestoreManyOutputsCommand>();
-        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if(error != null)
-        {
-            return NotFound(error);
-        }
-        return Ok(data);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 }

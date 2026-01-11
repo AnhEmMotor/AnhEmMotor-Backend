@@ -19,7 +19,7 @@ public sealed class DeleteInputCommandHandler(
 
         if(input is null)
         {
-            return Result.Failure(Error.NotFound($"Không tìm thấy phiếu nhập có ID {request.Id}.", "Id");
+            return Result.Failure(Error.NotFound($"Không tìm thấy phiếu nhập có ID {request.Id}.", "Id"));
         }
 
         if(Domain.Constants.InputStatus.IsCannotDelete(input.StatusId))

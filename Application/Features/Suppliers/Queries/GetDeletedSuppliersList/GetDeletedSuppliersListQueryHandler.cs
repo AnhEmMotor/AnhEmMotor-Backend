@@ -11,7 +11,7 @@ namespace Application.Features.Suppliers.Queries.GetDeletedSuppliersList;
 
 public sealed class GetDeletedSuppliersListQueryHandler(ISupplierReadRepository repository, ISievePaginator paginator) : IRequestHandler<GetDeletedSuppliersListQuery, Result<PagedResult<SupplierResponse>>>
 {
-    public async Task<Result<PagedResult<SupplierResponse>> Handle(
+    public async Task<Result<PagedResult<SupplierResponse>>> Handle(
         GetDeletedSuppliersListQuery request,
         CancellationToken cancellationToken)
     {
