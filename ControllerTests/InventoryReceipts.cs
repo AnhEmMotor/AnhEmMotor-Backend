@@ -126,7 +126,7 @@ public class InventoryReceipts
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateInputCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<InputResponse>.Failure(Error.NotFound("Input not found")));
+            .ReturnsAsync(Result<InputResponse?>.Failure(Error.NotFound("Input not found")));
 
         // Act
         var result = await _controller.UpdateInput(inputId, request, CancellationToken.None);
@@ -233,7 +233,7 @@ public class InventoryReceipts
         int inputId = 9999;
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<CloneInputCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<InputResponse>.Failure(Error.NotFound("Input not found")));
+            .ReturnsAsync(Result<InputResponse?>.Failure(Error.NotFound("Input not found")));
 
         // Act
         var result = await _controller.CloneInput(inputId, CancellationToken.None);
@@ -340,7 +340,7 @@ public class InventoryReceipts
         var expectedResponse = new InputResponse { Id = 1, StatusId = "working" };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateInputCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<InputResponse>.Success(expectedResponse));
+            .ReturnsAsync(Result<InputResponse?>.Success(expectedResponse));
 
         // Act
         var result = await _controller.CreateInput(request, CancellationToken.None);

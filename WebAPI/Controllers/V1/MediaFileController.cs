@@ -181,20 +181,25 @@ public class MediaFileController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> ViewImageWithResize(
-        string storagePath,
-        [FromQuery] int? width,
-        CancellationToken cancellationToken)
+    string storagePath,
+    [FromQuery] int? width,
+    CancellationToken cancellationToken)
     {
         var query = new ViewImageQuery { StoragePath = storagePath, Width = width };
 
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
 
-        if(result.IsFailure)
+        if (result.IsFailure)
         {
             return HandleResult(result);
         }
 
-        var (fileStream, contentType) = result.Value.Value;
-        return File(fileStream, contentType);
+        if (result.Value is { } imageData)
+        {
+            var (fileStream, contentType) = imageData;
+            return File(fileStream, contentType);
+        }
+
+        return StatusCode(StatusCodes.Status500InternalServerError);
     }
 }

@@ -122,7 +122,7 @@ public class SalesOrder
         int orderId = 1;
         var expectedOrder = new OutputResponse { Id = orderId };
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputByIdQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<OutputResponse>.Success(expectedOrder));
+            .ReturnsAsync(Result<OutputResponse?>.Success(expectedOrder));
 
         // Act
         var result = await _controller.GetOutputById(orderId, CancellationToken.None);
@@ -143,7 +143,7 @@ public class SalesOrder
         };
         var expectedResponse = new OutputResponse { Id = 1, BuyerId = request.BuyerId };
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateOutputCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<OutputResponse>.Success(expectedResponse));
+            .ReturnsAsync(Result<OutputResponse?>.Success(expectedResponse));
 
         // Act
         var result = await _controller.CreateOutput(request, CancellationToken.None);
@@ -163,7 +163,7 @@ public class SalesOrder
             Notes = "Admin order"
         };
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateOutputByManagerCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<OutputResponse>.Success(new OutputResponse()));
+            .ReturnsAsync(Result<OutputResponse?>.Success(new OutputResponse()));
 
         // Act
         var result = await _controller.CreateOutputForAdmin(request, CancellationToken.None);
@@ -183,7 +183,7 @@ public class SalesOrder
             Notes = "Updated notes"
         };
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateOutputCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<OutputResponse>.Success(new OutputResponse { Id = orderId }));
+            .ReturnsAsync(Result<OutputResponse?>.Success(new OutputResponse { Id = orderId }));
 
         // Act
         var result = await _controller.UpdateOutputForManager(orderId, request, CancellationToken.None);
@@ -200,7 +200,7 @@ public class SalesOrder
         int orderId = 1;
         var request = new UpdateOutputForManagerRequest();
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateOutputForManagerCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<OutputResponse>.Success(new OutputResponse()));
+            .ReturnsAsync(Result<OutputResponse?>.Success(new OutputResponse()));
 
         // Act
         var result = await _controller.UpdateOutput(orderId, request, CancellationToken.None);

@@ -43,7 +43,7 @@ public class Setting
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<SetSettingsCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<Dictionary<string, string>>.Failure(Error.Validation("Settings", "Validation failed")));
+            .ReturnsAsync(Result<Dictionary<string, string?>?>.Failure(Error.Validation("Settings", "Validation failed")));
 
         var request = new Dictionary<string, string?> { { "Invalid_Key", "100" } };
 
@@ -96,7 +96,7 @@ public class Setting
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<SetSettingsCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<Dictionary<string, string?>>.Success(expectedResponse));
+            .ReturnsAsync(Result<Dictionary<string, string?>?>.Success(expectedResponse));
 
         // Act
         var result = await _controller.SetSettings(request, CancellationToken.None);
@@ -128,7 +128,7 @@ public class Setting
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<SetSettingsCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<Dictionary<string, string>>.Failure(Error.Validation("Settings", "Validation failed")));
+            .ReturnsAsync(Result<Dictionary<string, string?>?>.Failure(Error.Validation("Settings", "Validation failed")));
 
         var request = new Dictionary<string, string?> { { "Deposit_ratio", "0" } };
 
@@ -183,7 +183,7 @@ public class Setting
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<SetSettingsCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<Dictionary<string, string>>.Failure(Error.Validation("Deposit<script>", "Invalid setting key")));
+            .ReturnsAsync(Result<Dictionary<string, string?>?>.Failure(Error.Validation("Deposit<script>", "Invalid setting key")));
 
         var request = new Dictionary<string, string?> { { "Deposit<script>", "50" } };
 
@@ -206,7 +206,7 @@ public class Setting
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<SetSettingsCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<Dictionary<string, string?>>.Success(expectedResponse));
+            .ReturnsAsync(Result<Dictionary<string, string?>?>.Success(expectedResponse));
 
         var request = new Dictionary<string, string?> { { "Deposit_ratio", null } };
 
@@ -232,7 +232,7 @@ public class Setting
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<SetSettingsCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<Dictionary<string, string>?>.Failure(Error.Validation("Invalid_Key", "Invalid setting key")));
+            .ReturnsAsync(Result<Dictionary<string, string?>?>.Failure(Error.Validation("Invalid_Key", "Invalid setting key")));
 
         var request = new Dictionary<string, string?>
         {
@@ -285,7 +285,7 @@ public class Setting
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<SetSettingsCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<Dictionary<string, string>?>.Failure(Error.Validation("Inventory_alert_level", "Value out of range for integer field")));
+            .ReturnsAsync(Result<Dictionary<string, string?>?>.Failure(Error.Validation("Inventory_alert_level", "Value out of range for integer field")));
 
         var request = new Dictionary<string, string?> { { "Inventory_alert_level", "9999999999999" } };
 
