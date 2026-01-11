@@ -14,45 +14,55 @@ public sealed class UploadManyImageCommandHandler(
     IMediaFileInsertRepository insertRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<UploadManyImageCommand, Result<List<MediaFileResponse>>>
 {
+    private const long MaxFileSize = 10 * 1024 * 1024;
+
     public async Task<Result<List<MediaFileResponse>>> Handle(
         UploadManyImageCommand request,
         CancellationToken cancellationToken)
     {
-        if(request.Files == null || request.Files.Count == 0)
+        if (request.Files == null || request.Files.Count == 0)
         {
-            return Error.BadRequest("Not upload any file");
+            return Result<List<MediaFileResponse>>.Failure("No files to upload");
         }
 
         var mediaFiles = new List<MediaFileEntity>();
 
-        foreach(var fileDto in request.Files)
+        foreach (var fileDto in request.Files)
         {
-            var (storagePath, fileExtension) = await fileStorageService.SaveFileAsync(
+            if (fileDto.FileContent.Length > MaxFileSize)
+            {
+                return Result<List<MediaFileResponse>>.Failure($"File {fileDto.FileName} exceeds 10MB limit");
+            }
+
+            var saveResult = await fileStorageService.SaveFileAsync(
                 fileDto.FileContent,
                 cancellationToken)
                 .ConfigureAwait(false);
 
-            var compressedFileResult = await fileStorageService.GetFileAsync(storagePath, cancellationToken)
-                .ConfigureAwait(false);
-            var actualFileSize = compressedFileResult?.FileBytes.Length ?? 0;
+            if (saveResult.IsFailure)
+            {
+                return Result<List<MediaFileResponse>>.Failure(saveResult.Error ?? Error.Failure("Unknown upload error"));
+            }
 
-            mediaFiles.Add(
-                new MediaFileEntity
-                {
-                    StorageType = "local",
-                    StoragePath = storagePath,
-                    OriginalFileName = fileDto.FileName,
-                    ContentType = "image/webp",
-                    FileExtension = fileExtension,
-                    FileSize = actualFileSize
-                });
+            var savedFile = saveResult.Value;
+
+            mediaFiles.Add(new MediaFileEntity
+            {
+                StorageType = "local",
+                StoragePath = savedFile.StoragePath,
+                OriginalFileName = fileDto.FileName,
+                ContentType = "image/webp",
+                FileExtension = savedFile.Extension,
+                FileSize = savedFile.Size
+            });
         }
 
         insertRepository.AddRange(mediaFiles);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         var responses = mediaFiles.Adapt<List<MediaFileResponse>>();
-        foreach(var response in responses)
+
+        foreach (var response in responses)
         {
             response.PublicUrl = fileStorageService.GetPublicUrl(response.StoragePath!);
         }

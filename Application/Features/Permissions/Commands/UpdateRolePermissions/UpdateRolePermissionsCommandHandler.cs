@@ -22,8 +22,7 @@ public class UpdateRolePermissionsCommandHandler(
         UpdateRolePermissionsCommand request,
         CancellationToken cancellationToken)
     {
-        var role = await roleManager.FindByNameAsync(request.RoleName).ConfigureAwait(false) ??
-            throw new NotFoundException("Role not found.");
+        var role = await roleManager.FindByNameAsync(request.RoleName).ConfigureAwait(false) ?? return Error.NotFound("Role not found.");
         var isRoleUpdated = false;
 
         if(request.Model.Description is not null && string.Compare(role.Description, request.Model.Description) != 0)
@@ -52,7 +51,7 @@ public class UpdateRolePermissionsCommandHandler(
         var invalidPermissions = request.Model.Permissions.Where(p => !validSystemPermissions.Contains(p)).ToList();
         if(invalidPermissions.Count != 0)
         {
-            throw new BadRequestException($"Invalid permissions: {string.Join(", ", invalidPermissions)}");
+                        return Error.BadRequest($"Invalid permissions: {string.Join(", ", invalidPermissions)}");
         }
 
         var currentRolePermissions = await roleReadRepository.GetRolePermissionsByRoleIdAsync(
@@ -88,8 +87,7 @@ public class UpdateRolePermissionsCommandHandler(
 
             if(orphanedPermissions.Count != 0)
             {
-                throw new BadRequestException(
-                    $"Cannot remove last role assignment for: {string.Join(", ", orphanedPermissions)}.");
+                        return Error.BadRequest($"Cannot remove last role assignment for: {string.Join(", ", orphanedPermissions)}.");
             }
 
             roleUpdateRepository.RemovePermissionsFromRole(rolePermissionsToRemove);

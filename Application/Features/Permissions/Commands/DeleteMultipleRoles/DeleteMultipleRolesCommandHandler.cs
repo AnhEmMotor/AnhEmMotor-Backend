@@ -47,8 +47,7 @@ public class DeleteMultipleRolesCommandHandler(
 
         if(skippedRoles.Count > 0)
         {
-            throw new BadRequestException(
-                $"Cannot delete some roles due to validation errors: {string.Join(',', skippedRoles)}");
+                        return Error.BadRequest($"Cannot delete some roles due to validation errors: {string.Join(',', skippedRoles)}");
         }
 
         cancellationToken.ThrowIfCancellationRequested();

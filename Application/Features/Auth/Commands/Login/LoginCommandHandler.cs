@@ -6,7 +6,7 @@ using MediatR;
 
 namespace Application.Features.Auth.Commands.Login;
 
-public class LoginCommandHandler(
+public sealed class LoginCommandHandler(
     IIdentityService identityService,
     ITokenManagerService tokenManagerService,
     IHttpTokenAccessorService httpTokenAccessorService,
@@ -20,7 +20,7 @@ public class LoginCommandHandler(
             cancellationToken)
             .ConfigureAwait(false);
 
-        if(authResult.IsFailure)
+        if (authResult.IsFailure)
         {
             return authResult.Error!;
         }
@@ -29,21 +29,20 @@ public class LoginCommandHandler(
 
         var expiryAccessTokenMinutes = tokenManagerService.GetAccessTokenExpiryMinutes();
         var expiryAccessTokenDate = DateTimeOffset.UtcNow.AddMinutes(expiryAccessTokenMinutes);
-        var accessToken = await tokenManagerService.CreateAccessTokenAsync(
-            userDto,
-            expiryAccessTokenDate,
-            cancellationToken)
-            .ConfigureAwait(false);
+        
+        var accessToken = tokenManagerService.CreateAccessToken(userDto, expiryAccessTokenDate);
 
         var refreshToken = tokenManagerService.CreateRefreshToken();
         var expiryRefreshTokenDays = tokenManagerService.GetRefreshTokenExpiryDays();
         var expiryRefreshTokenDate = DateTimeOffset.UtcNow.AddDays(expiryRefreshTokenDays);
+
         await userUpdateRepository.UpdateRefreshTokenAsync(
             userDto.Id,
             refreshToken,
             expiryRefreshTokenDate,
             cancellationToken)
             .ConfigureAwait(false);
+
         httpTokenAccessorService.SetRefreshTokenToCookie(refreshToken, expiryRefreshTokenDate);
 
         return new LoginResponse { AccessToken = accessToken, ExpiresAt = expiryAccessTokenDate };

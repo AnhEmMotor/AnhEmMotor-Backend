@@ -17,20 +17,18 @@ public class DeleteRoleCommandHandler(
     {
         var roleName = request.RoleName;
 
-        var role = await roleManager.FindByNameAsync(roleName).ConfigureAwait(false) ??
-            throw new NotFoundException("Role not found.");
+        var role = await roleManager.FindByNameAsync(roleName).ConfigureAwait(false) ?? return Error.BadRequest("Role not found.");
 
         var superRoles = protectedEntityManagerService.GetSuperRoles() ?? [];
         if(superRoles.Contains(roleName))
         {
-            throw new BadRequestException("Cannot delete SuperRole.");
+            return Error.BadRequest("Cannot delete SuperRole.");
         }
 
         var usersWithRole = await userManager.GetUsersInRoleAsync(roleName).ConfigureAwait(false);
         if(usersWithRole.Count > 0)
         {
-            throw new BadRequestException(
-                $"Cannot delete role '{roleName}' because {usersWithRole.Count} user(s) have this role.");
+            return Error.BadRequest($"Cannot delete role '{roleName}' because {usersWithRole.Count} user(s) have this role.");
         }
 
         cancellationToken.ThrowIfCancellationRequested();
@@ -39,7 +37,7 @@ public class DeleteRoleCommandHandler(
         if(!result.Succeeded)
         {
             var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-            throw new BadRequestException(errors);
+            return Error.BadRequest(errors);
         }
 
         return new RoleDeleteResponse() { Message = $"Role '{roleName}' deleted successfully." };

@@ -89,36 +89,32 @@ namespace Infrastructure.Repositories.User
                 sieveModel.PageSize ?? 10);
         }
 
-        public async Task<UserAuthDTO> GetUserByRefreshTokenAsync(
+        public async Task<UserEntity?> GetByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken)
+        {
+            return await userManager.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.RefreshToken == refreshToken, cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        public async Task<Result<UserAuthDTO>> GetUserByRefreshTokenAsync(
             string refreshToken,
             CancellationToken cancellationToken)
         {
-            var user = await userManager.Users
-                    .FirstOrDefaultAsync(u => string.Compare(u.RefreshToken, refreshToken) == 0, cancellationToken)
-                    .ConfigureAwait(false) ??
-                throw new UnauthorizedException("Invalid refresh token.");
-            if(user.RefreshTokenExpiryTime <= DateTimeOffset.UtcNow)
-            {
-                throw new UnauthorizedException("Refresh token has expired. Please login again.");
-            }
-
-            if(string.Compare(user.Status, UserStatus.Active) != 0 || user.DeletedAt != null)
-            {
-                throw new ForbiddenException("Account is not available.");
-            }
-
             var roles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
 
-            return new UserAuthDTO()
+            var userAuthDto = new UserAuthDTO
             {
                 Id = user.Id,
                 UserName = user.UserName,
-                Roles = [ .. roles ],
+                Roles = [.. roles],
                 Email = user.Email,
                 FullName = user.FullName,
                 Status = user.Status,
-                AuthMethods = [ "pwd" ]
+                AuthMethods = ["pwd"]
             };
+
+            return Result<UserAuthDTO>.Success(userAuthDto);
         }
 
         public async Task<UserAuthDTO?> GetUserByIDAsync(Guid? idUser, CancellationToken cancellationToken)

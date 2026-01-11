@@ -18,11 +18,11 @@ public class GetMyPermissionsQueryHandler(
     {
         if(string.IsNullOrEmpty(request.UserId) || !Guid.TryParse(request.UserId, out var userId))
         {
-            throw new UnauthorizedException("Invalid user token.");
+            return Error.Unauthorized("Invalid user token.");
         }
 
-        var user = await userManager.FindByIdAsync(userId.ToString()).ConfigureAwait(false) ??
-            throw new NotFoundException("User not found.");
+        var user = await userManager.FindByIdAsync(userId.ToString()).ConfigureAwait(false) ?? 
+            return Error.NotFound("User not found.");
         var userRoles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
         var roleEntities = await roleReadRepository.GetRolesByNamesAsync(userRoles!, cancellationToken)
             .ConfigureAwait(false);

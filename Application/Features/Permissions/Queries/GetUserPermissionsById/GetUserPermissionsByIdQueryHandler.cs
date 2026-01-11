@@ -17,7 +17,8 @@ public class GetUserPermissionsByIdQueryHandler(
         CancellationToken cancellationToken)
     {
         var user = await userManager.FindByIdAsync(request.UserId.ToString()).ConfigureAwait(false) ??
-            throw new NotFoundException("User not found.");
+            return Error.NotFound("User not found.");
+
         var userRoles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
         var roleEntities = await roleReadRepository.GetRolesByNamesAsync(userRoles!, cancellationToken)
             .ConfigureAwait(false);

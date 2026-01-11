@@ -18,7 +18,9 @@ namespace Application.Interfaces.Repositories.User
             SieveModel sieveModel,
             CancellationToken cancellationToken);
 
-        public Task<UserAuthDTO> GetUserByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken);
+        public Task<Result<UserAuthDTO>> GetUserByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken);
+
+        public Task<UserEntity?> GetByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken);
 
         public Task<UserAuthDTO?> GetUserByIDAsync(Guid? idUser, CancellationToken cancellationToken);
 

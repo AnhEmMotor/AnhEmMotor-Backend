@@ -12,13 +12,13 @@ public class GetCurrentUserQueryHandler(IUserReadRepository userReadRepository) 
     {
         if(string.IsNullOrEmpty(request.UserId) || !Guid.TryParse(request.UserId, out var userId))
         {
-            throw new UnauthorizedException("Invalid user token.");
+            return Error.Unauthorized("Invalid user token.");
         }
 
         cancellationToken.ThrowIfCancellationRequested();
 
         var user = await userReadRepository.FindUserByIdAsync(userId, cancellationToken).ConfigureAwait(false) ??
-            throw new NotFoundException("User not found.");
+            return Error.NotFound("Invalid user token.");
 
         return new UserResponse()
         {

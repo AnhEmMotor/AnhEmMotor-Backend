@@ -1,11 +1,11 @@
+using Application.Common.Models;
 using Application.Interfaces.Repositories.LocalFile;
 
 namespace Application.Interfaces.Repositories.LocalFile;
 
 public interface IFileStorageService
 {
-    public Task<(string StoragePath, string FileExtension)> SaveFileAsync(Stream file, CancellationToken cancellationToken);
-    public Task<List<(string StoragePath, string FileExtension)>> SaveFilesAsync(IEnumerable<Stream> files, CancellationToken cancellationToken);
+    public Task<Result<FileUpload>> SaveFileAsync(Stream file, CancellationToken cancellationToken);
     public bool DeleteFile(string storagePath);
     public bool DeleteFile(IEnumerable<string> storagePaths);
     public string GetPublicUrl(string storagePath);
