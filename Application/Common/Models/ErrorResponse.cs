@@ -45,8 +45,8 @@ namespace Application.Common.Models
             return new ErrorResponse(error.Message)
             {
                 Type = error.Code,
-                Errors = error.Field is not null
-                    ? [new ErrorDetail { Field = error.Field, Message = error.Message }]
+                Errors = error.Field is not null || error.Id is not null
+                    ? [new ErrorDetail { Field = error.Field, Message = error.Message, Id = error.Id }]
                     : null
             };
         }
@@ -57,7 +57,7 @@ namespace Application.Common.Models
             return new ErrorResponse(firstError?.Message ?? "One or more errors occurred.")
             {
                 Type = firstError?.Code,
-                Errors = [.. errors.Select(e => new ErrorDetail { Field = e.Field, Message = e.Message })]
+                Errors = [.. errors.Select(e => new ErrorDetail { Field = e.Field, Message = e.Message, Id = e.Id })]
             };
         }
     }
