@@ -1,5 +1,4 @@
-﻿using Application.Common.Exceptions;
-using Application.Common.Models;
+﻿using Application.Common.Models;
 using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using System.Net;
@@ -17,8 +16,11 @@ namespace WebAPI.Middleware;
 /// </remarks>
 /// <param name="environment">The hosting environment used to determine whether detailed error information should be included in responses.</param>
 /// <param name="logger">The logger used to record exception details and validation failures.</param>
-public class GlobalExceptionHandler(IWebHostEnvironment environment, ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
+public partial class GlobalExceptionHandler(IWebHostEnvironment environment, ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
 {
+    [LoggerMessage(Level = LogLevel.Error, Message = "CRITICAL: An unhandled exception occurred. TraceId: {TraceId}")]
+    private partial void LogUnhandledException(Exception exception, string traceId);
+
     /// <summary>
     /// Attempts to handle the specified exception by writing an appropriate error response to the HTTP context
     /// asynchronously.
@@ -41,24 +43,14 @@ public class GlobalExceptionHandler(IWebHostEnvironment environment, ILogger<Glo
         Exception exception,
         CancellationToken cancellationToken)
     {
-        // 1. Log ngay lập tức. Đây là lỗi hệ thống nghiêm trọng.
-        // Ghi lại StackTrace đầy đủ để debug.
-        logger.LogError(exception,
-            "CRITICAL: An unhandled exception occurred. TraceId: {TraceId}",
-            httpContext.TraceIdentifier);
-
-        // 2. Xác định response
-        // Trong môi trường Dev, có thể bạn muốn nhìn thấy lỗi chi tiết (Stack Trace)
-        // Trong Prod, TUYỆT ĐỐI KHÔNG lộ Stack Trace, chỉ báo lỗi chung.
+        LogUnhandledException(exception, httpContext.TraceIdentifier);
 
         var errorResponse = environment.IsDevelopment()
-            ? ErrorResponse.CreateDevelopmentError(exception) // Method cũ của bạn
+            ? ErrorResponse.CreateDevelopmentError(exception)
             : ErrorResponse.CreateProductionError("An unexpected system error occurred. Please contact support.");
 
         httpContext.Response.ContentType = "application/json";
 
-        // 3. Luôn luôn là 500 Internal Server Error
-        // Vì nếu là 400/404 thì lẽ ra tầng Application phải bắt bằng Result Pattern rồi.
         httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
 
         await httpContext.Response
