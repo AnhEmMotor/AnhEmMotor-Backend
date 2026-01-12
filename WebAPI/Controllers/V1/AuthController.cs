@@ -78,7 +78,9 @@ public class AuthController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> RefreshToken(CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new RefreshTokenCommand(), cancellationToken).ConfigureAwait(true);
+        var refreshToken = Request.Cookies["refreshToken"];
+        var accessToken = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
+        var result = await mediator.Send(new RefreshTokenCommand(refreshToken, accessToken), cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 

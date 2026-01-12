@@ -22,13 +22,13 @@ public sealed class UpdateOutputCommandHandler(
         UpdateOutputCommand request,
         CancellationToken cancellationToken)
     {
-        if(request.CurrentUserId is null)
+        if(request.Model.CurrentUserId is null)
         {
             return Error.BadRequest("CurrentUserId không được để trống.", "CurrentUserId");
         }
 
         var output = await readRepository.GetByIdWithDetailsAsync(
-            request.Id,
+            request.Model.Id,
             cancellationToken,
             DataFetchMode.ActiveOnly)
             .ConfigureAwait(false);
@@ -43,12 +43,12 @@ public sealed class UpdateOutputCommandHandler(
             return Error.BadRequest("Đơn hàng không có thông tin người mua. Vui lòng kiểm tra lại", "Buyer");
         }
 
-        if(output.Buyer.Id != request.CurrentUserId)
+        if(output.Buyer.Id != request.Model.CurrentUserId)
         {
             return Error.Unauthorized("Người dùng hiện tại không có quyền cập nhật đơn hàng này.", "CurrentUserId");
         }
 
-        var variantIds = request.OutputInfos
+        var variantIds = request.Model.OutputInfos
             .Where(p => p.ProductId.HasValue)
             .Select(p => p.ProductId!.Value)
             .Distinct()
@@ -83,7 +83,7 @@ public sealed class UpdateOutputCommandHandler(
 
         var existingInfoDict = output.OutputInfos.ToDictionary(oi => oi.Id);
 
-        var requestInfoDict = request.OutputInfos.Where(p => p.Id.HasValue && p.Id > 0).ToDictionary(p => p.Id!.Value);
+        var requestInfoDict = request.Model.OutputInfos.Where(p => p.Id.HasValue && p.Id > 0).ToDictionary(p => p.Id!.Value);
 
         var toDelete = output.OutputInfos.Where(oi => !requestInfoDict.ContainsKey(oi.Id)).ToList();
 
@@ -93,7 +93,7 @@ public sealed class UpdateOutputCommandHandler(
             deleteRepository.DeleteOutputInfo(info);
         }
 
-        foreach(var productRequest in request.OutputInfos)
+        foreach(var productRequest in request.Model.OutputInfos)
         {
             var currentVariant = variantsList.FirstOrDefault(v => v.Id == productRequest.ProductId);
 

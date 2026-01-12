@@ -18,11 +18,6 @@ public sealed class RestoreManySuppliersCommandHandler(
         RestoreManySuppliersCommand request,
         CancellationToken cancellationToken)
     {
-        if(request.Ids.Count == 0)
-        {
-            return Error.BadRequest("Bạn chưa truyền danh sách Supplier ID cần để khôi phục");
-        }
-
         var uniqueIds = request.Ids.Distinct().ToList();
         var errorDetails = new List<Error>();
 

@@ -18,16 +18,9 @@ public sealed class CreateOutputCommandHandler(
     IProductVariantReadRepository variantRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateOutputCommand, Result<OutputResponse?>>
 {
-    public async Task<Result<OutputResponse?>> Handle(
-        CreateOutputCommand request,
-        CancellationToken cancellationToken)
+    public async Task<Result<OutputResponse?>> Handle(CreateOutputCommand request, CancellationToken cancellationToken)
     {
-        if(request.OutputInfos.Count == 0)
-        {
-            return Error.BadRequest("Đơn hàng phải có ít nhất một sản phẩm.", "Products");
-        }
-
-        var variantIds = request.OutputInfos
+        var variantIds = request.Model.OutputInfos
             .Where(p => p.ProductId.HasValue)
             .Select(p => p.ProductId!.Value)
             .Distinct()
@@ -42,14 +35,18 @@ public sealed class CreateOutputCommandHandler(
         {
             var foundIds = variantsList.Select(v => v.Id).ToList();
             var missingIds = variantIds.Except(foundIds).ToList();
-            return Error.NotFound($"Không tìm thấy {missingIds.Count} sản phẩm: {string.Join(", ", missingIds)}", "Products");
+            return Error.NotFound(
+                $"Không tìm thấy {missingIds.Count} sản phẩm: {string.Join(", ", missingIds)}",
+                "Products");
         }
 
         foreach(var variant in variantsList)
         {
             if(string.Compare(variant.Product?.StatusId, Domain.Constants.ProductStatus.ForSale) != 0)
             {
-                return Error.BadRequest($"Sản phẩm '{variant.Product?.Name ?? variant.Id.ToString()}' không còn được bán.", "Products");
+                return Error.BadRequest(
+                    $"Sản phẩm '{variant.Product?.Name ?? variant.Id.ToString()}' không còn được bán.",
+                    "Products");
             }
         }
         var output = request.Adapt<Output>();
@@ -68,7 +65,7 @@ public sealed class CreateOutputCommandHandler(
             output.StatusId = OrderStatus.Pending;
         }
 
-        output.BuyerId = request.CurrentUserId;
+        output.BuyerId = request.Model.BuyerId;
 
         insertRepository.Add(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

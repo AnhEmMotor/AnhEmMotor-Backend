@@ -17,13 +17,6 @@ public class ChangeMultipleUsersStatusCommandHandler(
         ChangeMultipleUsersStatusCommand request,
         CancellationToken cancellationToken)
     {
-        if(!UserStatus.IsValid(request.Model.Status))
-        {
-            return Error.Validation("Status not vaild, please check.", "Status");
-        }
-
-        cancellationToken.ThrowIfCancellationRequested();
-
         var protectedUsers = protectedEntityManagerService.GetProtectedUsers() ?? [];
         var protectedEmails = protectedUsers.Select(entry => entry.Split(':')[0].Trim()).ToList();
         var superRoles = protectedEntityManagerService.GetSuperRoles() ?? [];

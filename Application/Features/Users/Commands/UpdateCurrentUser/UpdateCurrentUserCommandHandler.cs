@@ -14,15 +14,7 @@ public class UpdateCurrentUserCommandHandler(
         UpdateCurrentUserCommand request,
         CancellationToken cancellationToken)
     {
-        if(!GenderStatus.IsValid(request.Model.Gender))
-        {
-            return Error.Validation("Invalid gender. Please check again.", "gender");
-        }
-
-        if(string.IsNullOrEmpty(request.UserId) || !Guid.TryParse(request.UserId, out var userId))
-        {
-            return Error.Unauthorized("Invalid user token.");
-        }
+        var userId = Guid.Parse(request.UserId!);
 
         var user = await userReadRepository.FindUserByIdAsync(userId, cancellationToken).ConfigureAwait(false);
         if(user is null)

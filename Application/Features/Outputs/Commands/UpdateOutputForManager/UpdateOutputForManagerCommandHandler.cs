@@ -33,7 +33,7 @@ public sealed class UpdateOutputForManagerCommandHandler(
             return Error.NotFound($"Không tìm thấy đơn hàng có ID {request.Id}.", "Id");
         }
 
-        var variantIds = request.OutputInfos
+        var variantIds = request.Model.OutputInfos
             .Where(p => p.ProductId.HasValue)
             .Select(p => p.ProductId!.Value)
             .Distinct()
@@ -64,33 +64,33 @@ public sealed class UpdateOutputForManagerCommandHandler(
             }
         }
 
-        request.Adapt(output);
+        request.Model.Adapt(output);
 
-        var existingInfoDict = output.OutputInfos.ToDictionary(oi => oi.Id);
+        var existingInfoDict = output.Model.OutputInfos.ToDictionary(oi => oi.Id);
 
-        var requestInfoDict = request.OutputInfos.Where(p => p.Id.HasValue && p.Id > 0).ToDictionary(p => p.Id!.Value);
+        var requestInfoDict = request.Model.OutputInfos.Where(p => p.Id.HasValue && p.Id > 0).ToDictionary(p => p.Id!.Value);
 
-        var toDelete = output.OutputInfos.Where(oi => !requestInfoDict.ContainsKey(oi.Id)).ToList();
+        var toDelete = output.Model.OutputInfos.Where(oi => !requestInfoDict.ContainsKey(oi.Id)).ToList();
 
         foreach(var info in toDelete)
         {
-            output.OutputInfos.Remove(info);
+            output.Model.OutputInfos.Remove(info);
             deleteRepository.DeleteOutputInfo(info);
         }
 
-        foreach(var productRequest in request.OutputInfos)
+        foreach(var productRequest in request.Model.OutputInfos)
         {
             var currentVariant = variantsList.FirstOrDefault(v => v.Id == productRequest.ProductId);
 
             if(productRequest.Id.HasValue && productRequest.Id > 0)
             {
-                if(existingInfoDict.TryGetValue(productRequest.Id.Value, out var existingInfo))
+                if(existingInfoDict.Model.TryGetValue(productRequest.Id.Value, out var existingInfo))
                 {
                     productRequest.Adapt(existingInfo);
 
                     if(currentVariant != null)
                     {
-                        existingInfo.Price = currentVariant.Price;
+                        existingInfo.Model.Price = currentVariant.Price;
                     }
                 }
             } else
@@ -100,14 +100,14 @@ public sealed class UpdateOutputForManagerCommandHandler(
                 {
                     newInfo.Price = currentVariant.Price;
                 }
-                output.OutputInfos.Add(newInfo);
+                output.Model.OutputInfos.Add(newInfo);
             }
         }
 
         updateRepository.Update(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        var updated = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
+        var updated = await readRepository.GetByIdWithDetailsAsync(output.Model.Id, cancellationToken).ConfigureAwait(false);
 
         return updated.Adapt<OutputResponse>();
     }

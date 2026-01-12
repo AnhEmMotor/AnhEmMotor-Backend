@@ -16,11 +16,6 @@ public sealed class DeleteManyProductsCommandHandler(
         DeleteManyProductsCommand command,
         CancellationToken cancellationToken)
     {
-        if(command.Ids == null || command.Ids.Count == 0)
-        {
-            return Result.Failure(Error.BadRequest("Bạn chưa truyền danh sách Product ID để xoá"));
-        }
-
         var uniqueIds = command.Ids.Distinct().ToList();
 
         var activeProducts = await readRepository.GetByIdAsync(uniqueIds, cancellationToken).ConfigureAwait(false);

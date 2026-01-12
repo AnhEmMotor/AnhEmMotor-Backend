@@ -7,6 +7,6 @@ public class GoogleLoginCommandHandler : IRequestHandler<GoogleLoginCommand, Res
 {
     public Task<Result> Handle(GoogleLoginCommand request, CancellationToken cancellationToken)
     {
-        return Task.FromResult(Result.Failure(Error.BadRequest("Google login not implemented yet.")));
+        throw new NotImplementedException();
     }
 }

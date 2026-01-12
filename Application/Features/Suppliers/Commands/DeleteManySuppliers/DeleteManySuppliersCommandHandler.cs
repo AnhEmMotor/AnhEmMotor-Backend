@@ -16,11 +16,6 @@ public sealed class DeleteManySuppliersCommandHandler(
         DeleteManySuppliersCommand request,
         CancellationToken cancellationToken)
     {
-        if(request.Ids.Count == 0)
-        {
-            return Result.Failure(Error.BadRequest("Bạn chưa truyền các mã Supplier cần xoá"));
-        }
-
         var uniqueIds = request.Ids.Distinct().ToList();
         var errorDetails = new List<Error>();
 

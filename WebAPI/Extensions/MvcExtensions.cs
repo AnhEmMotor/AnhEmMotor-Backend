@@ -54,29 +54,6 @@ public static class MvcExtensions
                     options.SubstituteApiVersionInUrl = true;
                 });
 
-        services.AddControllers()
-            .ConfigureApiBehaviorOptions(
-                options =>
-                {
-                    options.InvalidModelStateResponseFactory = context =>
-                    {
-                        var errors = context.ModelState
-                            .Where(e => e.Value != null && e.Value.Errors.Count > 0)
-                            .SelectMany(
-                                kvp => kvp.Value!.Errors
-                                        .Select(
-                                            error => new Application.Common.Models.ErrorDetail
-                                                    {
-                                                        Field = kvp.Key,
-                                                        Message = error.ErrorMessage
-                                                    }))
-                            .ToList();
-
-                        return new BadRequestObjectResult(
-                            new { Title = "One or more validation errors occurred.", Errors = errors });
-                    };
-                });
-
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();
 

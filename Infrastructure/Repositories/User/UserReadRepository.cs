@@ -106,11 +106,6 @@ namespace Infrastructure.Repositories.User
                 .FirstOrDefaultAsync(u => u.RefreshToken == refreshToken, cancellationToken)
                 .ConfigureAwait(false);
 
-            if (user is null)
-            {
-                return Error.NotFound("User with refresh token not found.");
-            }
-
             var roles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
 
             var userAuthDto = new UserAuthDTO

@@ -18,16 +18,6 @@ public sealed class UpdateManySupplierStatusCommandHandler(
         UpdateManySupplierStatusCommand request,
         CancellationToken cancellationToken)
     {
-        if(request.Ids.Count == 0)
-        {
-            return Error.BadRequest("Bạn chưa truyền danh sách Supplier ID đẻ thực hiện việc cập nhật trạng thái");
-        }
-
-        if(!SupplierStatusConstants.IsValid(request.StatusId))
-        {
-            return Error.BadRequest($"Invalid status '{request.StatusId}'. Must be one of: {string.Join(", ", SupplierStatusConstants.AllowedValues)}", "StatusId");
-        }
-
         var errorDetails = new List<Error>();
         var ids = request.Ids.Distinct().ToList();
 

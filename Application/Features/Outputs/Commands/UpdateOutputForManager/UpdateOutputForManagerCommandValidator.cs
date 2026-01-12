@@ -6,25 +6,18 @@ public sealed class UpdateOutputForManagerCommandValidator : AbstractValidator<U
 {
     public UpdateOutputForManagerCommandValidator()
     {
-        RuleFor(x => x.OutputInfos).NotEmpty().WithMessage("Input must contain at least one product.");
+        RuleFor(x => x.Model.CurrentUserId)
+            .NotEmpty().WithMessage("CurrentUserId không được để trống.");
 
-        RuleFor(x => x.OutputInfos)
-            .Must(
-                products =>
-                {
-                    var productIds = products
-                    .Where(p => p.ProductId.HasValue)
-                        .Select(p => p!.ProductId!.Value)
-                        .ToList();
+        RuleFor(x => x.Model).NotNull();
 
-                    var distinctCount = productIds.Distinct().Count();
+        RuleFor(x => x.Model.OutputInfos)
+            .NotEmpty().WithMessage("Đơn xuất hàng phải có ít nhất một sản phẩm.");
 
-                    var isDuplicate = productIds.Count != distinctCount;
-
-                    return !isDuplicate;
-                })
-            .WithMessage("Product ID cannot be duplicated in a single output.");
-
-        RuleForEach(x => x.OutputInfos).SetValidator(new UpdateOutputProductForManagerCommandValidator());
+        RuleForEach(x => x.Model.OutputInfos).ChildRules(item =>
+        {
+            item.RuleFor(i => i.ProductId).NotEmpty().GreaterThan(0);
+            item.RuleFor(i => i.Count).NotEmpty().GreaterThan(0);
+        });
     }
 }

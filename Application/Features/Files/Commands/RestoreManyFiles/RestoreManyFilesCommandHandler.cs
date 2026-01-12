@@ -1,6 +1,7 @@
 using Application.ApiContracts.File.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.LocalFile;
 using Application.Interfaces.Repositories.MediaFile;
 using Domain.Constants;
 using Mapster;
@@ -11,18 +12,13 @@ namespace Application.Features.Files.Commands.RestoreManyFiles;
 public sealed class RestoreManyFilesCommandHandler(
     IMediaFileReadRepository readRepository,
     IMediaFileUpdateRepository updateRepository,
-    Interfaces.Repositories.LocalFile.IFileStorageService fileStorageService,
+    IFileStorageService fileStorageService,
     IUnitOfWork unitOfWork) : IRequestHandler<RestoreManyFilesCommand, Result<List<MediaFileResponse>?>>
 {
     public async Task<Result<List<MediaFileResponse>?>> Handle(
         RestoreManyFilesCommand request,
         CancellationToken cancellationToken)
     {
-        if(request.StoragePaths == null || request.StoragePaths.Count == 0)
-        {
-            return Error.BadRequest("You not passed Storage Path to restore");
-        }
-
         var uniquePaths = request.StoragePaths.Distinct().ToList();
         var errorDetails = new List<Error>();
 

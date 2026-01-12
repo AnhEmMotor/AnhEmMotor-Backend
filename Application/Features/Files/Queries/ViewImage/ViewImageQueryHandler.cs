@@ -10,11 +10,6 @@ public sealed class ViewImageQueryHandler(Interfaces.Repositories.LocalFile.IFil
         ViewImageQuery request,
         CancellationToken cancellationToken)
     {
-        if(request.Width > 1200)
-        {
-            return Error.BadRequest("Width exceeds maximum allowed size of 1200 pixels.");
-        }
-
         var fileResult = await fileStorageService.GetFileAsync(request.StoragePath, cancellationToken)
             .ConfigureAwait(false);
         if(fileResult == null)

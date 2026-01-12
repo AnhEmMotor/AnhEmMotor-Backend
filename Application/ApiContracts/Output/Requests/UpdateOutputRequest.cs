@@ -1,13 +1,17 @@
-﻿using System.Text.Json.Serialization;
+﻿using Application.ApiContracts.Output.Responses;
+using System.Text.Json.Serialization;
 
 namespace Application.ApiContracts.Output.Requests;
 
 public class UpdateOutputRequest
 {
-    public Guid? UserIdToEdit { get; set; }
+    public int Id { get; init; }
 
-    public string? Notes { get; set; }
+    public Guid? CurrentUserId { get; init; }
 
-    [JsonPropertyName("products")]
-    public List<UpdateOutputInfoRequest> OutputInfos { get; set; } = [];
+    public string? StatusId { get; init; }
+
+    public string? Notes { get; init; }
+
+    public ICollection<OutputInfoResponse> OutputInfos { get; init; } = [];
 }

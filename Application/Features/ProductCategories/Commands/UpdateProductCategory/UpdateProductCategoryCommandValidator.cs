@@ -6,6 +6,6 @@ public sealed class UpdateProductCategoryCommandValidator : AbstractValidator<Up
 {
     public UpdateProductCategoryCommandValidator()
     {
-        throw new System.NotImplementedException();
+        throw new NotImplementedException();
     }
 }

@@ -133,7 +133,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(OutputResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateOutputForAdmin(
-        [FromBody] Application.ApiContracts.Output.Requests.CreateOutputByAdminRequest request,
+        [FromBody] Application.ApiContracts.Output.Requests.CreateOutputForManagerRequest request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<Application.Features.Outputs.Commands.CreateOutputByManager.CreateOutputByManagerCommand>(

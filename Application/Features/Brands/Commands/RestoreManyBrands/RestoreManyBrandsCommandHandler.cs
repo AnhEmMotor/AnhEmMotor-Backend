@@ -19,32 +19,45 @@ public sealed class RestoreManyBrandsCommandHandler(
     {
         var uniqueIds = request.Ids.Distinct().ToList();
 
-        var allBrands = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.All)
-            .ConfigureAwait(false);
-        var deletedBrands = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.DeletedOnly)
+        var existingBrands = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.All)
             .ConfigureAwait(false);
 
-        var allBrandMap = allBrands.ToDictionary(b => b.Id);
-        var deletedBrandSet = deletedBrands.Select(b => b.Id).ToHashSet();
+        var existingBrandsMap = existingBrands.ToDictionary(b => b.Id);
+        var brandsToRestore = new List<Brand>();
+        var errors = new List<Error>();
 
-        foreach(var id in uniqueIds)
+        foreach (var id in uniqueIds)
         {
-            if(!allBrandMap.ContainsKey(id))
+            if (!existingBrandsMap.TryGetValue(id, out var brand))
             {
-                return Error.NotFound($"Brand with Id {id} not found.", "Id");
-            } 
-            else if(!deletedBrandSet.Contains(id))
-            {
-                return Error.NotFound($"Brand with Id {id} is not deleted.", "Id");
+                errors.Add(Error.NotFound($"Brand with Id {id} not found.", "Id"));
+                continue;
             }
+
+            if (brand.DeletedAt == null)
+            {
+                errors.Add(Error.BadRequest($"Brand with Id {id} is not deleted.", "Id"));
+                continue;
+            }
+
+            brandsToRestore.Add(brand);
         }
 
-        if(deletedBrands.ToList().Count > 0)
+        if (errors.Count > 0)
         {
-            updateRepository.Restore(deletedBrands);
+            if (typeof(Result<List<BrandResponse>?>).GetMethod("Failure", [typeof(List<Error>)]) != null)
+            {
+                 return (Result<List<BrandResponse>?>)(object)Result.Failure(errors); 
+            }
+            return (Result<List<BrandResponse>?>)(object)Result.Failure(errors[0]); 
+        }
+
+        if (brandsToRestore.Count > 0)
+        {
+            updateRepository.Restore(brandsToRestore);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        return deletedBrands.Adapt<List<BrandResponse>>();
+        return brandsToRestore.Adapt<List<BrandResponse>>();
     }
 }

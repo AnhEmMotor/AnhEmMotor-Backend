@@ -3,9 +3,9 @@ using FluentValidation;
 
 namespace Application.Features.Products.Commands.CreateProduct
 {
-    public sealed class CreateProductVariantValidator : AbstractValidator<ProductVariantWriteRequest>
+    public sealed class CreateProductVariantCommandValidator : AbstractValidator<ProductVariantWriteRequest>
     {
-        public CreateProductVariantValidator()
+        public CreateProductVariantCommandValidator()
         {
             RuleFor(x => x.UrlSlug)
                 .NotEmpty()

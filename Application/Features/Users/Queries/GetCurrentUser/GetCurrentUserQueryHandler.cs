@@ -9,12 +9,7 @@ public class GetCurrentUserQueryHandler(IUserReadRepository userReadRepository) 
 {
     public async Task<Result<UserResponse>> Handle(GetCurrentUserQuery request, CancellationToken cancellationToken)
     {
-        if(string.IsNullOrEmpty(request.UserId) || !Guid.TryParse(request.UserId, out var userId))
-        {
-            return Error.Unauthorized("Invalid user token.");
-        }
-
-        cancellationToken.ThrowIfCancellationRequested();
+        var userId = Guid.Parse(request.UserId!);
 
         var user = await userReadRepository.FindUserByIdAsync(userId, cancellationToken).ConfigureAwait(false);
         if (user is null)

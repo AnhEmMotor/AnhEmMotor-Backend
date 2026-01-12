@@ -13,17 +13,7 @@ public class ChangePasswordCurrentUserCommandHandler(
         ChangePasswordCurrentUserCommand request,
         CancellationToken cancellationToken)
     {
-        if(string.Compare(request.Model.CurrentPassword, request.Model.NewPassword) == 0)
-        {
-            return Error.Validation("New password can not dupplicate current password.", "newPassword");
-        }
-
-        if(string.IsNullOrEmpty(request.UserId) || !Guid.TryParse(request.UserId, out var userId))
-        {
-            return Error.Unauthorized("Invalid user token.");
-        }
-
-        cancellationToken.ThrowIfCancellationRequested();
+        var userId = Guid.Parse(request.UserId!);
 
         var user = await userReadRepository.FindUserByIdAsync(userId, cancellationToken).ConfigureAwait(false);
         if(user is null)

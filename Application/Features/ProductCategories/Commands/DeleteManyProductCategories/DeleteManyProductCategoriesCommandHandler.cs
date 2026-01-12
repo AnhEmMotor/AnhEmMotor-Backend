@@ -16,11 +16,6 @@ public sealed class DeleteManyProductCategoriesCommandHandler(
         DeleteManyProductCategoriesCommand request,
         CancellationToken cancellationToken)
     {
-        if(request.Ids == null || request.Ids.Count == 0)
-        {
-            return Result.Failure(Error.BadRequest("Bạn chưa truyền danh sách Product Category ID để xoá"));
-        }
-
         var uniqueIds = request.Ids.Distinct().ToList();
         var errorDetails = new List<Error>();
 

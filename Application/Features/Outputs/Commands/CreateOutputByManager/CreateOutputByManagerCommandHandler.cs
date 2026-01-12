@@ -24,19 +24,14 @@ public sealed class CreateOutputByManagerCommandHandler(
         CreateOutputByManagerCommand request,
         CancellationToken cancellationToken)
     {
-        if(request.OutputInfos.Count == 0)
-        {
-            return Error.BadRequest("Đơn hàng phải có ít nhất một sản phẩm.", "Products");
-        }
-
-        var userData = await userReadRepository.GetUserByIDAsync(request.BuyerId!.Value, cancellationToken)
+        var userData = await userReadRepository.GetUserByIDAsync(request.Model.BuyerId!.Value, cancellationToken)
             .ConfigureAwait(false);
         if(userData == null)
         {
             return Error.Forbidden("ID này là 1 tài khoản không tồn tại/đã bị xoá/đã bị cấm. Vui lòng kiểm tra lại.", "BuyerId");
         }
 
-        var variantIds = request.OutputInfos
+        var variantIds = request.Model.OutputInfos
             .Where(p => p.ProductId.HasValue)
             .Select(p => p.ProductId!.Value)
             .Distinct()

@@ -16,11 +16,6 @@ public class ChangeUserStatusCommandHandler(
         ChangeUserStatusCommand request,
         CancellationToken cancellationToken)
     {
-        if(!UserStatus.IsValid(request.Model.Status))
-        {
-            return Error.Validation("Status not vaild, please check.", "Status");
-        }
-
         var user = await userReadRepository.FindUserByIdAsync(request.UserId, cancellationToken).ConfigureAwait(false);
         if(user is null)
         {

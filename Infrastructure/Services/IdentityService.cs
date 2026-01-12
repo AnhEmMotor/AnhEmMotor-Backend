@@ -18,7 +18,6 @@ public class IdentityService(
     {
         ApplicationUser? user;
 
-            cancellationToken.ThrowIfCancellationRequested();
 
         if(usernameOrEmail.Contains('@'))
         {
@@ -29,23 +28,8 @@ public class IdentityService(
             user = await userManager.FindByNameAsync(usernameOrEmail).ConfigureAwait(false);
         }
 
-        if(user is null)
-        {
-                return Error.BadRequest("Invalid credentials.");
-            }
-
-            if(string.Compare(user.Status, UserStatus.Active) != 0 || user.DeletedAt is not null)
-            {
-                return Error.Unauthorized("Account is not available.");
-        }
-
         var result = await signInManager.CheckPasswordSignInAsync(user, password, lockoutOnFailure: false)
             .ConfigureAwait(false);
-
-        if(!result.Succeeded)
-        {
-            return Error.Unauthorized("Invalid username/email or password.");
-        }
 
         var roles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
 

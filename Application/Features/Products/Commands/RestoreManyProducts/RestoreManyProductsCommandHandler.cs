@@ -18,11 +18,6 @@ public sealed class RestoreManyProductsCommandHandler(
         RestoreManyProductsCommand command,
         CancellationToken cancellationToken)
     {
-        if(command.Ids == null || command.Ids.Count == 0)
-        {
-            return Error.BadRequest("You not pass Product ID to restore");
-        }
-
         var uniqueIds = command.Ids.Distinct().ToList();
 
         var deletedProducts = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.DeletedOnly)

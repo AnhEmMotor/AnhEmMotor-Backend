@@ -157,7 +157,7 @@ public class SalesOrder
     public async Task CreateOutputForAdmin_WithManagerPermission_CreatesOrder()
     {
         // Arrange
-        var request = new CreateOutputByAdminRequest
+        var request = new CreateOutputForManagerRequest
         {
             BuyerId = Guid.NewGuid(),
             Notes = "Admin order"

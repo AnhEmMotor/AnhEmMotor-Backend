@@ -118,7 +118,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
     public async Task CreateOutputForAdmin_ByManager_CreatesSuccessfully()
     {
         // Arrange
-        var request = new CreateOutputByAdminRequest { BuyerId = Guid.NewGuid() };
+        var request = new CreateOutputForManagerRequest { BuyerId = Guid.NewGuid() };
 
         // Act
         var response = await _client.PostAsJsonAsync("/api/v1/SalesOrders/admin", request);
