@@ -4,4 +4,7 @@ using MediatR;
 
 namespace Application.Features.Permissions.Commands.DeleteMultipleRoles;
 
-public record DeleteMultipleRolesCommand(List<string> RoleNames) : IRequest<Result<RoleDeleteResponse>>;
+public record DeleteMultipleRolesCommand : IRequest<Result<RoleDeleteResponse>>
+{
+    public List<string>? RoleNames { get; init; }
+}

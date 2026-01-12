@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace Application.Features.Products.Commands.CreateProduct
 {
-    public sealed class CreateProductVariantCommandValidator : AbstractValidator<ProductVariantWriteRequest>
+    public sealed class CreateProductVariantCommandValidator : AbstractValidator<CreateProductVariantRequest>
     {
         public CreateProductVariantCommandValidator()
         {

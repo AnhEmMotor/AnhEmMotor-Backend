@@ -4,4 +4,7 @@ using MediatR;
 
 namespace Application.Features.Users.Queries.GetCurrentUser;
 
-public record GetCurrentUserQuery(string? UserId) : IRequest<Result<UserResponse>>;
+public record GetCurrentUserQuery : IRequest<Result<UserResponse>>
+{
+    public string? UserId { get; init; }
+}

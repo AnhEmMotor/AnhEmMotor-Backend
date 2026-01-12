@@ -6,4 +6,7 @@ using Application.Common.Models;
 
 namespace Application.Features.Files.Queries.GetDeletedFilesList;
 
-public sealed record GetDeletedFilesListQuery(SieveModel SieveModel) : IRequest<Result<PagedResult<MediaFileResponse>>>;
+public sealed record GetDeletedFilesListQuery : IRequest<Result<PagedResult<MediaFileResponse>>>
+{
+    public SieveModel? SieveModel { get; init; }
+}

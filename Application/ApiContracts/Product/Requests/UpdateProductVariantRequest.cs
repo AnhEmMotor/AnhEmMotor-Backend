@@ -1,8 +1,8 @@
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Application.ApiContracts.Product.Requests;
 
-public class ProductVariantWriteRequest
+public class UpdateProductVariantRequest
 {
     public int? Id { get; set; }
 

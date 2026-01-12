@@ -4,4 +4,7 @@ using MediatR;
 
 namespace Application.Features.Products.Queries.GetProductById;
 
-public sealed record GetProductByIdQuery(int Id) : IRequest<Result<ProductDetailForManagerResponse?>>;
+public sealed record GetProductByIdQuery : IRequest<Result<ProductDetailForManagerResponse?>>
+{
+    public int Id { get; init; }
+}

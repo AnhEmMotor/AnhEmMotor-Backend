@@ -4,4 +4,7 @@ using MediatR;
 
 namespace Application.Features.Suppliers.Queries.GetSupplierById;
 
-public sealed record GetSupplierByIdQuery(int Id) : IRequest<Result<SupplierResponse?>>;
+public sealed record GetSupplierByIdQuery : IRequest<Result<SupplierResponse?>>
+{
+    public int Id { get; init; }
+}

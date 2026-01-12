@@ -4,4 +4,10 @@ using MediatR;
 
 namespace Application.Features.Products.Commands.UpdateProductPrice;
 
-public sealed record UpdateProductPriceCommand(int Id, decimal Price) : IRequest<Result<ProductDetailForManagerResponse?>>;
+public sealed record UpdateProductPriceCommand : IRequest<Result<ProductDetailForManagerResponse?>>
+{
+    public int Id { get; init; }
+    public decimal Price { get; init; }
+}
+
+

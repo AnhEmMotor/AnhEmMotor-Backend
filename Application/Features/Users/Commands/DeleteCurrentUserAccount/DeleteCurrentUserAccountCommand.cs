@@ -4,4 +4,7 @@ using MediatR;
 
 namespace Application.Features.Users.Commands.DeleteCurrentUserAccount;
 
-public record DeleteCurrentUserAccountCommand(string? UserId) : IRequest<Result<DeleteUserByUserReponse>>;
+public record DeleteCurrentUserAccountCommand : IRequest<Result<DeleteUserByUserReponse>>
+{
+    public string? UserId { get; set; }
+}

@@ -6,4 +6,7 @@ using Sieve.Models;
 
 namespace Application.Features.Brands.Queries.GetBrandsList;
 
-public sealed record GetBrandsListQuery(SieveModel SieveModel) : IRequest<Result<PagedResult<BrandResponse>>>;
+public sealed record GetBrandsListQuery : IRequest<Result<PagedResult<BrandResponse>>>
+{
+    public SieveModel? SieveModel { get; init; }
+}

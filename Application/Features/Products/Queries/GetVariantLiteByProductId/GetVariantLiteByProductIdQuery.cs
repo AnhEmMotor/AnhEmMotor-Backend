@@ -4,4 +4,8 @@ using MediatR;
 
 namespace Application.Features.Products.Queries.GetVariantLiteByProductId;
 
-public sealed record GetVariantLiteByProductIdQuery(int ProductId, bool IncludeDeleted) : IRequest<Result<List<ProductVariantLiteResponse>?>>;
+public sealed record GetVariantLiteByProductIdQuery : IRequest<Result<List<ProductVariantLiteResponse>?>>
+{
+    public int ProductId { get; init; }
+    public bool IncludeDeleted { get; init; }
+}

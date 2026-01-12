@@ -1,3 +1,4 @@
+using Application.ApiContracts.Input.Requests;
 using Application.ApiContracts.Input.Responses;
 using Application.Common.Models;
 using MediatR;
@@ -14,5 +15,5 @@ public sealed record UpdateInputCommand : IRequest<Result<InputResponse?>>
 
     public string? Notes { get; init; }
 
-    public ICollection<UpdateInputProductCommand> Products { get; init; } = [];
+    public ICollection<UpdateInputInfoRequest> Products { get; init; } = [];
 }

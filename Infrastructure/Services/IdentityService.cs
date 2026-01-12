@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Auth.Requests;
+﻿using Application.ApiContracts.Auth.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Services;
 using Domain.Constants;
@@ -11,7 +11,7 @@ public class IdentityService(
     UserManager<ApplicationUser> userManager,
     SignInManager<ApplicationUser> signInManager) : IIdentityService
 {
-    public async Task<Result<UserAuthDTO>> AuthenticateAsync(
+    public async Task<Result<UserAuth>> AuthenticateAsync(
         string usernameOrEmail,
         string password,
         CancellationToken cancellationToken)
@@ -33,7 +33,7 @@ public class IdentityService(
 
         var roles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
 
-        return new UserAuthDTO
+        return new UserAuth
         {
             Id = user.Id,
                 UserName = user.UserName,

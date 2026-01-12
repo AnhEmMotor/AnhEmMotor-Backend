@@ -4,4 +4,7 @@ using MediatR;
 
 namespace Application.Features.Inputs.Commands.DeleteInput;
 
-public sealed record DeleteInputCommand(int Id) : IRequest<Result>;
+public sealed record DeleteInputCommand : IRequest<Result>
+{
+    public int? Id { get; init; }
+}

@@ -4,4 +4,7 @@ using MediatR;
 
 namespace Application.Features.Permissions.Queries.GetMyPermissions;
 
-public record GetMyPermissionsQuery(string? UserId) : IRequest<Result<PermissionAndRoleOfUserResponse>>;
+public record GetMyPermissionsQuery : IRequest<Result<PermissionAndRoleOfUserResponse>>
+{
+    public string? UserId { get; init; }
+}

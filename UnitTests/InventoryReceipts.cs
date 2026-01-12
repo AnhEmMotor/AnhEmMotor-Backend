@@ -21,7 +21,7 @@ public class InventoryReceipts
     public void CreateInputProductValidator_NegativeQuantity_ReturnsValidationError()
     {
         // Arrange
-        var validator = new CreateInputProductCommandValidator();
+        var validator = new CreateInputInfoCommandValidator();
         var command = new CreateInputProductCommand
         {
             ProductId = 1,
@@ -40,7 +40,7 @@ public class InventoryReceipts
     public void CreateInputProductValidator_ZeroQuantity_ReturnsValidationError()
     {
         // Arrange
-        var validator = new CreateInputProductCommandValidator();
+        var validator = new CreateInputInfoCommandValidator();
         var command = new CreateInputProductCommand
         {
             ProductId = 1,
@@ -59,7 +59,7 @@ public class InventoryReceipts
     public void CreateInputProductValidator_NegativeInputPrice_ReturnsValidationError()
     {
         // Arrange
-        var validator = new CreateInputProductCommandValidator();
+        var validator = new CreateInputInfoCommandValidator();
         var command = new CreateInputProductCommand
         {
             ProductId = 1,
@@ -78,7 +78,7 @@ public class InventoryReceipts
     public void CreateInputProductValidator_ExcessiveDecimalPlaces_ReturnsValidationError()
     {
         // Arrange
-        var validator = new CreateInputProductCommandValidator();
+        var validator = new CreateInputInfoCommandValidator();
         var command = new CreateInputProductCommand
         {
             ProductId = 1,
@@ -175,7 +175,7 @@ public class InventoryReceipts
     public void CreateInputProductValidator_NullProductId_ReturnsValidationError()
     {
         // Arrange
-        var validator = new CreateInputProductCommandValidator();
+        var validator = new CreateInputInfoCommandValidator();
         var command = new CreateInputProductCommand
         {
             ProductId = null,

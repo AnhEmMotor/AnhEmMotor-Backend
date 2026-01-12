@@ -4,4 +4,7 @@ using MediatR;
 
 namespace Application.Features.Outputs.Commands.DeleteOutput;
 
-public sealed record DeleteOutputCommand(int Id) : IRequest<Result>;
+public sealed record DeleteOutputCommand : IRequest<Result>
+{
+    public int Id { get; init; }
+}

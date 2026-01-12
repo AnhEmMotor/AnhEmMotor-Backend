@@ -4,4 +4,7 @@ using Application.Common.Models;
 
 namespace Application.Features.Products.Queries.CheckSlugAvailability;
 
-public sealed record CheckSlugAvailabilityQuery(string Slug) : IRequest<Result<SlugAvailabilityResponse>>;
+public sealed record CheckSlugAvailabilityQuery : IRequest<Result<SlugAvailabilityResponse>>
+{
+    public string? Slug { get; init; }
+}

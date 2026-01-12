@@ -4,4 +4,8 @@ using MediatR;
 
 namespace Application.Features.Outputs.Commands.RestoreOutput;
 
-public sealed record RestoreOutputCommand(int Id) : IRequest<Result<OutputResponse?>>;
+public sealed record RestoreOutputCommand : IRequest<Result<OutputResponse?>>
+{
+    public int Id { get; init; }
+}
+

@@ -4,4 +4,7 @@ using MediatR;
 
 namespace Application.Features.Outputs.Queries.GetOutputById;
 
-public sealed record GetOutputByIdQuery(int Id) : IRequest<Result<OutputResponse?>>;
+public sealed record GetOutputByIdQuery : IRequest<Result<OutputResponse?>>
+{
+    public int Id { get; init; }
+}

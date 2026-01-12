@@ -6,4 +6,8 @@ using Application.Common.Models;
 
 namespace Application.Features.Inputs.Queries.GetInputsBySupplierId;
 
-public sealed record GetInputsBySupplierIdQuery(int SupplierId, SieveModel SieveModel) : IRequest<Result<PagedResult<InputResponse>>>;
+public sealed record GetInputsBySupplierIdQuery : IRequest<Result<PagedResult<InputResponse>>>
+{
+    public int SupplierId { get; init; }
+    public SieveModel? SieveModel { get; init; }
+}

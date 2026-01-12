@@ -5,4 +5,9 @@ using MediatR;
 
 namespace Application.Features.Outputs.Commands.UpdateManyOutputStatus;
 
-public sealed record UpdateManyOutputStatusCommand(UpdateManyOutputStatusRequest Model) : IRequest<Result<List<OutputResponse>?>>;
+public sealed record UpdateManyOutputStatusCommand : IRequest<Result<List<OutputResponse>?>>
+{
+    public List<int>? Ids { get; init; }
+
+    public string? StatusId { get; init; }
+}

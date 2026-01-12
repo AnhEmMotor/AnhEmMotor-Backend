@@ -1,4 +1,4 @@
-using Application.ApiContracts.Auth.Requests;
+using Application.ApiContracts.Auth.Responses;
 using Application.Common.Constants;
 using Application.Interfaces.Services;
 using Microsoft.Extensions.Configuration;
@@ -39,7 +39,7 @@ public class TokenManagerService : ITokenManagerService
         _refreshTokenExpiryDays = int.TryParse(refreshTokenExpiry, out var refreshDays) && refreshDays > 0 ? refreshDays : 7;
     }
 
-    public string CreateAccessToken(UserAuthDTO user, DateTimeOffset expiryTime)
+    public string CreateAccessToken(UserAuth user, DateTimeOffset expiryTime)
     {
         var claims = new List<Claim>
         {

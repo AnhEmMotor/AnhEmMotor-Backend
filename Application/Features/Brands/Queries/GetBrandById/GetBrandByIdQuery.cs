@@ -5,4 +5,7 @@ using MediatR;
 
 namespace Application.Features.Brands.Queries.GetBrandById;
 
-public sealed record GetBrandByIdQuery(int Id) : IRequest<Result<BrandResponse?>>;
+public sealed record GetBrandByIdQuery : IRequest<Result<BrandResponse>>
+{
+    public int? Id { get; init; }
+}

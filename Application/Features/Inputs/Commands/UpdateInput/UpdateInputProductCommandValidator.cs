@@ -1,9 +1,10 @@
-﻿using Application.Features.Inputs.Commands.CreateInput;
+﻿using Application.ApiContracts.Input.Requests;
+using Application.Features.Inputs.Commands.CreateInput;
 using FluentValidation;
 
 namespace Application.Features.Inputs.Commands.UpdateInput
 {
-    public sealed class UpdateInputProductCommandValidator : AbstractValidator<UpdateInputProductCommand>
+    public sealed class UpdateInputProductCommandValidator : AbstractValidator<UpdateInputInfoRequest>
     {
         public UpdateInputProductCommandValidator()
         {

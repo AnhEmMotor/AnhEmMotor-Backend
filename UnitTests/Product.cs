@@ -70,7 +70,7 @@ public class Product
             BrandId = 1,
             Variants =
             [
-                new ProductVariantWriteRequest
+                new CreateProductVariantRequest
                 {
                     UrlSlug = "wave-alpha-2024",
                     Price = 20000000,
@@ -113,13 +113,13 @@ public class Product
             BrandId = 1,
             Variants =
             [
-                new ProductVariantWriteRequest
+                new CreateProductVariantRequest
                 {
                     UrlSlug = "sh160i-red",
                     Price = 100000000,
                     OptionValues = new Dictionary<string, string> { { "Màu sắc", "Đỏ" }, { "Phiên bản", "Cao cấp" } }
                 },
-                new ProductVariantWriteRequest
+                new CreateProductVariantRequest
                 {
                     UrlSlug = "sh160i-black",
                     Price = 102000000,
@@ -161,7 +161,7 @@ public class Product
             BrandId = 1,
             Variants =
             [
-                new ProductVariantWriteRequest
+                new CreateProductVariantRequest
                 {
                     UrlSlug = "wave-2024",
                     Price = 20000000
@@ -199,7 +199,7 @@ public class Product
             BrandId = 999,
             Variants =
             [
-                new ProductVariantWriteRequest
+                new CreateProductVariantRequest
                 {
                     UrlSlug = "wave-2024",
                     Price = 20000000
@@ -239,7 +239,7 @@ public class Product
             BrandId = 1,
             Variants =
             [
-                new ProductVariantWriteRequest
+                new CreateProductVariantRequest
                 {
                     UrlSlug = "wave-2024",
                     Price = 20000000
@@ -277,7 +277,7 @@ public class Product
             BrandId = 1,
             Variants =
             [
-                new ProductVariantWriteRequest
+                new CreateProductVariantRequest
                 {
                     UrlSlug = "wave-2024",
                     Price = 20000000
@@ -317,7 +317,7 @@ public class Product
             BrandId = 1,
             Variants =
             [
-                new ProductVariantWriteRequest
+                new CreateProductVariantRequest
                 {
                     UrlSlug = "wave-alpha-2024",
                     Price = 20000000
@@ -358,7 +358,7 @@ public class Product
             BrandId = 1,
             Variants =
             [
-                new ProductVariantWriteRequest
+                new CreateProductVariantRequest
                 {
                     UrlSlug = "wave-alpha-2024",
                     Price = 20000000
@@ -399,7 +399,7 @@ public class Product
             BrandId = 1,
             Variants =
             [
-                new ProductVariantWriteRequest
+                new CreateProductVariantRequest
                 {
                     UrlSlug = "wave-2024",
                     Price = -100
@@ -426,7 +426,7 @@ public class Product
             BrandId = 1,
             Variants =
             [
-                new ProductVariantWriteRequest
+                new CreateProductVariantRequest
                 {
                     UrlSlug = "wave-2024",
                     Price = 0
@@ -487,13 +487,13 @@ public class Product
             BrandId = 1,
             Variants =
             [
-                new ProductVariantWriteRequest
+                new CreateProductVariantRequest
                 {
                     UrlSlug = "sh-red",
                     Price = 100000000,
                     OptionValues = new Dictionary<string, string> { { "Màu sắc", "Đỏ" } }
                 },
-                new ProductVariantWriteRequest
+                new CreateProductVariantRequest
                 {
                     UrlSlug = "sh-black",
                     Price = 100000000,
@@ -521,13 +521,13 @@ public class Product
             BrandId = 1,
             Variants =
             [
-                new ProductVariantWriteRequest
+                new CreateProductVariantRequest
                 {
                     UrlSlug = "sh-red-1",
                     Price = 100000000,
                     OptionValues = new Dictionary<string, string> { { "Màu sắc", "Đỏ" } }
                 },
-                new ProductVariantWriteRequest
+                new CreateProductVariantRequest
                 {
                     UrlSlug = "sh-red-2",
                     Price = 100000000,
@@ -555,7 +555,7 @@ public class Product
             BrandId = 1,
             Variants =
             [
-                new ProductVariantWriteRequest
+                new CreateProductVariantRequest
                 {
                     UrlSlug = "sh-xl",
                     Price = 100000000,
@@ -583,7 +583,7 @@ public class Product
             BrandId = 1,
             Variants =
             [
-                new ProductVariantWriteRequest
+                new CreateProductVariantRequest
                 {
                     UrlSlug = "sh-variant",
                     Price = 100000000,
@@ -611,7 +611,7 @@ public class Product
             BrandId = 1,
             Variants =
             [
-                new ProductVariantWriteRequest
+                new CreateProductVariantRequest
                 {
                     UrlSlug = "wave-2024",
                     Price = 20000000
@@ -653,7 +653,7 @@ public class Product
             Displacement = 124.85m,
             Variants =
             [
-                new ProductVariantWriteRequest
+                new CreateProductVariantRequest
                 {
                     UrlSlug = "wave-2024",
                     Price = 20000000
@@ -681,7 +681,7 @@ public class Product
             MaxPower = "15.851",
             Variants =
             [
-                new ProductVariantWriteRequest
+                new CreateProductVariantRequest
                 {
                     UrlSlug = "wave-2024",
                     Price = 20000000
@@ -709,7 +709,7 @@ public class Product
             FuelConsumption = "2.155",
             Variants =
             [
-                new ProductVariantWriteRequest
+                new CreateProductVariantRequest
                 {
                     UrlSlug = "wave-2024",
                     Price = 20000000
@@ -736,7 +736,7 @@ public class Product
             BrandId = 1,
             Variants =
             [
-                new ProductVariantWriteRequest
+                new CreateProductVariantRequest
                 {
                     UrlSlug = "honda-2024",
                     Price = 20000000
@@ -957,7 +957,7 @@ public class Product
             BrandId = 1,
             Variants =
             [
-                new ProductVariantWriteRequest
+                new CreateProductVariantRequest
                 {
                     UrlSlug = "wave-new-variant",
                     Price = 25000000
@@ -1002,7 +1002,7 @@ public class Product
             BrandId = 1,
             Variants =
             [
-                new ProductVariantWriteRequest
+                new CreateProductVariantRequest
                 {
                     Id = 1,
                     UrlSlug = "wave-updated",

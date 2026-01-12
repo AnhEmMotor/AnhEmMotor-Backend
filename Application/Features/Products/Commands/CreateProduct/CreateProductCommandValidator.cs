@@ -37,7 +37,7 @@ public sealed class CreateProductCommandValidator : AbstractValidator<CreateProd
             .SetValidator(new CreateProductVariantCommandValidator());
     }
 
-    private bool HaveUniqueSlugs(List<ProductVariantWriteRequest> variants)
+    private bool HaveUniqueSlugs(List<CreateProductVariantRequest> variants)
     {
         if (variants == null) return true;
 

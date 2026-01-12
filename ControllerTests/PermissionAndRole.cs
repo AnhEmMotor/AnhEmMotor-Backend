@@ -240,7 +240,7 @@ public class PermissionAndRole
             Message = "Permission updated successfully."
         };
 
-        _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateRolePermissionsCommand>(), It.IsAny<CancellationToken>()))
+        _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateRoleCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
 
         // Act

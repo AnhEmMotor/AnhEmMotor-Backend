@@ -51,7 +51,7 @@ public class BrandController(IMediator mediator) : ApiController
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
     {
-        var query = new GetBrandsListQuery(sieveModel);
+        var query = new GetBrandsListQuery() { SieveModel = sieveModel };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }

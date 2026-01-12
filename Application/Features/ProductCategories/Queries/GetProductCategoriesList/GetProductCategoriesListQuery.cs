@@ -6,4 +6,8 @@ using Sieve.Models;
 
 namespace Application.Features.ProductCategories.Queries.GetProductCategoriesList;
 
-public sealed record GetProductCategoriesListQuery(SieveModel SieveModel) : IRequest<Result<PagedResult<ProductCategoryResponse>>>;
+public sealed record GetProductCategoriesListQuery : IRequest<Result<PagedResult<ProductCategoryResponse>>>
+{
+    public SieveModel? SieveModel { get; init; }
+}
+

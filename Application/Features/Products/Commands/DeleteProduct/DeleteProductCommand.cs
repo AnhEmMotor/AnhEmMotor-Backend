@@ -4,4 +4,8 @@ using MediatR;
 
 namespace Application.Features.Products.Commands.DeleteProduct;
 
-public sealed record DeleteProductCommand(int Id) : IRequest<Result>;
+public sealed record DeleteProductCommand : IRequest<Result>
+{
+    public int Id { get; init; }
+}
+

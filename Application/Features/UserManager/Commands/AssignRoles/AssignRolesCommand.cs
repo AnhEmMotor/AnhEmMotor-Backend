@@ -5,4 +5,8 @@ using MediatR;
 
 namespace Application.Features.UserManager.Commands.AssignRoles;
 
-public record AssignRolesCommand(Guid UserId, AssignRolesRequest Model) : IRequest<Result<AssignRoleResponse>>;
+public record AssignRolesCommand : IRequest<Result<AssignRoleResponse>>
+{
+    public Guid UserId { get; init; }
+    public List<string>? RoleNames { get; init; }
+}

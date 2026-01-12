@@ -1,3 +1,4 @@
+using Application.ApiContracts.Input.Requests;
 using Application.ApiContracts.Input.Responses;
 using Application.Common.Models;
 using MediatR;
@@ -12,5 +13,5 @@ public sealed record CreateInputCommand : IRequest<Result<InputResponse?>>
 
     public int? SupplierId { get; init; }
 
-    public List<CreateInputProductCommand> Products { get; init; } = [];
+    public List<CreateInputInfoRequest> Products { get; init; } = [];
 }

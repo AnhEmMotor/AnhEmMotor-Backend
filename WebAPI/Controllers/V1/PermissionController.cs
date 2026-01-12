@@ -96,7 +96,7 @@ public class PermissionController(IMediator mediator) : ApiController
         [FromBody] UpdateRoleRequest model,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new UpdateRolePermissionsCommand(roleName, model), cancellationToken)
+        var result = await mediator.Send(new UpdateRoleCommand(roleName, model), cancellationToken)
             .ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -139,7 +139,7 @@ public class PermissionController(IMediator mediator) : ApiController
         [FromBody] UpdateRoleRequest model,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new UpdateRolePermissionsCommand(roleName, model), cancellationToken)
+        var result = await mediator.Send(new UpdateRoleCommand(roleName, model), cancellationToken)
             .ConfigureAwait(true);
         return HandleResult(result);
     }

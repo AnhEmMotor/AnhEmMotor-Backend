@@ -4,4 +4,7 @@ using MediatR;
 
 namespace Application.Features.Statistical.Queries.GetDailyRevenue;
 
-public sealed record GetDailyRevenueQuery(int Days = 7) : IRequest<Result<IEnumerable<DailyRevenueResponse>>>;
+public sealed record GetDailyRevenueQuery : IRequest<Result<IEnumerable<DailyRevenueResponse>>>
+{
+    public int Days { get; init; } = 7;
+}

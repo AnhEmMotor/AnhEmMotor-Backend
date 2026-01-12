@@ -6,4 +6,7 @@ using Sieve.Models;
 
 namespace Application.Features.ProductCategories.Queries.GetDeletedProductCategoriesList;
 
-public sealed record GetDeletedProductCategoriesListQuery(SieveModel SieveModel) : IRequest<Result<PagedResult<ProductCategoryResponse>>>;
+public sealed record GetDeletedProductCategoriesListQuery : IRequest<Result<PagedResult<ProductCategoryResponse>>>
+{
+    public SieveModel? SieveModel { get; init; }
+}

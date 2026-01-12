@@ -1,5 +1,4 @@
-﻿using Application.ApiContracts.Auth.Requests;
-using Application.ApiContracts.Auth.Responses;
+﻿using Application.ApiContracts.Auth.Responses;
 using Application.Common.Constants;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.User;
@@ -58,7 +57,7 @@ public sealed class RefreshTokenCommandHandler(
         }
 
         // 5. Execution Logic (Tạo token mới)
-        var userDto = user.Adapt<UserAuthDTO>();
+        var userDto = user.Adapt<UserAuth>();
         var accessExpiryMinutes = tokenService.GetAccessTokenExpiryMinutes();
         var refreshExpiryDays = tokenService.GetRefreshTokenExpiryDays();
         var now = DateTimeOffset.UtcNow;

@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace Application.ApiContracts.Auth.Requests
+namespace Application.ApiContracts.Auth.Responses
 {
-    public class UserAuthDTO
+    public class UserAuth
     {
         public Guid Id { get; set; }
 

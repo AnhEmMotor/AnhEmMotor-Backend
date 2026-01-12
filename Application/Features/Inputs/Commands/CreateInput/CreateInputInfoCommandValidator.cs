@@ -1,10 +1,11 @@
-﻿using FluentValidation;
+﻿using Application.ApiContracts.Input.Requests;
+using FluentValidation;
 
 namespace Application.Features.Inputs.Commands.CreateInput
 {
-    public sealed class CreateInputProductCommandValidator : AbstractValidator<CreateInputProductCommand>
+    public sealed class CreateInputInfoCommandValidator : AbstractValidator<CreateInputInfoRequest>
     {
-        public CreateInputProductCommandValidator()
+        public CreateInputInfoCommandValidator()
         {
             RuleFor(x => x.ProductId).NotNull().GreaterThan(0);
 

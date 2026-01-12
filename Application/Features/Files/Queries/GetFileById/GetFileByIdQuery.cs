@@ -4,4 +4,7 @@ using MediatR;
 
 namespace Application.Features.Files.Queries.GetFileById;
 
-public sealed record GetFileByIdQuery(int Id) : IRequest<Result<MediaFileResponse?>>;
+public sealed record GetFileByIdQuery : IRequest<Result<MediaFileResponse?>>
+{
+    public int? Id { get; init; }
+}

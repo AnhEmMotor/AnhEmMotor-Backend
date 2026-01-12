@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Auth.Requests;
+﻿using Application.ApiContracts.Auth.Responses;
 using Application.ApiContracts.User.Responses;
 using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Models;
@@ -19,11 +19,11 @@ namespace Application.Interfaces.Repositories.User
             SieveModel sieveModel,
             CancellationToken cancellationToken);
 
-        public Task<Result<UserAuthDTO>> GetUserByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken);
+        public Task<Result<UserAuth>> GetUserByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken);
 
         public Task<ApplicationUser?> GetByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken);
 
-        public Task<UserAuthDTO?> GetUserByIDAsync(Guid? idUser, CancellationToken cancellationToken);
+        public Task<UserAuth?> GetUserByIDAsync(Guid? idUser, CancellationToken cancellationToken);
 
         public Task<ApplicationUser?> FindUserByIdAsync(
             Guid userId,

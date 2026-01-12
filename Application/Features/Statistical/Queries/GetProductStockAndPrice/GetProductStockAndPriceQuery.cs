@@ -4,4 +4,7 @@ using MediatR;
 
 namespace Application.Features.Statistical.Queries.GetProductStockAndPrice;
 
-public sealed record GetProductStockAndPriceQuery(int VariantId) : IRequest<Result<ProductStockPriceResponse?>>;
+public sealed record GetProductStockAndPriceQuery : IRequest<Result<ProductStockPriceResponse?>>
+{
+    public int VariantId { get; init; }
+}

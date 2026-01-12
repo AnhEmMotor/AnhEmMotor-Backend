@@ -4,4 +4,7 @@ using MediatR;
 
 namespace Application.Features.UserManager.Queries.GetUserById;
 
-public record GetUserByIdQuery(Guid UserId) : IRequest<Result<UserDTOForManagerResponse>>;
+public record GetUserByIdQuery : IRequest<Result<UserDTOForManagerResponse>>
+{
+    public Guid? UserId { get; set; }
+}

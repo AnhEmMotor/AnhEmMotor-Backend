@@ -4,4 +4,7 @@ using MediatR;
 
 namespace Application.Features.Inputs.Commands.CloneInput;
 
-public sealed record CloneInputCommand(int Id) : IRequest<Result<InputResponse?>>;
+public sealed record CloneInputCommand : IRequest<Result<InputResponse?>>
+{
+    public int? Id { get; init; }
+}

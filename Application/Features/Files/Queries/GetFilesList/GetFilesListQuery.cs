@@ -6,4 +6,7 @@ using Application.Common.Models;
 
 namespace Application.Features.Files.Queries.GetFilesList;
 
-public sealed record GetFilesListQuery(SieveModel SieveModel) : IRequest<Result<PagedResult<MediaFileResponse>>>;
+public sealed record GetFilesListQuery : IRequest<Result<PagedResult<MediaFileResponse>>>
+{
+    public SieveModel? SieveModel { get; init; }
+}

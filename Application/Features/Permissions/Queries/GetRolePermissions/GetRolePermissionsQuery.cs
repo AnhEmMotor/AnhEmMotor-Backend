@@ -4,4 +4,7 @@ using MediatR;
 
 namespace Application.Features.Permissions.Queries.GetRolePermissions;
 
-public record GetRolePermissionsQuery(string RoleName) : IRequest<Result<List<PermissionResponse>>>;
+public record GetRolePermissionsQuery : IRequest<Result<List<PermissionResponse>>>
+{
+    public string? RoleName { get; init; }
+}

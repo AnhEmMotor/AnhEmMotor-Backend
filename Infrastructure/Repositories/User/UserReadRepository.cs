@@ -1,5 +1,4 @@
-﻿using Application.ApiContracts.Auth.Requests;
-using Application.ApiContracts.User.Responses;
+﻿using Application.ApiContracts.User.Responses;
 using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.User;
@@ -12,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
 using Sieve.Services;
 using System;
+using Application.ApiContracts.Auth.Responses;
 
 namespace Infrastructure.Repositories.User
 {
@@ -97,7 +97,7 @@ namespace Infrastructure.Repositories.User
                 .ConfigureAwait(false);
         }
 
-        public async Task<Result<UserAuthDTO>> GetUserByRefreshTokenAsync(
+        public async Task<Result<UserAuth>> GetUserByRefreshTokenAsync(
             string refreshToken,
             CancellationToken cancellationToken)
         {
@@ -108,7 +108,7 @@ namespace Infrastructure.Repositories.User
 
             var roles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
 
-            var userAuthDto = new UserAuthDTO
+            var UserAuth = new UserAuth
             {
                 Id = user.Id,
                 UserName = user.UserName,
@@ -119,10 +119,10 @@ namespace Infrastructure.Repositories.User
                 AuthMethods = ["pwd"]
             };
 
-            return Result<UserAuthDTO>.Success(userAuthDto);
+            return Result<UserAuth>.Success(UserAuth);
         }
 
-        public async Task<UserAuthDTO?> GetUserByIDAsync(Guid? idUser, CancellationToken cancellationToken)
+        public async Task<UserAuth?> GetUserByIDAsync(Guid? idUser, CancellationToken cancellationToken)
         {
             if(idUser == null)
                 return null;
@@ -134,7 +134,7 @@ namespace Infrastructure.Repositories.User
             if(user == null)
                 return null;
             var roles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
-            return new UserAuthDTO()
+            return new UserAuth()
             {
                 Id = user.Id,
                 UserName = user.UserName,

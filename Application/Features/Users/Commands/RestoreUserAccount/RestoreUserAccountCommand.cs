@@ -4,4 +4,7 @@ using MediatR;
 
 namespace Application.Features.Users.Commands.RestoreUserAccount;
 
-public record RestoreUserAccountCommand(Guid UserId) : IRequest<Result<RestoreUserResponse>>;
+public record RestoreUserAccountCommand : IRequest<Result<RestoreUserResponse>>
+{
+    public Guid? UserId { get; init; }
+}

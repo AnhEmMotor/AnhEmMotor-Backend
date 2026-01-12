@@ -6,4 +6,7 @@ using Application.Common.Models;
 
 namespace Application.Features.Inputs.Queries.GetInputsList;
 
-public sealed record GetInputsListQuery(SieveModel SieveModel) : IRequest<Result<PagedResult<InputResponse>>>;
+public sealed record GetInputsListQuery : IRequest<Result<PagedResult<InputResponse>>>
+{
+    public SieveModel? SieveModel { get; set; }
+}

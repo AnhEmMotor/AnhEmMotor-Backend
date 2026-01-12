@@ -4,4 +4,8 @@ using MediatR;
 
 namespace Application.Features.Products.Commands.RestoreManyProducts;
 
-public sealed record RestoreManyProductsCommand(List<int> Ids) : IRequest<Result<List<ProductDetailForManagerResponse>?>>;
+public sealed record RestoreManyProductsCommand : IRequest<Result<List<ProductDetailForManagerResponse>?>>
+{
+    public List<int>? Ids { get; init; }
+}
+

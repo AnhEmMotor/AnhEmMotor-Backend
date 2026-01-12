@@ -4,4 +4,7 @@ using MediatR;
 
 namespace Application.Features.Settings.Commands.SetSettings;
 
-public sealed record SetSettingsCommand(Dictionary<string,string?> Settings) : IRequest<Result<Dictionary<string, string?>?>>;
+public sealed record SetSettingsCommand() : IRequest<Result<Dictionary<string, string?>?>>
+{
+    public Dictionary<string, string?>? Settings { get; init; }
+}

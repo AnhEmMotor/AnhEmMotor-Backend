@@ -4,4 +4,7 @@ using MediatR;
 
 namespace Application.Features.Permissions.Commands.DeleteRole;
 
-public record DeleteRoleCommand(string RoleName) : IRequest<Result<RoleDeleteResponse>>;
+public record DeleteRoleCommand : IRequest<Result<RoleDeleteResponse>>
+{
+    public string? RoleName { get; init; }
+}

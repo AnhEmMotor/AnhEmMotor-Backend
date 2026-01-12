@@ -14,7 +14,7 @@ public class ProductMappingConfig : IRegister
     public void Register(TypeAdapterConfig config)
     {
         config.NewConfig<CreateProductRequest, Commands.CreateProduct.CreateProductCommand>()
-            .Map(dest => dest.Variants, src => src.Variants ?? new List<ProductVariantWriteRequest>());
+            .Map(dest => dest.Variants, src => src.Variants ?? new List<CreateProductVariantRequest>());
 
         config.NewConfig<UpdateProductRequest, Commands.UpdateProduct.UpdateProductCommand>()
             .MapWith(src => new Commands.UpdateProduct.UpdateProductCommand(0, src));

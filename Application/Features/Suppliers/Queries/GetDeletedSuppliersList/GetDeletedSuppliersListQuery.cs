@@ -6,4 +6,7 @@ using Sieve.Models;
 
 namespace Application.Features.Suppliers.Queries.GetDeletedSuppliersList;
 
-public sealed record GetDeletedSuppliersListQuery(SieveModel SieveModel) : IRequest<Result<PagedResult<SupplierResponse>>>;
+public sealed record GetDeletedSuppliersListQuery : IRequest<Result<PagedResult<SupplierResponse>>>
+{
+    public SieveModel? SieveModel { get; init; }
+}

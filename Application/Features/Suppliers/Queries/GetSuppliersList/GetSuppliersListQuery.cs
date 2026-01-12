@@ -6,4 +6,8 @@ using Sieve.Models;
 
 namespace Application.Features.Suppliers.Queries.GetSuppliersList;
 
-public sealed record GetSuppliersListQuery(SieveModel SieveModel) : IRequest<Result<PagedResult<SupplierResponse>>>;
+public sealed record GetSuppliersListQuery : IRequest<Result<PagedResult<SupplierResponse>>>
+{
+    public SieveModel? SieveModel { get; init; }
+}
+

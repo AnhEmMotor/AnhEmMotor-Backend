@@ -4,4 +4,7 @@ using MediatR;
 
 namespace Application.Features.Statistical.Queries.GetMonthlyRevenueProfit;
 
-public sealed record GetMonthlyRevenueProfitQuery(int Months = 12) : IRequest<Result<IEnumerable<MonthlyRevenueProfitResponse>>>;
+public sealed record GetMonthlyRevenueProfitQuery : IRequest<Result<IEnumerable<MonthlyRevenueProfitResponse>>>
+{
+    public int Months { get; set; } = 12;
+}

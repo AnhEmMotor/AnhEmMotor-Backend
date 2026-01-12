@@ -4,4 +4,8 @@ using MediatR;
 
 namespace Application.Features.Products.Commands.UpdateManyProductStatuses;
 
-public sealed record UpdateManyProductStatusesCommand(List<int> Ids, string StatusId) : IRequest<Result<List<int>?>>;
+public sealed record UpdateManyProductStatusesCommand : IRequest<Result<List<int>?>>
+{
+    public List<int>? Ids { get; init; }
+    public string? StatusId { get; init; }
+}

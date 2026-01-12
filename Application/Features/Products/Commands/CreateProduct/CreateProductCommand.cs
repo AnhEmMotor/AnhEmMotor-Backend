@@ -55,5 +55,5 @@ public sealed record CreateProductCommand : IRequest<Result<ProductDetailForMana
 
     public string? CompressionRatio { get; init; }
 
-    public List<ProductVariantWriteRequest> Variants { get; init; } = [];
+    public List<CreateProductVariantRequest> Variants { get; init; } = [];
 }

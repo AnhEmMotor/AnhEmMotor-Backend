@@ -6,4 +6,7 @@ using Application.Common.Models;
 
 namespace Application.Features.Brands.Queries.GetDeletedBrandsList;
 
-public sealed record GetDeletedBrandsListQuery(SieveModel SieveModel) : IRequest<Result<PagedResult<BrandResponse>>>;
+public sealed record GetDeletedBrandsListQuery : IRequest<Result<PagedResult<BrandResponse>>>
+{
+    public SieveModel? SieveModel { get; init; }
+}
