@@ -1,7 +1,6 @@
 ﻿using Application.ApiContracts.Auth.Requests;
 using Application.ApiContracts.User.Responses;
 using Application.ApiContracts.UserManager.Responses;
-using Application.Common.Exceptions;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Repositories.Role;

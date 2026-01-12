@@ -1,3 +1,4 @@
+using Application.Common.Models;
 using Application.Features.Products.Commands.CreateProduct;
 using Application.Features.Products.Commands.DeleteManyProducts;
 using Application.Features.Products.Commands.DeleteProduct;
@@ -268,11 +269,13 @@ public class Product
     {
         // Arrange
         _senderMock.Setup(m => m.Send(It.IsAny<CreateProductCommand>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new Application.Common.Exceptions.BadRequestException("Name là bắt buộc"));
+            .ReturnsAsync(Result<Application.ApiContracts.Product.Responses.ProductDetailForManagerResponse?>.Failure(Error.BadRequest("Name là bắt buộc")));
 
-        // Act & Assert
-        await Assert.ThrowsAsync<Application.Common.Exceptions.BadRequestException>(() => 
-            _controller.CreateProduct(new Application.ApiContracts.Product.Requests.CreateProductRequest(), CancellationToken.None));
+        // Act
+        var result = await _controller.CreateProduct(new Application.ApiContracts.Product.Requests.CreateProductRequest(), CancellationToken.None);
+
+        // Assert
+        Assert.IsType<BadRequestObjectResult>(result);
     }
 
     [Fact(DisplayName = "PRODUCT_100 - API hỗ trợ pagination với custom page size")]

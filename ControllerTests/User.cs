@@ -1,6 +1,6 @@
 using Application.ApiContracts.User.Requests;
 using Application.ApiContracts.User.Responses;
-using Application.Common.Exceptions;
+using Application.Common.Models;
 using Application.Features.Users.Commands.ChangePasswordCurrentUser;
 using Application.Features.Users.Commands.DeleteCurrentUserAccount;
 using Application.Features.Users.Commands.RestoreUserAccount;
@@ -138,11 +138,13 @@ public class User
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateCurrentUserCommand>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new BadRequestException("Invalid phone number format"));
+            .ReturnsAsync(Result<UserDTOForManagerResponse>.Failure(Error.BadRequest("Invalid phone number format")));
 
-        // Act & Assert
-        await Assert.ThrowsAsync<BadRequestException>(() =>
-            _controller.UpdateCurrentUser(request, CancellationToken.None));
+        // Act
+        var result = await _controller.UpdateCurrentUser(request, CancellationToken.None);
+
+        // Assert
+        result.Should().BeOfType<BadRequestObjectResult>();
     }
 
     [Fact(DisplayName = "USER_041 - Controller - POST /api/v1/User/change-password gọi đúng Command")]
@@ -186,11 +188,13 @@ public class User
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<ChangePasswordCurrentUserCommand>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new BadRequestException("NewPassword is required"));
+            .ReturnsAsync(Result<ChangePasswordUserByUserResponse>.Failure(Error.BadRequest("NewPassword is required")));
 
-        // Act & Assert
-        await Assert.ThrowsAsync<BadRequestException>(() =>
-            _controller.ChangePasswordCurrentUser(request, CancellationToken.None));
+        // Act
+        var result = await _controller.ChangePasswordCurrentUser(request, CancellationToken.None);
+
+        // Assert
+        result.Should().BeOfType<BadRequestObjectResult>();
     }
 
     [Fact(DisplayName = "USER_043 - Controller - POST /api/v1/User/change-password xử lý UnauthorizedException")]
@@ -238,11 +242,13 @@ public class User
     {
         // Arrange
         _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteCurrentUserAccountCommand>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new ForbiddenException("Cannot delete banned account"));
+            .ReturnsAsync(Result<DeleteUserByUserReponse>.Failure(Error.Forbidden("Cannot delete banned account")));
 
-        // Act & Assert
-        await Assert.ThrowsAsync<ForbiddenException>(() =>
-            _controller.DeleteCurrentUserAccount(CancellationToken.None));
+        // Act
+        var result = await _controller.DeleteCurrentUserAccount(CancellationToken.None);
+
+        // Assert
+        result.Should().BeOfType<ForbidResult>();
     }
 
     [Fact(DisplayName = "USER_046 - Controller - POST /api/v1/User/{userId}/restore gọi đúng Command")]
@@ -281,11 +287,13 @@ public class User
         var userId = Guid.Empty; // Empty GUID can be used to simulate invalid
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<RestoreUserAccountCommand>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new BadRequestException("Invalid user ID"));
+            .ReturnsAsync(Result<RestoreUserResponse>.Failure(Error.BadRequest("Invalid user ID")));
 
-        // Act & Assert
-        await Assert.ThrowsAsync<BadRequestException>(() =>
-            _controller.RestoreUserAccount(userId, CancellationToken.None));
+        // Act
+        var result = await _controller.RestoreUserAccount(userId, CancellationToken.None);
+
+        // Assert
+        result.Should().BeOfType<BadRequestObjectResult>();
     }
 
     [Fact(DisplayName = "USER_048 - Controller - POST /api/v1/User/{userId}/restore xử lý NotFoundException")]
@@ -295,11 +303,13 @@ public class User
         var userId = Guid.NewGuid();
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<RestoreUserAccountCommand>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new NotFoundException("User not found"));
+            .ReturnsAsync(Result<RestoreUserResponse>.Failure(Error.NotFound("User not found")));
 
-        // Act & Assert
-        await Assert.ThrowsAsync<NotFoundException>(() =>
-            _controller.RestoreUserAccount(userId, CancellationToken.None));
+        // Act
+        var result = await _controller.RestoreUserAccount(userId, CancellationToken.None);
+
+        // Assert
+        result.Should().BeOfType<NotFoundObjectResult>();
     }
 
     [Fact(DisplayName = "USER_049 - Controller - POST /api/v1/User/{userId}/restore xử lý BadRequestException")]
@@ -309,11 +319,13 @@ public class User
         var userId = Guid.NewGuid();
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<RestoreUserAccountCommand>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new BadRequestException("Account is not deleted"));
+            .ReturnsAsync(Result<RestoreUserResponse>.Failure(Error.BadRequest("Account is not deleted")));
 
-        // Act & Assert
-        await Assert.ThrowsAsync<BadRequestException>(() =>
-            _controller.RestoreUserAccount(userId, CancellationToken.None));
+        // Act
+        var result = await _controller.RestoreUserAccount(userId, CancellationToken.None);
+
+        // Assert
+        result.Should().BeOfType<BadRequestObjectResult>();
     }
 
     [Fact(DisplayName = "USER_050 - Controller - Kiểm tra Authorization Attribute trên các endpoints")]

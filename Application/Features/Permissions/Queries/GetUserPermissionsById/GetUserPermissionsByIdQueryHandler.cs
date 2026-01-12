@@ -1,5 +1,4 @@
 using Application.ApiContracts.Permission.Responses;
-using Application.Common.Exceptions;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.Role;
 using Domain.Entities;

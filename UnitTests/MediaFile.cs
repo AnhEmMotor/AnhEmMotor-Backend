@@ -1,4 +1,3 @@
-using Application.Common.Exceptions;
 using Application.Common.Models;
 using Application.Features.Files.Commands.DeleteFile;
 using Application.Features.Files.Commands.DeleteManyFiles;

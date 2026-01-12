@@ -1,5 +1,4 @@
 ﻿using Application.ApiContracts.Product.Requests;
-using Application.Common.Exceptions;
 using Application.Features.Products.Commands.CreateProduct;
 using Application.Features.Products.Commands.DeleteManyProducts;
 using Application.Features.Products.Commands.DeleteProduct;

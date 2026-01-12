@@ -1,5 +1,4 @@
 using Application.ApiContracts.User.Responses;
-using Application.Common.Exceptions;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.User;
 using MediatR;

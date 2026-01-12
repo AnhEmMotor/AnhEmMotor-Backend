@@ -1,5 +1,4 @@
 using Application.ApiContracts.Output.Responses;
-using Application.Common.Exceptions;
 using Application.Features.Outputs.Commands.CreateOutput;
 using Application.Features.Outputs.Commands.CreateOutputByManager;
 using Application.Features.Outputs.Commands.DeleteOutput;

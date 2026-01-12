@@ -1,4 +1,3 @@
-using Application.Common.Exceptions;
 using Application.Features.ProductCategories.Commands.CreateProductCategory;
 using Application.Features.ProductCategories.Commands.DeleteProductCategory;
 using Application.Features.ProductCategories.Commands.UpdateProductCategory;

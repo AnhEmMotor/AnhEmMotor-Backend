@@ -1,4 +1,3 @@
-using Application.Common.Exceptions;
 using Application.Features.Files.Commands.DeleteFile;
 using Application.Features.Files.Commands.DeleteManyFiles;
 using Application.Features.Files.Commands.RestoreFile;
@@ -32,11 +31,10 @@ public class MediaFile
         fileMock.Setup(f => f.FileName).Returns("test.webp");
 
         // Act
-        var act = async () => await controller.UploadImage(fileMock.Object, CancellationToken.None);
+        var result = await controller.UploadImage(fileMock.Object, CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ForbiddenException>()
-            .WithMessage("*permission*");
+        result.Should().BeOfType<ForbidResult>();
     }
 
     [Fact(DisplayName = "MF_006 - Tải lên ảnh thất bại khi chưa đăng nhập")]
@@ -51,11 +49,10 @@ public class MediaFile
         fileMock.Setup(f => f.FileName).Returns("test.webp");
 
         // Act
-        var act = async () => await controller.UploadImage(fileMock.Object, CancellationToken.None);
+        var result = await controller.UploadImage(fileMock.Object, CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<UnauthorizedException>()
-            .WithMessage("*authenticated*");
+        result.Should().BeOfType<UnauthorizedObjectResult>();
     }
 
     [Fact(DisplayName = "MF_012 - Xoá file thất bại khi không có quyền Delete")]
@@ -68,11 +65,10 @@ public class MediaFile
         var storagePath = "test-file.webp";
 
         // Act
-        var act = async () => await controller.DeleteFile(storagePath, CancellationToken.None);
+        var result = await controller.DeleteFile(storagePath, CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ForbiddenException>()
-            .WithMessage("*permission*");
+        result.Should().BeOfType<ForbidResult>();
     }
 
     [Fact(DisplayName = "MF_018 - Khôi phục file thất bại khi không có quyền")]
@@ -85,11 +81,10 @@ public class MediaFile
         var storagePath = "deleted-file.webp";
 
         // Act
-        var act = async () => await controller.RestoreFile(storagePath, CancellationToken.None);
+        var result = await controller.RestoreFile(storagePath, CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ForbiddenException>()
-            .WithMessage("*permission*");
+        result.Should().BeOfType<ForbidResult>();
     }
 
     [Fact(DisplayName = "MF_034 - Lấy thông tin file khi không có quyền View")]
@@ -102,11 +97,10 @@ public class MediaFile
         var fileId = 123;
 
         // Act
-        var act = async () => await controller.GetFileByIdAsync(fileId, CancellationToken.None);
+        var result = await controller.GetFileByIdAsync(fileId, CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ForbiddenException>()
-            .WithMessage("*permission*");
+        result.Should().BeOfType<ForbidResult>();
     }
 
     [Fact(DisplayName = "MF_046 - Validate: StoragePath rỗng khi xoá file")]
@@ -119,11 +113,10 @@ public class MediaFile
         var storagePath = "";
 
         // Act
-        var act = async () => await controller.DeleteFile(storagePath, CancellationToken.None);
+        var result = await controller.DeleteFile(storagePath, CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<BadRequestException>()
-            .WithMessage("*required*empty*");
+        result.Should().BeOfType<BadRequestObjectResult>();
     }
 
     [Fact(DisplayName = "MF_047 - Validate: StoragePath chứa path traversal (Security)")]
@@ -136,11 +129,10 @@ public class MediaFile
         var storagePath = "../../etc/passwd.webp";
 
         // Act
-        var act = async () => await controller.DeleteFile(storagePath, CancellationToken.None);
+        var result = await controller.DeleteFile(storagePath, CancellationToken.None);
 
         // Assert - Security: Path traversal phải bị reject
-        await act.Should().ThrowAsync<BadRequestException>()
-            .WithMessage("*invalid*path*");
+        result.Should().BeOfType<BadRequestObjectResult>();
     }
 
     [Fact(DisplayName = "MF_CT_001 - Upload ảnh với Authorization header hợp lệ")]
@@ -180,11 +172,10 @@ public class MediaFile
         fileMock.Setup(f => f.FileName).Returns("test.webp");
 
         // Act
-        var act = async () => await controller.UploadImage(fileMock.Object, CancellationToken.None);
+        var result = await controller.UploadImage(fileMock.Object, CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<UnauthorizedException>()
-            .WithMessage("*invalid*token*");
+        result.Should().BeOfType<UnauthorizedObjectResult>();
     }
 
     [Fact(DisplayName = "MF_CT_003 - Xoá file với Role có đúng Permission")]
@@ -213,10 +204,9 @@ public class MediaFile
         var storagePath = "test-file.webp";
 
         // Act
-        var act = async () => await controller.DeleteFile(storagePath, CancellationToken.None);
+        var result = await controller.DeleteFile(storagePath, CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ForbiddenException>()
-            .WithMessage("*permission*");
+        result.Should().BeOfType<ForbidResult>();
     }
 }

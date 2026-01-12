@@ -1,6 +1,5 @@
 using Application.ApiContracts.User.Requests;
 using Application.ApiContracts.UserManager.Requests;
-using Application.Common.Exceptions;
 using Application.Features.UserManager.Commands.AssignRoles;
 using Application.Features.UserManager.Commands.ChangeMultipleUsersStatus;
 using Application.Features.UserManager.Commands.ChangePassword;

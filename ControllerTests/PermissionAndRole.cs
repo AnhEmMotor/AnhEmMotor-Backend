@@ -1,6 +1,6 @@
 using Application.ApiContracts.Permission.Requests;
 using Application.ApiContracts.Permission.Responses;
-using Application.Common.Exceptions;
+using Application.Common.Models;
 using Application.Features.Permissions.Commands.CreateRole;
 using Application.Features.Permissions.Commands.DeleteMultipleRoles;
 using Application.Features.Permissions.Commands.DeleteRole;
@@ -117,14 +117,13 @@ public class PermissionAndRole
     {
         // Arrange
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetMyPermissionsQuery>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new UnauthorizedException("User not authenticated"));
+            .ReturnsAsync(Result<PermissionAndRoleOfUserResponse>.Failure(Error.Unauthorized("User not authenticated")));
 
         // Act
-        Func<Task> act = async () => await _controller.GetMyPermissions(CancellationToken.None);
+        var result = await _controller.GetMyPermissions(CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<UnauthorizedException>()
-            .WithMessage("*not authenticated*");
+        result.Should().BeOfType<UnauthorizedObjectResult>();
     }
 
     [Fact(DisplayName = "PERM_CTRL_004 - Controller gọi GetUserPermissionsById thành công")]
@@ -171,14 +170,13 @@ public class PermissionAndRole
         var userId = Guid.NewGuid();
 
         _mediatorMock.Setup(m => m.Send(It.Is<GetUserPermissionsByIdQuery>(q => q.UserId == userId), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new NotFoundException($"User with id {userId} not found"));
+            .ReturnsAsync(Result<PermissionAndRoleOfUserResponse>.Failure(Error.NotFound($"User with id {userId} not found")));
 
         // Act
-        Func<Task> act = async () => await _controller.GetUserPermissionsById(userId, CancellationToken.None);
+        var result = await _controller.GetUserPermissionsById(userId, CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<NotFoundException>()
-            .WithMessage("*User*not found*");
+        result.Should().BeOfType<NotFoundObjectResult>();
     }
 
     [Fact(DisplayName = "PERM_CTRL_006 - Controller gọi GetRolePermissions thành công")]
@@ -218,14 +216,13 @@ public class PermissionAndRole
         var roleName = "InvalidRole";
 
         _mediatorMock.Setup(m => m.Send(It.Is<GetRolePermissionsQuery>(q => q.RoleName == roleName), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new NotFoundException($"Role {roleName} not found"));
+            .ReturnsAsync(Result<List<PermissionResponse>>.Failure(Error.NotFound($"Role {roleName} not found")));
 
         // Act
-        Func<Task> act = async () => await _controller.GetRolePermissions(roleName, CancellationToken.None);
+        var result = await _controller.GetRolePermissions(roleName, CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<NotFoundException>()
-            .WithMessage("*Role*not found*");
+        result.Should().BeOfType<NotFoundObjectResult>();
     }
 
     [Fact(DisplayName = "PERM_CTRL_008 - Controller gọi UpdateRolePermissions thành công")]
@@ -403,14 +400,13 @@ public class PermissionAndRole
         var roleName = "NonExistent";
 
         _mediatorMock.Setup(m => m.Send(It.Is<DeleteRoleCommand>(c => c.RoleName == roleName), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new NotFoundException($"Role {roleName} not found"));
+            .ReturnsAsync(Result<RoleDeleteResponse>.Failure(Error.NotFound($"Role {roleName} not found")));
 
         // Act
-        Func<Task> act = async () => await _controller.DeleteRole(roleName, CancellationToken.None);
+        var result = await _controller.DeleteRole(roleName, CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<NotFoundException>()
-            .WithMessage("*Role*not found*");
+        result.Should().BeOfType<NotFoundObjectResult>();
     }
 
     [Fact(DisplayName = "PERM_CTRL_015 - Controller gọi DeleteMultipleRoles thành công")]
