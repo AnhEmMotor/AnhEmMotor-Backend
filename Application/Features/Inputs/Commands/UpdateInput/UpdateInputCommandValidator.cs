@@ -26,6 +26,6 @@ public sealed class UpdateInputCommandValidator : AbstractValidator<UpdateInputC
                 })
             .WithMessage("Product ID cannot be duplicated in a single input.");
 
-        RuleForEach(x => x.Products).SetValidator(new UpdateInputProductCommandValidator());
+        RuleForEach(x => x.Products).SetValidator(new UpdateInputInfoCommandValidator());
     }
 }

@@ -1,10 +1,11 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using Application.ApiContracts.Auth.Requests;
 using Application.ApiContracts.Auth.Responses;
-using Application.ApiContracts.User.Requests;
 using Application.ApiContracts.User.Responses;
+using Application.Features.Auth.Commands.Login;
+using Application.Features.UserManager.Commands.ChangePassword;
+using Application.Features.UserManager.Commands.UpdateUser;
 using Domain.Constants;
 using Domain.Entities;
 using FluentAssertions;
@@ -51,7 +52,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         await userManager.CreateAsync(user, password);
 
         // Login to get token
-        var loginRequest = new LoginRequest
+        var loginRequest = new LoginCommand
         {
             UsernameOrEmail = username,
             Password = password
@@ -195,7 +196,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        var updateRequest = new UpdateUserRequest
+        var updateRequest = new UpdateUserCommand
         {
             FullName = "Updated Name",
             Gender = GenderStatus.Female,
@@ -234,7 +235,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        var updateRequest = new UpdateUserRequest
+        var updateRequest = new UpdateUserCommand
         {
             PhoneNumber = "invalid-phone"
         };
@@ -259,7 +260,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        var changePasswordRequest = new ChangePasswordRequest
+        var changePasswordRequest = new ChangePasswordCommand
         {
             CurrentPassword = "OldPass123!",
             NewPassword = "NewPass456!"
@@ -275,7 +276,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         content!.Message.Should().Be("Password changed successfully");
 
         // Try to login with new password
-        var loginRequest = new LoginRequest
+        var loginRequest = new LoginCommand
         {
             UsernameOrEmail = "user029",
             Password = "NewPass456!"
@@ -299,7 +300,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        var changePasswordRequest = new ChangePasswordRequest
+        var changePasswordRequest = new ChangePasswordCommand
         {
             CurrentPassword = "WrongPassword",
             NewPassword = "NewPass456!"
@@ -383,7 +384,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         testResponse1.StatusCode.Should().Be(HttpStatusCode.OK);
 
         // Step 2: Change password
-        var changePasswordRequest = new ChangePasswordRequest
+        var changePasswordRequest = new ChangePasswordCommand
         {
             CurrentPassword = "Pass123!",
             NewPassword = "NewPass456!"

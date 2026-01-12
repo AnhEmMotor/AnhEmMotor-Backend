@@ -4,9 +4,9 @@ using FluentValidation;
 
 namespace Application.Features.Inputs.Commands.UpdateInput
 {
-    public sealed class UpdateInputProductCommandValidator : AbstractValidator<UpdateInputInfoRequest>
+    public sealed class UpdateInputInfoCommandValidator : AbstractValidator<UpdateInputInfoRequest>
     {
-        public UpdateInputProductCommandValidator()
+        public UpdateInputInfoCommandValidator()
         {
             RuleFor(x => x.ProductId).NotNull().GreaterThan(0);
 

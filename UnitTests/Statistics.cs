@@ -1,4 +1,4 @@
-using Application.ApiContracts.Statistical.Responses;
+﻿using Application.ApiContracts.Statistical.Responses;
 using Application.Features.Statistical.Queries.GetDailyRevenue;
 using Application.Features.Statistical.Queries.GetDashboardStats;
 using Application.Features.Statistical.Queries.GetMonthlyRevenueProfit;
@@ -26,7 +26,7 @@ public class Statistics
     public async Task Handle_ValidDays7_Returns7DaysData()
     {
         // Arrange
-        var query = new GetDailyRevenueQuery(7);
+        var query = new GetDailyRevenueQuery() { Days = 7 };
         var expectedData = new List<DailyRevenueResponse>();
         for (int i = 0; i < 7; i++)
         {
@@ -54,7 +54,7 @@ public class Statistics
     public async Task Handle_Days1_Returns1DayData()
     {
         // Arrange
-        var query = new GetDailyRevenueQuery(1);
+        var query = new GetDailyRevenueQuery { Days = 1 };
         var expectedData = new List<DailyRevenueResponse>
         {
             new() { ReportDay = DateOnly.FromDateTime(DateTime.Now), TotalRevenue = 5000000 }
@@ -77,7 +77,7 @@ public class Statistics
     public async Task Handle_Days3_CalculatesTotalRevenueCorrectly()
     {
         // Arrange
-        var query = new GetDailyRevenueQuery(3);
+        var query = new GetDailyRevenueQuery { Days = 3 };
         var expectedData = new List<DailyRevenueResponse>
         {
             new() { ReportDay = DateOnly.FromDateTime(DateTime.Now.AddDays(-2)), TotalRevenue = 1000000 },
@@ -102,7 +102,7 @@ public class Statistics
     public async Task Handle_ZeroRevenue_Returns5DaysWithZero()
     {
         // Arrange
-        var query = new GetDailyRevenueQuery(5);
+        var query = new GetDailyRevenueQuery { Days = 5 };
         var expectedData = new List<DailyRevenueResponse>();
         for (int i = 0; i < 5; i++)
         {
@@ -130,7 +130,7 @@ public class Statistics
     public async Task Handle_DecimalRevenue_PreservesDecimalPlaces()
     {
         // Arrange
-        var query = new GetDailyRevenueQuery(2);
+        var query = new GetDailyRevenueQuery { Days = 2 };
         var expectedData = new List<DailyRevenueResponse>
         {
             new() { ReportDay = DateOnly.FromDateTime(DateTime.Now.AddDays(-1)), TotalRevenue = 1234567.89m },
@@ -154,7 +154,7 @@ public class Statistics
     public async Task Handle_Days10_CallsRepositoryWithCorrectParameter()
     {
         // Arrange
-        var query = new GetDailyRevenueQuery(10);
+        var query = new GetDailyRevenueQuery { Days = 10 };
         _repositoryMock.Setup(r => r.GetDailyRevenueAsync(10, It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
 
@@ -171,7 +171,7 @@ public class Statistics
     public async Task Handle_NullData_ReturnsEmptyList()
     {
         // Arrange
-        var query = new GetDailyRevenueQuery(7);
+        var query = new GetDailyRevenueQuery { Days = 7 };
         _repositoryMock.Setup(r => r.GetDailyRevenueAsync(7, It.IsAny<CancellationToken>()))
             .ReturnsAsync((IEnumerable<DailyRevenueResponse>)null!);
 
@@ -188,7 +188,7 @@ public class Statistics
     public async Task Handle_Days3_ReturnsCorrectDateFormat()
     {
         // Arrange
-        var query = new GetDailyRevenueQuery(3);
+        var query = new GetDailyRevenueQuery { Days = 3 };
         var date1 = DateOnly.FromDateTime(DateTime.Now.AddDays(-2));
         var date2 = DateOnly.FromDateTime(DateTime.Now.AddDays(-1));
         var date3 = DateOnly.FromDateTime(DateTime.Now);
@@ -389,7 +389,7 @@ public class Statistics
     public async Task Handle_Months12_Returns12MonthsData()
     {
         // Arrange
-        var query = new GetMonthlyRevenueProfitQuery(12);
+        var query = new GetMonthlyRevenueProfitQuery() { Months = 12 };
         var expectedData = new List<MonthlyRevenueProfitResponse>();
         for (int i = 0; i < 12; i++)
         {
@@ -417,7 +417,7 @@ public class Statistics
     public async Task Handle_Months1_Returns1MonthData()
     {
         // Arrange
-        var query = new GetMonthlyRevenueProfitQuery(1);
+        var query = new GetMonthlyRevenueProfitQuery() { Months = 1};
         var expectedData = new List<MonthlyRevenueProfitResponse>
         {
             new()
@@ -445,7 +445,7 @@ public class Statistics
     public async Task Handle_Months3_CalculatesProfitCorrectly()
     {
         // Arrange
-        var query = new GetMonthlyRevenueProfitQuery(3);
+        var query = new GetMonthlyRevenueProfitQuery() { Months = 3 };
         var expectedData = new List<MonthlyRevenueProfitResponse>
         {
             new() { ReportMonth = DateOnly.FromDateTime(DateTime.Now.AddMonths(-2)), TotalRevenue = 10000000, TotalProfit = 4000000 },
@@ -471,7 +471,7 @@ public class Statistics
     public async Task Handle_Months2_MonthWithNoRevenue_ReturnsZeroProfit()
     {
         // Arrange
-        var query = new GetMonthlyRevenueProfitQuery(2);
+        var query = new GetMonthlyRevenueProfitQuery() { Months = 2 };
         var expectedData = new List<MonthlyRevenueProfitResponse>
         {
             new() { ReportMonth = DateOnly.FromDateTime(DateTime.Now.AddMonths(-1)), TotalRevenue = 0, TotalProfit = 0 },
@@ -495,7 +495,7 @@ public class Statistics
     public async Task Handle_Months6_ReturnsCorrectMonthFormat()
     {
         // Arrange
-        var query = new GetMonthlyRevenueProfitQuery(6);
+        var query = new GetMonthlyRevenueProfitQuery() { Months = 6 };
         var expectedData = new List<MonthlyRevenueProfitResponse>();
         for (int i = 0; i < 6; i++)
         {
@@ -525,7 +525,7 @@ public class Statistics
     public async Task Handle_Months5_ReturnsSortedData()
     {
         // Arrange
-        var query = new GetMonthlyRevenueProfitQuery(5);
+        var query = new GetMonthlyRevenueProfitQuery() { Months = 5 };
         var expectedData = new List<MonthlyRevenueProfitResponse>();
         for (int i = 4; i >= 0; i--)
         {
@@ -554,7 +554,7 @@ public class Statistics
     public async Task Handle_Months2_PreservesDecimalInProfit()
     {
         // Arrange
-        var query = new GetMonthlyRevenueProfitQuery(2);
+        var query = new GetMonthlyRevenueProfitQuery() { Months = 2 };
         var expectedData = new List<MonthlyRevenueProfitResponse>
         {
             new() { ReportMonth = DateOnly.FromDateTime(DateTime.Now.AddMonths(-1)), TotalRevenue = 1234567.89m, TotalProfit = 1000000.77m },
@@ -578,7 +578,7 @@ public class Statistics
     public async Task Handle_Months8_CallsRepositoryWithCorrectParameter()
     {
         // Arrange
-        var query = new GetMonthlyRevenueProfitQuery(8);
+        var query = new GetMonthlyRevenueProfitQuery() { Months = 8 };
         _repositoryMock.Setup(r => r.GetMonthlyRevenueProfitAsync(8, It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
 
@@ -1001,7 +1001,7 @@ public class Statistics
     public async Task Handle_VariantId10_ReturnsPriceAndStock()
     {
         // Arrange
-        var query = new GetProductStockAndPriceQuery(10);
+        var query = new GetProductStockAndPriceQuery() { VariantId = 10};
         var expectedData = new ProductStockPriceResponse
         {
             UnitPrice = 2500000,
@@ -1026,7 +1026,7 @@ public class Statistics
     public async Task Handle_VariantId5_ZeroPrice_ReturnsZeroPrice()
     {
         // Arrange
-        var query = new GetProductStockAndPriceQuery(5);
+        var query = new GetProductStockAndPriceQuery() { VariantId = 5 };
         var expectedData = new ProductStockPriceResponse
         {
             UnitPrice = 0,
@@ -1050,7 +1050,7 @@ public class Statistics
     public async Task Handle_VariantId8_ZeroStock_ReturnsZeroStock()
     {
         // Arrange
-        var query = new GetProductStockAndPriceQuery(8);
+        var query = new GetProductStockAndPriceQuery() { VariantId = 8 };
         var expectedData = new ProductStockPriceResponse
         {
             UnitPrice = 1000000,
@@ -1074,7 +1074,7 @@ public class Statistics
     public async Task Handle_VariantId12_DecimalPrice_PreservesDecimal()
     {
         // Arrange
-        var query = new GetProductStockAndPriceQuery(12);
+        var query = new GetProductStockAndPriceQuery() { VariantId = 12 };
         var expectedData = new ProductStockPriceResponse
         {
             UnitPrice = 1234567.89m,
@@ -1097,7 +1097,7 @@ public class Statistics
     public async Task Handle_VariantId15_CallsRepositoryWithCorrectId()
     {
         // Arrange
-        var query = new GetProductStockAndPriceQuery(15);
+        var query = new GetProductStockAndPriceQuery() {  VariantId = 15 };
         _repositoryMock.Setup(r => r.GetProductStockAndPriceAsync(15, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ProductStockPriceResponse());
 
@@ -1114,7 +1114,7 @@ public class Statistics
     public async Task Handle_VariantId999_NonExistent_ReturnsNull()
     {
         // Arrange
-        var query = new GetProductStockAndPriceQuery(999);
+        var query = new GetProductStockAndPriceQuery() {  VariantId = 999 };
         _repositoryMock.Setup(r => r.GetProductStockAndPriceAsync(999, It.IsAny<CancellationToken>()))
             .ReturnsAsync((ProductStockPriceResponse?)null);
 
@@ -1131,7 +1131,7 @@ public class Statistics
     public async Task Handle_VariantId20_Deleted_ReturnsData()
     {
         // Arrange
-        var query = new GetProductStockAndPriceQuery(20);
+        var query = new GetProductStockAndPriceQuery() {  VariantId = 20 };
         var expectedData = new ProductStockPriceResponse
         {
             UnitPrice = 500000,

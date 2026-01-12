@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http.Json;
-using Application.ApiContracts.File.Requests;
 using Application.ApiContracts.File.Responses;
 using Domain.Constants;
 using Domain.Entities;
@@ -120,10 +119,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         db.MediaFiles.AddRange(files);
         await db.SaveChangesAsync();
 
-        var request = new DeleteManyMediaFilesRequest
-        {
-            StoragePaths = [.. files.Select(f => f.StoragePath!)]
-        };
+        List<string> request = [.. files.Select(f => f.StoragePath!)];
 
         // Act
         var response = await _client.PostAsJsonAsync("/api/v1/MediaFile/delete-many", request);
@@ -185,10 +181,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         db.MediaFiles.AddRange(files);
         await db.SaveChangesAsync();
 
-        var request = new RestoreManyMediaFilesRequest
-        {
-            StoragePaths = [.. files.Select(f => f.StoragePath!)]
-        };
+        List<string> request = [.. files.Select(f => f.StoragePath!)];
 
         // Act
         var response = await _client.PostAsJsonAsync("/api/v1/MediaFile/restore-many", request);

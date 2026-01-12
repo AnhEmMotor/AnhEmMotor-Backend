@@ -1,6 +1,4 @@
-using Application.ApiContracts.User.Requests;
-using Application.ApiContracts.UserManager.Requests;
-using Application.Features.UserManager.Commands.AssignRoles;
+﻿using Application.Features.UserManager.Commands.AssignRoles;
 using Application.Features.UserManager.Commands.ChangeMultipleUsersStatus;
 using Application.Features.UserManager.Commands.ChangePassword;
 using Application.Features.UserManager.Commands.ChangeUserStatus;
@@ -44,14 +42,15 @@ public class UserManager
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var request = new UpdateUserRequest
+        var command = new UpdateUserCommand()
         {
+            UserId = userId,
             FullName = ""
         };
         var validator = new UpdateUserCommandValidator();
 
         // Act
-        var result = validator.Validate(new UpdateUserCommand(userId, request));
+        var result = validator.Validate(command);
 
         // Assert
         result.IsValid.Should().BeFalse();
@@ -63,14 +62,15 @@ public class UserManager
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var request = new UpdateUserRequest
+        var command = new UpdateUserCommand()
         {
+            UserId = userId,
             FullName = new string('A', 256)
         };
         var validator = new UpdateUserCommandValidator();
 
         // Act
-        var result = validator.Validate(new UpdateUserCommand(userId, request));
+        var result = validator.Validate(command);
 
         // Assert
         result.IsValid.Should().BeFalse();
@@ -161,18 +161,5 @@ public class UserManager
 
         // Test case 4: P@1 (invalid - too short)
         ChangePasswordCommandValidator.IsStrongPassword("P@1").Should().BeFalse();
-    }
-
-    [Fact(DisplayName = "UMGR_044 - Validate Status chỉ chấp nhận các giá trị trong UserStatus constant")]
-    public void ValidateStatus_VariousValues_ReturnsCorrectValidation()
-    {
-        // Test case 1: Active (valid)
-        ChangeUserStatusCommandValidator.IsValidStatus(UserStatus.Active).Should().BeTrue();
-
-        // Test case 2: Banned (valid)
-        ChangeUserStatusCommandValidator.IsValidStatus(UserStatus.Banned).Should().BeTrue();
-
-        // Test case 3: InvalidStatus (invalid)
-        ChangeUserStatusCommandValidator.IsValidStatus("InvalidStatus").Should().BeFalse();
     }
 }

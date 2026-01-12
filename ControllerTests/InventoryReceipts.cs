@@ -47,7 +47,7 @@ public class InventoryReceipts
     public async Task CreateInput_MissingPermission_ReturnsForbidden()
     {
         // Arrange
-        var request = new CreateInputRequest
+        var request = new CreateInputCommand
         {
             Notes = "Test",
             SupplierId = 1,
@@ -98,7 +98,7 @@ public class InventoryReceipts
     {
         // Arrange
         int inputId = 1;
-        var request = new UpdateInputRequest
+        var request = new UpdateInputCommand
         {
             Notes = "Updated",
             SupplierId = 2,
@@ -118,7 +118,7 @@ public class InventoryReceipts
     {
         // Arrange
         int inputId = 9999;
-        var request = new UpdateInputRequest
+        var request = new UpdateInputCommand
         {
             Notes = "Updated",
             SupplierId = 2,
@@ -140,7 +140,7 @@ public class InventoryReceipts
     {
         // Arrange
         int inputId = 1;
-        var request = new UpdateInputStatusRequest { StatusId = "finished" };
+        var request = new UpdateInputStatusCommand { StatusId = "finished" };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateInputStatusCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException("User does not have permission Permissions.Inputs.ChangeStatus"));
@@ -246,7 +246,7 @@ public class InventoryReceipts
     public async Task DeleteManyInputs_EmptyList_ReturnsBadRequest()
     {
         // Arrange
-        var request = new DeleteManyInputsRequest { Ids = [] };
+        var request = new DeleteManyInputsCommand { Ids = [] };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteManyInputsCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new FluentValidation.ValidationException("InputIds cannot be empty"));
@@ -260,7 +260,7 @@ public class InventoryReceipts
     public async Task UpdateManyInputStatus_EmptyList_ReturnsBadRequest()
     {
         // Arrange
-        var request = new UpdateManyInputStatusRequest { Ids = [], StatusId = "finished" };
+        var request = new UpdateManyInputStatusCommand { Ids = [], StatusId = "finished" };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateManyInputStatusCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new FluentValidation.ValidationException("InputIds cannot be empty"));
@@ -274,7 +274,7 @@ public class InventoryReceipts
     public async Task RestoreManyInputs_EmptyList_ReturnsBadRequest()
     {
         // Arrange
-        var request = new RestoreManyInputsRequest { Ids = [] };
+        var request = new RestoreManyInputsCommand { Ids = [] };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<RestoreManyInputsCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new FluentValidation.ValidationException("InputIds cannot be empty"));
@@ -327,7 +327,7 @@ public class InventoryReceipts
     public async Task CreateInput_ValidRequest_CallsMediator()
     {
         // Arrange
-        var request = new CreateInputRequest
+        var request = new CreateInputCommand
         {
             Notes = "Test",
             SupplierId = 1,
@@ -355,7 +355,7 @@ public class InventoryReceipts
     {
         // Arrange
         int inputId = 1;
-        var request = new UpdateInputRequest
+        var request = new UpdateInputCommand
         {
             Notes = "Updated",
             SupplierId = 2,
@@ -380,7 +380,7 @@ public class InventoryReceipts
     {
         // Arrange
         int inputId = 1;
-        var request = new UpdateInputStatusRequest { StatusId = "finished" };
+        var request = new UpdateInputStatusCommand { StatusId = "finished" };
 
         var expectedResponse = new InputResponse { Id = inputId, StatusId = "finished" };
 

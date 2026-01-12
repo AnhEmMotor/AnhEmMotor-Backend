@@ -770,14 +770,14 @@ public class Product
     public async Task UpdateProduct_ValidData_Success()
     {
         // Arrange
-        var request = new UpdateProductRequest
+        var command = new UpdateProductCommand()
         {
+            Id = 1,
             Name = "Honda Wave Alpha 2025",
             CategoryId = 1,
             BrandId = 1,
             Variants = []
         };
-        var command = new UpdateProductCommand(1, request);
 
         _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.Product { Id = 1, StatusId = "for-sale", DeletedAt = null });
@@ -807,11 +807,11 @@ public class Product
     public async Task UpdateProduct_ProductNotExists_ThrowsException()
     {
         // Arrange
-        var request = new UpdateProductRequest
+        var command = new UpdateProductCommand
         {
+            Id = 999,
             Name = "Honda Wave Alpha 2025"
         };
-        var command = new UpdateProductCommand(999, request);
 
         _productReadRepoMock.Setup(x => x.GetByIdAsync(999, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Domain.Entities.Product?)null);
@@ -833,15 +833,16 @@ public class Product
         // Assert
         result.Should().NotBeNull();
     }
+
     [Fact(DisplayName = "PRODUCT_023 - Sửa sản phẩm thất bại khi sản phẩm đã bị xóa mềm")]
     public async Task UpdateProduct_ProductSoftDeleted_ThrowsException()
     {
         // Arrange
-        var request = new UpdateProductRequest
+        var command = new UpdateProductCommand
         {
+            Id = 1,
             Name = "Honda Wave Alpha 2025"
         };
-        var command = new UpdateProductCommand(1, request);
 
         _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.Product { Id = 1, StatusId = "for-sale", DeletedAt = DateTime.UtcNow });
@@ -863,14 +864,16 @@ public class Product
         // Assert
         result.Should().NotBeNull();
     }
+
     [Fact(DisplayName = "PRODUCT_024 - Sửa sản phẩm thất bại khi gửi StatusId trong request")]
     public async Task UpdateProduct_StatusIdInRequest_ThrowsException()
     {
         // Arrange
-        var command = new UpdateProductCommand(1, new UpdateProductRequest
+        var command = new UpdateProductCommand
         {
+            Id = 1,
             Name = "Honda Wave"
-        });
+        };
 
         var validator = new UpdateProductCommandValidator();
 
@@ -880,16 +883,17 @@ public class Product
         // Assert
         validationResult.Should().NotBeNull();
     }
+
     [Fact(DisplayName = "PRODUCT_025 - Sửa sản phẩm thất bại khi CategoryId mới không tồn tại")]
     public async Task UpdateProduct_NewCategoryNotExists_ThrowsException()
     {
         // Arrange
-        var request = new UpdateProductRequest
+        var command = new UpdateProductCommand
         {
+            Id = 1,
             Name = "Honda Wave",
             CategoryId = 999
         };
-        var command = new UpdateProductCommand(1, request);
 
         _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.Product { Id = 1, StatusId = "for-sale", DeletedAt = null });
@@ -913,16 +917,17 @@ public class Product
         // Assert
         result.Should().NotBeNull();
     }
+
     [Fact(DisplayName = "PRODUCT_026 - Sửa sản phẩm thất bại khi CategoryId mới đã bị xóa mềm")]
     public async Task UpdateProduct_NewCategorySoftDeleted_ThrowsException()
     {
         // Arrange
-        var request = new UpdateProductRequest
+        var command = new UpdateProductCommand
         {
+            Id = 1,
             Name = "Honda Wave",
             CategoryId = 1
         };
-        var command = new UpdateProductCommand(1, request);
 
         _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.Product { Id = 1, StatusId = "for-sale", DeletedAt = null });
@@ -946,25 +951,26 @@ public class Product
         // Assert
         result.Should().NotBeNull();
     }
+
     [Fact(DisplayName = "PRODUCT_027 - Sửa biến thể sản phẩm - thêm biến thể mới")]
     public async Task UpdateProduct_AddNewVariant_Success()
     {
         // Arrange
-        var request = new UpdateProductRequest
+        var command = new UpdateProductCommand
         {
+            Id = 1,
             Name = "Honda Wave",
             CategoryId = 1,
             BrandId = 1,
             Variants =
             [
-                new CreateProductVariantRequest
+                new UpdateProductVariantRequest
                 {
                     UrlSlug = "wave-new-variant",
                     Price = 25000000
                 }
             ]
         };
-        var command = new UpdateProductCommand(1, request);
 
         _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.Product { Id = 1, StatusId = "for-sale", DeletedAt = null });
@@ -991,26 +997,27 @@ public class Product
         // Assert
         result.Should().NotBeNull();
     }
+
     [Fact(DisplayName = "PRODUCT_028 - Sửa biến thể sản phẩm - cập nhật biến thể hiện có")]
     public async Task UpdateProduct_UpdateExistingVariant_Success()
     {
         // Arrange
-        var request = new UpdateProductRequest
+        var command = new UpdateProductCommand
         {
+            Id = 1,
             Name = "Honda Wave",
             CategoryId = 1,
             BrandId = 1,
             Variants =
             [
-                new CreateProductVariantRequest
-                {
-                    Id = 1,
-                    UrlSlug = "wave-updated",
-                    Price = 22000000
-                }
+                new UpdateProductVariantRequest
+            {
+                Id = 1,
+                UrlSlug = "wave-updated",
+                Price = 22000000
+            }
             ]
         };
-        var command = new UpdateProductCommand(1, request);
 
         _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.Product { Id = 1, StatusId = "for-sale", DeletedAt = null });
@@ -1038,18 +1045,19 @@ public class Product
         // Assert
         result.Should().NotBeNull();
     }
+
     [Fact(DisplayName = "PRODUCT_029 - Sửa biến thể sản phẩm - xóa mềm biến thể (không gửi Id trong request)")]
     public async Task UpdateProduct_SoftDeleteVariant_Success()
     {
         // Arrange
-        var request = new UpdateProductRequest
+        var command = new UpdateProductCommand
         {
+            Id = 1,
             Name = "Honda Wave",
             CategoryId = 1,
             BrandId = 1,
             Variants = []
         };
-        var command = new UpdateProductCommand(1, request);
 
         _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.Product { Id = 1, StatusId = "for-sale", DeletedAt = null });
@@ -1080,11 +1088,16 @@ public class Product
         // Assert
         result.Should().NotBeNull();
     }
+
     [Fact(DisplayName = "PRODUCT_030 - Sửa giá một biến thể thành công")]
     public async Task UpdateVariantPrice_ValidData_Success()
     {
         // Arrange
-        var command = new UpdateVariantPriceCommand(1, 25000000m);
+        var command = new UpdateVariantPriceCommand
+        {
+            VariantId = 1,
+            Price = 25000000m
+        };
 
         _variantReadRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ProductVariant { Id = 1, ProductId = 1, DeletedAt = null });
@@ -1100,11 +1113,16 @@ public class Product
         // Assert
         result.Should().NotBeNull();
     }
+
     [Fact(DisplayName = "PRODUCT_031 - Sửa giá nhiều biến thể của một sản phẩm thành công")]
     public async Task UpdateProductPrice_ValidData_Success()
     {
         // Arrange
-        var command = new UpdateProductPriceCommand(1, 30000000m);
+        var command = new UpdateProductPriceCommand
+        {
+            Id = 1,
+            Price = 30000000m
+        };
 
         _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.Product { Id = 1, DeletedAt = null });
@@ -1112,7 +1130,7 @@ public class Product
             .ReturnsAsync(
             [
                 new() { Id = 1, ProductId = 1, DeletedAt = null },
-                new() { Id = 2, ProductId = 1, DeletedAt = null }
+            new() { Id = 2, ProductId = 1, DeletedAt = null }
             ]);
 
         var handler = new UpdateProductPriceCommandHandler(
@@ -1126,11 +1144,16 @@ public class Product
         // Assert
         result.Should().NotBeNull();
     }
+
     [Fact(DisplayName = "PRODUCT_032 - Sửa giá nhiều sản phẩm cùng lúc thành công")]
     public async Task UpdateManyProductPrices_ValidData_Success()
     {
         // Arrange
-        var command = new UpdateManyProductPricesCommand([1, 2], 25000000m);
+        var command = new UpdateManyProductPricesCommand
+        {
+            Ids = [1, 2],
+            Price = 25000000m
+        };
 
         _productReadRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((int id, CancellationToken ct) => new Domain.Entities.Product { Id = id, DeletedAt = null });
@@ -1151,11 +1174,16 @@ public class Product
         // Assert
         result.Should().NotBeNull();
     }
+
     [Fact(DisplayName = "PRODUCT_033 - Sửa trạng thái một sản phẩm thành công")]
     public async Task UpdateProductStatus_ValidData_Success()
     {
         // Arrange
-        var command = new UpdateProductStatusCommand(1, "out-of-stock");
+        var command = new UpdateProductStatusCommand
+        {
+            Id = 1,
+            StatusId = "out-of-stock"
+        };
 
         _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.Product { Id = 1, StatusId = "for-sale", DeletedAt = null });
@@ -1171,18 +1199,23 @@ public class Product
         // Assert
         result.Should().NotBeNull();
     }
+
     [Fact(DisplayName = "PRODUCT_034 - Sửa trạng thái nhiều sản phẩm thành công")]
     public async Task UpdateManyProductStatuses_ValidData_Success()
     {
         // Arrange
-        var command = new UpdateManyProductStatusesCommand([1, 2, 3], "out-of-stock");
+        var command = new UpdateManyProductStatusesCommand
+        {
+            Ids = [1, 2, 3],
+            StatusId = "out-of-stock"
+        };
 
         _productReadRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(
             [
                 new() { Id = 1, StatusId = "for-sale", DeletedAt = null },
-                new() { Id = 2, StatusId = "for-sale", DeletedAt = null },
-                new() { Id = 3, StatusId = "for-sale", DeletedAt = null }
+            new() { Id = 2, StatusId = "for-sale", DeletedAt = null },
+            new() { Id = 3, StatusId = "for-sale", DeletedAt = null }
             ]);
 
         var handler = new UpdateManyProductStatusesCommandHandler(
@@ -1196,18 +1229,23 @@ public class Product
         // Assert
         result.Should().NotBeNull();
     }
+
     [Fact(DisplayName = "PRODUCT_035 - Sửa trạng thái nhiều sản phẩm thất bại khi 1 trong số đó đã bị xóa")]
     public async Task UpdateManyProductStatuses_OneDeleted_ThrowsException()
     {
         // Arrange
-        var command = new UpdateManyProductStatusesCommand([1, 2, 3], "out-of-stock");
+        var command = new UpdateManyProductStatusesCommand
+        {
+            Ids = [1, 2, 3],
+            StatusId = "out-of-stock"
+        };
 
         _productReadRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(
             [
                 new() { Id = 1, StatusId = "for-sale", DeletedAt = null },
-                new() { Id = 2, StatusId = "for-sale", DeletedAt = DateTime.UtcNow },
-                new() { Id = 3, StatusId = "for-sale", DeletedAt = null }
+            new() { Id = 2, StatusId = "for-sale", DeletedAt = DateTime.UtcNow },
+            new() { Id = 3, StatusId = "for-sale", DeletedAt = null }
             ]);
 
         var handler = new UpdateManyProductStatusesCommandHandler(
@@ -1225,7 +1263,7 @@ public class Product
     public async Task DeleteProduct_ValidData_Success()
     {
         // Arrange
-        var command = new DeleteProductCommand(1);
+        var command = new DeleteProductCommand { Id = 1 };
 
         _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.Product { Id = 1, StatusId = "for-sale", DeletedAt = null });
@@ -1245,7 +1283,7 @@ public class Product
     public async Task DeleteProduct_ProductNotExists_ThrowsException()
     {
         // Arrange
-        var command = new DeleteProductCommand(999);
+        var command = new DeleteProductCommand { Id = 999 };
 
         _productReadRepoMock.Setup(x => x.GetByIdAsync(999, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Domain.Entities.Product?)null);
@@ -1265,7 +1303,7 @@ public class Product
     public async Task DeleteProduct_AlreadyDeleted_ThrowsException()
     {
         // Arrange
-        var command = new DeleteProductCommand(1);
+        var command = new DeleteProductCommand { Id = 1 };
 
         _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.Product { Id = 1, StatusId = "for-sale", DeletedAt = DateTime.UtcNow });
@@ -1285,7 +1323,7 @@ public class Product
     public async Task DeleteManyProducts_ValidData_Success()
     {
         // Arrange
-        var command = new DeleteManyProductsCommand([1, 2, 3]);
+        var command = new DeleteManyProductsCommand { Ids = [1, 2, 3] };
 
         _productReadRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(
@@ -1310,7 +1348,7 @@ public class Product
     public async Task DeleteManyProducts_OneNotExists_ThrowsException()
     {
         // Arrange
-        var command = new DeleteManyProductsCommand([1, 2, 3]);
+        var command = new DeleteManyProductsCommand { Ids = [1, 2, 3] };
 
         _productReadRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(
@@ -1334,7 +1372,7 @@ public class Product
     public async Task DeleteManyProducts_OneAlreadyDeleted_ThrowsException()
     {
         // Arrange
-        var command = new DeleteManyProductsCommand([1, 2, 3]);
+        var command = new DeleteManyProductsCommand { Ids = [1, 2, 3] };
 
         _productReadRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(
@@ -1359,7 +1397,7 @@ public class Product
     public async Task RestoreProduct_ValidData_Success()
     {
         // Arrange
-        var command = new RestoreProductCommand(1);
+        var command = new RestoreProductCommand { Id = 1 };
 
         _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.Product { Id = 1, StatusId = "for-sale", DeletedAt = DateTime.UtcNow });
@@ -1379,7 +1417,7 @@ public class Product
     public async Task RestoreProduct_NotDeleted_ThrowsException()
     {
         // Arrange
-        var command = new RestoreProductCommand(1);
+        var command = new RestoreProductCommand { Id = 1 };
 
         _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.Product { Id = 1, StatusId = "for-sale", DeletedAt = null });
@@ -1399,7 +1437,7 @@ public class Product
     public async Task RestoreManyProducts_ValidData_Success()
     {
         // Arrange
-        var command = new RestoreManyProductsCommand([1, 2, 3]);
+        var command = new RestoreManyProductsCommand { Ids = [1, 2, 3] };
 
         _productReadRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(
@@ -1424,7 +1462,7 @@ public class Product
     public async Task RestoreManyProducts_OneNotDeleted_ThrowsException()
     {
         // Arrange
-        var command = new RestoreManyProductsCommand([1, 2, 3]);
+        var command = new RestoreManyProductsCommand { Ids = [1, 2, 3] };
 
         _productReadRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(
@@ -1449,7 +1487,7 @@ public class Product
     public async Task CheckSlugAvailability_Available_ReturnsTrue()
     {
         // Arrange
-        var query = new CheckSlugAvailabilityQuery("new-product-slug");
+        var query = new CheckSlugAvailabilityQuery { Slug = "new-product-slug" };
 
         _variantReadRepoMock.Setup(x => x.GetBySlugAsync("new-product-slug", It.IsAny<CancellationToken>()))
             .ReturnsAsync((ProductVariant?)null);
@@ -1466,7 +1504,7 @@ public class Product
     public async Task CheckSlugAvailability_AlreadyExists_ReturnsFalse()
     {
         // Arrange
-        var query = new CheckSlugAvailabilityQuery("existing-product-slug");
+        var query = new CheckSlugAvailabilityQuery { Slug = "existing-product-slug" };
 
         _variantReadRepoMock.Setup(x => x.GetBySlugAsync("existing-product-slug", It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ProductVariant { Id = 1, UrlSlug = "existing-product-slug" });
@@ -1483,7 +1521,7 @@ public class Product
     public async Task CheckSlugAvailability_SoftDeleted_ReturnsFalse()
     {
         // Arrange
-        var query = new CheckSlugAvailabilityQuery("soft-deleted-slug");
+        var query = new CheckSlugAvailabilityQuery { Slug = "soft-deleted-slug" };
 
         _variantReadRepoMock.Setup(x => x.GetBySlugAsync("soft-deleted-slug", It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ProductVariant { Id = 1, UrlSlug = "soft-deleted-slug", DeletedAt = DateTime.UtcNow });

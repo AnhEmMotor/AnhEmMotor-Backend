@@ -136,7 +136,7 @@ public class SalesOrder
     public async Task CreateOutput_ValidRequest_CreatesOrder()
     {
         // Arrange
-        var request = new CreateOutputRequest
+        var request = new CreateOutputCommand
         {
             BuyerId = Guid.NewGuid(),
             Notes = "Test order"
@@ -157,7 +157,7 @@ public class SalesOrder
     public async Task CreateOutputForAdmin_WithManagerPermission_CreatesOrder()
     {
         // Arrange
-        var request = new CreateOutputForManagerRequest
+        var request = new CreateOutputByManagerCommand
         {
             BuyerId = Guid.NewGuid(),
             Notes = "Admin order"
@@ -178,7 +178,7 @@ public class SalesOrder
     {
         // Arrange
         int orderId = 1;
-        var request = new UpdateOutputForManagerRequest
+        var request = new UpdateOutputCommand
         {
             Notes = "Updated notes"
         };
@@ -198,7 +198,7 @@ public class SalesOrder
     {
         // Arrange
         int orderId = 1;
-        var request = new UpdateOutputForManagerRequest();
+        var request = new UpdateOutputForManagerCommand();
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateOutputForManagerCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<OutputResponse?>.Success(new OutputResponse()));
 
@@ -215,7 +215,7 @@ public class SalesOrder
     {
         // Arrange
         int orderId = 1;
-        var request = new UpdateOutputStatusRequest { StatusId = "confirmed_cod" };
+        var request = new UpdateOutputStatusCommand { StatusId = "confirmed_cod" };
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateOutputStatusCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<OutputResponse?>.Success(new OutputResponse { StatusId = "confirmed_cod" }));
 
@@ -231,13 +231,13 @@ public class SalesOrder
     public async Task UpdateManyOutputStatus_ValidRequest_UpdatesMultipleOrders()
     {
         // Arrange
-        var request = new UpdateManyOutputStatusRequest
+        var request = new UpdateManyOutputStatusCommand
         {
             Ids = [1, 2, 3],
             StatusId = "confirmed_cod"
         };
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateManyOutputStatusCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<List<OutputResponse>?>.Success(new List<OutputResponse>()));
+            .ReturnsAsync(Result<List<OutputResponse>?>.Success([]));
 
         // Act
         var result = await _controller.UpdateManyOutputStatus(request, CancellationToken.None);
@@ -267,7 +267,7 @@ public class SalesOrder
     public async Task DeleteManyOutputs_ValidRequest_DeletesMultipleOrders()
     {
         // Arrange
-        var request = new DeleteManyOutputsRequest { Ids = [1, 2, 3] };
+        var request = new DeleteManyOutputsCommand { Ids = [1, 2, 3] };
         _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteManyOutputsCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success());
 
@@ -299,9 +299,9 @@ public class SalesOrder
     public async Task RestoreManyOutputs_DeletedOrders_RestoresMultipleOrders()
     {
         // Arrange
-        var request = new RestoreManyOutputsRequest { Ids = [1, 2, 3] };
+        var request = new RestoreManyOutputsCommand { Ids = [1, 2, 3] };
         _mediatorMock.Setup(m => m.Send(It.IsAny<RestoreManyOutputsCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<List<OutputResponse>?>.Success(new List<OutputResponse> { new(), new(), new() }));
+            .ReturnsAsync(Result<List<OutputResponse>?>.Success([new(), new(), new()]));
 
         // Act
         var result = await _controller.RestoreManyOutputs(request, CancellationToken.None);
@@ -320,7 +320,7 @@ public class SalesOrder
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.CreateOutput(new CreateOutputRequest(), CancellationToken.None));
+            _controller.CreateOutput(new CreateOutputCommand(), CancellationToken.None));
     }
 
     [Fact(DisplayName = "SO_097 - Controller xử lý NotFoundException")]
@@ -344,6 +344,6 @@ public class SalesOrder
 
         // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(() => 
-            _controller.CreateOutput(new CreateOutputRequest(), CancellationToken.None));
+            _controller.CreateOutput(new CreateOutputCommand(), CancellationToken.None));
     }
 }

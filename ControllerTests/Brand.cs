@@ -1,5 +1,4 @@
 using System.Reflection;
-using Application.ApiContracts.Brand.Requests;
 using Application.ApiContracts.Brand.Responses;
 using Application.Common.Models;
 using Application.Features.Brands.Commands.CreateBrand;
@@ -49,7 +48,7 @@ public class Brand
             .ThrowsAsync(new UnauthorizedAccessException());
 
         // Act
-        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _controller.CreateBrand(new CreateBrandRequest(), CancellationToken.None));
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _controller.CreateBrand(new CreateBrandCommand(), CancellationToken.None));
     }
 
     [Fact(DisplayName = "BRAND_009 - GetBrandById - NotFound")]
@@ -71,7 +70,7 @@ public class Brand
             .ThrowsAsync(new KeyNotFoundException());
 
         // Act
-        await Assert.ThrowsAsync<KeyNotFoundException>(() => _controller.UpdateBrand(9999, new UpdateBrandRequest(), CancellationToken.None));
+        await Assert.ThrowsAsync<KeyNotFoundException>(() => _controller.UpdateBrand(9999, new UpdateBrandCommand(), CancellationToken.None));
     }
 
     [Fact(DisplayName = "BRAND_014 - DeleteBrand - NotFound")]
@@ -157,7 +156,7 @@ public class Brand
             .ThrowsAsync(new Exception("Internal Error"));
 
         // Act & Assert
-        await Assert.ThrowsAsync<Exception>(() => _controller.CreateBrand(new CreateBrandRequest(), CancellationToken.None));
+        await Assert.ThrowsAsync<Exception>(() => _controller.CreateBrand(new CreateBrandCommand(), CancellationToken.None));
     }
 
     [Fact(DisplayName = "BRAND_045 - UpdateBrand - Exception")]
@@ -168,7 +167,7 @@ public class Brand
             .ThrowsAsync(new Exception("Internal Error"));
 
         // Act & Assert
-        await Assert.ThrowsAsync<Exception>(() => _controller.UpdateBrand(1, new UpdateBrandRequest(), CancellationToken.None));
+        await Assert.ThrowsAsync<Exception>(() => _controller.UpdateBrand(1, new UpdateBrandCommand(), CancellationToken.None));
     }
 
     [Fact(DisplayName = "BRAND_046 - DeleteBrand - Exception")]

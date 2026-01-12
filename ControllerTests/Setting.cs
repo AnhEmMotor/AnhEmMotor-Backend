@@ -104,7 +104,7 @@ public class Setting
         // Assert
         _mediatorMock.Verify(m => m.Send(
             It.Is<SetSettingsCommand>(cmd => 
-                cmd.Settings.ContainsKey("Deposit_ratio") && 
+                cmd.Settings!.ContainsKey("Deposit_ratio") && 
                 cmd.Settings["Deposit_ratio"] == "50"),
             It.IsAny<CancellationToken>()), 
             Times.Once);

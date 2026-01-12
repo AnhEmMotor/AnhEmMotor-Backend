@@ -1,4 +1,3 @@
-using Application.ApiContracts.Supplier.Requests;
 using Application.ApiContracts.Supplier.Responses;
 using Application.Common.Models;
 using Application.Features.Suppliers.Commands.CreateSupplier;
@@ -46,7 +45,7 @@ public class Supplier
     public async Task CreateSupplier_Success_ReturnsCreatedSupplier()
     {
         // Arrange
-        var request = new CreateSupplierRequest
+        var request = new CreateSupplierCommand
         {
             Name = "API Supplier",
             Phone = "0123456789",
@@ -81,7 +80,7 @@ public class Supplier
     public async Task CreateSupplier_NoPermission_ReturnsForbidden()
     {
         // Arrange
-        var request = new CreateSupplierRequest
+        var request = new CreateSupplierCommand
         {
             Name = "No Permission",
             Phone = "0123456789",
@@ -100,7 +99,7 @@ public class Supplier
     public async Task CreateSupplier_Unauthorized_ReturnsUnauthorized()
     {
         // Arrange
-        var request = new CreateSupplierRequest
+        var request = new CreateSupplierCommand
         {
             Name = "Unauthorized",
             Phone = "0123456789",
@@ -258,7 +257,7 @@ public class Supplier
     public async Task UpdateSupplier_NoPermission_ReturnsForbidden()
     {
         // Arrange
-        var request = new UpdateSupplierRequest { Name = "Updated" };
+        var request = new UpdateSupplierCommand { Name = "Updated" };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateSupplierCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException("No permission"));
@@ -298,7 +297,7 @@ public class Supplier
     public async Task DeleteManySuppliers_PartialFailure_ReturnsError()
     {
         // Arrange
-        var request = new DeleteManySuppliersRequest
+        var request = new DeleteManySuppliersCommand
         {
             Ids = [1, 2, 3]
         };
@@ -327,7 +326,7 @@ public class Supplier
     public async Task UpdateManySupplierStatus_NoPermission_ReturnsForbidden()
     {
         // Arrange
-        var request = new UpdateManySupplierStatusRequest
+        var request = new UpdateManySupplierStatusCommand
         {
             Ids = [1, 2],
             StatusId = "inactive"

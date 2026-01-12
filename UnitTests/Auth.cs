@@ -21,7 +21,7 @@ public class Auth
         var validator = new RegisterCommandValidator(userReadRepositoryMock.Object);
 
         // TH1: Email invalid
-        var command = new RegisterCommand("user", "invalid-email", "Pass", "Full Name", "0123456789", "Male");
+        var command = new RegisterCommand { Username = "user", Email = "invalid-email", Password = "Pass", FullName = "Full Name", PhoneNumber = "0123456789", Gender = "Male" };
         var result = validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor(x => x.Email);
     }
@@ -34,7 +34,7 @@ public class Auth
         var validator = new RegisterCommandValidator(userReadRepositoryMock.Object);
 
         // TH2: Password too short
-        var command = new RegisterCommand("user", "test@test.com", "123", "Full Name", "0123456789", "Male");
+        var command = new RegisterCommand { Username = "user", Email = "test@test.com", Password = "123", FullName = "Full Name", PhoneNumber = "0123456789", Gender = "Male" };
         var result = validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor(x => x.Password);
     }
@@ -47,7 +47,7 @@ public class Auth
         var validator = new RegisterCommandValidator(userReadRepositoryMock.Object);
 
         // TH3: Username special chars
-        var command = new RegisterCommand("user@#$", "test@test.com", "Password123!", "Full Name", "0123456789", "Male");
+        var command = new RegisterCommand { Username = "user@#$", Email = "test@test.com", Password = "Password123!", FullName = "Full Name", PhoneNumber = "0123456789", Gender = "Male" };
         var result = validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor(x => x.Username);
     }
@@ -65,7 +65,7 @@ public class Auth
         var protectedEntityManagerServiceMock = new Mock<IProtectedEntityManagerService>();
         var handler = new RegisterCommandHandler(userCreateRepositoryMock.Object, protectedEntityManagerServiceMock.Object);
 
-        var command = new RegisterCommand("user", "email@test.com", "pass", "name", "phone", "Male");
+        var command = new RegisterCommand { Username = "user", Email = "email@test.com", Password = "pass", FullName = "name", PhoneNumber = "phone", Gender = "Male" };
 
         // Act & Assert
         await Assert.ThrowsAsync<Exception>(() => handler.Handle(command, CancellationToken.None));

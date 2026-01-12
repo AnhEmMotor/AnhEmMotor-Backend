@@ -1,6 +1,7 @@
-using Application.ApiContracts.User.Requests;
 using Application.ApiContracts.User.Responses;
 using Application.Common.Models;
+using Application.Features.UserManager.Commands.ChangePassword;
+using Application.Features.UserManager.Commands.UpdateUser;
 using Application.Features.Users.Commands.ChangePasswordCurrentUser;
 using Application.Features.Users.Commands.DeleteCurrentUserAccount;
 using Application.Features.Users.Commands.RestoreUserAccount;
@@ -78,7 +79,7 @@ public class User
     public async Task UpdateCurrentUser_CallsCorrectCommand_ReturnsOk()
     {
         // Arrange
-        var request = new UpdateUserRequest
+        var request = new UpdateUserCommand
         {
             FullName = "Test",
             Gender = GenderStatus.Male
@@ -102,7 +103,7 @@ public class User
         var okResult = result as OkObjectResult;
         okResult!.Value.Should().BeEquivalentTo(expectedResponse);
         _mediatorMock.Verify(m => m.Send(
-            It.Is<UpdateCurrentUserCommand>(c => c.Model == request), 
+            It.Is<UpdateCurrentUserCommand>(c => c.UserId == request.UserId.ToString()), 
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -110,7 +111,7 @@ public class User
     public async Task UpdateCurrentUser_EmptyBody_CallsMediator()
     {
         // Arrange
-        var request = new UpdateUserRequest();
+        var request = new UpdateUserCommand();
 
         var expectedResponse = new UserDTOForManagerResponse
         {
@@ -132,7 +133,7 @@ public class User
     public async Task UpdateCurrentUser_ValidationException_ThrowsValidationException()
     {
         // Arrange
-        var request = new UpdateUserRequest
+        var request = new UpdateUserCommand
         {
             PhoneNumber = "invalid"
         };
@@ -151,7 +152,7 @@ public class User
     public async Task ChangePassword_CallsCorrectCommand_ReturnsOk()
     {
         // Arrange
-        var request = new ChangePasswordRequest
+        var request = new ChangePasswordCommand
         {
             CurrentPassword = "Old",
             NewPassword = "New"
@@ -173,7 +174,7 @@ public class User
         var okResult = result as OkObjectResult;
         okResult!.Value.Should().BeEquivalentTo(expectedResponse);
         _mediatorMock.Verify(m => m.Send(
-            It.Is<ChangePasswordCurrentUserCommand>(c => c.Model == request), 
+            It.Is<ChangePasswordCurrentUserCommand>(c => c.UserId == request.CurrentUserId), 
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -181,7 +182,7 @@ public class User
     public async Task ChangePassword_MissingField_ThrowsValidationException()
     {
         // Arrange
-        var request = new ChangePasswordRequest
+        var request = new ChangePasswordCommand
         {
             CurrentPassword = "Old",
             NewPassword = "" // Missing
@@ -201,7 +202,7 @@ public class User
     public async Task ChangePassword_UnauthorizedException_ThrowsUnauthorizedException()
     {
         // Arrange
-        var request = new ChangePasswordRequest
+        var request = new ChangePasswordCommand
         {
             CurrentPassword = "Wrong",
             NewPassword = "New"

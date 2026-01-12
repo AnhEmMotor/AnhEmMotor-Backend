@@ -1,4 +1,4 @@
-using Application.ApiContracts.Input.Requests;
+﻿using Application.ApiContracts.Input.Requests;
 using Application.Features.Inputs.Commands.CreateInput;
 using Application.Features.Inputs.Commands.UpdateInput;
 using Application.Features.Inputs.Commands.UpdateInputStatus;
@@ -22,7 +22,7 @@ public class InventoryReceipts
     {
         // Arrange
         var validator = new CreateInputInfoCommandValidator();
-        var command = new CreateInputProductCommand
+        var command = new CreateInputInfoRequest
         {
             ProductId = 1,
             Count = -5,
@@ -41,7 +41,7 @@ public class InventoryReceipts
     {
         // Arrange
         var validator = new CreateInputInfoCommandValidator();
-        var command = new CreateInputProductCommand
+        var command = new CreateInputInfoRequest
         {
             ProductId = 1,
             Count = 0,
@@ -60,7 +60,7 @@ public class InventoryReceipts
     {
         // Arrange
         var validator = new CreateInputInfoCommandValidator();
-        var command = new CreateInputProductCommand
+        var command = new CreateInputInfoRequest
         {
             ProductId = 1,
             Count = 10,
@@ -79,7 +79,7 @@ public class InventoryReceipts
     {
         // Arrange
         var validator = new CreateInputInfoCommandValidator();
-        var command = new CreateInputProductCommand
+        var command = new CreateInputInfoRequest
         {
             ProductId = 1,
             Count = 10,
@@ -123,7 +123,7 @@ public class InventoryReceipts
             SupplierId = null,
             Products =
             [
-                new CreateInputProductCommand { ProductId = 1, Count = 10, InputPrice = 100000 }
+                new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }
             ]
         };
 
@@ -160,7 +160,7 @@ public class InventoryReceipts
             SupplierId = 1,
             Products =
             [
-                new CreateInputProductCommand { ProductId = 1, Count = 10, InputPrice = 100000 }
+                new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }
             ]
         };
 
@@ -176,7 +176,7 @@ public class InventoryReceipts
     {
         // Arrange
         var validator = new CreateInputInfoCommandValidator();
-        var command = new CreateInputProductCommand
+        var command = new CreateInputInfoRequest
         {
             ProductId = null,
             Count = 10,
@@ -194,8 +194,8 @@ public class InventoryReceipts
     public void UpdateInputProductValidator_NegativeQuantity_ReturnsValidationError()
     {
         // Arrange
-        var validator = new UpdateInputProductCommandValidator();
-        var command = new UpdateInputProductCommand
+        var validator = new UpdateInputInfoCommandValidator();
+        var command = new UpdateInputInfoRequest
         {
             ProductId = 1,
             Count = -10,
@@ -244,7 +244,7 @@ public class InventoryReceipts
             SupplierId = 1,
             Products =
             [
-                new CreateInputProductCommand { ProductId = 1, Count = 10, InputPrice = 100000 }
+                new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }
             ]
         };
 
@@ -383,7 +383,7 @@ public class InventoryReceipts
             SupplierId = -1,
             Products =
             [
-                new CreateInputProductCommand { ProductId = 1, Count = 10, InputPrice = 100000 }
+                new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }
             ]
         };
 
@@ -406,8 +406,8 @@ public class InventoryReceipts
             SupplierId = 1,
             Products =
             [
-                new UpdateInputProductCommand { ProductId = 1, Count = 10, InputPrice = 100 },
-                new UpdateInputProductCommand { ProductId = 1, Count = 5, InputPrice = 200 }
+                new UpdateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100 },
+                new UpdateInputInfoRequest { ProductId = 1, Count = 5, InputPrice = 200 }
             ]
         };
 

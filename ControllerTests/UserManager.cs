@@ -1,6 +1,4 @@
-using Application.ApiContracts.User.Requests;
 using Application.ApiContracts.User.Responses;
-using Application.ApiContracts.UserManager.Requests;
 using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Models;
 using Application.Features.UserManager.Commands.AssignRoles;
@@ -98,7 +96,7 @@ public class UserManager
         response.TotalCount.Should().Be(10);
 
         _mediatorMock.Verify(m => m.Send(
-            It.Is<GetUsersListQuery>(q => q.SieveModel.Filters == "Status==Active"),
+            It.Is<GetUsersListQuery>(q => q.SieveModel!.Filters == "Status==Active"),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -125,7 +123,7 @@ public class UserManager
         okResult.StatusCode.Should().Be(StatusCodes.Status200OK);
 
         _mediatorMock.Verify(m => m.Send(
-            It.Is<GetUsersListQuery>(q => q.SieveModel.Sorts == "FullName"),
+            It.Is<GetUsersListQuery>(q => q.SieveModel!.Sorts == "FullName"),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -251,7 +249,7 @@ public class UserManager
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var request = new UpdateUserRequest
+        var request = new UpdateUserCommand
         {
             FullName = "Updated Name",
             Gender = GenderStatus.Female,
@@ -271,7 +269,7 @@ public class UserManager
         okResult.StatusCode.Should().Be(StatusCodes.Status200OK);
 
         _mediatorMock.Verify(m => m.Send(
-            It.Is<UpdateUserCommand>(c => c.UserId == userId && c.Model == request),
+            It.Is<UpdateUserCommand>(c => c.UserId == userId),
             It.IsAny<CancellationToken>()), Times.Once());
     }
 
@@ -280,7 +278,7 @@ public class UserManager
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var request = new UpdateUserRequest
+        var request = new UpdateUserCommand
         {
             FullName = "Test User",
             PhoneNumber = ""  // Invalid phone
@@ -305,7 +303,7 @@ public class UserManager
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var request = new UpdateUserRequest
+        var request = new UpdateUserCommand
         {
             FullName = "Test User"
         };
@@ -329,7 +327,7 @@ public class UserManager
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var request = new ChangePasswordRequest
+        var request = new ChangePasswordCommand
         {
             NewPassword = "NewPass@123"
         };
@@ -351,7 +349,7 @@ public class UserManager
         response.Message.Should().Be("Đổi mật khẩu thành công");
 
         _mediatorMock.Verify(m => m.Send(
-            It.Is<ChangePasswordCommand>(c => c.UserId == userId && c.Model == request),
+            It.Is<ChangePasswordCommand>(c => c.UserId == userId),
             It.IsAny<CancellationToken>()), Times.Once());
     }
 
@@ -360,7 +358,7 @@ public class UserManager
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var request = new ChangePasswordRequest
+        var request = new ChangePasswordCommand
         {
             NewPassword = "123"
         };
@@ -384,7 +382,7 @@ public class UserManager
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var request = new AssignRolesRequest
+        var request = new AssignRolesCommand
         {
             RoleNames = ["Manager", "Staff"]
         };
@@ -410,7 +408,7 @@ public class UserManager
         response.Roles.Should().Contain("Manager");
 
         _mediatorMock.Verify(m => m.Send(
-            It.Is<AssignRolesCommand>(c => c.UserId == userId && c.Model == request),
+            It.Is<AssignRolesCommand>(c => c.UserId == userId),
             It.IsAny<CancellationToken>()), Times.Once());
     }
 
@@ -419,7 +417,7 @@ public class UserManager
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var request = new AssignRolesRequest
+        var request = new AssignRolesCommand
         {
             RoleNames = ["InvalidRole"]
         };
@@ -443,7 +441,7 @@ public class UserManager
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var request = new ChangeUserStatusRequest
+        var request = new ChangeUserStatusCommand
         {
             Status = UserStatus.Banned
         };
@@ -465,7 +463,7 @@ public class UserManager
         response.Message.Should().Be("Thay đổi trạng thái thành công");
 
         _mediatorMock.Verify(m => m.Send(
-            It.Is<ChangeUserStatusCommand>(c => c.UserId == userId && c.Model == request),
+            It.Is<ChangeUserStatusCommand>(c => c.UserId == userId),
             It.IsAny<CancellationToken>()), Times.Once());
     }
 
@@ -474,7 +472,7 @@ public class UserManager
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var request = new ChangeUserStatusRequest
+        var request = new ChangeUserStatusCommand
         {
             Status = UserStatus.Banned
         };
@@ -497,7 +495,7 @@ public class UserManager
     public async Task ChangeMultipleUsersStatus_WithValidUsers_ReturnsOk()
     {
         // Arrange
-        var request = new ChangeMultipleUsersStatusRequest
+        var request = new ChangeMultipleUsersStatusCommand
         {
             UserIds = [Guid.NewGuid(), Guid.NewGuid()],
             Status = UserStatus.Banned
@@ -520,7 +518,7 @@ public class UserManager
         response.Message.Should().Be("Thay đổi trạng thái thành công");
 
         _mediatorMock.Verify(m => m.Send(
-            It.Is<ChangeMultipleUsersStatusCommand>(c => c.Model == request),
+            It.Is<ChangeMultipleUsersStatusCommand>(c => c.Status == request.Status),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 }

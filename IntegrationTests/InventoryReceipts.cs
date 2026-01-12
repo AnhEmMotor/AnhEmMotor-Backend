@@ -1,12 +1,18 @@
-using System.Net;
-using System.Net.Http.Json;
 using Application.ApiContracts.Input.Requests;
 using Application.ApiContracts.Input.Responses;
+using Application.Features.Inputs.Commands.CreateInput;
+using Application.Features.Inputs.Commands.DeleteManyInputs;
+using Application.Features.Inputs.Commands.RestoreManyInputs;
+using Application.Features.Inputs.Commands.UpdateInput;
+using Application.Features.Inputs.Commands.UpdateInputStatus;
+using Application.Features.Inputs.Commands.UpdateManyInputStatus;
 using Domain.Constants;
 using Domain.Entities;
 using FluentAssertions;
 using Infrastructure.DBContexts;
 using Microsoft.Extensions.DependencyInjection;
+using System.Net;
+using System.Net.Http.Json;
 using Xunit;
 
 namespace IntegrationTests;
@@ -26,13 +32,13 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     public async Task CreateInput_Success_ReturnsOk()
     {
         // Arrange
-        var request = new CreateInputRequest
+        var request = new UpdateInputCommand
         {
             Notes = "Nhập hàng tháng 1",
             SupplierId = 1,
             Products =
             [
-                new CreateInputInfoRequest
+                new UpdateInputInfoRequest
                 {
                     ProductId = 1,
                     Count = 10,
@@ -67,7 +73,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     public async Task CreateInput_MultipleProducts_CalculatesTotalCorrectly()
     {
         // Arrange
-        var request = new CreateInputRequest
+        var request = new CreateInputCommand
         {
             Notes = "Test",
             SupplierId = 1,
@@ -104,8 +110,8 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "INPUT_004 - Tạo phiếu nhập với SupplierId không tồn tại")]
     public async Task CreateInput_NonExistentSupplier_ReturnsNotFound()
     {
-        // Arrange
-        var request = new CreateInputRequest
+        // Arrange  
+        var request = new CreateInputCommand
         {
             Notes = "Test",
             SupplierId = 9999,
@@ -131,7 +137,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     public async Task CreateInput_NonExistentProduct_ReturnsNotFound()
     {
         // Arrange
-        var request = new CreateInputRequest
+        var request = new CreateInputCommand
         {
             Notes = "Test",
             SupplierId = 1,
@@ -157,7 +163,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     public async Task CreateInput_DeletedProduct_ReturnsBadRequest()
     {
         // Arrange
-        var request = new CreateInputRequest
+        var request = new CreateInputCommand
         {
             Notes = "Test",
             SupplierId = 1,
@@ -183,7 +189,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     public async Task CreateInput_XSSInNotes_SanitizesInput()
     {
         // Arrange
-        var request = new CreateInputRequest
+        var request = new CreateInputCommand
         {
             Notes = "<script>alert('XSS')</script>",
             SupplierId = 1,
@@ -297,7 +303,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     {
         // Arrange
         // First create an input in working status
-        var createRequest = new CreateInputRequest
+        var createRequest = new CreateInputCommand
         {
             Notes = "Original",
             SupplierId = 1,
@@ -308,8 +314,8 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         };
         var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest);
         var createdInput = await createResponse.Content.ReadFromJsonAsync<InputResponse>();
-
-        var updateRequest = new UpdateInputRequest
+            
+        var updateRequest = new UpdateInputCommand
         {
             Notes = "Updated",
             SupplierId = 2,
@@ -335,7 +341,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     {
         // Arrange
         // Create and finish an input
-        var createRequest = new CreateInputRequest
+        var createRequest = new CreateInputCommand
         {
             Notes = "Original",
             SupplierId = 1,
@@ -349,9 +355,9 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
 
         // Update status to finished
         await _client.PatchAsJsonAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}/status",
-            new UpdateInputStatusRequest { StatusId = Domain.Constants.InputStatus.Finish });
+            new UpdateInputStatusCommand { StatusId = Domain.Constants.InputStatus.Finish });
 
-        var updateRequest = new UpdateInputRequest
+        var updateRequest = new UpdateInputCommand
         {
             Notes = "Updated",
             SupplierId = 2,
@@ -369,7 +375,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     public async Task UpdateInput_CancelledStatus_ReturnsBadRequest()
     {
         // Arrange
-        var createRequest = new CreateInputRequest
+        var createRequest = new CreateInputCommand
         {
             Notes = "Original",
             SupplierId = 1,
@@ -383,9 +389,9 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
 
         // Update status to cancelled
         await _client.PatchAsJsonAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}/status",
-            new UpdateInputStatusRequest { StatusId = Domain.Constants.InputStatus.Cancel });
+            new UpdateInputStatusCommand { StatusId = Domain.Constants.InputStatus.Cancel });
 
-        var updateRequest = new UpdateInputRequest
+        var updateRequest = new UpdateInputCommand
         {
             Notes = "Updated",
             SupplierId = 2,
@@ -403,7 +409,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     public async Task UpdateInputStatus_WorkingToFinished_UpdatesSuccessfully()
     {
         // Arrange
-        var createRequest = new CreateInputRequest
+        var createRequest = new CreateInputCommand
         {
             Notes = "Test",
             SupplierId = 1,
@@ -415,7 +421,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest);
         var createdInput = await createResponse.Content.ReadFromJsonAsync<InputResponse>();
 
-        var statusRequest = new UpdateInputStatusRequest { StatusId = Domain.Constants.InputStatus.Finish };
+        var statusRequest = new UpdateInputStatusCommand { StatusId = Domain.Constants.InputStatus.Finish };
 
         // Act
         var response = await _client.PatchAsJsonAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}/status", statusRequest);
@@ -437,7 +443,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     public async Task UpdateInputStatus_WorkingToCancelled_UpdatesSuccessfully()
     {
         // Arrange
-        var createRequest = new CreateInputRequest
+        var createRequest = new CreateInputCommand
         {
             Notes = "Test",
             SupplierId = 1,
@@ -449,7 +455,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest);
         var createdInput = await createResponse.Content.ReadFromJsonAsync<InputResponse>();
 
-        var statusRequest = new UpdateInputStatusRequest { StatusId = Domain.Constants.InputStatus.Cancel };
+        var statusRequest = new UpdateInputStatusCommand { StatusId = Domain.Constants.InputStatus.Cancel };
 
         // Act
         var response = await _client.PatchAsJsonAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}/status", statusRequest);
@@ -468,7 +474,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var ids = new List<int>();
         for (int i = 0; i < 3; i++)
         {
-            var createRequest = new CreateInputRequest
+            var createRequest = new CreateInputCommand
             {
                 Notes = $"Test {i}",
                 SupplierId = 1,
@@ -482,7 +488,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
             ids.Add(createdInput!.Id!.Value);
         }
 
-        var statusRequest = new UpdateManyInputStatusRequest
+        var statusRequest = new UpdateManyInputStatusCommand
         {
             Ids = ids,
             StatusId = Domain.Constants.InputStatus.Finish
@@ -508,7 +514,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     public async Task UpdateManyInputStatus_SomeNonExistent_HandlesPartially()
     {
         // Arrange
-        var createRequest = new CreateInputRequest
+        var createRequest = new CreateInputCommand
         {
             Notes = "Test",
             SupplierId = 1,
@@ -520,7 +526,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest);
         var createdInput = await createResponse.Content.ReadFromJsonAsync<InputResponse>();
 
-        var statusRequest = new UpdateManyInputStatusRequest
+        var statusRequest = new UpdateManyInputStatusCommand
         {
             Ids = [createdInput!.Id!.Value, 9999],
             StatusId = Domain.Constants.InputStatus.Finish
@@ -537,7 +543,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     public async Task DeleteInput_WorkingStatus_DeletesSuccessfully()
     {
         // Arrange
-        var createRequest = new CreateInputRequest
+        var createRequest = new CreateInputCommand
         {
             Notes = "Test",
             SupplierId = 1,
@@ -569,7 +575,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var ids = new List<int>();
         for (int i = 0; i < 3; i++)
         {
-            var createRequest = new CreateInputRequest
+            var createRequest = new CreateInputCommand
             {
                 Notes = $"Test {i}",
                 SupplierId = 1,
@@ -583,7 +589,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
             ids.Add(createdInput!.Id!.Value);
         }
 
-        var deleteRequest = new DeleteManyInputsRequest { Ids = ids };
+        var deleteRequest = new DeleteManyInputsCommand { Ids = ids };
 
         // Act
         var response = await _client.SendAsync(new HttpRequestMessage
@@ -601,7 +607,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     public async Task RestoreInput_DeletedInput_RestoresSuccessfully()
     {
         // Arrange
-        var createRequest = new CreateInputRequest
+        var createRequest = new CreateInputCommand
         {
             Notes = "Test",
             SupplierId = 1,
@@ -636,7 +642,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var ids = new List<int>();
         for (int i = 0; i < 3; i++)
         {
-            var createRequest = new CreateInputRequest
+            var createRequest = new CreateInputCommand
             {
                 Notes = $"Test {i}",
                 SupplierId = 1,
@@ -653,7 +659,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
             await _client.DeleteAsync($"/api/v1/InventoryReceipts/{createdInput.Id}");
         }
 
-        var restoreRequest = new RestoreManyInputsRequest { Ids = ids };
+        var restoreRequest = new RestoreManyInputsCommand { Ids = ids };
 
         // Act
         var response = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts/restore", restoreRequest);
@@ -675,7 +681,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     public async Task CloneInput_ValidInput_CreatesNewInput()
     {
         // Arrange
-        var createRequest = new CreateInputRequest
+        var createRequest = new CreateInputCommand
         {
             Notes = "Original",
             SupplierId = 1,
@@ -702,7 +708,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     public async Task CloneInput_WithDeletedProduct_ClonesOnlyValidProducts()
     {
         // Arrange
-        var createRequest = new CreateInputRequest
+        var createRequest = new CreateInputCommand
         {
             Notes = "Original",
             SupplierId = 1,
@@ -769,7 +775,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     public async Task CreateInput_ZeroImportPrice_AllowsFreeProducts()
     {
         // Arrange
-        var request = new CreateInputRequest
+        var request = new CreateInputCommand
         {
             Notes = "Free products",
             SupplierId = 1,
@@ -792,7 +798,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     public async Task UpdateInputStatus_TracksConfirmedByCorrectly()
     {
         // Arrange
-        var createRequest = new CreateInputRequest
+        var createRequest = new CreateInputCommand
         {
             Notes = "Test",
             SupplierId = 1,
@@ -804,7 +810,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest);
         var createdInput = await createResponse.Content.ReadFromJsonAsync<InputResponse>();
 
-        var statusRequest = new UpdateInputStatusRequest { StatusId = Domain.Constants.InputStatus.Finish };
+        var statusRequest = new UpdateInputStatusCommand { StatusId = Domain.Constants.InputStatus.Finish };
 
         // Act
         var response = await _client.PatchAsJsonAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}/status", statusRequest);

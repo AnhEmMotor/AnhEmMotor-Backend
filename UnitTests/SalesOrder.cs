@@ -64,11 +64,9 @@ public class SalesOrder
 
         var command = new CreateOutputCommand
         {
-            CurrentUserId = Guid.NewGuid(),
-            StatusId = "pending",
             OutputInfos =
             [
-                new() { ProductId = 1, Count = 5, Price = 100 }
+                new() { ProductId = 1, Count = 5 }
             ]
         };
 
@@ -91,8 +89,7 @@ public class SalesOrder
 
         var command = new CreateOutputCommand
         {
-            CurrentUserId = Guid.NewGuid(),
-            OutputInfos = [new() { ProductId = 1, Count = 1, Price = 50 }]
+            OutputInfos = [new() { ProductId = 1, Count = 1 }]
         };
 
         var result = await handler.Handle(command, CancellationToken.None);
@@ -113,11 +110,10 @@ public class SalesOrder
 
         var command = new CreateOutputCommand
         {
-            CurrentUserId = Guid.NewGuid(),
             OutputInfos =
             [
-                new() { ProductId = 1, Count = 2, Price = 100, CostPrice = 60 },
-                new() { ProductId = 2, Count = 3, Price = 200, CostPrice = 120 }
+                new() { ProductId = 1, Count = 2  },
+                new() { ProductId = 2, Count = 3 }
             ]
         };
 
@@ -142,12 +138,11 @@ public class SalesOrder
 
         var command = new CreateOutputCommand
         {
-            CurrentUserId = Guid.NewGuid(),
             OutputInfos =
             [
-                new() { ProductId = 1, Count = 1, Price = 50 },
-                new() { ProductId = 2, Count = 1, Price = 100 },
-                new() { ProductId = 3, Count = 1, Price = 150 }
+                new() { ProductId = 1, Count = 1},
+                new() { ProductId = 2, Count = 1 },
+                new() { ProductId = 3, Count = 1 }
             ]
         };
 
@@ -172,9 +167,8 @@ public class SalesOrder
 
         var command = new CreateOutputCommand
         {
-            CurrentUserId = Guid.NewGuid(),
-            StatusId = null,
-            OutputInfos = [new() { ProductId = 1, Count = 1, Price = 100 }]
+            BuyerId = Guid.NewGuid(),
+            OutputInfos = [new() { ProductId = 1, Count = 1 }]
         };
 
         Output? capturedOutput = null;
@@ -475,7 +469,7 @@ public class SalesOrder
         {
             BuyerId = Guid.NewGuid(),
             StatusId = "pending",
-            OutputInfos = [new() { ProductId = 1, Count = 1, Price = 100 }]
+            OutputInfos = [new() { ProductId = 1, Count = 1 }]
         };
 
         var result = await handler.Handle(command, CancellationToken.None);
@@ -500,7 +494,7 @@ public class SalesOrder
         {
             BuyerId = customBuyerId,
             StatusId = "pending",
-            OutputInfos = [new() { ProductId = 1, Count = 1, Price = 100 }]
+            OutputInfos = [new() { ProductId = 1, Count = 1 }]
         };
 
         Output? capturedOutput = null;
@@ -526,7 +520,7 @@ public class SalesOrder
         var command = new UpdateOutputForManagerCommand
         {
             Id = 1,
-            OutputInfos = [new() { ProductId = 1, Count = 2, Price = 100 }]
+            OutputInfos = [new() { ProductId = 1, Count = 2 }]
         };
 
         var existingOutput = new Output { Id = 1, CreatedBy = Guid.NewGuid() };
@@ -552,7 +546,7 @@ public class SalesOrder
         var command = new UpdateOutputCommand
         {
             Id = 1,
-            OutputInfos = [new() { ProductId = 1, Count = 3, Price = 150 }]
+            OutputInfos = [new() { ProductId = 1, Count = 3 }]
         };
 
         var existingOutput = new Output { Id = 1, StatusId = "pending" };
@@ -573,7 +567,7 @@ public class SalesOrder
             _deleteRepoMock.Object,
             _unitOfWorkMock.Object);
 
-        var command = new DeleteOutputCommand(1);
+        var command = new DeleteOutputCommand() { Id = 1 };
 
         var existingOutput = new Output { Id = 1, StatusId = "pending" };
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
@@ -593,7 +587,7 @@ public class SalesOrder
             _deleteRepoMock.Object,
             _unitOfWorkMock.Object);
 
-        var command = new DeleteOutputCommand(1);
+        var command = new DeleteOutputCommand() {  Id = 1};
 
         var existingOutput = new Output { Id = 1, StatusId = "pending" };
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
@@ -613,7 +607,7 @@ public class SalesOrder
             _updateRepoMock.Object,
             _unitOfWorkMock.Object);
 
-        var command = new RestoreOutputCommand(1);
+        var command = new RestoreOutputCommand() { Id = 1 };
 
         var deletedOutput = new Output { Id = 1, DeletedAt = DateTime.UtcNow };
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), DataFetchMode.All))
@@ -707,7 +701,7 @@ public class SalesOrder
     {
         var handler = new GetOutputByIdQueryHandler(_readRepoMock.Object);
 
-        var query = new GetOutputByIdQuery(1);
+        var query = new GetOutputByIdQuery() { Id = 1 };
 
         var existingOutput = new Output { Id = 1, StatusId = "pending" };
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
@@ -727,7 +721,7 @@ public class SalesOrder
             _paginatorMock.Object);
 
         var userId = Guid.NewGuid();
-        var query = new GetOutputsByUserIdQuery(userId, new SieveModel());
+        var query = new GetOutputsByUserIdQuery() { BuyerId = userId, SieveModel = new SieveModel() };
 
         var userOutputs = new List<Output>
         {
@@ -750,7 +744,7 @@ public class SalesOrder
             _readRepoMock.Object,
             _paginatorMock.Object);
 
-        var query = new GetOutputsListQuery(new SieveModel { Page = 1, PageSize = 10 });
+        var query = new GetOutputsListQuery() { SieveModel = new SieveModel { Page = 1, PageSize = 10 } };
 
         var outputs = new List<Output>
         {
@@ -773,7 +767,7 @@ public class SalesOrder
             _readRepoMock.Object,
             _paginatorMock.Object);
 
-        var query = new GetOutputsListQuery(new SieveModel { Filters = "StatusId==pending" });
+        var query = new GetOutputsListQuery() { SieveModel = new SieveModel { Filters = "StatusId==pending" } };
 
         var outputs = new List<Output>
         {
@@ -796,7 +790,7 @@ public class SalesOrder
             _readRepoMock.Object,
             _paginatorMock.Object);
 
-        var query = new GetOutputsListQuery(new SieveModel { Sorts = "-CreatedAt" });
+        var query = new GetOutputsListQuery() { SieveModel = new SieveModel { Sorts = "-CreatedAt" } };
 
         var outputs = new List<Output>
         {
@@ -819,7 +813,7 @@ public class SalesOrder
             _readRepoMock.Object,
             _paginatorMock.Object);
 
-        var query = new GetDeletedOutputsListQuery(new SieveModel());
+        var query = new GetDeletedOutputsListQuery() { SieveModel = new SieveModel()};
 
         var deletedOutputs = new List<Output>
         {
@@ -846,13 +840,13 @@ public class SalesOrder
 
         var command = new CreateOutputCommand
         {
-            CurrentUserId = Guid.NewGuid(),
+            BuyerId = Guid.NewGuid(),
             OutputInfos =
             [
-                new() { ProductId = 1, Count = 5, Price = 100 },
-                new() { ProductId = 2, Count = 3, Price = 200 },
-                new() { ProductId = 3, Count = 2, Price = 150 },
-                new() { ProductId = 4, Count = 1, Price = 500 }
+                new() { ProductId = 1, Count = 5 },
+                new() { ProductId = 2, Count = 3 },
+                new() { ProductId = 3, Count = 2 },
+                new() { ProductId = 4, Count = 1 }
             ]
         };
 
@@ -877,11 +871,11 @@ public class SalesOrder
 
         var command = new CreateOutputCommand
         {
-            CurrentUserId = Guid.NewGuid(),
+            BuyerId = Guid.NewGuid(),
             OutputInfos =
             [
-                new() { ProductId = 1, Count = 2, Price = 100 },
-                new() { ProductId = 2, Count = 3, Price = 50 }
+                new() { ProductId = 1, Count = 2 },
+                new() { ProductId = 2, Count = 3}
             ]
         };
 
@@ -906,10 +900,10 @@ public class SalesOrder
 
         var command = new CreateOutputCommand
         {
-            CurrentUserId = Guid.NewGuid(),
+            BuyerId = Guid.NewGuid(),
             OutputInfos = 
             {
-                new() { ProductId = 1, Count = 0, Price = 100 }
+                new() { ProductId = 1, Count = 0 }
             }
         };
 
@@ -929,10 +923,10 @@ public class SalesOrder
 
         var command = new CreateOutputCommand
         {
-            CurrentUserId = Guid.NewGuid(),
+            BuyerId = Guid.NewGuid(),
             OutputInfos =
             [
-                new() { ProductId = 999, Count = 1, Price = 100 }
+                new() { ProductId = 999, Count = 1 }
             ]
         };
 
@@ -957,7 +951,7 @@ public class SalesOrder
         var command = new UpdateOutputCommand
         {
             Id = 1,
-            OutputInfos =  { new() { ProductId = 1, Count = 5, Price = 200 } }
+            OutputInfos =  { new() { ProductId = 1, Count = 5 } }
         };
 
         var completedOutput = new Output { Id = 1, StatusId = "completed" };
@@ -982,7 +976,7 @@ public class SalesOrder
         var command = new UpdateOutputCommand
         {
             Id = 1,
-            OutputInfos =  { new() { ProductId = 1, Count = 5, Price = 200 } }
+            OutputInfos =  { new() { ProductId = 1, Count = 5 } }
         };
 
         var deletedOutput = new Output { Id = 1, DeletedAt = DateTime.UtcNow };
@@ -1002,7 +996,7 @@ public class SalesOrder
             _deleteRepoMock.Object,
             _unitOfWorkMock.Object);
 
-        var command = new DeleteOutputCommand(1);
+        var command = new DeleteOutputCommand() { Id = 1 };
 
         var completedOutput = new Output { Id = 1, StatusId = "completed" };
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
@@ -1021,7 +1015,7 @@ public class SalesOrder
             _updateRepoMock.Object,
             _unitOfWorkMock.Object);
 
-        var command = new RestoreOutputCommand(1);
+        var command = new RestoreOutputCommand() { Id = 1 };
 
         var activeOutput = new Output { Id = 1, DeletedAt = null };
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), DataFetchMode.All))
@@ -1070,8 +1064,8 @@ public class SalesOrder
         var createdBy = Guid.NewGuid();
         var command = new CreateOutputCommand
         {
-            CurrentUserId = createdBy,
-            OutputInfos =  { new() { ProductId = 1, Count = 1, Price = 100 } }
+            BuyerId = createdBy,
+            OutputInfos =  { new() { ProductId = 1, Count = 1 } }
         };
 
         Output? capturedOutput = null;
@@ -1089,7 +1083,7 @@ public class SalesOrder
     {
         var handler = new GetOutputByIdQueryHandler(_readRepoMock.Object);
 
-        var query = new GetOutputByIdQuery(1);
+        var query = new GetOutputByIdQuery() { Id = 1 };
 
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), DataFetchMode.ActiveOnly))
             .ReturnsAsync((Output?)null);
@@ -1106,7 +1100,7 @@ public class SalesOrder
             _readRepoMock.Object,
             _paginatorMock.Object);
 
-        var query = new GetOutputsListQuery(new SieveModel());
+        var query = new GetOutputsListQuery() { SieveModel = new SieveModel() };
 
         var outputs = new List<Output>
         {
@@ -1133,8 +1127,8 @@ public class SalesOrder
 
         var command = new CreateOutputCommand
         {
-            CurrentUserId = Guid.Empty,
-            OutputInfos =  { new() { ProductId = 1, Count = 1, Price = 100 } }
+            BuyerId = Guid.Empty,
+            OutputInfos =  { new() { ProductId = 1, Count = 1 } }
         };
 
         var result = await handler.Handle(command, CancellationToken.None);
@@ -1153,7 +1147,7 @@ public class SalesOrder
 
         var command = new CreateOutputCommand
         {
-            CurrentUserId = Guid.NewGuid(),
+            BuyerId = Guid.NewGuid(),
             OutputInfos = []
         };
 
@@ -1262,7 +1256,7 @@ public class SalesOrder
             _paginatorMock.Object);
 
         var userId = Guid.NewGuid();
-        var query = new GetOutputsByUserIdQuery(userId, new SieveModel { Page = 2, PageSize = 5 });
+        var query = new GetOutputsByUserIdQuery() { BuyerId = userId, SieveModel = new SieveModel { Page = 2, PageSize = 5 } };
 
         var outputs = new List<Output>
         {
@@ -1286,7 +1280,7 @@ public class SalesOrder
             _paginatorMock.Object);
 
         var userId = Guid.NewGuid();
-        var query = new GetOutputsByUserIdQuery(userId, new SieveModel());
+        var query = new GetOutputsByUserIdQuery() { BuyerId = userId, SieveModel = new SieveModel() };
 
         var outputs = new List<Output>
         {
@@ -1316,7 +1310,7 @@ public class SalesOrder
             Id = 1,
             OutputInfos = 
             {
-                new() { ProductId = 999, Count = 1, Price = 100 }
+                new() { ProductId = 999, Count = 1 }
             }
         };
 
@@ -1343,10 +1337,10 @@ public class SalesOrder
 
         var command = new CreateOutputCommand
         {
-            CurrentUserId = Guid.NewGuid(),
+            BuyerId = Guid.NewGuid(), 
             OutputInfos =
             [
-                new() { ProductId = 1, Count = 1, Price = 100 }
+                new() { ProductId = 1, Count = 1 }
             ]
         };
 
@@ -1395,9 +1389,9 @@ public class SalesOrder
 
         var command = new CreateOutputCommand
         {
-            CurrentUserId = Guid.NewGuid(),
+            BuyerId = Guid.NewGuid(),
             Notes = "Giao hàng trước 5pm",
-            OutputInfos = [new() { ProductId = 1, Count = 1, Price = 100 }]
+            OutputInfos = [new() { ProductId = 1, Count = 1 }]
         };
 
         Output? capturedOutput = null;
@@ -1424,7 +1418,7 @@ public class SalesOrder
         {
             Id = 1,
             Notes = "Cập nhật: Giao vào sáng mai",
-            OutputInfos = [new() { ProductId = 1, Count = 2, Price = 100 }]
+            OutputInfos = [new() { ProductId = 1, Count = 2 }]
         };
 
         var existingOutput = new Output { Id = 1, StatusId = "pending", Notes = "Old notes" };
@@ -1444,7 +1438,7 @@ public class SalesOrder
             _readRepoMock.Object,
             _paginatorMock.Object);
 
-        var query = new GetOutputsListQuery(new SieveModel { Filters = "CustomerName@=Nguyen" });
+        var query = new GetOutputsListQuery() { SieveModel = new SieveModel { Filters = "CustomerName@=Nguyen" } };
 
         var outputs = new List<Output>
         {
@@ -1467,7 +1461,7 @@ public class SalesOrder
             _readRepoMock.Object,
             _paginatorMock.Object);
 
-        var query = new GetOutputsListQuery(new SieveModel { Filters = "CreatedAt>=2024-01-01,CreatedAt<=2024-12-31" });
+        var query = new GetOutputsListQuery() { SieveModel = new SieveModel { Filters = "CreatedAt>=2024-01-01,CreatedAt<=2024-12-31" } };
 
         var outputs = new List<Output>
         {

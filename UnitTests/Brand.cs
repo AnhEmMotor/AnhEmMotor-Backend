@@ -1,4 +1,4 @@
-using Application.Features.Brands.Commands.CreateBrand;
+﻿using Application.Features.Brands.Commands.CreateBrand;
 using Application.Features.Brands.Commands.DeleteBrand;
 using Application.Features.Brands.Commands.DeleteManyBrands;
 using Application.Features.Brands.Commands.RestoreBrand;
@@ -203,7 +203,7 @@ public class Brand
     {
         // Arrange
         var handler = new GetBrandByIdQueryHandler(_readRepoMock.Object);
-        var query = new GetBrandByIdQuery(1);
+        var query = new GetBrandByIdQuery { Id = 1 };
         var brand = new BrandEntities { Id = 1, Name = "Honda" };
 
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<Domain.Constants.DataFetchMode>())).ReturnsAsync(brand);
@@ -221,7 +221,7 @@ public class Brand
     {
         // Arrange
         var handler = new GetBrandByIdQueryHandler(_readRepoMock.Object);
-        var query = new GetBrandByIdQuery(999);
+        var query = new GetBrandByIdQuery { Id = 999 };
 
         _readRepoMock.Setup(x => x.GetByIdAsync(999, It.IsAny<CancellationToken>(), It.IsAny<Domain.Constants.DataFetchMode>()))
             .ReturnsAsync((BrandEntities?)null);

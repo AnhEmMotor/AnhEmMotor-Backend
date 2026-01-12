@@ -1,6 +1,7 @@
-using Application.Features.UserManager.Commands.ChangeUserStatus;
 using Domain.Constants;
 using FluentValidation;
+
+namespace Application.Features.UserManager.Commands.ChangeUserStatus;
 
 public sealed class ChangeUserStatusCommandValidator : AbstractValidator<ChangeUserStatusCommand>
 {

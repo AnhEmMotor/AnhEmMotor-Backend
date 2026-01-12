@@ -1,4 +1,4 @@
-using Application.Features.Users.Commands.ChangePasswordCurrentUser;
+﻿using Application.Features.Users.Commands.ChangePasswordCurrentUser;
 using Application.Features.Users.Commands.DeleteCurrentUserAccount;
 using Application.Features.Users.Commands.UpdateCurrentUser;
 using Application.Features.Users.Queries.GetCurrentUser;
@@ -49,7 +49,7 @@ public class User
             .ReturnsAsync(user);
 
         var handler = new GetCurrentUserQueryHandler(_userReadRepositoryMock.Object);
-        var query = new GetCurrentUserQuery(userId.ToString());
+        var query = new GetCurrentUserQuery() { UserId = userId.ToString() };
 
         // Act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -97,7 +97,7 @@ public class User
             .ReturnsAsync(user);
 
         var handler = new GetCurrentUserQueryHandler(_userReadRepositoryMock.Object);
-        var query = new GetCurrentUserQuery(userId.ToString());
+        var query = new GetCurrentUserQuery() { UserId = userId.ToString() };
 
         // Act & Assert
         var result = await handler.Handle(query, CancellationToken.None);
@@ -120,7 +120,7 @@ public class User
             .ReturnsAsync(user);
 
         var handler = new GetCurrentUserQueryHandler(_userReadRepositoryMock.Object);
-        var query = new GetCurrentUserQuery(userId.ToString());
+        var query = new GetCurrentUserQuery() { UserId = userId.ToString() };
 
         // Act & Assert
         var result = await handler.Handle(query, CancellationToken.None);
@@ -150,13 +150,11 @@ public class User
             .ReturnsAsync((true, Array.Empty<string>()));
 
         var handler = new UpdateCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
-        var request = new UpdateUserRequest
-        {
+        var command = new UpdateCurrentUserCommand() { UserId = userId.ToString(),
             FullName = "New Name",
             Gender = GenderStatus.Female,
             PhoneNumber = "0987654321"
         };
-        var command = new UpdateCurrentUserCommand(userId.ToString(), request);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -190,13 +188,11 @@ public class User
             .ReturnsAsync((true, Array.Empty<string>()));
 
         var handler = new UpdateCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
-        var request = new UpdateUserRequest
-        {
+        var command = new UpdateCurrentUserCommand() { UserId = userId.ToString(),
             FullName = null,
             Gender = null,
             PhoneNumber = null
         };
-        var command = new UpdateCurrentUserCommand(userId.ToString(), request);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -227,12 +223,10 @@ public class User
             .ReturnsAsync((true, Array.Empty<string>()));
 
         var handler = new UpdateCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
-        var request = new UpdateUserRequest
-        {
+        var command = new UpdateCurrentUserCommand() { UserId = userId.ToString(),
             FullName = "  Trimmed Name  ",
             PhoneNumber = "  0999888777  "
         };
-        var command = new UpdateCurrentUserCommand(userId.ToString(), request);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -262,12 +256,10 @@ public class User
             .ReturnsAsync((true, Array.Empty<string>()));
 
         var handler = new UpdateCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
-        var request = new UpdateUserRequest
-        {
+        var command = new UpdateCurrentUserCommand() { UserId = userId.ToString(),
             FullName = "<script>alert('XSS')</script>",
             Gender = GenderStatus.Male
         };
-        var command = new UpdateCurrentUserCommand(userId.ToString(), request);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -294,11 +286,9 @@ public class User
             .ReturnsAsync(user);
 
         var handler = new UpdateCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
-        var request = new UpdateUserRequest
-        {
+        var command = new UpdateCurrentUserCommand() { UserId = userId.ToString(),
             Gender = "InvalidGender"
         };
-        var command = new UpdateCurrentUserCommand(userId.ToString(), request);
 
         // Act & Assert
         var result = await handler.Handle(command, CancellationToken.None);
@@ -321,11 +311,9 @@ public class User
             .ReturnsAsync(user);
 
         var handler = new UpdateCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
-        var request = new UpdateUserRequest
-        {
+        var command = new UpdateCurrentUserCommand() { UserId = userId.ToString(),
             PhoneNumber = "abcd1234"
         };
-        var command = new UpdateCurrentUserCommand(userId.ToString(), request);
 
         // Act & Assert
         var result = await handler.Handle(command, CancellationToken.None);
@@ -347,8 +335,7 @@ public class User
             .ReturnsAsync(user);
 
         var handler = new UpdateCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
-        var request = new UpdateUserRequest { FullName = "Test" };
-        var command = new UpdateCurrentUserCommand(userId.ToString(), request);
+        var command = new UpdateCurrentUserCommand() { UserId = userId.ToString(), FullName = "Test" };
 
         // Act & Assert
         var result = await handler.Handle(command, CancellationToken.None);
@@ -371,8 +358,7 @@ public class User
             .ReturnsAsync(user);
 
         var handler = new UpdateCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
-        var request = new UpdateUserRequest { FullName = "Test" };
-        var command = new UpdateCurrentUserCommand(userId.ToString(), request);
+        var command = new UpdateCurrentUserCommand() { UserId = userId.ToString(), FullName = "Test" };
 
         // Act & Assert
         var result = await handler.Handle(command, CancellationToken.None);
@@ -398,15 +384,14 @@ public class User
             .ReturnsAsync((true, Array.Empty<string>()));
 
         var handler = new UpdateCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
-        var request = new UpdateUserRequest { FullName = "Test" };
-        var command = new UpdateCurrentUserCommand(userId.ToString(), request);
+        var command = new UpdateCurrentUserCommand() { UserId = userId.ToString(), FullName = "Test" };
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.Should().NotBeNull();
-        // Verify Email không bị thay đổi (vì không có trong UpdateUserRequest)
+        // Verify Email khÃ´ng bá»‹ thay Ä‘á»•i (vÃ¬ khÃ´ng cÃ³ trong UpdateUserRequest)
         _userUpdateRepositoryMock.Verify(x => x.UpdateUserAsync(It.Is<ApplicationUser>(u => u.Email == "old@example.com")), Times.Once);
     }
 
@@ -431,12 +416,10 @@ public class User
             .ReturnsAsync((true, Array.Empty<string>()));
 
         var handler = new ChangePasswordCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
-        var request = new ChangePasswordRequest
-        {
+        var command = new ChangePasswordCurrentUserCommand() { UserId = userId.ToString(),
             CurrentPassword = "OldPass123!",
             NewPassword = "NewPass456!"
         };
-        var command = new ChangePasswordCurrentUserCommand(userId.ToString(), request);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -466,12 +449,10 @@ public class User
             .ReturnsAsync(false);
 
         var handler = new ChangePasswordCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
-        var request = new ChangePasswordRequest
-        {
+        var command = new ChangePasswordCurrentUserCommand() { UserId = userId.ToString(),
             CurrentPassword = "WrongPass",
             NewPassword = "NewPass456!"
         };
-        var command = new ChangePasswordCurrentUserCommand(userId.ToString(), request);
 
         // Act & Assert
         var result = await handler.Handle(command, CancellationToken.None);
@@ -496,12 +477,10 @@ public class User
             .ReturnsAsync(true);
 
         var handler = new ChangePasswordCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
-        var request = new ChangePasswordRequest
-        {
+        var command = new ChangePasswordCurrentUserCommand() { UserId = userId.ToString(),
             CurrentPassword = "OldPass123!",
             NewPassword = "123"
         };
-        var command = new ChangePasswordCurrentUserCommand(userId.ToString(), request);
 
         // Act & Assert
         var result = await handler.Handle(command, CancellationToken.None);
@@ -523,12 +502,10 @@ public class User
             .ReturnsAsync(user);
 
         var handler = new ChangePasswordCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
-        var request = new ChangePasswordRequest
-        {
+        var command = new ChangePasswordCurrentUserCommand() { UserId = userId.ToString(),
             CurrentPassword = "OldPass123!",
             NewPassword = "NewPass456!"
         };
-        var command = new ChangePasswordCurrentUserCommand(userId.ToString(), request);
 
         // Act & Assert
         var result = await handler.Handle(command, CancellationToken.None);
@@ -554,7 +531,7 @@ public class User
             .ReturnsAsync((true, Array.Empty<string>()));
 
         var handler = new DeleteCurrentUserAccountCommandHandler(_userReadRepositoryMock.Object, _userDeleteRepositoryMock.Object, _protectedEntityManagerServiceMock.Object);
-        var command = new DeleteCurrentUserAccountCommand(userId.ToString());
+        var command = new DeleteCurrentUserAccountCommand() { UserId = userId.ToString() };
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -582,7 +559,7 @@ public class User
             .ReturnsAsync(user);
 
         var handler = new DeleteCurrentUserAccountCommandHandler(_userReadRepositoryMock.Object, _userDeleteRepositoryMock.Object, _protectedEntityManagerServiceMock.Object);
-        var command = new DeleteCurrentUserAccountCommand(userId.ToString());
+        var command = new DeleteCurrentUserAccountCommand() { UserId = userId.ToString() };
 
         // Act & Assert
         var result = await handler.Handle(command, CancellationToken.None);
@@ -604,7 +581,7 @@ public class User
             .ReturnsAsync(user);
 
         var handler = new DeleteCurrentUserAccountCommandHandler(_userReadRepositoryMock.Object, _userDeleteRepositoryMock.Object, _protectedEntityManagerServiceMock.Object);
-        var command = new DeleteCurrentUserAccountCommand(userId.ToString());
+        var command = new DeleteCurrentUserAccountCommand() { UserId = userId.ToString() };
 
         // Act & Assert
         var result = await handler.Handle(command, CancellationToken.None);

@@ -1,7 +1,8 @@
 using System.Net;
 using System.Net.Http.Json;
-using Application.ApiContracts.Auth.Requests;
 using Application.ApiContracts.Auth.Responses;
+using Application.Features.Auth.Commands.Login;
+using Application.Features.Auth.Commands.Register;
 using Domain.Constants;
 using Domain.Entities;
 using FluentAssertions;
@@ -27,7 +28,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
     public async Task AUTH_REG_001_Register_Success()
     {
         // Arrange
-        var request = new RegisterRequest
+        var request = new RegisterCommand
         {
             Email = "test_reg_001@example.com",
             Password = "Password123!",
@@ -57,7 +58,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
     public async Task AUTH_REG_003_Register_Duplicate_Fail()
     {
         // Arrange
-        var request1 = new RegisterRequest
+        var request1 = new RegisterCommand
         {
             Email = "exist@example.com",
             Username = "existuser",
@@ -67,7 +68,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         };
         await _client.PostAsJsonAsync("/api/v1/Auth/register", request1);
 
-        var request2 = new RegisterRequest
+        var request2 = new RegisterCommand
         {
             Email = "exist@example.com", // Duplicate Email
             Username = "newuser",
@@ -87,7 +88,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
     public async Task AUTH_REG_005_Register_Sanitization()
     {
         // Arrange
-        var request = new RegisterRequest
+        var request = new RegisterCommand
         {
             Email = "hacker@example.com",
             Password = "Password123!",
@@ -138,7 +139,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
             await userManager.CreateAsync(user, "Password123!");
         }
 
-        var request = new RegisterRequest
+        var request = new RegisterCommand
         {
             Email = email,
             Username = "newdeleteduser",
@@ -167,7 +168,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
             await userManager.CreateAsync(user, password);
         }
 
-        var request = new LoginRequest { UsernameOrEmail = email, Password = password };
+        var request = new LoginCommand { UsernameOrEmail = email, Password = password };
 
         // Act
         var response = await _client.PostAsJsonAsync("/api/v1/Auth/login", request);
@@ -193,7 +194,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
             await userManager.CreateAsync(user, password);
         }
 
-        var request = new LoginRequest { UsernameOrEmail = username, Password = password };
+        var request = new LoginCommand { UsernameOrEmail = username, Password = password };
 
         // Act
         var response = await _client.PostAsJsonAsync("/api/v1/Auth/login", request);
@@ -221,7 +222,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
             await userManager.AddToRoleAsync(user, "Manager");
         }
 
-        var request = new LoginRequest { UsernameOrEmail = username, Password = password };
+        var request = new LoginCommand { UsernameOrEmail = username, Password = password };
 
         // Act
         var response = await _client.PostAsJsonAsync("/api/v1/Auth/login/for-manager", request);
@@ -247,7 +248,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
             await userManager.CreateAsync(user, password);
         }
 
-        var loginRes = await _client.PostAsJsonAsync("/api/v1/Auth/login", new LoginRequest { UsernameOrEmail = username, Password = password });
+        var loginRes = await _client.PostAsJsonAsync("/api/v1/Auth/login", new LoginCommand { UsernameOrEmail = username, Password = password });
         var loginContent = await loginRes.Content.ReadFromJsonAsync<LoginResponse>();
         refreshToken = loginContent!.RefreshToken;
         accessToken = loginContent!.AccessToken;
@@ -295,7 +296,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
             await userManager.CreateAsync(user, password);
         }
         
-        var loginRes = await _client.PostAsJsonAsync("/api/v1/Auth/login", new LoginRequest { UsernameOrEmail = username, Password = password });
+        var loginRes = await _client.PostAsJsonAsync("/api/v1/Auth/login", new LoginCommand { UsernameOrEmail = username, Password = password });
         var loginContent = await loginRes.Content.ReadFromJsonAsync<LoginResponse>();
         string? refreshToken = loginContent!.RefreshToken;
 
@@ -322,7 +323,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
     public async Task AUTH_VAL_001_Trimming()
     {
         // Arrange
-        var request = new RegisterRequest
+        var request = new RegisterCommand
         {
             Email = "  trim@example.com  ",
             Username = "  trimuser  ",
