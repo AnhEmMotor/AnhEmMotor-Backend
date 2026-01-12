@@ -1,4 +1,3 @@
-using Application.ApiContracts.Auth.Requests;
 using Application.Features.Auth.Commands.RefreshToken;
 using Application.Features.Auth.Commands.Register;
 using Application.Interfaces.Repositories.User;

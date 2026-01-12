@@ -1,5 +1,4 @@
-using Application.ApiContracts.User.Requests;
-using Application.ApiContracts.User.Responses;
+﻿using Application.ApiContracts.User.Responses;
 using Application.Features.Users.Commands.ChangePasswordCurrentUser;
 using Application.Features.Users.Commands.DeleteCurrentUserAccount;
 using Application.Features.Users.Commands.RestoreUserAccount;
@@ -13,7 +12,8 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
 using WebAPI.Controllers.Base;
-
+using Application.Features.UserManager.Commands.UpdateUser;
+using Application.Features.UserManager.Commands.ChangePassword;
 namespace WebAPI.Controllers.V1;
 
 /// <summary>
@@ -36,7 +36,7 @@ public class UserController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetCurrentUser(CancellationToken cancellationToken)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var result = await mediator.Send(new GetCurrentUserQuery(userId), cancellationToken).ConfigureAwait(false);
+        var result = await mediator.Send(new GetCurrentUserQuery() { UserId = userId }, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -50,12 +50,11 @@ public class UserController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> UpdateCurrentUser(
-        [FromBody] UpdateUserRequest model,
+        [FromBody] UpdateUserCommand model,
         CancellationToken cancellationToken)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var result = await mediator.Send(new UpdateCurrentUserCommand(userId, model), cancellationToken)
-            .ConfigureAwait(false);
+        var modelToSend = model with { UserId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!) };
+        var result = await mediator.Send(modelToSend, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -69,12 +68,11 @@ public class UserController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> ChangePasswordCurrentUser(
-        [FromBody] ChangePasswordRequest model,
+        [FromBody] ChangePasswordCommand model,
         CancellationToken cancellationToken)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var result = await mediator.Send(new ChangePasswordCurrentUserCommand(userId, model), cancellationToken)
-            .ConfigureAwait(false);
+        var modelToSend = model with { UserId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!) };
+        var result = await mediator.Send(modelToSend, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -90,8 +88,7 @@ public class UserController(IMediator mediator) : ApiController
     public async Task<IActionResult> DeleteCurrentUserAccount(CancellationToken cancellationToken)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var result = await mediator.Send(new DeleteCurrentUserAccountCommand(userId), cancellationToken)
-            .ConfigureAwait(false);
+        var result = await mediator.Send(new DeleteCurrentUserAccountCommand() { UserId = userId}, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 
@@ -104,7 +101,7 @@ public class UserController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RestoreUserAccount(Guid userId, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new RestoreUserAccountCommand(userId), cancellationToken).ConfigureAwait(false);
+        var result = await mediator.Send(new RestoreUserAccountCommand() { UserId = userId }, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 }

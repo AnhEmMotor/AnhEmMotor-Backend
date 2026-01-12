@@ -35,7 +35,7 @@ public class SettingController(IMediator mediator) : ApiController
         [FromBody][ValidSettingKeys] Dictionary<string, string?> request,
         CancellationToken cancellationToken)
     {
-        var command = new SetSettingsCommand(request);
+        var command = new SetSettingsCommand() { Settings = request };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }

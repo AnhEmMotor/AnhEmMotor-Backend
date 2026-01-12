@@ -1,7 +1,6 @@
 using MediatR;
 using Application.Common.Models;
 using Application.ApiContracts.Brand.Responses;
-using Application.ApiContracts.Brand.Requests;
 
 namespace Application.Features.Brands.Commands.CreateBrand;
 

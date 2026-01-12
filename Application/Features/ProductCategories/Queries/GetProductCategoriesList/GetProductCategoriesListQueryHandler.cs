@@ -20,7 +20,7 @@ public sealed class GetProductCategoriesListQueryHandler(
 
         return await paginator.ApplyAsync<ProductCategoryEntity, ProductCategoryResponse>(
             query,
-            request.SieveModel,
+            request.SieveModel!,
             cancellationToken: cancellationToken);
     }
 }

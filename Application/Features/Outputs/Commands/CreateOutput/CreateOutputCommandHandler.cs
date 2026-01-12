@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Output.Responses;
+using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
@@ -20,7 +20,7 @@ public sealed class CreateOutputCommandHandler(
 {
     public async Task<Result<OutputResponse?>> Handle(CreateOutputCommand request, CancellationToken cancellationToken)
     {
-        var variantIds = request.Model.OutputInfos
+        var variantIds = request.OutputInfos
             .Where(p => p.ProductId.HasValue)
             .Select(p => p.ProductId!.Value)
             .Distinct()
@@ -36,7 +36,7 @@ public sealed class CreateOutputCommandHandler(
             var foundIds = variantsList.Select(v => v.Id).ToList();
             var missingIds = variantIds.Except(foundIds).ToList();
             return Error.NotFound(
-                $"Không tìm thấy {missingIds.Count} sản phẩm: {string.Join(", ", missingIds)}",
+                $"Kh�ng t�m th?y {missingIds.Count} s?n ph?m: {string.Join(", ", missingIds)}",
                 "Products");
         }
 
@@ -45,7 +45,7 @@ public sealed class CreateOutputCommandHandler(
             if(string.Compare(variant.Product?.StatusId, Domain.Constants.ProductStatus.ForSale) != 0)
             {
                 return Error.BadRequest(
-                    $"Sản phẩm '{variant.Product?.Name ?? variant.Id.ToString()}' không còn được bán.",
+                    $"S?n ph?m '{variant.Product?.Name ?? variant.Id.ToString()}' kh�ng c�n du?c b�n.",
                     "Products");
             }
         }
@@ -65,7 +65,7 @@ public sealed class CreateOutputCommandHandler(
             output.StatusId = OrderStatus.Pending;
         }
 
-        output.BuyerId = request.Model.BuyerId;
+        output.BuyerId = request.BuyerId;
 
         insertRepository.Add(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -75,3 +75,4 @@ public sealed class CreateOutputCommandHandler(
         return created.Adapt<OutputResponse>();
     }
 }
+

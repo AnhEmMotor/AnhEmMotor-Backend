@@ -23,7 +23,7 @@ public sealed class GetDeletedFilesListQueryHandler(
 
         var result = await paginator.ApplyAsync<MediaFileEntity, MediaFileResponse>(
             query,
-            request.SieveModel,
+            request.SieveModel!,
             DataFetchMode.DeletedOnly,
             cancellationToken)
             .ConfigureAwait(false);

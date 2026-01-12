@@ -18,7 +18,7 @@ public sealed class GetOutputsByUserrIdQueryHandler(IOutputReadRepository reposi
 
         return await paginator.ApplyAsync<OutputEntity, OutputResponse>(
             query,
-            request.SieveModel,
+            request.SieveModel!,
             cancellationToken: cancellationToken);
     }
 }

@@ -9,7 +9,7 @@ public class GetUserByIdQueryHandler(IUserReadRepository userReadRepository) : I
 {
     public async Task<Result<UserDTOForManagerResponse>> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
     {
-        var user = await userReadRepository.FindUserByIdAsync(request.UserId, cancellationToken).ConfigureAwait(false);
+        var user = await userReadRepository.FindUserByIdAsync(request.UserId!.Value, cancellationToken).ConfigureAwait(false);
         if(user is null)
         {
             return Error.NotFound("User not found.");

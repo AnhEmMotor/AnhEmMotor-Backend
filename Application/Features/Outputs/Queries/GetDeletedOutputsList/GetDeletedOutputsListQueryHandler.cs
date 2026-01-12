@@ -19,7 +19,7 @@ public sealed class GetDeletedOutputsListQueryHandler(IOutputReadRepository repo
 
         return await paginator.ApplyAsync<OutputEntity, OutputResponse>(
             query,
-            request.SieveModel,
+            request.SieveModel!,
             cancellationToken: cancellationToken);
     }
 }

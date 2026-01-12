@@ -1,6 +1,4 @@
-﻿using Application.ApiContracts.User.Requests;
-using Application.ApiContracts.User.Responses;
-using Application.ApiContracts.UserManager.Requests;
+﻿using Application.ApiContracts.User.Responses;
 using Application.ApiContracts.UserManager.Responses;
 using Application.Features.UserManager.Commands.AssignRoles;
 using Application.Features.UserManager.Commands.ChangeMultipleUsersStatus;
@@ -50,7 +48,7 @@ public class UserManagerController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Domain.Primitives.PagedResult<UserDTOForManagerResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllUsers([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
     {
-        var query = new GetUsersListQuery(sieveModel);
+        var query = new GetUsersListQuery() { SieveModel = sieveModel };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -68,7 +66,7 @@ public class UserManagerController(IMediator mediator) : ApiController
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
     {
-        var query = new GetUsersListForOutputQuery(sieveModel);
+        var query = new GetUsersListForOutputQuery() { SieveModel = sieveModel };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -82,7 +80,7 @@ public class UserManagerController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetUserById(Guid userId, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetUserByIdQuery(userId), cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(new GetUserByIdQuery() { UserId = userId }, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -96,15 +94,16 @@ public class UserManagerController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateUser(
         Guid userId,
-        [FromBody] UpdateUserRequest model,
+        [FromBody] UpdateUserCommand model,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new UpdateUserCommand(userId, model), cancellationToken).ConfigureAwait(true);
+        var modelToSend = model with { UserId = userId };
+        var result = await mediator.Send(modelToSend, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
     /// <summary>
-    /// Đổi mật khẩu người dùng theo ID
+    /// Đổi mật khẩu người dùng theo ID (đang đăng nhập)
     /// </summary>
     [HttpPost("{userId:guid}/change-password")]
     [HasPermission(Users.ChangePassword)]
@@ -115,11 +114,11 @@ public class UserManagerController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> ChangePassword(
         Guid userId,
-        [FromBody] ChangePasswordRequest model,
+        [FromBody] ChangePasswordCommand model,
         CancellationToken cancellationToken)
     {
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var result = await mediator.Send(new ChangePasswordCommand(userId, model, currentUserId), cancellationToken)
+        var modelToSend = model with { UserId = userId };
+        var result = await mediator.Send(modelToSend, cancellationToken)
             .ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -136,10 +135,11 @@ public class UserManagerController(IMediator mediator) : ApiController
     [HasPermission(Users.AssignRoles)]
     public async Task<IActionResult> AssignRoles(
         Guid userId,
-        [FromBody] AssignRolesRequest model,
+        [FromBody] AssignRolesCommand model,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new AssignRolesCommand(userId, model), cancellationToken).ConfigureAwait(true);
+        var modelToSend = model with { UserId = userId };
+        var result = await mediator.Send(modelToSend, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -153,11 +153,11 @@ public class UserManagerController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> ChangeUserStatus(
         Guid userId,
-        [FromBody] ChangeUserStatusRequest model,
+        [FromBody] ChangeUserStatusCommand model,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new ChangeUserStatusCommand(userId, model), cancellationToken)
-            .ConfigureAwait(true);
+        var modelToSend = model with { UserId = userId };
+        var result = await mediator.Send(modelToSend, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -171,11 +171,10 @@ public class UserManagerController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     [HasPermission(Users.Edit)]
     public async Task<IActionResult> ChangeMultipleUsersStatus(
-        [FromBody] ChangeMultipleUsersStatusRequest model,
+        [FromBody] ChangeMultipleUsersStatusCommand model,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new ChangeMultipleUsersStatusCommand(model), cancellationToken)
-            .ConfigureAwait(true);
+        var result = await mediator.Send(new ChangeMultipleUsersStatusCommand() { Status = model.Status, UserIds = model.UserIds }, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 }

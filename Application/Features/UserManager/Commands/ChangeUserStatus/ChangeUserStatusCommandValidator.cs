@@ -9,7 +9,7 @@ public sealed class ChangeUserStatusCommandValidator : AbstractValidator<ChangeU
         RuleFor(x => x.UserId)
             .NotEmpty().WithMessage("User ID is required.");
 
-        RuleFor(x => x.Model.Status)
+        RuleFor(x => x.Status)
             .NotEmpty().WithMessage("Status is required.")
             .Must(UserStatus.IsValid).WithMessage("Invalid status provided.");
     }

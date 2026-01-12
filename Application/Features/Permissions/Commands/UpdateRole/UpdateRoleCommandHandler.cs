@@ -21,20 +21,20 @@ public class UpdateRoleCommandHandler(
         UpdateRoleCommand request,
         CancellationToken cancellationToken)
     {
-        var role = await roleManager.FindByNameAsync(request.RoleName).ConfigureAwait(false);
+        var role = await roleManager.FindByNameAsync(request.RoleName!).ConfigureAwait(false);
         if (role is null)
         {
             return Error.NotFound("Role not found.");
         }
         var isRoleUpdated = false;
 
-        if(request.Model.Description is not null && string.Compare(role.Description, request.Model.Description) != 0)
+        if(request.Description is not null && string.Compare(role.Description, request.Description) != 0)
         {
-            role.Description = request.Model.Description;
+            role.Description = request.Description;
             isRoleUpdated = true;
         }
 
-        if(request.Model.Permissions.Count == 0)
+        if(request.Permissions!.Count == 0)
         {
             if(isRoleUpdated)
             {
@@ -51,7 +51,7 @@ public class UpdateRoleCommandHandler(
             .Where(p => p is not null)
             .ToHashSet();
 
-        var invalidPermissions = request.Model.Permissions.Where(p => !validSystemPermissions.Contains(p)).ToList();
+        var invalidPermissions = request.Permissions.Where(p => !validSystemPermissions.Contains(p)).ToList();
         if(invalidPermissions.Count != 0)
         {
                         return Error.BadRequest($"Invalid permissions: {string.Join(", ", invalidPermissions)}");
@@ -67,10 +67,10 @@ public class UpdateRoleCommandHandler(
             .Select(rp => rp.Permission!.Name)
             .ToHashSet();
 
-        var permissionNamesToAdd = request.Model.Permissions.Where(p => !currentPermissionNames.Contains(p)).ToList();
+        var permissionNamesToAdd = request.Permissions.Where(p => !currentPermissionNames.Contains(p)).ToList();
 
         var rolePermissionsToRemove = currentRolePermissions
-            .Where(rp => rp.Permission is not null && !request.Model.Permissions.Contains(rp.Permission.Name))
+            .Where(rp => rp.Permission is not null && !request.Permissions.Contains(rp.Permission.Name))
             .ToList();
 
         if(rolePermissionsToRemove.Count != 0)

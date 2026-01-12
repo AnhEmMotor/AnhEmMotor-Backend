@@ -23,15 +23,20 @@ public sealed class CloneInputCommandHandler(
         CloneInputCommand command,
         CancellationToken cancellationToken)
     {
+        if (!command.Id.HasValue)
+        {
+            return Error.BadRequest("Id không được để trống", "Id");
+        }
+
         var originalInput = await inputReadRepository.GetByIdWithDetailsAsync(
-            command.Id,
+            command.Id.Value,
             cancellationToken,
             DataFetchMode.All)
             .ConfigureAwait(false);
 
         if(originalInput is null)
         {
-            return Error.NotFound($"Phiếu nhập với Id = {command.Id} không tồn tại", "Id");
+            return Error.NotFound($"Phiếu nhập với Id = {command.Id.Value} không tồn tại", "Id");
         }
 
         var supplier = await supplierReadRepository.GetByIdAsync(
@@ -114,3 +119,4 @@ public sealed class CloneInputCommandHandler(
         return createdInput!.Adapt<InputResponse>();
     }
 }
+

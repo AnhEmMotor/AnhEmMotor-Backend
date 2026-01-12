@@ -1,5 +1,4 @@
-﻿using Application.ApiContracts.ProductCategory.Requests;
-using Application.ApiContracts.ProductCategory.Responses;
+﻿using Application.ApiContracts.ProductCategory.Responses;
 using Application.Features.ProductCategories.Commands.CreateProductCategory;
 using Application.Features.ProductCategories.Commands.DeleteManyProductCategories;
 using Application.Features.ProductCategories.Commands.DeleteProductCategory;
@@ -39,7 +38,7 @@ public class ProductCategoryController(IMediator mediator) : ApiController
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
     {
-        var query = new GetProductCategoriesListQuery(sieveModel);
+        var query = new GetProductCategoriesListQuery() { SieveModel = sieveModel };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -54,7 +53,7 @@ public class ProductCategoryController(IMediator mediator) : ApiController
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
     {
-        var query = new GetProductCategoriesListQuery(sieveModel);
+        var query = new GetProductCategoriesListQuery() { SieveModel = sieveModel };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -69,7 +68,7 @@ public class ProductCategoryController(IMediator mediator) : ApiController
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
     {
-        var query = new GetDeletedProductCategoriesListQuery(sieveModel);
+        var query = new GetDeletedProductCategoriesListQuery() { SieveModel = sieveModel };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -83,7 +82,7 @@ public class ProductCategoryController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetProductCategoryById(int id, CancellationToken cancellationToken)
     {
-        var query = new GetProductCategoryByIdQuery(id);
+        var query = new GetProductCategoryByIdQuery() { Id = id};
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -95,7 +94,7 @@ public class ProductCategoryController(IMediator mediator) : ApiController
     [HasPermission(ProductCategories.Create)]
     [ProducesResponseType(typeof(ProductCategoryResponse), StatusCodes.Status201Created)]
     public async Task<IActionResult> CreateProductCategory(
-        [FromBody] CreateProductCategoryRequest request,
+        [FromBody] CreateProductCategoryCommand request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<CreateProductCategoryCommand>();
@@ -112,7 +111,7 @@ public class ProductCategoryController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateProductCategory(
         int id,
-        [FromBody] UpdateProductCategoryRequest request,
+        [FromBody] UpdateProductCategoryCommand request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<UpdateProductCategoryCommand>() with { Id = id };
@@ -142,7 +141,7 @@ public class ProductCategoryController(IMediator mediator) : ApiController
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteProductCategories(
-        [FromBody] DeleteManyProductCategoriesRequest request,
+        [FromBody] DeleteManyProductCategoriesCommand request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<DeleteManyProductCategoriesCommand>();
@@ -173,7 +172,7 @@ public class ProductCategoryController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(List<ProductCategoryResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RestoreProductCategories(
-        [FromBody] RestoreManyProductCategoriesRequest request,
+        [FromBody] RestoreManyProductCategoriesCommand request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<RestoreManyProductCategoriesCommand>();

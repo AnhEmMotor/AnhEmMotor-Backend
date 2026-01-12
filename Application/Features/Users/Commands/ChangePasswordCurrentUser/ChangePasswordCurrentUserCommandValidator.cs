@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace Application.Features.Users.Commands.ChangePasswordCurrentUser;
 
@@ -10,13 +10,13 @@ public sealed class GetCurrentUserQueryValidator : AbstractValidator<ChangePassw
             .NotEmpty().WithMessage("User ID is missing.")
             .Must(id => Guid.TryParse(id, out _)).WithMessage("Invalid User ID format.");
 
-        RuleFor(x => x.Model.CurrentPassword)
+        RuleFor(x => x.CurrentPassword)
             .NotEmpty().WithMessage("Current password is required.");
 
-        RuleFor(x => x.Model.NewPassword)
+        RuleFor(x => x.NewPassword)
             .NotEmpty().WithMessage("New password is required.")
             .MinimumLength(6).WithMessage("Password must be at least 6 characters.")
-            .NotEqual(x => x.Model.CurrentPassword)
+            .NotEqual(x => x.CurrentPassword)
             .WithMessage("New password cannot be the same as the current password.");
     }
 }

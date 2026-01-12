@@ -15,7 +15,7 @@ public sealed class GetFileByIdQueryHandler(
         GetFileByIdQuery request,
         CancellationToken cancellationToken)
     {
-        var file = await repository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
+        var file = await repository.GetByIdAsync(request.Id!.Value, cancellationToken).ConfigureAwait(false);
 
         if(file == null)
         {
@@ -31,3 +31,4 @@ public sealed class GetFileByIdQueryHandler(
         return response;
     }
 }
+

@@ -13,7 +13,7 @@ public sealed class SetSettingsCommandHandler(ISettingRepository settingReposito
         SetSettingsCommand request,
         CancellationToken cancellationToken)
     {
-        var settingsToUpsert = request.Settings.Select(req => new SettingEntity { Key = req.Key, Value = req.Value });
+        var settingsToUpsert = request.Settings!.Select(req => new SettingEntity { Key = req.Key, Value = req.Value });
 
         settingRepository.Update(settingsToUpsert);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

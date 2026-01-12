@@ -16,7 +16,7 @@ public sealed class UpdateManyProductStatusesCommandHandler(
         UpdateManyProductStatusesCommand command,
         CancellationToken cancellationToken)
     {
-        var productIds = command.Ids.Distinct().ToList();
+        var productIds = command.Ids!.Distinct().ToList();
 
         var products = await readRepository.GetByIdAsync(productIds, cancellationToken, DataFetchMode.ActiveOnly)
             .ConfigureAwait(false);

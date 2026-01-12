@@ -1,4 +1,4 @@
-using Application.ApiContracts.File.Responses;
+﻿using Application.ApiContracts.File.Responses;
 using Application.Features.Files.Commands.DeleteFile;
 using Application.Features.Files.Commands.DeleteManyFiles;
 using Application.Features.Files.Commands.RestoreFile;
@@ -39,7 +39,7 @@ public class MediaFileController(IMediator mediator) : ApiController
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
     {
-        var query = new GetFilesListQuery(sieveModel);
+        var query = new GetFilesListQuery() { SieveModel = sieveModel };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -53,7 +53,7 @@ public class MediaFileController(IMediator mediator) : ApiController
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
     {
-        var query = new GetDeletedFilesListQuery(sieveModel);
+        var query = new GetDeletedFilesListQuery() { SieveModel = sieveModel };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -66,7 +66,7 @@ public class MediaFileController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetFileByIdAsync(int id, CancellationToken cancellationToken)
     {
-        var query = new GetFileByIdQuery(id);
+        var query = new GetFileByIdQuery() { Id = id};
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -96,14 +96,13 @@ public class MediaFileController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UploadManyImages(List<IFormFile> files, CancellationToken cancellationToken)
     {
-        var fileDtos = new List<Application.ApiContracts.File.Requests.FileUploadRequest>();
+        var fileDtos = new List<(Stream FileContent, string FileName)>();
 
         foreach(var file in files)
         {
             if(file.Length > 0)
             {
-                fileDtos.Add(
-                    new Application.ApiContracts.File.Requests.FileUploadRequest(file.OpenReadStream(), file.FileName));
+                fileDtos.Add((file.OpenReadStream(), file.FileName));
             }
         }
 
@@ -135,7 +134,7 @@ public class MediaFileController(IMediator mediator) : ApiController
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteFiles(
-        [FromBody] Application.ApiContracts.File.Requests.DeleteManyMediaFilesRequest request,
+        [FromBody] List<string> request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<DeleteManyFilesCommand>();
@@ -165,7 +164,7 @@ public class MediaFileController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(List<MediaFileResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RestoreFiles(
-        [FromBody] Application.ApiContracts.File.Requests.RestoreManyMediaFilesRequest request,
+        [FromBody] List<string> request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<RestoreManyFilesCommand>();
@@ -181,8 +180,8 @@ public class MediaFileController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> ViewImageWithResize(
-    string storagePath,
-    [FromQuery] int? width,
+        string storagePath,
+        [FromQuery] int? width,
     CancellationToken cancellationToken)
     {
         var query = new ViewImageQuery { StoragePath = storagePath, Width = width };

@@ -36,7 +36,7 @@ public class BrandController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Domain.Primitives.PagedResult<BrandResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetBrands([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
     {
-        var query = new GetBrandsListQuery(sieveModel);
+        var query = new GetBrandsListQuery() { SieveModel = sieveModel };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -66,7 +66,7 @@ public class BrandController(IMediator mediator) : ApiController
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
     {
-        var query = new GetDeletedBrandsListQuery(sieveModel);
+        var query = new GetDeletedBrandsListQuery() { SieveModel= sieveModel };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -80,7 +80,7 @@ public class BrandController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetBrandById(int id, CancellationToken cancellationToken)
     {
-        var query = new GetBrandByIdQuery(id);
+        var query = new GetBrandByIdQuery() { Id = id };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -92,7 +92,7 @@ public class BrandController(IMediator mediator) : ApiController
     [HasPermission(Brands.Create)]
     [ProducesResponseType(typeof(BrandResponse), StatusCodes.Status201Created)]
     public async Task<IActionResult> CreateBrand(
-        [FromBody] Application.ApiContracts.Brand.Requests.CreateBrandRequest request,
+        [FromBody] CreateBrandCommand request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<CreateBrandCommand>();
@@ -109,7 +109,7 @@ public class BrandController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateBrand(
         int id,
-        [FromBody] Application.ApiContracts.Brand.Requests.UpdateBrandRequest request,
+        [FromBody] UpdateBrandCommand request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<UpdateBrandCommand>() with { Id = id };
@@ -153,7 +153,7 @@ public class BrandController(IMediator mediator) : ApiController
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteBrands(
-        [FromBody] Application.ApiContracts.Brand.Requests.DeleteManyBrandsRequest request,
+        [FromBody] DeleteManyBrandsCommand request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<DeleteManyBrandsCommand>();
@@ -169,7 +169,7 @@ public class BrandController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(List<BrandResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RestoreBrands(
-        [FromBody] Application.ApiContracts.Brand.Requests.RestoreManyBrandsRequest request,
+        [FromBody] RestoreManyBrandsCommand request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<RestoreManyBrandsCommand>();

@@ -106,11 +106,11 @@ namespace Infrastructure.Repositories.User
                 .FirstOrDefaultAsync(u => u.RefreshToken == refreshToken, cancellationToken)
                 .ConfigureAwait(false);
 
-            var roles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
+            var roles = await userManager.GetRolesAsync(user!).ConfigureAwait(false);
 
             var UserAuth = new UserAuth
             {
-                Id = user.Id,
+                Id = user!.Id,
                 UserName = user.UserName,
                 Roles = [.. roles],
                 Email = user.Email,

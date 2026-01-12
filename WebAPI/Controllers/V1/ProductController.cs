@@ -162,7 +162,7 @@ public class ProductController(ISender sender) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetVarientById(int id, CancellationToken cancellationToken = default)
     {
-        var result = await sender.Send(new GetProductByIdQuery(id), cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(new GetProductByIdQuery() { Id = id }, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -175,7 +175,7 @@ public class ProductController(ISender sender) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetVarientByIdForManager(int id, CancellationToken cancellationToken = default)
     {
-        var result = await sender.Send(new GetProductByIdQuery(id), cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(new GetProductByIdQuery() { Id = id }, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -191,7 +191,7 @@ public class ProductController(ISender sender) : ApiController
         CancellationToken cancellationToken = default)
     {
         var result = await sender.Send(
-            new GetVariantLiteByProductIdQuery(id, IncludeDeleted: false),
+            new GetVariantLiteByProductIdQuery() { IncludeDeleted = false, ProductId = id },
             cancellationToken)
             .ConfigureAwait(true);
         return HandleResult(result);
@@ -205,7 +205,7 @@ public class ProductController(ISender sender) : ApiController
     [ProducesResponseType(typeof(SlugAvailabilityResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> CheckSlugAvailability([FromQuery] string slug, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new CheckSlugAvailabilityQuery(slug), cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(new CheckSlugAvailabilityQuery() { Slug = slug }, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -217,7 +217,7 @@ public class ProductController(ISender sender) : ApiController
     [ProducesResponseType(typeof(ProductDetailForManagerResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateProduct(
-        [FromBody] Application.ApiContracts.Product.Requests.CreateProductRequest request,
+        [FromBody] CreateProductCommand request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<CreateProductCommand>();
@@ -235,10 +235,11 @@ public class ProductController(ISender sender) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateProduct(
         int id,
-        [FromBody] Application.ApiContracts.Product.Requests.UpdateProductRequest request,
+        [FromBody] UpdateProductCommand request,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new UpdateProductCommand(id, request), cancellationToken)
+        var command = request with { Id = id };
+        var result = await sender.Send(command, cancellationToken)
             .ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -252,7 +253,7 @@ public class ProductController(ISender sender) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteProduct(int id, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new DeleteProductCommand(id), cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(new DeleteProductCommand() { Id = id }, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -264,10 +265,10 @@ public class ProductController(ISender sender) : ApiController
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteProducts(
-        [FromBody] Application.ApiContracts.Product.Requests.DeleteManyProductsRequest request,
+        [FromBody] DeleteManyProductsCommand request,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new DeleteManyProductsCommand(request.Ids!), cancellationToken)
+        var result = await sender.Send(new DeleteManyProductsCommand() { Ids = request.Ids }, cancellationToken)
             .ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -281,7 +282,7 @@ public class ProductController(ISender sender) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RestoreProduct(int id, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new RestoreProductCommand(id), cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(new RestoreProductCommand() { Id = id }, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -293,10 +294,10 @@ public class ProductController(ISender sender) : ApiController
     [ProducesResponseType(typeof(List<ProductDetailForManagerResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RestoreProducts(
-        [FromBody] Application.ApiContracts.Product.Requests.RestoreManyProductsRequest request,
+        [FromBody] RestoreManyProductsCommand request,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new RestoreManyProductsCommand(request.Ids!), cancellationToken)
+        var result = await sender.Send(new RestoreManyProductsCommand() { Ids = request.Ids }, cancellationToken)
             .ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -311,10 +312,10 @@ public class ProductController(ISender sender) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateProductPrice(
         int id,
-        [FromBody] Application.ApiContracts.Product.Requests.UpdateProductPriceRequest request,
+        [FromBody] UpdateProductPriceCommand request,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new UpdateProductPriceCommand(id, request.Price ?? 0), cancellationToken)
+        var result = await sender.Send(new UpdateProductPriceCommand() { Id = id, Price = request.Price}, cancellationToken)
             .ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -327,11 +328,11 @@ public class ProductController(ISender sender) : ApiController
     [ProducesResponseType(typeof(List<int>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateManyProductPrices(
-        [FromBody] Application.ApiContracts.Product.Requests.UpdateManyProductPricesRequest request,
+        [FromBody] UpdateManyProductPricesCommand request,
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(
-            new UpdateManyProductPricesCommand(request.Ids!, request.Price),
+            new UpdateManyProductPricesCommand() { Ids = request.Ids, Price = request.Price },
             cancellationToken)
             .ConfigureAwait(true);
         return HandleResult(result);
@@ -347,11 +348,11 @@ public class ProductController(ISender sender) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateVariantPrice(
         int variantId,
-        [FromBody] Application.ApiContracts.Product.Requests.UpdateVariantPriceRequest request,
+        [FromBody] UpdateVariantPriceCommand request,
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(
-            new UpdateVariantPriceCommand(variantId, request.Price ?? 0),
+            new UpdateVariantPriceCommand() { Price = request.Price, VariantId = variantId },
             cancellationToken)
             .ConfigureAwait(true);
         return HandleResult(result);
@@ -365,11 +366,11 @@ public class ProductController(ISender sender) : ApiController
     [ProducesResponseType(typeof(List<int>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateManyVariantPrices(
-        [FromBody] Application.ApiContracts.Product.Requests.UpdateManyVariantPricesRequest request,
+        [FromBody] UpdateManyVariantPricesCommand request,
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(
-            new UpdateManyVariantPricesCommand(request.Ids!, request.Price),
+            new UpdateManyVariantPricesCommand() { Ids = request.Ids, Price = request.Price },
             cancellationToken)
             .ConfigureAwait(true);
         return HandleResult(result);
@@ -385,10 +386,10 @@ public class ProductController(ISender sender) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateProductStatus(
         int id,
-        [FromBody] Application.ApiContracts.Product.Requests.UpdateProductStatusRequest request,
+        [FromBody] UpdateProductStatusCommand request,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new UpdateProductStatusCommand(id, request.StatusId!), cancellationToken)
+        var result = await sender.Send(new UpdateProductStatusCommand() { Id = id, StatusId = request.StatusId }, cancellationToken)
             .ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -401,11 +402,11 @@ public class ProductController(ISender sender) : ApiController
     [ProducesResponseType(typeof(List<int>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateManyProductStatuses(
-        [FromBody] Application.ApiContracts.Product.Requests.UpdateManyProductStatusesRequest request,
+        [FromBody] UpdateManyProductStatusesCommand request,
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(
-            new UpdateManyProductStatusesCommand(request.Ids!, request.StatusId!),
+            new UpdateManyProductStatusesCommand() { Ids = request.Ids, StatusId = request.StatusId },
             cancellationToken)
             .ConfigureAwait(true);
         return HandleResult(result);

@@ -1,4 +1,4 @@
-using Application.ApiContracts.Auth.Responses;
+﻿using Application.ApiContracts.Auth.Responses;
 using Application.Common.Models;
 using Application.Features.Auth.Commands.GoogleLogin;
 using Application.Features.Auth.Commands.Login;
@@ -34,17 +34,11 @@ public class AuthController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(RegistrationSuccessResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Register(
-        [FromBody] Application.ApiContracts.Auth.Requests.RegisterRequest model,
+        [FromBody] RegisterCommand command,
         CancellationToken cancellationToken)
     {
         var result = await mediator.Send(
-            new RegisterCommand(
-                model.Username,
-                model.Email,
-                model.Password,
-                model.FullName,
-                model.PhoneNumber,
-                model.Gender),
+            command,
             cancellationToken)
             .ConfigureAwait(false);
 
@@ -59,10 +53,10 @@ public class AuthController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Login(
-        [FromBody] Application.ApiContracts.Auth.Requests.LoginRequest model,
+        [FromBody] LoginCommand command,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new LoginCommand(model.UsernameOrEmail, model.Password), cancellationToken)
+        var result = await mediator.Send(command, cancellationToken)
             .ConfigureAwait(true);
 
         return HandleResult(result);
@@ -80,7 +74,7 @@ public class AuthController(IMediator mediator) : ApiController
     {
         var refreshToken = Request.Cookies["refreshToken"];
         var accessToken = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
-        var result = await mediator.Send(new RefreshTokenCommand(refreshToken, accessToken), cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(new RefreshTokenCommand() { RefreshToken = refreshToken, AccessToken = accessToken }, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -93,7 +87,7 @@ public class AuthController(IMediator mediator) : ApiController
     public async Task<IActionResult> Logout(CancellationToken cancellationToken)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var result = await mediator.Send(new LogoutCommand(userId), cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(new LogoutCommand() { UserId = userId }, cancellationToken).ConfigureAwait(true);
         // Assuming LogoutCommand returns Result/Result<Unit>
         // Manually creating success response if needed, or if LogoutCommand returns Result
         // If LogoutCommand returns Result:
@@ -110,10 +104,10 @@ public class AuthController(IMediator mediator) : ApiController
     [AnonymousOnly]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status501NotImplemented)]
     public async Task<IActionResult> GoogleLogin(
-        [FromBody] Application.ApiContracts.Auth.Requests.GoogleLoginRequest model,
+        [FromBody] GoogleLoginCommand command,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GoogleLoginCommand(model), cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -139,7 +133,7 @@ public class AuthController(IMediator mediator) : ApiController
     /// </summary>
     [HttpPost("login/for-manager")]
     public async Task<IActionResult> LoginForManager(
-        [FromBody] Application.ApiContracts.Auth.Requests.LoginRequest model,
+        [FromBody] LoginCommand command,
         CancellationToken cancellationToken)
     { throw new NotImplementedException(); }
 }

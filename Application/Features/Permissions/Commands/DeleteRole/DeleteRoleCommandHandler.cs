@@ -16,7 +16,7 @@ public class DeleteRoleCommandHandler(
     {
         var roleName = request.RoleName;
 
-        var role = await roleManager.FindByNameAsync(roleName).ConfigureAwait(false);
+        var role = await roleManager.FindByNameAsync(roleName!).ConfigureAwait(false);
         if (role is null)
         {
             return Error.BadRequest("Role not found.");
@@ -28,7 +28,7 @@ public class DeleteRoleCommandHandler(
             return Error.BadRequest("Cannot delete SuperRole.");
         }
 
-        var usersWithRole = await userManager.GetUsersInRoleAsync(roleName).ConfigureAwait(false);
+        var usersWithRole = await userManager.GetUsersInRoleAsync(roleName!).ConfigureAwait(false);
         if(usersWithRole.Count > 0)
         {
             return Error.BadRequest($"Cannot delete role '{roleName}' because {usersWithRole.Count} user(s) have this role.");

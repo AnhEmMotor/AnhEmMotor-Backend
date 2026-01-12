@@ -18,7 +18,7 @@ public sealed class GetOutputsListQueryHandler(IOutputReadRepository repository,
 
         return await paginator.ApplyAsync<OutputEntity, OutputResponse>(
             query,
-            request.SieveModel,
+            request.SieveModel!,
             cancellationToken: cancellationToken);
     }
 }

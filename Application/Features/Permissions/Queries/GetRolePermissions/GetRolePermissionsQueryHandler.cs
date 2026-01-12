@@ -15,7 +15,7 @@ public class GetRolePermissionsQueryHandler(
         GetRolePermissionsQuery request,
         CancellationToken cancellationToken)
     {
-        var role = await roleManager.FindByNameAsync(request.RoleName).ConfigureAwait(false);
+        var role = await roleManager.FindByNameAsync(request.RoleName!).ConfigureAwait(false);
         if (role is null)
         {
             return Error.NotFound("Role not found.");

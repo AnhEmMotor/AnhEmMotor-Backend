@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 
 namespace Application.Features.Permissions.Queries.GetMyPermissions;
+
 public sealed class GetMyPermissionsQueryValidator : AbstractValidator<GetMyPermissionsQuery>
 {
     public GetMyPermissionsQueryValidator()
@@ -10,7 +11,7 @@ public sealed class GetMyPermissionsQueryValidator : AbstractValidator<GetMyPerm
             .Must(BeAValidGuid).WithMessage("Invalid User ID format.");
     }
 
-    private static bool BeAValidGuid(string userId)
+    private static bool BeAValidGuid(string? userId)
     {
         return Guid.TryParse(userId, out _);
     }

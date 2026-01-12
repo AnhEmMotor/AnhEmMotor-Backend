@@ -18,7 +18,7 @@ public class RegisterCommandHandler(
         {
             UserName = string.IsNullOrEmpty(request.Username) ? request.Email : request.Username,
             Email = request.Email,
-            FullName = string.IsNullOrEmpty(request.FullName) ? request.Email : request.FullName,
+            FullName = string.IsNullOrEmpty(request.FullName!) ? request.Email! : request.FullName,
             PhoneNumber = request.PhoneNumber,
             Gender = request.Gender ?? GenderStatus.Male,
             Status = UserStatus.Active
@@ -26,7 +26,7 @@ public class RegisterCommandHandler(
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        var (succeeded, errors) = await userCreateRepository.CreateUserAsync(user, request.Password, cancellationToken).ConfigureAwait(false);
+        var (succeeded, errors) = await userCreateRepository.CreateUserAsync(user, request.Password!, cancellationToken).ConfigureAwait(false);
 
         if(!succeeded)
         {

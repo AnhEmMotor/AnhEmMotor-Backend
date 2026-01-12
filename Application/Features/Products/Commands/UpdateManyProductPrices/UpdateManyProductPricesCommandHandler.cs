@@ -15,7 +15,7 @@ public sealed class UpdateManyProductPricesCommandHandler(
         UpdateManyProductPricesCommand command,
         CancellationToken cancellationToken)
     {
-        var productIds = command.Ids.Distinct().ToList();
+        var productIds = command.Ids!.Distinct().ToList();
 
         var products = await readRepository.GetByIdWithVariantsAsync(productIds, cancellationToken)
             .ConfigureAwait(false);

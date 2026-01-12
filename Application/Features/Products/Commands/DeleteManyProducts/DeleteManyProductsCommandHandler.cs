@@ -16,7 +16,7 @@ public sealed class DeleteManyProductsCommandHandler(
         DeleteManyProductsCommand command,
         CancellationToken cancellationToken)
     {
-        var uniqueIds = command.Ids.Distinct().ToList();
+        var uniqueIds = command.Ids!.Distinct().ToList();
 
         var activeProducts = await readRepository.GetByIdAsync(uniqueIds, cancellationToken).ConfigureAwait(false);
         var allProducts = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.ActiveOnly)

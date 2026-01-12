@@ -15,7 +15,7 @@ public sealed class DeleteInputCommandHandler(
         DeleteInputCommand request,
         CancellationToken cancellationToken)
     {
-        var input = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
+        var input = await readRepository.GetByIdAsync(request.Id!.Value, cancellationToken).ConfigureAwait(false);
 
         if(input is null)
         {
@@ -33,3 +33,4 @@ public sealed class DeleteInputCommandHandler(
         return Result.Success();
     }
 }
+

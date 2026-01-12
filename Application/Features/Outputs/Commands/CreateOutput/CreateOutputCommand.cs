@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Output.Requests;
+using Application.ApiContracts.Output.Requests;
 using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
 using MediatR;

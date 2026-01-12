@@ -1,4 +1,4 @@
-using Application.ApiContracts.Input.Responses;
+﻿using Application.ApiContracts.Input.Responses;
 using Application.Features.Inputs.Commands.CloneInput;
 using Application.Features.Inputs.Commands.CreateInput;
 using Application.Features.Inputs.Commands.DeleteInput;
@@ -42,7 +42,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Domain.Primitives.PagedResult<InputResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetInputs([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
     {
-        var query = new GetInputsListQuery(sieveModel);
+        var query = new GetInputsListQuery() { SieveModel = sieveModel };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -57,7 +57,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
     {
-        var query = new GetDeletedInputsListQuery(sieveModel);
+        var query = new GetDeletedInputsListQuery() { SieveModel = sieveModel };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -71,7 +71,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetInputById(int id, CancellationToken cancellationToken)
     {
-        var query = new GetInputByIdQuery(id);
+        var query = new GetInputByIdQuery() { Id  = id };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -87,7 +87,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
     {
-        var query = new GetInputsBySupplierIdQuery(supplierId, sieveModel);
+        var query = new GetInputsBySupplierIdQuery() {  SieveModel = sieveModel, SupplierId = supplierId};
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -100,7 +100,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(InputResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateInput(
-        [FromBody] Application.ApiContracts.Input.Requests.CreateInputRequest request,
+        [FromBody] CreateInputCommand request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<CreateInputCommand>();
@@ -118,7 +118,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CloneInput(int id, CancellationToken cancellationToken)
     {
-        var command = new CloneInputCommand(id);
+        var command = new CloneInputCommand() { Id = id };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -133,7 +133,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateInput(
         int id,
-        [FromBody] Application.ApiContracts.Input.Requests.UpdateInputRequest request,
+        [FromBody] UpdateInputCommand request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<UpdateInputCommand>() with { Id = id };
@@ -151,7 +151,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateInputStatus(
         int id,
-        [FromBody] Application.ApiContracts.Input.Requests.UpdateInputStatusRequest request,
+        [FromBody] UpdateInputStatusCommand request,
         CancellationToken cancellationToken)
     {
         var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -172,7 +172,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(List<InputResponse>), StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateManyInputStatus(
-        [FromBody] Application.ApiContracts.Input.Requests.UpdateManyInputStatusRequest request,
+        [FromBody] UpdateManyInputStatusCommand request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<UpdateManyInputStatusCommand>();
@@ -189,7 +189,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteInput(int id, CancellationToken cancellationToken)
     {
-        var command = new DeleteInputCommand(id);
+        var command = new DeleteInputCommand() { Id = id};
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -202,7 +202,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteManyInputs(
-        [FromBody] Application.ApiContracts.Input.Requests.DeleteManyInputsRequest request,
+        [FromBody] DeleteManyInputsCommand request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<DeleteManyInputsCommand>();
@@ -219,7 +219,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RestoreInput(int id, CancellationToken cancellationToken)
     {
-        var command = new RestoreInputCommand(id);
+        var command = new RestoreInputCommand() { Id = id};
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -232,7 +232,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(List<InputResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RestoreManyInputs(
-        [FromBody] Application.ApiContracts.Input.Requests.RestoreManyInputsRequest request,
+        [FromBody] RestoreManyInputsCommand request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<RestoreManyInputsCommand>();

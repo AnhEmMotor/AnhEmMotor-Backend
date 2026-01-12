@@ -6,9 +6,9 @@ using Application.Common.Models;
 
 namespace Application.Features.Brands.Queries.GetBrandById;
 
-public sealed class GetBrandByIdQueryHandler(IBrandReadRepository repository) : IRequestHandler<GetBrandByIdQuery, Result<BrandResponse?>>
+public sealed class GetBrandByIdQueryHandler(IBrandReadRepository repository) : IRequestHandler<GetBrandByIdQuery, Result<BrandResponse>>
 {
-    public async Task<Result<BrandResponse?>> Handle(
+    public async Task<Result<BrandResponse>> Handle(
         GetBrandByIdQuery request,
         CancellationToken cancellationToken)
     {

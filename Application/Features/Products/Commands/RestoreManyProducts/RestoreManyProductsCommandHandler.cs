@@ -18,7 +18,7 @@ public sealed class RestoreManyProductsCommandHandler(
         RestoreManyProductsCommand command,
         CancellationToken cancellationToken)
     {
-        var uniqueIds = command.Ids.Distinct().ToList();
+        var uniqueIds = command.Ids!.Distinct().ToList();
 
         var deletedProducts = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.DeletedOnly)
             .ConfigureAwait(false);

@@ -1,4 +1,4 @@
-using Application.ApiContracts.Permission.Responses;
+﻿using Application.ApiContracts.Permission.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Permission;
@@ -18,15 +18,15 @@ public class CreateRoleCommandHandler(
 {
     public async Task<Result<RoleCreateResponse>> Handle(CreateRoleCommand request, CancellationToken cancellationToken)
     {
-        var model = request.Model;
+        
 
-        var roleExists = await roleManager.RoleExistsAsync(model.RoleName).ConfigureAwait(false);
+        var roleExists = await roleManager.RoleExistsAsync(request.RoleName!).ConfigureAwait(false);
         if(roleExists)
         {
             return Error.BadRequest("Role already exists.");
         }
 
-        if(model.Permissions is null || model.Permissions.Count == 0)
+        if(request.Permissions is null || request.Permissions.Count == 0)
         {
             return Error.BadRequest("At least one permission must be assigned to the role.");
         }
@@ -40,13 +40,13 @@ public class CreateRoleCommandHandler(
             .Where(permission => permission is not null)
             .ToList();
 
-        var invalidPermissions = model.Permissions.Except(allPermissions!).ToList();
+        var invalidPermissions = request.Permissions.Except(allPermissions!).ToList();
         if(invalidPermissions.Count != 0)
         {
             return Error.BadRequest($"Invalid permissions: {string.Join(", ", invalidPermissions)}");
         }
 
-        var role = new ApplicationRole { Name = model.RoleName, Description = model.Description };
+        var role = new ApplicationRole { Name = request.RoleName, Description = request.Description };
 
         var createResult = await roleManager.CreateAsync(role).ConfigureAwait(false);
         if(!createResult.Succeeded)
@@ -56,7 +56,7 @@ public class CreateRoleCommandHandler(
         }
 
         var permissionsInDb = await permissionRepository.GetPermissionsByNamesAsync(
-            model.Permissions,
+            request.Permissions,
             cancellationToken)
             .ConfigureAwait(false);
 
@@ -69,11 +69,11 @@ public class CreateRoleCommandHandler(
 
         return new RoleCreateResponse()
         {
-            Message = $"Role '{model.RoleName}' created successfully with {rolePermissions.Count} permission(s).",
+            Message = $"Role '{request.RoleName}' created successfully with {rolePermissions.Count} permission(s).",
             RoleId = role.Id,
             RoleName = role.Name,
             Description = role.Description,
-            Permissions = model.Permissions
+            Permissions = request.Permissions
         };
     }
 }

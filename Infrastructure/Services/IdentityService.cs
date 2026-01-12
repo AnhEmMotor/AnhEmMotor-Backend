@@ -28,14 +28,14 @@ public class IdentityService(
             user = await userManager.FindByNameAsync(usernameOrEmail).ConfigureAwait(false);
         }
 
-        var result = await signInManager.CheckPasswordSignInAsync(user, password, lockoutOnFailure: false)
+        var result = await signInManager.CheckPasswordSignInAsync(user!, password, lockoutOnFailure: false)
             .ConfigureAwait(false);
 
-        var roles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
+        var roles = await userManager.GetRolesAsync(user!).ConfigureAwait(false);
 
         return new UserAuth
         {
-            Id = user.Id,
+            Id = user!.Id,
                 UserName = user.UserName,
                 Roles = [ .. roles ],
                 AuthMethods = [ "amr" ],

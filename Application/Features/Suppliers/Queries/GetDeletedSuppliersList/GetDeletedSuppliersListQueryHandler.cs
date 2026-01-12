@@ -19,7 +19,7 @@ public sealed class GetDeletedSuppliersListQueryHandler(ISupplierReadRepository 
 
         return await paginator.ApplyAsync<SupplierEntity, SupplierResponse>(
             query,
-            request.SieveModel,
+            request.SieveModel!,
             DataFetchMode.DeletedOnly,
             cancellationToken);
     }

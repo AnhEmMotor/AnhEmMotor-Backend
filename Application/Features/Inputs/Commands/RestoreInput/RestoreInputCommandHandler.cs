@@ -18,7 +18,7 @@ public sealed class RestoreInputCommandHandler(
         RestoreInputCommand request,
         CancellationToken cancellationToken)
     {
-        var input = await readRepository.GetByIdAsync(request.Id, cancellationToken, DataFetchMode.DeletedOnly)
+        var input = await readRepository.GetByIdAsync(request.Id!.Value, cancellationToken, DataFetchMode.DeletedOnly)
             .ConfigureAwait(false);
 
         if(input is null)
@@ -32,3 +32,4 @@ public sealed class RestoreInputCommandHandler(
         return input.Adapt<InputResponse>();
     }
 }
+

@@ -6,18 +6,18 @@ public sealed class UpdateOutputForManagerCommandValidator : AbstractValidator<U
 {
     public UpdateOutputForManagerCommandValidator()
     {
-        RuleFor(x => x.Model.CurrentUserId)
-            .NotEmpty().WithMessage("CurrentUserId không được để trống.");
+        RuleFor(x => x.CurrentUserId)
+            .NotEmpty().WithMessage("CurrentUserId không du?c d? tr?ng.");
 
-        RuleFor(x => x.Model).NotNull();
 
-        RuleFor(x => x.Model.OutputInfos)
-            .NotEmpty().WithMessage("Đơn xuất hàng phải có ít nhất một sản phẩm.");
+        RuleFor(x => x.OutputInfos)
+            .NotEmpty().WithMessage("Ðon xu?t hàng ph?i có ít nh?t m?t s?n ph?m.");
 
-        RuleForEach(x => x.Model.OutputInfos).ChildRules(item =>
+        RuleForEach(x => x.OutputInfos).ChildRules(item =>
         {
             item.RuleFor(i => i.ProductId).NotEmpty().GreaterThan(0);
             item.RuleFor(i => i.Count).NotEmpty().GreaterThan(0);
         });
     }
 }
+

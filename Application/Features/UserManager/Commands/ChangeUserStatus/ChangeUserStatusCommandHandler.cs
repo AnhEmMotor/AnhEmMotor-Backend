@@ -24,7 +24,7 @@ public class ChangeUserStatusCommandHandler(
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        if(string.Compare(request.Model.Status, UserStatus.Banned) == 0)
+        if(string.Compare(request.Status, UserStatus.Banned) == 0)
         {
             var protectedUsers = protectedEntityManagerService.GetProtectedUsers() ?? [];
             var protectedEmails = protectedUsers.Select(entry => entry.Split(':')[0].Trim()).ToList();
@@ -53,7 +53,7 @@ public class ChangeUserStatusCommandHandler(
             }
         }
 
-        user.Status = request.Model.Status;
+        user.Status = request.Status!;
         var (succeeded, errors) = await userUpdateRepository.UpdateUserAsync(user, cancellationToken).ConfigureAwait(false);
         if(!succeeded)
         {
@@ -63,7 +63,8 @@ public class ChangeUserStatusCommandHandler(
 
         return new ChangeStatusUserByManagerResponse()
         {
-            Message = $"User status changed to {request.Model.Status} successfully.",
+            Message = $"User status changed to {request.Status} successfully.",
         };
     }
 }
+

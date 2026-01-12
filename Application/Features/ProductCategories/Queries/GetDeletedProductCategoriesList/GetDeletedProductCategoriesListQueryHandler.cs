@@ -21,7 +21,7 @@ public sealed class GetDeletedProductCategoriesListQueryHandler(
 
         return await paginator.ApplyAsync<ProductCategoryEntity, ProductCategoryResponse>(
             query,
-            request.SieveModel,
+            request.SieveModel!,
             DataFetchMode.DeletedOnly,
             cancellationToken);
     }

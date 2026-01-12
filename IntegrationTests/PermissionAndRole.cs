@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http.Json;
-using Application.ApiContracts.Permission.Requests;
 using Application.ApiContracts.Permission.Responses;
 using Domain.Constants.Permission;
 using Domain.Entities;

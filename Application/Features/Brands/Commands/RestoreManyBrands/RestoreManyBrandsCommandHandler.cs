@@ -2,6 +2,7 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
 using Domain.Constants;
+using Domain.Entities;
 using Mapster;
 using Application.ApiContracts.Brand.Responses;
 using MediatR;

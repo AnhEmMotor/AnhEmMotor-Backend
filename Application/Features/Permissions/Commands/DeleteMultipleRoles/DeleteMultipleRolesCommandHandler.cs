@@ -21,7 +21,7 @@ public class DeleteMultipleRolesCommandHandler(
         var skippedRoles = new List<string>();
         var deletedCount = 0;
 
-        foreach(var roleName in roleNames)
+        foreach(var roleName in roleNames!)
         {
             if(superRoles.Contains(roleName))
             {

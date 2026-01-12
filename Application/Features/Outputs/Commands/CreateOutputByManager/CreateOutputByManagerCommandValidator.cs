@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Output.Requests;
+using Application.ApiContracts.Output.Requests;
 using Application.Features.Outputs.Commands.CreateOutput;
 using FluentValidation;
 
@@ -8,13 +8,13 @@ namespace Application.Features.Outputs.Commands.CreateOutputByManager
     {
         public CreateOutputByManagerCommandValidator()
         {
-            RuleFor(x => x.Model.OutputInfos).NotEmpty().WithMessage("Input must contain at least one product.");
+            RuleFor(x => x.OutputInfos).NotEmpty().WithMessage("Input must contain at least one product.");
 
-            RuleFor(x => x.Model.OutputInfos)
+            RuleFor(x => x.OutputInfos)
                 .Must(HaveUniqueProducts)
                 .WithMessage("Product ID cannot be duplicated in a single output.");
 
-            RuleForEach(x => x.Model.OutputInfos).SetValidator(new CreateOutputProductByManagerCommandValidator());
+            RuleForEach(x => x.OutputInfos).SetValidator(new CreateOutputProductByManagerCommandValidator());
         }
 
         private bool HaveUniqueProducts(List<CreateOutputInfoRequest> products)

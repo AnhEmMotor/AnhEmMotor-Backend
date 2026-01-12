@@ -25,19 +25,19 @@ public class UpdateCurrentUserCommandHandler(
         cancellationToken.ThrowIfCancellationRequested();
 
 
-        if(!string.IsNullOrWhiteSpace(request.Model.FullName))
+        if(!string.IsNullOrWhiteSpace(request.FullName))
         {
-            user.FullName = request.Model.FullName;
+            user.FullName = request.FullName;
         }
 
-        if(!string.IsNullOrWhiteSpace(request.Model.Gender))
+        if(!string.IsNullOrWhiteSpace(request.Gender))
         {
-            user.Gender = request.Model.Gender;
+            user.Gender = request.Gender;
         }
 
-        if(!string.IsNullOrWhiteSpace(request.Model.PhoneNumber))
+        if(!string.IsNullOrWhiteSpace(request.PhoneNumber))
         {
-            user.PhoneNumber = request.Model.PhoneNumber;
+            user.PhoneNumber = request.PhoneNumber;
         }
 
         var (succeeded, errors) = await userUpdateRepository.UpdateUserAsync(user, cancellationToken).ConfigureAwait(false);
@@ -64,3 +64,4 @@ public class UpdateCurrentUserCommandHandler(
         };
     }
 }
+

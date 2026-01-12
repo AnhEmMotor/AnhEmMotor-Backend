@@ -18,18 +18,18 @@ public class ChangePasswordCommandHandler(
             return Error.Unauthorized("Invalid user token.");
         }
 
-        if(currentUserGuid != request.UserId)
+        if(currentUserGuid != request.UserId!.Value)
         {
             return Error.Forbidden("Invalid user token.");
         }
 
-        var user = await userReadRepository.FindUserByIdAsync(request.UserId, cancellationToken).ConfigureAwait(false);
+        var user = await userReadRepository.FindUserByIdAsync(request.UserId!.Value, cancellationToken).ConfigureAwait(false);
         if(user is null)
         {
             return Error.NotFound("User not found.");
         }
 
-        if(string.Compare(request.Model.CurrentPassword, request.Model.NewPassword) == 0)
+        if(string.Compare(request.CurrentPassword, request.NewPassword) == 0)
         {
             return Error.Validation("New password must be different from current password.", "NewPassword");
         }
@@ -38,8 +38,8 @@ public class ChangePasswordCommandHandler(
 
         var (succeeded, errors) = await userUpdateRepository.ChangePasswordAsync(
             user,
-            request.Model.CurrentPassword,
-            request.Model.NewPassword,
+            request.CurrentPassword!,
+            request.NewPassword!,
             cancellationToken)
             .ConfigureAwait(false);
 
@@ -52,3 +52,4 @@ public class ChangePasswordCommandHandler(
         return new ChangePasswordByManagerResponse() { Message = "Password changed successfully." };
     }
 }
+

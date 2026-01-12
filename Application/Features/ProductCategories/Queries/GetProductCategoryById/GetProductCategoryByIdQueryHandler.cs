@@ -13,7 +13,7 @@ public sealed class GetProductCategoryByIdQueryHandler(IProductCategoryReadRepos
         GetProductCategoryByIdQuery request,
         CancellationToken cancellationToken)
     {
-        var category = await repository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
+        var category = await repository.GetByIdAsync(request.Id!.Value, cancellationToken).ConfigureAwait(false);
 
         if(category == null)
         {
@@ -23,3 +23,4 @@ public sealed class GetProductCategoryByIdQueryHandler(IProductCategoryReadRepos
         return category.Adapt<ProductCategoryResponse>();
     }
 }
+

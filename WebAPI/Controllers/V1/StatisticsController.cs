@@ -1,4 +1,4 @@
-using Application.ApiContracts.Statistical.Responses;
+﻿using Application.ApiContracts.Statistical.Responses;
 using Application.Features.Statistical.Queries.GetDailyRevenue;
 using Application.Features.Statistical.Queries.GetDashboardStats;
 using Application.Features.Statistical.Queries.GetMonthlyRevenueProfit;
@@ -37,7 +37,7 @@ public class StatisticsController(IMediator mediator) : ApiController
         [FromQuery] int days = 7,
         CancellationToken cancellationToken = default)
     {
-        var query = new GetDailyRevenueQuery(days);
+        var query = new GetDailyRevenueQuery() { Days = days };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -67,7 +67,7 @@ public class StatisticsController(IMediator mediator) : ApiController
         [FromQuery] int months = 12,
         CancellationToken cancellationToken = default)
     {
-        var query = new GetMonthlyRevenueProfitQuery(months);
+        var query = new GetMonthlyRevenueProfitQuery() { Months = months };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -107,7 +107,7 @@ public class StatisticsController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetProductStockAndPrice(int variantId, CancellationToken cancellationToken)
     {
-        var query = new GetProductStockAndPriceQuery(variantId);
+        var query = new GetProductStockAndPriceQuery() { VariantId = variantId };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }

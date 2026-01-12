@@ -15,8 +15,8 @@ public sealed class LoginCommandHandler(
     public async Task<Result<LoginResponse>> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
         var authResult = await identityService.AuthenticateAsync(
-            request.UsernameOrEmail,
-            request.Password,
+            request.UsernameOrEmail!,
+            request.Password!,
             cancellationToken)
             .ConfigureAwait(false);
 

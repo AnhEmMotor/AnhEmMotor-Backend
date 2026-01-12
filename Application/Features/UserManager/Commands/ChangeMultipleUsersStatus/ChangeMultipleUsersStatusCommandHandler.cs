@@ -24,7 +24,7 @@ public class ChangeMultipleUsersStatusCommandHandler(
         var usersToUpdate = new List<ApplicationUser>();
         var errorMessages = new List<Error>();
 
-        foreach(var userId in request.Model.UserIds)
+        foreach(var userId in request.UserIds!)
         {
             var user = await userReadRepository.FindUserByIdAsync(userId, cancellationToken).ConfigureAwait(false);
             if(user is null)
@@ -33,7 +33,7 @@ public class ChangeMultipleUsersStatusCommandHandler(
                 continue;
             }
 
-            if(string.Compare(request.Model.Status, UserStatus.Banned) == 0)
+            if(string.Compare(request.Status, UserStatus.Banned) == 0)
             {
                 if(!string.IsNullOrEmpty(user.Email) && protectedEmails.Contains(user.Email))
                 {
@@ -91,7 +91,7 @@ public class ChangeMultipleUsersStatusCommandHandler(
 
         foreach(var user in usersToUpdate)
         {
-            user.Status = request.Model.Status;
+            user.Status = request.Status!;
             var (succeeded, errors) = await userUpdateRepository.UpdateUserAsync(user, cancellationToken).ConfigureAwait(false);
 
             if(!succeeded)
@@ -116,7 +116,8 @@ public class ChangeMultipleUsersStatusCommandHandler(
 
         return new ChangeStatusMultiUserByManagerResponse()
         {
-            Message = $"{updatedCount} user(s) status changed to {request.Model.Status} successfully.",
+            Message = $"{updatedCount} user(s) status changed to {request.Status} successfully.",
         };
     }
 }
+

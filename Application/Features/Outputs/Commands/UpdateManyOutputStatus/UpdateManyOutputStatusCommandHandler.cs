@@ -20,12 +20,12 @@ public sealed class UpdateManyOutputStatusCommandHandler(
     {
         var errors = new List<Error>();
 
-        var outputs = await readRepository.GetByIdAsync(request.Model.Ids, cancellationToken).ConfigureAwait(false);
+        var outputs = await readRepository.GetByIdAsync(request.Ids!, cancellationToken).ConfigureAwait(false);
 
         var outputsList = outputs.ToList();
 
         var foundIds = outputsList.Select(o => o.Id).ToList();
-        var missingIds = request.Model.Ids.Except(foundIds).ToList();
+        var missingIds = request.Ids!.Except(foundIds).ToList();
 
         if(missingIds.Count != 0)
         {
@@ -34,14 +34,14 @@ public sealed class UpdateManyOutputStatusCommandHandler(
 
         foreach(var output in outputsList)
         {
-            if(!OrderStatusTransitions.IsTransitionAllowed(output.StatusId, request.Model.StatusId))
+            if(!OrderStatusTransitions.IsTransitionAllowed(output.StatusId, request.StatusId))
             {
                 var allowed = OrderStatusTransitions.GetAllowedTransitions(output.StatusId);
-                errors.Add(Error.BadRequest($"Đơn hàng ID {output.Id}: Không thể chuyển từ '{output.StatusId}' sang '{request.Model.StatusId}'. Chỉ được chuyển sang: {string.Join(", ", allowed)}", "StatusId"));
+                errors.Add(Error.BadRequest($"Đơn hàng ID {output.Id}: Không thể chuyển từ '{output.StatusId}' sang '{request.StatusId}'. Chỉ được chuyển sang: {string.Join(", ", allowed)}", "StatusId"));
             }
         }
 
-        if(string.Compare(request.Model.StatusId, OrderStatus.Completed) == 0 && outputsList.Count > 0)
+        if(string.Compare(request.StatusId, OrderStatus.Completed) == 0 && outputsList.Count > 0)
         {
             var productDemands = new Dictionary<int, int>();
 
@@ -85,7 +85,7 @@ public sealed class UpdateManyOutputStatusCommandHandler(
             return errors;
         }
 
-        if(string.Compare(request.Model.StatusId, OrderStatus.Completed) == 0)
+        if(string.Compare(request.StatusId, OrderStatus.Completed) == 0)
         {
             foreach(var output in outputsList)
             {
@@ -96,7 +96,7 @@ public sealed class UpdateManyOutputStatusCommandHandler(
 
         foreach(var output in outputsList)
         {
-            output.StatusId = request.Model.StatusId;
+            output.StatusId = request.StatusId;
             updateRepository.Update(output);
         }
 

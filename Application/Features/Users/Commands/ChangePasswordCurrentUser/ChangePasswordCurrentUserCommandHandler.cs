@@ -23,8 +23,8 @@ public class ChangePasswordCurrentUserCommandHandler(
 
         var (succeeded, errors) = await userUpdateRepository.ChangePasswordAsync(
             user,
-            request.Model.CurrentPassword,
-            request.Model.NewPassword,
+            request.CurrentPassword!,
+            request.NewPassword!,
             cancellationToken)
             .ConfigureAwait(false);
 
@@ -37,3 +37,4 @@ public class ChangePasswordCurrentUserCommandHandler(
         return new ChangePasswordUserByUserResponse() { Message = "Password changed successfully." };
     }
 }
+

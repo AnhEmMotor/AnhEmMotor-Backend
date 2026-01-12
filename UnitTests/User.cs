@@ -1,8 +1,5 @@
-using Application.ApiContracts.User.Requests;
-using Application.ApiContracts.User.Responses;
 using Application.Features.Users.Commands.ChangePasswordCurrentUser;
 using Application.Features.Users.Commands.DeleteCurrentUserAccount;
-using Application.Features.Users.Commands.RestoreUserAccount;
 using Application.Features.Users.Commands.UpdateCurrentUser;
 using Application.Features.Users.Queries.GetCurrentUser;
 using Application.Interfaces.Repositories.User;
@@ -77,7 +74,7 @@ public class User
             .ReturnsAsync((ApplicationUser?)null);
 
         var handler = new GetCurrentUserQueryHandler(_userReadRepositoryMock.Object);
-        var query = new GetCurrentUserQuery(null);
+        var query = new GetCurrentUserQuery() { UserId = null };
 
         // Act & Assert
         var result = await handler.Handle(query, CancellationToken.None);

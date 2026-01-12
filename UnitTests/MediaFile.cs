@@ -13,7 +13,6 @@ using Application.Interfaces.Repositories.MediaFile;
 using Domain.Constants;
 using FluentAssertions;
 using Moq;
-using Application.ApiContracts.File.Requests;
 using Xunit;
 using MediaFileEntity = Domain.Entities.MediaFile;
 

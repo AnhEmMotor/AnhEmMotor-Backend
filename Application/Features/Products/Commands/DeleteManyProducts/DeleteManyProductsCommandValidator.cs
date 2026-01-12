@@ -8,7 +8,7 @@ public sealed class DeleteManyProductsCommandValidator : AbstractValidator<Delet
     {
         RuleFor(x => x.Ids)
             .NotEmpty().WithMessage("Bạn chưa truyền danh sách Product ID để xoá.")
-            .Must(ids => ids.Count <= 50).WithMessage("Không được xoá quá 50 sản phẩm một lần để đảm bảo hiệu năng.");
+            .Must(ids => ids!.Count <= 50).WithMessage("Không được xoá quá 50 sản phẩm một lần để đảm bảo hiệu năng.");
 
         // Check từng ID trong list không được rỗng (nếu cần thiết với Guid)
         RuleForEach(x => x.Ids).NotEmpty().WithMessage("Product ID không hợp lệ.");

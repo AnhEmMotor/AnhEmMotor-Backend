@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.UserManager.Responses;
+using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.Role;
 using Application.Interfaces.Repositories.User;
@@ -24,10 +24,10 @@ public sealed class AssignRolesCommandHandler(
             return Error.NotFound("User not found.");
         }
 
-        var requestedRoles = request.Model.RoleNames.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        var requestedRoles = request.RoleNames!.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
 
-        // 1. Bulk Validation: Check tất cả Role có tồn tại trong hệ thống không (1 Query)
-        // Repo cần hàm GetExistingRolesAsync nhận List<string>
+        // 1. Bulk Validation: Check t?t c? Role c� t?n t?i trong h? th?ng kh�ng (1 Query)
+        // Repo c?n h�m GetExistingRolesAsync nh?n List<string>
         var existingSystemRoles = await roleReadRepository.GetRolesByNamesAsync(requestedRoles, cancellationToken)
             .ConfigureAwait(false);
 
@@ -46,7 +46,7 @@ public sealed class AssignRolesCommandHandler(
         var rolesToAdd = requestedRoles.Except(currentUserRoles, StringComparer.OrdinalIgnoreCase).ToList();
         var rolesToRemove = currentUserRoles.Except(requestedRoles, StringComparer.OrdinalIgnoreCase).ToList();
 
-        // 3. Logic "Last Man Standing" cho Super Admin (Chỉ check trên danh sách cần xóa)
+        // 3. Logic "Last Man Standing" cho Super Admin (Ch? check tr�n danh s�ch c?n x�a)
         var superRoles = protectedEntityManagerService.GetSuperRoles() ?? [];
 
         foreach (var roleToRemove in rolesToRemove)
@@ -56,7 +56,7 @@ public sealed class AssignRolesCommandHandler(
                 var usersWithThisRole = await userReadRepository.GetUsersInRoleAsync(roleToRemove, cancellationToken)
                     .ConfigureAwait(false);
 
-                // Nếu user hiện tại là người cuối cùng có quyền SuperRole này -> Chặn xóa
+                // N?u user hi?n t?i l� ngu?i cu?i c�ng c� quy?n SuperRole n�y -> Ch?n x�a
                 if (usersWithThisRole.Count <= 1 && usersWithThisRole.Any(u => u.Id == request.UserId))
                 {
                     return Error.Validation($"Cannot remove SuperRole '{roleToRemove}'. This user is the last one holding this role.", "RoleNames");
@@ -64,7 +64,7 @@ public sealed class AssignRolesCommandHandler(
             }
         }
 
-        // 4. Execute Changes (Chỉ tác động những cái thay đổi)
+        // 4. Execute Changes (Ch? t�c d?ng nh?ng c�i thay d?i)
         if (rolesToRemove.Count > 0)
         {
             var (removeSucceeded, removeErrors) = await userUpdateRepository.RemoveUserFromRolesAsync(user, rolesToRemove, cancellationToken)
@@ -88,7 +88,7 @@ public sealed class AssignRolesCommandHandler(
         }
 
         // 5. Return latest state
-        // Nếu Identity tracking tốt, user.Roles đã tự update, nhưng an toàn thì fetch lại list string
+        // N?u Identity tracking t?t, user.Roles d� t? update, nhung an to�n th� fetch l?i list string
         var finalRoles = await userReadRepository.GetUserRolesAsync(user, cancellationToken)
             .ConfigureAwait(false);
 

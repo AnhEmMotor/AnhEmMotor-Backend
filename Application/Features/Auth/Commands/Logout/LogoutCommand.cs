@@ -1,4 +1,3 @@
-using Application.ApiContracts.Auth.Requests;
 using Application.Common.Models;
 using MediatR;
 

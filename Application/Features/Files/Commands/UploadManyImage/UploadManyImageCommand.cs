@@ -1,6 +1,5 @@
 using MediatR;
 using Application.ApiContracts.File.Responses;
-using Application.ApiContracts.File.Requests;
 using Application.Common.Models;
 
 namespace Application.Features.Files.Commands.UploadManyImage;

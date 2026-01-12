@@ -1,4 +1,3 @@
-﻿using Application.ApiContracts.User.Requests;
 using Application.ApiContracts.User.Responses;
 using Application.Common.Models;
 using MediatR;

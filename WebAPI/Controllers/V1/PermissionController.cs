@@ -1,5 +1,4 @@
-using Application.ApiContracts.Permission.Requests;
-using Application.ApiContracts.Permission.Responses;
+﻿using Application.ApiContracts.Permission.Responses;
 using Application.Features.Permissions.Commands.CreateRole;
 using Application.Features.Permissions.Commands.DeleteMultipleRoles;
 using Application.Features.Permissions.Commands.DeleteRole;
@@ -52,7 +51,7 @@ public class PermissionController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetMyPermissions(CancellationToken cancellationToken)
     {
         var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var result = await mediator.Send(new GetMyPermissionsQuery(userIdClaim), cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(new GetMyPermissionsQuery() { UserId = userIdClaim }, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -65,7 +64,7 @@ public class PermissionController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetUserPermissionsById(Guid userId, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetUserPermissionsByIdQuery(userId), cancellationToken)
+        var result = await mediator.Send(new GetUserPermissionsByIdQuery() { UserId = userId }, cancellationToken)
             .ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -79,24 +78,24 @@ public class PermissionController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetRolePermissions(string roleName, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetRolePermissionsQuery(roleName), cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(new GetRolePermissionsQuery() { RoleName = roleName }, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
     /// <summary>
     /// Cập nhật quyền cho một vai trò
     /// </summary>
-    [HttpPut("roles/{roleName}/permissions")]
+    [HttpPut("roles/{roleName}")]
     [HasPermission(Domain.Constants.Permission.PermissionsList.Roles.AssignPermissions)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(PermissionRoleUpdateResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> UpdateRolePermissions(
+    public async Task<IActionResult> UpdateRole(
         string roleName,
-        [FromBody] UpdateRoleRequest model,
+        [FromBody] UpdateRoleCommand model,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new UpdateRoleCommand(roleName, model), cancellationToken)
+        var result = await mediator.Send(new UpdateRoleCommand() { RoleName = roleName, Description = model.Description, Permissions = model.Permissions }, cancellationToken)
             .ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -120,27 +119,9 @@ public class PermissionController(IMediator mediator) : ApiController
     [HasPermission(Domain.Constants.Permission.PermissionsList.Roles.Create)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(RoleCreateResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> CreateRole([FromBody] CreateRoleRequest model, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateRole([FromBody] CreateRoleCommand model, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new CreateRoleCommand(model), cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
-    }
-
-    /// <summary>
-    /// Cập nhật thông tin vai trò (chỉ cập nhật Description nếu được cung cấp)
-    /// </summary>
-    [HttpPut("roles/{roleName}")]
-    [HasPermission(Domain.Constants.Permission.PermissionsList.Roles.Edit)]
-    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(RoleUpdateResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> UpdateRole(
-        string roleName,
-        [FromBody] UpdateRoleRequest model,
-        CancellationToken cancellationToken)
-    {
-        var result = await mediator.Send(new UpdateRoleCommand(roleName, model), cancellationToken)
-            .ConfigureAwait(true);
+        var result = await mediator.Send(new CreateRoleCommand() { Description = model.Description, Permissions = model.Permissions, RoleName = model.RoleName }, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -154,7 +135,7 @@ public class PermissionController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(RoleDeleteResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> DeleteRole(string roleName, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new DeleteRoleCommand(roleName), cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(new DeleteRoleCommand() { RoleName = roleName }, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -169,7 +150,7 @@ public class PermissionController(IMediator mediator) : ApiController
         [FromBody] List<string> roleNames,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new DeleteMultipleRolesCommand(roleNames), cancellationToken)
+        var result = await mediator.Send(new DeleteMultipleRolesCommand() { RoleNames = roleNames }, cancellationToken)
             .ConfigureAwait(true);
         return HandleResult(result);
     }

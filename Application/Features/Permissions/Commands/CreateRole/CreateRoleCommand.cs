@@ -1,4 +1,3 @@
-﻿using Application.ApiContracts.Permission.Requests;
 using Application.ApiContracts.Permission.Responses;
 using Application.Common.Models;
 using MediatR;
@@ -8,17 +7,17 @@ namespace Application.Features.Permissions.Commands.CreateRole;
 public record CreateRoleCommand : IRequest<Result<RoleCreateResponse>>
 {
     /// <summary>
-    /// Tên vai trò
+    /// T�n vai tr�
     /// </summary>
     public string? RoleName { get; init; }
 
     /// <summary>
-    /// Mô tả của vai trò (tuỳ chọn)
+    /// M� t? c?a vai tr� (tu? ch?n)
     /// </summary>
     public string? Description { get; init; }
 
     /// <summary>
-    /// Danh sách quyền cho vai trò (bắt buộc - phải có ít nhất 1 quyền)
+    /// Danh s�ch quy?n cho vai tr� (b?t bu?c - ph?i c� �t nh?t 1 quy?n)
     /// </summary>
     public List<string>? Permissions { get; init; }
 }
