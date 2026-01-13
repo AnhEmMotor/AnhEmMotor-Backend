@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Application.ApiContracts.Auth.Responses;
@@ -58,8 +58,8 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
             Password = password
         };
 
-        var loginResponse = await _client.PostAsJsonAsync("/api/v1/Auth/login", loginRequest);
-        var loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResponse>();
+        var loginResponse = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None"/api/v1/Auth/login", loginRequest;
+        var loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResponse>(CancellationToken.None).ConfigureAwait(true);
 
         return (user, loginResult!.AccessToken!);
     }
@@ -77,11 +77,11 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
             DateTimeOffset.UtcNow.AddDays(-3));
 
         // Act
-        var response = await _client.PostAsync($"/api/v1/User/{user.Id}/restore", null);
+        var response = await _client.PostAsync(await _client.PostAsync(, CancellationToken.None$"/api/v1/User/{user.Id}/restore", null;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<RestoreUserResponse>();
+        var content = await response.Content.ReadFromJsonAsync<RestoreUserResponse>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Message.Should().Be("Account restored successfully");
 
@@ -105,11 +105,11 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
             null);
 
         // Act
-        var response = await _client.PostAsync($"/api/v1/User/{user.Id}/restore", null);
+        var response = await _client.PostAsync(await _client.PostAsync(, CancellationToken.None$"/api/v1/User/{user.Id}/restore", null;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var content = await response.Content.ReadAsStringAsync();
+        var content = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
         content.Should().Contain("Account is not deleted");
     }
 
@@ -125,11 +125,11 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
             DateTimeOffset.UtcNow.AddDays(-5));
 
         // Act
-        var response = await _client.PostAsync($"/api/v1/User/{user.Id}/restore", null);
+        var response = await _client.PostAsync(await _client.PostAsync(, CancellationToken.None$"/api/v1/User/{user.Id}/restore", null;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
-        var content = await response.Content.ReadAsStringAsync();
+        var content = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
         content.Should().Contain("Cannot restore banned account");
     }
 
@@ -140,11 +140,11 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         var nonExistentUserId = Guid.NewGuid();
 
         // Act
-        var response = await _client.PostAsync($"/api/v1/User/{nonExistentUserId}/restore", null);
+        var response = await _client.PostAsync(await _client.PostAsync(, CancellationToken.None$"/api/v1/User/{nonExistentUserId}/restore", null;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
-        var content = await response.Content.ReadAsStringAsync();
+        var content = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
         content.Should().Contain("User not found");
     }
 
@@ -160,11 +160,11 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
-        var response = await _client.GetAsync("/api/v1/User/me");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/User/me";
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<UserResponse>();
+        var content = await response.Content.ReadFromJsonAsync<UserResponse>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Id.Should().Be(user.Id);
         content.UserName.Should().Be("user025");
@@ -180,7 +180,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         // Arrange - No authorization header
 
         // Act
-        var response = await _client.GetAsync("/api/v1/User/me");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/User/me";
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -205,11 +205,11 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PutAsJsonAsync("/api/v1/User/me", updateRequest);
+        var response = await _client.PutAsJsonAsync(await _client.PutAsJsonAsync(, CancellationToken.None"/api/v1/User/me", updateRequest;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<UserDTOForManagerResponse>();
+        var content = await response.Content.ReadFromJsonAsync<UserDTOForManagerResponse>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.FullName.Should().Be("Updated Name");
         content.Gender.Should().Be(GenderStatus.Female);
@@ -242,11 +242,11 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PutAsJsonAsync("/api/v1/User/me", updateRequest);
+        var response = await _client.PutAsJsonAsync(await _client.PutAsJsonAsync(, CancellationToken.None"/api/v1/User/me", updateRequest;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var content = await response.Content.ReadAsStringAsync();
+        var content = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
         content.Should().Contain("Invalid phone number format");
     }
 
@@ -268,11 +268,11 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/User/change-password", changePasswordRequest);
+        var response = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None"/api/v1/User/change-password", changePasswordRequest;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<ChangePasswordUserByUserResponse>();
+        var content = await response.Content.ReadFromJsonAsync<ChangePasswordUserByUserResponse>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Message.Should().Be("Password changed successfully");
 
@@ -282,11 +282,11 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
             UsernameOrEmail = "user029",
             Password = "NewPass456!"
         };
-        var loginResponse = await _client.PostAsJsonAsync("/api/v1/Auth/login", loginRequest);
+        var loginResponse = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None"/api/v1/Auth/login", loginRequest;
         loginResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
         // Old token should be invalid (SecurityStamp changed)
-        var oldTokenResponse = await _client.GetAsync("/api/v1/User/me");
+        var oldTokenResponse = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/User/me";
         oldTokenResponse.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
@@ -308,11 +308,11 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/User/change-password", changePasswordRequest);
+        var response = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None"/api/v1/User/change-password", changePasswordRequest;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
-        var content = await response.Content.ReadAsStringAsync();
+        var content = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
         content.Should().Contain("Current password is incorrect");
     }
 
@@ -328,11 +328,11 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
-        var response = await _client.PostAsync("/api/v1/User/delete-account", null);
+        var response = await _client.PostAsync(await _client.PostAsync(, CancellationToken.None"/api/v1/User/delete-account", null;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<DeleteUserByUserReponse>();
+        var content = await response.Content.ReadFromJsonAsync<DeleteUserByUserReponse>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Message.Should().Be("Account deleted successfully");
 
@@ -344,7 +344,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         deletedUser!.DeletedAt.Should().NotBeNull();
 
         // Old token should be invalid
-        var tokenTestResponse = await _client.GetAsync("/api/v1/User/me");
+        var tokenTestResponse = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/User/me";
         tokenTestResponse.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
@@ -361,11 +361,11 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
-        var response = await _client.PostAsync("/api/v1/User/delete-account", null);
+        var response = await _client.PostAsync(await _client.PostAsync(, CancellationToken.None"/api/v1/User/delete-account", null;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
-        var content = await response.Content.ReadAsStringAsync();
+        var content = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
         content.Should().Contain("Cannot delete banned account");
     }
 
@@ -381,7 +381,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token1);
 
         // Verify token1 works
-        var testResponse1 = await _client.GetAsync("/api/v1/User/me");
+        var testResponse1 = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/User/me";
         testResponse1.StatusCode.Should().Be(HttpStatusCode.OK);
 
         // Step 2: Change password
@@ -390,11 +390,11 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
             CurrentPassword = "Pass123!",
             NewPassword = "NewPass456!"
         };
-        var changeResponse = await _client.PostAsJsonAsync("/api/v1/User/change-password", changePasswordRequest);
+        var changeResponse = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None"/api/v1/User/change-password", changePasswordRequest;
         changeResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
         // Step 3: Try to use old token
-        var testResponse2 = await _client.GetAsync("/api/v1/User/me");
+        var testResponse2 = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/User/me";
 
         // Assert
         testResponse2.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -412,7 +412,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Verify token works initially
-        var testResponse1 = await _client.GetAsync("/api/v1/User/me");
+        var testResponse1 = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/User/me";
         testResponse1.StatusCode.Should().Be(HttpStatusCode.OK);
 
         // Step 2: Admin soft-deletes the user
@@ -421,15 +421,15 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var userToDelete = await db.Users.FindAsync(user.Id);
             userToDelete!.DeletedAt = DateTimeOffset.UtcNow;
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
         }
 
         // Step 3: Try to use the same token
-        var testResponse2 = await _client.GetAsync("/api/v1/User/me");
+        var testResponse2 = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/User/me";
 
         // Assert
         testResponse2.StatusCode.Should().Be(HttpStatusCode.Forbidden);
-        var content = await testResponse2.Content.ReadAsStringAsync();
+        var content = await testResponse2.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
         content.Should().Contain("Account has been deleted");
     }
 
@@ -445,7 +445,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Verify token works initially
-        var testResponse1 = await _client.GetAsync("/api/v1/User/me");
+        var testResponse1 = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/User/me";
         testResponse1.StatusCode.Should().Be(HttpStatusCode.OK);
 
         // Step 2: Admin bans the user
@@ -454,15 +454,15 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var userToBan = await db.Users.FindAsync(user.Id);
             userToBan!.Status = UserStatus.Banned;
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
         }
 
         // Step 3: Try to use the same token
-        var testResponse2 = await _client.GetAsync("/api/v1/User/me");
+        var testResponse2 = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/User/me";
 
         // Assert
         testResponse2.StatusCode.Should().Be(HttpStatusCode.Forbidden);
-        var content = await testResponse2.Content.ReadAsStringAsync();
+        var content = await testResponse2.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
         content.Should().Contain("Account has been banned");
     }
 #pragma warning restore CRR0035

@@ -68,8 +68,6 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>
             using var scope = sp.CreateScope();
             var scopedServices = scope.ServiceProvider;
             var db = scopedServices.GetRequiredService<ApplicationDBContext>();
-            var logger = scopedServices
-                .GetRequiredService<Microsoft.Extensions.Logging.ILogger<IntegrationTestWebAppFactory>>();
 
             // Ensure the database is created.
             db.Database.EnsureCreated();

@@ -32,10 +32,10 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
         var brand = new Domain.Entities.Brand { Name = "Test Brand", DeletedAt = null };
         dbContext.ProductCategories.Add(category);
         dbContext.Brands.Add(brand);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync().ConfigureAwait(true);
 
         // Act
-        var response = await _client.GetAsync("/api/v1/product");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/product";
 
         // Assert
         response.Should().NotBeNull();
@@ -52,10 +52,10 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
         var brand2 = new Domain.Entities.Brand { Name = "Yamaha", DeletedAt = null };
         dbContext.ProductCategories.Add(category);
         dbContext.Brands.AddRange(brand1, brand2);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         // Act
-        var response = await _client.GetAsync($"/api/v1/product?filters=BrandId=={brand1.Id}");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None$"/api/v1/product?filters=BrandId=={brand1.Id}";
 
         // Assert
         response.Should().NotBeNull();
@@ -71,10 +71,10 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
         var brand = new Domain.Entities.Brand { Name = "Test Brand", DeletedAt = null };
         dbContext.ProductCategories.Add(category);
         dbContext.Brands.Add(brand);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         // Act
-        var response = await _client.GetAsync("/api/v1/product?sorts=Name");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/product?sorts=Name";
 
         // Assert
         response.Should().NotBeNull();
@@ -90,7 +90,7 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
         var brand = new Domain.Entities.Brand { Name = "Test Brand", DeletedAt = null };
         dbContext.ProductCategories.Add(category);
         dbContext.Brands.Add(brand);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var product = new Domain.Entities.Product
         {
@@ -101,10 +101,10 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
             DeletedAt = null
         };
         dbContext.Products.Add(product);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         // Act
-        var response = await _client.GetAsync("/api/v1/product");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/product";
 
         // Assert
         response.Should().NotBeNull();
@@ -120,10 +120,10 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
         var brand = new Domain.Entities.Brand { Name = "Test Brand", DeletedAt = null };
         dbContext.ProductCategories.Add(category);
         dbContext.Brands.Add(brand);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         // Act
-        var response = await _client.GetAsync("/api/v1/product");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/product";
 
         // Assert
         response.Should().NotBeNull();
@@ -140,10 +140,10 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
         var brand = new Domain.Entities.Brand { Name = "Test Brand", DeletedAt = null };
         dbContext.ProductCategories.Add(category);
         dbContext.Brands.Add(brand);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         // Act
-        var response = await _client.GetAsync("/api/v1/product/for-manager");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/product/for-manager";
 
         // Assert
         response.Should().NotBeNull();
@@ -159,7 +159,7 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
         var brand = new Domain.Entities.Brand { Name = "Test Brand", DeletedAt = null };
         dbContext.ProductCategories.Add(category);
         dbContext.Brands.Add(brand);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var deletedProduct = new Domain.Entities.Product
         {
@@ -170,10 +170,10 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
             DeletedAt = DateTime.UtcNow
         };
         dbContext.Products.Add(deletedProduct);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         // Act
-        var response = await _client.GetAsync("/api/v1/product/deleted");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/product/deleted";
 
         // Assert
         response.Should().NotBeNull();
@@ -189,7 +189,7 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
         var brand = new Domain.Entities.Brand { Name = "Test Brand", DeletedAt = null };
         dbContext.ProductCategories.Add(category);
         dbContext.Brands.Add(brand);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var product = new Domain.Entities.Product
         {
@@ -200,10 +200,10 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
             DeletedAt = null
         };
         dbContext.Products.Add(product);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         // Act
-        var response = await _client.GetAsync("/api/v1/product/variants-lite");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/product/variants-lite";
 
         // Assert
         response.Should().NotBeNull();
@@ -220,10 +220,10 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
         var brand = new Domain.Entities.Brand { Name = "Test Brand", DeletedAt = null };
         dbContext.ProductCategories.Add(category);
         dbContext.Brands.Add(brand);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         // Act
-        var response = await _client.GetAsync("/api/v1/product/variants-lite/for-input");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/product/variants-lite/for-input";
 
         // Assert
         response.Should().NotBeNull();
@@ -239,10 +239,10 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
         var brand = new Domain.Entities.Brand { Name = "Test Brand", DeletedAt = null };
         dbContext.ProductCategories.Add(category);
         dbContext.Brands.Add(brand);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         // Act
-        var response = await _client.GetAsync("/api/v1/product/variants-lite/for-output");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/product/variants-lite/for-output";
 
         // Assert
         response.Should().NotBeNull();
@@ -258,7 +258,7 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
         var brand = new Domain.Entities.Brand { Name = "Test Brand", DeletedAt = null };
         dbContext.ProductCategories.Add(category);
         dbContext.Brands.Add(brand);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var product = new Domain.Entities.Product
         {
@@ -271,10 +271,10 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
             MaxPower = "12.5"
         };
         dbContext.Products.Add(product);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         // Act
-        var response = await _client.GetAsync($"/api/v1/product/{product.Id}");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None$"/api/v1/product/{product.Id}";
 
         // Assert
         response.Should().NotBeNull();
@@ -290,7 +290,7 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
         var brand = new Domain.Entities.Brand { Name = "Test Brand", DeletedAt = null };
         dbContext.ProductCategories.Add(category);
         dbContext.Brands.Add(brand);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var product = new Domain.Entities.Product
         {
@@ -301,10 +301,10 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
             DeletedAt = DateTime.UtcNow
         };
         dbContext.Products.Add(product);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         // Act
-        var response = await _client.GetAsync($"/api/v1/product/{product.Id}");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None$"/api/v1/product/{product.Id}";
 
         // Assert
         response.Should().NotBeNull();
@@ -320,7 +320,7 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
         var brand = new Domain.Entities.Brand { Name = "Test Brand", DeletedAt = null };
         dbContext.ProductCategories.Add(category);
         dbContext.Brands.Add(brand);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var product = new Domain.Entities.Product
         {
@@ -331,7 +331,7 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
             DeletedAt = null
         };
         dbContext.Products.Add(product);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var variant = new ProductVariant
         {
@@ -341,10 +341,10 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
             DeletedAt = null
         };
         dbContext.ProductVariants.Add(variant);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         // Act
-        var response = await _client.GetAsync($"/api/v1/product/{product.Id}/variants");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None$"/api/v1/product/{product.Id}/variants";
 
         // Assert
         response.Should().NotBeNull();
@@ -360,7 +360,7 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
         var brand = new Domain.Entities.Brand { Name = "Test Brand", DeletedAt = null };
         dbContext.ProductCategories.Add(category);
         dbContext.Brands.Add(brand);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var request = new CreateProductCommand
         {
@@ -379,7 +379,7 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/product", request);
+        var response = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None"/api/v1/product", request;
 
         // Assert
         response.Should().NotBeNull();
@@ -395,15 +395,15 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
         var brand = new Domain.Entities.Brand { Name = "Test Brand", DeletedAt = null };
         dbContext.ProductCategories.Add(category);
         dbContext.Brands.Add(brand);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var option = new Option { Name = "Màu sắc" };
         dbContext.Options.Add(option);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var optionValue = new OptionValue { OptionId = option.Id, Name = "Đỏ" };
         dbContext.OptionValues.Add(optionValue);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var request = new CreateProductCommand
         {
@@ -422,7 +422,7 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/product", request);
+        var response = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None"/api/v1/product", request;
 
         // Assert
         response.Should().NotBeNull();
@@ -438,7 +438,7 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
         var brand = new Domain.Entities.Brand { Name = "Test Brand", DeletedAt = null };
         dbContext.ProductCategories.Add(category);
         dbContext.Brands.Add(brand);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var product = new Domain.Entities.Product
         {
@@ -449,10 +449,10 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
             DeletedAt = null
         };
         dbContext.Products.Add(product);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         // Act
-        var response = await _client.GetAsync($"/api/v1/product/{product.Id}");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None$"/api/v1/product/{product.Id}";
 
         // Assert
         response.Should().NotBeNull();
@@ -468,7 +468,7 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
         var brand = new Domain.Entities.Brand { Name = "Test Brand", DeletedAt = null };
         dbContext.ProductCategories.Add(category);
         dbContext.Brands.Add(brand);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var product = new Domain.Entities.Product
         {
@@ -479,7 +479,7 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
             DeletedAt = null
         };
         dbContext.Products.Add(product);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var variant = new ProductVariant
         {
@@ -489,10 +489,10 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
             DeletedAt = null
         };
         dbContext.ProductVariants.Add(variant);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         // Act
-        var response = await _client.GetAsync($"/api/v1/product/{product.Id}/variants");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None$"/api/v1/product/{product.Id}/variants";
 
         // Assert
         response.Should().NotBeNull();
@@ -508,7 +508,7 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
         var brand = new Domain.Entities.Brand { Name = "Test Brand", DeletedAt = null };
         dbContext.ProductCategories.Add(category);
         dbContext.Brands.Add(brand);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var request = new CreateProductCommand
         {
@@ -526,7 +526,7 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/product", request);
+        var response = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None"/api/v1/product", request;
 
         // Assert
         response.Should().NotBeNull();
@@ -542,7 +542,7 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
         var brand = new Domain.Entities.Brand { Name = "Test Brand", DeletedAt = null };
         dbContext.ProductCategories.Add(category);
         dbContext.Brands.Add(brand);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var product1 = new Domain.Entities.Product
         {
@@ -561,7 +561,7 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
             DeletedAt = null
         };
         dbContext.Products.AddRange(product1, product2);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var request = new UpdateManyProductStatusesCommand
         {
@@ -570,7 +570,7 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
         };
 
         // Act
-        var response = await _client.PutAsJsonAsync("/api/v1/product/many/status", request);
+        var response = await _client.PutAsJsonAsync(await _client.PutAsJsonAsync(, CancellationToken.None"/api/v1/product/many/status", request;
 
         // Assert
         response.Should().NotBeNull();
@@ -586,7 +586,7 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
         var brand = new Domain.Entities.Brand { Name = "Test Brand", DeletedAt = null };
         dbContext.ProductCategories.Add(category);
         dbContext.Brands.Add(brand);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var product1 = new Domain.Entities.Product
         {
@@ -605,7 +605,7 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
             DeletedAt = DateTime.UtcNow
         };
         dbContext.Products.AddRange(product1, product2);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var request = new UpdateManyProductStatusesCommand
         {
@@ -614,7 +614,7 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
         };
 
         // Act
-        var response = await _client.PutAsJsonAsync("/api/v1/product/many/status", request);
+        var response = await _client.PutAsJsonAsync(await _client.PutAsJsonAsync(, CancellationToken.None"/api/v1/product/many/status", request;
 
         // Assert
         response.Should().NotBeNull();

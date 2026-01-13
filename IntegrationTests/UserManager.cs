@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Application.ApiContracts.Auth.Responses;
@@ -80,7 +80,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
             }
         }
 
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
         await userManager.AddToRoleAsync(user, roleName);
 
         // Login to get token
@@ -90,8 +90,8 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
             Password = password
         };
 
-        var loginResponse = await _client.PostAsJsonAsync("/api/v1/Auth/login", loginRequest);
-        var loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResponse>();
+        var loginResponse = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None"/api/v1/Auth/login", loginRequest;
+        var loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResponse>(CancellationToken.None).ConfigureAwait(true);
 
         return (user, loginResult!.AccessToken!);
     }
@@ -140,7 +140,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
-        var response = await _client.GetAsync("/api/v1/UserManager?Filters=Status==Active&Sorts=-FullName&Page=1&PageSize=5");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/UserManager?Filters=Status==Active&Sorts=-FullName&Page=1&PageSize=5";
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -164,11 +164,11 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
-        var response = await _client.GetAsync($"/api/v1/UserManager/{softDeletedUser.Id}");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None$"/api/v1/UserManager/{softDeletedUser.Id}";
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var result = await response.Content.ReadFromJsonAsync<dynamic>();
+        var result = await response.Content.ReadFromJsonAsync<dynamic>(CancellationToken.None).ConfigureAwait(true);
         result?.Should().NotBeNull();
     }
 
@@ -191,7 +191,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
-        var response = await _client.PutAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}", request);
+        var response = await _client.PutAsJsonAsync(await _client.PutAsJsonAsync(, CancellationToken.None$"/api/v1/UserManager/{targetUser.Id}", request;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -222,7 +222,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
-        var response = await _client.PutAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}", request);
+        var response = await _client.PutAsJsonAsync(await _client.PutAsJsonAsync(, CancellationToken.None$"/api/v1/UserManager/{targetUser.Id}", request;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -252,7 +252,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
-        var response = await _client.PutAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}", request);
+        var response = await _client.PutAsJsonAsync(await _client.PutAsJsonAsync(, CancellationToken.None$"/api/v1/UserManager/{targetUser.Id}", request;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Conflict);
@@ -277,7 +277,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
-        var response = await _client.PutAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}", request);
+        var response = await _client.PutAsJsonAsync(await _client.PutAsJsonAsync(, CancellationToken.None$"/api/v1/UserManager/{targetUser.Id}", request;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -306,7 +306,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
             var user = await db.Users.FindAsync(targetUser.Id);
             user!.RefreshToken = "valid_refresh_token";
             user.RefreshTokenExpiryTime = DateTimeOffset.UtcNow.AddDays(7);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
         }
 
         var request = new ChangePasswordCommand { NewPassword = "NewPass@123" };
@@ -314,7 +314,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
-        var response = await _client.PostAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}/change-password", request);
+        var response = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None$"/api/v1/UserManager/{targetUser.Id}/change-password", request;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -359,7 +359,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
-        var response = await _client.PostAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}/assign-roles", request);
+        var response = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None$"/api/v1/UserManager/{targetUser.Id}/assign-roles", request;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -401,7 +401,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
-        var response = await _client.PostAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}/assign-roles", request);
+        var response = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None$"/api/v1/UserManager/{targetUser.Id}/assign-roles", request;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -432,7 +432,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
-        var response = await _client.PatchAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}/status", request);
+        var response = await _client.PatchAsJsonAsync(await _client.PatchAsJsonAsync(, CancellationToken.None$"/api/v1/UserManager/{targetUser.Id}/status", request);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -513,7 +513,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
-        var response = await _client.PutAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}", request);
+        var response = await _client.PutAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}", request;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Conflict);
@@ -530,7 +530,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
-        var response = await _client.GetAsync("/api/v1/UserManager?Page=3&PageSize=10");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/UserManager?Page=3&PageSize=10";
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -555,14 +555,14 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
-        var response = await _client.PutAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}", request);
+        var response = await _client.PutAsJsonAsync(await _client.PutAsJsonAsync(, CancellationToken.None$"/api/v1/UserManager/{targetUser.Id}", request;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         // Verify password unchanged by attempting login with old password
         var loginRequest = new LoginCommand { UsernameOrEmail = "targetUser033", Password = "OldPass@123" };
-        var loginResponse = await _client.PostAsJsonAsync("/api/v1/Auth/login", loginRequest);
+        var loginResponse = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None"/api/v1/Auth/login", loginRequest;
         loginResponse.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
@@ -582,7 +582,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var user = await db.Users.FindAsync(targetUser.Id);
             user!.RefreshToken = originalRefreshToken;
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
         }
 
         var maliciousRequest = new
@@ -595,7 +595,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
-        var response = await _client.PutAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}", maliciousRequest);
+        var response = await _client.PutAsJsonAsync(await _client.PutAsJsonAsync(, CancellationToken.None$"/api/v1/UserManager/{targetUser.Id}", maliciousRequest;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -626,7 +626,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
-        var response = await _client.PostAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}/change-password", request);
+        var response = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None$"/api/v1/UserManager/{targetUser.Id}/change-password", request;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -658,7 +658,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
-        var response = await _client.PostAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}/assign-roles", request);
+        var response = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None$"/api/v1/UserManager/{targetUser.Id}/assign-roles", request;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);

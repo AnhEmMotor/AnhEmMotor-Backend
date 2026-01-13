@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Json;
 using Application.ApiContracts.Brand.Responses;
 using Application.Features.Brands.Commands.CreateBrand;
@@ -38,11 +38,11 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/Brand", request);
+        var response = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None"/api/v1/Brand", request;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<BrandResponse>();
+        var content = await response.Content.ReadFromJsonAsync<BrandResponse>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Name.Should().Be("Honda Integration");
     }
@@ -57,23 +57,23 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             // Clear existing to ensure count is correct
             db.Brands.RemoveRange(db.Brands);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
             var brands = new List<BrandEntities>();
             for (int i = 1; i <= 11; i++)
             {
                 brands.Add(new BrandEntities { Name = $"Brand {i}", Description = "Desc" });
             }
-            await db.Brands.AddRangeAsync(brands);
-            await db.SaveChangesAsync();
+            await db.Brands.AddRangeAsync(brands, CancellationToken.None).ConfigureAwait(true).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
         
         // Act
-        var response = await _client.GetAsync("/api/v1/Brand?Page=1&PageSize=10");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Brand?Page=1&PageSize=10";
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<BrandResponse>>();
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<BrandResponse>>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Items.Should().HaveCount(10);
         content.TotalCount.Should().Be(11);
@@ -92,18 +92,18 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
             if (!db.Brands.Any(b => b.Name == "Honda Filter"))
             {
                 db.Brands.Add(new BrandEntities { Name = "Honda Filter", Description = "Desc" });
-                await db.SaveChangesAsync();
+                await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             }
         }
 
         // Act
-        var response = await _client.GetAsync("/api/v1/Brand?Filters=Name@=Honda Filter");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Brand?Filters=Name@=Honda Filter";
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<BrandResponse>>();
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<BrandResponse>>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
-        content!.Items.Should().Contain(x => x.Name == "Honda Filter");
+        content!.Items.Should().Contain(x => string.Compare(x.Name, "Honda Filter") == 0);
     }
 
     [Fact(DisplayName = "BRAND_008 - GetBrandById - Success")]
@@ -116,16 +116,16 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var brand = new BrandEntities { Name = "Brand GetById", Description = "Desc" };
             db.Brands.Add(brand);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
             id = brand.Id;
         }
         
         // Act
-        var response = await _client.GetAsync($"/api/v1/Brand/{id}");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None$"/api/v1/Brand/{id}";
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<BrandResponse>();
+        var content = await response.Content.ReadFromJsonAsync<BrandResponse>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Id.Should().Be(id);
     }
@@ -140,7 +140,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var brand = new BrandEntities { Name = "Brand Update", Description = "Desc" };
             db.Brands.Add(brand);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
             id = brand.Id;
         }
 
@@ -151,7 +151,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PutAsJsonAsync($"/api/v1/Brand/{id}", request);
+        var response = await _client.PutAsJsonAsync(await _client.PutAsJsonAsync(, CancellationToken.None$"/api/v1/Brand/{id}", request;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -167,12 +167,12 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var brand = new BrandEntities { Name = "Brand Delete", Description = "Desc" };
             db.Brands.Add(brand);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
             id = brand.Id;
         }
 
         // Act
-        var response = await _client.DeleteAsync($"/api/v1/Brand/{id}");
+        var response = await _client.DeleteAsync(await _client.DeleteAsync(, CancellationToken.None$"/api/v1/Brand/{id}";
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -188,12 +188,12 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var brand = new BrandEntities { Name = "Brand Restore", Description = "Desc", DeletedAt = DateTime.UtcNow };
             db.Brands.Add(brand);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
             id = brand.Id;
         }
 
         // Act
-        var response = await _client.PostAsync($"/api/v1/Brand/restore/{id}", null);
+        var response = await _client.PostAsync(await _client.PostAsync(, CancellationToken.None$"/api/v1/Brand/restore/{id}", null;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -210,7 +210,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
             var b1 = new BrandEntities { Name = "Brand DelMany 1", Description = "Desc" };
             var b2 = new BrandEntities { Name = "Brand DelMany 2", Description = "Desc" };
             db.Brands.AddRange(b1, b2);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
             ids.Add(b1.Id);
             ids.Add(b2.Id);
         }
@@ -222,7 +222,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
         {
             Content = JsonContent.Create(request)
         };
-        var response = await _client.SendAsync(requestMessage);
+        var response = await _client.SendAsync(await _client.SendAsync(, CancellationToken.NonerequestMessage;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -239,7 +239,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
             var b1 = new BrandEntities { Name = "Brand ResMany 1", Description = "Desc", DeletedAt = DateTime.UtcNow };
             var b2 = new BrandEntities { Name = "Brand ResMany 2", Description = "Desc", DeletedAt = DateTime.UtcNow };
             db.Brands.AddRange(b1, b2);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
             ids.Add(b1.Id);
             ids.Add(b2.Id);
         }
@@ -247,7 +247,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
         var request = new RestoreManyBrandsCommand { Ids = ids };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/Brand/restore-many", request);
+        var response = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None"/api/v1/Brand/restore-many", request;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -257,7 +257,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
     public async Task BRAND_018_GetDeletedBrands_Success()
     {
         // Act
-        var response = await _client.GetAsync("/api/v1/Brand/deleted");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Brand/deleted";
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -270,7 +270,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
         var request = new CreateBrandCommand { Name = "Audit Brand", Description = "Audit" };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/Brand", request);
+        await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None"/api/v1/Brand", request;
 
         // Assert
         // Verify in DB
@@ -290,13 +290,13 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var brand = new BrandEntities { Name = "Audit Update", Description = "Audit" };
             db.Brands.Add(brand);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
             id = brand.Id;
         }
 
         var request = new UpdateBrandCommand { Name = "Audit Update Changed", Description = "Audit" };
 
-        var response = await _client.PutAsJsonAsync($"/api/v1/Brand/{id}", request);
+        await _client.PutAsJsonAsync(await _client.PutAsJsonAsync(, CancellationToken.None$"/api/v1/Brand/{id}", request;
 
         using var verifyScope = _factory.Services.CreateScope();
         var verifyDb = verifyScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();

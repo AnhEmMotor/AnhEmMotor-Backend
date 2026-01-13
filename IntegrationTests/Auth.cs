@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Json;
 using Application.ApiContracts.Auth.Responses;
 using Application.Features.Auth.Commands.Login;
@@ -39,11 +39,11 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/Auth/register", request);
+        var response = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync("/api/v1/Auth/register", CancellationToken.None), request;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<RegisterResponse>(CancellationToken.None);
+        var content = await response.Content.ReadFromJsonAsync<RegisterResponse>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.UserId.Should().NotBeEmpty();
         
@@ -67,7 +67,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
             FullName = "Exist User",
             PhoneNumber = "0987654321"
         };
-        await _client.PostAsJsonAsync("/api/v1/Auth/register", request1);
+        await _client.PostAsJsonAsync(await _client.PostAsJsonAsync("/api/v1/Auth/register", CancellationToken.None), request1;
 
         var request2 = new RegisterCommand
         {
@@ -79,7 +79,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/Auth/register", request2);
+        var response = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None"/api/v1/Auth/register", request2;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest); // Or 409 depending on implementation
@@ -99,7 +99,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/Auth/register", request);
+        var response = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None"/api/v1/Auth/register", request;
 
         // Assert
         // Assuming the system accepts it but sanitizes or treats as literal string. 
@@ -137,7 +137,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
                 DeletedAt = DateTimeOffset.UtcNow,
                 Status = UserStatus.Active // Or whatever status implies deleted if logic depends on DeletedAt
             };
-            await userManager.CreateAsync(user, "Password123!");
+            await userManager.CreateAsync(user, "Password123!").ConfigureAwait(true);
         }
 
         var request = new RegisterCommand
@@ -150,7 +150,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/Auth/register", request);
+        var response = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None"/api/v1/Auth/register", request;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -166,17 +166,17 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         {
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             var user = new ApplicationUser { UserName = "loginuser", Email = email, FullName = "Login User", Status = UserStatus.Active };
-            await userManager.CreateAsync(user, password);
+            await userManager.CreateAsync(user, password).ConfigureAwait(true);
         }
 
         var request = new LoginCommand { UsernameOrEmail = email, Password = password };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/Auth/login", request);
+        var response = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None"/api/v1/Auth/login", request;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<LoginResponse>();
+        var content = await response.Content.ReadFromJsonAsync<LoginResponse>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.AccessToken.Should().NotBeNullOrEmpty();
         content.RefreshToken.Should().NotBeNullOrEmpty();
@@ -192,13 +192,13 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         {
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             var user = new ApplicationUser { UserName = username, Email = "banned@example.com", FullName = "Banned User", Status = UserStatus.Banned };
-            await userManager.CreateAsync(user, password);
+            await userManager.CreateAsync(user, password).ConfigureAwait(true);
         }
 
         var request = new LoginCommand { UsernameOrEmail = username, Password = password };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/Auth/login", request);
+        var response = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None"/api/v1/Auth/login", request;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
@@ -215,18 +215,18 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
             
-            if (!await roleManager.RoleExistsAsync("Manager"))
-                await roleManager.CreateAsync(new ApplicationRole { Name = "Manager" });
+            if (!await roleManager.RoleExistsAsync("Manager").ConfigureAwait(true))
+                await roleManager.CreateAsync(new ApplicationRole { Name = "Manager" }).ConfigureAwait(true);
 
             var user = new ApplicationUser { UserName = username, Email = "manager@example.com", FullName = "Manager User", Status = UserStatus.Active };
-            await userManager.CreateAsync(user, password);
-            await userManager.AddToRoleAsync(user, "Manager");
+            await userManager.CreateAsync(user, password).ConfigureAwait(true);
+            await userManager.AddToRoleAsync(user, "Manager").ConfigureAwait(true);
         }
 
         var request = new LoginCommand { UsernameOrEmail = username, Password = password };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/Auth/login/for-manager", request);
+        var response = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None"/api/v1/Auth/login/for-manager", request;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -239,20 +239,18 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         var username = "refresh_user";
         var password = "Password123!";
         string? refreshToken = "";
-        string? accessToken = "";
 
         // Create user and login to get tokens
         using (var scope = _factory.Services.CreateScope())
         {
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             var user = new ApplicationUser { UserName = username, Email = "refresh@example.com", FullName = "Refresh User", Status = UserStatus.Active };
-            await userManager.CreateAsync(user, password);
+            await userManager.CreateAsync(user, password).ConfigureAwait(true);
         }
 
-        var loginRes = await _client.PostAsJsonAsync("/api/v1/Auth/login", new LoginCommand { UsernameOrEmail = username, Password = password });
-        var loginContent = await loginRes.Content.ReadFromJsonAsync<LoginResponse>();
+        var loginRes = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None"/api/v1/Auth/login", new LoginCommand { UsernameOrEmail = username, Password = password };
+        var loginContent = await loginRes.Content.ReadFromJsonAsync<LoginResponse>(CancellationToken.None).ConfigureAwait(true);
         refreshToken = loginContent!.RefreshToken;
-        accessToken = loginContent!.AccessToken;
 
         // Add Refresh Token to Cookie (assuming API reads from Cookie or Body - spec says Cookie for Refresh Token usually, but let's check Controller. 
         // The controller signature is `RefreshToken(CancellationToken cancellationToken)`. It likely reads from Cookie.
@@ -262,14 +260,14 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         requestMsg.Headers.Add("Cookie", $"refreshToken={refreshToken}"); // Assuming cookie name is refreshToken
 
         // Act
-        var response = await _client.SendAsync(requestMsg);
+        var response = await _client.SendAsync(await _client.SendAsync(, CancellationToken.NonerequestMsg;
 
         // Assert
         // If the controller expects cookie, this should work. If it fails, check implementation.
         // Assuming 200 OK for now.
         if (response.StatusCode == HttpStatusCode.OK)
         {
-             var content = await response.Content.ReadFromJsonAsync<GetAccessTokenFromRefreshTokenResponse>();
+             var content = await response.Content.ReadFromJsonAsync<GetAccessTokenFromRefreshTokenResponse>(CancellationToken.None).ConfigureAwait(true);
              content.Should().NotBeNull();
              content!.AccessToken.Should().NotBeNullOrEmpty();
              // content.RefreshToken.Should().NotBeNullOrEmpty(); // Not in response body
@@ -294,27 +292,27 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         {
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             var user = new ApplicationUser { UserName = username, Email = "refresh_banned@example.com", FullName = "Refresh Banned", Status = UserStatus.Active };
-            await userManager.CreateAsync(user, password);
+            await userManager.CreateAsync(user, password).ConfigureAwait(true);
         }
         
-        var loginRes = await _client.PostAsJsonAsync("/api/v1/Auth/login", new LoginCommand { UsernameOrEmail = username, Password = password });
-        var loginContent = await loginRes.Content.ReadFromJsonAsync<LoginResponse>();
+        var loginRes = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None"/api/v1/Auth/login", new LoginCommand { UsernameOrEmail = username, Password = password };
+        var loginContent = await loginRes.Content.ReadFromJsonAsync<LoginResponse>(CancellationToken.None).ConfigureAwait(true);
         string? refreshToken = loginContent!.RefreshToken;
 
         // Ban user
         using (var scope = _factory.Services.CreateScope())
         {
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-            var user = await userManager.FindByNameAsync(username);
+            var user = await userManager.FindByNameAsync(username).ConfigureAwait(true);
             user!.Status = UserStatus.Banned;
-            await userManager.UpdateAsync(user);
+            await userManager.UpdateAsync(user).ConfigureAwait(true);
         }
 
         var requestMsg = new HttpRequestMessage(HttpMethod.Post, "/api/v1/Auth/refresh-token");
         requestMsg.Headers.Add("Cookie", $"refreshToken={refreshToken}");
 
         // Act
-        var response = await _client.SendAsync(requestMsg);
+        var response = await _client.SendAsync(await _client.SendAsync(, CancellationToken.NonerequestMsg;
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.Forbidden, HttpStatusCode.Unauthorized, HttpStatusCode.BadRequest);
@@ -334,7 +332,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/Auth/register", request);
+        var response = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None"/api/v1/Auth/register", request;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);

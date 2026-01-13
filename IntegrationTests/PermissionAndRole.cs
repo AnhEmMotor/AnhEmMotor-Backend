@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Json;
 using Application.ApiContracts.Permission.Responses;
 using Application.Features.Permissions.Commands.CreateRole;
@@ -34,7 +34,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
         await AuthenticateAsAdminAsync();
 
         // Act
-        var response = await _client.GetAsync("/api/v1/Permission/permissions");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Permission/permissions";
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -61,14 +61,14 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
             "Editor_INT002",
             [ PermissionsList.Brands.View, PermissionsList.Brands.Create, PermissionsList.Products.View, PermissionsList.Products.Create, PermissionsList.Files.View, PermissionsList.Files.Upload ]);
 
-        await AuthenticateAsUserAsync(user.Email!);
+        await AuthenticateAsUserAsync(user!.Email!);
 
         // Act
-        var response = await _client.GetAsync("/api/v1/Permission/my-permissions");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Permission/my-permissions";
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<PermissionAndRoleOfUserResponse>();
+        var content = await response.Content.ReadFromJsonAsync<PermissionAndRoleOfUserResponse>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.UserId.Should().Be(user.Id);
         content.Permissions.Should().HaveCount(6);
@@ -80,7 +80,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
         // Arrange - No authentication
 
         // Act
-        var response = await _client.GetAsync("/api/v1/Permission/my-permissions");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Permission/my-permissions";
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -100,14 +100,14 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
             "Staff_INT004",
             [ PermissionsList.Products.View, PermissionsList.Brands.View, PermissionsList.Files.View]);
 
-        await AuthenticateAsUserAsync(adminUser.Email!);
+        await AuthenticateAsUserAsync(adminUser!.Email!);
 
         // Act
-        var response = await _client.GetAsync($"/api/v1/Permission/users/{targetUser.Id}/permissions");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None$"/api/v1/Permission/users/{targetUser!.Id}/permissions";
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<PermissionAndRoleOfUserResponse>();
+        var content = await response.Content.ReadFromJsonAsync<PermissionAndRoleOfUserResponse>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.UserId.Should().Be(targetUser.Id);
         content.Permissions.Should().HaveCount(3);
@@ -128,10 +128,10 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
             "Target_INT005",
             [PermissionsList.Products.View]);
 
-        await AuthenticateAsUserAsync(normalUser.Email!);
+        await AuthenticateAsUserAsync(normalUser!.Email!);
 
         // Act
-        var response = await _client.GetAsync($"/api/v1/Permission/users/{targetUser.Id}/permissions");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None$"/api/v1/Permission/users/{targetUser!.Id}/permissions";
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
@@ -151,14 +151,14 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
             [ PermissionsList.Brands.View, PermissionsList.Brands.Create, PermissionsList.Brands.Edit, 
                     PermissionsList.Brands.Delete, PermissionsList.Products.View ]);
 
-        await AuthenticateAsUserAsync(adminUser.Email!);
+        await AuthenticateAsUserAsync(adminUser!.Email!);
 
         // Act
-        var response = await _client.GetAsync($"/api/v1/Permission/roles/{testRole.Name}/permissions");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None$"/api/v1/Permission/roles/{testRole.Name}/permissions";
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<List<PermissionResponse>>();
+        var content = await response.Content.ReadFromJsonAsync<List<PermissionResponse>>(CancellationToken.None);
         content.Should().NotBeNull();
         content.Should().HaveCount(5);
     }
@@ -182,11 +182,11 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/Permission/roles", request);
+        var response = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None"/api/v1/Permission/roles", request;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<RoleCreateResponse>();
+        var content = await response.Content.ReadFromJsonAsync<RoleCreateResponse>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.RoleId.Should().NotBeEmpty();
         content.RoleName.Should().Be("NewRole_INT007");
@@ -196,7 +196,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
         // Verify in DB
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var roleInDb = await db.Roles.FirstOrDefaultAsync(r => r.Name == "NewRole_INT007");
+        var roleInDb = await db.Roles.FirstOrDefaultAsync(r => string.Compare(r.Name, "NewRole_INT007") == 0);
         roleInDb.Should().NotBeNull();
         roleInDb!.Description.Should().Be("Integration Test Role");
     }
@@ -220,7 +220,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/Permission/roles", request);
+        var response = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None"/api/v1/Permission/roles", request;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
@@ -251,11 +251,11 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/Permission/roles", request);
+        var response = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None"/api/v1/Permission/roles", request;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var content = await response.Content.ReadAsStringAsync();
+        var content = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
         content.Should().Contain("already exists");
     }
 
@@ -280,7 +280,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PutAsJsonAsync($"/api/v1/Permission/roles/{testRole.Name}/permissions", request);
+        var response = await _client.PutAsJsonAsync(await _client.PutAsJsonAsync(, CancellationToken.None$"/api/v1/Permission/roles/{testRole.Name}/permissions", request;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -315,7 +315,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PutAsJsonAsync($"/api/v1/Permission/roles/{testRole.Name}", request);
+        var response = await _client.PutAsJsonAsync(await _client.PutAsJsonAsync(, CancellationToken.None$"/api/v1/Permission/roles/{testRole.Name}", request;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -344,7 +344,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
         await AuthenticateAsUserAsync(adminUser.Email!);
 
         // Act
-        var response = await _client.DeleteAsync($"/api/v1/Permission/roles/{testRole.Name}");
+        var response = await _client.DeleteAsync(await _client.DeleteAsync(, CancellationToken.None$"/api/v1/Permission/roles/{testRole.Name}";
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -372,7 +372,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
         await AuthenticateAsUserAsync(normalUser.Email!);
 
         // Act
-        var response = await _client.DeleteAsync($"/api/v1/Permission/roles/{testRole.Name}");
+        var response = await _client.DeleteAsync(await _client.DeleteAsync(, CancellationToken.None$"/api/v1/Permission/roles/{testRole.Name}";
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
@@ -402,11 +402,11 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
         var request = new List<string> { "Role1_INT014", "Role2_INT014", "Role3_INT014" };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/Permission/roles/delete-multiple", request);
+        var response = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None"/api/v1/Permission/roles/delete-multiple", request;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<RoleDeleteResponse>();
+        var content = await response.Content.ReadFromJsonAsync<RoleDeleteResponse>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Message.Should().Contain("3");
 
@@ -435,7 +435,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
         await AuthenticateAsUserAsync(adminUser.Email!);
 
         // Act
-        var response = await _client.GetAsync("/api/v1/Permission/roles");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Permission/roles";
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -484,7 +484,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
             });
         }
 
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
 
         return (user, role);
     }
@@ -514,7 +514,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
             });
         }
 
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
 
         return role;
     }

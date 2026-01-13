@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Json;
 using Application.ApiContracts.Supplier.Responses;
 using Application.Features.Suppliers.Commands.DeleteManySuppliers;
@@ -33,7 +33,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             db.Suppliers.RemoveRange(db.Suppliers);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
 
             var suppliers = new List<Domain.Entities.Supplier>();
             for (int i = 1; i <= 25; i++)
@@ -46,12 +46,12 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
                     StatusId = i % 2 == 0 ? "active" : "inactive"
                 });
             }
-            await db.Suppliers.AddRangeAsync(suppliers);
-            await db.SaveChangesAsync();
+            await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
         }
 
         // Act
-        var response = await _client.GetAsync("/api/v1/Supplier?Page=1&PageSize=10");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Supplier?Page=1&PageSize=10";
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -71,7 +71,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             db.Suppliers.RemoveRange(db.Suppliers);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
 
             var suppliers = new List<Domain.Entities.Supplier>();
             for (int i = 1; i <= 25; i++)
@@ -84,12 +84,12 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
                     StatusId = "active"
                 });
             }
-            await db.Suppliers.AddRangeAsync(suppliers);
-            await db.SaveChangesAsync();
+            await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
         }
 
         // Act
-        var response = await _client.GetAsync("/api/v1/Supplier?Page=2&PageSize=5");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Supplier?Page=2&PageSize=5";
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -109,7 +109,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             db.Suppliers.RemoveRange(db.Suppliers);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
 
             var suppliers = new List<Domain.Entities.Supplier>
             {
@@ -117,12 +117,12 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
                 new() { Name = "Test Supplier 2", Phone = "0222222222", Address = "Address 2", StatusId = "active" },
                 new() { Name = "Other Supplier", Phone = "0333333333", Address = "Address 3", StatusId = "active" }
             };
-            await db.Suppliers.AddRangeAsync(suppliers);
-            await db.SaveChangesAsync();
+            await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
         }
 
         // Act
-        var response = await _client.GetAsync("/api/v1/Supplier?Filters=Name@=*Test*");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Supplier?Filters=Name@=*Test*";
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -140,7 +140,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             db.Suppliers.RemoveRange(db.Suppliers);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
 
             var suppliers = new List<Domain.Entities.Supplier>
             {
@@ -148,12 +148,12 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
                 new() { Name = "Alpha Supplier", Phone = "0222222222", Address = "Address", StatusId = "active" },
                 new() { Name = "Beta Supplier", Phone = "0333333333", Address = "Address", StatusId = "active" }
             };
-            await db.Suppliers.AddRangeAsync(suppliers);
-            await db.SaveChangesAsync();
+            await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
         }
 
         // Act
-        var response = await _client.GetAsync("/api/v1/Supplier?Sorts=Name");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Supplier?Sorts=Name";
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -171,7 +171,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             db.Suppliers.RemoveRange(db.Suppliers);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
 
             var suppliers = new List<Domain.Entities.Supplier>
             {
@@ -179,12 +179,12 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
                 new() { Name = "Inactive 1", Phone = "0222222222", Address = "A", StatusId = "inactive", DeletedAt = null },
                 new() { Name = "Deleted 1", Phone = "0333333333", Address = "A", StatusId = "active", DeletedAt = DateTime.UtcNow }
             };
-            await db.Suppliers.AddRangeAsync(suppliers);
-            await db.SaveChangesAsync();
+            await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
         }
 
         // Act
-        var response = await _client.GetAsync("/api/v1/Supplier");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Supplier";
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -202,7 +202,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             db.Suppliers.RemoveRange(db.Suppliers);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
 
             var suppliers = new List<Domain.Entities.Supplier>
             {
@@ -210,12 +210,12 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
                 new() { Name = "Deleted 1", Phone = "0222222222", Address = "A", StatusId = "active", DeletedAt = DateTime.UtcNow },
                 new() { Name = "Deleted 2", Phone = "0333333333", Address = "A", StatusId = "inactive", DeletedAt = DateTime.UtcNow }
             };
-            await db.Suppliers.AddRangeAsync(suppliers);
-            await db.SaveChangesAsync();
+            await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
         }
 
         // Act
-        var response = await _client.GetAsync("/api/v1/Supplier/deleted?Page=1&PageSize=10");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Supplier/deleted?Page=1&PageSize=10";
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -244,16 +244,16 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
                 Notes = "Test notes"
             };
             await db.Suppliers.AddAsync(supplier);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
             supplierId = supplier.Id;
         }
 
         // Act
-        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None$"/api/v1/Supplier/{supplierId}";
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<SupplierResponse>();
+        var content = await response.Content.ReadFromJsonAsync<SupplierResponse>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Id.Should().Be(supplierId);
         content.Name.Should().Be("Full Info Supplier");
@@ -279,12 +279,12 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
                 DeletedAt = DateTime.UtcNow
             };
             await db.Suppliers.AddAsync(supplier);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
             supplierId = supplier.Id;
         }
 
         // Act
-        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None$"/api/v1/Supplier/{supplierId}";
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -294,7 +294,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
     public async Task GetSupplierById_NonExistentId_ReturnsNotFound()
     {
         // Act
-        var response = await _client.GetAsync("/api/v1/Supplier/999999");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Supplier/999999";
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -314,15 +314,15 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
                 new() { Name = "Supplier 2", Phone = "0222222222", Address = "A", StatusId = "active" },
                 new() { Name = "Supplier 3", Phone = "0333333333", Address = "A", StatusId = "active" }
             };
-            await db.Suppliers.AddRangeAsync(suppliers);
-            await db.SaveChangesAsync();
+            await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
             supplierIds = [.. suppliers.Select(s => s.Id)];
         }
 
         var request = new DeleteManySuppliersCommand { Ids = supplierIds };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/Supplier/delete-many", request);
+        var response = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None"/api/v1/Supplier/delete-many", request;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -347,12 +347,12 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var supplier1 = new Domain.Entities.Supplier { Name = "Supplier 1", Phone = "0111111111", Address = "A", StatusId = "active" };
             var supplier2 = new Domain.Entities.Supplier { Name = "Supplier 2", Phone = "0222222222", Address = "A", StatusId = "active" };
-            await db.Suppliers.AddRangeAsync([supplier1, supplier2]);
-            await db.SaveChangesAsync();
+            await db.Suppliers.AddRangeAsync([supplier1, supplier2], CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
 
             var input = new Input { SupplierId = supplier2.Id, StatusId = "working" };
             await db.InputReceipts.AddAsync(input);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
 
             supplierIds = [supplier1.Id, supplier2.Id];
         }
@@ -360,7 +360,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         var request = new DeleteManySuppliersCommand { Ids = supplierIds };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/Supplier/delete-many", request);
+        var response = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None"/api/v1/Supplier/delete-many", request;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -386,15 +386,15 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
                 new() { Name = "Supplier 1", Phone = "0111111111", Address = "A", StatusId = "active", DeletedAt = DateTime.UtcNow },
                 new() { Name = "Supplier 2", Phone = "0222222222", Address = "A", StatusId = "inactive", DeletedAt = DateTime.UtcNow }
             };
-            await db.Suppliers.AddRangeAsync(suppliers);
-            await db.SaveChangesAsync();
+            await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
             supplierIds = [.. suppliers.Select(s => s.Id)];
         }
 
         var request = new RestoreManySuppliersCommand { Ids = supplierIds };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/Supplier/restore-many", request);
+        var response = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None"/api/v1/Supplier/restore-many", request;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -420,8 +420,8 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
                 new() { Name = "Supplier 1", Phone = "0111111111", Address = "A", StatusId = "active" },
                 new() { Name = "Supplier 2", Phone = "0222222222", Address = "A", StatusId = "active" }
             };
-            await db.Suppliers.AddRangeAsync(suppliers);
-            await db.SaveChangesAsync();
+            await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
             supplierIds = [.. suppliers.Select(s => s.Id)];
         }
 
@@ -432,7 +432,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PatchAsJsonAsync("/api/v1/Supplier/update-status-many", request);
+        var response = await _client.PatchAsJsonAsync(await _client.PatchAsJsonAsync(, CancellationToken.None"/api/v1/Supplier/update-status-many", request);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -461,7 +461,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
                 StatusId = "active"
             };
             await db.Suppliers.AddAsync(supplier);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None;;
             supplierId = supplier.Id;
 
             var inputs = new List<Input>
@@ -470,8 +470,8 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
                 new() { SupplierId = supplierId, StatusId = "completed" },
                 new() { SupplierId = supplierId, StatusId = "completed" }
             };
-            await db.InputReceipts.AddRangeAsync(inputs);
-            await db.SaveChangesAsync();
+            await db.InputReceipts.AddRangeAsync(inputs, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
 
             // Add InputInfo records to calculate total
             var inputInfos = new List<InputInfo>
@@ -480,16 +480,16 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
                 new() { InputId = inputs[1].Id, InputPrice = 2000.00m, Count = 20 }, // 40000
                 new() { InputId = inputs[2].Id, InputPrice = 500.00m, Count = 30 }   // 15000
             };
-            await db.InputInfos.AddRangeAsync(inputInfos);
-            await db.SaveChangesAsync();
+            await db.InputInfos.AddRangeAsync(inputInfos, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
         }
 
         // Act
-        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None$"/api/v1/Supplier/{supplierId}";
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<SupplierResponse>();
+        var content = await response.Content.ReadFromJsonAsync<SupplierResponse>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.TotalInput.Should().Be(65000); // 10000 + 40000 + 15000
     }
@@ -510,7 +510,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
                 StatusId = "active"
             };
             await db.Suppliers.AddAsync(supplier);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
             supplierId = supplier.Id;
 
             var inputs = new List<Input>
@@ -519,8 +519,8 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
                 new() { SupplierId = supplierId, StatusId = "working" },
                 new() { SupplierId = supplierId, StatusId = "cancelled" }
             };
-            await db.InputReceipts.AddRangeAsync(inputs);
-            await db.SaveChangesAsync();
+            await db.InputReceipts.AddRangeAsync(inputs, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
 
             // Add InputInfo records - only completed should be counted
             var inputInfos = new List<InputInfo>
@@ -529,16 +529,16 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
                 new() { InputId = inputs[1].Id, InputPrice = 200m, Count = 50 },  // 10000 - working (not counted)
                 new() { InputId = inputs[2].Id, InputPrice = 300m, Count = 100 }  // 30000 - cancelled (not counted)
             };
-            await db.InputInfos.AddRangeAsync(inputInfos);
-            await db.SaveChangesAsync();
+            await db.InputInfos.AddRangeAsync(inputInfos, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
         }
 
         // Act
-        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None$"/api/v1/Supplier/{supplierId}";
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<SupplierResponse>();
+        var content = await response.Content.ReadFromJsonAsync<SupplierResponse>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.TotalInput.Should().Be(10000); // Only completed input
     }

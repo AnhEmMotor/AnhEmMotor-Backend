@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Json;
 
 using Domain.Entities;
@@ -32,7 +32,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
             
             // Clear existing settings
             db.Settings.RemoveRange(db.Settings);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);ancellationToken.None).ConfigureAwait(true);
 
             // Seed settings
             var settings = new List<SettingEntity>
@@ -42,12 +42,12 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
                 new (){ Key = "Order_value_exceeds", Value = "50000000" },
                 new (){ Key = "Z-bike_threshold_for_meeting", Value = "5" }
             };
-            await db.Settings.AddRangeAsync(settings);
-            await db.SaveChangesAsync();
+            await db.Settings.AddRangeAsync(settings, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
         }
 
         // Act
-        var response = await _client.GetAsync("/api/v1/Setting");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Setting";
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -74,13 +74,13 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
             {
                 new (){ Key = "Deposit_ratio", Value = "50" }
             };
-            await db.Settings.AddRangeAsync(settings);
-            await db.SaveChangesAsync();
+            await db.Settings.AddRangeAsync(settings, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
         }
 
         // Act
         // Note: Without proper authentication setup, this will test authorization flow
-        var response = await _client.GetAsync("/api/v1/Setting");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Setting";
 
         // Assert
         // Depending on auth configuration, should be 401 or 403
@@ -96,11 +96,11 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             db.Settings.RemoveRange(db.Settings);
             await db.Settings.AddAsync(new (){ Key = "Deposit_ratio", Value = "50" });
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
         }
 
         // Act
-        var response = await _client.GetAsync("/api/v1/Setting");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Setting";
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -114,11 +114,11 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             db.Settings.RemoveRange(db.Settings);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
         }
 
         // Act
-        var response = await _client.GetAsync("/api/v1/Setting");
+        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Setting";
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -144,8 +144,8 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
                 new (){ Key = "Order_value_exceeds", Value = "30000000" },
                 new (){ Key = "Z-bike_threshold_for_meeting", Value = "3" }
             };
-            await db.Settings.AddRangeAsync(initialSettings);
-            await db.SaveChangesAsync();
+            await db.Settings.AddRangeAsync(initialSettings, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
         }
 
         var request = new Dictionary<string, long?>
@@ -157,7 +157,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PutAsJsonAsync("/api/v1/Setting", request);
+        var response = await _client.PutAsJsonAsync(await _client.PutAsJsonAsync(, CancellationToken.None"/api/v1/Setting", request;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -192,8 +192,8 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
                 new (){ Key = "Deposit_ratio", Value = "30" },
                 new (){ Key = "Inventory_alert_level", Value = "5" }
             };
-            await db.Settings.AddRangeAsync(initialSettings);
-            await db.SaveChangesAsync();
+            await db.Settings.AddRangeAsync(initialSettings, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
         }
 
         var request = new Dictionary<string, long?>
@@ -202,7 +202,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PutAsJsonAsync("/api/v1/Setting", request);
+        var response = await _client.PutAsJsonAsync(await _client.PutAsJsonAsync(, CancellationToken.None"/api/v1/Setting", request;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -226,13 +226,13 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             db.Settings.RemoveRange(db.Settings);
             await db.Settings.AddAsync(new (){ Key = "Deposit_ratio", Value = "50" });
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
         }
 
         var request = new Dictionary<string, long?> { { "Deposit_ratio", 25 } };
 
         // Act
-        var response = await _client.PutAsJsonAsync("/api/v1/Setting", request);
+        var response = await _client.PutAsJsonAsync(await _client.PutAsJsonAsync(, CancellationToken.None"/api/v1/Setting", request;
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.Unauthorized, HttpStatusCode.Forbidden);
@@ -255,13 +255,13 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             db.Settings.RemoveRange(db.Settings);
             await db.Settings.AddAsync(new (){ Key = "Deposit_ratio", Value = "50" });
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
         }
 
         var request = new Dictionary<string, long?> { { "Deposit_ratio", 25 } };
 
         // Act
-        var response = await _client.PutAsJsonAsync("/api/v1/Setting", request);
+        var response = await _client.PutAsJsonAsync(await _client.PutAsJsonAsync(, CancellationToken.None"/api/v1/Setting", request;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -276,17 +276,17 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             db.Settings.RemoveRange(db.Settings);
             await db.Settings.AddAsync(new (){ Key = "Deposit_ratio", Value = "50" });
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
         }
 
         var request = new Dictionary<string, long?> { { "Deposit_ratio", 0 } };
 
         // Act
-        var response = await _client.PutAsJsonAsync("/api/v1/Setting", request);
+        var response = await _client.PutAsJsonAsync(await _client.PutAsJsonAsync(, CancellationToken.None"/api/v1/Setting", request;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var content = await response.Content.ReadFromJsonAsync<Application.Common.Models.ErrorResponse>();
+        var content = await response.Content.ReadFromJsonAsync<Application.Common.Models.ErrorResponse>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Errors.Should().Contain(e => 
             e.Field == "Deposit_ratio" && 
@@ -310,17 +310,17 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             db.Settings.RemoveRange(db.Settings);
             await db.Settings.AddAsync(new (){ Key = "Deposit_ratio", Value = "50" });
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
         }
 
         var request = new Dictionary<string, long?> { { "Deposit_ratio", 100 } };
 
         // Act
-        var response = await _client.PutAsJsonAsync("/api/v1/Setting", request);
+        var response = await _client.PutAsJsonAsync(await _client.PutAsJsonAsync(, CancellationToken.None"/api/v1/Setting", request;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var content = await response.Content.ReadFromJsonAsync<Application.Common.Models.ErrorResponse>();
+        var content = await response.Content.ReadFromJsonAsync<Application.Common.Models.ErrorResponse>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Errors.Should().Contain(e => 
             e.Field == "Deposit_ratio" && 
@@ -344,7 +344,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             db.Settings.RemoveRange(db.Settings);
             await db.Settings.AddAsync(new (){ Key = "Deposit_ratio", Value = "50" });
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
         }
 
         // Note: Since request accepts long?, this test simulates decimal input via string conversion
@@ -352,11 +352,11 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         var request = new Dictionary<string, long?> { { "Deposit_ratio", 5055 } }; // Represents 50.55
 
         // Act
-        var response = await _client.PutAsJsonAsync("/api/v1/Setting", request);
+        var response = await _client.PutAsJsonAsync(await _client.PutAsJsonAsync(, CancellationToken.None"/api/v1/Setting", request;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var content = await response.Content.ReadFromJsonAsync<Application.Common.Models.ErrorResponse>();
+        var content = await response.Content.ReadFromJsonAsync<Application.Common.Models.ErrorResponse>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Errors.Should().Contain(e => e.Message.Contains("decimal place"));
     }
@@ -370,17 +370,17 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             db.Settings.RemoveRange(db.Settings);
             await db.Settings.AddAsync(new (){ Key = "Deposit_ratio", Value = "50" });
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
         }
 
         var request = new Dictionary<string, long?>();
 
         // Act
-        var response = await _client.PutAsJsonAsync("/api/v1/Setting", request);
+        var response = await _client.PutAsJsonAsync(await _client.PutAsJsonAsync(, CancellationToken.None"/api/v1/Setting", request;
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var content = await response.Content.ReadFromJsonAsync<Application.Common.Models.ErrorResponse>();
+        var content = await response.Content.ReadFromJsonAsync<Application.Common.Models.ErrorResponse>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Errors.Should().Contain(e => e.Message.Contains("cannot be empty"));
     }

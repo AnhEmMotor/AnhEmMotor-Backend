@@ -1,4 +1,4 @@
-using Application.ApiContracts.Input.Requests;
+﻿using Application.ApiContracts.Input.Requests;
 using Application.ApiContracts.Input.Responses;
 using Application.Features.Inputs.Commands.CreateInput;
 using Application.Features.Inputs.Commands.DeleteManyInputs;
@@ -49,11 +49,11 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", request);
+        var response = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<InputResponse>();
+        var content = await response.Content.ReadFromJsonAsync<InputResponse>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Id.Should().NotBeNull();
         content.StatusId.Should().Be(Domain.Constants.Input.InputStatus.Working);
@@ -96,11 +96,11 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", request);
+        var response = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<InputResponse>();
+        var content = await response.Content.ReadFromJsonAsync<InputResponse>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
 
         // Calculate expected: (5 × 123456.78) + (3 × 987654.32) = 617283.90 + 2962962.96 = 3580246.86
@@ -128,7 +128,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", request);
+        var response = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.NotFound, HttpStatusCode.BadRequest);
@@ -154,7 +154,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", request);
+        var response = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.NotFound, HttpStatusCode.BadRequest);
@@ -180,7 +180,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", request);
+        var response = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -206,13 +206,13 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", request);
+        var response = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         // Verify DB - Notes should be sanitized
-        var content = await response.Content.ReadFromJsonAsync<InputResponse>();
+        var content = await response.Content.ReadFromJsonAsync<InputResponse>(CancellationToken.None).ConfigureAwait(true);
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var input = db.InputReceipts.FirstOrDefault(i => i.Id == content!.Id);
@@ -226,7 +226,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         // Assuming DB has 25 inputs
 
         // Act
-        var response = await _client.GetAsync("/api/v1/InventoryReceipts?page=1&pageSize=10");
+        var response = await _client.GetAsync("/api/v1/InventoryReceipts?page=1&pageSize=10").ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -242,7 +242,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         // Arrange
 
         // Act
-        var response = await _client.GetAsync("/api/v1/InventoryReceipts?filters=StatusId==working");
+        var response = await _client.GetAsync("/api/v1/InventoryReceipts?filters=StatusId==working").ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -257,7 +257,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         // Arrange
 
         // Act
-        var response = await _client.GetAsync("/api/v1/InventoryReceipts?sorts=-InputDate");
+        var response = await _client.GetAsync("/api/v1/InventoryReceipts?sorts=-InputDate").ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -273,11 +273,11 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         int inputId = 1;
 
         // Act
-        var response = await _client.GetAsync($"/api/v1/InventoryReceipts/{inputId}");
+        var response = await _client.GetAsync($"/api/v1/InventoryReceipts/{inputId}").ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<InputResponse>();
+        var content = await response.Content.ReadFromJsonAsync<InputResponse>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Id.Should().Be(inputId);
         content.StatusId.Should().NotBeNullOrEmpty();
@@ -293,7 +293,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         int inputId = 9999;
 
         // Act
-        var response = await _client.GetAsync($"/api/v1/InventoryReceipts/{inputId}");
+        var response = await _client.GetAsync($"/api/v1/InventoryReceipts/{inputId}").ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -313,8 +313,8 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
                 new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }
             ]
         };
-        var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest);
-        var createdInput = await createResponse.Content.ReadFromJsonAsync<InputResponse>();
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest).ConfigureAwait(true);
+        var createdInput = await createResponse.Content.ReadFromJsonAsync<InputResponse>(CancellationToken.None).ConfigureAwait(true);
             
         var updateRequest = new UpdateInputCommand
         {
@@ -327,11 +327,11 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PutAsJsonAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}", updateRequest);
+        var response = await _client.PutAsJsonAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}", updateRequest).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<InputResponse>();
+        var content = await response.Content.ReadFromJsonAsync<InputResponse>(CancellationToken.None).ConfigureAwait(true);
         content!.Notes.Should().Be("Updated");
         content.SupplierId.Should().Be(2);
         content.TotalPayable.Should().Be(4000000);
@@ -351,12 +351,12 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
                 new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }
             ]
         };
-        var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest);
-        var createdInput = await createResponse.Content.ReadFromJsonAsync<InputResponse>();
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest).ConfigureAwait(true);
+        var createdInput = await createResponse.Content.ReadFromJsonAsync<InputResponse>(CancellationToken.None).ConfigureAwait(true);
 
         // Update status to finished
         await _client.PatchAsJsonAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}/status",
-            new UpdateInputStatusCommand { StatusId = Domain.Constants.Input.InputStatus.Finish });
+            new UpdateInputStatusCommand { StatusId = Domain.Constants.Input.InputStatus.Finish }).ConfigureAwait(true);
 
         var updateRequest = new UpdateInputCommand
         {
@@ -366,7 +366,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PutAsJsonAsync($"/api/v1/InventoryReceipts/{createdInput.Id}", updateRequest);
+        var response = await _client.PutAsJsonAsync($"/api/v1/InventoryReceipts/{createdInput.Id}", updateRequest).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -385,8 +385,8 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
                 new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }
             ]
         };
-        var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest);
-        var createdInput = await createResponse.Content.ReadFromJsonAsync<InputResponse>();
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest).ConfigureAwait(true);
+        var createdInput = await createResponse.Content.ReadFromJsonAsync<InputResponse>(CancellationToken.None).ConfigureAwait(true);
 
         // Update status to cancelled
         await _client.PatchAsJsonAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}/status",
@@ -400,7 +400,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PutAsJsonAsync($"/api/v1/InventoryReceipts/{createdInput.Id}", updateRequest);
+        var response = await _client.PutAsJsonAsync($"/api/v1/InventoryReceipts/{createdInput.Id}", updateRequest).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -419,8 +419,8 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
                 new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }
             ]
         };
-        var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest);
-        var createdInput = await createResponse.Content.ReadFromJsonAsync<InputResponse>();
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest).ConfigureAwait(true);
+        var createdInput = await createResponse.Content.ReadFromJsonAsync<InputResponse>(CancellationToken.None).ConfigureAwait(true);
 
         var statusRequest = new UpdateInputStatusCommand { StatusId = Domain.Constants.Input.InputStatus.Finish };
 
@@ -429,7 +429,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<InputResponse>();
+        var content = await response.Content.ReadFromJsonAsync<InputResponse>(CancellationToken.None).ConfigureAwait(true);
         content!.StatusId.Should().Be(Domain.Constants.Input.InputStatus.Finish);
 
         // Verify DB
@@ -453,8 +453,8 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
                 new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }
             ]
         };
-        var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest);
-        var createdInput = await createResponse.Content.ReadFromJsonAsync<InputResponse>();
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest).ConfigureAwait(true);
+        var createdInput = await createResponse.Content.ReadFromJsonAsync<InputResponse>(CancellationToken.None).ConfigureAwait(true);
 
         var statusRequest = new UpdateInputStatusCommand { StatusId = Domain.Constants.Input.InputStatus.Cancel };
 
@@ -463,7 +463,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<InputResponse>();
+        var content = await response.Content.ReadFromJsonAsync<InputResponse>(CancellationToken.None).ConfigureAwait(true);
         content!.StatusId.Should().Be(Domain.Constants.Input.InputStatus.Cancel);
     }
 
@@ -484,8 +484,8 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
                     new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }
                 ]
             };
-            var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest);
-            var createdInput = await createResponse.Content.ReadFromJsonAsync<InputResponse>();
+            var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest).ConfigureAwait(true);
+            var createdInput = await createResponse.Content.ReadFromJsonAsync<InputResponse>(CancellationToken.None).ConfigureAwait(true);
             ids.Add(createdInput!.Id!.Value);
         }
 
@@ -524,8 +524,8 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
                 new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }
             ]
         };
-        var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest);
-        var createdInput = await createResponse.Content.ReadFromJsonAsync<InputResponse>();
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest).ConfigureAwait(true);
+        var createdInput = await createResponse.Content.ReadFromJsonAsync<InputResponse>(CancellationToken.None).ConfigureAwait(true);
 
         var statusRequest = new UpdateManyInputStatusCommand
         {
@@ -553,11 +553,11 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
                 new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }
             ]
         };
-        var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest);
-        var createdInput = await createResponse.Content.ReadFromJsonAsync<InputResponse>();
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest).ConfigureAwait(true);
+        var createdInput = await createResponse.Content.ReadFromJsonAsync<InputResponse>(CancellationToken.None).ConfigureAwait(true);
 
         // Act
-        var response = await _client.DeleteAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}");
+        var response = await _client.DeleteAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}").ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NoContent);
@@ -585,8 +585,8 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
                     new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }
                 ]
             };
-            var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest);
-            var createdInput = await createResponse.Content.ReadFromJsonAsync<InputResponse>();
+            var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest).ConfigureAwait(true);
+            var createdInput = await createResponse.Content.ReadFromJsonAsync<InputResponse>(CancellationToken.None).ConfigureAwait(true);
             ids.Add(createdInput!.Id!.Value);
         }
 
@@ -598,7 +598,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
             Method = HttpMethod.Delete,
             RequestUri = new Uri("/api/v1/InventoryReceipts", UriKind.Relative),
             Content = JsonContent.Create(deleteRequest)
-        });
+        }).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NoContent);
@@ -617,14 +617,14 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
                 new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }
             ]
         };
-        var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest);
-        var createdInput = await createResponse.Content.ReadFromJsonAsync<InputResponse>();
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest).ConfigureAwait(true);
+        var createdInput = await createResponse.Content.ReadFromJsonAsync<InputResponse>(CancellationToken.None).ConfigureAwait(true);
 
         // Delete it first
-        await _client.DeleteAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}");
+        await _client.DeleteAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}").ConfigureAwait(true);
 
         // Act
-        var response = await _client.PostAsync($"/api/v1/InventoryReceipts/{createdInput.Id}/restore", null);
+        var response = await _client.PostAsync($"/api/v1/InventoryReceipts/{createdInput.Id}/restore", null).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -652,18 +652,18 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
                     new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }
                 ]
             };
-            var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest);
-            var createdInput = await createResponse.Content.ReadFromJsonAsync<InputResponse>();
+            var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest).ConfigureAwait(true);
+            var createdInput = await createResponse.Content.ReadFromJsonAsync<InputResponse>(CancellationToken.None).ConfigureAwait(true);
             ids.Add(createdInput!.Id!.Value);
 
             // Delete each one
-            await _client.DeleteAsync($"/api/v1/InventoryReceipts/{createdInput.Id}");
+            await _client.DeleteAsync($"/api/v1/InventoryReceipts/{createdInput.Id}").ConfigureAwait(true);
         }
 
         var restoreRequest = new RestoreManyInputsCommand { Ids = ids };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts/restore", restoreRequest);
+        var response = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts/restore", restoreRequest).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -691,15 +691,15 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
                 new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }
             ]
         };
-        var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest);
-        var createdInput = await createResponse.Content.ReadFromJsonAsync<InputResponse>();
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest).ConfigureAwait(true);
+        var createdInput = await createResponse.Content.ReadFromJsonAsync<InputResponse>(CancellationToken.None).ConfigureAwait(true);
 
         // Act
-        var response = await _client.PostAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}/clone", null);
+        var response = await _client.PostAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}/clone", null).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var clonedInput = await response.Content.ReadFromJsonAsync<InputResponse>();
+        var clonedInput = await response.Content.ReadFromJsonAsync<InputResponse>(CancellationToken.None).ConfigureAwait(true);
         clonedInput!.Id.Should().NotBe(createdInput.Id);
         clonedInput.StatusId.Should().Be(Domain.Constants.Input.InputStatus.Working);
         clonedInput.SupplierId.Should().Be(createdInput.SupplierId);
@@ -719,8 +719,8 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
                 new CreateInputInfoRequest { ProductId = 2, Count = 5, InputPrice = 50000 }
             ]
         };
-        var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest);
-        var createdInput = await createResponse.Content.ReadFromJsonAsync<InputResponse>();
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest).ConfigureAwait(true);
+        var createdInput = await createResponse.Content.ReadFromJsonAsync<InputResponse>(CancellationToken.None).ConfigureAwait(true);
 
         // Delete product 2
         using var scope = _factory.Services.CreateScope();
@@ -733,11 +733,11 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         }
 
         // Act
-        var response = await _client.PostAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}/clone", null);
+        var response = await _client.PostAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}/clone", null).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var clonedInput = await response.Content.ReadFromJsonAsync<InputResponse>();
+        var clonedInput = await response.Content.ReadFromJsonAsync<InputResponse>(CancellationToken.None).ConfigureAwait(true);
         clonedInput!.Products.Should().HaveCount(1);
         clonedInput.Products[0].ProductId.Should().Be(1);
     }
@@ -749,7 +749,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         int supplierId = 1;
 
         // Act
-        var response = await _client.GetAsync($"/api/v1/InventoryReceipts/by-supplier/{supplierId}?page=1&pageSize=10");
+        var response = await _client.GetAsync($"/api/v1/InventoryReceipts/by-supplier/{supplierId}?page=1&pageSize=10").ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -764,7 +764,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         // Arrange
 
         // Act
-        var response = await _client.GetAsync("/api/v1/InventoryReceipts/deleted?page=1&pageSize=10");
+        var response = await _client.GetAsync("/api/v1/InventoryReceipts/deleted?page=1&pageSize=10").ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -787,11 +787,11 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", request);
+        var response = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<InputResponse>();
+        var content = await response.Content.ReadFromJsonAsync<InputResponse>(CancellationToken.None).ConfigureAwait(true);
         content!.TotalPayable.Should().Be(0);
     }
 
@@ -808,8 +808,8 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
                 new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }
             ]
         };
-        var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest);
-        var createdInput = await createResponse.Content.ReadFromJsonAsync<InputResponse>();
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest).ConfigureAwait(true);
+        var createdInput = await createResponse.Content.ReadFromJsonAsync<InputResponse>(CancellationToken.None).ConfigureAwait(true);
 
         var statusRequest = new UpdateInputStatusCommand { StatusId = Domain.Constants.Input.InputStatus.Finish };
 
@@ -832,7 +832,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         // Arrange
 
         // Act
-        var response = await _client.GetAsync("/api/v1/InventoryReceipts?filters=StatusId==working,SupplierId==1");
+        var response = await _client.GetAsync("/api/v1/InventoryReceipts?filters=StatusId==working,SupplierId==1").ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
