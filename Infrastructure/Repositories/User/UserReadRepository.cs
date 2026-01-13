@@ -119,7 +119,7 @@ namespace Infrastructure.Repositories.User
                 AuthMethods = ["pwd"]
             };
 
-            return Result<UserAuth>.Success(UserAuth);
+            return UserAuth;
         }
 
         public async Task<UserAuth?> GetUserByIDAsync(Guid? idUser, CancellationToken cancellationToken)

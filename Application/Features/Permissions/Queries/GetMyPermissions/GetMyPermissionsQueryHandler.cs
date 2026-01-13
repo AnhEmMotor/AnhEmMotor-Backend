@@ -16,13 +16,13 @@ public class GetMyPermissionsQueryHandler(
         CancellationToken cancellationToken)
     {
         var userId = Guid.Parse(request.UserId!);
-        var user = await userReadRepository.GetUserByIDAsync(userId, cancellationToken).ConfigureAwait(false);
+        var user = await userReadRepository.FindUserByIdAsync(userId, cancellationToken).ConfigureAwait(false);
         if (user is null)
         {
             return Error.NotFound("User not found.");
         }
         var userRoles = await userReadRepository.GetRolesOfUserAsync(user).ConfigureAwait(false);
-        var roleEntities = await userReadRepository.GetRolesOfUserAsync(userRoles, cancellationToken)
+        var roleEntities = await roleReadRepository.GetRolesByNameAsync(userRoles, cancellationToken)
             .ConfigureAwait(false);
 
         var roleIds = roleEntities.Select(r => r.Id).ToList();

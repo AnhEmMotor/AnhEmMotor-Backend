@@ -21,7 +21,7 @@ public class GetRolePermissionsQueryHandler(
             return Error.NotFound("Role not found.");
         }
 
-        var permissions = await rolePermissionRepository.GetRolesPermissionByRoleIdAsync(role.Id, cancellationToken)
+        var permissions = await rolePermissionRepository.GetPermissionsNameByRoleIdAsync(role.Id, cancellationToken)
             .ConfigureAwait(false);
 
         var permissionsWithMetadata = permissions

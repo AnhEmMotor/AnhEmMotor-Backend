@@ -11,6 +11,7 @@ using Application.Features.Permissions.Queries.GetUserPermissionsById;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Permission;
 using Application.Interfaces.Repositories.Role;
+using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Services;
 using Domain.Constants.Permission;
 using Domain.Entities;
@@ -52,41 +53,6 @@ public class PermissionAndRole
             Mock.Of<ILogger<RoleManager<ApplicationRole>>>());
     }
 
-    private static Mock<IApplicationUserManager> CreateApplicationUserManagerMock(Mock<UserManager<ApplicationUser>> userManagerMock)
-    {
-        var mock = new Mock<IApplicationUserManager>();
-        
-        mock.Setup(x => x.FindByIdAsync(It.IsAny<string>()))
-            .Returns<string>(id => userManagerMock.Object.FindByIdAsync(id));
-        
-        mock.Setup(x => x.GetRolesAsync(It.IsAny<ApplicationUser>()))
-            .Returns<ApplicationUser>(user => userManagerMock.Object.GetRolesAsync(user));
-        
-        mock.Setup(x => x.GetUsersInRoleAsync(It.IsAny<string>()))
-            .Returns<string>(roleName => userManagerMock.Object.GetUsersInRoleAsync(roleName));
-        
-        return mock;
-    }
-
-    private static Mock<IApplicationRoleManager> CreateApplicationRoleManagerMock(Mock<RoleManager<ApplicationRole>> roleManagerMock)
-    {
-        var mock = new Mock<IApplicationRoleManager>();
-        
-        mock.Setup(x => x.FindByNameAsync(It.IsAny<string>()))
-            .Returns<string>(name => roleManagerMock.Object.FindByNameAsync(name));
-        
-        mock.Setup(x => x.RoleExistsAsync(It.IsAny<string>()))
-            .Returns<string>(name => roleManagerMock.Object.RoleExistsAsync(name));
-        
-        mock.Setup(x => x.CreateAsync(It.IsAny<ApplicationRole>()))
-            .Returns<ApplicationRole>(role => roleManagerMock.Object.CreateAsync(role));
-        
-        mock.Setup(x => x.DeleteAsync(It.IsAny<ApplicationRole>()))
-            .Returns<ApplicationRole>(role => roleManagerMock.Object.DeleteAsync(role));
-        
-        return mock;
-    }
-
     [Fact(DisplayName = "PERM_001 - Lấy tất cả permissions thành công")]
     public async Task GetAllPermissions_NoParams_ReturnsGroupedPermissions()
     {
@@ -112,15 +78,18 @@ public class PermissionAndRole
         var userId = Guid.NewGuid();
         var roleId = Guid.NewGuid();
 
-        var userManagerMock = CreateUserManagerMock();
-
+        var userReadRepoMock = new Mock<IUserReadRepository>();
         var roleReadRepoMock = new Mock<IRoleReadRepository>();
 
-        var user = new ApplicationUser { Id = userId, UserName = "testuser" };
-        userManagerMock.Setup(x => x.FindByIdAsync(userId.ToString()))
+        var user = new ApplicationUser { Id = userId, UserName = "testuser", Email = "test@example.com" };
+        userReadRepoMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
-        userManagerMock.Setup(x => x.GetRolesAsync(user))
-            .ReturnsAsync(["Manager"]);
+        userReadRepoMock.Setup(x => x.GetRolesOfUserAsync(user))
+            .ReturnsAsync(new List<string> { "Manager" });
+
+        var roles = new List<ApplicationRole> { new() { Id = Guid.NewGuid(), Name = "Manager" } };
+        roleReadRepoMock.Setup(x => x.GetRolesByNameAsync(It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(roles);
 
         var permissions = new List<string>
         {
@@ -131,11 +100,10 @@ public class PermissionAndRole
             PermissionsList.Roles.View
         };
 
-        roleReadRepoMock.Setup(x => x.GetPermissionNamesByRoleIdsAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
+        roleReadRepoMock.Setup(x => x.GetPermissionsNameByRoleIdAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(permissions);
 
-        var userServiceMock = CreateApplicationUserManagerMock(userManagerMock);
-        var handler = new GetMyPermissionsQueryHandler(userServiceMock.Object, roleReadRepoMock.Object);
+        var handler = new GetMyPermissionsQueryHandler(roleReadRepoMock.Object, userReadRepoMock.Object);
         var query = new GetMyPermissionsQuery { UserId = userId.ToString() };
 
         // Act
@@ -153,18 +121,19 @@ public class PermissionAndRole
         // Arrange
         var userId = Guid.NewGuid();
 
-        var userManagerMock = CreateUserManagerMock();
-
+        var userReadRepoMock = new Mock<IUserReadRepository>();
         var roleReadRepoMock = new Mock<IRoleReadRepository>();
 
-        var user = new ApplicationUser { Id = userId, UserName = "testuser" };
-        userManagerMock.Setup(x => x.FindByIdAsync(userId.ToString()))
+        var user = new ApplicationUser { Id = userId, UserName = "testuser", Email = "test@example.com" };
+        userReadRepoMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
-        userManagerMock.Setup(x => x.GetRolesAsync(user))
-            .ReturnsAsync([]);
+        userReadRepoMock.Setup(x => x.GetRolesOfUserAsync(user))
+            .ReturnsAsync(new List<string>());
 
-        var userServiceMock = CreateApplicationUserManagerMock(userManagerMock);
-        var handler = new GetMyPermissionsQueryHandler(userServiceMock.Object, roleReadRepoMock.Object);
+        roleReadRepoMock.Setup(x => x.GetRolesByNameAsync(It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<ApplicationRole>());
+
+        var handler = new GetMyPermissionsQueryHandler(roleReadRepoMock.Object, userReadRepoMock.Object);
         var query = new GetMyPermissionsQuery { UserId = userId.ToString() };
 
         // Act
@@ -183,15 +152,18 @@ public class PermissionAndRole
         var userId = Guid.NewGuid();
         var roleId = Guid.NewGuid();
 
-        var userManagerMock = CreateUserManagerMock();
-
+        var userReadRepoMock = new Mock<IUserReadRepository>();
         var roleReadRepoMock = new Mock<IRoleReadRepository>();
 
         var user = new ApplicationUser { Id = userId, UserName = "staffuser", Email = "staff@test.com" };
-        userManagerMock.Setup(x => x.FindByIdAsync(userId.ToString()))
+        userReadRepoMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
-        userManagerMock.Setup(x => x.GetRolesAsync(user))
-            .ReturnsAsync(["Staff"]);
+        userReadRepoMock.Setup(x => x.GetRolesOfUserAsync(user))
+            .ReturnsAsync(new List<string> { "Staff" });
+
+        var roles = new List<ApplicationRole> { new() { Id = Guid.NewGuid(), Name = "Staff" } };
+        roleReadRepoMock.Setup(x => x.GetRolesByNameAsync(It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(roles);
 
         var permissions = new List<string>
         {
@@ -200,11 +172,10 @@ public class PermissionAndRole
             PermissionsList.Files.View
         };
 
-        roleReadRepoMock.Setup(x => x.GetPermissionNamesByRoleIdsAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
+        roleReadRepoMock.Setup(x => x.GetPermissionsNameByRoleIdAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(permissions);
 
-        var userServiceMock = CreateApplicationUserManagerMock(userManagerMock);
-        var handler = new GetUserPermissionsByIdQueryHandler(userServiceMock.Object, roleReadRepoMock.Object);
+        var handler = new GetUserPermissionsByIdQueryHandler(userReadRepoMock.Object, roleReadRepoMock.Object);
         var query = new GetUserPermissionsByIdQuery { UserId = userId };
 
         // Act
@@ -223,15 +194,13 @@ public class PermissionAndRole
         // Arrange
         var userId = Guid.NewGuid();
 
-        var userManagerMock = CreateUserManagerMock();
-
+        var userReadRepoMock = new Mock<IUserReadRepository>();
         var roleReadRepoMock = new Mock<IRoleReadRepository>();
 
-        userManagerMock.Setup(x => x.FindByIdAsync(userId.ToString()))
+        userReadRepoMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((ApplicationUser?)null);
 
-        var userServiceMock = CreateApplicationUserManagerMock(userManagerMock);
-        var handler = new GetUserPermissionsByIdQueryHandler(userServiceMock.Object, roleReadRepoMock.Object);
+        var handler = new GetUserPermissionsByIdQueryHandler(userReadRepoMock.Object, roleReadRepoMock.Object);
         var query = new GetUserPermissionsByIdQuery { UserId = userId };
 
         // Act
@@ -244,12 +213,10 @@ public class PermissionAndRole
     {
         // Arrange
         var roleId = Guid.NewGuid();
-        var roleManagerMock = CreateRoleManagerMock();
-
         var roleReadRepoMock = new Mock<IRoleReadRepository>();
 
         var role = new ApplicationRole { Id = roleId, Name = "Manager" };
-        roleManagerMock.Setup(x => x.FindByNameAsync("Manager"))
+        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("Manager"))
             .ReturnsAsync(role);
 
         var permissions = new List<string>
@@ -260,11 +227,10 @@ public class PermissionAndRole
             PermissionsList.Brands.Delete
         };
 
-        roleReadRepoMock.Setup(x => x.GetPermissionNamesByRoleIdAsync(roleId, It.IsAny<CancellationToken>()))
+        roleReadRepoMock.Setup(x => x.GetPermissionsNameByRoleIdAsync(roleId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(permissions);
 
-        var roleServiceMock = CreateApplicationRoleManagerMock(roleManagerMock);
-        var handler = new GetRolePermissionsQueryHandler(roleServiceMock.Object, roleReadRepoMock.Object);
+        var handler = new GetRolePermissionsQueryHandler(roleReadRepoMock.Object);
         var query = new GetRolePermissionsQuery { RoleName = "Manager" };
 
         // Act
@@ -279,15 +245,12 @@ public class PermissionAndRole
     public async Task GetRolePermissions_InvalidRoleName_ThrowsNotFoundException()
     {
         // Arrange
-        var roleManagerMock = CreateRoleManagerMock();
-
         var roleReadRepoMock = new Mock<IRoleReadRepository>();
 
-        roleManagerMock.Setup(x => x.FindByNameAsync("NonExistentRole"))
+        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("NonExistentRole"))
             .ReturnsAsync((ApplicationRole?)null);
 
-        var roleServiceMock = CreateApplicationRoleManagerMock(roleManagerMock);
-        var handler = new GetRolePermissionsQueryHandler(roleServiceMock.Object, roleReadRepoMock.Object);
+        var handler = new GetRolePermissionsQueryHandler(roleReadRepoMock.Object);
         var query = new GetRolePermissionsQuery { RoleName = "NonExistentRole" };
 
         // Act
@@ -300,12 +263,10 @@ public class PermissionAndRole
     {
         // Arrange
         var roleId = Guid.NewGuid();
-        var roleManagerMock = CreateRoleManagerMock();
-
         var roleReadRepoMock = new Mock<IRoleReadRepository>();
 
         var role = new ApplicationRole { Id = roleId, Name = "Manager" };
-        roleManagerMock.Setup(x => x.FindByNameAsync("Manager"))
+        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("Manager"))
             .ReturnsAsync(role);
 
         var permissions = new List<string>
@@ -314,11 +275,10 @@ public class PermissionAndRole
             PermissionsList.Brands.Create
         };
 
-        roleReadRepoMock.Setup(x => x.GetPermissionNamesByRoleIdAsync(roleId, It.IsAny<CancellationToken>()))
+        roleReadRepoMock.Setup(x => x.GetPermissionsNameByRoleIdAsync(roleId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(permissions);
 
-        var roleServiceMock = CreateApplicationRoleManagerMock(roleManagerMock);
-        var handler = new GetRolePermissionsQueryHandler(roleServiceMock.Object, roleReadRepoMock.Object);
+        var handler = new GetRolePermissionsQueryHandler(roleReadRepoMock.Object);
         var query = new GetRolePermissionsQuery { RoleName = "  Manager  " };
 
         // Act
@@ -333,8 +293,8 @@ public class PermissionAndRole
     public async Task CreateRole_ValidData_ReturnsSuccess()
     {
         // Arrange
-        var roleManagerMock = CreateRoleManagerMock();
-
+        var roleReadRepoMock = new Mock<IRoleReadRepository>();
+        var roleInsertRepoMock = new Mock<IRoleInsertRepository>();
         var permissionRepoMock = new Mock<IPermissionReadRepository>();
         var roleUpdateRepoMock = new Mock<IRoleUpdateRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
@@ -349,16 +309,15 @@ public class PermissionAndRole
             It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(permissions);
 
-        roleManagerMock.Setup(x => x.RoleExistsAsync("NewRole"))
+        roleReadRepoMock.Setup(x => x.IsRoleExistAsync("NewRole"))
             .ReturnsAsync(false);
 
         var createdRole = new ApplicationRole { Id = Guid.NewGuid(), Name = "NewRole", Description = "Test role" };
-        roleManagerMock.Setup(x => x.CreateAsync(It.IsAny<ApplicationRole>()))
+        roleInsertRepoMock.Setup(x => x.CreateAsync(It.IsAny<ApplicationRole>()))
             .ReturnsAsync(IdentityResult.Success)
             .Callback<ApplicationRole>(r => { r.Id = createdRole.Id; });
 
-        var roleServiceMock = CreateApplicationRoleManagerMock(roleManagerMock);
-        var handler = new CreateRoleCommandHandler(roleServiceMock.Object, permissionRepoMock.Object, roleUpdateRepoMock.Object, unitOfWorkMock.Object);
+        var handler = new CreateRoleCommandHandler(roleReadRepoMock.Object, roleInsertRepoMock.Object, permissionRepoMock.Object, roleUpdateRepoMock.Object, unitOfWorkMock.Object);
         var command = new CreateRoleCommand { RoleName = "NewRole", Description = "Test role", Permissions = [PermissionsList.Brands.View, PermissionsList.Products.View] };
 
         // Act
@@ -376,17 +335,16 @@ public class PermissionAndRole
     public async Task CreateRole_DuplicateName_ThrowsException()
     {
         // Arrange
-        var roleManagerMock = CreateRoleManagerMock();
-
+        var roleReadRepoMock = new Mock<IRoleReadRepository>();
+        var roleInsertRepoMock = new Mock<IRoleInsertRepository>();
         var permissionRepoMock = new Mock<IPermissionReadRepository>();
         var roleUpdateRepoMock = new Mock<IRoleUpdateRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
 
-        roleManagerMock.Setup(x => x.RoleExistsAsync("Manager"))
+        roleReadRepoMock.Setup(x => x.IsRoleExistAsync("Manager"))
             .ReturnsAsync(true);
 
-        var roleServiceMock = CreateApplicationRoleManagerMock(roleManagerMock);
-        var handler = new CreateRoleCommandHandler(roleServiceMock.Object, permissionRepoMock.Object, roleUpdateRepoMock.Object, unitOfWorkMock.Object);
+        var handler = new CreateRoleCommandHandler(roleReadRepoMock.Object, roleInsertRepoMock.Object, permissionRepoMock.Object, roleUpdateRepoMock.Object, unitOfWorkMock.Object);
         var command = new CreateRoleCommand {
             RoleName = "Manager",
             Description = "Duplicate",
@@ -402,14 +360,13 @@ public class PermissionAndRole
     public async Task CreateRole_EmptyRoleName_ThrowsValidationException()
     {
         // Arrange
-        var roleManagerMock = CreateRoleManagerMock();
-
+        var roleReadRepoMock = new Mock<IRoleReadRepository>();
+        var roleInsertRepoMock = new Mock<IRoleInsertRepository>();
         var permissionRepoMock = new Mock<IPermissionReadRepository>();
         var roleUpdateRepoMock = new Mock<IRoleUpdateRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
 
-        var roleServiceMock = CreateApplicationRoleManagerMock(roleManagerMock);
-        var handler = new CreateRoleCommandHandler(roleServiceMock.Object, permissionRepoMock.Object, roleUpdateRepoMock.Object, unitOfWorkMock.Object);
+        var handler = new CreateRoleCommandHandler(roleReadRepoMock.Object, roleInsertRepoMock.Object, permissionRepoMock.Object, roleUpdateRepoMock.Object, unitOfWorkMock.Object);
         var command = new CreateRoleCommand {
             RoleName = "",
             Description = "Test",
@@ -425,14 +382,13 @@ public class PermissionAndRole
     public async Task CreateRole_NullRoleName_ThrowsValidationException()
     {
         // Arrange
-        var roleManagerMock = CreateRoleManagerMock();
-
+        var roleReadRepoMock = new Mock<IRoleReadRepository>();
+        var roleInsertRepoMock = new Mock<IRoleInsertRepository>();
         var permissionRepoMock = new Mock<IPermissionReadRepository>();
         var roleUpdateRepoMock = new Mock<IRoleUpdateRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
 
-        var roleServiceMock = CreateApplicationRoleManagerMock(roleManagerMock);
-        var handler = new CreateRoleCommandHandler(roleServiceMock.Object, permissionRepoMock.Object, roleUpdateRepoMock.Object, unitOfWorkMock.Object);
+        var handler = new CreateRoleCommandHandler(roleReadRepoMock.Object, roleInsertRepoMock.Object, permissionRepoMock.Object, roleUpdateRepoMock.Object, unitOfWorkMock.Object);
         var command = new CreateRoleCommand
         {
             RoleName = null!,
@@ -449,14 +405,13 @@ public class PermissionAndRole
     public async Task CreateRole_EmptyPermissions_ThrowsValidationException()
     {
         // Arrange
-        var roleManagerMock = CreateRoleManagerMock();
-
+        var roleReadRepoMock = new Mock<IRoleReadRepository>();
+        var roleInsertRepoMock = new Mock<IRoleInsertRepository>();
         var permissionRepoMock = new Mock<IPermissionReadRepository>();
         var roleUpdateRepoMock = new Mock<IRoleUpdateRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
 
-        var roleServiceMock = CreateApplicationRoleManagerMock(roleManagerMock);
-        var handler = new CreateRoleCommandHandler(roleServiceMock.Object, permissionRepoMock.Object, roleUpdateRepoMock.Object, unitOfWorkMock.Object);
+        var handler = new CreateRoleCommandHandler(roleReadRepoMock.Object, roleInsertRepoMock.Object, permissionRepoMock.Object, roleUpdateRepoMock.Object, unitOfWorkMock.Object);
         var command = new CreateRoleCommand {
             RoleName = "EmptyPermRole",
             Description = "Test",
@@ -472,21 +427,20 @@ public class PermissionAndRole
     public async Task CreateRole_InvalidPermissions_ThrowsValidationException()
     {
         // Arrange
-        var roleManagerMock = CreateRoleManagerMock();
-
+        var roleReadRepoMock = new Mock<IRoleReadRepository>();
+        var roleInsertRepoMock = new Mock<IRoleInsertRepository>();
         var permissionRepoMock = new Mock<IPermissionReadRepository>();
         var roleUpdateRepoMock = new Mock<IRoleUpdateRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
 
-        roleManagerMock.Setup(x => x.RoleExistsAsync("InvalidPermRole"))
+        roleReadRepoMock.Setup(x => x.IsRoleExistAsync("InvalidPermRole"))
             .ReturnsAsync(false);
 
         permissionRepoMock.Setup(x => x.GetPermissionsByNamesAsync(
             It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
 
-        var roleServiceMock = CreateApplicationRoleManagerMock(roleManagerMock);
-        var handler = new CreateRoleCommandHandler(roleServiceMock.Object, permissionRepoMock.Object, roleUpdateRepoMock.Object, unitOfWorkMock.Object);
+        var handler = new CreateRoleCommandHandler(roleReadRepoMock.Object, roleInsertRepoMock.Object, permissionRepoMock.Object, roleUpdateRepoMock.Object, unitOfWorkMock.Object);
         var command = new CreateRoleCommand {
             RoleName = "InvalidPermRole",
             Description = "Test",
@@ -502,14 +456,13 @@ public class PermissionAndRole
     public async Task CreateRole_RoleNameWithSpecialCharacters_ThrowsValidationException()
     {
         // Arrange
-        var roleManagerMock = CreateRoleManagerMock();
-
+        var roleReadRepoMock = new Mock<IRoleReadRepository>();
+        var roleInsertRepoMock = new Mock<IRoleInsertRepository>();
         var permissionRepoMock = new Mock<IPermissionReadRepository>();
         var roleUpdateRepoMock = new Mock<IRoleUpdateRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
 
-        var roleServiceMock = CreateApplicationRoleManagerMock(roleManagerMock);
-        var handler = new CreateRoleCommandHandler(roleServiceMock.Object, permissionRepoMock.Object, roleUpdateRepoMock.Object, unitOfWorkMock.Object);
+        var handler = new CreateRoleCommandHandler(roleReadRepoMock.Object, roleInsertRepoMock.Object, permissionRepoMock.Object, roleUpdateRepoMock.Object, unitOfWorkMock.Object);
         var command = new CreateRoleCommand {
             RoleName = "Role@#$%",
             Description = "Test",
@@ -526,21 +479,16 @@ public class PermissionAndRole
     {
         // Arrange
         var roleId = Guid.NewGuid();
-        var roleManagerMock = CreateRoleManagerMock();
-
+        var roleReadRepoMock = new Mock<IRoleReadRepository>();
         var permissionRepoMock = new Mock<IPermissionReadRepository>();
         var roleUpdateRepoMock = new Mock<IRoleUpdateRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
-        var roleReadRepoMock = new Mock<IRoleReadRepository>();
 
         var role = new ApplicationRole { Id = roleId, Name = "Manager", Description = "Old description" };
-        roleManagerMock.Setup(x => x.FindByNameAsync("Manager"))
+        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("Manager"))
             .ReturnsAsync(role);
-        roleManagerMock.Setup(x => x.UpdateAsync(It.IsAny<ApplicationRole>()))
-            .ReturnsAsync(IdentityResult.Success);
 
-        var roleServiceMock = CreateApplicationRoleManagerMock(roleManagerMock);
-        var handler = new UpdateRoleCommandHandler(roleServiceMock.Object, roleReadRepoMock.Object, roleUpdateRepoMock.Object, permissionRepoMock.Object, unitOfWorkMock.Object);
+        var handler = new UpdateRoleCommandHandler(roleReadRepoMock.Object, roleUpdateRepoMock.Object, permissionRepoMock.Object, unitOfWorkMock.Object);
         var command = new UpdateRoleCommand() { RoleName = "Manager",
             Description = "Updated description",
             Permissions = null!
@@ -558,15 +506,13 @@ public class PermissionAndRole
     {
         // Arrange
         var roleId = Guid.NewGuid();
-        var roleManagerMock = CreateRoleManagerMock();
-
+        var roleReadRepoMock = new Mock<IRoleReadRepository>();
         var permissionRepoMock = new Mock<IPermissionReadRepository>();
         var roleUpdateRepoMock = new Mock<IRoleUpdateRepository>();
-        var roleReadRepoMock = new Mock<IRoleReadRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
 
         var role = new ApplicationRole { Id = roleId, Name = "Manager", Description = "Test" };
-        roleManagerMock.Setup(x => x.FindByNameAsync("Manager"))
+        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("Manager"))
             .ReturnsAsync(role);
 
         var oldPermissions = new List<RolePermission>
@@ -581,15 +527,14 @@ public class PermissionAndRole
             new() { Id = 4, Name = PermissionsList.Products.Create }
         };
 
-        roleReadRepoMock.Setup(x => x.GetRolePermissionsByRoleIdAsync(roleId, It.IsAny<CancellationToken>()))
+        roleReadRepoMock.Setup(x => x.GetRolesPermissionByRoleIdAsync(roleId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(oldPermissions);
 
         permissionRepoMock.Setup(x => x.GetPermissionsByNamesAsync(
             It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(newPermissions);
 
-        var roleServiceMock = CreateApplicationRoleManagerMock(roleManagerMock);
-        var handler = new UpdateRoleCommandHandler(roleServiceMock.Object, roleReadRepoMock.Object, roleUpdateRepoMock.Object, permissionRepoMock.Object, unitOfWorkMock.Object);
+        var handler = new UpdateRoleCommandHandler(roleReadRepoMock.Object, roleUpdateRepoMock.Object, permissionRepoMock.Object, unitOfWorkMock.Object);
         
         var command = new UpdateRoleCommand()
         {
@@ -613,19 +558,16 @@ public class PermissionAndRole
     {
         // Arrange
         var roleId = Guid.NewGuid();
-        var roleManagerMock = CreateRoleManagerMock();
-
+        var roleReadRepoMock = new Mock<IRoleReadRepository>();
         var permissionRepoMock = new Mock<IPermissionReadRepository>();
         var roleUpdateRepoMock = new Mock<IRoleUpdateRepository>();
-        var roleReadRepoMock = new Mock<IRoleReadRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
 
         var role = new ApplicationRole { Id = roleId, Name = "Manager", Description = "Original description" };
-        roleManagerMock.Setup(x => x.FindByNameAsync("Manager"))
+        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("Manager"))
             .ReturnsAsync(role);
 
-        var roleServiceMock = CreateApplicationRoleManagerMock(roleManagerMock);
-        var handler = new UpdateRoleCommandHandler(roleServiceMock.Object, roleReadRepoMock.Object, roleUpdateRepoMock.Object, permissionRepoMock.Object, unitOfWorkMock.Object);
+        var handler = new UpdateRoleCommandHandler(roleReadRepoMock.Object, roleUpdateRepoMock.Object, permissionRepoMock.Object, unitOfWorkMock.Object);
         var command = new UpdateRoleCommand()
         {
             RoleName = "Manager",
@@ -646,18 +588,15 @@ public class PermissionAndRole
     public async Task UpdateRole_NonExistentRole_ThrowsNotFoundException()
     {
         // Arrange
-        var roleManagerMock = CreateRoleManagerMock();
-
-        var permissionRepoMock = new Mock<IPermissionReadRepository>();
         var roleReadRepoMock = new Mock<IRoleReadRepository>();
+        var permissionRepoMock = new Mock<IPermissionReadRepository>();
         var roleUpdateRepoMock = new Mock<IRoleUpdateRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
 
-        roleManagerMock.Setup(x => x.FindByNameAsync("NonExistentRole"))
+        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("NonExistentRole"))
             .ReturnsAsync((ApplicationRole?)null);
 
-        var roleServiceMock = CreateApplicationRoleManagerMock(roleManagerMock);
-        var handler = new UpdateRoleCommandHandler(roleServiceMock.Object, roleReadRepoMock.Object, roleUpdateRepoMock.Object, permissionRepoMock.Object, unitOfWorkMock.Object);
+        var handler = new UpdateRoleCommandHandler(roleReadRepoMock.Object, roleUpdateRepoMock.Object, permissionRepoMock.Object, unitOfWorkMock.Object);
         var command = new UpdateRoleCommand()
         {
             RoleName = "NonExistentRole",
@@ -674,21 +613,19 @@ public class PermissionAndRole
     {
         // Arrange
         var roleId = Guid.NewGuid();
-        var roleManagerMock = CreateRoleManagerMock();
-
-        var userManagerMock = CreateUserManagerMock();
-
+        var roleReadRepoMock = new Mock<IRoleReadRepository>();
+        var roleDeleteRepoMock = new Mock<IRoleDeleteRepository>();
         var protectedEntityServiceMock = new Mock<IProtectedEntityManagerService>();
 
         var role = new ApplicationRole { Id = roleId, Name = "OldRole" };
-        roleManagerMock.Setup(x => x.FindByNameAsync("OldRole"))
+        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("OldRole"))
             .ReturnsAsync(role);
-        roleManagerMock.Setup(x => x.DeleteAsync(role))
+        roleReadRepoMock.Setup(x => x.GetUsersInRoleAsync("OldRole"))
+            .ReturnsAsync(new List<ApplicationUser>());
+        roleDeleteRepoMock.Setup(x => x.DeleteAsync(role))
             .ReturnsAsync(IdentityResult.Success);
 
-        var roleServiceMock = CreateApplicationRoleManagerMock(roleManagerMock);
-        var userServiceMock = CreateApplicationUserManagerMock(userManagerMock);
-        var handler = new DeleteRoleCommandHandler(roleServiceMock.Object, userServiceMock.Object, protectedEntityServiceMock.Object);
+        var handler = new DeleteRoleCommandHandler(roleReadRepoMock.Object, roleDeleteRepoMock.Object, protectedEntityServiceMock.Object);
         var command = new DeleteRoleCommand() { RoleName = "OldRole" };
 
         // Act
@@ -697,33 +634,33 @@ public class PermissionAndRole
         // Assert
         result.Should().NotBeNull();
         result.Value.Message.Should().Contain("successfully");
-        roleManagerMock.Verify(x => x.DeleteAsync(role), Times.Once);
+        roleDeleteRepoMock.Verify(x => x.DeleteAsync(role), Times.Once);
     }
 
     [Fact(DisplayName = "PERM_020 - Xóa nhiều roles thành công")]
     public async Task DeleteMultipleRoles_ValidRoles_ReturnsSuccess()
     {
         // Arrange
-        var roleManagerMock = CreateRoleManagerMock();
-
-        var userManagerMock = CreateUserManagerMock();
-
+        var roleReadRepoMock = new Mock<IRoleReadRepository>();
+        var userReadRepoMock = new Mock<IUserReadRepository>();
+        var roleDeleteRepoMock = new Mock<IRoleDeleteRepository>();
         var protectedEntityServiceMock = new Mock<IProtectedEntityManagerService>();
 
         var role1 = new ApplicationRole { Id = Guid.NewGuid(), Name = "Role1" };
         var role2 = new ApplicationRole { Id = Guid.NewGuid(), Name = "Role2" };
         var role3 = new ApplicationRole { Id = Guid.NewGuid(), Name = "Role3" };
 
-        roleManagerMock.Setup(x => x.FindByNameAsync("Role1")).ReturnsAsync(role1);
-        roleManagerMock.Setup(x => x.FindByNameAsync("Role2")).ReturnsAsync(role2);
-        roleManagerMock.Setup(x => x.FindByNameAsync("Role3")).ReturnsAsync(role3);
+        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("Role1")).ReturnsAsync(role1);
+        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("Role2")).ReturnsAsync(role2);
+        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("Role3")).ReturnsAsync(role3);
 
-        roleManagerMock.Setup(x => x.DeleteAsync(It.IsAny<ApplicationRole>()))
+        userReadRepoMock.Setup(x => x.GetUsersInRoleAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<ApplicationUser>());
+
+        roleDeleteRepoMock.Setup(x => x.DeleteAsync(It.IsAny<ApplicationRole>()))
             .ReturnsAsync(IdentityResult.Success);
 
-        var roleServiceMock = CreateApplicationRoleManagerMock(roleManagerMock);
-        var userServiceMock = CreateApplicationUserManagerMock(userManagerMock);
-        var handler = new DeleteMultipleRolesCommandHandler(roleServiceMock.Object, userServiceMock.Object, protectedEntityServiceMock.Object);
+        var handler = new DeleteMultipleRolesCommandHandler(roleReadRepoMock.Object, userReadRepoMock.Object, roleDeleteRepoMock.Object, protectedEntityServiceMock.Object);
         var command = new DeleteMultipleRolesCommand() { RoleNames = ["Role1", "Role2", "Role3"] };
 
         // Act
@@ -733,6 +670,6 @@ public class PermissionAndRole
         result.Should().NotBeNull();
         result.Value.Message.Should().Contain("3");
         result.Value.Message.Should().Contain("successfully");
-        roleManagerMock.Verify(x => x.DeleteAsync(It.IsAny<ApplicationRole>()), Times.Exactly(3));
+        roleDeleteRepoMock.Verify(x => x.DeleteAsync(It.IsAny<ApplicationRole>()), Times.Exactly(3));
     }
 }
