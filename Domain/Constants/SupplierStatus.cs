@@ -9,6 +9,8 @@ namespace Domain.Constants
 
         public static readonly string[] AllowedValues = [ Active, Inactive ];
 
+        public static readonly List<string> All = [ Active, Inactive ];
+
         public static bool IsValid(string? value)
         {
             if(string.IsNullOrWhiteSpace(value))
