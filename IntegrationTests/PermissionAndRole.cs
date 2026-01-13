@@ -152,7 +152,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
     public async Task CreateRole_ValidData_CreatesRoleSuccessfully()
     {
         // Arrange
-        var (adminUser, _) = await CreateUserWithRoleAndPermissionsAsync(
+        var (_, _) = await CreateUserWithRoleAndPermissionsAsync(
             "admin_int007@test.com",
             "Admin_INT007",
             [PermissionsList.Roles.Create]).ConfigureAwait(true);
@@ -190,7 +190,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
     public async Task CreateRole_WithoutPermission_ReturnsForbidden()
     {
         // Arrange
-        var (normalUser, _) = await CreateUserWithRoleAndPermissionsAsync(
+        var (_, _) = await CreateUserWithRoleAndPermissionsAsync(
             "user_int008@test.com",
             "User_INT008",
             [PermissionsList.Brands.View]).ConfigureAwait(true);
@@ -242,7 +242,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
     public async Task UpdateRolePermissions_ValidData_UpdatesSuccessfully()
     {
         // Arrange
-        var (adminUser, _) = await CreateUserWithRoleAndPermissionsAsync(
+        var (_, _) = await CreateUserWithRoleAndPermissionsAsync(
             "admin_int010@test.com",
             "Admin_INT010",
             [PermissionsList.Roles.AssignPermissions]).ConfigureAwait(true);
@@ -276,7 +276,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
     public async Task UpdateRole_UpdateDescription_UpdatesSuccessfully()
     {
         // Arrange
-        var (adminUser, _) = await CreateUserWithRoleAndPermissionsAsync(
+        var (_, _) = await CreateUserWithRoleAndPermissionsAsync(
             "admin_int011@test.com",
             "Admin_INT011",
             [PermissionsList.Roles.Edit]).ConfigureAwait(true);
@@ -311,7 +311,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
     public async Task DeleteRole_ValidRole_DeletesSuccessfully()
     {
         // Arrange
-        var (adminUser, _) = await CreateUserWithRoleAndPermissionsAsync(
+        var (_, _) = await CreateUserWithRoleAndPermissionsAsync(
             "admin_int012@test.com",
             "Admin_INT012",
             [PermissionsList.Roles.Delete]).ConfigureAwait(true);
@@ -339,16 +339,12 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
     public async Task DeleteRole_WithoutPermission_ReturnsForbidden()
     {
         // Arrange
-        var (normalUser, _) = await CreateUserWithRoleAndPermissionsAsync(
-            "user_int013@test.com",
-            "User_INT013",
-            [PermissionsList.Brands.View]).ConfigureAwait(true);
 
         var testRole = await CreateRoleWithPermissionsAsync(
             "TestRole_INT013",
             [PermissionsList.Brands.View]).ConfigureAwait(true);
 
-        await AuthenticateAsUserAsync(normalUser.Email!).ConfigureAwait(true);
+        await AuthenticateAsUserAsync().ConfigureAwait(false);
 
         // Act
         var response = await _client.DeleteAsync($"/api/v1/Permission/roles/{testRole.Name}", CancellationToken.None).ConfigureAwait(true);
@@ -367,16 +363,12 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
     public async Task DeleteMultipleRoles_ValidRoles_DeletesAllSuccessfully()
     {
         // Arrange
-        var (adminUser, _) = await CreateUserWithRoleAndPermissionsAsync(
-            "admin_int014@test.com",
-            "Admin_INT014",
-            [PermissionsList.Roles.Delete]).ConfigureAwait(true);
 
         await CreateRoleWithPermissionsAsync("Role1_INT014", [PermissionsList.Brands.View]).ConfigureAwait(true);
         await CreateRoleWithPermissionsAsync("Role2_INT014", [PermissionsList.Products.View]).ConfigureAwait(true);
         await CreateRoleWithPermissionsAsync("Role3_INT014", [PermissionsList.Files.View]).ConfigureAwait(true);
 
-        await AuthenticateAsUserAsync(adminUser.Email!).ConfigureAwait(true);
+        await AuthenticateAsUserAsync().ConfigureAwait(false);
 
         var request = new List<string> { "Role1_INT014", "Role2_INT014", "Role3_INT014" };
 
@@ -392,7 +384,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
         // Verify all removed from DB
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var rolesInDb = await db.Roles.Where(r => r.Name!.Contains("INT014")).ToListAsync().ConfigureAwait(true);
+        var rolesInDb = await db.Roles.Where(r => r.Name!.Contains("INT014")).ToListAsync(CancellationToken.None).ConfigureAwait(true);
         rolesInDb.Should().HaveCount(1); // Only Admin_INT014 should remain
     }
 
@@ -400,10 +392,6 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
     public async Task GetAllRoles_WithViewPermission_ReturnsAllRoles()
     {
         // Arrange
-        var (adminUser, _) = await CreateUserWithRoleAndPermissionsAsync(
-            "admin_int015@test.com",
-            "Admin_INT015",
-            [PermissionsList.Roles.View]).ConfigureAwait(true);
 
         await CreateRoleWithPermissionsAsync("Role1_INT015", [PermissionsList.Brands.View]).ConfigureAwait(true);
         await CreateRoleWithPermissionsAsync("Role2_INT015", [PermissionsList.Products.View]).ConfigureAwait(true);
@@ -411,7 +399,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
         await CreateRoleWithPermissionsAsync("Role4_INT015", [PermissionsList.Suppliers.View]).ConfigureAwait(true);
         await CreateRoleWithPermissionsAsync("Role5_INT015", [PermissionsList.Inputs.View]).ConfigureAwait(true);
 
-        await AuthenticateAsUserAsync(adminUser.Email!).ConfigureAwait(true);
+        await AuthenticateAsUserAsync().ConfigureAwait(false);
 
         // Act
         var response = await _client.GetAsync("/api/v1/Permission/roles").ConfigureAwait(true);
@@ -483,7 +471,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
 
         await roleManager.CreateAsync(role).ConfigureAwait(true);
 
-        var permissions = await db.Permissions.Where(p => permissionNames.Contains(p.Name)).ToListAsync().ConfigureAwait(true);
+        var permissions = await db.Permissions.Where(p => permissionNames.Contains(p.Name)).ToListAsync(CancellationToken.None).ConfigureAwait(true);
         foreach (var permission in permissions)
         {
             db.RolePermissions.Add(new RolePermission

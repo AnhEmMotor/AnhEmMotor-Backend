@@ -51,7 +51,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<Dictionary<string, decimal?>>();
+        var content = await response.Content.ReadFromJsonAsync<Dictionary<string, decimal?>>(CancellationToken.None).ConfigureAwait(false);
         content.Should().NotBeNull();
         content.Should().HaveCount(4);
         content!["Deposit_ratio"].Should().Be(50.5m);
@@ -95,7 +95,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             db.Settings.RemoveRange(db.Settings);
-            await db.Settings.AddAsync(new (){ Key = "Deposit_ratio", Value = "50" });
+            await db.Settings.AddAsync(new (){ Key = "Deposit_ratio", Value = "50" }, CancellationToken.None).ConfigureAwait(false);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
         }
 
@@ -122,7 +122,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<Dictionary<string, decimal?>>();
+        var content = await response.Content.ReadFromJsonAsync<Dictionary<string, decimal?>>(CancellationToken.None).ConfigureAwait(false);
         content.Should().NotBeNull();
         content.Should().BeEmpty();
     }
@@ -161,7 +161,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<Dictionary<string, long?>>();
+        var content = await response.Content.ReadFromJsonAsync<Dictionary<string, long?>>(CancellationToken.None).ConfigureAwait(false);
         content.Should().NotBeNull();
         content.Should().HaveCount(4);
         content!["Deposit_ratio"].Should().Be(50);
@@ -212,8 +212,8 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var savedSettings = db.Settings.ToList();
-            savedSettings.First(s => s.Key == "Deposit_ratio").Value.Should().Be("25");
-            savedSettings.First(s => s.Key == "Inventory_alert_level").Value.Should().Be("5"); // Unchanged
+            savedSettings.First(s => string.Compare(s.Key, "Deposit_ratio") == 0).Value.Should().Be("25");
+            savedSettings.First(s => string.Compare(s.Key, "Inventory_alert_level") == 0).Value.Should().Be("5"); // Unchanged
         }
     }
 
@@ -225,7 +225,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             db.Settings.RemoveRange(db.Settings);
-            await db.Settings.AddAsync(new (){ Key = "Deposit_ratio", Value = "50" });
+            await db.Settings.AddAsync(new (){ Key = "Deposit_ratio", Value = "50" }, CancellationToken.None).ConfigureAwait(false);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
         }
 
@@ -254,7 +254,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             db.Settings.RemoveRange(db.Settings);
-            await db.Settings.AddAsync(new (){ Key = "Deposit_ratio", Value = "50" });
+            await db.Settings.AddAsync(new (){ Key = "Deposit_ratio", Value = "50" }, CancellationToken.None).ConfigureAwait(false);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
         }
 
@@ -275,7 +275,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             db.Settings.RemoveRange(db.Settings);
-            await db.Settings.AddAsync(new (){ Key = "Deposit_ratio", Value = "50" });
+            await db.Settings.AddAsync(new (){ Key = "Deposit_ratio", Value = "50" }, CancellationToken.None).ConfigureAwait(false);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
         }
 
@@ -289,7 +289,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         var content = await response.Content.ReadFromJsonAsync<Application.Common.Models.ErrorResponse>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Errors.Should().Contain(e => 
-            e.Field == "Deposit_ratio" && 
+            string.Compare(e.Field, "Deposit_ratio") == 0 && 
             e.Message.Contains("between 1.0 and 99.0"));
         
         // Verify DB unchanged
@@ -309,7 +309,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             db.Settings.RemoveRange(db.Settings);
-            await db.Settings.AddAsync(new (){ Key = "Deposit_ratio", Value = "50" });
+            await db.Settings.AddAsync(new (){ Key = "Deposit_ratio", Value = "50" }, CancellationToken.None).ConfigureAwait(false);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
         }
 
@@ -323,7 +323,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         var content = await response.Content.ReadFromJsonAsync<Application.Common.Models.ErrorResponse>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Errors.Should().Contain(e => 
-            e.Field == "Deposit_ratio" && 
+            string.Compare(e.Field, "Deposit_ratio") == 0 && 
             e.Message.Contains("between 1.0 and 99.0"));
         
         // Verify DB unchanged
@@ -343,7 +343,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             db.Settings.RemoveRange(db.Settings);
-            await db.Settings.AddAsync(new (){ Key = "Deposit_ratio", Value = "50" });
+            await db.Settings.AddAsync(new (){ Key = "Deposit_ratio", Value = "50" }, CancellationToken.None).ConfigureAwait(false);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
         }
 
@@ -369,7 +369,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             db.Settings.RemoveRange(db.Settings);
-            await db.Settings.AddAsync(new (){ Key = "Deposit_ratio", Value = "50" });
+            await db.Settings.AddAsync(new (){ Key = "Deposit_ratio", Value = "50" }, CancellationToken.None).ConfigureAwait(false);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
         }
 

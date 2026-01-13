@@ -59,16 +59,16 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
             SecurityStamp = Guid.NewGuid().ToString()
         };
 
-        await userManager.CreateAsync(user, password);
+        await userManager.CreateAsync(user, password).ConfigureAwait(true);
 
         // Create role with permissions
         var roleName = $"Role_{username}";
         var role = new ApplicationRole { Name = roleName, Description = "Test role" };
-        await roleManager.CreateAsync(role);
+        await roleManager.CreateAsync(role).ConfigureAwait(true);
 
         foreach (var permissionName in permissions)
         {
-            var permission = await db.Permissions.FirstOrDefaultAsync(p => p.Name == permissionName);
+            var permission = await db.Permissions.FirstOrDefaultAsync(p => string.Compare(p.Name, permissionName) == 0, CancellationToken.None).ConfigureAwait(true);
             if (permission != null)
             {
                 var rolePermission = new RolePermission
@@ -82,7 +82,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         }
 
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
-        await userManager.AddToRoleAsync(user, roleName);
+        await userManager.AddToRoleAsync(user, roleName).ConfigureAwait(true);
 
         // Login to get token
         var loginRequest = new LoginCommand
@@ -120,7 +120,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
             SecurityStamp = Guid.NewGuid().ToString()
         };
 
-        await userManager.CreateAsync(user, password);
+        await userManager.CreateAsync(user, password).ConfigureAwait(true);
         return user;
     }
 
@@ -131,12 +131,12 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         // Arrange
         var (_, token) = await CreateAndAuthenticateUserWithPermissionsAsync(
             "adminUMGR019", "admin019@test.com", "Pass@123",
-            [PermissionsList.Users.View]);
+            [PermissionsList.Users.View]).ConfigureAwait(true);
 
         // Create test users
-        await CreateUserAsync("userA", "userA@test.com", "Pass@123", UserStatus.Active);
-        await CreateUserAsync("userB", "userB@test.com", "Pass@123", UserStatus.Active);
-        await CreateUserAsync("userC", "userC@test.com", "Pass@123", UserStatus.Banned);
+        await CreateUserAsync("userA", "userA@test.com", "Pass@123", UserStatus.Active).ConfigureAwait(true);
+        await CreateUserAsync("userB", "userB@test.com", "Pass@123", UserStatus.Active).ConfigureAwait(true);
+        await CreateUserAsync("userC", "userC@test.com", "Pass@123", UserStatus.Banned).ConfigureAwait(true);
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
@@ -145,7 +145,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var result = await response.Content.ReadFromJsonAsync<PagedResult<object>>();
+        var result = await response.Content.ReadFromJsonAsync<PagedResult<object>>(CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
         result!.Items.Should().NotBeNull();
     }
@@ -156,11 +156,11 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         // Arrange
         var (_, token) = await CreateAndAuthenticateUserWithPermissionsAsync(
             "adminUMGR020", "admin020@test.com", "Pass@123",
-            [PermissionsList.Users.View]);
+            [PermissionsList.Users.View]).ConfigureAwait(true);
 
         var softDeletedUser = await CreateUserAsync(
             "deletedUser", "deleted@test.com", "Pass@123",
-            UserStatus.Active, DateTimeOffset.UtcNow.AddDays(-1));
+            UserStatus.Active, DateTimeOffset.UtcNow.AddDays(-1)).ConfigureAwait(true);
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
@@ -169,8 +169,6 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var result = await response.Content.ReadFromJsonAsync<dynamic>(CancellationToken.None).ConfigureAwait(true);
-        result?.Should().NotBeNull();
     }
 
     [Fact(DisplayName = "UMGR_021 - Cập nhật thông tin user với dữ liệu có khoảng trắng đầu cuối")]
@@ -179,9 +177,9 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         // Arrange
         var (_, token) = await CreateAndAuthenticateUserWithPermissionsAsync(
             "adminUMGR021", "admin021@test.com", "Pass@123",
-            [PermissionsList.Users.Edit]);
+            [PermissionsList.Users.Edit]).ConfigureAwait(true);
 
-        var targetUser = await CreateUserAsync("targetUser021", "target021@test.com", "Pass@123");
+        var targetUser = await CreateUserAsync("targetUser021", "target021@test.com", "Pass@123").ConfigureAwait(true);
 
         var request = new UpdateUserCommand
         {
@@ -200,7 +198,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         // Verify DB
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var updatedUser = await db.Users.FindAsync(targetUser.Id);
+        var updatedUser = await db.Users.FindAsync(targetUser.Id).ConfigureAwait(true);
         updatedUser!.FullName.Should().Be("Test User");
         updatedUser.PhoneNumber.Should().Be("0912345678");
     }
@@ -211,9 +209,9 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         // Arrange
         var (_, token) = await CreateAndAuthenticateUserWithPermissionsAsync(
             "adminUMGR022", "admin022@test.com", "Pass@123",
-            [PermissionsList.Users.Edit]);
+            [PermissionsList.Users.Edit]).ConfigureAwait(true);
 
-        var targetUser = await CreateUserAsync("targetUser022", "target022@test.com", "Pass@123");
+        var targetUser = await CreateUserAsync("targetUser022", "target022@test.com", "Pass@123").ConfigureAwait(true);
 
         var request = new UpdateUserCommand
         {
@@ -231,7 +229,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         // Verify DB
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var updatedUser = await db.Users.FindAsync(targetUser.Id);
+        var updatedUser = await db.Users.FindAsync(targetUser.Id).ConfigureAwait(true);
         updatedUser!.Email.Should().Be("test+tag@example.co.uk");
     }
 
@@ -241,9 +239,9 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         // Arrange
         var (_, token) = await CreateAndAuthenticateUserWithPermissionsAsync(
             "adminUMGR023", "admin023@test.com", "Pass@123",
-            [PermissionsList.Users.Edit]);
+            [PermissionsList.Users.Edit]).ConfigureAwait(true);
 
-        var targetUser = await CreateUserAsync("targetUser023", "target023@test.com", "Pass@123", phoneNumber: "0987654321");
+        var targetUser = await CreateUserAsync("targetUser023", "target023@test.com", "Pass@123", phoneNumber: "0987654321").ConfigureAwait(true);
 
         var request = new UpdateUserCommand
         {
@@ -263,12 +261,12 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
     public async Task UpdateUser_WithNullPhoneNumber_AllowsMultipleNulls()
     {
         // Arrange
-        var (adminUser, token) = await CreateAndAuthenticateUserWithPermissionsAsync(
+        var (_, token) = await CreateAndAuthenticateUserWithPermissionsAsync(
             "adminUMGR024", "admin024@test.com", "Pass@123",
-            [PermissionsList.Users.Edit]);
+            [PermissionsList.Users.Edit]).ConfigureAwait(true);
 
-        var targetUser = await CreateUserAsync("targetUser024", "target024@test.com", "Pass@123", phoneNumber: "0912345678");
-        var existingUser = await CreateUserAsync("existingUser024", "existing024@test.com", "Pass@123", phoneNumber: null);
+        var targetUser = await CreateUserAsync("targetUser024", "target024@test.com", "Pass@123", phoneNumber: "0912345678").ConfigureAwait(true);
+        _ = await CreateUserAsync("existingUser024", "existing024@test.com", "Pass@123", phoneNumber: null).ConfigureAwait(true);
 
         var request = new UpdateUserCommand
         {
@@ -286,7 +284,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         // Verify DB allows multiple nulls
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var nullPhoneUsers = await db.Users.Where(u => u.PhoneNumber == null).CountAsync();
+        var nullPhoneUsers = await db.Users.Where(u => u.PhoneNumber == null).CountAsync(CancellationToken.None).ConfigureAwait(true);
         nullPhoneUsers.Should().BeGreaterThanOrEqualTo(2);
     }
 
@@ -296,15 +294,15 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         // Arrange
         var (_, token) = await CreateAndAuthenticateUserWithPermissionsAsync(
             "adminUMGR025", "admin025@test.com", "Pass@123",
-            [PermissionsList.Users.Edit]);
+            [PermissionsList.Users.Edit]).ConfigureAwait(true);
 
-        var targetUser = await CreateUserAsync("targetUser025", "target025@test.com", "Pass@123");
+        var targetUser = await CreateUserAsync("targetUser025", "target025@test.com", "Pass@123").ConfigureAwait(true);
 
         // Set refresh token
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var user = await db.Users.FindAsync(targetUser.Id);
+            var user = await db.Users.FindAsync(targetUser.Id).ConfigureAwait(true);
             user!.RefreshToken = "valid_refresh_token";
             user.RefreshTokenExpiryTime = DateTimeOffset.UtcNow.AddDays(7);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
@@ -324,7 +322,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var user = await db.Users.FindAsync(targetUser.Id);
+            var user = await db.Users.FindAsync(targetUser.Id).ConfigureAwait(true);
             (user!.RefreshToken == null || user.RefreshTokenExpiryTime < DateTimeOffset.UtcNow).Should().BeTrue();
         }
     }
@@ -335,9 +333,9 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         // Arrange
         var (_, token) = await CreateAndAuthenticateUserWithPermissionsAsync(
             "adminUMGR026", "admin026@test.com", "Pass@123",
-            [PermissionsList.Users.AssignRoles]);
+            [PermissionsList.Users.AssignRoles]).ConfigureAwait(true);
 
-        var targetUser = await CreateUserAsync("targetUser026", "target026@test.com", "Pass@123");
+        var targetUser = await CreateUserAsync("targetUser026", "target026@test.com", "Pass@123").ConfigureAwait(true);
 
         // Create roles
         ApplicationRole staffRole, managerRole;
@@ -348,11 +346,11 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
 
             staffRole = new ApplicationRole { Name = "Staff026", Description = "Staff role" };
             managerRole = new ApplicationRole { Name = "Manager026", Description = "Manager role" };
-            await roleManager.CreateAsync(staffRole);
-            await roleManager.CreateAsync(managerRole);
+            await roleManager.CreateAsync(staffRole).ConfigureAwait(true);
+            await roleManager.CreateAsync(managerRole).ConfigureAwait(true);
 
             // Assign staff role initially
-            await userManager.AddToRoleAsync(targetUser, staffRole.Name!);
+            await userManager.AddToRoleAsync(targetUser, staffRole.Name!).ConfigureAwait(true);
         }
 
         var request = new AssignRolesCommand { RoleNames = [managerRole.Name!] };
@@ -369,7 +367,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         using (var scope = _factory.Services.CreateScope())
         {
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-            var roles = await userManager.GetRolesAsync(targetUser);
+            var roles = await userManager.GetRolesAsync(targetUser).ConfigureAwait(true);
             roles.Should().ContainSingle();
             roles.Should().Contain("Manager026");
             roles.Should().NotContain("Staff026");
@@ -382,9 +380,9 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         // Arrange
         var (_, token) = await CreateAndAuthenticateUserWithPermissionsAsync(
             "adminUMGR027", "admin027@test.com", "Pass@123",
-            [PermissionsList.Users.AssignRoles]);
+            [PermissionsList.Users.AssignRoles]).ConfigureAwait(true);
 
-        var targetUser = await CreateUserAsync("targetUser027", "target027@test.com", "Pass@123");
+        var targetUser = await CreateUserAsync("targetUser027", "target027@test.com", "Pass@123").ConfigureAwait(true);
 
         // Create and assign role
         using (var scope = _factory.Services.CreateScope())
@@ -393,8 +391,8 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
             var staffRole = new ApplicationRole { Name = "Staff027", Description = "Staff role" };
-            await roleManager.CreateAsync(staffRole);
-            await userManager.AddToRoleAsync(targetUser, staffRole.Name!);
+            await roleManager.CreateAsync(staffRole).ConfigureAwait(true);
+            await userManager.AddToRoleAsync(targetUser, staffRole.Name!).ConfigureAwait(true);
         }
 
         var request = new AssignRolesCommand { RoleNames = [] };
@@ -411,7 +409,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         using (var scope = _factory.Services.CreateScope())
         {
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-            var roles = await userManager.GetRolesAsync(targetUser);
+            var roles = await userManager.GetRolesAsync(targetUser).ConfigureAwait(true);
             roles.Should().BeEmpty();
         }
     }
@@ -422,18 +420,18 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         // Arrange
         var (_, token) = await CreateAndAuthenticateUserWithPermissionsAsync(
             "adminUMGR028", "admin028@test.com", "Pass@123",
-            [PermissionsList.Users.Edit]);
+            [PermissionsList.Users.Edit]).ConfigureAwait(true);
 
         var targetUser = await CreateUserAsync(
             "targetUser028", "target028@test.com", "Pass@123",
-            UserStatus.Banned, DateTimeOffset.UtcNow.AddDays(-1));
+            UserStatus.Banned, DateTimeOffset.UtcNow.AddDays(-1)).ConfigureAwait(true);
 
         var request = new ChangeUserStatusCommand { Status = UserStatus.Active };
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
-        var response = await _client.PatchAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}/status", request).ConfigureAwait(true);
+        var response = await _client.PatchAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}/status", request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -445,10 +443,10 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         // Arrange
         var (_, token) = await CreateAndAuthenticateUserWithPermissionsAsync(
             "adminUMGR029", "admin029@test.com", "Pass@123",
-            [PermissionsList.Users.Edit]);
+            [PermissionsList.Users.Edit]).ConfigureAwait(true);
 
-        var user1 = await CreateUserAsync("user029_1", "user029_1@test.com", "Pass@123", UserStatus.Active);
-        var user2 = await CreateUserAsync("user029_2", "user029_2@test.com", "Pass@123", UserStatus.Active);
+        var user1 = await CreateUserAsync("user029_1", "user029_1@test.com", "Pass@123", UserStatus.Active).ConfigureAwait(true);
+        var user2 = await CreateUserAsync("user029_2", "user029_2@test.com", "Pass@123", UserStatus.Active).ConfigureAwait(true);
         var nonExistentId = Guid.NewGuid();
 
         var request = new ChangeMultipleUsersStatusCommand
@@ -460,7 +458,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
-        var response = await _client.PatchAsJsonAsync("/api/v1/UserManager/status", request);
+        var response = await _client.PatchAsJsonAsync("/api/v1/UserManager/status", request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -468,8 +466,8 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         // Verify no users were changed
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var u1 = await db.Users.FindAsync(user1.Id);
-        var u2 = await db.Users.FindAsync(user2.Id);
+        var u1 = await db.Users.FindAsync(user1.Id).ConfigureAwait(true);
+        var u2 = await db.Users.FindAsync(user2.Id).ConfigureAwait(true);
         u1!.Status.Should().Be(UserStatus.Active);
         u2!.Status.Should().Be(UserStatus.Active);
     }
@@ -480,20 +478,20 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         // Arrange
         var (adminUser, token) = await CreateAndAuthenticateUserWithPermissionsAsync(
             "adminUMGR030", "admin030@test.com", "Pass@123",
-            [PermissionsList.Users.Edit]);
+            [PermissionsList.Users.Edit]).ConfigureAwait(true);
 
-        var targetUser = await CreateUserAsync("targetUser030", "target030@test.com", "Pass@123");
+        var targetUser = await CreateUserAsync("targetUser030", "target030@test.com", "Pass@123").ConfigureAwait(true);
 
         var request = new ChangeMultipleUsersStatusCommand
         {
-            UserIds = [adminUser.Id, targetUser.Id],
+            UserIds = [adminUser!.Id, targetUser.Id],
             Status = UserStatus.Banned
         };
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
-        var response = await _client.PatchAsJsonAsync("/api/v1/UserManager/status", request);
+        var response = await _client.PatchAsJsonAsync("/api/v1/UserManager/status", request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -505,9 +503,9 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         // Arrange
         var (_, token) = await CreateAndAuthenticateUserWithPermissionsAsync(
             "adminUMGR031", "admin031@test.com", "Pass@123",
-            [PermissionsList.Users.Edit]);
+            [PermissionsList.Users.Edit]).ConfigureAwait(true);
 
-        var targetUser = await CreateUserAsync("targetUser031", "target031@test.com", "Pass@123");
+        var targetUser = await CreateUserAsync("targetUser031", "target031@test.com", "Pass@123").ConfigureAwait(true);
 
         var request = new UpdateUserCommand { FullName = "Deleted User Updated" };
 
@@ -526,7 +524,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         // Arrange
         var (_, token) = await CreateAndAuthenticateUserWithPermissionsAsync(
             "adminUMGR032", "admin032@test.com", "Pass@123",
-            [PermissionsList.Users.View]);
+            [PermissionsList.Users.View]).ConfigureAwait(true);
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
@@ -535,7 +533,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var result = await response.Content.ReadFromJsonAsync<PagedResult<object>>();
+        var result = await response.Content.ReadFromJsonAsync<PagedResult<object>>(CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
         result!.PageNumber.Should().Be(3);
         result.PageSize.Should().Be(10);
@@ -547,9 +545,9 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         // Arrange
         var (_, token) = await CreateAndAuthenticateUserWithPermissionsAsync(
             "adminUMGR033", "admin033@test.com", "Pass@123",
-            [PermissionsList.Users.Edit]);
+            [PermissionsList.Users.Edit]).ConfigureAwait(true);
 
-        var targetUser = await CreateUserAsync("targetUser033", "target033@test.com", "OldPass@123");
+        var targetUser = await CreateUserAsync("targetUser033", "target033@test.com", "OldPass@123").ConfigureAwait(true);
 
         var request = new UpdateUserCommand { FullName = "New Name" };
 
@@ -573,15 +571,15 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         // Arrange
         var (_, token) = await CreateAndAuthenticateUserWithPermissionsAsync(
             "adminUMGR034", "admin034@test.com", "Pass@123",
-            [PermissionsList.Users.Edit]);
+            [PermissionsList.Users.Edit]).ConfigureAwait(true);
 
-        var targetUser = await CreateUserAsync("targetUser034", "target034@test.com", "Pass@123");
+        var targetUser = await CreateUserAsync("targetUser034", "target034@test.com", "Pass@123").ConfigureAwait(true);
 
         var originalRefreshToken = "original_token";
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var user = await db.Users.FindAsync(targetUser.Id);
+            var user = await db.Users.FindAsync(targetUser.Id).ConfigureAwait(true);
             user!.RefreshToken = originalRefreshToken;
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
         }
@@ -605,7 +603,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var user = await db.Users.FindAsync(targetUser.Id);
+            var user = await db.Users.FindAsync(targetUser.Id).ConfigureAwait(true);
             user!.FullName.Should().Be("New Name");
             user.RefreshToken.Should().Be(originalRefreshToken);
             user.Id.Should().Be(targetUser.Id);
@@ -618,9 +616,9 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         // Arrange
         var (_, token) = await CreateAndAuthenticateUserWithPermissionsAsync(
             "adminUMGR035", "admin035@test.com", "Pass@123",
-            [PermissionsList.Users.Edit]);
+            [PermissionsList.Users.Edit]).ConfigureAwait(true);
 
-        var targetUser = await CreateUserAsync("targetUser035", "target035@test.com", "Pass@123");
+        var targetUser = await CreateUserAsync("targetUser035", "target035@test.com", "Pass@123").ConfigureAwait(true);
 
         var request = new ChangePasswordCommand { NewPassword = "NewPass@123" };
 
@@ -642,16 +640,16 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         // Arrange
         var (_, token) = await CreateAndAuthenticateUserWithPermissionsAsync(
             "adminUMGR036", "admin036@test.com", "Pass@123",
-            [PermissionsList.Users.AssignRoles]);
+            [PermissionsList.Users.AssignRoles]).ConfigureAwait(true);
 
-        var targetUser = await CreateUserAsync("targetUser036", "target036@test.com", "Pass@123");
+        var targetUser = await CreateUserAsync("targetUser036", "target036@test.com", "Pass@123").ConfigureAwait(true);
 
         ApplicationRole managerRole;
         using (var scope = _factory.Services.CreateScope())
         {
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
             managerRole = new ApplicationRole { Name = "Manager036", Description = "Manager role" };
-            await roleManager.CreateAsync(managerRole);
+            await roleManager.CreateAsync(managerRole).ConfigureAwait(true);
         }
 
         var request = new AssignRolesCommand { RoleNames = [managerRole.Name!] };

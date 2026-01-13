@@ -30,7 +30,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
     private async Task<(ApplicationUser user, string token)> CreateAndAuthenticateUserAsync(
         string username, 
         string email, 
-        string password, 
+        string password,
         string status = UserStatus.Active,
         DateTimeOffset? deletedAt = null)
     {
@@ -49,7 +49,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
             SecurityStamp = Guid.NewGuid().ToString()
         };
 
-        await userManager.CreateAsync(user, password);
+        await userManager.CreateAsync(user, password).ConfigureAwait(false);
 
         // Login to get token
         var loginRequest = new LoginCommand
@@ -74,10 +74,10 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
             "user021@test.com", 
             "Pass123!", 
             UserStatus.Active,
-            DateTimeOffset.UtcNow.AddDays(-3));
+            DateTimeOffset.UtcNow.AddDays(-3)).ConfigureAwait(false);
 
         // Act
-        var response = await _client.PostAsync($"/api/v1/User/{user.Id}/restore", null).ConfigureAwait(true);
+        var response = await _client.PostAsync($"/api/v1/User/{user!.Id}/restore", null).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -88,7 +88,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         // Verify DB
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var updatedUser = await db.Users.FindAsync(user.Id);
+        var updatedUser = await db.Users.FindAsync(user!.Id).ConfigureAwait(false);
         updatedUser.Should().NotBeNull();
         updatedUser!.DeletedAt.Should().BeNull();
     }
@@ -100,12 +100,12 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         var (user, _) = await CreateAndAuthenticateUserAsync(
             "user022", 
             "user022@test.com", 
-            "Pass123!", 
+            "Pass123!",
             UserStatus.Active,
-            null);
+            null).ConfigureAwait(false);
 
         // Act
-        var response = await _client.PostAsync($"/api/v1/User/{user.Id}/restore", null).ConfigureAwait(true);
+        var response = await _client.PostAsync($"/api/v1/User/{user!.Id}/restore", null).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -120,12 +120,12 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         var (user, _) = await CreateAndAuthenticateUserAsync(
             "user023", 
             "user023@test.com", 
-            "Pass123!", 
+            "Pass123!",
             UserStatus.Banned,
-            DateTimeOffset.UtcNow.AddDays(-5));
+            DateTimeOffset.UtcNow.AddDays(-5)).ConfigureAwait(false);
 
         // Act
-        var response = await _client.PostAsync($"/api/v1/User/{user.Id}/restore", null).ConfigureAwait(true);
+        var response = await _client.PostAsync($"/api/v1/User/{user!.Id}/restore", null).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
@@ -155,7 +155,8 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         var (user, token) = await CreateAndAuthenticateUserAsync(
             "user025", 
             "user025@test.com", 
-            "Pass123!");
+            "Pass123!",
+            CancellationToken.None).ConfigureAwait(false);
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
@@ -166,7 +167,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content.ReadFromJsonAsync<UserResponse>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
-        content!.Id.Should().Be(user.Id);
+        content!.Id.Should().Be(user!.Id);
         content.UserName.Should().Be("user025");
         content.Email.Should().Be("user025@test.com");
         content.FullName.Should().Be("Test user025");
@@ -193,7 +194,8 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         var (user, token) = await CreateAndAuthenticateUserAsync(
             "user027", 
             "user027@test.com", 
-            "Pass123!");
+            "Pass123!",
+            CancellationToken.None).ConfigureAwait(false);
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
@@ -218,7 +220,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         // Verify DB
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var updatedUser = await db.Users.FindAsync(user.Id);
+        var updatedUser = await db.Users.FindAsync(user!.Id).ConfigureAwait(false);
         updatedUser.Should().NotBeNull();
         updatedUser!.FullName.Should().Be("Updated Name");
         updatedUser.Gender.Should().Be(GenderStatus.Female);
@@ -232,7 +234,8 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         var (_, token) = await CreateAndAuthenticateUserAsync(
             "user028", 
             "user028@test.com", 
-            "Pass123!");
+            "Pass123!",
+            CancellationToken.None).ConfigureAwait(false);
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
@@ -257,7 +260,8 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         var (_, token) = await CreateAndAuthenticateUserAsync(
             "user029", 
             "user029@test.com", 
-            "OldPass123!");
+            "OldPass123!",
+            CancellationToken.None).ConfigureAwait(false);
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
@@ -297,7 +301,8 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         var (_, token) = await CreateAndAuthenticateUserAsync(
             "user030", 
             "user030@test.com", 
-            "OldPass123!");
+            "OldPass123!",
+            CancellationToken.None).ConfigureAwait(false);
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
@@ -323,7 +328,8 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         var (user, token) = await CreateAndAuthenticateUserAsync(
             "user031", 
             "user031@test.com", 
-            "Pass123!");
+            "Pass123!",
+            CancellationToken.None).ConfigureAwait(false);
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
@@ -339,7 +345,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         // Verify DB
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var deletedUser = await db.Users.FindAsync(user.Id);
+        var deletedUser = await db.Users.FindAsync(user!.Id).ConfigureAwait(false);
         deletedUser.Should().NotBeNull();
         deletedUser!.DeletedAt.Should().NotBeNull();
 
@@ -356,7 +362,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
             "user032", 
             "user032@test.com", 
             "Pass123!",
-            UserStatus.Banned);
+            UserStatus.Banned).ConfigureAwait(false);
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
@@ -376,7 +382,8 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         var (_, token1) = await CreateAndAuthenticateUserAsync(
             "user033", 
             "user033@test.com", 
-            "Pass123!");
+            "Pass123!",
+            CancellationToken.None).ConfigureAwait(false);
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token1);
 
@@ -407,7 +414,8 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         var (user, token) = await CreateAndAuthenticateUserAsync(
             "user034", 
             "user034@test.com", 
-            "Pass123!");
+            "Pass123!",
+            CancellationToken.None).ConfigureAwait(false);
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
@@ -419,7 +427,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var userToDelete = await db.Users.FindAsync(user.Id);
+            var userToDelete = await db.Users.FindAsync(user!.Id).ConfigureAwait(false);
             userToDelete!.DeletedAt = DateTimeOffset.UtcNow;
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
         }
@@ -440,7 +448,8 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         var (user, token) = await CreateAndAuthenticateUserAsync(
             "user035", 
             "user035@test.com", 
-            "Pass123!");
+            "Pass123!",
+            CancellationToken.None).ConfigureAwait(false);
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
@@ -452,7 +461,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var userToBan = await db.Users.FindAsync(user.Id);
+            var userToBan = await db.Users.FindAsync(user!.Id).ConfigureAwait(false);
             userToBan!.Status = UserStatus.Banned;
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
         }
