@@ -44,7 +44,6 @@ public static class ProductCategorySeeder
             .Select(name => new ProductCategory
             {
                 Name = name,
-                Description = $"Danh mục {name} - Được bảo vệ không được xoá"
             })
             .ToList();
 

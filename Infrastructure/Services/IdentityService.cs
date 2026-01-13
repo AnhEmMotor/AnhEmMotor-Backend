@@ -28,7 +28,11 @@ public class IdentityService(
             user = await userManager.FindByNameAsync(usernameOrEmail).ConfigureAwait(false);
         }
 
-        var result = await signInManager.CheckPasswordSignInAsync(user!, password, lockoutOnFailure: false)
+        if (user == null) {
+            return Error.Unauthorized("Wrong username/email or password.");
+        }
+ 
+        var result = await signInManager.CheckPasswordSignInAsync(user, password, lockoutOnFailure: false)
             .ConfigureAwait(false);
 
         var roles = await userManager.GetRolesAsync(user!).ConfigureAwait(false);

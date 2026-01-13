@@ -18,6 +18,7 @@ if(!environment.IsEnvironment("Test"))
 builder.Services
     .AddCustomMvc()
     .AddJwtAuthentication(configuration)
+    .AddAuthorization()
     .AddCustomSwagger(environment)
     .AddCustomOpenTelemetry(configuration, "AnhEmMotor API", "1.0.0");
 
