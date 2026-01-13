@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Json;
 using Application.ApiContracts.ProductCategory.Responses;
 using Application.Features.ProductCategories.Commands.CreateProductCategory;
@@ -108,8 +108,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
             await db.ProductCategories.AddRangeAsync(
                 new ProductCategoryEntity { Name = "Smartphone", Description = "Desc", DeletedAt = null },
                 new ProductCategoryEntity { Name = "Phone Case", Description = "Desc", DeletedAt = null },
-                new ProductCategoryEntity { Name = "Laptop", Description = "Desc", DeletedAt = null }
-            , CancellationToken.None).ConfigureAwait(true);
+                new ProductCategoryEntity { Name = "Laptop", Description = "Desc", DeletedAt = null }).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
         }
 
@@ -273,7 +272,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
     public async Task GetProductCategoryById_InvalidId_ShouldReturnNotFound()
     {
         // Act
-        var response = await _client.GetAsync("/api/v1/ProductCategory/999", CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/ProductCategory/999").ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -311,7 +310,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/ProductCategory", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/ProductCategory", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
@@ -339,7 +338,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
         var request = new UpdateProductCategoryCommand { Name = "API Updated" };
 
         // Act
-        var response = await _client.PutAsJsonAsync($"/api/v1/ProductCategory/{categoryId}", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PutAsJsonAsync($"/api/v1/ProductCategory/{categoryId}", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -364,7 +363,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
         }
 
         // Act
-        var response = await _client.DeleteAsync($"/api/v1/ProductCategory/{categoryId}", CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.DeleteAsync($"/api/v1/ProductCategory/{categoryId}").ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -398,7 +397,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
         var request = new DeleteManyProductCategoriesCommand { Ids = [.. categoryIds] };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/ProductCategory/delete-many", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/ProductCategory/delete-many", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -435,7 +434,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
         var request = new DeleteManyProductCategoriesCommand { Ids = [validIds[0], 999, validIds[1]] };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/ProductCategory/delete-many", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/ProductCategory/delete-many", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -475,7 +474,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
         var request = new DeleteManyProductCategoriesCommand { Ids = [.. categoryIds] };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/ProductCategory/delete-many", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/ProductCategory/delete-many", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -509,7 +508,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
         var request = new RestoreManyProductCategoriesCommand { Ids = [.. categoryIds] };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/ProductCategory/restore-many", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/ProductCategory/restore-many", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -552,7 +551,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
         var request = new RestoreManyProductCategoriesCommand { Ids = [.. categoryIds] };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/ProductCategory/restore-many", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/ProductCategory/restore-many", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);

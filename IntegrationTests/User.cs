@@ -58,7 +58,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
             Password = password
         };
 
-        var loginResponse = await _client.PostAsJsonAsync("/api/v1/Auth/login", loginRequest, CancellationToken.None).ConfigureAwait(true);
+        var loginResponse = await _client.PostAsJsonAsync("/api/v1/Auth/login", loginRequest).ConfigureAwait(true);
         var loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResponse>(CancellationToken.None).ConfigureAwait(true);
 
         return (user, loginResult!.AccessToken!);
@@ -77,7 +77,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
             DateTimeOffset.UtcNow.AddDays(-3));
 
         // Act
-        var response = await _client.PostAsync($"/api/v1/User/{user.Id}/restore", null, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsync($"/api/v1/User/{user.Id}/restore", null).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -105,7 +105,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
             null);
 
         // Act
-        var response = await _client.PostAsync($"/api/v1/User/{user.Id}/restore", null, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsync($"/api/v1/User/{user.Id}/restore", null).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -125,7 +125,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
             DateTimeOffset.UtcNow.AddDays(-5));
 
         // Act
-        var response = await _client.PostAsync($"/api/v1/User/{user.Id}/restore", null, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsync($"/api/v1/User/{user.Id}/restore", null).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
@@ -140,7 +140,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         var nonExistentUserId = Guid.NewGuid();
 
         // Act
-        var response = await _client.PostAsync($"/api/v1/User/{nonExistentUserId}/restore", null, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsync($"/api/v1/User/{nonExistentUserId}/restore", null).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -160,7 +160,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
-        var response = await _client.GetAsync("/api/v1/User/me", CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/User/me").ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -180,7 +180,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         // Arrange - No authorization header
 
         // Act
-        var response = await _client.GetAsync("/api/v1/User/me", CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/User/me").ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -205,7 +205,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PutAsJsonAsync("/api/v1/User/me", updateRequest, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PutAsJsonAsync("/api/v1/User/me", updateRequest).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -242,7 +242,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PutAsJsonAsync("/api/v1/User/me", updateRequest, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PutAsJsonAsync("/api/v1/User/me", updateRequest).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -268,7 +268,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/User/change-password", changePasswordRequest, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/User/change-password", changePasswordRequest).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -282,7 +282,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
             UsernameOrEmail = "user029",
             Password = "NewPass456!"
         };
-        var loginResponse = await _client.PostAsJsonAsync("/api/v1/Auth/login", loginRequest, CancellationToken.None).ConfigureAwait(true);
+        var loginResponse = await _client.PostAsJsonAsync("/api/v1/Auth/login", loginRequest).ConfigureAwait(true);
         loginResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
         // Old token should be invalid (SecurityStamp changed)
@@ -308,7 +308,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/User/change-password", changePasswordRequest, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/User/change-password", changePasswordRequest).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -328,7 +328,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
-        var response = await _client.PostAsync("/api/v1/User/delete-account", null, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsync("/api/v1/User/delete-account", null).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -344,7 +344,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         deletedUser!.DeletedAt.Should().NotBeNull();
 
         // Old token should be invalid
-        var tokenTestResponse = await _client.GetAsync("/api/v1/User/me", CancellationToken.None).ConfigureAwait(true);
+        var tokenTestResponse = await _client.GetAsync("/api/v1/User/me").ConfigureAwait(true);
         tokenTestResponse.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
@@ -361,7 +361,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Act
-        var response = await _client.PostAsync("/api/v1/User/delete-account", null, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsync("/api/v1/User/delete-account", null).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
@@ -381,7 +381,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token1);
 
         // Verify token1 works
-        var testResponse1 = await _client.GetAsync("/api/v1/User/me", CancellationToken.None).ConfigureAwait(true);
+        var testResponse1 = await _client.GetAsync("/api/v1/User/me").ConfigureAwait(true);
         testResponse1.StatusCode.Should().Be(HttpStatusCode.OK);
 
         // Step 2: Change password
@@ -390,7 +390,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
             CurrentPassword = "Pass123!",
             NewPassword = "NewPass456!"
         };
-        var changeResponse = await _client.PostAsJsonAsync("/api/v1/User/change-password", changePasswordRequest, CancellationToken.None).ConfigureAwait(true);
+        var changeResponse = await _client.PostAsJsonAsync("/api/v1/User/change-password", changePasswordRequest).ConfigureAwait(true);
         changeResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
         // Step 3: Try to use old token
@@ -445,7 +445,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Verify token works initially
-        var testResponse1 = await _client.GetAsync("/api/v1/User/me", CancellationToken.None).ConfigureAwait(true);
+        var testResponse1 = await _client.GetAsync("/api/v1/User/me").ConfigureAwait(true);
         testResponse1.StatusCode.Should().Be(HttpStatusCode.OK);
 
         // Step 2: Admin bans the user

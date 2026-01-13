@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Json;
 using Application.ApiContracts.Brand.Responses;
 using Application.Features.Brands.Commands.CreateBrand;
@@ -38,7 +38,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/Brand", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/Brand", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -64,7 +64,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
             {
                 brands.Add(new BrandEntities { Name = $"Brand {i}", Description = "Desc" });
             }
-            await db.Brands.AddRangeAsync(brands, CancellationToken.None).ConfigureAwait(true).ConfigureAwait(true);
+            await db.Brands.AddRangeAsync(brands, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
         
@@ -151,7 +151,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PutAsJsonAsync($"/api/v1/Brand/{id}", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PutAsJsonAsync($"/api/v1/Brand/{id}", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -172,7 +172,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
         }
 
         // Act
-        var response = await _client.DeleteAsync($"/api/v1/Brand/{id}", CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.DeleteAsync($"/api/v1/Brand/{id}").ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -193,7 +193,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
         }
 
         // Act
-        var response = await _client.PostAsync($"/api/v1/Brand/restore/{id}", null, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsync($"/api/v1/Brand/restore/{id}", null).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -222,7 +222,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
         {
             Content = JsonContent.Create(request)
         };
-        var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -247,7 +247,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
         var request = new RestoreManyBrandsCommand { Ids = ids };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/Brand/restore-many", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/Brand/restore-many", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -270,7 +270,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
         var request = new CreateBrandCommand { Name = "Audit Brand", Description = "Audit" };
 
         // Act
-        await _client.PostAsJsonAsync("/api/v1/Brand", request, CancellationToken.None).ConfigureAwait(true);
+        await _client.PostAsJsonAsync("/api/v1/Brand", request).ConfigureAwait(true);
 
         // Assert
         // Verify in DB
@@ -296,7 +296,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
 
         var request = new UpdateBrandCommand { Name = "Audit Update Changed", Description = "Audit" };
 
-        await _client.PutAsJsonAsync($"/api/v1/Brand/{id}", request, CancellationToken.None).ConfigureAwait(true);
+        await _client.PutAsJsonAsync($"/api/v1/Brand/{id}", request).ConfigureAwait(true);
 
         using var verifyScope = _factory.Services.CreateScope();
         var verifyDb = verifyScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();

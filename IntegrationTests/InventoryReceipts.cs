@@ -8,6 +8,7 @@ using Application.Features.Inputs.Commands.UpdateInputStatus;
 using Application.Features.Inputs.Commands.UpdateManyInputStatus;
 using Domain.Constants;
 using Domain.Entities;
+using Domain.Primitives;
 using FluentAssertions;
 using Infrastructure.DBContexts;
 using Microsoft.Extensions.DependencyInjection;
@@ -230,7 +231,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<Domain.Primitives.PagedResult<InputResponse>>();
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<InputResponse>>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Items.Should().HaveCountLessThanOrEqualTo(10);
         content.PageNumber.Should().Be(1);
@@ -246,9 +247,9 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<Domain.Primitives.PagedResult<InputResponse>>();
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<InputResponse>>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
-        content!.Items.Should().OnlyContain(i => i.StatusId == Domain.Constants.Input.InputStatus.Working);
+        content!.Items.Should().OnlyContain(i => string.Compare(i.StatusId, Domain.Constants.Input.InputStatus.Working) == 0);
     }
 
     [Fact(DisplayName = "INPUT_018 - Lấy danh sách phiếu nhập với sort theo InputDate descending")]
@@ -261,7 +262,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<Domain.Primitives.PagedResult<InputResponse>>();
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<InputResponse>>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Items.Should().BeInDescendingOrder(i => i.InputDate);
     }
@@ -356,7 +357,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
 
         // Update status to finished
         await _client.PatchAsJsonAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}/status",
-            new UpdateInputStatusCommand { StatusId = Domain.Constants.Input.InputStatus.Finish }).ConfigureAwait(true);
+            new UpdateInputStatusCommand { StatusId = Domain.Constants.Input.InputStatus.Finish }, CancellationToken.None).ConfigureAwait(true);
 
         var updateRequest = new UpdateInputCommand
         {
@@ -390,7 +391,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
 
         // Update status to cancelled
         await _client.PatchAsJsonAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}/status",
-            new UpdateInputStatusCommand { StatusId = Domain.Constants.Input.InputStatus.Cancel });
+            new UpdateInputStatusCommand { StatusId = Domain.Constants.Input.InputStatus.Cancel }, CancellationToken.None).ConfigureAwait(true);
 
         var updateRequest = new UpdateInputCommand
         {
@@ -425,7 +426,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var statusRequest = new UpdateInputStatusCommand { StatusId = Domain.Constants.Input.InputStatus.Finish };
 
         // Act
-        var response = await _client.PatchAsJsonAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}/status", statusRequest);
+        var response = await _client.PatchAsJsonAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}/status", statusRequest, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -459,7 +460,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var statusRequest = new UpdateInputStatusCommand { StatusId = Domain.Constants.Input.InputStatus.Cancel };
 
         // Act
-        var response = await _client.PatchAsJsonAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}/status", statusRequest);
+        var response = await _client.PatchAsJsonAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}/status", statusRequest, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -496,7 +497,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PatchAsJsonAsync("/api/v1/InventoryReceipts/status", statusRequest);
+        var response = await _client.PatchAsJsonAsync("/api/v1/InventoryReceipts/status", statusRequest, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -534,7 +535,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PatchAsJsonAsync("/api/v1/InventoryReceipts/status", statusRequest);
+        var response = await _client.PatchAsJsonAsync("/api/v1/InventoryReceipts/status", statusRequest, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.MultiStatus, HttpStatusCode.BadRequest);
@@ -753,7 +754,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<Domain.Primitives.PagedResult<InputResponse>>();
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<InputResponse>>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Items.Should().OnlyContain(i => i.SupplierId == supplierId);
     }
@@ -768,7 +769,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<Domain.Primitives.PagedResult<InputResponse>>();
+        var content = await response.Content.ReadFromJsonAsync< PagedResult<InputResponse>>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
     }
 
@@ -814,7 +815,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var statusRequest = new UpdateInputStatusCommand { StatusId = Domain.Constants.Input.InputStatus.Finish };
 
         // Act
-        var response = await _client.PatchAsJsonAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}/status", statusRequest);
+        var response = await _client.PatchAsJsonAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}/status", statusRequest, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -836,9 +837,9 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<Domain.Primitives.PagedResult<InputResponse>>();
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<InputResponse>>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
-        content!.Items.Should().OnlyContain(i => i.StatusId == Domain.Constants.Input.InputStatus.Working && i.SupplierId == 1);
+        content!.Items.Should().OnlyContain(i => string.Compare(i.StatusId, Domain.Constants.Input.InputStatus.Working) == 0 && i.SupplierId == 1);
     }
 #pragma warning restore CRR0035
 }

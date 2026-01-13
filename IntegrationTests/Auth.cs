@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Json;
 using Application.ApiContracts.Auth.Responses;
 using Application.Features.Auth.Commands.Login;
@@ -39,7 +39,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/Auth/register", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/Auth/register", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -67,7 +67,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
             FullName = "Exist User",
             PhoneNumber = "0987654321"
         };
-        await _client.PostAsJsonAsync("/api/v1/Auth/register", request1, CancellationToken.None).ConfigureAwait(true);
+        await _client.PostAsJsonAsync("/api/v1/Auth/register", request1).ConfigureAwait(true);
 
         var request2 = new RegisterCommand
         {
@@ -79,7 +79,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/Auth/register", request2, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/Auth/register", request2).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest); // Or 409 depending on implementation
@@ -99,7 +99,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/Auth/register", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/Auth/register", request).ConfigureAwait(true);
 
         // Assert
         // Assuming the system accepts it but sanitizes or treats as literal string. 
@@ -150,7 +150,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/Auth/register", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/Auth/register", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -172,7 +172,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         var request = new LoginCommand { UsernameOrEmail = email, Password = password };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/Auth/login", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/Auth/login", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -198,7 +198,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         var request = new LoginCommand { UsernameOrEmail = username, Password = password };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/Auth/login", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/Auth/login", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
@@ -226,7 +226,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         var request = new LoginCommand { UsernameOrEmail = username, Password = password };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/Auth/login/for-manager", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/Auth/login/for-manager", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -248,7 +248,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
             await userManager.CreateAsync(user, password).ConfigureAwait(true);
         }
 
-        var loginRes = await _client.PostAsJsonAsync("/api/v1/Auth/login", new LoginCommand { UsernameOrEmail = username, Password = password }, CancellationToken.None).ConfigureAwait(true);
+        var loginRes = await _client.PostAsJsonAsync("/api/v1/Auth/login", new LoginCommand { UsernameOrEmail = username, Password = password }).ConfigureAwait(true);
         var loginContent = await loginRes.Content.ReadFromJsonAsync<LoginResponse>(CancellationToken.None).ConfigureAwait(true);
         refreshToken = loginContent!.RefreshToken;
 
@@ -260,7 +260,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         requestMsg.Headers.Add("Cookie", $"refreshToken={refreshToken}"); // Assuming cookie name is refreshToken
 
         // Act
-        var response = await _client.SendAsync(requestMsg, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMsg).ConfigureAwait(true);
 
         // Assert
         // If the controller expects cookie, this should work. If it fails, check implementation.
@@ -295,7 +295,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
             await userManager.CreateAsync(user, password).ConfigureAwait(true);
         }
         
-        var loginRes = await _client.PostAsJsonAsync("/api/v1/Auth/login", new LoginCommand { UsernameOrEmail = username, Password = password }, CancellationToken.None).ConfigureAwait(true);
+        var loginRes = await _client.PostAsJsonAsync("/api/v1/Auth/login", new LoginCommand { UsernameOrEmail = username, Password = password }).ConfigureAwait(true);
         var loginContent = await loginRes.Content.ReadFromJsonAsync<LoginResponse>(CancellationToken.None).ConfigureAwait(true);
         string? refreshToken = loginContent!.RefreshToken;
 
@@ -312,7 +312,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         requestMsg.Headers.Add("Cookie", $"refreshToken={refreshToken}");
 
         // Act
-        var response = await _client.SendAsync(requestMsg, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMsg).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.Forbidden, HttpStatusCode.Unauthorized, HttpStatusCode.BadRequest);
@@ -332,7 +332,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/Auth/register", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/Auth/register", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);

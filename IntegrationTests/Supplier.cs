@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Json;
 using Application.ApiContracts.Supplier.Responses;
 using Application.Features.Suppliers.Commands.DeleteManySuppliers;
@@ -284,7 +284,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         }
 
         // Act
-        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}", CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}").ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -322,7 +322,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         var request = new DeleteManySuppliersCommand { Ids = supplierIds };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/Supplier/delete-many", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/Supplier/delete-many", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -360,7 +360,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         var request = new DeleteManySuppliersCommand { Ids = supplierIds };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/Supplier/delete-many", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/Supplier/delete-many", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -394,7 +394,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         var request = new RestoreManySuppliersCommand { Ids = supplierIds };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/Supplier/restore-many", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/Supplier/restore-many", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -432,7 +432,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PatchAsJsonAsync("/api/v1/Supplier/update-status-many", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PatchAsJsonAsync("/api/v1/Supplier/update-status-many", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -519,7 +519,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
                 new() { SupplierId = supplierId, StatusId = "working" },
                 new() { SupplierId = supplierId, StatusId = "cancelled" }
             };
-            await db.InputReceipts.AddRangeAsync(inputs, CancellationToken.None).ConfigureAwait(true);
+            await db.InputReceipts.AddRangeAsync(inputs).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
 
             // Add InputInfo records - only completed should be counted

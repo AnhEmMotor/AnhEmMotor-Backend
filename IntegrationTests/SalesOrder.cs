@@ -1,4 +1,4 @@
-using Application.ApiContracts.Output.Requests;
+﻿using Application.ApiContracts.Output.Requests;
 using Application.ApiContracts.Output.Responses;
 using Application.Features.Outputs.Commands.CreateOutput;
 using Application.Features.Outputs.Commands.CreateOutputByManager;
@@ -33,7 +33,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
         var request = new CreateOutputCommand { BuyerId = Guid.NewGuid(), Notes = "Test" };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/SalesOrders", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/SalesOrders", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
@@ -49,7 +49,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
         var request = new CreateOutputCommand { BuyerId = Guid.NewGuid(), Notes = "COD Order" };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/SalesOrders", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/SalesOrders", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
@@ -63,7 +63,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
     {
         // Arrange - Create order
         var createRequest = new CreateOutputCommand { BuyerId = Guid.NewGuid() };
-        var createResponse = await _client.PostAsJsonAsync("/api/v1/SalesOrders", createRequest, CancellationToken.None).ConfigureAwait(true);
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/SalesOrders", createRequest).ConfigureAwait(true);
         var order = await createResponse.Content.ReadFromJsonAsync<OutputResponse>(CancellationToken.None).ConfigureAwait(true);
         int orderId = order!.Id!.Value;
 
@@ -74,12 +74,12 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
 
         // Act & Assert - ConfirmedCod -> Delivering
         var updateRequest2 = new UpdateOutputStatusCommand { StatusId = "delivering" };
-        var response2 = await _client.PatchAsJsonAsync($"/api/v1/SalesOrders/{orderId}/status", updateRequest2);
+        var response2 = await _client.PatchAsJsonAsync($"/api/v1/SalesOrders/{orderId}/status", updateRequest2, CancellationToken.None).ConfigureAwait(true);
         response2.StatusCode.Should().Be(HttpStatusCode.OK);
 
         // Act & Assert - Delivering -> Completed
         var updateRequest3 = new UpdateOutputStatusCommand { StatusId = "completed" };
-        var response3 = await _client.PatchAsJsonAsync($"/api/v1/SalesOrders/{orderId}/status", updateRequest3);
+        var response3 = await _client.PatchAsJsonAsync($"/api/v1/SalesOrders/{orderId}/status", updateRequest3, CancellationToken.None).ConfigureAwait(true);
         response3.StatusCode.Should().Be(HttpStatusCode.OK);
 
         var finalOrder = await response3.Content.ReadFromJsonAsync<OutputResponse>(CancellationToken.None).ConfigureAwait(true);
@@ -91,15 +91,15 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
     {
         // Arrange
         var createRequest = new CreateOutputCommand { BuyerId = Guid.NewGuid() };
-        var createResponse = await _client.PostAsJsonAsync("/api/v1/SalesOrders", createRequest, CancellationToken.None).ConfigureAwait(true);
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/SalesOrders", createRequest).ConfigureAwait(true);
         var order = await createResponse.Content.ReadFromJsonAsync<OutputResponse>(CancellationToken.None).ConfigureAwait(true);
         int orderId = order!.Id!.Value;
 
         // Act - Full deposit flow
         await _client.PatchAsJsonAsync($"/api/v1/SalesOrders/{orderId}/status", new UpdateOutputStatusCommand { StatusId = "deposit_50" }, CancellationToken.None).ConfigureAwait(true);
-        await _client.PatchAsJsonAsync($"/api/v1/SalesOrders/{orderId}/status", new UpdateOutputStatusCommand { StatusId = "confirmed_50" });
-        await _client.PatchAsJsonAsync($"/api/v1/SalesOrders/{orderId}/status", new UpdateOutputStatusCommand { StatusId = "delivering" });
-        var finalResponse = await _client.PatchAsJsonAsync($"/api/v1/SalesOrders/{orderId}/status", new UpdateOutputStatusCommand { StatusId = "completed" });
+        await _client.PatchAsJsonAsync($"/api/v1/SalesOrders/{orderId}/status", new UpdateOutputStatusCommand { StatusId = "confirmed_50" }, CancellationToken.None).ConfigureAwait(true);
+        await _client.PatchAsJsonAsync($"/api/v1/SalesOrders/{orderId}/status", new UpdateOutputStatusCommand { StatusId = "delivering" }, CancellationToken.None).ConfigureAwait(true);
+        var finalResponse = await _client.PatchAsJsonAsync($"/api/v1/SalesOrders/{orderId}/status", new UpdateOutputStatusCommand { StatusId = "completed" }, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         finalResponse.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -110,13 +110,13 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
     {
         // Arrange
         var createRequest = new CreateOutputCommand { BuyerId = Guid.NewGuid() };
-        var createResponse = await _client.PostAsJsonAsync("/api/v1/SalesOrders", createRequest, CancellationToken.None).ConfigureAwait(true);
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/SalesOrders", createRequest).ConfigureAwait(true);
         var order = await createResponse.Content.ReadFromJsonAsync<OutputResponse>(CancellationToken.None).ConfigureAwait(true);
         int orderId = order!.Id!.Value;
 
         // Act
         await _client.PatchAsJsonAsync($"/api/v1/SalesOrders/{orderId}/status", new UpdateOutputStatusCommand { StatusId = "confirmed_cod" }, CancellationToken.None).ConfigureAwait(true);
-        var refundResponse = await _client.PatchAsJsonAsync($"/api/v1/SalesOrders/{orderId}/status", new UpdateOutputStatusCommand { StatusId = "refund" });
+        var refundResponse = await _client.PatchAsJsonAsync($"/api/v1/SalesOrders/{orderId}/status", new UpdateOutputStatusCommand { StatusId = "refund" }, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         refundResponse.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -129,7 +129,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
         var request = new CreateOutputByManagerCommand { BuyerId = Guid.NewGuid() };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/SalesOrders/admin", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/SalesOrders/admin", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
@@ -152,7 +152,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
         var request = new CreateOutputCommand { BuyerId = Guid.NewGuid() };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/SalesOrders", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/SalesOrders", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
@@ -182,11 +182,11 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
     public async Task DeleteOutput_ValidId_SetsDeletedAt()
     {
         // Arrange
-        var createResponse = await _client.PostAsJsonAsync("/api/v1/SalesOrders", new CreateOutputCommand { BuyerId = Guid.NewGuid() }, CancellationToken.None).ConfigureAwait(true);
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/SalesOrders", new CreateOutputCommand { BuyerId = Guid.NewGuid() }).ConfigureAwait(true);
         var order = await createResponse.Content.ReadFromJsonAsync<OutputResponse>(CancellationToken.None).ConfigureAwait(true);
 
         // Act
-        var deleteResponse = await _client.DeleteAsync($"/api/v1/SalesOrders/{order!.Id}", CancellationToken.None).ConfigureAwait(true);
+        var deleteResponse = await _client.DeleteAsync($"/api/v1/SalesOrders/{order!.Id}").ConfigureAwait(true);
 
         // Assert
         deleteResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -196,9 +196,9 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
     public async Task RestoreOutput_ValidId_ClearsDeletedAt()
     {
         // Arrange - Create and delete
-        var createResponse = await _client.PostAsJsonAsync("/api/v1/SalesOrders", new CreateOutputCommand { BuyerId = Guid.NewGuid() }, CancellationToken.None).ConfigureAwait(true);
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/SalesOrders", new CreateOutputCommand { BuyerId = Guid.NewGuid() }).ConfigureAwait(true);
         var order = await createResponse.Content.ReadFromJsonAsync<OutputResponse>(CancellationToken.None).ConfigureAwait(true);
-        await _client.DeleteAsync($"/api/v1/SalesOrders/{order!.Id}", CancellationToken.None).ConfigureAwait(true);
+        await _client.DeleteAsync($"/api/v1/SalesOrders/{order!.Id}").ConfigureAwait(true);
 
         // Act
         var restoreResponse = await _client.PatchAsync($"/api/v1/SalesOrders/{order.Id}/restore", null).ConfigureAwait(true);
@@ -234,7 +234,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
     public async Task UpdateOutputStatus_InvalidTransition_ReturnsBadRequest()
     {
         // Arrange - Create order in pending state
-        var createResponse = await _client.PostAsJsonAsync("/api/v1/SalesOrders", new CreateOutputCommand { BuyerId = Guid.NewGuid() }, CancellationToken.None).ConfigureAwait(true);
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/SalesOrders", new CreateOutputCommand { BuyerId = Guid.NewGuid() }).ConfigureAwait(true);
         var order = await createResponse.Content.ReadFromJsonAsync<OutputResponse>(CancellationToken.None).ConfigureAwait(true);
 
         // Act - Try invalid transition (pending -> completed directly)
@@ -252,7 +252,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
         var request = new DeleteManyOutputsCommand { Ids = [1, 2] };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/SalesOrders/delete-many", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/SalesOrders/delete-many", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NoContent);
@@ -265,7 +265,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
         var request = new RestoreManyOutputsCommand { Ids = [1, 2] };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/SalesOrders/restore-many", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/SalesOrders/restore-many", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NoContent);
@@ -278,7 +278,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
         var request = new UpdateManyOutputStatusCommand { Ids = [1, 2], StatusId = "confirmed_cod" };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/SalesOrders/update-status-many", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/SalesOrders/update-status-many", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NoContent);

@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Json;
 
 using Domain.Entities;
@@ -157,7 +157,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PutAsJsonAsync("/api/v1/Setting", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PutAsJsonAsync("/api/v1/Setting", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -173,8 +173,8 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var savedSettings = db.Settings.ToList();
             savedSettings.Should().HaveCount(4);
-            savedSettings.First(s => s.Key == "Deposit_ratio").Value.Should().Be("50");
-            savedSettings.First(s => s.Key == "Inventory_alert_level").Value.Should().Be("10");
+            savedSettings.First(s => string.Compare(s.Key, "Deposit_ratio") == 0).Value.Should().Be("50");
+            savedSettings.First(s => string.Compare(s.Key, "Inventory_alert_level") == 0).Value.Should().Be("10");
         }
     }
 
@@ -202,7 +202,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PutAsJsonAsync("/api/v1/Setting", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PutAsJsonAsync("/api/v1/Setting", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -232,7 +232,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         var request = new Dictionary<string, long?> { { "Deposit_ratio", 25 } };
 
         // Act
-        var response = await _client.PutAsJsonAsync("/api/v1/Setting", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PutAsJsonAsync("/api/v1/Setting", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.Unauthorized, HttpStatusCode.Forbidden);
@@ -261,7 +261,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         var request = new Dictionary<string, long?> { { "Deposit_ratio", 25 } };
 
         // Act
-        var response = await _client.PutAsJsonAsync("/api/v1/Setting", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PutAsJsonAsync("/api/v1/Setting", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -282,7 +282,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         var request = new Dictionary<string, long?> { { "Deposit_ratio", 0 } };
 
         // Act
-        var response = await _client.PutAsJsonAsync("/api/v1/Setting", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PutAsJsonAsync("/api/v1/Setting", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -316,7 +316,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         var request = new Dictionary<string, long?> { { "Deposit_ratio", 100 } };
 
         // Act
-        var response = await _client.PutAsJsonAsync("/api/v1/Setting", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PutAsJsonAsync("/api/v1/Setting", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -352,7 +352,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         var request = new Dictionary<string, long?> { { "Deposit_ratio", 5055 } }; // Represents 50.55
 
         // Act
-        var response = await _client.PutAsJsonAsync("/api/v1/Setting", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PutAsJsonAsync("/api/v1/Setting", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -376,7 +376,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         var request = new Dictionary<string, long?>();
 
         // Act
-        var response = await _client.PutAsJsonAsync("/api/v1/Setting", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PutAsJsonAsync("/api/v1/Setting", request).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);

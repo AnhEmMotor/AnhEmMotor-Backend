@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Json;
 using Application.ApiContracts.Product.Common;
 using Application.ApiContracts.Product.Requests;
@@ -32,7 +32,7 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
         var brand = new Domain.Entities.Brand { Name = "Test Brand", DeletedAt = null };
         dbContext.ProductCategories.Add(category);
         dbContext.Brands.Add(brand);
-        await dbContext.SaveChangesAsync().ConfigureAwait(true);
+        await dbContext.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         // Act
         var response = await _client.GetAsync("/api/v1/product", CancellationToken.None).ConfigureAwait(true);
@@ -379,7 +379,7 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/product", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/product", request).ConfigureAwait(true);
 
         // Assert
         response.Should().NotBeNull();
@@ -422,7 +422,7 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/product", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/product", request).ConfigureAwait(true);
 
         // Assert
         response.Should().NotBeNull();
@@ -526,7 +526,7 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/product", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/product", request).ConfigureAwait(true);
 
         // Assert
         response.Should().NotBeNull();
@@ -570,7 +570,7 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
         };
 
         // Act
-        var response = await _client.PutAsJsonAsync("/api/v1/product/many/status", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PutAsJsonAsync("/api/v1/product/many/status", request).ConfigureAwait(true);
 
         // Assert
         response.Should().NotBeNull();
@@ -614,7 +614,7 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
         };
 
         // Act
-        var response = await _client.PutAsJsonAsync("/api/v1/product/many/status", request, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PutAsJsonAsync("/api/v1/product/many/status", request).ConfigureAwait(true);
 
         // Assert
         response.Should().NotBeNull();
