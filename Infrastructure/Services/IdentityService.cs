@@ -6,36 +6,48 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Infrastructure.Services;
 
-public class IdentityService(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager) : IIdentityService
+public class IdentityService(UserManager<ApplicationUser> userManager) : IIdentityService
 {
     public async Task<Result<UserAuth>> AuthenticateAsync(
         string usernameOrEmail,
         string password,
         CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         ApplicationUser? user;
 
-        if(usernameOrEmail.Contains('@'))
+        if (usernameOrEmail.Contains('@'))
         {
             user = await userManager.FindByEmailAsync(usernameOrEmail).ConfigureAwait(false);
-        } else
+        }
+        else
         {
             user = await userManager.FindByNameAsync(usernameOrEmail).ConfigureAwait(false);
         }
 
-        if(user == null)
+        if (user == null)
         {
             return Error.Unauthorized("Wrong username/email or password.");
         }
 
-        var roles = await userManager.GetRolesAsync(user!).ConfigureAwait(false);
+        var isPasswordValid = await userManager.CheckPasswordAsync(user, password).ConfigureAwait(false);
+
+        if (!isPasswordValid)
+        {
+            return Error.Unauthorized("Wrong username/email or password.");
+        }
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var roles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
 
         return new UserAuth
         {
-            Id = user!.Id,
+            Id = user.Id,
             UserName = user.UserName,
-            Roles = [ .. roles ],
-            AuthMethods = [ "amr" ],
+            Roles = [.. roles],
+            AuthMethods = ["amr"],
             Email = user.Email,
             FullName = user.FullName,
             Status = user.Status

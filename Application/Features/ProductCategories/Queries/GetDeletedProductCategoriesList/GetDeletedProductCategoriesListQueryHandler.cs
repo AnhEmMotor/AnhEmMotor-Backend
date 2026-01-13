@@ -1,3 +1,4 @@
+using Application.ApiContracts.Brand.Responses;
 using Application.ApiContracts.ProductCategory.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
@@ -19,10 +20,12 @@ public sealed class GetDeletedProductCategoriesListQueryHandler(
     {
         var query = repository.GetQueryable(DataFetchMode.DeletedOnly);
 
-        return await paginator.ApplyAsync<ProductCategoryEntity, ProductCategoryResponse>(
+        var result = await paginator.ApplyAsync<ProductCategoryEntity, ProductCategoryResponse>(
             query,
             request.SieveModel!,
             DataFetchMode.DeletedOnly,
             cancellationToken).ConfigureAwait(false);
+
+        return result;
     }
 }

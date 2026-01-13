@@ -110,7 +110,11 @@ public class LocalFileStorageService(IWebHostEnvironment environment, IHttpConte
     }
 
     public async Task<Stream> ReadImageAsync(Stream inputStream, int? width, CancellationToken cancellationToken)
-    { return await CompressImageAsync(inputStream, 75, width, cancellationToken).ConfigureAwait(false); }
+    {
+        var result = await CompressImageAsync(inputStream, 75, width, cancellationToken).ConfigureAwait(false);
+        return result;
+
+    }
 
     public async Task<Stream> CompressImageAsync(
         Stream inputStream,

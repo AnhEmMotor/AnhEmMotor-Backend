@@ -16,9 +16,11 @@ public sealed class GetBrandsListQueryHandler(IBrandReadRepository repository, I
     {
         var query = repository.GetQueryable();
 
-        return await paginator.ApplyAsync<BrandEntity, BrandResponse>(
+        var pagedResult = await paginator.ApplyAsync<BrandEntity, BrandResponse>(
             query,
             request.SieveModel!,
             cancellationToken: cancellationToken).ConfigureAwait(false);
+
+        return pagedResult;
     }
 }

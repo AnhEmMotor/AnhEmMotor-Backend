@@ -19,6 +19,7 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
 {
     private readonly HttpClient _client = factory.CreateClient();
 
+#pragma warning disable CRR0035
     [Fact(DisplayName = "PRODUCT_061 - Lấy danh sách sản phẩm với phân trang mặc định (10 items/page)")]
     public async Task GetProducts_DefaultPagination_Returns10ItemsPerPage()
     {
@@ -619,4 +620,5 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
         response.Should().NotBeNull();
         response.StatusCode.Should().NotBe(HttpStatusCode.OK);
     }
+#pragma warning restore CRR0035
 }

@@ -33,7 +33,7 @@ public class AuthController(IMediator mediator) : ApiController
     [SwaggerOperation(Summary = "Đăng ký tài khoản mới", Description = "Tạo 1 tài khoản mới (với email và password)")]
     [ProducesResponseType(typeof(RegistrationSuccessResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Register([FromBody] RegisterCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> RegisterAsync([FromBody] RegisterCommand command, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
 
@@ -47,7 +47,7 @@ public class AuthController(IMediator mediator) : ApiController
     [AnonymousOnly]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> Login([FromBody] LoginCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> LoginAsync([FromBody] LoginCommand command, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
 
@@ -62,7 +62,7 @@ public class AuthController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(GetAccessTokenFromRefreshTokenResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> RefreshToken(CancellationToken cancellationToken)
+    public async Task<IActionResult> RefreshTokenAsync(CancellationToken cancellationToken)
     {
         var refreshToken = Request.Cookies["refreshToken"];
         var accessToken = Request.Headers.Authorization.ToString().Replace("Bearer ", string.Empty);
@@ -79,7 +79,7 @@ public class AuthController(IMediator mediator) : ApiController
     [HttpPost("logout")]
     [ProducesResponseType(typeof(LogoutSuccessResponse), StatusCodes.Status200OK)]
     [Authorize]
-    public async Task<IActionResult> Logout(CancellationToken cancellationToken)
+    public async Task<IActionResult> LogoutAsync(CancellationToken cancellationToken)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var result = await mediator.Send(new LogoutCommand() { UserId = userId }, cancellationToken)
@@ -97,7 +97,7 @@ public class AuthController(IMediator mediator) : ApiController
     [HttpPost("google")]
     [AnonymousOnly]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status501NotImplemented)]
-    public async Task<IActionResult> GoogleLogin(
+    public async Task<IActionResult> GoogleLoginAsync(
         [FromBody] GoogleLoginCommand command,
         CancellationToken cancellationToken)
     {
@@ -111,7 +111,7 @@ public class AuthController(IMediator mediator) : ApiController
     [HttpPost("facebook")]
     [AnonymousOnly]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status501NotImplemented)]
-    public IActionResult FacebookLogin()
+    public IActionResult FacebookLoginAsync()
     {
         return StatusCode(
             501,
@@ -122,7 +122,7 @@ public class AuthController(IMediator mediator) : ApiController
     /// Đăng nhập bằng Username/Email và Password - Dành cho quản lý
     /// </summary>
     [HttpPost("login/for-manager")]
-    public async Task<IActionResult> LoginForManager(
+    public async Task<IActionResult> LoginForManagerAsync(
         [FromBody] LoginCommand command,
         CancellationToken cancellationToken)
     { throw new NotImplementedException(); }

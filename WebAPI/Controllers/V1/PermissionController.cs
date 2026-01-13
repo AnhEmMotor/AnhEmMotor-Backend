@@ -33,7 +33,7 @@ public class PermissionController(IMediator mediator) : ApiController
     [HttpGet("permissions")]
     [HasPermission(Domain.Constants.Permission.PermissionsList.Roles.View)]
     [ProducesResponseType(typeof(List<PermissionResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetAllPermissions(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAllPermissionsAsync(CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetAllPermissionsQuery(), cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
@@ -47,7 +47,7 @@ public class PermissionController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(List<PermissionAndRoleOfUserResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetMyPermissions(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetMyPermissionsAsync(CancellationToken cancellationToken)
     {
         var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var result = await mediator.Send(new GetMyPermissionsQuery() { UserId = userIdClaim }, cancellationToken)
@@ -62,7 +62,7 @@ public class PermissionController(IMediator mediator) : ApiController
     [HasPermission(Domain.Constants.Permission.PermissionsList.Users.View)]
     [ProducesResponseType(typeof(List<PermissionAndRoleOfUserResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetUserPermissionsById(Guid userId, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetUserPermissionsByIdAsync(Guid userId, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetUserPermissionsByIdQuery() { UserId = userId }, cancellationToken)
             .ConfigureAwait(true);
@@ -76,7 +76,7 @@ public class PermissionController(IMediator mediator) : ApiController
     [HasPermission(Domain.Constants.Permission.PermissionsList.Roles.View)]
     [ProducesResponseType(typeof(List<PermissionResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetRolePermissions(string roleName, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetRolePermissionsAsync(string roleName, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetRolePermissionsQuery() { RoleName = roleName }, cancellationToken)
             .ConfigureAwait(true);
@@ -91,7 +91,7 @@ public class PermissionController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(PermissionRoleUpdateResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> UpdateRole(
+    public async Task<IActionResult> UpdateRoleAsync(
         string roleName,
         [FromBody] Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommand model,
         CancellationToken cancellationToken)
@@ -114,7 +114,7 @@ public class PermissionController(IMediator mediator) : ApiController
     [HttpGet("roles")]
     [HasPermission(Domain.Constants.Permission.PermissionsList.Roles.View)]
     [ProducesResponseType(typeof(List<RoleSelectResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetAllRoles(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAllRolesAsync(CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetAllRolesQuery(), cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
@@ -127,7 +127,7 @@ public class PermissionController(IMediator mediator) : ApiController
     [HasPermission(Domain.Constants.Permission.PermissionsList.Roles.Create)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(RoleCreateResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> CreateRole([FromBody] CreateRoleCommand model, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateRoleAsync([FromBody] CreateRoleCommand model, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(
             new CreateRoleCommand()
@@ -149,7 +149,7 @@ public class PermissionController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(RoleDeleteResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> DeleteRole(string roleName, CancellationToken cancellationToken)
+    public async Task<IActionResult> DeleteRoleAsync(string roleName, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new DeleteRoleCommand() { RoleName = roleName }, cancellationToken)
             .ConfigureAwait(true);
@@ -163,7 +163,7 @@ public class PermissionController(IMediator mediator) : ApiController
     [HasPermission(Domain.Constants.Permission.PermissionsList.Roles.Delete)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(RoleDeleteResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> DeleteMultipleRoles(
+    public async Task<IActionResult> DeleteMultipleRolesAsync(
         [FromBody] List<string> roleNames,
         CancellationToken cancellationToken)
     {

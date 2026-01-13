@@ -15,7 +15,7 @@ public class DeleteRoleCommandHandler(
     {
         var roleName = request.RoleName;
 
-        var role = await roleReadRepository.GetRoleByNameAsync(roleName!).ConfigureAwait(false);
+        var role = await roleReadRepository.GetRoleByNameAsync(roleName!, cancellationToken).ConfigureAwait(false);
         if(role is null)
         {
             return Error.BadRequest("Role not found.");
@@ -27,7 +27,7 @@ public class DeleteRoleCommandHandler(
             return Error.BadRequest("Cannot delete SuperRole.");
         }
 
-        var usersWithRole = await roleReadRepository.GetUsersInRoleAsync(roleName!).ConfigureAwait(false);
+        var usersWithRole = await roleReadRepository.GetUsersInRoleAsync(roleName!, cancellationToken).ConfigureAwait(false);
         if(usersWithRole.Count > 0)
         {
             return Error.BadRequest(
@@ -36,7 +36,7 @@ public class DeleteRoleCommandHandler(
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        var result = await roleDeleteRepository.DeleteAsync(role).ConfigureAwait(false);
+        var result = await roleDeleteRepository.DeleteAsync(role, cancellationToken).ConfigureAwait(false);
         if(!result.Succeeded)
         {
             var errors = string.Join(", ", result.Errors.Select(e => e.Description));

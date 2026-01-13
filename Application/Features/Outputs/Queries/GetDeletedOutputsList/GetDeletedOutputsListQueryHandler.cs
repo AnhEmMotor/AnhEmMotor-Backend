@@ -1,3 +1,4 @@
+using Application.ApiContracts.Brand.Responses;
 using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
@@ -17,9 +18,11 @@ public sealed class GetDeletedOutputsListQueryHandler(IOutputReadRepository repo
     {
         var query = repository.GetQueryable(DataFetchMode.DeletedOnly);
 
-        return await paginator.ApplyAsync<OutputEntity, OutputResponse>(
+        var result = await paginator.ApplyAsync<OutputEntity, OutputResponse>(
             query,
             request.SieveModel!,
             cancellationToken: cancellationToken).ConfigureAwait(false);
+
+        return result;
     }
 }

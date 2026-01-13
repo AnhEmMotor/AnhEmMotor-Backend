@@ -26,6 +26,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
         _client = _factory.CreateClient();
     }
 
+#pragma warning disable CRR0035
     [Fact(DisplayName = "BRAND_001 - CreateBrand - Success")]
     public async Task BRAND_001_CreateBrand_Success()
     {
@@ -302,4 +303,5 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
         var verifyBrand = verifyDb.Set<BrandEntities>().FirstOrDefault(b => b.Id == id);
         verifyBrand!.UpdatedAt.Should().NotBeNull();
     }
+#pragma warning restore CRR0035
 }

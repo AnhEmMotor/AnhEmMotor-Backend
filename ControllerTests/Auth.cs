@@ -1,4 +1,4 @@
-using Application.Common.Models;
+﻿using Application.Common.Models;
 using Application.Features.Auth.Commands.Login;
 using Application.Features.Auth.Commands.Logout;
 using Application.Features.Auth.Commands.Register;
@@ -30,6 +30,7 @@ public class Auth
         };
     }
 
+#pragma warning disable CRR0035
     [Fact(DisplayName = "AUTH_REG_002 - Đăng ký thất bại (Validation) - TH1: Thiếu Password")]
     public async Task AUTH_REG_002_1_Register_MissingPassword()
     {
@@ -46,7 +47,7 @@ public class Auth
             .ThrowsAsync(new FluentValidation.ValidationException("Validation failed: Password is required"));
 
         // Act & Assert
-        await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _controller.Register(request, CancellationToken.None));
+        await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _controller.RegisterAsync(request, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "AUTH_REG_002 - Đăng ký thất bại (Validation) - TH2: Thiếu Email và Username")]
@@ -65,7 +66,7 @@ public class Auth
             .ThrowsAsync(new FluentValidation.ValidationException("Validation failed: Email and Username are required"));
 
         // Act & Assert
-        await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _controller.Register(request, CancellationToken.None));
+        await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _controller.RegisterAsync(request, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "AUTH_REG_002 - Đăng ký thất bại (Validation) - TH3: Thiếu FullName")]
@@ -84,7 +85,7 @@ public class Auth
             .ThrowsAsync(new FluentValidation.ValidationException("Validation failed: FullName is required"));
 
         // Act & Assert
-        await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _controller.Register(request, CancellationToken.None));
+        await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => _controller.RegisterAsync(request, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "AUTH_LOG_002 - Đăng nhập sai thông tin")]
@@ -108,7 +109,7 @@ public class Auth
             .ThrowsAsync(new UnauthorizedAccessException("Invalid credentials"));
 
         // Act & Assert
-        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _controller.Login(request, CancellationToken.None));
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _controller.LoginAsync(request, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "AUTH_MGR_002 - Manager Login Fail (Quyền)")]
@@ -121,7 +122,7 @@ public class Auth
             .ThrowsAsync(new UnauthorizedAccessException("Forbidden"));
 
         // Act & Assert
-        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _controller.LoginForManager(request, CancellationToken.None));
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _controller.LoginForManagerAsync(request, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "AUTH_OUT_001 - Đăng xuất")]
@@ -132,7 +133,7 @@ public class Auth
             .ReturnsAsync(Result.Success());
 
         // Act
-        var result = await _controller.Logout(CancellationToken.None);
+        var result = await _controller.LogoutAsync(CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         // Assuming Controller returns Ok(response)
@@ -140,4 +141,5 @@ public class Auth
         // Since implementation is missing, I'll just verify the call.
         _mediatorMock.Verify(m => m.Send(It.IsAny<LogoutCommand>(), It.IsAny<CancellationToken>()), Times.Once);
     }
+#pragma warning restore CRR0035
 }

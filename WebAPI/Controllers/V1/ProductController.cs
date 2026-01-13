@@ -43,7 +43,7 @@ public class ProductController(ISender sender) : ApiController
     /// </summary>
     [HttpGet]
     [ProducesResponseType(typeof(Domain.Primitives.PagedResult<ProductDetailResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetProducts([FromQuery] SieveModel request, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetProductsAsync([FromQuery] SieveModel request, CancellationToken cancellationToken)
     {
         var query = GetProductsListQuery.FromRequest(request);
         var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
@@ -58,7 +58,7 @@ public class ProductController(ISender sender) : ApiController
     [ProducesResponseType(
         typeof(Domain.Primitives.PagedResult<ProductDetailForManagerResponse>),
         StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetProductsForManager(
+    public async Task<IActionResult> GetProductsForManagerAsync(
         [FromQuery] SieveModel request,
         CancellationToken cancellationToken)
     {
@@ -76,7 +76,7 @@ public class ProductController(ISender sender) : ApiController
     [ProducesResponseType(
         typeof(Domain.Primitives.PagedResult<ProductDetailForManagerResponse>),
         StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetDeletedProducts(
+    public async Task<IActionResult> GetDeletedProductsAsync(
         [FromQuery] SieveModel request,
         CancellationToken cancellationToken)
     {
@@ -92,7 +92,7 @@ public class ProductController(ISender sender) : ApiController
     [HttpGet("variants-lite/for-manager")]
     [RequiresAnyPermissions(Products.View)]
     [ProducesResponseType(typeof(Domain.Primitives.PagedResult<ProductVariantLiteResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetActiveVariantLiteProducts(
+    public async Task<IActionResult> GetActiveVariantLiteProductsAsync(
         [FromQuery] SieveModel request,
         CancellationToken cancellationToken = default)
     {
@@ -107,7 +107,7 @@ public class ProductController(ISender sender) : ApiController
     /// </summary>
     [HttpGet("variants-lite")]
     [ProducesResponseType(typeof(Domain.Primitives.PagedResult<ProductVariantLiteResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetActiveVariantLiteProductsPublic(
+    public async Task<IActionResult> GetActiveVariantLiteProductsPublicAsync(
         [FromQuery] SieveModel request,
         CancellationToken cancellationToken = default)
     {
@@ -126,7 +126,7 @@ public class ProductController(ISender sender) : ApiController
     [ProducesResponseType(
         typeof(Domain.Primitives.PagedResult<ProductVariantLiteResponseForInput>),
         StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetActiveVariantLiteProductsForInput(
+    public async Task<IActionResult> GetActiveVariantLiteProductsForInputAsync(
         [FromQuery] SieveModel request,
         CancellationToken cancellationToken = default)
     {
@@ -145,7 +145,7 @@ public class ProductController(ISender sender) : ApiController
     [ProducesResponseType(
         typeof(Domain.Primitives.PagedResult<ProductVariantLiteResponseForOutput>),
         StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetActiveVariantLiteProductsForOutput(
+    public async Task<IActionResult> GetActiveVariantLiteProductsForOutputAsync(
         [FromQuery] SieveModel request,
         CancellationToken cancellationToken = default)
     {
@@ -160,7 +160,7 @@ public class ProductController(ISender sender) : ApiController
     [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(ProductDetailForManagerResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetVarientById(int id, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetVarientByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         var result = await sender.Send(new GetProductByIdQuery() { Id = id }, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
@@ -173,7 +173,7 @@ public class ProductController(ISender sender) : ApiController
     [HasPermission(Products.View)]
     [ProducesResponseType(typeof(ProductDetailForManagerResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetVarientByIdForManager(int id, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetVarientByIdForManagerAsync(int id, CancellationToken cancellationToken = default)
     {
         var result = await sender.Send(new GetProductByIdQuery() { Id = id }, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
@@ -186,7 +186,7 @@ public class ProductController(ISender sender) : ApiController
     [HasPermission(Products.View)]
     [ProducesResponseType(typeof(List<ProductVariantLiteResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetVariantLiteByProductIdActive(
+    public async Task<IActionResult> GetVariantLiteByProductIdActiveAsync(
         int id,
         CancellationToken cancellationToken = default)
     {
@@ -203,7 +203,7 @@ public class ProductController(ISender sender) : ApiController
     [HttpGet("check-slug")]
     [RequiresAnyPermissions(Products.Create, Products.Edit)]
     [ProducesResponseType(typeof(SlugAvailabilityResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> CheckSlugAvailability([FromQuery] string slug, CancellationToken cancellationToken)
+    public async Task<IActionResult> CheckSlugAvailabilityAsync([FromQuery] string slug, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new CheckSlugAvailabilityQuery() { Slug = slug }, cancellationToken)
             .ConfigureAwait(true);
@@ -217,7 +217,7 @@ public class ProductController(ISender sender) : ApiController
     [HasPermission(Products.Create)]
     [ProducesResponseType(typeof(ProductDetailForManagerResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> CreateProduct(
+    public async Task<IActionResult> CreateProductAsync(
         [FromBody] CreateProductCommand request,
         CancellationToken cancellationToken)
     {
@@ -234,7 +234,7 @@ public class ProductController(ISender sender) : ApiController
     [ProducesResponseType(typeof(ProductDetailForManagerResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> UpdateProduct(
+    public async Task<IActionResult> UpdateProductAsync(
         int id,
         [FromBody] UpdateProductCommand request,
         CancellationToken cancellationToken)
@@ -251,7 +251,7 @@ public class ProductController(ISender sender) : ApiController
     [HasPermission(Products.Delete)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> DeleteProduct(int id, CancellationToken cancellationToken)
+    public async Task<IActionResult> DeleteProductAsync(int id, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new DeleteProductCommand() { Id = id }, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
@@ -264,7 +264,7 @@ public class ProductController(ISender sender) : ApiController
     [HasPermission(Products.Delete)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> DeleteProducts(
+    public async Task<IActionResult> DeleteProductsAsync(
         [FromBody] DeleteManyProductsCommand request,
         CancellationToken cancellationToken)
     {
@@ -280,7 +280,7 @@ public class ProductController(ISender sender) : ApiController
     [HasPermission(Products.Delete)]
     [ProducesResponseType(typeof(ProductDetailForManagerResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> RestoreProduct(int id, CancellationToken cancellationToken)
+    public async Task<IActionResult> RestoreProductAsync(int id, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new RestoreProductCommand() { Id = id }, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
@@ -293,7 +293,7 @@ public class ProductController(ISender sender) : ApiController
     [HasPermission(Products.Delete)]
     [ProducesResponseType(typeof(List<ProductDetailForManagerResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> RestoreProducts(
+    public async Task<IActionResult> RestoreProductsAsync(
         [FromBody] RestoreManyProductsCommand request,
         CancellationToken cancellationToken)
     {
@@ -310,7 +310,7 @@ public class ProductController(ISender sender) : ApiController
     [ProducesResponseType(typeof(ProductDetailForManagerResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UpdateProductPrice(
+    public async Task<IActionResult> UpdateProductPriceAsync(
         int id,
         [FromBody] UpdateProductPriceCommand request,
         CancellationToken cancellationToken)
@@ -329,7 +329,7 @@ public class ProductController(ISender sender) : ApiController
     [HasPermission(Products.EditPrice)]
     [ProducesResponseType(typeof(List<int>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> UpdateManyProductPrices(
+    public async Task<IActionResult> UpdateManyProductPricesAsync(
         [FromBody] UpdateManyProductPricesCommand request,
         CancellationToken cancellationToken)
     {
@@ -348,7 +348,7 @@ public class ProductController(ISender sender) : ApiController
     [ProducesResponseType(typeof(ProductVariantLiteResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UpdateVariantPrice(
+    public async Task<IActionResult> UpdateVariantPriceAsync(
         int variantId,
         [FromBody] UpdateVariantPriceCommand request,
         CancellationToken cancellationToken)
@@ -367,7 +367,7 @@ public class ProductController(ISender sender) : ApiController
     [HasPermission(Products.EditPrice)]
     [ProducesResponseType(typeof(List<int>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> UpdateManyVariantPrices(
+    public async Task<IActionResult> UpdateManyVariantPricesAsync(
         [FromBody] UpdateManyVariantPricesCommand request,
         CancellationToken cancellationToken)
     {
@@ -386,7 +386,7 @@ public class ProductController(ISender sender) : ApiController
     [ProducesResponseType(typeof(ProductDetailForManagerResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UpdateProductStatus(
+    public async Task<IActionResult> UpdateProductStatusAsync(
         int id,
         [FromBody] UpdateProductStatusCommand request,
         CancellationToken cancellationToken)
@@ -405,7 +405,7 @@ public class ProductController(ISender sender) : ApiController
     [HasPermission(Products.ChangeStatus)]
     [ProducesResponseType(typeof(List<int>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> UpdateManyProductStatuses(
+    public async Task<IActionResult> UpdateManyProductStatusesAsync(
         [FromBody] UpdateManyProductStatusesCommand request,
         CancellationToken cancellationToken)
     {

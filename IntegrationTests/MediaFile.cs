@@ -22,6 +22,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         _client = _factory.CreateClient();
     }
 
+#pragma warning disable CRR0035
     [Fact(DisplayName = "MF_002 - Tải lên ảnh thành công với định dạng JPG hợp lệ")]
     public async Task UploadImage_ValidJpg_Success()
     {
@@ -416,4 +417,5 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         // Response should contain only deleted files with pagination
     }
+#pragma warning restore CRR0035
 }

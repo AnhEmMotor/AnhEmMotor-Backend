@@ -21,6 +21,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         _client = _factory.CreateClient();
     }
 
+#pragma warning disable CRR0035
     [Fact(DisplayName = "SETTING_001 - GetAllSettings - Thành công (Happy Path)")]
     public async Task SETTING_001_GetAllSettings_Success()
     {
@@ -383,4 +384,5 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         content.Should().NotBeNull();
         content!.Errors.Should().Contain(e => e.Message.Contains("cannot be empty"));
     }
+#pragma warning restore CRR0035
 }

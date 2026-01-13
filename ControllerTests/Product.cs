@@ -1,4 +1,4 @@
-using Application.Common.Models;
+﻿using Application.Common.Models;
 using Application.Features.Products.Commands.CreateProduct;
 using Application.Features.Products.Commands.DeleteManyProducts;
 using Application.Features.Products.Commands.DeleteProduct;
@@ -45,6 +45,7 @@ public class Product
         };
     }
 
+#pragma warning disable CRR0035
     [Fact(DisplayName = "PRODUCT_081 - API tạo sản phẩm trả về 403 khi user không có quyền")]
     public async Task CreateProduct_UserNoPermission_ReturnsForbidden()
     {
@@ -54,7 +55,7 @@ public class Product
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.CreateProduct(new CreateProductCommand(), CancellationToken.None));
+            _controller.CreateProductAsync(new CreateProductCommand(), CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "PRODUCT_082 - API tạo sản phẩm trả về 401 khi user chưa đăng nhập")]
@@ -66,7 +67,7 @@ public class Product
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.CreateProduct(new CreateProductCommand(), CancellationToken.None));
+            _controller.CreateProductAsync(new CreateProductCommand(), CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "PRODUCT_083 - API lấy danh sách sản phẩm for-manager trả về 403 khi user không có quyền")]
@@ -78,7 +79,7 @@ public class Product
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.GetProductsForManager(new Sieve.Models.SieveModel(), CancellationToken.None));
+            _controller.GetProductsForManagerAsync(new Sieve.Models.SieveModel(), CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "PRODUCT_084 - API lấy danh sách sản phẩm public cho phép truy cập không cần quyền")]
@@ -90,7 +91,7 @@ public class Product
                 [], 0, 1, 10));
 
         // Act
-        var result = await _controller.GetProducts(new Sieve.Models.SieveModel(), CancellationToken.None);
+        var result = await _controller.GetProductsAsync(new Sieve.Models.SieveModel(), CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         Assert.NotNull(result);
@@ -105,7 +106,7 @@ public class Product
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.DeleteProduct(1, CancellationToken.None));
+            _controller.DeleteProductAsync(1, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "PRODUCT_086 - API sửa sản phẩm trả về 403 khi user không có quyền")]
@@ -117,7 +118,7 @@ public class Product
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.UpdateProduct(1, new UpdateProductCommand(), CancellationToken.None));
+            _controller.UpdateProductAsync(1, new UpdateProductCommand(), CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "PRODUCT_087 - API lấy deleted products trả về 403 khi user không có quyền view")]
@@ -129,7 +130,7 @@ public class Product
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.GetDeletedProducts(new Sieve.Models.SieveModel(), CancellationToken.None));
+            _controller.GetDeletedProductsAsync(new Sieve.Models.SieveModel(), CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "PRODUCT_088 - API check slug availability trả về 403 khi user không có quyền update")]
@@ -141,7 +142,7 @@ public class Product
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.CheckSlugAvailability("test-slug", CancellationToken.None));
+            _controller.CheckSlugAvailabilityAsync("test-slug", CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "PRODUCT_089 - API update product price trả về 403 khi user không có quyền")]
@@ -153,7 +154,7 @@ public class Product
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.UpdateProductPrice(1, new UpdateProductPriceCommand(), CancellationToken.None));
+            _controller.UpdateProductPriceAsync(1, new UpdateProductPriceCommand(), CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "PRODUCT_090 - API update variant price trả về 403 khi user không có quyền")]
@@ -165,7 +166,7 @@ public class Product
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.UpdateVariantPrice(1, new UpdateVariantPriceCommand(), CancellationToken.None));
+            _controller.UpdateVariantPriceAsync(1, new UpdateVariantPriceCommand(), CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "PRODUCT_091 - API update many product prices trả về 403 khi user không có quyền")]
@@ -177,7 +178,7 @@ public class Product
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.UpdateManyProductPrices(new UpdateManyProductPricesCommand(), CancellationToken.None));
+            _controller.UpdateManyProductPricesAsync(new UpdateManyProductPricesCommand(), CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "PRODUCT_092 - API update product status trả về 403 khi user không có quyền")]
@@ -189,7 +190,7 @@ public class Product
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.UpdateProductStatus(1, new UpdateProductStatusCommand(), CancellationToken.None));
+            _controller.UpdateProductStatusAsync(1, new UpdateProductStatusCommand(), CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "PRODUCT_093 - API update many product statuses trả về 403 khi user không có quyền")]
@@ -201,7 +202,7 @@ public class Product
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.UpdateManyProductStatuses(new UpdateManyProductStatusesCommand(), CancellationToken.None));
+            _controller.UpdateManyProductStatusesAsync(new UpdateManyProductStatusesCommand(), CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "PRODUCT_094 - API delete many products trả về 403 khi user không có quyền")]
@@ -213,7 +214,7 @@ public class Product
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.DeleteProducts(new DeleteManyProductsCommand(), CancellationToken.None));
+            _controller.DeleteProductsAsync(new DeleteManyProductsCommand(), CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "PRODUCT_095 - API restore product trả về 403 khi user không có quyền")]
@@ -225,7 +226,7 @@ public class Product
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.RestoreProduct(1, CancellationToken.None));
+            _controller.RestoreProductAsync(1, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "PRODUCT_096 - API restore many products trả về 403 khi user không có quyền")]
@@ -237,7 +238,7 @@ public class Product
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.RestoreProducts(new RestoreManyProductsCommand(), CancellationToken.None));
+            _controller.RestoreProductsAsync(new RestoreManyProductsCommand(), CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "PRODUCT_097 - API variants-lite/for-input trả về 403 khi user không có quyền input")]
@@ -249,7 +250,7 @@ public class Product
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.GetActiveVariantLiteProductsForInput(new Sieve.Models.SieveModel(), CancellationToken.None));
+            _controller.GetActiveVariantLiteProductsForInputAsync(new Sieve.Models.SieveModel(), CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "PRODUCT_098 - API variants-lite/for-output trả về 403 khi user không có quyền output")]
@@ -261,7 +262,7 @@ public class Product
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.GetActiveVariantLiteProductsForOutput(new Sieve.Models.SieveModel(), CancellationToken.None));
+            _controller.GetActiveVariantLiteProductsForOutputAsync(new Sieve.Models.SieveModel(), CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "PRODUCT_099 - API tạo sản phẩm trả về 400 với error response đúng format")]
@@ -272,7 +273,7 @@ public class Product
             .ReturnsAsync(Result<Application.ApiContracts.Product.Responses.ProductDetailForManagerResponse?>.Failure(Error.BadRequest("Name là bắt buộc")));
 
         // Act
-        var result = await _controller.CreateProduct(new CreateProductCommand(), CancellationToken.None);
+        var result = await _controller.CreateProductAsync(new CreateProductCommand(), CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         Assert.IsType<BadRequestObjectResult>(result);
@@ -294,10 +295,11 @@ public class Product
             .ReturnsAsync(expectedResult);
 
         // Act
-        var result = await _controller.GetProducts(sieveModel, CancellationToken.None);
+        var result = await _controller.GetProductsAsync(sieveModel, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         Assert.NotNull(result);
         _senderMock.Verify(m => m.Send(It.IsAny<GetProductsListQuery>(), It.IsAny<CancellationToken>()), Times.Once);
     }
+#pragma warning restore CRR0035
 }

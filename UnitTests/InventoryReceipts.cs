@@ -17,6 +17,7 @@ namespace UnitTests;
 
 public class InventoryReceipts
 {
+#pragma warning disable CRR0035
     [Fact(DisplayName = "INPUT_007 - Tạo phiếu nhập với Quantity là số âm")]
     public void CreateInputProductValidator_NegativeQuantity_ReturnsValidationError()
     {
@@ -249,7 +250,7 @@ public class InventoryReceipts
         };
 
         // Act & Assert
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
 
@@ -279,7 +280,7 @@ public class InventoryReceipts
         };
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.Value.Should().BeNull();
         result.IsFailure.Should().BeTrue();
     }
@@ -417,4 +418,5 @@ public class InventoryReceipts
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.Products);
     }
+#pragma warning restore CRR0035
 }

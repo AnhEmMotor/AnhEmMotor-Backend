@@ -33,7 +33,7 @@ public class StatisticsController(IMediator mediator) : ApiController
     [HttpGet("daily-revenue")]
     [HasPermission(Statistical.View)]
     [ProducesResponseType(typeof(IEnumerable<DailyRevenueResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetDailyRevenue(
+    public async Task<IActionResult> GetDailyRevenueAsync(
         [FromQuery] int days = 7,
         CancellationToken cancellationToken = default)
     {
@@ -48,7 +48,7 @@ public class StatisticsController(IMediator mediator) : ApiController
     [HttpGet("dashboard-stats")]
     [HasPermission(Statistical.View)]
     [ProducesResponseType(typeof(DashboardStatsResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetDashboardStats(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetDashboardStatsAsync(CancellationToken cancellationToken)
     {
         var query = new GetDashboardStatsQuery();
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
@@ -63,7 +63,7 @@ public class StatisticsController(IMediator mediator) : ApiController
     [HttpGet("monthly-revenue-profit")]
     [HasPermission(Statistical.View)]
     [ProducesResponseType(typeof(IEnumerable<MonthlyRevenueProfitResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetMonthlyRevenueProfit(
+    public async Task<IActionResult> GetMonthlyRevenueProfitAsync(
         [FromQuery] int months = 12,
         CancellationToken cancellationToken = default)
     {
@@ -78,7 +78,7 @@ public class StatisticsController(IMediator mediator) : ApiController
     [HttpGet("order-status-counts")]
     [HasPermission(Statistical.View)]
     [ProducesResponseType(typeof(IEnumerable<OrderStatusCountResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetOrderStatusCounts(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetOrderStatusCountsAsync(CancellationToken cancellationToken)
     {
         var query = new GetOrderStatusCountsQuery();
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
@@ -91,7 +91,7 @@ public class StatisticsController(IMediator mediator) : ApiController
     [HttpGet("product-report-last-month")]
     [HasPermission(Statistical.View)]
     [ProducesResponseType(typeof(IEnumerable<ProductReportResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetProductReportLastMonth(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetProductReportLastMonthAsync(CancellationToken cancellationToken)
     {
         var query = new GetProductReportLastMonthQuery();
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
@@ -105,7 +105,7 @@ public class StatisticsController(IMediator mediator) : ApiController
     [HasPermission(Statistical.View)]
     [ProducesResponseType(typeof(ProductStockPriceResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetProductStockAndPrice(int variantId, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetProductStockAndPriceAsync(int variantId, CancellationToken cancellationToken)
     {
         var query = new GetProductStockAndPriceQuery() { VariantId = variantId };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);

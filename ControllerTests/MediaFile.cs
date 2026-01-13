@@ -1,4 +1,4 @@
-using Application.Features.Files.Commands.DeleteFile;
+﻿using Application.Features.Files.Commands.DeleteFile;
 using Application.Features.Files.Commands.DeleteManyFiles;
 using Application.Features.Files.Commands.RestoreFile;
 using Application.Features.Files.Commands.RestoreManyFiles;
@@ -31,12 +31,13 @@ public class MediaFile
         fileMock.Setup(f => f.FileName).Returns("test.webp");
 
         // Act
-        var result = await controller.UploadImage(fileMock.Object, CancellationToken.None);
+        var result = await controller.UploadImageAsync(fileMock.Object, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<ForbidResult>();
     }
 
+#pragma warning disable CRR0035
     [Fact(DisplayName = "MF_006 - Tải lên ảnh thất bại khi chưa đăng nhập")]
     public async Task UploadImage_NotAuthenticated_Unauthorized()
     {
@@ -49,7 +50,7 @@ public class MediaFile
         fileMock.Setup(f => f.FileName).Returns("test.webp");
 
         // Act
-        var result = await controller.UploadImage(fileMock.Object, CancellationToken.None);
+        var result = await controller.UploadImageAsync(fileMock.Object, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<UnauthorizedObjectResult>();
@@ -65,7 +66,7 @@ public class MediaFile
         var storagePath = "test-file.webp";
 
         // Act
-        var result = await controller.DeleteFile(storagePath, CancellationToken.None);
+        var result = await controller.DeleteFileAsync(storagePath, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<ForbidResult>();
@@ -81,7 +82,7 @@ public class MediaFile
         var storagePath = "deleted-file.webp";
 
         // Act
-        var result = await controller.RestoreFile(storagePath, CancellationToken.None);
+        var result = await controller.RestoreFileAsync(storagePath, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<ForbidResult>();
@@ -97,7 +98,7 @@ public class MediaFile
         var fileId = 123;
 
         // Act
-        var result = await controller.GetFileByIdAsync(fileId, CancellationToken.None);
+        var result = await controller.GetFileByIdAsync(fileId, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<ForbidResult>();
@@ -113,7 +114,7 @@ public class MediaFile
         var storagePath = "";
 
         // Act
-        var result = await controller.DeleteFile(storagePath, CancellationToken.None);
+        var result = await controller.DeleteFileAsync(storagePath, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<BadRequestObjectResult>();
@@ -129,7 +130,7 @@ public class MediaFile
         var storagePath = "../../etc/passwd.webp";
 
         // Act
-        var result = await controller.DeleteFile(storagePath, CancellationToken.None);
+        var result = await controller.DeleteFileAsync(storagePath, CancellationToken.None).ConfigureAwait(true);
 
         // Assert - Security: Path traversal phải bị reject
         result.Should().BeOfType<BadRequestObjectResult>();
@@ -152,7 +153,7 @@ public class MediaFile
         // controller.ControllerContext.HttpContext.User = ...
 
         // Act
-        var result = await controller.UploadImage(fileMock.Object, CancellationToken.None);
+        var result = await controller.UploadImageAsync(fileMock.Object, CancellationToken.None).ConfigureAwait(true);
 
         // Assert - Upload thành công
         result.Should().BeOfType<OkObjectResult>();
@@ -172,7 +173,7 @@ public class MediaFile
         fileMock.Setup(f => f.FileName).Returns("test.webp");
 
         // Act
-        var result = await controller.UploadImage(fileMock.Object, CancellationToken.None);
+        var result = await controller.UploadImageAsync(fileMock.Object, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<UnauthorizedObjectResult>();
@@ -188,7 +189,7 @@ public class MediaFile
         var storagePath = "test-file.webp";
 
         // Act
-        var result = await controller.DeleteFile(storagePath, CancellationToken.None);
+        var result = await controller.DeleteFileAsync(storagePath, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<OkResult>();
@@ -204,9 +205,10 @@ public class MediaFile
         var storagePath = "test-file.webp";
 
         // Act
-        var result = await controller.DeleteFile(storagePath, CancellationToken.None);
+        var result = await controller.DeleteFileAsync(storagePath, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<ForbidResult>();
     }
+#pragma warning restore CRR0035
 }

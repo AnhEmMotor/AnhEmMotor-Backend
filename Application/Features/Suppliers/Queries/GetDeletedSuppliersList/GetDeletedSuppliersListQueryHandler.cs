@@ -1,3 +1,4 @@
+using Application.ApiContracts.Brand.Responses;
 using Application.ApiContracts.Supplier.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
@@ -17,10 +18,11 @@ public sealed class GetDeletedSuppliersListQueryHandler(ISupplierReadRepository 
     {
         var query = repository.GetQueryable(DataFetchMode.DeletedOnly);
 
-        return await paginator.ApplyAsync<SupplierEntity, SupplierResponse>(
+        var result = await paginator.ApplyAsync<SupplierEntity, SupplierResponse>(
             query,
             request.SieveModel!,
             DataFetchMode.DeletedOnly,
             cancellationToken).ConfigureAwait(false);
+        return result;
     }
 }

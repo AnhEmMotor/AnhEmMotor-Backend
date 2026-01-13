@@ -26,6 +26,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
         _client = _factory.CreateClient();
     }
 
+#pragma warning disable CRR0035
     [Fact(DisplayName = "PERM_INT_001 - API lấy tất cả permissions trả về đầy đủ thông tin")]
     public async Task GetAllPermissions_ReturnsFullPermissionList()
     {
@@ -531,4 +532,5 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
         // This is a placeholder - adjust based on your IntegrationTestWebAppFactory setup
         throw new NotImplementedException();
     }
+#pragma warning restore CRR0035
 }

@@ -1,4 +1,4 @@
-using Application.ApiContracts.Statistical.Responses;
+﻿using Application.ApiContracts.Statistical.Responses;
 using Application.Features.Statistical.Queries.GetDailyRevenue;
 using Application.Features.Statistical.Queries.GetDashboardStats;
 using Application.Features.Statistical.Queries.GetMonthlyRevenueProfit;
@@ -32,6 +32,7 @@ public class Statistics
         };
     }
 
+#pragma warning disable CRR0035
     [Fact(DisplayName = "STAT_001 - Lấy doanh thu theo ngày - Happy Path với 7 ngày")]
     public async Task GetDailyRevenue_ValidDays7_ReturnsRevenueData()
     {
@@ -52,7 +53,7 @@ public class Statistics
             .ReturnsAsync(expectedRevenue);
 
         // Act
-        var result = await _controller.GetDailyRevenue(days, CancellationToken.None);
+        var result = await _controller.GetDailyRevenueAsync(days, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
@@ -71,7 +72,7 @@ public class Statistics
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
-            _controller.GetDailyRevenue(days, CancellationToken.None));
+            _controller.GetDailyRevenueAsync(days, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "STAT_003 - Lấy doanh thu theo ngày - Chưa đăng nhập")]
@@ -84,7 +85,7 @@ public class Statistics
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
-            _controller.GetDailyRevenue(days, CancellationToken.None));
+            _controller.GetDailyRevenueAsync(days, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "STAT_004 - Lấy doanh thu theo ngày - Days âm")]
@@ -97,7 +98,7 @@ public class Statistics
 
         // Act & Assert
         await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-            _controller.GetDailyRevenue(days, CancellationToken.None));
+            _controller.GetDailyRevenueAsync(days, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "STAT_005 - Lấy doanh thu theo ngày - Days = 0")]
@@ -110,7 +111,7 @@ public class Statistics
 
         // Act & Assert
         await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-            _controller.GetDailyRevenue(days, CancellationToken.None));
+            _controller.GetDailyRevenueAsync(days, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "STAT_006 - Lấy doanh thu theo ngày - Days quá lớn (366)")]
@@ -123,7 +124,7 @@ public class Statistics
 
         // Act & Assert
         await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-            _controller.GetDailyRevenue(days, CancellationToken.None));
+            _controller.GetDailyRevenueAsync(days, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "STAT_007 - Lấy chỉ số Dashboard - Happy Path")]
@@ -142,7 +143,7 @@ public class Statistics
             .ReturnsAsync(expectedStats);
 
         // Act
-        var result = await _controller.GetDashboardStats(CancellationToken.None);
+        var result = await _controller.GetDashboardStatsAsync(CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
@@ -162,7 +163,7 @@ public class Statistics
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
-            _controller.GetDashboardStats(CancellationToken.None));
+            _controller.GetDashboardStatsAsync(CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "STAT_009 - Lấy doanh thu và lợi nhuận theo tháng - Happy Path với 12 tháng")]
@@ -185,7 +186,7 @@ public class Statistics
             .ReturnsAsync(expectedData);
 
         // Act
-        var result = await _controller.GetMonthlyRevenueProfit(months, CancellationToken.None);
+        var result = await _controller.GetMonthlyRevenueProfitAsync(months, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
@@ -203,7 +204,7 @@ public class Statistics
 
         // Act & Assert
         await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-            _controller.GetMonthlyRevenueProfit(months, CancellationToken.None));
+            _controller.GetMonthlyRevenueProfitAsync(months, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "STAT_011 - Lấy doanh thu và lợi nhuận theo tháng - Months = 0")]
@@ -216,7 +217,7 @@ public class Statistics
 
         // Act & Assert
         await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-            _controller.GetMonthlyRevenueProfit(months, CancellationToken.None));
+            _controller.GetMonthlyRevenueProfitAsync(months, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "STAT_012 - Lấy doanh thu và lợi nhuận theo tháng - Months quá lớn (25)")]
@@ -229,7 +230,7 @@ public class Statistics
 
         // Act & Assert
         await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-            _controller.GetMonthlyRevenueProfit(months, CancellationToken.None));
+            _controller.GetMonthlyRevenueProfitAsync(months, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "STAT_013 - Lấy số lượng đơn hàng theo trạng thái - Happy Path")]
@@ -248,14 +249,14 @@ public class Statistics
             .ReturnsAsync(expectedCounts);
 
         // Act
-        var result = await _controller.GetOrderStatusCounts(CancellationToken.None);
+        var result = await _controller.GetOrderStatusCountsAsync(CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
         var actualCounts = okResult.Value.Should().BeAssignableTo<IEnumerable<OrderStatusCountResponse>>().Subject;
         actualCounts.Should().HaveCount(4);
-        actualCounts.First(x => x.StatusName == "pending").OrderCount.Should().Be(5);
-        actualCounts.First(x => x.StatusName == "completed").OrderCount.Should().Be(15);
+        actualCounts.First(x => string.Compare(x.StatusName, "pending") == 0).OrderCount.Should().Be(5);
+        actualCounts.First(x => string.Compare(x.StatusName, "completed") == 0).OrderCount.Should().Be(15);
     }
 
     [Fact(DisplayName = "STAT_014 - Lấy số lượng đơn hàng theo trạng thái - Không có quyền")]
@@ -267,7 +268,7 @@ public class Statistics
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
-            _controller.GetOrderStatusCounts(CancellationToken.None));
+            _controller.GetOrderStatusCountsAsync(CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "STAT_015 - Lấy báo cáo sản phẩm tháng trước - Happy Path")]
@@ -285,14 +286,14 @@ public class Statistics
             .ReturnsAsync(expectedReport);
 
         // Act
-        var result = await _controller.GetProductReportLastMonth(CancellationToken.None);
+        var result = await _controller.GetProductReportLastMonthAsync(CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
         var actualReport = okResult.Value.Should().BeAssignableTo<IEnumerable<ProductReportResponse>>().Subject;
         actualReport.Should().HaveCount(3);
-        actualReport.First(x => x.ProductName == "Sản phẩm A").SoldLastMonth.Should().Be(50);
-        actualReport.First(x => x.ProductName == "Sản phẩm B").StockQuantity.Should().Be(200);
+        actualReport.First(x => string.Compare(x.ProductName, "Sản phẩm A") == 0).SoldLastMonth.Should().Be(50);
+        actualReport.First(x => string.Compare(x.ProductName, "Sản phẩm B") == 0).StockQuantity.Should().Be(200);
     }
 
     [Fact(DisplayName = "STAT_016 - Lấy báo cáo sản phẩm tháng trước - Không có quyền")]
@@ -304,7 +305,7 @@ public class Statistics
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
-            _controller.GetProductReportLastMonth(CancellationToken.None));
+            _controller.GetProductReportLastMonthAsync(CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "STAT_017 - Lấy giá và tồn kho sản phẩm - Happy Path")]
@@ -322,7 +323,7 @@ public class Statistics
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await _controller.GetProductStockAndPrice(variantId, CancellationToken.None);
+        var result = await _controller.GetProductStockAndPriceAsync(variantId, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
@@ -341,7 +342,7 @@ public class Statistics
 
         // Act & Assert
         await Assert.ThrowsAsync<KeyNotFoundException>(() =>
-            _controller.GetProductStockAndPrice(variantId, CancellationToken.None));
+            _controller.GetProductStockAndPriceAsync(variantId, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "STAT_019 - Lấy giá và tồn kho sản phẩm - VariantId âm")]
@@ -354,7 +355,7 @@ public class Statistics
 
         // Act & Assert
         await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-            _controller.GetProductStockAndPrice(variantId, CancellationToken.None));
+            _controller.GetProductStockAndPriceAsync(variantId, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "STAT_020 - Lấy giá và tồn kho sản phẩm - Variant đã bị xóa mềm")]
@@ -372,7 +373,7 @@ public class Statistics
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await _controller.GetProductStockAndPrice(variantId, CancellationToken.None);
+        var result = await _controller.GetProductStockAndPriceAsync(variantId, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
@@ -380,4 +381,5 @@ public class Statistics
         actualResponse.UnitPrice.Should().Be(500000);
         actualResponse.StockQuantity.Should().Be(0);
     }
+#pragma warning restore CRR0035
 }

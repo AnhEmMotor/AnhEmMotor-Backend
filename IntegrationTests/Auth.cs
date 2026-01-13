@@ -24,6 +24,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         _client = _factory.CreateClient();
     }
 
+#pragma warning disable CRR0035
     [Fact(DisplayName = "AUTH_REG_001 - Đăng ký thành công")]
     public async Task AUTH_REG_001_Register_Success()
     {
@@ -42,7 +43,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<RegisterResponse>();
+        var content = await response.Content.ReadFromJsonAsync<RegisterResponse>(CancellationToken.None);
         content.Should().NotBeNull();
         content!.UserId.Should().NotBeEmpty();
         
@@ -344,4 +345,5 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         user!.UserName.Should().Be("trimuser");
         user.FullName.Should().Be("Trim User");
     }
+#pragma warning restore CRR0035
 }

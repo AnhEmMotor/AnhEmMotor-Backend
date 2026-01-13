@@ -21,6 +21,7 @@ public class Setting
         _unitOfWorkMock = new Mock<IUnitOfWork>();
     }
 
+#pragma warning disable CRR0035
     [Fact(DisplayName = "SETTING_014 - Validator - Deposit_ratio = 1 (giá trị biên tối thiểu hợp lệ)")]
     public void SETTING_014_Validator_DepositRatio_MinimumBoundary_ShouldPass()
     {
@@ -248,7 +249,7 @@ public class Setting
         } };
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         _settingRepoMock.Verify(x => x.Update(It.Is<IEnumerable<SettingEntity>>(s => 
@@ -259,4 +260,5 @@ public class Setting
         
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
+#pragma warning restore CRR0035
 }

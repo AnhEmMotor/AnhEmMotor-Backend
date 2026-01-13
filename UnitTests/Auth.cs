@@ -13,6 +13,7 @@ namespace UnitTests;
 
 public class Auth
 {
+#pragma warning disable CRR0035
     [Fact(DisplayName = "AUTH_REG_004 - Validate Format (Unit) - TH1: Email sai định dạng")]
     public void AUTH_REG_004_1_Register_InvalidEmail()
     {
@@ -70,4 +71,5 @@ public class Auth
         // Act & Assert
         await Assert.ThrowsAsync<Exception>(() => handler.Handle(command, CancellationToken.None));
     }
+#pragma warning restore CRR0035
 }

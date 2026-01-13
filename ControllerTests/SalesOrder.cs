@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 using Application.ApiContracts.Output.Requests;
 using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
@@ -48,6 +48,7 @@ public class SalesOrder
         };
     }
 
+#pragma warning disable CRR0035
     [Fact(DisplayName = "SO_081 - GetMyPurchases - Lấy đơn hàng của chính mình")]
     public async Task GetMyPurchases_UserAuthenticated_ReturnsOrders()
     {
@@ -59,7 +60,7 @@ public class SalesOrder
             .ReturnsAsync(Result<PagedResult<OutputResponse>>.Success(new PagedResult<OutputResponse>([expectedOrder], 1, 1, 10)));
 
         // Act
-        var result = await _controller.GetMyPurchases(sieveModel, CancellationToken.None);
+        var result = await _controller.GetMyPurchasesAsync(sieveModel, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -76,7 +77,7 @@ public class SalesOrder
             .ReturnsAsync(Result<PagedResult<OutputResponse>>.Success(new PagedResult<OutputResponse>([], 0, 1, 10)));
 
         // Act
-        var result = await _controller.GetPurchasesByID(sieveModel, buyerId, CancellationToken.None);
+        var result = await _controller.GetPurchasesByIDAsync(sieveModel, buyerId, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -92,7 +93,7 @@ public class SalesOrder
             .ReturnsAsync(Result<PagedResult<OutputResponse>>.Success(new PagedResult<OutputResponse>([], 0, 1, 10)));
 
         // Act
-        var result = await _controller.GetOutputs(sieveModel, CancellationToken.None);
+        var result = await _controller.GetOutputsAsync(sieveModel, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -108,7 +109,7 @@ public class SalesOrder
             .ReturnsAsync(Result<PagedResult<OutputResponse>>.Success(new PagedResult<OutputResponse>([], 0, 1, 10)));
 
         // Act
-        var result = await _controller.GetDeletedOutputs(sieveModel, CancellationToken.None);
+        var result = await _controller.GetDeletedOutputsAsync(sieveModel, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -125,7 +126,7 @@ public class SalesOrder
             .ReturnsAsync(Result<OutputResponse?>.Success(expectedOrder));
 
         // Act
-        var result = await _controller.GetOutputById(orderId, CancellationToken.None);
+        var result = await _controller.GetOutputByIdAsync(orderId, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -146,7 +147,7 @@ public class SalesOrder
             .ReturnsAsync(Result<OutputResponse?>.Success(expectedResponse));
 
         // Act
-        var result = await _controller.CreateOutput(request, CancellationToken.None);
+        var result = await _controller.CreateOutputAsync(request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -166,7 +167,7 @@ public class SalesOrder
             .ReturnsAsync(Result<OutputResponse?>.Success(new OutputResponse()));
 
         // Act
-        var result = await _controller.CreateOutputForAdmin(request, CancellationToken.None);
+        var result = await _controller.CreateOutputForAdminAsync(request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -186,7 +187,7 @@ public class SalesOrder
             .ReturnsAsync(Result<OutputResponse?>.Success(new OutputResponse { Id = orderId }));
 
         // Act
-        var result = await _controller.UpdateOutputForManager(orderId, request, CancellationToken.None);
+        var result = await _controller.UpdateOutputForManagerAsync(orderId, request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -203,7 +204,7 @@ public class SalesOrder
             .ReturnsAsync(Result<OutputResponse?>.Success(new OutputResponse()));
 
         // Act
-        var result = await _controller.UpdateOutput(orderId, request, CancellationToken.None);
+        var result = await _controller.UpdateOutputAsync(orderId, request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -220,7 +221,7 @@ public class SalesOrder
             .ReturnsAsync(Result<OutputResponse?>.Success(new OutputResponse { StatusId = "confirmed_cod" }));
 
         // Act
-        var result = await _controller.UpdateOutputStatus(orderId, request, CancellationToken.None);
+        var result = await _controller.UpdateOutputStatusAsync(orderId, request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -240,7 +241,7 @@ public class SalesOrder
             .ReturnsAsync(Result<List<OutputResponse>?>.Success([]));
 
         // Act
-        var result = await _controller.UpdateManyOutputStatus(request, CancellationToken.None);
+        var result = await _controller.UpdateManyOutputStatusAsync(request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -256,7 +257,7 @@ public class SalesOrder
             .ReturnsAsync(Result.Success());
 
         // Act
-        var result = await _controller.DeleteOutput(orderId, CancellationToken.None);
+        var result = await _controller.DeleteOutputAsync(orderId, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -272,7 +273,7 @@ public class SalesOrder
             .ReturnsAsync(Result.Success());
 
         // Act
-        var result = await _controller.DeleteManyOutputs(request, CancellationToken.None);
+        var result = await _controller.DeleteManyOutputsAsync(request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -288,7 +289,7 @@ public class SalesOrder
             .ReturnsAsync(Result<OutputResponse?>.Success(new OutputResponse { Id = orderId }));
 
         // Act
-        var result = await _controller.RestoreOutput(orderId, CancellationToken.None);
+        var result = await _controller.RestoreOutputAsync(orderId, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -304,7 +305,7 @@ public class SalesOrder
             .ReturnsAsync(Result<List<OutputResponse>?>.Success([new(), new(), new()]));
 
         // Act
-        var result = await _controller.RestoreManyOutputs(request, CancellationToken.None);
+        var result = await _controller.RestoreManyOutputsAsync(request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -320,7 +321,7 @@ public class SalesOrder
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.CreateOutput(new CreateOutputCommand(), CancellationToken.None));
+            _controller.CreateOutputAsync(new CreateOutputCommand(), CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "SO_097 - Controller xử lý NotFoundException")]
@@ -332,7 +333,7 @@ public class SalesOrder
 
         // Act & Assert
         await Assert.ThrowsAsync<KeyNotFoundException>(() => 
-            _controller.GetOutputById(999, CancellationToken.None));
+            _controller.GetOutputByIdAsync(999, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "SO_098 - Controller xử lý ValidationException")]
@@ -344,6 +345,7 @@ public class SalesOrder
 
         // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(() => 
-            _controller.CreateOutput(new CreateOutputCommand(), CancellationToken.None));
+            _controller.CreateOutputAsync(new CreateOutputCommand(), CancellationToken.None)).ConfigureAwait(true);
     }
+#pragma warning restore CRR0035
 }

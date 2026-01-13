@@ -26,6 +26,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
         _client = _factory.CreateClient();
     }
 
+#pragma warning disable CRR0035
     [Fact(DisplayName = "PC_025 - Lấy danh sách danh mục sản phẩm thành công (cho mọi người dùng)")]
     public async Task GetProductCategories_WithPagination_ShouldReturnCorrectData()
     {
@@ -564,4 +565,5 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
             category!.DeletedAt.Should().NotBeNull();
         }
     }
+#pragma warning restore CRR0035
 }

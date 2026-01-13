@@ -1,4 +1,4 @@
-using Application.ApiContracts.Supplier.Responses;
+﻿using Application.ApiContracts.Supplier.Responses;
 using Application.Common.Models;
 using Application.Features.Suppliers.Commands.CreateSupplier;
 using Application.Features.Suppliers.Commands.DeleteManySuppliers;
@@ -41,6 +41,7 @@ public class Supplier
         };
     }
 
+#pragma warning disable CRR0035
     [Fact(DisplayName = "SUP_046 - Tạo Supplier thành công qua API")]
     public async Task CreateSupplier_Success_ReturnsCreatedSupplier()
     {
@@ -65,7 +66,7 @@ public class Supplier
             .ReturnsAsync(Result<SupplierResponse>.Success(expectedResponse));
 
         // Act
-        var result = await _controller.CreateSupplier(request, CancellationToken.None);
+        var result = await _controller.CreateSupplierAsync(request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         var createdResult = result.Should().BeOfType<CreatedResult>().Subject;
@@ -92,7 +93,7 @@ public class Supplier
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
-            () => _controller.CreateSupplier(request, CancellationToken.None));
+            () => _controller.CreateSupplierAsync(request, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "SUP_048 - Tạo Supplier thất bại khi chưa đăng nhập")]
@@ -111,7 +112,7 @@ public class Supplier
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
-            () => _controller.CreateSupplier(request, CancellationToken.None));
+            () => _controller.CreateSupplierAsync(request, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "SUP_049 - Lấy danh sách Supplier thành công với quyền View Supplier")]
@@ -130,7 +131,7 @@ public class Supplier
             .ReturnsAsync(Result<PagedResult<SupplierResponse>>.Success(expectedResponse));
 
         // Act
-        var result = await _controller.GetSuppliers(sieveModel, CancellationToken.None);
+        var result = await _controller.GetSuppliersAsync(sieveModel, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
@@ -156,13 +157,13 @@ public class Supplier
             .ReturnsAsync(Result<PagedResult<SupplierResponse>>.Success(expectedResponse));
 
         // Act
-        var result = await _controller.GetSuppliersForInput(sieveModel, CancellationToken.None);
+        var result = await _controller.GetSuppliersForInputAsync(sieveModel, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
         var response = okResult.Value.Should().BeOfType<PagedResult<SupplierResponse>>().Subject;
         response.Items.Should().HaveCount(2);
-        response.Items.Should().OnlyContain(s => s.StatusId == "active");
+        response.Items.Should().OnlyContain(s => string.Compare(s.StatusId, "active") == 0);
         response.Items.First().TotalInput.Should().BeNull();
     }
 
@@ -182,12 +183,12 @@ public class Supplier
             .ReturnsAsync(Result<PagedResult<SupplierResponse>>.Success(expectedResponse));
 
         // Act
-        var result = await _controller.GetSuppliers(sieveModel, CancellationToken.None);
+        var result = await _controller.GetSuppliersAsync(sieveModel, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
         var response = okResult.Value.Should().BeOfType<PagedResult<SupplierResponse>>().Subject;
-        response.Items.Should().OnlyContain(s => s.StatusId == "active");
+        response.Items.Should().OnlyContain(s => string.Compare(s.StatusId, "active") == 0);
         response.Items.Should().OnlyContain(s => s.TotalInput == null);
     }
 
@@ -207,7 +208,7 @@ public class Supplier
             .ReturnsAsync(Result<SupplierResponse?>.Success(expectedResponse));
 
         // Act
-        var result = await _controller.GetSupplierById(1, CancellationToken.None);
+        var result = await _controller.GetSupplierByIdAsync(1, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
@@ -232,7 +233,7 @@ public class Supplier
             .ReturnsAsync(Result<SupplierResponse?>.Success(expectedResponse));
 
         // Act
-        var result = await _controller.GetSupplierById(1, CancellationToken.None);
+        var result = await _controller.GetSupplierByIdAsync(1, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
@@ -250,7 +251,7 @@ public class Supplier
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
-            () => _controller.GetSupplierById(1, CancellationToken.None));
+            () => _controller.GetSupplierByIdAsync(1, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "SUP_055 - Cập nhật Supplier thất bại khi không có quyền")]
@@ -264,7 +265,7 @@ public class Supplier
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
-            () => _controller.UpdateSupplier(1, request, CancellationToken.None));
+            () => _controller.UpdateSupplierAsync(1, request, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "SUP_056 - Xóa Supplier thất bại khi không có quyền")]
@@ -276,7 +277,7 @@ public class Supplier
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
-            () => _controller.DeleteSupplier(1, CancellationToken.None));
+            () => _controller.DeleteSupplierAsync(1, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "SUP_057 - Lấy danh sách deleted Supplier thất bại khi không có quyền")]
@@ -290,7 +291,7 @@ public class Supplier
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
-            () => _controller.GetDeletedSuppliers(sieveModel, CancellationToken.None));
+            () => _controller.GetDeletedSuppliersAsync(sieveModel, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "SUP_058 - Xóa nhiều Supplier với một phần thành công và một phần thất bại")]
@@ -307,7 +308,7 @@ public class Supplier
 
         // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(
-            () => _controller.DeleteSuppliers(request, CancellationToken.None));
+            () => _controller.DeleteSuppliersAsync(request, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "SUP_059 - Khôi phục Supplier thất bại khi không có quyền")]
@@ -319,7 +320,7 @@ public class Supplier
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
-            () => _controller.RestoreSupplier(1, CancellationToken.None));
+            () => _controller.RestoreSupplierAsync(1, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "SUP_060 - Cập nhật trạng thái nhiều Supplier thất bại khi không có quyền")]
@@ -337,6 +338,7 @@ public class Supplier
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
-            () => _controller.UpdateManySupplierStatus(request, CancellationToken.None));
+            () => _controller.UpdateManySupplierStatusAsync(request, CancellationToken.None)).ConfigureAwait(true);
     }
+#pragma warning restore CRR0035
 }

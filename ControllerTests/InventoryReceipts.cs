@@ -1,4 +1,4 @@
-using Application.ApiContracts.Input.Requests;
+﻿using Application.ApiContracts.Input.Requests;
 using Application.ApiContracts.Input.Responses;
 using Application.Common.Models;
 using Application.Features.Inputs.Commands.CloneInput;
@@ -43,6 +43,8 @@ public class InventoryReceipts
         };
     }
 
+#pragma warning disable IDE0079 // Remove unnecessary suppression
+#pragma warning disable CRR0035
     [Fact(DisplayName = "INPUT_003 - Tạo phiếu nhập thiếu quyền Create")]
     public async Task CreateInput_MissingPermission_ReturnsForbidden()
     {
@@ -62,7 +64,7 @@ public class InventoryReceipts
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
-            _controller.CreateInput(request, CancellationToken.None));
+            _controller.CreateInputAsync(request, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "INPUT_019 - Lấy danh sách phiếu nhập thiếu quyền View")]
@@ -76,7 +78,7 @@ public class InventoryReceipts
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
-            _controller.GetInputs(sieveModel, CancellationToken.None));
+            _controller.GetInputsAsync(sieveModel, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "INPUT_022 - Lấy chi tiết phiếu nhập thiếu quyền View")]
@@ -90,7 +92,7 @@ public class InventoryReceipts
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
-            _controller.GetInputById(inputId, CancellationToken.None));
+            _controller.GetInputByIdAsync(inputId, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "INPUT_026 - Cập nhật phiếu nhập thiếu quyền Edit")]
@@ -110,7 +112,7 @@ public class InventoryReceipts
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
-            _controller.UpdateInput(inputId, request, CancellationToken.None));
+            _controller.UpdateInputAsync(inputId, request, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "INPUT_027 - Cập nhật phiếu nhập không tồn tại")]
@@ -129,7 +131,7 @@ public class InventoryReceipts
             .ReturnsAsync(Result<InputResponse?>.Failure(Error.NotFound("Input not found")));
 
         // Act
-        var result = await _controller.UpdateInput(inputId, request, CancellationToken.None);
+        var result = await _controller.UpdateInputAsync(inputId, request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<NotFoundObjectResult>();
@@ -147,7 +149,7 @@ public class InventoryReceipts
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
-            _controller.UpdateInputStatus(inputId, request, CancellationToken.None));
+            _controller.UpdateInputStatusAsync(inputId, request, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "INPUT_035 - Xóa phiếu nhập ở trạng thái finished (không cho phép)")]
@@ -160,7 +162,7 @@ public class InventoryReceipts
             .ReturnsAsync(Result.Failure(Error.BadRequest("Cannot delete finished input")));
 
         // Act
-        var result = await _controller.DeleteInput(inputId, CancellationToken.None);
+        var result = await _controller.DeleteInputAsync(inputId, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<BadRequestObjectResult>();
@@ -177,7 +179,7 @@ public class InventoryReceipts
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
-            _controller.DeleteInput(inputId, CancellationToken.None));
+            _controller.DeleteInputAsync(inputId, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "INPUT_037 - Xóa phiếu nhập không tồn tại")]
@@ -190,7 +192,7 @@ public class InventoryReceipts
             .ReturnsAsync(Result.Failure(Error.NotFound("Input not found")));
 
         // Act
-        var result = await _controller.DeleteInput(inputId, CancellationToken.None);
+        var result = await _controller.DeleteInputAsync(inputId, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<NotFoundObjectResult>();
@@ -206,7 +208,7 @@ public class InventoryReceipts
             .ReturnsAsync(Result<InputResponse>.Failure(Error.BadRequest("Input is not deleted")));
 
         // Act
-        var result = await _controller.RestoreInput(inputId, CancellationToken.None);
+        var result = await _controller.RestoreInputAsync(inputId, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<BadRequestObjectResult>();
@@ -223,7 +225,7 @@ public class InventoryReceipts
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
-            _controller.CloneInput(inputId, CancellationToken.None));
+            _controller.CloneInputAsync(inputId, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "INPUT_045 - Clone phiếu nhập không tồn tại")]
@@ -236,7 +238,7 @@ public class InventoryReceipts
             .ReturnsAsync(Result<InputResponse?>.Failure(Error.NotFound("Input not found")));
 
         // Act
-        var result = await _controller.CloneInput(inputId, CancellationToken.None);
+        var result = await _controller.CloneInputAsync(inputId, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<NotFoundObjectResult>();
@@ -253,7 +255,7 @@ public class InventoryReceipts
 
         // Act & Assert
         await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-            _controller.DeleteManyInputs(request, CancellationToken.None));
+            _controller.DeleteManyInputsAsync(request, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "INPUT_C_002 - Cập nhật trạng thái nhiều phiếu nhập với danh sách rỗng")]
@@ -267,7 +269,7 @@ public class InventoryReceipts
 
         // Act & Assert
         await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-            _controller.UpdateManyInputStatus(request, CancellationToken.None));
+            _controller.UpdateManyInputStatusAsync(request, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "INPUT_C_003 - Khôi phục nhiều phiếu nhập với danh sách rỗng")]
@@ -281,7 +283,7 @@ public class InventoryReceipts
 
         // Act & Assert
         await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
-            _controller.RestoreManyInputs(request, CancellationToken.None));
+            _controller.RestoreManyInputsAsync(request, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "INPUT_C_004 - Lấy danh sách phiếu nhập đã xóa với phân trang")]
@@ -295,7 +297,7 @@ public class InventoryReceipts
             .ReturnsAsync(Result<PagedResult<InputResponse>>.Success(expectedResponse));
 
         // Act
-        var result = await _controller.GetDeletedInputs(sieveModel, CancellationToken.None);
+        var result = await _controller.GetDeletedInputsAsync(sieveModel, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();
@@ -315,7 +317,7 @@ public class InventoryReceipts
             .ReturnsAsync(Result<PagedResult<InputResponse>>.Success(expectedResponse));
 
         // Act
-        var result = await _controller.GetInputsBySupplierId(supplierId, sieveModel, CancellationToken.None);
+        var result = await _controller.GetInputsBySupplierIdAsync(supplierId, sieveModel, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();
@@ -343,7 +345,7 @@ public class InventoryReceipts
             .ReturnsAsync(Result<InputResponse?>.Success(expectedResponse));
 
         // Act
-        var result = await _controller.CreateInput(request, CancellationToken.None);
+        var result = await _controller.CreateInputAsync(request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();
@@ -368,7 +370,7 @@ public class InventoryReceipts
             .ReturnsAsync(Result<InputResponse?>.Success(expectedResponse));
 
         // Act
-        var result = await _controller.UpdateInput(inputId, request, CancellationToken.None);
+        var result = await _controller.UpdateInputAsync(inputId, request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();
@@ -388,10 +390,12 @@ public class InventoryReceipts
             .ReturnsAsync(Result<InputResponse>.Success(expectedResponse));
 
         // Act
-        var result = await _controller.UpdateInputStatus(inputId, request, CancellationToken.None);
+        var result = await _controller.UpdateInputStatusAsync(inputId, request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();
         _mediatorMock.Verify(m => m.Send(It.IsAny<UpdateInputStatusCommand>(), It.IsAny<CancellationToken>()), Times.Once);
     }
+#pragma warning restore CRR0035
 }
+#pragma warning restore IDE0079 // Remove unnecessary suppression

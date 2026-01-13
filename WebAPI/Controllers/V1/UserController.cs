@@ -32,7 +32,7 @@ public class UserController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> GetCurrentUser(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetCurrentUserAsync(CancellationToken cancellationToken)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var result = await mediator.Send(new GetCurrentUserQuery() { UserId = userId }, cancellationToken)
@@ -49,7 +49,7 @@ public class UserController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> UpdateCurrentUser(
+    public async Task<IActionResult> UpdateCurrentUserAsync(
         [FromBody] UpdateUserCommand model,
         CancellationToken cancellationToken)
     {
@@ -67,7 +67,7 @@ public class UserController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> ChangePasswordCurrentUser(
+    public async Task<IActionResult> ChangePasswordCurrentUserAsync(
         [FromBody] ChangePasswordCommand model,
         CancellationToken cancellationToken)
     {
@@ -85,7 +85,7 @@ public class UserController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> DeleteCurrentUserAccount(CancellationToken cancellationToken)
+    public async Task<IActionResult> DeleteCurrentUserAccountAsync(CancellationToken cancellationToken)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var result = await mediator.Send(new DeleteCurrentUserAccountCommand() { UserId = userId }, cancellationToken)
@@ -100,7 +100,7 @@ public class UserController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(RestoreUserResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> RestoreUserAccount(Guid userId, CancellationToken cancellationToken)
+    public async Task<IActionResult> RestoreUserAccountAsync(Guid userId, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new RestoreUserAccountCommand() { UserId = userId }, cancellationToken)
             .ConfigureAwait(false);

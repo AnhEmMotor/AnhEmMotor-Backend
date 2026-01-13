@@ -19,6 +19,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
     private readonly IntegrationTestWebAppFactory _factory;
     private readonly HttpClient _client;
 
+#pragma warning disable CRR0035
     public SalesOrder(IntegrationTestWebAppFactory factory)
     {
         _factory = factory;
@@ -305,4 +306,5 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
+#pragma warning restore CRR0035
 }

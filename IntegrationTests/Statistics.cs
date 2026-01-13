@@ -8,6 +8,7 @@ public class Statistics(IntegrationTestWebAppFactory factory) : IClassFixture<In
 {
     private readonly HttpClient _client = factory.CreateClient();
 
+#pragma warning disable CRR0035
     [Fact(DisplayName = "STAT_021 - Lấy doanh thu 7 ngày gần nhất")]
     public async Task GetDailyRevenue_Last7Days_ReturnsCorrectData()
     {
@@ -207,4 +208,5 @@ public class Statistics(IntegrationTestWebAppFactory factory) : IClassFixture<In
         // Assert
         response.Content.Headers.ContentType?.MediaType.Should().Be("application/json");
     }
+#pragma warning restore CRR0035
 }

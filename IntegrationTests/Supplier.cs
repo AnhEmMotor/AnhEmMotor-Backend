@@ -24,6 +24,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         _client = _factory.CreateClient();
     }
 
+#pragma warning disable CRR0035
     [Fact(DisplayName = "SUP_031 - Lấy danh sách Supplier với phân trang mặc định")]
     public async Task GetSuppliers_DefaultPagination_ReturnsPagedResult()
     {
@@ -541,4 +542,5 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         content.Should().NotBeNull();
         content!.TotalInput.Should().Be(10000); // Only completed input
     }
+#pragma warning restore CRR0035
 }

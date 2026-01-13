@@ -31,7 +31,7 @@ public class SettingController(IMediator mediator) : ApiController
     [HasPermission(Settings.Edit)]
     [ProducesResponseType(typeof(Dictionary<string, long?>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> SetSettings(
+    public async Task<IActionResult> SetSettingsAsync(
         [FromBody][ValidSettingKeys] Dictionary<string, string?> request,
         CancellationToken cancellationToken)
     {
@@ -48,7 +48,7 @@ public class SettingController(IMediator mediator) : ApiController
     [HttpGet]
     [HasPermission(Settings.View)]
     [ProducesResponseType(typeof(Dictionary<string, long?>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetAllSettings(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAllSettingsAsync(CancellationToken cancellationToken)
     {
         var query = new GetAllSettingsQuery();
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);

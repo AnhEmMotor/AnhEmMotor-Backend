@@ -28,6 +28,7 @@ public class User
         _protectedEntityManagerServiceMock = new Mock<IProtectedEntityManagerService>();
     }
 
+#pragma warning disable CRR0035
     [Fact(DisplayName = "USER_001 - Lấy thông tin người dùng hiện tại thành công")]
     public async Task GetCurrentUser_Success_ReturnsUserResponse()
     {
@@ -157,7 +158,7 @@ public class User
         };
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -195,7 +196,7 @@ public class User
         };
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -229,7 +230,7 @@ public class User
         };
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -262,7 +263,7 @@ public class User
         };
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -291,7 +292,7 @@ public class User
         };
 
         // Act & Assert
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
 
@@ -316,7 +317,7 @@ public class User
         };
 
         // Act & Assert
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
 
@@ -338,7 +339,7 @@ public class User
         var command = new UpdateCurrentUserCommand() { UserId = userId.ToString(), FullName = "Test" };
 
         // Act & Assert
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
 
@@ -361,7 +362,7 @@ public class User
         var command = new UpdateCurrentUserCommand() { UserId = userId.ToString(), FullName = "Test" };
 
         // Act & Assert
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
 
@@ -387,7 +388,7 @@ public class User
         var command = new UpdateCurrentUserCommand() { UserId = userId.ToString(), FullName = "Test" };
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -422,7 +423,7 @@ public class User
         };
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -455,7 +456,7 @@ public class User
         };
 
         // Act & Assert
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
 
@@ -483,7 +484,7 @@ public class User
         };
 
         // Act & Assert
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
 
@@ -508,7 +509,7 @@ public class User
         };
 
         // Act & Assert
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
 
@@ -534,7 +535,7 @@ public class User
         var command = new DeleteCurrentUserAccountCommand() { UserId = userId.ToString() };
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -562,7 +563,7 @@ public class User
         var command = new DeleteCurrentUserAccountCommand() { UserId = userId.ToString() };
 
         // Act & Assert
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
 
@@ -584,9 +585,10 @@ public class User
         var command = new DeleteCurrentUserAccountCommand() { UserId = userId.ToString() };
 
         // Act & Assert
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
+#pragma warning restore CRR0035
 }
 
 

@@ -28,6 +28,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         _client = _factory.CreateClient();
     }
 
+#pragma warning disable CRR0035
     [Fact(DisplayName = "INPUT_001 - Tạo phiếu nhập hàng thành công (Happy Path)")]
     public async Task CreateInput_Success_ReturnsOk()
     {
@@ -839,4 +840,5 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         content.Should().NotBeNull();
         content!.Items.Should().OnlyContain(i => i.StatusId == Domain.Constants.Input.InputStatus.Working && i.SupplierId == 1);
     }
+#pragma warning restore CRR0035
 }

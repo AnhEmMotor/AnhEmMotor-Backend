@@ -123,6 +123,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         return user;
     }
 
+#pragma warning disable CRR0035
     [Fact(DisplayName = "UMGR_019 - Query người dùng với filter và sorting phức tạp")]
     public async Task GetAllUsers_WithComplexFilterAndSorting_ReturnsCorrectResults()
     {
@@ -665,4 +666,5 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         // Verify audit log exists (implementation should create audit log)
         // Note: This test assumes audit log functionality will be implemented
     }
-}
+#pragma warning restore CRR0035
+

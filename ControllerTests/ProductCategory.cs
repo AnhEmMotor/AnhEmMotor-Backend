@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 using Application.ApiContracts.ProductCategory.Responses;
 using Application.Common.Models;
 using Application.Features.ProductCategories.Commands.CreateProductCategory;
@@ -41,6 +41,7 @@ public class ProductCategory
         };
     }
 
+#pragma warning disable CRR0035
     [Fact(DisplayName = "PC_043 - Kiểm tra phân quyền - Tạo danh mục sản phẩm không có quyền")]
     public async Task CreateProductCategory_WithoutPermission_ShouldThrowUnauthorized()
     {
@@ -50,7 +51,7 @@ public class ProductCategory
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.CreateProductCategory(new CreateProductCategoryCommand(), CancellationToken.None));
+            _controller.CreateProductCategoryAsync(new CreateProductCategoryCommand(), CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "PC_044 - Kiểm tra phân quyền - Xem danh sách cho manager không có quyền")]
@@ -62,7 +63,7 @@ public class ProductCategory
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.GetProductCategoriesForManager(new SieveModel(), CancellationToken.None));
+            _controller.GetProductCategoriesForManagerAsync(new SieveModel(), CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "PC_045 - Kiểm tra phân quyền - Xem danh sách đã xóa không có quyền")]
@@ -74,7 +75,7 @@ public class ProductCategory
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.GetDeletedProductCategories(new SieveModel(), CancellationToken.None));
+            _controller.GetDeletedProductCategoriesAsync(new SieveModel(), CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "PC_046 - Kiểm tra phân quyền - Cập nhật danh mục sản phẩm không có quyền")]
@@ -86,7 +87,7 @@ public class ProductCategory
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.UpdateProductCategory(28, new UpdateProductCategoryCommand(), CancellationToken.None));
+            _controller.UpdateProductCategoryAsync(28, new UpdateProductCategoryCommand(), CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "PC_047 - Kiểm tra phân quyền - Xóa danh mục sản phẩm không có quyền")]
@@ -97,8 +98,8 @@ public class ProductCategory
             .ThrowsAsync(new UnauthorizedAccessException());
 
         // Act & Assert
-        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.DeleteProductCategory(29, CancellationToken.None));
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
+            _controller.DeleteProductCategoryAsync(29, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "PC_048 - Kiểm tra phân quyền - Khôi phục danh mục sản phẩm không có quyền")]
@@ -110,7 +111,7 @@ public class ProductCategory
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.RestoreProductCategory(30, CancellationToken.None));
+            _controller.RestoreProductCategoryAsync(30, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "PC_049 - Kiểm tra phân quyền - Xóa nhiều danh mục sản phẩm không có quyền")]
@@ -122,7 +123,7 @@ public class ProductCategory
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.DeleteProductCategories(new DeleteManyProductCategoriesCommand { Ids = [31, 32] }, CancellationToken.None));
+            _controller.DeleteProductCategoriesAsync(new DeleteManyProductCategoriesCommand { Ids = [31, 32] }, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "PC_050 - Kiểm tra phân quyền - Khôi phục nhiều danh mục sản phẩm không có quyền")]
@@ -134,7 +135,7 @@ public class ProductCategory
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.RestoreProductCategories(new RestoreManyProductCategoriesCommand { Ids = [33, 34] }, CancellationToken.None));
+            _controller.RestoreProductCategoriesAsync(new RestoreManyProductCategoriesCommand { Ids = [33, 34] }, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "PC_052 - Xác thực dữ liệu - Tạo với Name quá dài (vượt max length)")]
@@ -151,7 +152,7 @@ public class ProductCategory
 
         // Act & Assert
         await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => 
-            _controller.CreateProductCategory(request, CancellationToken.None));
+            _controller.CreateProductCategoryAsync(request, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "PC_054 - Xác thực dữ liệu - Xóa với Id âm")]
@@ -163,7 +164,7 @@ public class ProductCategory
 
         // Act & Assert
         await Assert.ThrowsAsync<ArgumentException>(() => 
-            _controller.DeleteProductCategory(-1, CancellationToken.None));
+            _controller.DeleteProductCategoryAsync(-1, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "PC_055 - Xác thực dữ liệu - Xóa nhiều với danh sách Ids rỗng")]
@@ -176,7 +177,7 @@ public class ProductCategory
 
         // Act & Assert
         await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => 
-            _controller.DeleteProductCategories(request, CancellationToken.None));
+            _controller.DeleteProductCategoriesAsync(request, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "PC_056 - Xác thực dữ liệu - Khôi phục nhiều với danh sách Ids null")]
@@ -189,7 +190,7 @@ public class ProductCategory
 
         // Act & Assert
         await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => 
-            _controller.RestoreProductCategories(request, CancellationToken.None));
+            _controller.RestoreProductCategoriesAsync(request, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "PC_057 - Kiểm tra Rate Limiting - Gửi quá nhiều request")]
@@ -201,7 +202,7 @@ public class ProductCategory
 
         // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(() => 
-            _controller.CreateProductCategory(new CreateProductCategoryCommand(), CancellationToken.None));
+            _controller.CreateProductCategoryAsync(new CreateProductCategoryCommand(), CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "PC_058 - Lấy danh sách danh mục sản phẩm khi chưa đăng nhập (public endpoint)")]
@@ -222,7 +223,7 @@ public class ProductCategory
             .ReturnsAsync(Result<PagedResult<ProductCategoryResponse>>.Success(expectedResult));
 
         // Act
-        var result = await _controller.GetProductCategories(new SieveModel(), CancellationToken.None);
+        var result = await _controller.GetProductCategoriesAsync(new SieveModel(), CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -238,7 +239,7 @@ public class ProductCategory
             .ReturnsAsync(Result<ProductCategoryResponse?>.Success(expectedResult));
 
         // Act
-        var result = await _controller.GetProductCategoryById(35, CancellationToken.None);
+        var result = await _controller.GetProductCategoryByIdAsync(35, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -260,12 +261,13 @@ public class ProductCategory
             .ReturnsAsync(Result<ProductCategoryResponse?>.Success(response2));
 
         // Act
-        var result1 = await _controller.UpdateProductCategory(36, request1, CancellationToken.None);
-        var result2 = await _controller.UpdateProductCategory(36, request2, CancellationToken.None);
+        var result1 = await _controller.UpdateProductCategoryAsync(36, request1, CancellationToken.None).ConfigureAwait(true);
+        var result2 = await _controller.UpdateProductCategoryAsync(36, request2, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result1.Should().NotBeNull();
         result2.Should().NotBeNull();
         _mediatorMock.Verify(m => m.Send(It.IsAny<UpdateProductCategoryCommand>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
     }
+#pragma warning restore CRR0035
 }

@@ -1,4 +1,4 @@
-using Application.ApiContracts.User.Responses;
+﻿using Application.ApiContracts.User.Responses;
 using Application.Common.Models;
 using Application.Features.UserManager.Commands.ChangePassword;
 using Application.Features.UserManager.Commands.UpdateUser;
@@ -36,6 +36,7 @@ public class User
         };
     }
 
+#pragma warning disable CRR0035
     [Fact(DisplayName = "USER_036 - Controller - GET /api/v1/User/me gọi đúng Query")]
     public async Task GetCurrentUser_CallsCorrectQuery_ReturnsOk()
     {
@@ -54,7 +55,7 @@ public class User
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await _controller.GetCurrentUser(CancellationToken.None);
+        var result = await _controller.GetCurrentUserAsync(CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();
@@ -72,7 +73,7 @@ public class User
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
-            _controller.GetCurrentUser(CancellationToken.None));
+            _controller.GetCurrentUserAsync(CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "USER_038 - Controller - PUT /api/v1/User/me gọi đúng Command")]
@@ -96,14 +97,14 @@ public class User
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await _controller.UpdateCurrentUser(request, CancellationToken.None);
+        var result = await _controller.UpdateCurrentUserAsync(request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();
         var okResult = result as OkObjectResult;
         okResult!.Value.Should().BeEquivalentTo(expectedResponse);
         _mediatorMock.Verify(m => m.Send(
-            It.Is<UpdateCurrentUserCommand>(c => c.UserId == request.UserId.ToString()), 
+            It.Is<UpdateCurrentUserCommand>(c => string.Compare(c.UserId, request.UserId.ToString()) == 0), 
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -122,7 +123,7 @@ public class User
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await _controller.UpdateCurrentUser(request, CancellationToken.None);
+        var result = await _controller.UpdateCurrentUserAsync(request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();
@@ -142,7 +143,7 @@ public class User
             .ReturnsAsync(Result<UserDTOForManagerResponse>.Failure(Error.BadRequest("Invalid phone number format")));
 
         // Act
-        var result = await _controller.UpdateCurrentUser(request, CancellationToken.None);
+        var result = await _controller.UpdateCurrentUserAsync(request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<BadRequestObjectResult>();
@@ -167,14 +168,14 @@ public class User
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await _controller.ChangePasswordCurrentUser(request, CancellationToken.None);
+        var result = await _controller.ChangePasswordCurrentUserAsync(request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();
         var okResult = result as OkObjectResult;
         okResult!.Value.Should().BeEquivalentTo(expectedResponse);
         _mediatorMock.Verify(m => m.Send(
-            It.Is<ChangePasswordCurrentUserCommand>(c => c.UserId == request.CurrentUserId), 
+            It.Is<ChangePasswordCurrentUserCommand>(c => string.Compare(c.UserId, request.CurrentUserId) == 0), 
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -192,7 +193,7 @@ public class User
             .ReturnsAsync(Result<ChangePasswordUserByUserResponse>.Failure(Error.BadRequest("NewPassword is required")));
 
         // Act
-        var result = await _controller.ChangePasswordCurrentUser(request, CancellationToken.None);
+        var result = await _controller.ChangePasswordCurrentUserAsync(request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<BadRequestObjectResult>();
@@ -212,8 +213,8 @@ public class User
             .ThrowsAsync(new UnauthorizedAccessException("Current password is incorrect"));
 
         // Act & Assert
-        await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
-            _controller.ChangePasswordCurrentUser(request, CancellationToken.None));
+        await   Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
+            _controller.ChangePasswordCurrentUserAsync(request, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "USER_044 - Controller - POST /api/v1/User/delete-account gọi đúng Command")]
@@ -229,7 +230,7 @@ public class User
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await _controller.DeleteCurrentUserAccount(CancellationToken.None);
+        var result = await _controller.DeleteCurrentUserAccountAsync(CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();
@@ -246,7 +247,7 @@ public class User
             .ReturnsAsync(Result<DeleteUserByUserReponse>.Failure(Error.Forbidden("Cannot delete banned account")));
 
         // Act
-        var result = await _controller.DeleteCurrentUserAccount(CancellationToken.None);
+        var result = await _controller.DeleteCurrentUserAccountAsync(CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<ForbidResult>();
@@ -266,7 +267,7 @@ public class User
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await _controller.RestoreUserAccount(userId, CancellationToken.None);
+        var result = await _controller.RestoreUserAccountAsync(userId, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();
@@ -291,7 +292,7 @@ public class User
             .ReturnsAsync(Result<RestoreUserResponse>.Failure(Error.BadRequest("Invalid user ID")));
 
         // Act
-        var result = await _controller.RestoreUserAccount(userId, CancellationToken.None);
+        var result = await _controller.RestoreUserAccountAsync(userId, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<BadRequestObjectResult>();
@@ -307,7 +308,7 @@ public class User
             .ReturnsAsync(Result<RestoreUserResponse>.Failure(Error.NotFound("User not found")));
 
         // Act
-        var result = await _controller.RestoreUserAccount(userId, CancellationToken.None);
+        var result = await _controller.RestoreUserAccountAsync(userId, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<NotFoundObjectResult>();
@@ -323,7 +324,7 @@ public class User
             .ReturnsAsync(Result<RestoreUserResponse>.Failure(Error.BadRequest("Account is not deleted")));
 
         // Act
-        var result = await _controller.RestoreUserAccount(userId, CancellationToken.None);
+        var result = await _controller.RestoreUserAccountAsync(userId, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<BadRequestObjectResult>();
@@ -359,4 +360,5 @@ public class User
             hasControllerLevelAuthorize.Should().BeTrue();
         }
     }
+#pragma warning restore CRR0035
 }

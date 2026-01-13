@@ -37,6 +37,7 @@ public class UserManager
         _protectedEntityManagerServiceMock = new Mock<IProtectedEntityManagerService>();
     }
 
+#pragma warning disable CRR0035
     [Fact(DisplayName = "UMGR_037 - Validate FullName không được rỗng")]
     public void ValidateFullName_EmptyString_ValidationFails()
     {
@@ -162,4 +163,5 @@ public class UserManager
         // Test case 4: P@1 (invalid - too short)
         ChangePasswordCommandValidator.IsStrongPassword("P@1").Should().BeFalse();
     }
+#pragma warning restore CRR0035
 }

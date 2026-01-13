@@ -1,4 +1,4 @@
-using Application.ApiContracts.User.Responses;
+﻿using Application.ApiContracts.User.Responses;
 using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Models;
 using Application.Features.UserManager.Commands.AssignRoles;
@@ -40,6 +40,7 @@ public class UserManager
         };
     }
 
+#pragma warning disable CRR0035
     [Fact(DisplayName = "UMGR_001 - Lấy danh sách người dùng thành công với phân trang mặc định")]
     public async Task GetAllUsers_WithDefaultPagination_ReturnsOkWithUsers()
     {
@@ -56,7 +57,7 @@ public class UserManager
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await _controller.GetAllUsers(sieveModel, CancellationToken.None);
+        var result = await _controller.GetAllUsersAsync(sieveModel, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
@@ -88,7 +89,7 @@ public class UserManager
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await _controller.GetAllUsers(sieveModel, CancellationToken.None);
+        var result = await _controller.GetAllUsersAsync(sieveModel, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
@@ -96,7 +97,7 @@ public class UserManager
         response.TotalCount.Should().Be(10);
 
         _mediatorMock.Verify(m => m.Send(
-            It.Is<GetUsersListQuery>(q => q.SieveModel!.Filters == "Status==Active"),
+            It.Is<GetUsersListQuery>(q => string.Compare(q.SieveModel!.Filters, "Status==Active") == 0),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -116,14 +117,14 @@ public class UserManager
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await _controller.GetAllUsers(sieveModel, CancellationToken.None);
+        var result = await _controller.GetAllUsersAsync(sieveModel, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
         okResult.StatusCode.Should().Be(StatusCodes.Status200OK);
 
         _mediatorMock.Verify(m => m.Send(
-            It.Is<GetUsersListQuery>(q => q.SieveModel!.Sorts == "FullName"),
+            It.Is<GetUsersListQuery>(q => string.Compare(q.SieveModel!.Sorts, "FullName") == 0),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -137,7 +138,7 @@ public class UserManager
             .ReturnsAsync(Result<PagedResult<UserDTOForManagerResponse>>.Failure(Error.Forbidden("Không có quyền truy cập")));
 
         // Act
-        var result = await _controller.GetAllUsers(sieveModel, CancellationToken.None);
+        var result = await _controller.GetAllUsersAsync(sieveModel, CancellationToken.None).ConfigureAwait(true) ;
 
         // Assert
         result.Should().BeOfType<ForbidResult>();
@@ -166,7 +167,7 @@ public class UserManager
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await _controller.GetAllUsersForOutput(sieveModel, CancellationToken.None);
+        var result = await _controller.GetAllUsersForOutputAsync(sieveModel, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
@@ -192,7 +193,7 @@ public class UserManager
             .ReturnsAsync(Result<PagedResult<UserDTOForOutputResponse>>.Failure(Error.Forbidden("Không có quyền truy cập")));
 
         // Act
-        var result = await _controller.GetAllUsersForOutput(sieveModel, CancellationToken.None);
+        var result = await _controller.GetAllUsersForOutputAsync(sieveModel, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<ForbidResult>();
@@ -213,7 +214,7 @@ public class UserManager
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await _controller.GetUserById(userId, CancellationToken.None);
+        var result = await _controller.GetUserByIdAsync(userId, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
@@ -234,7 +235,7 @@ public class UserManager
             .ReturnsAsync(Result<UserDTOForManagerResponse>.Failure(Error.NotFound($"User {userId} not found")));
 
         // Act
-        var result = await _controller.GetUserById(userId, CancellationToken.None);
+        var result = await _controller.GetUserByIdAsync(userId, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<NotFoundObjectResult>();
@@ -262,7 +263,7 @@ public class UserManager
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await _controller.UpdateUser(userId, request, CancellationToken.None);
+        var result = await _controller.UpdateUserAsync(userId, request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
@@ -288,7 +289,7 @@ public class UserManager
             .ReturnsAsync(Result<UserDTOForManagerResponse>.Failure(Error.BadRequest("Số điện thoại không hợp lệ")));
 
         // Act
-        var result = await _controller.UpdateUser(userId, request, CancellationToken.None);
+        var result = await _controller.UpdateUserAsync(userId, request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<BadRequestObjectResult>();
@@ -312,7 +313,7 @@ public class UserManager
             .ReturnsAsync(Result<UserDTOForManagerResponse>.Failure(Error.BadRequest("Username đã tồn tại")));
 
         // Act
-        var result = await _controller.UpdateUser(userId, request, CancellationToken.None);
+        var result = await _controller.UpdateUserAsync(userId, request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<BadRequestObjectResult>();
@@ -341,7 +342,7 @@ public class UserManager
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await _controller.ChangePassword(userId, request, CancellationToken.None);
+        var result = await _controller.ChangePasswordAsync(userId, request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
@@ -367,7 +368,7 @@ public class UserManager
             .ReturnsAsync(Result<ChangePasswordByManagerResponse>.Failure(Error.BadRequest("Mật khẩu không đủ mạnh")));
 
         // Act
-        var result = await _controller.ChangePassword(userId, request, CancellationToken.None);
+        var result = await _controller.ChangePasswordAsync(userId, request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<BadRequestObjectResult>();
@@ -400,7 +401,7 @@ public class UserManager
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await _controller.AssignRoles(userId, request, CancellationToken.None);
+        var result = await _controller.AssignRolesAsync(userId, request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
@@ -426,7 +427,7 @@ public class UserManager
             .ReturnsAsync(Result<AssignRoleResponse>.Failure(Error.BadRequest("Role không tồn tại")));
 
         // Act
-        var result = await _controller.AssignRoles(userId, request, CancellationToken.None);
+        var result = await _controller.AssignRolesAsync(userId, request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<BadRequestObjectResult>();
@@ -455,7 +456,7 @@ public class UserManager
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await _controller.ChangeUserStatus(userId, request, CancellationToken.None);
+        var result = await _controller.ChangeUserStatusAsync(userId, request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
@@ -481,7 +482,7 @@ public class UserManager
             .ReturnsAsync(Result<ChangeStatusUserByManagerResponse>.Failure(Error.BadRequest("Super Admin không thể tự ban chính mình")));
 
         // Act
-        var result = await _controller.ChangeUserStatus(userId, request, CancellationToken.None);
+        var result = await _controller.ChangeUserStatusAsync(userId, request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<BadRequestObjectResult>();
@@ -510,7 +511,7 @@ public class UserManager
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await _controller.ChangeMultipleUsersStatus(request, CancellationToken.None);
+        var result = await _controller.ChangeMultipleUsersStatusAsync(request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
@@ -518,7 +519,8 @@ public class UserManager
         response.Message.Should().Be("Thay đổi trạng thái thành công");
 
         _mediatorMock.Verify(m => m.Send(
-            It.Is<ChangeMultipleUsersStatusCommand>(c => c.Status == request.Status),
+            It.Is<ChangeMultipleUsersStatusCommand>(c => string.Compare(c.Status, request.Status) == 0),
             It.IsAny<CancellationToken>()), Times.Once);
     }
+#pragma warning restore CRR0035
 }

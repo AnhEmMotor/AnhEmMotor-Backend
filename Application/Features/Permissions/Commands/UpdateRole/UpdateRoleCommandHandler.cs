@@ -19,7 +19,7 @@ public class UpdateRoleCommandHandler(
         UpdateRoleCommand request,
         CancellationToken cancellationToken)
     {
-        var role = await roleReadRepository.GetRoleByNameAsync(request.RoleName!).ConfigureAwait(false);
+        var role = await roleReadRepository.GetRoleByNameAsync(request.RoleName!, cancellationToken).ConfigureAwait(false);
         if(role is null)
         {
             return Error.NotFound("Role not found.");

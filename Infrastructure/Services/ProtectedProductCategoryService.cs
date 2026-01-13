@@ -29,7 +29,9 @@ public class ProtectedProductCategoryService(
     /// <inheritdoc/>
     public Task<bool> IsProtectedByNameAsync(string categoryName, CancellationToken cancellationToken)
     {
-        if(string.IsNullOrWhiteSpace(categoryName))
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (string.IsNullOrWhiteSpace(categoryName))
         {
             return Task.FromResult(false);
         }

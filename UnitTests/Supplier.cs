@@ -35,6 +35,7 @@ public class Supplier
         _unitOfWorkMock = new Mock<IUnitOfWork>();
     }
 
+#pragma warning disable CRR0035
     [Fact(DisplayName = "SUP_001 - Tạo Supplier thành công với đầy đủ thông tin")]
     public async Task CreateSupplier_WithFullInformation_Success()
     {
@@ -57,7 +58,7 @@ public class Supplier
         _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         _insertRepoMock.Verify(x => x.Add(It.IsAny<SupplierEntity>()), Times.Once);
@@ -83,7 +84,7 @@ public class Supplier
         _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         _insertRepoMock.Verify(x => x.Add(It.IsAny<SupplierEntity>()), Times.Once);
@@ -109,7 +110,7 @@ public class Supplier
         _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         _insertRepoMock.Verify(x => x.Add(It.IsAny<SupplierEntity>()), Times.Once);
@@ -190,7 +191,7 @@ public class Supplier
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(existingSuppliers);
 
         // Act & Assert
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
 
@@ -213,7 +214,7 @@ public class Supplier
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(existingSuppliers);
 
         // Act & Assert
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
 
@@ -237,7 +238,7 @@ public class Supplier
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(existingSuppliers);
 
         // Act & Assert
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
 
@@ -260,7 +261,7 @@ public class Supplier
         _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         _insertRepoMock.Verify(x => x.Add(It.Is<SupplierEntity>(s => s.Name != null && !s.Name.StartsWith(' ') && !s.Name.EndsWith(' '))), Times.Once);
@@ -355,7 +356,7 @@ public class Supplier
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(emptySuppliers);
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Value.Should().NotBeNull();
@@ -390,7 +391,7 @@ public class Supplier
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(emptySuppliers);
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Value.Should().NotBeNull();
@@ -417,7 +418,7 @@ public class Supplier
             .ReturnsAsync(existingSupplier);
 
         // Act & Assert
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
 
@@ -449,7 +450,7 @@ public class Supplier
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(existingSuppliers);
 
         // Act & Assert
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
 
@@ -468,7 +469,7 @@ public class Supplier
             .ReturnsAsync((SupplierEntity?)null);
 
         // Act & Assert
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
 
@@ -494,7 +495,7 @@ public class Supplier
             .ReturnsAsync(existingSupplier);
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -523,7 +524,7 @@ public class Supplier
             .ReturnsAsync(existingSupplier);
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -563,7 +564,7 @@ public class Supplier
             .ReturnsAsync((SupplierEntity?)null);
 
         // Act & Assert
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
 
@@ -586,7 +587,7 @@ public class Supplier
             .ReturnsAsync(existingSupplier);
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -614,7 +615,7 @@ public class Supplier
             .ReturnsAsync(existingSupplier);
 
         // Act & Assert
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
 
@@ -640,7 +641,7 @@ public class Supplier
             .ReturnsAsync(existingSupplier);
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -657,7 +658,7 @@ public class Supplier
             .ReturnsAsync((SupplierEntity?)null);
 
         // Act & Assert
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
 
@@ -680,7 +681,7 @@ public class Supplier
             .ReturnsAsync(deletedSupplier);
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -705,7 +706,8 @@ public class Supplier
             .ReturnsAsync(activeSupplier);
 
         // Act & Assert
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
+#pragma warning restore CRR0035
 }

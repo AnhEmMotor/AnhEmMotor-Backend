@@ -46,7 +46,7 @@ public class CreateRoleCommandHandler(
 
         var role = new ApplicationRole { Name = request.RoleName, Description = request.Description };
 
-        var createResult = await roleInsertRepository.CreateAsync(role).ConfigureAwait(false);
+        var createResult = await roleInsertRepository.CreateAsync(role, cancellationToken).ConfigureAwait(false);
         if(!createResult.Succeeded)
         {
             var errors = string.Join(", ", createResult.Errors.Select(e => e.Description));

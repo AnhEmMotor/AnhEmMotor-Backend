@@ -1,9 +1,8 @@
-using Application.ApiContracts.Permission.Responses;
+﻿using Application.ApiContracts.Permission.Responses;
 using Application.Common.Models;
 using Application.Features.Permissions.Commands.CreateRole;
 using Application.Features.Permissions.Commands.DeleteMultipleRoles;
 using Application.Features.Permissions.Commands.DeleteRole;
-using Application.Features.Permissions.Commands.UpdateRolePermissions;
 using Application.Features.Permissions.Queries.GetAllPermissions;
 using Application.Features.Permissions.Queries.GetAllRoles;
 using Application.Features.Permissions.Queries.GetMyPermissions;
@@ -38,6 +37,7 @@ public class PermissionAndRole
         };
     }
 
+#pragma warning disable CRR0035
     [Fact(DisplayName = "PERM_CTRL_001 - Controller gọi GetAllPermissions thành công")]
     public async Task GetAllPermissions_MediatorReturnsData_ReturnsOkWithData()
     {
@@ -66,7 +66,7 @@ public class PermissionAndRole
             .ReturnsAsync(expectedData);
 
         // Act
-        var result = await _controller.GetAllPermissions(CancellationToken.None);
+        var result = await _controller.GetAllPermissionsAsync(CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();
@@ -100,7 +100,7 @@ public class PermissionAndRole
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await _controller.GetMyPermissions(CancellationToken.None);
+        var result = await _controller.GetMyPermissionsAsync(CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();
@@ -118,7 +118,7 @@ public class PermissionAndRole
             .ReturnsAsync(Result<PermissionAndRoleOfUserResponse>.Failure(Error.Unauthorized("User not authenticated")));
 
         // Act
-        var result = await _controller.GetMyPermissions(CancellationToken.None);
+        var result = await _controller.GetMyPermissionsAsync(CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<UnauthorizedObjectResult>();
@@ -150,7 +150,7 @@ public class PermissionAndRole
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await _controller.GetUserPermissionsById(userId, CancellationToken.None);
+        var result = await _controller.GetUserPermissionsByIdAsync(userId, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();
@@ -171,7 +171,7 @@ public class PermissionAndRole
             .ReturnsAsync(Result<PermissionAndRoleOfUserResponse>.Failure(Error.NotFound($"User with id {userId} not found")));
 
         // Act
-        var result = await _controller.GetUserPermissionsById(userId, CancellationToken.None);
+        var result = await _controller.GetUserPermissionsByIdAsync(userId, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<NotFoundObjectResult>();
@@ -193,11 +193,11 @@ public class PermissionAndRole
             new() { ID = PermissionsList.Suppliers.View }
         };
 
-        _mediatorMock.Setup(m => m.Send(It.Is<GetRolePermissionsQuery>(q => q.RoleName == roleName), It.IsAny<CancellationToken>()))
+        _mediatorMock.Setup(m => m.Send(It.Is<GetRolePermissionsQuery>(q => string.Compare(q.RoleName, roleName) == 0), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedPermissions);
 
         // Act
-        var result = await _controller.GetRolePermissions(roleName, CancellationToken.None);
+        var result = await _controller.GetRolePermissionsAsync(roleName, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();
@@ -213,11 +213,11 @@ public class PermissionAndRole
         // Arrange
         var roleName = "InvalidRole";
 
-        _mediatorMock.Setup(m => m.Send(It.Is<GetRolePermissionsQuery>(q => q.RoleName == roleName), It.IsAny<CancellationToken>()))
+        _mediatorMock.Setup(m => m.Send(It.Is<GetRolePermissionsQuery>(q => string.Compare(q.RoleName, roleName) == 0), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<List<PermissionResponse>>.Failure(Error.NotFound($"Role {roleName} not found")));
 
         // Act
-        var result = await _controller.GetRolePermissions(roleName, CancellationToken.None);
+        var result = await _controller.GetRolePermissionsAsync(roleName, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<NotFoundObjectResult>();
@@ -239,7 +239,7 @@ public class PermissionAndRole
             .ReturnsAsync(expectedRoles);
 
         // Act
-        var result = await _controller.GetAllRoles(CancellationToken.None);
+        var result = await _controller.GetAllRolesAsync(CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();
@@ -273,7 +273,7 @@ public class PermissionAndRole
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await _controller.CreateRole(request, CancellationToken.None);
+        var result = await _controller.CreateRoleAsync(request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();
@@ -299,11 +299,11 @@ public class PermissionAndRole
             .ThrowsAsync(new FluentValidation.ValidationException("Role name already exists"));
 
         // Act
-        Func<Task> act = async () => await _controller.CreateRole(request, CancellationToken.None);
+        Func<Task> act = async () => await _controller.CreateRoleAsync(request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         await act.Should().ThrowAsync<FluentValidation.ValidationException>()
-            .WithMessage("*already exists*");
+            .WithMessage("*already exists*").ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "PERM_CTRL_012 - Controller calls UpdateRole successfully")]
@@ -328,7 +328,7 @@ public class PermissionAndRole
             .ReturnsAsync(Result<PermissionRoleUpdateResponse>.Success(expectedResponse));
 
         // Act
-        var result = await _controller.UpdateRole(roleName, request, CancellationToken.None);
+        var result = await _controller.UpdateRoleAsync(roleName, request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();
@@ -350,11 +350,11 @@ public class PermissionAndRole
             Message = "Role deleted successfully"
         };
 
-        _mediatorMock.Setup(m => m.Send(It.Is<DeleteRoleCommand>(c => c.RoleName == roleName), It.IsAny<CancellationToken>()))
+        _mediatorMock.Setup(m => m.Send(It.Is<DeleteRoleCommand>(c => string.Compare(c.RoleName, roleName) == 0), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await _controller.DeleteRole(roleName, CancellationToken.None);
+        var result = await _controller.DeleteRoleAsync(roleName, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();
@@ -370,11 +370,11 @@ public class PermissionAndRole
         // Arrange
         var roleName = "NonExistent";
 
-        _mediatorMock.Setup(m => m.Send(It.Is<DeleteRoleCommand>(c => c.RoleName == roleName), It.IsAny<CancellationToken>()))
+        _mediatorMock.Setup(m => m.Send(It.Is<DeleteRoleCommand>(c => string.Compare(c.RoleName, roleName) == 0), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<RoleDeleteResponse>.Failure(Error.NotFound($"Role {roleName} not found")));
 
         // Act
-        var result = await _controller.DeleteRole(roleName, CancellationToken.None);
+        var result = await _controller.DeleteRoleAsync(roleName, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<NotFoundObjectResult>();
@@ -395,7 +395,7 @@ public class PermissionAndRole
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await _controller.DeleteMultipleRoles(roleNames, CancellationToken.None);
+        var result = await _controller.DeleteMultipleRolesAsync(roleNames, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();
@@ -422,4 +422,5 @@ public class PermissionAndRole
 
         _controller.ControllerContext.HttpContext.User = claimsPrincipal;
     }
+#pragma warning restore CRR0035
 }

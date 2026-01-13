@@ -22,6 +22,7 @@ public class Statistics
         _repositoryMock = new Mock<IStatisticalReadRepository>();
     }
 
+#pragma warning disable CRR0035
     [Fact(DisplayName = "STAT_041 - Unit - GetDailyRevenueQueryHandler xử lý days hợp lệ")]
     public async Task Handle_ValidDays7_Returns7DaysData()
     {
@@ -1150,4 +1151,5 @@ public class Statistics
         result.Should().NotBeNull();
         result.Value!.UnitPrice.Should().Be(500000);
     }
+#pragma warning restore CRR0035
 }

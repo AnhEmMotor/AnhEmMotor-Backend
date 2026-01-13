@@ -1,4 +1,5 @@
-﻿using Application.ApiContracts.Output.Responses;
+﻿using Application.ApiContracts.Brand.Responses;
+using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
 using Application.Features.Outputs.Queries.GetOutputsByUserId;
 using Application.Interfaces.Repositories;
@@ -17,9 +18,11 @@ public sealed class GetOutputsByUserIdByManagerQueryHandler(IOutputReadRepositor
     {
         var query = repository.GetQueryable().Where(o => o.BuyerId == request.BuyerId);
 
-        return await paginator.ApplyAsync<OutputEntity, OutputResponse>(
+        var result = await paginator.ApplyAsync<OutputEntity, OutputResponse>(
             query,
             request.SieveModel!,
             cancellationToken: cancellationToken).ConfigureAwait(false);
+
+        return result;
     }
 }

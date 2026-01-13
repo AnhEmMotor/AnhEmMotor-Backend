@@ -53,6 +53,7 @@ public class SalesOrder
         _paginatorMock = new Mock<ISievePaginator>();
     }
 
+#pragma warning disable CRR0035
     [Fact(DisplayName = "SO_001 - CreateOutput tạo đơn hàng thành công")]
     public async Task CreateOutput_ValidRequest_ShouldCallInsertRepository()
     {
@@ -70,7 +71,7 @@ public class SalesOrder
             ]
         };
 
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         result.Value.Should().NotBeNull();
         result.Value!.Id.Should().BeGreaterThan(0);
@@ -92,7 +93,7 @@ public class SalesOrder
             OutputInfos = [new() { ProductId = 1, Count = 1 }]
         };
 
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         result.Value.Should().NotBeNull();
         result.Value!.Id.Should().BeGreaterThan(0);
@@ -121,7 +122,7 @@ public class SalesOrder
         _insertRepoMock.Setup(x => x.Add(It.IsAny<Output>()))
             .Callback<Output>((output) => capturedOutput = output);
 
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         capturedOutput.Should().NotBeNull();
         capturedOutput!.OutputInfos.Should().HaveCount(2);
@@ -150,7 +151,7 @@ public class SalesOrder
         _insertRepoMock.Setup(x => x.Add(It.IsAny<Output>()))
             .Callback<Output>((output) => capturedOutput = output);
 
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         capturedOutput.Should().NotBeNull();
         capturedOutput!.OutputInfos.Should().HaveCount(3);
@@ -175,7 +176,7 @@ public class SalesOrder
         _insertRepoMock.Setup(x => x.Add(It.IsAny<Output>()))
             .Callback<Output>((output) => capturedOutput = output);
 
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         capturedOutput.Should().NotBeNull();
         result.Value!.StatusId.Should().Be("pending");
@@ -401,7 +402,7 @@ public class SalesOrder
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);
 
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         result.IsFailure.Should().BeTrue();
     }
@@ -472,7 +473,7 @@ public class SalesOrder
             OutputInfos = [new() { ProductId = 1, Count = 1 }]
         };
 
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         result.Value.Should().NotBeNull();
         result.Value!.Id.Should().BeGreaterThan(0);
@@ -501,7 +502,7 @@ public class SalesOrder
         _insertRepoMock.Setup(x => x.Add(It.IsAny<Output>()))
             .Callback<Output>((output) => capturedOutput = output);
 
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         capturedOutput.Should().NotBeNull();
         result.Value!.BuyerId.Should().Be(customBuyerId);
@@ -854,7 +855,7 @@ public class SalesOrder
         _insertRepoMock.Setup(x => x.Add(It.IsAny<Output>()))
             .Callback<Output>((output) => capturedOutput = output);
 
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         capturedOutput.Should().NotBeNull();
         capturedOutput!.OutputInfos.Should().HaveCount(4);
@@ -883,7 +884,7 @@ public class SalesOrder
         _insertRepoMock.Setup(x => x.Add(It.IsAny<Output>()))
             .Callback<Output>((output) => capturedOutput = output);
 
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         capturedOutput.Should().NotBeNull();
         capturedOutput!.OutputInfos.Should().HaveCount(2);
@@ -907,7 +908,7 @@ public class SalesOrder
             }
         };
 
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         result.IsFailure.Should().BeTrue();
     }
@@ -933,7 +934,7 @@ public class SalesOrder
         _variantRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync([]);
 
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         result.IsFailure.Should().BeTrue();
     }
@@ -958,7 +959,7 @@ public class SalesOrder
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(completedOutput);
 
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         result.IsFailure.Should().BeTrue();
     }
@@ -983,7 +984,7 @@ public class SalesOrder
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(deletedOutput);
 
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         result.IsFailure.Should().BeTrue();
     }
@@ -1002,7 +1003,7 @@ public class SalesOrder
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(completedOutput);
 
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         result.IsFailure.Should().BeTrue();
     }
@@ -1021,7 +1022,7 @@ public class SalesOrder
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), DataFetchMode.All))
             .ReturnsAsync(activeOutput);
 
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         result.IsFailure.Should().BeTrue();
     }
@@ -1072,7 +1073,7 @@ public class SalesOrder
         _insertRepoMock.Setup(x => x.Add(It.IsAny<Output>()))
             .Callback<Output>((output) => capturedOutput = output);
 
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         capturedOutput.Should().NotBeNull();
         capturedOutput!.CreatedBy.Should().Be(createdBy);
@@ -1131,7 +1132,7 @@ public class SalesOrder
             OutputInfos =  { new() { ProductId = 1, Count = 1 } }
         };
 
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         result.IsFailure.Should().BeTrue();
     }
@@ -1151,7 +1152,7 @@ public class SalesOrder
             OutputInfos = []
         };
 
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         result.IsFailure.Should().BeTrue();
     }
@@ -1171,7 +1172,7 @@ public class SalesOrder
             CurrentUserId = Guid.NewGuid()
         };
 
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         result.IsFailure.Should().BeTrue();
     }
@@ -1194,7 +1195,7 @@ public class SalesOrder
         _readRepoMock.Setup(x => x.GetByIdAsync(999, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync((Output?)null);
 
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         result.IsFailure.Should().BeTrue();
     }
@@ -1213,7 +1214,7 @@ public class SalesOrder
             StatusId = "confirmed_cod"
         };
 
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         result.IsFailure.Should().BeTrue();
     }
@@ -1228,7 +1229,7 @@ public class SalesOrder
 
         var command = new DeleteManyOutputsCommand { Ids = [] };
 
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         result.IsFailure.Should().BeTrue();
     }
@@ -1243,7 +1244,7 @@ public class SalesOrder
 
         var command = new RestoreManyOutputsCommand { Ids = [] };
 
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         result.IsFailure.Should().BeTrue();
     }
@@ -1321,7 +1322,7 @@ public class SalesOrder
         _variantRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync([]);
 
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         result.IsFailure.Should().BeTrue();
     }
@@ -1348,7 +1349,7 @@ public class SalesOrder
         _variantRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), DataFetchMode.All))
             .ReturnsAsync([deletedVariant]);
 
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         result.IsFailure.Should().BeTrue();
     }
@@ -1398,7 +1399,7 @@ public class SalesOrder
         _insertRepoMock.Setup(x => x.Add(It.IsAny<Output>()))
             .Callback<Output>((output) => capturedOutput = output);
 
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         capturedOutput.Should().NotBeNull();
         result.Value!.Notes.Should().Be("Giao hàng trước 5pm");
@@ -1476,4 +1477,5 @@ public class SalesOrder
         result.Should().NotBeNull();
         _paginatorMock.Verify(x => x.ApplyAsync<Output, OutputResponse>(It.IsAny<IQueryable<Output>>(), It.IsAny<SieveModel>(), It.IsAny<DataFetchMode?>(), It.IsAny<CancellationToken>()), Times.Once);
     }
+#pragma warning restore CRR0035
 }

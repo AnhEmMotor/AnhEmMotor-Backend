@@ -1,3 +1,4 @@
+using Application.ApiContracts.Brand.Responses;
 using Application.ApiContracts.Input.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
@@ -16,9 +17,11 @@ public sealed class GetInputsBySupplierIdQueryHandler(IInputReadRepository repos
     {
         var query = repository.GetBySupplierIdAsync(request.SupplierId, cancellationToken);
 
-        return await paginator.ApplyAsync<InputEntity, InputResponse>(
+        var result = await paginator.ApplyAsync<InputEntity, InputResponse>(
             query,
             request.SieveModel!,
             cancellationToken: cancellationToken).ConfigureAwait(false);
+
+        return result;
     }
 }

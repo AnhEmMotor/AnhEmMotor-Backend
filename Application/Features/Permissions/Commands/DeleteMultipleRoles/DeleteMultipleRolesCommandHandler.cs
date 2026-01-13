@@ -30,7 +30,7 @@ public class DeleteMultipleRolesCommandHandler(
                 continue;
             }
 
-            var role = await roleReadRepository.GetRoleByNameAsync(roleName).ConfigureAwait(false);
+            var role = await roleReadRepository.GetRoleByNameAsync(roleName, cancellationToken).ConfigureAwait(false);
             if(role is null)
             {
                 skippedRoles.Add($"{roleName} (Not found)");
@@ -55,10 +55,10 @@ public class DeleteMultipleRolesCommandHandler(
 
         foreach(var roleName in roleNames)
         {
-            var role = await roleReadRepository.GetRoleByNameAsync(roleName).ConfigureAwait(false);
+            var role = await roleReadRepository.GetRoleByNameAsync(roleName, cancellationToken).ConfigureAwait(false);
             if(role is not null)
             {
-                var result = await roleDeleteRepository.DeleteAsync(role).ConfigureAwait(false);
+                var result = await roleDeleteRepository.DeleteAsync(role, cancellationToken).ConfigureAwait(false);
                 if(result.Succeeded)
                 {
                     deletedCount++;

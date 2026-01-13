@@ -53,6 +53,7 @@ public class ProductCategory
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
+#pragma warning disable CRR0035
     [Fact(DisplayName = "PC_002 - Tạo danh mục sản phẩm chỉ với Name (Description null)")]
     public async Task CreateProductCategory_WithNameOnly_ShouldSucceed()
     {
@@ -467,4 +468,5 @@ public class ProductCategory
         // Assert
         resultObj.IsFailure.Should().BeTrue();
     }
+#pragma warning restore CRR0035
 }

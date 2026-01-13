@@ -21,7 +21,7 @@ public class GetUserPermissionsByIdQueryHandler(
             return Error.NotFound("User not found.");
         }
 
-        var userRoles = await userReadRepository.GetRolesOfUserAsync(user).ConfigureAwait(false);
+        var userRoles = await userReadRepository.GetRolesOfUserAsync(user, cancellationToken).ConfigureAwait(false);
         var roleEntities = await roleReadRepository.GetRolesByNameAsync(userRoles, cancellationToken)
             .ConfigureAwait(false);
 

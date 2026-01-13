@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 using Application.ApiContracts.Brand.Responses;
 using Application.Common.Models;
 using Application.Features.Brands.Commands.CreateBrand;
@@ -40,6 +40,7 @@ public class Brand
         };
     }
 
+#pragma warning disable CRR0035
     [Fact(DisplayName = "BRAND_005 - CreateBrand - Forbidden")]
     public async Task BRAND_005_CreateBrand_Forbidden()
     {
@@ -48,7 +49,7 @@ public class Brand
             .ThrowsAsync(new UnauthorizedAccessException());
 
         // Act
-        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _controller.CreateBrand(new CreateBrandCommand(), CancellationToken.None));
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _controller.CreateBrandAsync(new CreateBrandCommand(), CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "BRAND_009 - GetBrandById - NotFound")]
@@ -59,7 +60,7 @@ public class Brand
             .ThrowsAsync(new KeyNotFoundException());
 
         // Act
-        await Assert.ThrowsAsync<KeyNotFoundException>(() => _controller.GetBrandById(9999, CancellationToken.None));
+        await Assert.ThrowsAsync<KeyNotFoundException>(() => _controller.GetBrandByIdAsync(9999, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "BRAND_012 - UpdateBrand - NotFound")]
@@ -70,7 +71,7 @@ public class Brand
             .ThrowsAsync(new KeyNotFoundException());
 
         // Act
-        await Assert.ThrowsAsync<KeyNotFoundException>(() => _controller.UpdateBrand(9999, new UpdateBrandCommand(), CancellationToken.None));
+        await Assert.ThrowsAsync<KeyNotFoundException>(() => _controller.UpdateBrandAsync(9999, new UpdateBrandCommand(), CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "BRAND_014 - DeleteBrand - NotFound")]
@@ -81,7 +82,7 @@ public class Brand
             .ThrowsAsync(new KeyNotFoundException());
 
         // Act
-        await Assert.ThrowsAsync<KeyNotFoundException>(() => _controller.DeleteBrand(9999, CancellationToken.None));
+        await Assert.ThrowsAsync<KeyNotFoundException>(() => _controller.DeleteBrandAsync(9999, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "BRAND_032 - CreateBrand - Check Authorize Attribute")]
@@ -156,7 +157,7 @@ public class Brand
             .ThrowsAsync(new Exception("Internal Error"));
 
         // Act & Assert
-        await Assert.ThrowsAsync<Exception>(() => _controller.CreateBrand(new CreateBrandCommand(), CancellationToken.None));
+        await Assert.ThrowsAsync<Exception>(() => _controller.CreateBrandAsync(new CreateBrandCommand(), CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "BRAND_045 - UpdateBrand - Exception")]
@@ -167,7 +168,7 @@ public class Brand
             .ThrowsAsync(new Exception("Internal Error"));
 
         // Act & Assert
-        await Assert.ThrowsAsync<Exception>(() => _controller.UpdateBrand(1, new UpdateBrandCommand(), CancellationToken.None));
+        await Assert.ThrowsAsync<Exception>(() => _controller.UpdateBrandAsync(1, new UpdateBrandCommand(), CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "BRAND_046 - DeleteBrand - Exception")]
@@ -178,6 +179,7 @@ public class Brand
             .ThrowsAsync(new Exception("Internal Error"));
 
         // Act & Assert
-        await Assert.ThrowsAsync<Exception>(() => _controller.DeleteBrand(1, CancellationToken.None));
+        await Assert.ThrowsAsync<Exception>(() => _controller.DeleteBrandAsync(1, CancellationToken.None)).ConfigureAwait(true)  ;
     }
+#pragma warning restore CRR0035
 }

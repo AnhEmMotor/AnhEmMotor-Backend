@@ -18,9 +18,11 @@ public sealed class GetProductCategoriesListQueryHandler(
     {
         var query = repository.GetQueryable();
 
-        return await paginator.ApplyAsync<ProductCategoryEntity, ProductCategoryResponse>(
+        var result = await paginator.ApplyAsync<ProductCategoryEntity, ProductCategoryResponse>(
             query,
             request.SieveModel!,
             cancellationToken: cancellationToken).ConfigureAwait(false);
+
+        return result;
     }
 }

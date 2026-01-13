@@ -33,6 +33,7 @@ public class Brand
         _unitOfWorkMock = new Mock<IUnitOfWork>();
     }
 
+#pragma warning disable CRR0035
     [Fact(DisplayName = "BRAND_002 - Tạo thương hiệu với tên rỗng")]
     public void BRAND_002_CreateBrand_EmptyName_ShouldFailValidation()
     {
@@ -72,7 +73,7 @@ public class Brand
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>())).Returns(existingBrands);
 
         // Act & Assert
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
 
@@ -93,7 +94,7 @@ public class Brand
             .ReturnsAsync(new BrandEntities { Id = 1, Name = "OldName" });
 
         // Act & Assert
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
 
@@ -137,7 +138,7 @@ public class Brand
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>())).Returns(Enumerable.Empty<BrandEntities>().AsQueryable());
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -158,7 +159,7 @@ public class Brand
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>())).Returns(Enumerable.Empty<BrandEntities>().AsQueryable());
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
 
         // Assert
@@ -176,7 +177,7 @@ public class Brand
         _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
 
         // Assert
@@ -191,7 +192,7 @@ public class Brand
         var command = new RestoreBrandCommand { Id = 1 };
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
 
         // Assert
@@ -243,7 +244,7 @@ public class Brand
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>())).Returns(Enumerable.Empty<BrandEntities>().AsQueryable());
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Value.Name.Should().Be("Honda");
@@ -265,7 +266,7 @@ public class Brand
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>())).Returns(Enumerable.Empty<BrandEntities>().AsQueryable());
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         _updateRepoMock.Verify(x => x.Update(It.IsAny<BrandEntities>()), Times.Once);
@@ -279,7 +280,7 @@ public class Brand
         var command = new DeleteManyBrandsCommand { Ids = [1, 2] };
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         _deleteRepoMock.Verify(x => x.Delete(It.IsAny<BrandEntities>()), Times.Exactly(2));
@@ -293,7 +294,7 @@ public class Brand
         var command = new RestoreManyBrandsCommand { Ids = [1, 2] };
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         _updateRepoMock.Verify(x => x.Restore(It.IsAny<BrandEntities>()), Times.Exactly(2));
@@ -354,4 +355,5 @@ public class Brand
         // Assert
         result.ShouldNotHaveValidationErrorFor(x => x.Name);
     }
+#pragma warning restore CRR0035
 }

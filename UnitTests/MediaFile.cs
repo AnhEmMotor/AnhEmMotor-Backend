@@ -20,6 +20,7 @@ namespace UnitTests;
 
 public class MediaFile
 {
+#pragma warning disable CRR0035
     [Fact(DisplayName = "MF_001 - Tải lên ảnh thành công với định dạng WEBP hợp lệ")]
     public async Task UploadImage_ValidWebp_Success()
     {
@@ -47,7 +48,7 @@ public class MediaFile
         };
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -134,7 +135,7 @@ public class MediaFile
         };
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
 
         // Assert - Sau khi implement, sáº½ throw BadRequestException vá»›i message "File size exceeds limit"
@@ -164,7 +165,7 @@ public class MediaFile
         var command = new UploadManyImageCommand { Files = files };
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
 
         // Assert - Bulk Request Rule: 1 file invalid => toÃ n bá»™ request fail
@@ -196,7 +197,7 @@ public class MediaFile
         var command = new DeleteFileCommand { StoragePath = "nonexistent-file.webp" };
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
 
         // Assert
@@ -228,7 +229,7 @@ public class MediaFile
         var command = new DeleteFileCommand { StoragePath = "already-deleted.webp" };
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
 
         // Assert
@@ -267,7 +268,7 @@ public class MediaFile
         };
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
 
         // Assert - Bulk Request Rule: Request 3 files, chá»‰ tÃ¬m tháº¥y 2 => Fail toÃ n bá»™
@@ -299,7 +300,7 @@ public class MediaFile
         var command = new RestoreFileCommand { StoragePath = "nonexistent-file.webp" };
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
 
         // Assert
@@ -331,7 +332,7 @@ public class MediaFile
         var command = new RestoreFileCommand { StoragePath = "active-file.webp" };
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
 
         // Assert - File chÆ°a bá»‹ xoÃ¡ => khÃ´ng tÃ¬m tháº¥y trong DeletedOnly
@@ -372,7 +373,7 @@ public class MediaFile
         };
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
 
         // Assert - Bulk Request Rule: Request 3 files, chá»‰ tÃ¬m tháº¥y 2 => Fail toÃ n bá»™
@@ -485,7 +486,7 @@ public class MediaFile
         };
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert - Handler sáº½ sanitize filename vÃ  upload thÃ nh cÃ´ng
         result.Should().NotBeNull();
@@ -520,7 +521,7 @@ public class MediaFile
         };
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert - Handler sáº½ trim whitespace vÃ  upload thÃ nh cÃ´ng
         result.Should().NotBeNull();
@@ -549,7 +550,7 @@ public class MediaFile
         };
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
 
         // Assert - Magic bytes validation sáº½ detect fake file
@@ -577,7 +578,7 @@ public class MediaFile
         };
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
 
         // Assert - Magic bytes validation sáº½ detect fake file
@@ -661,7 +662,7 @@ public class MediaFile
         };
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -708,7 +709,7 @@ public class MediaFile
         };
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Value.Should().HaveCount(2);
@@ -749,7 +750,7 @@ public class MediaFile
         };
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -782,7 +783,7 @@ public class MediaFile
         };
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert - Validation sáº½ catch null stream
         result.IsFailure.Should().BeTrue();
@@ -810,7 +811,7 @@ public class MediaFile
         };
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert - Validation sáº½ catch empty stream
         result.IsFailure.Should().BeTrue();
@@ -838,10 +839,11 @@ public class MediaFile
         };
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert - Validation sáº½ catch empty filename
         result.IsFailure.Should().BeTrue();
         result.Error?.Message.Should().Contain("filename");
     }
+#pragma warning restore CRR0035
 }

@@ -64,6 +64,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         return (user, loginResult!.AccessToken!);
     }
 
+#pragma warning disable CRR0035
     [Fact(DisplayName = "USER_021 - Khôi phục tài khoản thành công")]
     public async Task RestoreAccount_Success_DeletedAtSetToNull()
     {
@@ -464,4 +465,5 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         var content = await testResponse2.Content.ReadAsStringAsync();
         content.Should().Contain("Account has been banned");
     }
+#pragma warning restore CRR0035
 }
