@@ -12,9 +12,7 @@ public sealed class DeleteManySuppliersCommandHandler(
     ISupplierDeleteRepository deleteRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<DeleteManySuppliersCommand, Result>
 {
-    public async Task<Result> Handle(
-        DeleteManySuppliersCommand request,
-        CancellationToken cancellationToken)
+    public async Task<Result> Handle(DeleteManySuppliersCommand request, CancellationToken cancellationToken)
     {
         var uniqueIds = request.Ids.Distinct().ToList();
         var errorDetails = new List<Error>();
@@ -31,8 +29,7 @@ public sealed class DeleteManySuppliersCommandHandler(
             if(!allSupplierMap.ContainsKey(id))
             {
                 errorDetails.Add(Error.NotFound($"Supplier with Id {id} not found.", "Id"));
-            } 
-            else if(!activeSupplierSet.Contains(id))
+            } else if(!activeSupplierSet.Contains(id))
             {
                 errorDetails.Add(Error.BadRequest($"Supplier with Id {id} has already been deleted.", "Id"));
             }

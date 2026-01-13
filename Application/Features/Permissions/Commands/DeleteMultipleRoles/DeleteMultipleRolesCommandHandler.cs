@@ -3,14 +3,13 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories.Role;
 using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Services;
-using Domain.Entities;
 using MediatR;
 
 namespace Application.Features.Permissions.Commands.DeleteMultipleRoles;
 
 public class DeleteMultipleRolesCommandHandler(
     IRoleReadRepository roleReadRepository,
-    IUserReadRepository userReadRepository, 
+    IUserReadRepository userReadRepository,
     IRoleDeleteRepository roleDeleteRepository,
     IProtectedEntityManagerService protectedEntityManagerService) : IRequestHandler<DeleteMultipleRolesCommand, Result<RoleDeleteResponse>>
 {
@@ -38,7 +37,7 @@ public class DeleteMultipleRolesCommandHandler(
                 continue;
             }
 
-            var usersWithRole = await userReadRepository.GetUsersInRoleAsync(roleName).ConfigureAwait(false);
+            var usersWithRole = await userReadRepository.GetUsersInRoleAsync(roleName, cancellationToken).ConfigureAwait(false);
             if(usersWithRole.Count > 0)
             {
                 skippedRoles.Add($"{roleName} ({usersWithRole.Count} user(s) assigned)");
@@ -48,7 +47,8 @@ public class DeleteMultipleRolesCommandHandler(
 
         if(skippedRoles.Count > 0)
         {
-                        return Error.BadRequest($"Cannot delete some roles due to validation errors: {string.Join(',', skippedRoles)}");
+            return Error.BadRequest(
+                $"Cannot delete some roles due to validation errors: {string.Join(',', skippedRoles)}");
         }
 
         cancellationToken.ThrowIfCancellationRequested();

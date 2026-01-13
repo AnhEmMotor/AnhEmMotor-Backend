@@ -1,5 +1,4 @@
 ﻿using Application.ApiContracts.Output.Requests;
-using Application.ApiContracts.Output.Responses;
 using FluentValidation;
 
 namespace Application.Features.Outputs.Commands.CreateOutputByManager

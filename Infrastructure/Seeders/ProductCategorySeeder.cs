@@ -23,7 +23,7 @@ public static class ProductCategorySeeder
     {
         var protectedCategories = configuration.GetSection("ProtectedProductCategory").Get<List<string>>() ?? [];
 
-        if (protectedCategories.Count == 0)
+        if(protectedCategories.Count == 0)
         {
             return;
         }
@@ -39,19 +39,13 @@ public static class ProductCategorySeeder
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         var categoriesToAdd = protectedCategories
-            .Where(name => !string.IsNullOrWhiteSpace(name) && 
-                          !existingCategoryNames.Contains(name))
-            .Select(name => new ProductCategory
-            {
-                Name = name,
-            })
+            .Where(name => !string.IsNullOrWhiteSpace(name) && !existingCategoryNames.Contains(name))
+            .Select(name => new ProductCategory { Name = name, })
             .ToList();
 
-        if (categoriesToAdd.Count != 0)
+        if(categoriesToAdd.Count != 0)
         {
-            await context.ProductCategories
-                .AddRangeAsync(categoriesToAdd, cancellationToken)
-                .ConfigureAwait(false);
+            await context.ProductCategories.AddRangeAsync(categoriesToAdd, cancellationToken).ConfigureAwait(false);
             await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
     }

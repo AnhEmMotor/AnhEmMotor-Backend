@@ -138,11 +138,11 @@ public class InventoryReceipts
     public void UpdateInputStatus_InvalidTransition_ThrowsException()
     {
         // Arrange
-        var currentStatus = Domain.Constants.InputStatus.Finish;
-        var newStatus = Domain.Constants.InputStatus.Working;
+        var currentStatus = Domain.Constants.Input.InputStatus.Finish;
+        var newStatus = Domain.Constants.Input.InputStatus.Working;
 
         // Act
-        bool isAllowed = InputStatusTransitions.IsTransitionAllowed(currentStatus, newStatus);
+        bool isAllowed = Domain.Constants.Input.InputStatusTransitions.IsTransitionAllowed(currentStatus, newStatus);
 
         // Assert
         isAllowed.Should().BeFalse();
@@ -216,7 +216,7 @@ public class InventoryReceipts
         var statusId = "invalid_status";
 
         // Act
-        bool isValid = Domain.Constants.InputStatus.IsValid(statusId);
+        bool isValid = Domain.Constants.Input.InputStatus.IsValid(statusId);
 
         // Assert
         isValid.Should().BeFalse();
@@ -288,11 +288,11 @@ public class InventoryReceipts
     public void InputStatusTransitions_WorkingToFinished_IsAllowed()
     {
         // Arrange
-        var currentStatus = Domain.Constants.InputStatus.Working;
-        var newStatus = Domain.Constants.InputStatus.Finish;
+        var currentStatus = Domain.Constants.Input.InputStatus.Working;
+        var newStatus = Domain.Constants.Input.InputStatus.Finish;
 
         // Act
-        bool isAllowed = InputStatusTransitions.IsTransitionAllowed(currentStatus, newStatus);
+        bool isAllowed = Domain.Constants.Input.InputStatusTransitions.IsTransitionAllowed(currentStatus, newStatus);
 
         // Assert
         isAllowed.Should().BeTrue();
@@ -302,10 +302,10 @@ public class InventoryReceipts
     public void InputStatus_FinishedInput_CannotDelete()
     {
         // Arrange
-        var statusId = Domain.Constants.InputStatus.Finish;
+        var statusId = Domain.Constants.Input.InputStatus.Finish;
 
         // Act
-        bool cannotDelete = Domain.Constants.InputStatus.IsCannotDelete(statusId);
+        bool cannotDelete = Domain.Constants.Input.InputStatus.IsCannotDelete(statusId);
 
         // Assert
         cannotDelete.Should().BeTrue();
@@ -315,9 +315,9 @@ public class InventoryReceipts
     public void InputStatus_ValidStatuses_ReturnsTrue()
     {
         // Arrange & Act & Assert
-        Domain.Constants.InputStatus.IsValid(Domain.Constants.InputStatus.Working).Should().BeTrue();
-        Domain.Constants.InputStatus.IsValid(Domain.Constants.InputStatus.Finish).Should().BeTrue();
-        Domain.Constants.InputStatus.IsValid(Domain.Constants.InputStatus.Cancel).Should().BeTrue();
+        Domain.Constants.Input.InputStatus.IsValid(Domain.Constants.Input.InputStatus.Working).Should().BeTrue();
+        Domain.Constants.Input.InputStatus.IsValid(Domain.Constants.Input.InputStatus.Finish).Should().BeTrue();
+        Domain.Constants.Input.InputStatus.IsValid(Domain.Constants.Input.InputStatus.Cancel).Should().BeTrue();
     }
 
     [Fact(DisplayName = "INPUT_060 - Kiểm tra Domain.Constants.InputStatus.IsValid với giá trị không hợp lệ")]
@@ -327,7 +327,7 @@ public class InventoryReceipts
         var invalidStatus = "invalid";
 
         // Act
-        bool isValid = Domain.Constants.InputStatus.IsValid(invalidStatus);
+        bool isValid = Domain.Constants.Input.InputStatus.IsValid(invalidStatus);
 
         // Assert
         isValid.Should().BeFalse();
@@ -337,10 +337,10 @@ public class InventoryReceipts
     public void InputStatus_WorkingStatus_CanEdit()
     {
         // Arrange
-        var statusId = Domain.Constants.InputStatus.Working;
+        var statusId = Domain.Constants.Input.InputStatus.Working;
 
         // Act
-        bool canEdit = Domain.Constants.InputStatus.IsCanEdit(statusId);
+        bool canEdit = Domain.Constants.Input.InputStatus.IsCanEdit(statusId);
 
         // Assert
         canEdit.Should().BeTrue();
@@ -350,10 +350,10 @@ public class InventoryReceipts
     public void InputStatus_FinishedStatus_CannotEdit()
     {
         // Arrange
-        var statusId = Domain.Constants.InputStatus.Finish;
+        var statusId = Domain.Constants.Input.InputStatus.Finish;
 
         // Act
-        bool canEdit = Domain.Constants.InputStatus.IsCanEdit(statusId);
+        bool canEdit = Domain.Constants.Input.InputStatus.IsCanEdit(statusId);
 
         // Assert
         canEdit.Should().BeFalse();
@@ -363,10 +363,10 @@ public class InventoryReceipts
     public void InputStatus_FinishedStatus_CannotDelete()
     {
         // Arrange
-        var statusId = Domain.Constants.InputStatus.Finish;
+        var statusId = Domain.Constants.Input.InputStatus.Finish;
 
         // Act
-        bool cannotDelete = Domain.Constants.InputStatus.IsCannotDelete(statusId);
+        bool cannotDelete = Domain.Constants.Input.InputStatus.IsCannotDelete(statusId);
 
         // Assert
         cannotDelete.Should().BeTrue();

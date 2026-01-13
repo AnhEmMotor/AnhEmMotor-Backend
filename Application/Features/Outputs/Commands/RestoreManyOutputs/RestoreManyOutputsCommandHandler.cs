@@ -27,7 +27,9 @@ public sealed class RestoreManyOutputsCommandHandler(
         {
             var foundIds = outputsList.Select(o => o.Id).ToList();
             var missingIds = request.Ids.Except(foundIds).ToList();
-            return Error.NotFound($"Không tìm thấy {missingIds.Count} đơn hàng đã xóa: {string.Join(", ", missingIds)}", "Ids");
+            return Error.NotFound(
+                $"Không tìm thấy {missingIds.Count} đơn hàng đã xóa: {string.Join(", ", missingIds)}",
+                "Ids");
         }
 
         updateRepository.Restore(outputsList);

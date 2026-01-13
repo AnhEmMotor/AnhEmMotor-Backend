@@ -5,7 +5,6 @@ using Application.Interfaces.Repositories.Supplier;
 
 using Mapster;
 using MediatR;
-using SupplierStatusConstants = Domain.Constants.SupplierStatus;
 
 namespace Application.Features.Suppliers.Commands.UpdateManySupplierStatus;
 

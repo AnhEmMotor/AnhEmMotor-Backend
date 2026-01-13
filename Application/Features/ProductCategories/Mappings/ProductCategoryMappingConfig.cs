@@ -1,7 +1,5 @@
 using Application.ApiContracts.ProductCategory.Responses;
 using Application.Features.ProductCategories.Commands.CreateProductCategory;
-using Application.Features.ProductCategories.Commands.DeleteManyProductCategories;
-using Application.Features.ProductCategories.Commands.RestoreManyProductCategories;
 using Application.Features.ProductCategories.Commands.UpdateProductCategory;
 using Mapster;
 using CategoryEntity = Domain.Entities.ProductCategory;

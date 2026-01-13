@@ -1,4 +1,4 @@
-﻿namespace Application.Common.Constants;
+﻿namespace Domain.Constants;
 
 public static class ClaimJWTPayload
 {

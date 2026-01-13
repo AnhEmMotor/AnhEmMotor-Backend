@@ -5,24 +5,24 @@
     </assembly>
     <members>
         <member name="T:WebAPI.Controllers.Base.ApiController">
-            <summary>
+             <summary>
             
-            </summary>
+             </summary>
         </member>
         <member name="M:WebAPI.Controllers.Base.ApiController.HandleResult(Application.Common.Models.Result)">
-            <summary>
+             <summary>
             
-            </summary>
-            <param name="result"></param>
-            <returns></returns>
+             </summary>
+             <param name="result"></param>
+             <returns></returns>
         </member>
         <member name="M:WebAPI.Controllers.Base.ApiController.HandleResult``1(Application.Common.Models.Result{``0})">
-            <summary>
+             <summary>
             
-            </summary>
-            <typeparam name="T"></typeparam>
-            <param name="result"></param>
-            <returns></returns>
+             </summary>
+             <typeparam name="T"></typeparam>
+             <param name="result"></param>
+             <returns></returns>
         </member>
         <member name="T:WebAPI.Controllers.V1.AuthController">
             <summary>
@@ -294,7 +294,7 @@
             Lấy các quyền của một vai trò cụ thể
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.PermissionController.UpdateRole(System.String,Application.Features.Permissions.Commands.UpdateRolePermissions.UpdateRoleCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.PermissionController.UpdateRole(System.String,Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommand,System.Threading.CancellationToken)">
             <summary>
             Cập nhật quyền cho một vai trò
             </summary>
@@ -710,7 +710,8 @@
         </member>
         <member name="M:WebAPI.Controllers.V1.SupplierController.GetSuppliersForInput(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
-            Lấy danh sách nhà cung cấp (có phân trang, lọc, sắp xếp - chỉ được vào khi người dùng có quyền thêm và xoá phiếu bán hàng).
+            Lấy danh sách nhà cung cấp (có phân trang, lọc, sắp xếp - chỉ được vào khi người dùng có quyền thêm và xoá phiếu
+            bán hàng).
             </summary>
             <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
             <param name="cancellationToken"></param>

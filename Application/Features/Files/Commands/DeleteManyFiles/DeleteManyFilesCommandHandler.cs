@@ -12,9 +12,7 @@ public sealed class DeleteManyFilesCommandHandler(
     IMediaFileDeleteRepository deleteRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<DeleteManyFilesCommand, Result>
 {
-    public async Task<Result> Handle(
-        DeleteManyFilesCommand request,
-        CancellationToken cancellationToken)
+    public async Task<Result> Handle(DeleteManyFilesCommand request, CancellationToken cancellationToken)
     {
         if(request.StoragePaths == null || request.StoragePaths.Count == 0)
         {
@@ -37,8 +35,7 @@ public sealed class DeleteManyFilesCommandHandler(
             if(!allFileMap.ContainsKey(path))
             {
                 errorDetails.Add(Error.NotFound($"File '{path}' not found.", "StoragePath"));
-            } 
-            else if(!activeFileSet.Contains(path))
+            } else if(!activeFileSet.Contains(path))
             {
                 errorDetails.Add(Error.BadRequest($"File '{path}' has already been deleted.", "StoragePath"));
             }

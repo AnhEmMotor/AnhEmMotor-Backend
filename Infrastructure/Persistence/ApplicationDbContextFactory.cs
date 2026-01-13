@@ -11,7 +11,7 @@ namespace Infrastructure.Persistence
         {
             var basePath = Path.Combine(Directory.GetCurrentDirectory(), "../WebAPI");
 
-            if (!Directory.Exists(basePath))
+            if(!Directory.Exists(basePath))
             {
                 basePath = Directory.GetCurrentDirectory();
             }
@@ -24,7 +24,7 @@ namespace Infrastructure.Persistence
 
             var connectionString = configuration.GetConnectionString("StringConnection");
 
-            if (string.IsNullOrEmpty(connectionString))
+            if(string.IsNullOrEmpty(connectionString))
             {
                 throw new InvalidOperationException("Không tìm thấy ConnectionString 'StringConnection'.");
             }

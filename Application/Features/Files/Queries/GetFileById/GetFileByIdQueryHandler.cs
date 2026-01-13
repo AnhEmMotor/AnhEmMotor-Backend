@@ -11,9 +11,7 @@ public sealed class GetFileByIdQueryHandler(
     IMediaFileReadRepository repository,
     Interfaces.Repositories.LocalFile.IFileStorageService fileStorageService) : IRequestHandler<GetFileByIdQuery, Result<MediaFileResponse?>>
 {
-    public async Task<Result<MediaFileResponse?>> Handle(
-        GetFileByIdQuery request,
-        CancellationToken cancellationToken)
+    public async Task<Result<MediaFileResponse?>> Handle(GetFileByIdQuery request, CancellationToken cancellationToken)
     {
         var file = await repository.GetByIdAsync(request.Id!.Value, cancellationToken).ConfigureAwait(false);
 

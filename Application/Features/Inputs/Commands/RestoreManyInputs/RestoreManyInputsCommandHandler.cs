@@ -27,7 +27,9 @@ public sealed class RestoreManyInputsCommandHandler(
         {
             var foundIds = inputsList.Select(i => i.Id).ToList();
             var missingIds = request.Ids.Except(foundIds).ToList();
-            return Error.NotFound($"Không tìm thấy {missingIds.Count} phiếu nhập đã xóa: {string.Join(", ", missingIds)}", "Ids");
+            return Error.NotFound(
+                $"Không tìm thấy {missingIds.Count} phiếu nhập đã xóa: {string.Join(", ", missingIds)}",
+                "Ids");
         }
 
         updateRepository.Restore(inputsList);

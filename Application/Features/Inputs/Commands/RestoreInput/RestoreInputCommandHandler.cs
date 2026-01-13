@@ -14,9 +14,7 @@ public sealed class RestoreInputCommandHandler(
     IInputUpdateRepository updateRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<RestoreInputCommand, Result<InputResponse>>
 {
-    public async Task<Result<InputResponse>> Handle(
-        RestoreInputCommand request,
-        CancellationToken cancellationToken)
+    public async Task<Result<InputResponse>> Handle(RestoreInputCommand request, CancellationToken cancellationToken)
     {
         var input = await readRepository.GetByIdAsync(request.Id!.Value, cancellationToken, DataFetchMode.DeletedOnly)
             .ConfigureAwait(false);

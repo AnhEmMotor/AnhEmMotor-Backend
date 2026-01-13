@@ -7,7 +7,9 @@ public sealed class DeleteCurrentUserAccountCommandValidator : AbstractValidator
     public DeleteCurrentUserAccountCommandValidator()
     {
         RuleFor(x => x.UserId)
-            .NotEmpty().WithMessage("User ID is missing.")
-            .Must(id => Guid.TryParse(id, out _)).WithMessage("Invalid User ID format.");
+            .NotEmpty()
+            .WithMessage("User ID is missing.")
+            .Must(id => Guid.TryParse(id, out _))
+            .WithMessage("Invalid User ID format.");
     }
 }

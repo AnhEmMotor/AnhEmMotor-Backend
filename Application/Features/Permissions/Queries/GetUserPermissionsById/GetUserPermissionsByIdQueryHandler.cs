@@ -2,8 +2,6 @@ using Application.ApiContracts.Permission.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.Role;
 using Application.Interfaces.Repositories.User;
-using Application.Interfaces.Services;
-using Domain.Entities;
 using MediatR;
 
 namespace Application.Features.Permissions.Queries.GetUserPermissionsById;
@@ -16,8 +14,9 @@ public class GetUserPermissionsByIdQueryHandler(
         GetUserPermissionsByIdQuery request,
         CancellationToken cancellationToken)
     {
-        var user = await userReadRepository.FindUserByIdAsync(request.UserId!.Value, cancellationToken).ConfigureAwait(false);
-        if (user is null)
+        var user = await userReadRepository.FindUserByIdAsync(request.UserId!.Value, cancellationToken)
+            .ConfigureAwait(false);
+        if(user is null)
         {
             return Error.NotFound("User not found.");
         }

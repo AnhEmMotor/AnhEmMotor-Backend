@@ -23,6 +23,6 @@ public sealed class GetDeletedProductCategoriesListQueryHandler(
             query,
             request.SieveModel!,
             DataFetchMode.DeletedOnly,
-            cancellationToken);
+            cancellationToken).ConfigureAwait(false);
     }
 }

@@ -41,8 +41,7 @@ namespace Infrastructure.Repositories.User
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var result = await userManager.ChangePasswordAsync(user, currentPassword, newPassword)
-                .ConfigureAwait(false);
+            var result = await userManager.ChangePasswordAsync(user, currentPassword, newPassword).ConfigureAwait(false);
 
             return (result.Succeeded, result.Errors.Select(e => e.Description));
         }
@@ -55,15 +54,12 @@ namespace Infrastructure.Repositories.User
             cancellationToken.ThrowIfCancellationRequested();
 
             var resetToken = await userManager.GeneratePasswordResetTokenAsync(user).ConfigureAwait(false);
-            var result = await userManager.ResetPasswordAsync(user, resetToken, newPassword)
-                .ConfigureAwait(false);
+            var result = await userManager.ResetPasswordAsync(user, resetToken, newPassword).ConfigureAwait(false);
 
             return (result.Succeeded, result.Errors.Select(e => e.Description));
         }
 
-        public async Task ClearRefreshTokenAsync(
-            Guid userId,
-            CancellationToken cancellationToken = default)
+        public async Task ClearRefreshTokenAsync(Guid userId, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 

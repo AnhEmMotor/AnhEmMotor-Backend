@@ -1,7 +1,6 @@
 ﻿using Application.ApiContracts.Auth.Responses;
 using Application.ApiContracts.User.Responses;
 using Application.ApiContracts.UserManager.Responses;
-using Application.Common.Models;
 using Domain.Entities;
 using Domain.Primitives;
 using Sieve.Models;
@@ -25,13 +24,9 @@ namespace Application.Interfaces.Repositories.User
 
         public Task<UserAuth?> GetUserByIDAsync(Guid? idUser, CancellationToken cancellationToken);
 
-        public Task<ApplicationUser?> FindUserByIdAsync(
-            Guid userId,
-            CancellationToken cancellationToken = default);
+        public Task<ApplicationUser?> FindUserByIdAsync(Guid userId, CancellationToken cancellationToken = default);
 
-        public Task<ApplicationUser?> FindUserByEmailAsync(
-            string email,
-            CancellationToken cancellationToken = default);
+        public Task<ApplicationUser?> FindUserByEmailAsync(string email, CancellationToken cancellationToken = default);
 
         public Task<ApplicationUser?> FindUserByUsernameAsync(
             string username,
@@ -50,6 +45,6 @@ namespace Application.Interfaces.Repositories.User
             string roleName,
             CancellationToken cancellationToken = default);
 
-        public Task<IList<string>> GetRolesOfUserAsync(ApplicationUser user);
+        public Task<IList<string>> GetRolesOfUserAsync(ApplicationUser user, CancellationToken cancellationToken);
     }
 }

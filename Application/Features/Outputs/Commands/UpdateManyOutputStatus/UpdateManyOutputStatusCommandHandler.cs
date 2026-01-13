@@ -29,7 +29,8 @@ public sealed class UpdateManyOutputStatusCommandHandler(
 
         if(missingIds.Count != 0)
         {
-            errors.Add(Error.NotFound($"Không tìm thấy {missingIds.Count} đơn hàng: {string.Join(", ", missingIds)}", "Ids"));
+            errors.Add(
+                Error.NotFound($"Không tìm thấy {missingIds.Count} đơn hàng: {string.Join(", ", missingIds)}", "Ids"));
         }
 
         foreach(var output in outputsList)
@@ -37,7 +38,10 @@ public sealed class UpdateManyOutputStatusCommandHandler(
             if(!OrderStatusTransitions.IsTransitionAllowed(output.StatusId, request.StatusId))
             {
                 var allowed = OrderStatusTransitions.GetAllowedTransitions(output.StatusId);
-                errors.Add(Error.BadRequest($"Đơn hàng ID {output.Id}: Không thể chuyển từ '{output.StatusId}' sang '{request.StatusId}'. Chỉ được chuyển sang: {string.Join(", ", allowed)}", "StatusId"));
+                errors.Add(
+                    Error.BadRequest(
+                        $"Đơn hàng ID {output.Id}: Không thể chuyển từ '{output.StatusId}' sang '{request.StatusId}'. Chỉ được chuyển sang: {string.Join(", ", allowed)}",
+                        "StatusId"));
             }
         }
 
@@ -75,7 +79,10 @@ public sealed class UpdateManyOutputStatusCommandHandler(
 
                 if(currentStock < totalNeeded)
                 {
-                    errors.Add(Error.BadRequest($"Sản phẩm ID {variantId} không đủ tồn kho. Tổng kho hiện có: {currentStock}, Tổng đơn hàng cần: {totalNeeded}, Thiếu: {totalNeeded - currentStock}", "Products"));
+                    errors.Add(
+                        Error.BadRequest(
+                            $"Sản phẩm ID {variantId} không đủ tồn kho. Tổng kho hiện có: {currentStock}, Tổng đơn hàng cần: {totalNeeded}, Thiếu: {totalNeeded - currentStock}",
+                            "Products"));
                 }
             }
         }

@@ -9,9 +9,7 @@ namespace Application.Features.Outputs.Queries.GetOutputById;
 
 public sealed class GetOutputByIdQueryHandler(IOutputReadRepository repository) : IRequestHandler<GetOutputByIdQuery, Result<OutputResponse?>>
 {
-    public async Task<Result<OutputResponse?>> Handle(
-        GetOutputByIdQuery request,
-        CancellationToken cancellationToken)
+    public async Task<Result<OutputResponse?>> Handle(GetOutputByIdQuery request, CancellationToken cancellationToken)
     {
         var output = await repository.GetByIdWithDetailsAsync(request.Id, cancellationToken).ConfigureAwait(false);
 

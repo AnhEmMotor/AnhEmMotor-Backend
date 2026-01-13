@@ -1,8 +1,7 @@
-﻿using Application.ApiContracts.User.Responses;
+﻿using Application.ApiContracts.Auth.Responses;
+using Application.ApiContracts.User.Responses;
 using Application.ApiContracts.UserManager.Responses;
-using Application.Common.Models;
 using Application.Interfaces.Repositories.User;
-using Application.Interfaces.Repositories.Role;
 using Domain.Constants;
 using Domain.Entities;
 using Domain.Primitives;
@@ -11,13 +10,10 @@ using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
 using Sieve.Services;
 using System;
-using Application.ApiContracts.Auth.Responses;
 
 namespace Infrastructure.Repositories.User
 {
-    public class UserReadRepository(
-        UserManager<ApplicationUser> userManager,
-        ISieveProcessor sieveProcessor) : IUserReadRepository
+    public class UserReadRepository(UserManager<ApplicationUser> userManager, ISieveProcessor sieveProcessor) : IUserReadRepository
     {
         public async Task<PagedResult<UserDTOForManagerResponse>> GetPagedListAsync(
             SieveModel sieveModel,
@@ -89,7 +85,9 @@ namespace Infrastructure.Repositories.User
                 sieveModel.PageSize ?? 10);
         }
 
-        public async Task<ApplicationUser?> GetByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken)
+        public async Task<ApplicationUser?> GetByRefreshTokenAsync(
+            string refreshToken,
+            CancellationToken cancellationToken)
         {
             return await userManager.Users
                 .AsNoTracking()
@@ -97,9 +95,7 @@ namespace Infrastructure.Repositories.User
                 .ConfigureAwait(false);
         }
 
-        public async Task<UserAuth> GetUserByRefreshTokenAsync(
-            string refreshToken,
-            CancellationToken cancellationToken)
+        public async Task<UserAuth> GetUserByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken)
         {
             var user = await userManager.Users
                 .AsNoTracking()
@@ -112,11 +108,11 @@ namespace Infrastructure.Repositories.User
             {
                 Id = user!.Id,
                 UserName = user.UserName,
-                Roles = [.. roles],
+                Roles = [ .. roles ],
                 Email = user.Email,
                 FullName = user.FullName,
                 Status = user.Status,
-                AuthMethods = ["pwd"]
+                AuthMethods = [ "pwd" ]
             };
 
             return UserAuth;
@@ -148,49 +144,35 @@ namespace Infrastructure.Repositories.User
         public async Task<ApplicationUser?> FindUserByIdAsync(
             Guid userId,
             CancellationToken cancellationToken = default)
-        {
-            return await userManager.FindByIdAsync(userId.ToString()).ConfigureAwait(false);
-        }
+        { return await userManager.FindByIdAsync(userId.ToString()).ConfigureAwait(false); }
 
         public async Task<ApplicationUser?> FindUserByEmailAsync(
             string email,
             CancellationToken cancellationToken = default)
-        {
-            return await userManager.FindByEmailAsync(email).ConfigureAwait(false);
-        }
+        { return await userManager.FindByEmailAsync(email).ConfigureAwait(false); }
 
         public async Task<ApplicationUser?> FindUserByUsernameAsync(
             string username,
             CancellationToken cancellationToken = default)
-        {
-            return await userManager.FindByNameAsync(username).ConfigureAwait(false);
-        }
+        { return await userManager.FindByNameAsync(username).ConfigureAwait(false); }
 
         public async Task<bool> CheckPasswordAsync(
             ApplicationUser user,
             string password,
             CancellationToken cancellationToken = default)
-        {
-            return await userManager.CheckPasswordAsync(user, password).ConfigureAwait(false);
-        }
+        { return await userManager.CheckPasswordAsync(user, password).ConfigureAwait(false); }
 
         public async Task<IList<string>> GetUserRolesAsync(
             ApplicationUser user,
             CancellationToken cancellationToken = default)
-        {
-            return await userManager.GetRolesAsync(user).ConfigureAwait(false);
-        }
+        { return await userManager.GetRolesAsync(user).ConfigureAwait(false); }
 
         public async Task<IList<ApplicationUser>> GetUsersInRoleAsync(
             string roleName,
             CancellationToken cancellationToken = default)
-        {
-            return await userManager.GetUsersInRoleAsync(roleName).ConfigureAwait(false);
-        }
+        { return await userManager.GetUsersInRoleAsync(roleName).ConfigureAwait(false); }
 
-        public async Task<IList<string>> GetRolesOfUserAsync(ApplicationUser user)
-        {
-            return await userManager.GetRolesAsync(user).ConfigureAwait(false);
-        }
+        public async Task<IList<string>> GetRolesOfUserAsync(ApplicationUser user, CancellationToken cancellationToken)
+        { return await userManager.GetRolesAsync(user).ConfigureAwait(false); }
     }
 }

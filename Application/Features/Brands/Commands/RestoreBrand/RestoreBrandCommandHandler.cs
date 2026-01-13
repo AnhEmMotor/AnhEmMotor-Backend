@@ -1,6 +1,5 @@
 using Application.ApiContracts.Brand.Responses;
 using Application.Common.Models;
-using Application.Features.Brands.Commands.DeleteManyBrands;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
 using Domain.Constants;
@@ -12,11 +11,9 @@ namespace Application.Features.Brands.Commands.RestoreBrand;
 public sealed class RestoreBrandCommandHandler(
     IBrandReadRepository readRepository,
     IBrandUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<RestoreBrandCommand, Result<BrandResponse>> 
+    IUnitOfWork unitOfWork) : IRequestHandler<RestoreBrandCommand, Result<BrandResponse>>
 {
-    public async Task<Result<BrandResponse>> Handle(
-        RestoreBrandCommand request,
-        CancellationToken cancellationToken)
+    public async Task<Result<BrandResponse>> Handle(RestoreBrandCommand request, CancellationToken cancellationToken)
     {
         var brand = await readRepository.GetByIdAsync(request.Id, cancellationToken, DataFetchMode.DeletedOnly)
             .ConfigureAwait(false);

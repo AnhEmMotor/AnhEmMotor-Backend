@@ -14,7 +14,8 @@ public class RestoreUserAccountCommandHandler(
         RestoreUserAccountCommand request,
         CancellationToken cancellationToken)
     {
-        var user = await userReadRepository.FindUserByIdAsync(request.UserId!.Value, cancellationToken).ConfigureAwait(false);
+        var user = await userReadRepository.FindUserByIdAsync(request.UserId!.Value, cancellationToken)
+            .ConfigureAwait(false);
         if(user is null)
         {
             return Error.NotFound("User not found.");
@@ -27,12 +28,15 @@ public class RestoreUserAccountCommandHandler(
 
         if(string.Compare(user.Status, UserStatus.Active) != 0)
         {
-            return Error.Validation($"Cannot restore user with status '{user.Status}'. User status must be Active.", "Status");
+            return Error.Validation(
+                $"Cannot restore user with status '{user.Status}'. User status must be Active.",
+                "Status");
         }
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        var (succeeded, errors) = await userDeleteRepository.RestoreUserAsync(user, cancellationToken).ConfigureAwait(false);
+        var (succeeded, errors) = await userDeleteRepository.RestoreUserAsync(user, cancellationToken)
+            .ConfigureAwait(false);
         if(!succeeded)
         {
             var validationErrors = errors.Select(e => Error.Validation(e)).ToList();

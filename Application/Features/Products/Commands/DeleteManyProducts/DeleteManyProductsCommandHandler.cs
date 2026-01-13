@@ -12,9 +12,7 @@ public sealed class DeleteManyProductsCommandHandler(
     IProductDeleteRepository deleteRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<DeleteManyProductsCommand, Result>
 {
-    public async Task<Result> Handle(
-        DeleteManyProductsCommand command,
-        CancellationToken cancellationToken)
+    public async Task<Result> Handle(DeleteManyProductsCommand command, CancellationToken cancellationToken)
     {
         var uniqueIds = command.Ids!.Distinct().ToList();
 
@@ -37,7 +35,8 @@ public sealed class DeleteManyProductsCommandHandler(
             if(!activeProductsSet.Contains(id))
             {
                 var productName = allProductsMap[id].Name;
-                errorDetails.Add(Error.BadRequest($"Product has already been deleted, Product ID: {id}, Product Name: {productName}"));
+                errorDetails.Add(
+                    Error.BadRequest($"Product has already been deleted, Product ID: {id}, Product Name: {productName}"));
             }
         }
 

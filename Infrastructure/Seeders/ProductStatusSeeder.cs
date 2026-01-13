@@ -13,13 +13,11 @@ public static class ProductStatusSeeder
     /// </summary>
     /// <param name="context">Database context</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    public static async Task SeedAsync(
-        ApplicationDBContext context,
-        CancellationToken cancellationToken)
+    public static async Task SeedAsync(ApplicationDBContext context, CancellationToken cancellationToken)
     {
         var allStatuses = Domain.Constants.ProductStatus.All;
 
-        if (allStatuses.Count == 0)
+        if(allStatuses.Count == 0)
         {
             return;
         }
@@ -33,7 +31,7 @@ public static class ProductStatusSeeder
             .Select(key => new Domain.Entities.ProductStatus { Key = key })
             .ToList();
 
-        if (newStatuses.Count != 0)
+        if(newStatuses.Count != 0)
         {
             await context.Set<Domain.Entities.ProductStatus>()
                 .AddRangeAsync(newStatuses, cancellationToken)
@@ -45,14 +43,14 @@ public static class ProductStatusSeeder
             .Where(s => !allStatuses.Contains(s.Key, StringComparer.OrdinalIgnoreCase))
             .ToList();
 
-        if (statusesToDelete.Count != 0)
+        if(statusesToDelete.Count != 0)
         {
             var statusKeys = statusesToDelete.Select(s => s.Key).ToList();
             var hasReferences = await context.Set<Domain.Entities.Product>()
                 .AnyAsync(p => p.StatusId != null && statusKeys.Contains(p.StatusId), cancellationToken)
                 .ConfigureAwait(false);
 
-            if (!hasReferences)
+            if(!hasReferences)
             {
                 context.Set<Domain.Entities.ProductStatus>().RemoveRange(statusesToDelete);
                 await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

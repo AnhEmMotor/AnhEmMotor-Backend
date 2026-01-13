@@ -38,8 +38,7 @@ public sealed class RestoreManyFilesCommandHandler(
             if(!allFileMap.ContainsKey(path))
             {
                 errorDetails.Add(Error.NotFound($"File '{path}' not found.", "StoragePath"));
-            } 
-            else if(!deletedFileSet.Contains(path))
+            } else if(!deletedFileSet.Contains(path))
             {
                 errorDetails.Add(Error.BadRequest($"File '{path}' is not deleted.", "StoragePath"));
             }

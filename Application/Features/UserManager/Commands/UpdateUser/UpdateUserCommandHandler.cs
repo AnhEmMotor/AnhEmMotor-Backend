@@ -10,9 +10,12 @@ public class UpdateUserCommandHandler(
     IUserReadRepository userReadRepository,
     IUserUpdateRepository userUpdateRepository) : IRequestHandler<UpdateUserCommand, Result<UserDTOForManagerResponse>>
 {
-    public async Task<Result<UserDTOForManagerResponse>> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
+    public async Task<Result<UserDTOForManagerResponse>> Handle(
+        UpdateUserCommand request,
+        CancellationToken cancellationToken)
     {
-        var user = await userReadRepository.FindUserByIdAsync(request.UserId!.Value, cancellationToken).ConfigureAwait(false);
+        var user = await userReadRepository.FindUserByIdAsync(request.UserId!.Value, cancellationToken)
+            .ConfigureAwait(false);
         if(user is null)
         {
             return Error.NotFound("User not found.");
@@ -27,7 +30,9 @@ public class UpdateUserCommandHandler(
         {
             if(!GenderStatus.IsValid(request.Gender))
             {
-                return Error.Validation($"Invalid gender value. Allowed values: {string.Join(", ", GenderStatus.All)}", "Gender");
+                return Error.Validation(
+                    $"Invalid gender value. Allowed values: {string.Join(", ", GenderStatus.All)}",
+                    "Gender");
             }
             user.Gender = request.Gender;
         }
@@ -39,7 +44,8 @@ public class UpdateUserCommandHandler(
             user.PhoneNumber = request.PhoneNumber;
         }
 
-        var (succeeded, errors) = await userUpdateRepository.UpdateUserAsync(user, cancellationToken).ConfigureAwait(false);
+        var (succeeded, errors) = await userUpdateRepository.UpdateUserAsync(user, cancellationToken)
+            .ConfigureAwait(false);
         if(!succeeded)
         {
             var validationErrors = errors.Select(e => Error.Validation(e)).ToList();

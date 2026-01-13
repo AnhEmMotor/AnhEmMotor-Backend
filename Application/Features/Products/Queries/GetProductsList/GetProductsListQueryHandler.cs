@@ -29,10 +29,6 @@ public sealed class GetProductsListQueryHandler(IProductReadRepository readRepos
 
         var items = entities.Select(e => e.Adapt<ProductDetailResponse>()).ToList();
 
-        return new PagedResult<ProductDetailResponse>(
-            items,
-            totalCount,
-            request.Page,
-            request.PageSize);
+        return new PagedResult<ProductDetailResponse>(items, totalCount, request.Page, request.PageSize);
     }
 }

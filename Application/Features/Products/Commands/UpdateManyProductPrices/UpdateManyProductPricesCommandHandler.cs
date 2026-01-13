@@ -26,8 +26,7 @@ public sealed class UpdateManyProductPricesCommandHandler(
             var foundIds = productList.Select(p => p.Id).ToHashSet();
             var missingErrors = productIds
                 .Where(id => !foundIds.Contains(id))
-                .Select(
-                    id => Error.NotFound($"Sản phẩm với Id {id} không tồn tại."))
+                .Select(id => Error.NotFound($"Sản phẩm với Id {id} không tồn tại."))
                 .ToList();
 
             return missingErrors;

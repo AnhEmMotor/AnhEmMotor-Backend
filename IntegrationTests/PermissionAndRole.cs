@@ -273,7 +273,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
 
         await AuthenticateAsUserAsync(adminUser.Email!);
 
-        var request = new UpdateRoleCommand
+        var request = new Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommand
         {
             Permissions = [PermissionsList.Products.View, PermissionsList.Products.Create, PermissionsList.Products.Edit]
         };
@@ -308,7 +308,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
 
         await AuthenticateAsUserAsync(adminUser.Email!);
 
-        var request = new UpdateRoleCommand
+        var request = new Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommand
         {
             Description = "Updated Description"
         };

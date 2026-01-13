@@ -2,7 +2,6 @@
 using Application.Features.Permissions.Commands.CreateRole;
 using Application.Features.Permissions.Commands.DeleteMultipleRoles;
 using Application.Features.Permissions.Commands.DeleteRole;
-using Application.Features.Permissions.Commands.UpdateRolePermissions;
 using Application.Features.Permissions.Queries.GetAllPermissions;
 using Application.Features.Permissions.Queries.GetAllRoles;
 using Application.Features.Permissions.Queries.GetMyPermissions;
@@ -51,7 +50,8 @@ public class PermissionController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetMyPermissions(CancellationToken cancellationToken)
     {
         var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var result = await mediator.Send(new GetMyPermissionsQuery() { UserId = userIdClaim }, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(new GetMyPermissionsQuery() { UserId = userIdClaim }, cancellationToken)
+            .ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -78,7 +78,8 @@ public class PermissionController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetRolePermissions(string roleName, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetRolePermissionsQuery() { RoleName = roleName }, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(new GetRolePermissionsQuery() { RoleName = roleName }, cancellationToken)
+            .ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -92,10 +93,17 @@ public class PermissionController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(PermissionRoleUpdateResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> UpdateRole(
         string roleName,
-        [FromBody] UpdateRoleCommand model,
+        [FromBody] Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommand model,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new UpdateRoleCommand() { RoleName = roleName, Description = model.Description, Permissions = model.Permissions }, cancellationToken)
+        var result = await mediator.Send(
+            new Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommand()
+            {
+                RoleName = roleName,
+                Description = model.Description,
+                Permissions = model.Permissions
+            },
+            cancellationToken)
             .ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -121,7 +129,15 @@ public class PermissionController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(RoleCreateResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> CreateRole([FromBody] CreateRoleCommand model, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new CreateRoleCommand() { Description = model.Description, Permissions = model.Permissions, RoleName = model.RoleName }, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(
+            new CreateRoleCommand()
+            {
+                Description = model.Description,
+                Permissions = model.Permissions,
+                RoleName = model.RoleName
+            },
+            cancellationToken)
+            .ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -135,7 +151,8 @@ public class PermissionController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(RoleDeleteResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> DeleteRole(string roleName, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new DeleteRoleCommand() { RoleName = roleName }, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(new DeleteRoleCommand() { RoleName = roleName }, cancellationToken)
+            .ConfigureAwait(true);
         return HandleResult(result);
     }
 

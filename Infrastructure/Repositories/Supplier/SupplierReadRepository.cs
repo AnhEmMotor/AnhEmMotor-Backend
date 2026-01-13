@@ -18,7 +18,7 @@ public class SupplierReadRepository(ApplicationDBContext context) : ISupplierRea
         var query = context.GetQuery<SupplierEntity>(mode)
             .GroupJoin(
                 context.GetQuery<Domain.Entities.Input>(DataFetchMode.ActiveOnly)
-                    .Where(i => i.StatusId == InputStatus.Finish),
+                    .Where(i => i.StatusId == Domain.Constants.Input.InputStatus.Finish),
                 supplier => supplier.Id,
                 input => input.SupplierId,
                 (supplier, inputs) => new { supplier, inputs })

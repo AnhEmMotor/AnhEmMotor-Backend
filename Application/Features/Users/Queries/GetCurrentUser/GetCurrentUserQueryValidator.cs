@@ -1,10 +1,4 @@
-﻿using Application.Features.Users.Queries.GetCurrentUser;
-using FluentValidation;
-using Application.Features.Users.Commands.ChangePasswordCurrentUser;
-using Application;
-using Application.Features;
-using Application.Features.Users;
-using Application.Features.Users.Commands;
+﻿using FluentValidation;
 
 namespace Application.Features.Users.Queries.GetCurrentUser;
 

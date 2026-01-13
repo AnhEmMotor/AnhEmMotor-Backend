@@ -20,6 +20,6 @@ public sealed class GetOutputsByUserIdByManagerQueryHandler(IOutputReadRepositor
         return await paginator.ApplyAsync<OutputEntity, OutputResponse>(
             query,
             request.SieveModel!,
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 }

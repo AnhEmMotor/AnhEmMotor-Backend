@@ -20,6 +20,6 @@ public sealed class GetDeletedInputsListQueryHandler(IInputReadRepository reposi
         return await paginator.ApplyAsync<InputEntity, InputResponse>(
             query,
             request.SieveModel!,
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 }

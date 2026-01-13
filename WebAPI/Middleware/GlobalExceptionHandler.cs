@@ -1,7 +1,5 @@
 ﻿using Application.Common.Models;
-using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
-using System.Net;
 
 namespace WebAPI.Middleware;
 
@@ -53,9 +51,7 @@ public partial class GlobalExceptionHandler(IWebHostEnvironment environment, ILo
 
         httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
 
-        await httpContext.Response
-            .WriteAsJsonAsync(errorResponse, cancellationToken)
-            .ConfigureAwait(false);
+        await httpContext.Response.WriteAsJsonAsync(errorResponse, cancellationToken).ConfigureAwait(false);
 
         return true;
     }

@@ -19,6 +19,6 @@ public sealed class GetInputsBySupplierIdQueryHandler(IInputReadRepository repos
         return await paginator.ApplyAsync<InputEntity, InputResponse>(
             query,
             request.SieveModel!,
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 }

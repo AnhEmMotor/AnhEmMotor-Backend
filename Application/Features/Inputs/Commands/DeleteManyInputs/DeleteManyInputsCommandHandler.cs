@@ -11,9 +11,7 @@ public sealed class DeleteManyInputsCommandHandler(
     IInputDeleteRepository deleteRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<DeleteManyInputsCommand, Result>
 {
-    public async Task<Result> Handle(
-        DeleteManyInputsCommand request,
-        CancellationToken cancellationToken)
+    public async Task<Result> Handle(DeleteManyInputsCommand request, CancellationToken cancellationToken)
     {
         var inputs = await readRepository.GetByIdAsync(request.Ids, cancellationToken).ConfigureAwait(false);
 
@@ -23,14 +21,15 @@ public sealed class DeleteManyInputsCommandHandler(
         {
             var foundIds = inputsList.Select(i => i.Id).ToList();
             var missingIds = request.Ids.Except(foundIds).ToList();
-            return Result.Failure(Error.NotFound($"Không tìm thấy {missingIds.Count} phiếu nhập: {string.Join(", ", missingIds)}", "Ids"));
+            return Result.Failure(
+                Error.NotFound($"Không tìm thấy {missingIds.Count} phiếu nhập: {string.Join(", ", missingIds)}", "Ids"));
         }
 
         var errors = new List<Error>();
 
         foreach(var output in inputsList)
         {
-            if(Domain.Constants.InputStatus.IsCannotDelete(output.StatusId))
+            if(Domain.Constants.Input.InputStatus.IsCannotDelete(output.StatusId))
             {
                 errors.Add(Error.BadRequest($"Phiếu nhập với Id {output.Id} đã bị xóa trước đó", "Ids"));
             }

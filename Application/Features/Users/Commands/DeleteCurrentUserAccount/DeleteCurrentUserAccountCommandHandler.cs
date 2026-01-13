@@ -39,7 +39,8 @@ public class DeleteCurrentUserAccountCommandHandler(
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        var (succeeded, errors) = await userDeleteRepository.SoftDeleteUserAsync(user, cancellationToken).ConfigureAwait(false);
+        var (succeeded, errors) = await userDeleteRepository.SoftDeleteUserAsync(user, cancellationToken)
+            .ConfigureAwait(false);
         if(!succeeded)
         {
             var validationErrors = errors.Select(e => Error.Validation(e)).ToList();

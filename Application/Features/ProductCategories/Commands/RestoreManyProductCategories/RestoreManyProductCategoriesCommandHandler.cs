@@ -42,8 +42,7 @@ public sealed class RestoreManyProductCategoriesCommandHandler(
             if(!allCategoryMap.ContainsKey(id))
             {
                 errorDetails.Add(Error.NotFound($"Product category with Id {id} not found.", "Id"));
-            } 
-            else if(!deletedCategorySet.Contains(id))
+            } else if(!deletedCategorySet.Contains(id))
             {
                 errorDetails.Add(Error.BadRequest($"Product category with Id {id} is not deleted.", "Id"));
             }

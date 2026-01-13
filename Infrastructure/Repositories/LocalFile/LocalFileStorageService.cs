@@ -3,7 +3,6 @@ using Application.Interfaces.Repositories.LocalFile;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Formats.Webp;
 using SixLabors.ImageSharp.Processing;
 
@@ -12,40 +11,37 @@ namespace Infrastructure.Repositories.LocalFile;
 public class LocalFileStorageService(IWebHostEnvironment environment, IHttpContextAccessor httpContextAccessor) : IFileStorageService
 {
     private const int DefaultMaxWidth = 1200;
-    private const long MaxFileSize = 10 * 1024 * 1024;
     private readonly string _uploadFolder = Path.Combine(environment.WebRootPath, "uploads");
 
-    private readonly List<string> _allowedMimeTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+    private readonly List<string> _allowedMimeTypes = [ "image/jpeg", "image/png", "image/gif", "image/webp" ];
 
-    public async Task<Result<FileUpload>> SaveFileAsync(
-    Stream file,
-    CancellationToken cancellationToken)
+    public async Task<Result<FileUpload>> SaveFileAsync(Stream file, CancellationToken cancellationToken)
     {
         try
         {
-            if (file == null || file.Length == 0)
+            if(file == null || file.Length == 0)
             {
                 return Result<FileUpload>.Failure("File stream is empty");
             }
 
-            if (!Directory.Exists(_uploadFolder))
+            if(!Directory.Exists(_uploadFolder))
             {
                 Directory.CreateDirectory(_uploadFolder);
             }
 
-            if (file.CanSeek)
+            if(file.CanSeek)
             {
                 file.Position = 0;
             }
 
             var format = await Image.DetectFormatAsync(file, cancellationToken).ConfigureAwait(false);
 
-            if (format == null)
+            if(format == null)
             {
                 return Result<FileUpload>.Failure("Unable to detect image format");
             }
 
-            if (!_allowedMimeTypes.Contains(format.DefaultMimeType))
+            if(!_allowedMimeTypes.Contains(format.DefaultMimeType))
             {
                 return Result<FileUpload>.Failure($"Format {format.DefaultMimeType} is not supported");
             }
@@ -53,15 +49,15 @@ public class LocalFileStorageService(IWebHostEnvironment environment, IHttpConte
             var storageFileName = $"{Guid.NewGuid()}.webp";
             var fullPath = Path.Combine(_uploadFolder, storageFileName);
 
-            using var compressedStream = await CompressImageAsync(file, 75, DefaultMaxWidth, cancellationToken).ConfigureAwait(false);
+            using var compressedStream = await CompressImageAsync(file, 75, DefaultMaxWidth, cancellationToken)
+                .ConfigureAwait(false);
             var compressedSize = compressedStream.Length;
 
             using var fileStream = new FileStream(fullPath, FileMode.Create);
             await compressedStream.CopyToAsync(fileStream, cancellationToken).ConfigureAwait(false);
 
             return new FileUpload(storageFileName, ".webp", compressedSize);
-        }
-        catch (Exception ex)
+        } catch(Exception ex)
         {
             return Result<FileUpload>.Failure(ex.Message);
         }
@@ -70,14 +66,13 @@ public class LocalFileStorageService(IWebHostEnvironment environment, IHttpConte
     public bool DeleteFile(string storagePath)
     {
         var fullPath = Path.Combine(_uploadFolder, storagePath);
-        if (File.Exists(fullPath))
+        if(File.Exists(fullPath))
         {
             try
             {
                 File.Delete(fullPath);
                 return true;
-            }
-            catch
+            } catch
             {
                 return false;
             }
@@ -88,8 +83,8 @@ public class LocalFileStorageService(IWebHostEnvironment environment, IHttpConte
     public bool DeleteFile(IEnumerable<string> storagePaths)
     {
         var allDeleted = true;
-        foreach (var path in storagePaths)
-            if (!DeleteFile(path))
+        foreach(var path in storagePaths)
+            if(!DeleteFile(path))
                 allDeleted = false;
         return allDeleted;
     }
@@ -97,7 +92,7 @@ public class LocalFileStorageService(IWebHostEnvironment environment, IHttpConte
     public string GetPublicUrl(string storagePath)
     {
         var request = httpContextAccessor.HttpContext?.Request;
-        if (request == null)
+        if(request == null)
             return $"/api/v1/mediafile/view-image/{storagePath}";
         return $"{request.Scheme}://{request.Host.Value}/api/v1/mediafile/view-image/{storagePath}";
     }
@@ -107,7 +102,7 @@ public class LocalFileStorageService(IWebHostEnvironment environment, IHttpConte
         CancellationToken cancellationToken)
     {
         var fullPath = Path.Combine(_uploadFolder, storagePath);
-        if (!File.Exists(fullPath))
+        if(!File.Exists(fullPath))
             return null;
 
         var fileBytes = await File.ReadAllBytesAsync(fullPath, cancellationToken).ConfigureAwait(false);
@@ -115,20 +110,22 @@ public class LocalFileStorageService(IWebHostEnvironment environment, IHttpConte
     }
 
     public async Task<Stream> ReadImageAsync(Stream inputStream, int? width, CancellationToken cancellationToken)
-    {
-        return await CompressImageAsync(inputStream, 75, width, cancellationToken).ConfigureAwait(false);
-    }
+    { return await CompressImageAsync(inputStream, 75, width, cancellationToken).ConfigureAwait(false); }
 
-    public async Task<Stream> CompressImageAsync(Stream inputStream, int quality, int? maxWidth, CancellationToken cancellationToken)
+    public async Task<Stream> CompressImageAsync(
+        Stream inputStream,
+        int quality,
+        int? maxWidth,
+        CancellationToken cancellationToken)
     {
-        if (inputStream.CanSeek)
+        if(inputStream.CanSeek)
             inputStream.Position = 0;
 
         using var image = await Image.LoadAsync(inputStream, cancellationToken).ConfigureAwait(false);
 
         var targetWidth = maxWidth ?? DefaultMaxWidth;
 
-        if (image.Width > targetWidth)
+        if(image.Width > targetWidth)
         {
             var newHeight = (int)((double)targetWidth / image.Width * image.Height);
             image.Mutate(x => x.Resize(targetWidth, newHeight));

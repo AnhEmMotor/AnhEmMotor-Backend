@@ -20,8 +20,8 @@ using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
-using static Domain.Constants.Permission.PermissionsList;
 using WebAPI.Controllers.Base;
+using static Domain.Constants.Permission.PermissionsList;
 
 namespace WebAPI.Controllers.V1;
 
@@ -71,7 +71,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetInputById(int id, CancellationToken cancellationToken)
     {
-        var query = new GetInputByIdQuery() { Id  = id };
+        var query = new GetInputByIdQuery() { Id = id };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -87,7 +87,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
     {
-        var query = new GetInputsBySupplierIdQuery() {  SieveModel = sieveModel, SupplierId = supplierId};
+        var query = new GetInputsBySupplierIdQuery() { SieveModel = sieveModel, SupplierId = supplierId };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -189,7 +189,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteInput(int id, CancellationToken cancellationToken)
     {
-        var command = new DeleteInputCommand() { Id = id};
+        var command = new DeleteInputCommand() { Id = id };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -219,7 +219,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RestoreInput(int id, CancellationToken cancellationToken)
     {
-        var command = new RestoreInputCommand() { Id = id};
+        var command = new RestoreInputCommand() { Id = id };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }

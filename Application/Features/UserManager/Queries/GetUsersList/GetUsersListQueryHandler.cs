@@ -12,7 +12,7 @@ public sealed class GetUsersListQueryHandler(IUserReadRepository userReadReposit
         GetUsersListQuery request,
         CancellationToken cancellationToken)
     {
-        var result = await userReadRepository.GetPagedListAsync(request.SieveModel!, cancellationToken);
+        var result = await userReadRepository.GetPagedListAsync(request.SieveModel!, cancellationToken).ConfigureAwait(false);
         return result;
     }
 }

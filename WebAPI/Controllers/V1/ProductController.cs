@@ -24,8 +24,8 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
-using static Domain.Constants.Permission.PermissionsList;
 using WebAPI.Controllers.Base;
+using static Domain.Constants.Permission.PermissionsList;
 
 namespace WebAPI.Controllers.V1;
 
@@ -205,7 +205,8 @@ public class ProductController(ISender sender) : ApiController
     [ProducesResponseType(typeof(SlugAvailabilityResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> CheckSlugAvailability([FromQuery] string slug, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new CheckSlugAvailabilityQuery() { Slug = slug }, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(new CheckSlugAvailabilityQuery() { Slug = slug }, cancellationToken)
+            .ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -239,8 +240,7 @@ public class ProductController(ISender sender) : ApiController
         CancellationToken cancellationToken)
     {
         var command = request with { Id = id };
-        var result = await sender.Send(command, cancellationToken)
-            .ConfigureAwait(true);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -315,7 +315,9 @@ public class ProductController(ISender sender) : ApiController
         [FromBody] UpdateProductPriceCommand request,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new UpdateProductPriceCommand() { Id = id, Price = request.Price}, cancellationToken)
+        var result = await sender.Send(
+            new UpdateProductPriceCommand() { Id = id, Price = request.Price },
+            cancellationToken)
             .ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -389,7 +391,9 @@ public class ProductController(ISender sender) : ApiController
         [FromBody] UpdateProductStatusCommand request,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new UpdateProductStatusCommand() { Id = id, StatusId = request.StatusId }, cancellationToken)
+        var result = await sender.Send(
+            new UpdateProductStatusCommand() { Id = id, StatusId = request.StatusId },
+            cancellationToken)
             .ConfigureAwait(true);
         return HandleResult(result);
     }

@@ -1,10 +1,10 @@
+using Application.ApiContracts.Brand.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
 using Domain.Constants;
 using Domain.Entities;
 using Mapster;
-using Application.ApiContracts.Brand.Responses;
 using MediatR;
 
 namespace Application.Features.Brands.Commands.RestoreManyBrands;
@@ -27,15 +27,15 @@ public sealed class RestoreManyBrandsCommandHandler(
         var brandsToRestore = new List<Brand>();
         var errors = new List<Error>();
 
-        foreach (var id in uniqueIds)
+        foreach(var id in uniqueIds)
         {
-            if (!existingBrandsMap.TryGetValue(id, out var brand))
+            if(!existingBrandsMap.TryGetValue(id, out var brand))
             {
                 errors.Add(Error.NotFound($"Brand with Id {id} not found.", "Id"));
                 continue;
             }
 
-            if (brand.DeletedAt == null)
+            if(brand.DeletedAt == null)
             {
                 errors.Add(Error.BadRequest($"Brand with Id {id} is not deleted.", "Id"));
                 continue;
@@ -44,16 +44,16 @@ public sealed class RestoreManyBrandsCommandHandler(
             brandsToRestore.Add(brand);
         }
 
-        if (errors.Count > 0)
+        if(errors.Count > 0)
         {
-            if (typeof(Result<List<BrandResponse>?>).GetMethod("Failure", [typeof(List<Error>)]) != null)
+            if(typeof(Result<List<BrandResponse>?>).GetMethod("Failure", [ typeof(List<Error>) ]) != null)
             {
-                 return (Result<List<BrandResponse>?>)(object)Result.Failure(errors); 
+                return (Result<List<BrandResponse>?>)(object)Result.Failure(errors);
             }
-            return (Result<List<BrandResponse>?>)(object)Result.Failure(errors[0]); 
+            return (Result<List<BrandResponse>?>)(object)Result.Failure(errors[0]);
         }
 
-        if (brandsToRestore.Count > 0)
+        if(brandsToRestore.Count > 0)
         {
             updateRepository.Restore(brandsToRestore);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

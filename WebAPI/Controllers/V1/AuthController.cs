@@ -33,14 +33,9 @@ public class AuthController(IMediator mediator) : ApiController
     [SwaggerOperation(Summary = "Đăng ký tài khoản mới", Description = "Tạo 1 tài khoản mới (với email và password)")]
     [ProducesResponseType(typeof(RegistrationSuccessResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Register(
-        [FromBody] RegisterCommand command,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> Register([FromBody] RegisterCommand command, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(
-            command,
-            cancellationToken)
-            .ConfigureAwait(false);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
 
         return HandleResult(result);
     }
@@ -52,12 +47,9 @@ public class AuthController(IMediator mediator) : ApiController
     [AnonymousOnly]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> Login(
-        [FromBody] LoginCommand command,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> Login([FromBody] LoginCommand command, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(command, cancellationToken)
-            .ConfigureAwait(true);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
 
         return HandleResult(result);
     }
@@ -73,8 +65,11 @@ public class AuthController(IMediator mediator) : ApiController
     public async Task<IActionResult> RefreshToken(CancellationToken cancellationToken)
     {
         var refreshToken = Request.Cookies["refreshToken"];
-        var accessToken = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
-        var result = await mediator.Send(new RefreshTokenCommand() { RefreshToken = refreshToken, AccessToken = accessToken }, cancellationToken).ConfigureAwait(true);
+        var accessToken = Request.Headers.Authorization.ToString().Replace("Bearer ", string.Empty);
+        var result = await mediator.Send(
+            new RefreshTokenCommand() { RefreshToken = refreshToken, AccessToken = accessToken },
+            cancellationToken)
+            .ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -87,11 +82,10 @@ public class AuthController(IMediator mediator) : ApiController
     public async Task<IActionResult> Logout(CancellationToken cancellationToken)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var result = await mediator.Send(new LogoutCommand() { UserId = userId }, cancellationToken).ConfigureAwait(true);
-        // Assuming LogoutCommand returns Result/Result<Unit>
-        // Manually creating success response if needed, or if LogoutCommand returns Result
-        // If LogoutCommand returns Result:
-        if (result.IsFailure) return HandleResult(result);
+        var result = await mediator.Send(new LogoutCommand() { UserId = userId }, cancellationToken)
+            .ConfigureAwait(true);
+        if(result.IsFailure)
+            return HandleResult(result);
 
         Response.Cookies.Delete("refreshToken");
         return Ok(new LogoutSuccessResponse());
@@ -121,11 +115,7 @@ public class AuthController(IMediator mediator) : ApiController
     {
         return StatusCode(
             501,
-            new ErrorResponse()
-            {
-                Errors =
-                    [ new ErrorDetail() { Message = "Facebook login not implemented yet." } ]
-            });
+            new ErrorResponse() { Errors = [ new ErrorDetail() { Message = "Facebook login not implemented yet." } ] });
     }
 
     /// <summary>

@@ -311,7 +311,7 @@ public class PermissionAndRole
     {
         // Arrange
         var roleName = "Editor";
-        var request = new UpdateRoleCommand
+        var request = new Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommand
         {
             Description = "Updated Description"
         };
@@ -324,7 +324,7 @@ public class PermissionAndRole
 
         // Đảm bảo bọc đúng vào Result wrapper (như bài trước đã nói)
         _mediatorMock
-            .Setup(m => m.Send(It.IsAny<UpdateRoleCommand>(), It.IsAny<CancellationToken>()))
+            .Setup(m => m.Send(It.IsAny<Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PermissionRoleUpdateResponse>.Success(expectedResponse));
 
         // Act

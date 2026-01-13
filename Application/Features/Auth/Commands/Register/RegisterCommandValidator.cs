@@ -16,7 +16,8 @@ public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
             .MustAsync(
                 async (username, cancellation) =>
                 {
-                    var existingUser = await userReadRepository.FindUserByUsernameAsync(username!, cancellation).ConfigureAwait(false);
+                    var existingUser = await userReadRepository.FindUserByUsernameAsync(username!, cancellation)
+                        .ConfigureAwait(false);
                     return existingUser is null;
                 })
             .WithMessage("Username already exists.");
@@ -27,7 +28,8 @@ public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
             .MustAsync(
                 async (email, cancellation) =>
                 {
-                    var existingUser = await userReadRepository.FindUserByEmailAsync(email, cancellation).ConfigureAwait(false);
+                    var existingUser = await userReadRepository.FindUserByEmailAsync(email, cancellation)
+                        .ConfigureAwait(false);
                     return existingUser is null;
                 })
             .WithMessage("Email already exists.");

@@ -20,7 +20,7 @@ public sealed class LoginCommandHandler(
             cancellationToken)
             .ConfigureAwait(false);
 
-        if (authResult.IsFailure)
+        if(authResult.IsFailure)
         {
             return authResult.Error!;
         }
@@ -29,7 +29,7 @@ public sealed class LoginCommandHandler(
 
         var expiryAccessTokenMinutes = tokenManagerService.GetAccessTokenExpiryMinutes();
         var expiryAccessTokenDate = DateTimeOffset.UtcNow.AddMinutes(expiryAccessTokenMinutes);
-        
+
         var accessToken = tokenManagerService.CreateAccessToken(userDto, expiryAccessTokenDate);
 
         var refreshToken = tokenManagerService.CreateRefreshToken();

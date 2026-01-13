@@ -7,9 +7,12 @@ namespace Application.Features.UserManager.Queries.GetUserById;
 
 public class GetUserByIdQueryHandler(IUserReadRepository userReadRepository) : IRequestHandler<GetUserByIdQuery, Result<UserDTOForManagerResponse>>
 {
-    public async Task<Result<UserDTOForManagerResponse>> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<UserDTOForManagerResponse>> Handle(
+        GetUserByIdQuery request,
+        CancellationToken cancellationToken)
     {
-        var user = await userReadRepository.FindUserByIdAsync(request.UserId!.Value, cancellationToken).ConfigureAwait(false);
+        var user = await userReadRepository.FindUserByIdAsync(request.UserId!.Value, cancellationToken)
+            .ConfigureAwait(false);
         if(user is null)
         {
             return Error.NotFound("User not found.");

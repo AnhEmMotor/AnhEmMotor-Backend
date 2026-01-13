@@ -11,9 +11,7 @@ public sealed class DeleteSupplierCommandHandler(
     ISupplierDeleteRepository deleteRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<DeleteSupplierCommand, Result>
 {
-    public async Task<Result> Handle(
-        DeleteSupplierCommand request,
-        CancellationToken cancellationToken)
+    public async Task<Result> Handle(DeleteSupplierCommand request, CancellationToken cancellationToken)
     {
         var supplier = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
 

@@ -61,7 +61,11 @@ public class SalesOrdersController(IMediator mediator) : ApiController
                 });
         }
 
-        var query = new Application.Features.Outputs.Queries.GetOutputsByUserId.GetOutputsByUserIdQuery() { BuyerId = buyerId, SieveModel = sieveModel };
+        var query = new Application.Features.Outputs.Queries.GetOutputsByUserId.GetOutputsByUserIdQuery()
+        {
+            BuyerId = buyerId,
+            SieveModel = sieveModel
+        };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -78,7 +82,11 @@ public class SalesOrdersController(IMediator mediator) : ApiController
         Guid id,
         CancellationToken cancellationToken)
     {
-        var query = new Application.Features.Outputs.Queries.GetOutputsByUserId.GetOutputsByUserIdQuery() { BuyerId = id, SieveModel = sieveModel};
+        var query = new Application.Features.Outputs.Queries.GetOutputsByUserId.GetOutputsByUserIdQuery()
+        {
+            BuyerId = id,
+            SieveModel = sieveModel
+        };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }

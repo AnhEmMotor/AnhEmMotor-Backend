@@ -20,9 +20,7 @@ public sealed class CreateInputCommandHandler(
     IProductVariantReadRepository variantRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateInputCommand, Result<InputResponse?>>
 {
-    public async Task<Result<InputResponse?>> Handle(
-        CreateInputCommand request,
-        CancellationToken cancellationToken)
+    public async Task<Result<InputResponse?>> Handle(CreateInputCommand request, CancellationToken cancellationToken)
     {
         if(request.SupplierId.HasValue)
         {
@@ -63,7 +61,7 @@ public sealed class CreateInputCommandHandler(
         }
 
         var input = request.Adapt<InputEntity>();
-        input.StatusId = InputStatus.Working;
+        input.StatusId = Domain.Constants.Input.InputStatus.Working;
         input.InputInfos = [ .. request.Products
             .Select(
                 p =>

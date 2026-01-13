@@ -23,7 +23,8 @@ public class ChangePasswordCommandHandler(
             return Error.Forbidden("Invalid user token.");
         }
 
-        var user = await userReadRepository.FindUserByIdAsync(request.UserId!.Value, cancellationToken).ConfigureAwait(false);
+        var user = await userReadRepository.FindUserByIdAsync(request.UserId!.Value, cancellationToken)
+            .ConfigureAwait(false);
         if(user is null)
         {
             return Error.NotFound("User not found.");

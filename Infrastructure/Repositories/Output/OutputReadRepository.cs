@@ -86,7 +86,7 @@ public class OutputReadRepository(ApplicationDBContext context) : IOutputReadRep
 
     public async Task<long> GetStockQuantityByVariantIdAsync(int variantId, CancellationToken cancellationToken)
     {
-        var validStatusIds = InputStatus.FinishInputValues;
+        var validStatusIds = Domain.Constants.Input.InputStatus.FinishInputValues;
 
         var currentStock = await context.InputInfos
             .AsNoTracking()

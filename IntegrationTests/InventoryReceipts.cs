@@ -55,7 +55,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var content = await response.Content.ReadFromJsonAsync<InputResponse>();
         content.Should().NotBeNull();
         content!.Id.Should().NotBeNull();
-        content.StatusId.Should().Be(Domain.Constants.InputStatus.Working);
+        content.StatusId.Should().Be(Domain.Constants.Input.InputStatus.Working);
         content.Products.Should().HaveCount(1);
         content.Products[0].Count.Should().Be(10);
         content.Products[0].InputPrice.Should().Be(100000);
@@ -66,7 +66,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var input = db.InputReceipts.FirstOrDefault(i => i.Id == content.Id);
         input.Should().NotBeNull();
-        input!.StatusId.Should().Be(Domain.Constants.InputStatus.Working);
+        input!.StatusId.Should().Be(Domain.Constants.Input.InputStatus.Working);
     }
 
     [Fact(DisplayName = "INPUT_002 - Tạo phiếu nhập với nhiều sản phẩm và tính toán chính xác tổng tiền")]
@@ -247,7 +247,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content.ReadFromJsonAsync<Domain.Primitives.PagedResult<InputResponse>>();
         content.Should().NotBeNull();
-        content!.Items.Should().OnlyContain(i => i.StatusId == Domain.Constants.InputStatus.Working);
+        content!.Items.Should().OnlyContain(i => i.StatusId == Domain.Constants.Input.InputStatus.Working);
     }
 
     [Fact(DisplayName = "INPUT_018 - Lấy danh sách phiếu nhập với sort theo InputDate descending")]
@@ -355,7 +355,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
 
         // Update status to finished
         await _client.PatchAsJsonAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}/status",
-            new UpdateInputStatusCommand { StatusId = Domain.Constants.InputStatus.Finish });
+            new UpdateInputStatusCommand { StatusId = Domain.Constants.Input.InputStatus.Finish });
 
         var updateRequest = new UpdateInputCommand
         {
@@ -389,7 +389,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
 
         // Update status to cancelled
         await _client.PatchAsJsonAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}/status",
-            new UpdateInputStatusCommand { StatusId = Domain.Constants.InputStatus.Cancel });
+            new UpdateInputStatusCommand { StatusId = Domain.Constants.Input.InputStatus.Cancel });
 
         var updateRequest = new UpdateInputCommand
         {
@@ -421,7 +421,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest);
         var createdInput = await createResponse.Content.ReadFromJsonAsync<InputResponse>();
 
-        var statusRequest = new UpdateInputStatusCommand { StatusId = Domain.Constants.InputStatus.Finish };
+        var statusRequest = new UpdateInputStatusCommand { StatusId = Domain.Constants.Input.InputStatus.Finish };
 
         // Act
         var response = await _client.PatchAsJsonAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}/status", statusRequest);
@@ -429,13 +429,13 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content.ReadFromJsonAsync<InputResponse>();
-        content!.StatusId.Should().Be(Domain.Constants.InputStatus.Finish);
+        content!.StatusId.Should().Be(Domain.Constants.Input.InputStatus.Finish);
 
         // Verify DB
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var input = db.InputReceipts.FirstOrDefault(i => i.Id == createdInput.Id);
-        input!.StatusId.Should().Be(Domain.Constants.InputStatus.Finish);
+        input!.StatusId.Should().Be(Domain.Constants.Input.InputStatus.Finish);
         input.ConfirmedBy.Should().NotBeNull();
     }
 
@@ -455,7 +455,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest);
         var createdInput = await createResponse.Content.ReadFromJsonAsync<InputResponse>();
 
-        var statusRequest = new UpdateInputStatusCommand { StatusId = Domain.Constants.InputStatus.Cancel };
+        var statusRequest = new UpdateInputStatusCommand { StatusId = Domain.Constants.Input.InputStatus.Cancel };
 
         // Act
         var response = await _client.PatchAsJsonAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}/status", statusRequest);
@@ -463,7 +463,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content.ReadFromJsonAsync<InputResponse>();
-        content!.StatusId.Should().Be(Domain.Constants.InputStatus.Cancel);
+        content!.StatusId.Should().Be(Domain.Constants.Input.InputStatus.Cancel);
     }
 
     [Fact(DisplayName = "INPUT_032 - Cập nhật trạng thái nhiều phiếu nhập cùng lúc")]
@@ -491,7 +491,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var statusRequest = new UpdateManyInputStatusCommand
         {
             Ids = ids,
-            StatusId = Domain.Constants.InputStatus.Finish
+            StatusId = Domain.Constants.Input.InputStatus.Finish
         };
 
         // Act
@@ -506,7 +506,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         foreach (var id in ids)
         {
             var input = db.InputReceipts.FirstOrDefault(i => i.Id == id);
-            input!.StatusId.Should().Be(Domain.Constants.InputStatus.Finish);
+            input!.StatusId.Should().Be(Domain.Constants.Input.InputStatus.Finish);
         }
     }
 
@@ -529,7 +529,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var statusRequest = new UpdateManyInputStatusCommand
         {
             Ids = [createdInput!.Id!.Value, 9999],
-            StatusId = Domain.Constants.InputStatus.Finish
+            StatusId = Domain.Constants.Input.InputStatus.Finish
         };
 
         // Act
@@ -700,7 +700,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var clonedInput = await response.Content.ReadFromJsonAsync<InputResponse>();
         clonedInput!.Id.Should().NotBe(createdInput.Id);
-        clonedInput.StatusId.Should().Be(Domain.Constants.InputStatus.Working);
+        clonedInput.StatusId.Should().Be(Domain.Constants.Input.InputStatus.Working);
         clonedInput.SupplierId.Should().Be(createdInput.SupplierId);
     }
 
@@ -810,7 +810,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest);
         var createdInput = await createResponse.Content.ReadFromJsonAsync<InputResponse>();
 
-        var statusRequest = new UpdateInputStatusCommand { StatusId = Domain.Constants.InputStatus.Finish };
+        var statusRequest = new UpdateInputStatusCommand { StatusId = Domain.Constants.Input.InputStatus.Finish };
 
         // Act
         var response = await _client.PatchAsJsonAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}/status", statusRequest);
@@ -837,6 +837,6 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content.ReadFromJsonAsync<Domain.Primitives.PagedResult<InputResponse>>();
         content.Should().NotBeNull();
-        content!.Items.Should().OnlyContain(i => i.StatusId == Domain.Constants.InputStatus.Working && i.SupplierId == 1);
+        content!.Items.Should().OnlyContain(i => i.StatusId == Domain.Constants.Input.InputStatus.Working && i.SupplierId == 1);
     }
 }

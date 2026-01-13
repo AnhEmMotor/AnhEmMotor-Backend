@@ -1,5 +1,4 @@
 using Application.ApiContracts.Output.Requests;
-using Application.Features.Outputs.Commands.CreateOutput;
 using FluentValidation;
 
 namespace Application.Features.Outputs.Commands.CreateOutputByManager
@@ -19,16 +18,16 @@ namespace Application.Features.Outputs.Commands.CreateOutputByManager
 
         private bool HaveUniqueProducts(List<CreateOutputInfoRequest> products)
         {
-            if (products == null)
+            if(products == null)
                 return true;
 
             var productIds = new HashSet<int>();
 
-            foreach (var item in products)
+            foreach(var item in products)
             {
-                if (item.ProductId.HasValue)
+                if(item.ProductId.HasValue)
                 {
-                    if (!productIds.Add(item.ProductId.Value))
+                    if(!productIds.Add(item.ProductId.Value))
                     {
                         return false;
                     }

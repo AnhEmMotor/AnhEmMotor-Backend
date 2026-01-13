@@ -2,7 +2,6 @@ using Application.ApiContracts.Permission.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.Role;
 using Application.Interfaces.Services;
-using Domain.Entities;
 using MediatR;
 
 namespace Application.Features.Permissions.Commands.DeleteRole;
@@ -17,7 +16,7 @@ public class DeleteRoleCommandHandler(
         var roleName = request.RoleName;
 
         var role = await roleReadRepository.GetRoleByNameAsync(roleName!).ConfigureAwait(false);
-        if (role is null)
+        if(role is null)
         {
             return Error.BadRequest("Role not found.");
         }
@@ -31,7 +30,8 @@ public class DeleteRoleCommandHandler(
         var usersWithRole = await roleReadRepository.GetUsersInRoleAsync(roleName!).ConfigureAwait(false);
         if(usersWithRole.Count > 0)
         {
-            return Error.BadRequest($"Cannot delete role '{roleName}' because {usersWithRole.Count} user(s) have this role.");
+            return Error.BadRequest(
+                $"Cannot delete role '{roleName}' because {usersWithRole.Count} user(s) have this role.");
         }
 
         cancellationToken.ThrowIfCancellationRequested();

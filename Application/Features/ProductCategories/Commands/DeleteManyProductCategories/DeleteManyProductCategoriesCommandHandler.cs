@@ -12,9 +12,7 @@ public sealed class DeleteManyProductCategoriesCommandHandler(
     IProductCategoryDeleteRepository deleteRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<DeleteManyProductCategoriesCommand, Result>
 {
-    public async Task<Result> Handle(
-        DeleteManyProductCategoriesCommand request,
-        CancellationToken cancellationToken)
+    public async Task<Result> Handle(DeleteManyProductCategoriesCommand request, CancellationToken cancellationToken)
     {
         var uniqueIds = request.Ids.Distinct().ToList();
         var errorDetails = new List<Error>();
@@ -31,8 +29,7 @@ public sealed class DeleteManyProductCategoriesCommandHandler(
             if(!allCategoryMap.ContainsKey(id))
             {
                 errorDetails.Add(Error.NotFound($"Product category with Id {id} not found.", "Id"));
-            } 
-            else if(!activeCategorySet.Contains(id))
+            } else if(!activeCategorySet.Contains(id))
             {
                 errorDetails.Add(Error.BadRequest($"Product category with Id {id} has already been deleted.", "Id"));
             }

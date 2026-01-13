@@ -26,9 +26,7 @@ namespace Application.Interfaces.Repositories.User
             string newPassword,
             CancellationToken cancellationToken = default);
 
-        public Task ClearRefreshTokenAsync(
-            Guid userId,
-            CancellationToken cancellationToken = default);
+        public Task ClearRefreshTokenAsync(Guid userId, CancellationToken cancellationToken = default);
 
         public Task<(bool Succeeded, IEnumerable<string> Errors)> RemoveUserFromRolesAsync(
             ApplicationUser user,

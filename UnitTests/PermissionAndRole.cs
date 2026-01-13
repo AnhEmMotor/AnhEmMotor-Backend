@@ -488,8 +488,8 @@ public class PermissionAndRole
         roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("Manager"))
             .ReturnsAsync(role);
 
-        var handler = new UpdateRoleCommandHandler(roleReadRepoMock.Object, roleUpdateRepoMock.Object, permissionRepoMock.Object, unitOfWorkMock.Object);
-        var command = new UpdateRoleCommand() { RoleName = "Manager",
+        var handler = new Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommandHandler(roleReadRepoMock.Object, roleUpdateRepoMock.Object, permissionRepoMock.Object, unitOfWorkMock.Object);
+        var command = new Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommand() { RoleName = "Manager",
             Description = "Updated description",
             Permissions = null!
         };
@@ -534,9 +534,9 @@ public class PermissionAndRole
             It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(newPermissions);
 
-        var handler = new UpdateRoleCommandHandler(roleReadRepoMock.Object, roleUpdateRepoMock.Object, permissionRepoMock.Object, unitOfWorkMock.Object);
+        var handler = new Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommandHandler(roleReadRepoMock.Object, roleUpdateRepoMock.Object, permissionRepoMock.Object, unitOfWorkMock.Object);
         
-        var command = new UpdateRoleCommand()
+        var command = new Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommand()
         {
             RoleName = "Manager",
             Description = null,
@@ -567,8 +567,8 @@ public class PermissionAndRole
         roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("Manager"))
             .ReturnsAsync(role);
 
-        var handler = new UpdateRoleCommandHandler(roleReadRepoMock.Object, roleUpdateRepoMock.Object, permissionRepoMock.Object, unitOfWorkMock.Object);
-        var command = new UpdateRoleCommand()
+        var handler = new Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommandHandler(roleReadRepoMock.Object, roleUpdateRepoMock.Object, permissionRepoMock.Object, unitOfWorkMock.Object);
+        var command = new Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommand()
         {
             RoleName = "Manager",
             Description = null,
@@ -596,8 +596,8 @@ public class PermissionAndRole
         roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("NonExistentRole"))
             .ReturnsAsync((ApplicationRole?)null);
 
-        var handler = new UpdateRoleCommandHandler(roleReadRepoMock.Object, roleUpdateRepoMock.Object, permissionRepoMock.Object, unitOfWorkMock.Object);
-        var command = new UpdateRoleCommand()
+        var handler = new Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommandHandler(roleReadRepoMock.Object, roleUpdateRepoMock.Object, permissionRepoMock.Object, unitOfWorkMock.Object);
+        var command = new Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommand()
         {
             RoleName = "NonExistentRole",
             Description = "Test"

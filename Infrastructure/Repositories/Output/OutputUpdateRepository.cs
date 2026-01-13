@@ -40,7 +40,7 @@ public class OutputUpdateRepository(ApplicationDBContext context) : IOutputUpdat
 
     private Task<List<InputInfo>> GetAvailableBatchesAsync(int productId, CancellationToken cancellationToken)
     {
-        var finishedStatuses = Domain.Constants.InputStatus.FinishInputValues;
+        var finishedStatuses = Domain.Constants.Input.InputStatus.FinishInputValues;
 
         return context.InputInfos
             .Include(ii => ii.InputReceipt)

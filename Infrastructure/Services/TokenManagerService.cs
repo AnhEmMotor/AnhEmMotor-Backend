@@ -1,5 +1,4 @@
 using Application.ApiContracts.Auth.Responses;
-using Application.Common.Constants;
 using Application.Interfaces.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -27,16 +26,23 @@ public class TokenManagerService : ITokenManagerService
         var accessTokenExpiry = configuration["Jwt:AccessTokenExpiryInMinutes"];
         var refreshTokenExpiry = configuration["Jwt:RefreshTokenExpiryInDays"];
 
-        if (string.IsNullOrEmpty(jwtKey)) throw new InvalidOperationException("Jwt:Key is missing.");
-        if (string.IsNullOrEmpty(issuer)) throw new InvalidOperationException("Jwt:Issuer is missing.");
-        if (string.IsNullOrEmpty(audience)) throw new InvalidOperationException("Jwt:Audience is missing.");
+        if(string.IsNullOrEmpty(jwtKey))
+            throw new InvalidOperationException("Jwt:Key is missing.");
+        if(string.IsNullOrEmpty(issuer))
+            throw new InvalidOperationException("Jwt:Issuer is missing.");
+        if(string.IsNullOrEmpty(audience))
+            throw new InvalidOperationException("Jwt:Audience is missing.");
 
         _authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
         _issuer = issuer;
         _audience = audience;
 
-        _accessTokenExpiryMinutes = int.TryParse(accessTokenExpiry, out var accessMinutes) && accessMinutes > 0 ? accessMinutes : 15;
-        _refreshTokenExpiryDays = int.TryParse(refreshTokenExpiry, out var refreshDays) && refreshDays > 0 ? refreshDays : 7;
+        _accessTokenExpiryMinutes = int.TryParse(accessTokenExpiry, out var accessMinutes) && accessMinutes > 0
+            ? accessMinutes
+            : 15;
+        _refreshTokenExpiryDays = int.TryParse(refreshTokenExpiry, out var refreshDays) && refreshDays > 0
+            ? refreshDays
+            : 7;
     }
 
     public string CreateAccessToken(UserAuth user, DateTimeOffset expiryTime)
@@ -47,20 +53,24 @@ public class TokenManagerService : ITokenManagerService
             new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
             new(JwtRegisteredClaimNames.Name, user.UserName ?? string.Empty),
-            new(ClaimJWTPayload.FullName, user.FullName ?? string.Empty),
-            new(ClaimJWTPayload.Status, user.Status ?? string.Empty)
+            new(Domain.Constants.ClaimJWTPayload.FullName, user.FullName ?? string.Empty),
+            new(Domain.Constants.ClaimJWTPayload.Status, user.Status ?? string.Empty)
         };
 
-        if (user.AuthMethods is { Length: > 0 })
+        if(user.AuthMethods is { Length: > 0 })
         {
-            claims.Add(new Claim(ClaimJWTPayload.Amr, JsonSerializer.Serialize(user.AuthMethods), JsonClaimValueTypes.JsonArray));
+            claims.Add(
+                new Claim(
+                    Domain.Constants.ClaimJWTPayload.Amr,
+                    JsonSerializer.Serialize(user.AuthMethods),
+                    JsonClaimValueTypes.JsonArray));
         }
 
-        if (user.Roles is not null)
+        if(user.Roles is not null)
         {
-            foreach (var role in user.Roles)
+            foreach(var role in user.Roles)
             {
-                claims.Add(new Claim(ClaimJWTPayload.Role, role));
+                claims.Add(new Claim(Domain.Constants.ClaimJWTPayload.Role, role));
             }
         }
 
@@ -100,12 +110,11 @@ public class TokenManagerService : ITokenManagerService
                 },
                 out SecurityToken validatedToken);
 
-            if (validatedToken is JwtSecurityToken jwtToken)
+            if(validatedToken is JwtSecurityToken jwtToken)
             {
-                return jwtToken.Claims.FirstOrDefault(c => c.Type == claimType)?.Value;
+                return jwtToken.Claims.FirstOrDefault(c => string.Compare(c.Type, claimType) == 0)?.Value;
             }
-        }
-        catch
+        } catch
         {
             return null;
         }

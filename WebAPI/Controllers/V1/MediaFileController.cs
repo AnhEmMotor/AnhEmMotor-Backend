@@ -66,7 +66,7 @@ public class MediaFileController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetFileByIdAsync(int id, CancellationToken cancellationToken)
     {
-        var query = new GetFileByIdQuery() { Id = id};
+        var query = new GetFileByIdQuery() { Id = id };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -133,9 +133,7 @@ public class MediaFileController(IMediator mediator) : ApiController
     [RequiresAnyPermissions(Products.Edit, Products.Create)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> DeleteFiles(
-        [FromBody] List<string> request,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> DeleteFiles([FromBody] List<string> request, CancellationToken cancellationToken)
     {
         var command = request.Adapt<DeleteManyFilesCommand>();
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
@@ -163,9 +161,7 @@ public class MediaFileController(IMediator mediator) : ApiController
     [RequiresAnyPermissions(Products.Edit, Products.Create)]
     [ProducesResponseType(typeof(List<MediaFileResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> RestoreFiles(
-        [FromBody] List<string> request,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> RestoreFiles([FromBody] List<string> request, CancellationToken cancellationToken)
     {
         var command = request.Adapt<RestoreManyFilesCommand>();
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
@@ -182,18 +178,18 @@ public class MediaFileController(IMediator mediator) : ApiController
     public async Task<IActionResult> ViewImageWithResize(
         string storagePath,
         [FromQuery] int? width,
-    CancellationToken cancellationToken)
+        CancellationToken cancellationToken)
     {
         var query = new ViewImageQuery { StoragePath = storagePath, Width = width };
 
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
 
-        if (result.IsFailure)
+        if(result.IsFailure)
         {
             return HandleResult(result);
         }
 
-        if (result.Value is { } imageData)
+        if(result.Value is { } imageData)
         {
             var (fileStream, contentType) = imageData;
             return File(fileStream, contentType);

@@ -13,9 +13,7 @@ public sealed class DeleteFileCommandHandler(
     IUnitOfWork unitOfWork,
     Interfaces.Repositories.LocalFile.IFileStorageService fileStorageService) : IRequestHandler<DeleteFileCommand, Result>
 {
-    public async Task<Result> Handle(
-        DeleteFileCommand request,
-        CancellationToken cancellationToken)
+    public async Task<Result> Handle(DeleteFileCommand request, CancellationToken cancellationToken)
     {
         var mediaFile = await readRepository.GetByStoragePathAsync(
             request.StoragePath,

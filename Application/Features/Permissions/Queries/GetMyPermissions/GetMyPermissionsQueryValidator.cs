@@ -7,12 +7,11 @@ public sealed class GetMyPermissionsQueryValidator : AbstractValidator<GetMyPerm
     public GetMyPermissionsQueryValidator()
     {
         RuleFor(x => x.UserId)
-            .NotEmpty().WithMessage("User ID is required.")
-            .Must(BeAValidGuid).WithMessage("Invalid User ID format.");
+            .NotEmpty()
+            .WithMessage("User ID is required.")
+            .Must(BeAValidGuid)
+            .WithMessage("Invalid User ID format.");
     }
 
-    private static bool BeAValidGuid(string? userId)
-    {
-        return Guid.TryParse(userId, out _);
-    }
+    private static bool BeAValidGuid(string? userId) { return Guid.TryParse(userId, out _); }
 }

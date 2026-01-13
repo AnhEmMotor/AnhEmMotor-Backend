@@ -7,8 +7,9 @@ public sealed class DeleteManyBrandsCommandValidator : AbstractValidator<DeleteM
     public DeleteManyBrandsCommandValidator()
     {
         RuleFor(x => x.Ids)
-            .NotEmpty().WithMessage("You must provide at least one ID.")
+            .NotEmpty()
+            .WithMessage("You must provide at least one ID.")
             .Must(ids => ids.Distinct().Count() == ids.Count)
-            .WithMessage("Duplicate IDs are not allowed."); // Chặn luôn trùng lặp từ cửa vào nếu muốn chặt chẽ
+            .WithMessage("Duplicate IDs are not allowed.");
     }
 }

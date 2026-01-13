@@ -7,7 +7,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories.Role
 {
-    public class RoleReadRepository(ApplicationDBContext context, RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager) : IRoleReadRepository
+    public class RoleReadRepository(
+        ApplicationDBContext context,
+        RoleManager<ApplicationRole> roleManager,
+        UserManager<ApplicationUser> userManager) : IRoleReadRepository
     {
         public Task<List<ApplicationRole>> GetRolesByNameAsync(
             IEnumerable<string> names,
@@ -53,21 +56,13 @@ namespace Infrastructure.Repositories.Role
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<bool> IsRoleExistAsync(
-            string roleName,
-            CancellationToken cancellationToken = default)
-        {
-            return await roleManager.RoleExistsAsync(roleName).ConfigureAwait(false);
-        }
+        public async Task<bool> IsRoleExistAsync(string roleName, CancellationToken cancellationToken = default)
+        { return await roleManager.RoleExistsAsync(roleName).ConfigureAwait(false); }
 
-        public async Task<ApplicationRole?> GetRoleByNameAsync(string roleName)
-        {
-            return await roleManager.FindByNameAsync(roleName).ConfigureAwait(false);
-        }
+        public async Task<ApplicationRole?> GetRoleByNameAsync(string roleName, CancellationToken cancellationToken)
+        { return await roleManager.FindByNameAsync(roleName).ConfigureAwait(false); }
 
-        public async Task<IList<ApplicationUser>> GetUsersInRoleAsync(string roleName)
-        {
-            return await userManager.GetUsersInRoleAsync(roleName).ConfigureAwait(false);
-        }
+        public async Task<IList<ApplicationUser>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken)
+        { return await userManager.GetUsersInRoleAsync(roleName).ConfigureAwait(false); }
     }
 }

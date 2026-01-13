@@ -38,7 +38,9 @@ public sealed class UpdateOutputStatusCommandHandler(
         if(!OrderStatusTransitions.IsTransitionAllowed(output.StatusId, request.StatusId))
         {
             var allowed = OrderStatusTransitions.GetAllowedTransitions(output.StatusId);
-            return Error.BadRequest($"Không thể chuyển từ '{output.StatusId}' sang '{request.StatusId}'. Chỉ được chuyển sang: {string.Join(", ", allowed)}", "StatusId");
+            return Error.BadRequest(
+                $"Không thể chuyển từ '{output.StatusId}' sang '{request.StatusId}'. Chỉ được chuyển sang: {string.Join(", ", allowed)}",
+                "StatusId");
         }
 
         if(string.Compare(request.StatusId, OrderStatus.Completed) == 0)
@@ -57,7 +59,9 @@ public sealed class UpdateOutputStatusCommandHandler(
 
                     if(stock < outputInfo.Count.Value)
                     {
-                        return Error.BadRequest($"Sản phẩm ID {outputInfo.ProductVarientId} không đủ tồn kho. Hiện có: {stock}, cần: {outputInfo.Count.Value}", "Products");
+                        return Error.BadRequest(
+                            $"Sản phẩm ID {outputInfo.ProductVarientId} không đủ tồn kho. Hiện có: {stock}, cần: {outputInfo.Count.Value}",
+                            "Products");
                     }
                 }
             }

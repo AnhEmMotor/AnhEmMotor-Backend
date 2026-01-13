@@ -21,6 +21,6 @@ public sealed class GetDeletedSuppliersListQueryHandler(ISupplierReadRepository 
             query,
             request.SieveModel!,
             DataFetchMode.DeletedOnly,
-            cancellationToken);
+            cancellationToken).ConfigureAwait(false);
     }
 }

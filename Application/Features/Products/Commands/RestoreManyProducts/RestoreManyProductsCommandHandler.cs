@@ -40,7 +40,8 @@ public sealed class RestoreManyProductsCommandHandler(
             if(!deletedProductsSet.Contains(id))
             {
                 var productName = allProductsMap[id].Name;
-                errorDetails.Add(Error.BadRequest($"Product is not deleted, Product ID: {id}, Product Name: {productName}"));
+                errorDetails.Add(
+                    Error.BadRequest($"Product is not deleted, Product ID: {id}, Product Name: {productName}"));
             }
         }
 
@@ -55,9 +56,7 @@ public sealed class RestoreManyProductsCommandHandler(
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        var responses = deletedProducts.Select(
-            p => p.Adapt<ProductDetailForManagerResponse>())
-            .ToList();
+        var responses = deletedProducts.Select(p => p.Adapt<ProductDetailForManagerResponse>()).ToList();
         return responses;
     }
 }

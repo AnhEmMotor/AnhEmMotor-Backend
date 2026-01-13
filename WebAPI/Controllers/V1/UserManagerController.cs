@@ -14,9 +14,8 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
-using System.Security.Claims;
-using static Domain.Constants.Permission.PermissionsList;
 using WebAPI.Controllers.Base;
+using static Domain.Constants.Permission.PermissionsList;
 
 namespace WebAPI.Controllers.V1;
 
@@ -80,7 +79,8 @@ public class UserManagerController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetUserById(Guid userId, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetUserByIdQuery() { UserId = userId }, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(new GetUserByIdQuery() { UserId = userId }, cancellationToken)
+            .ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -118,8 +118,7 @@ public class UserManagerController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var modelToSend = model with { UserId = userId };
-        var result = await mediator.Send(modelToSend, cancellationToken)
-            .ConfigureAwait(true);
+        var result = await mediator.Send(modelToSend, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -174,7 +173,10 @@ public class UserManagerController(IMediator mediator) : ApiController
         [FromBody] ChangeMultipleUsersStatusCommand model,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new ChangeMultipleUsersStatusCommand() { Status = model.Status, UserIds = model.UserIds }, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(
+            new ChangeMultipleUsersStatusCommand() { Status = model.Status, UserIds = model.UserIds },
+            cancellationToken)
+            .ConfigureAwait(true);
         return HandleResult(result);
     }
 }
