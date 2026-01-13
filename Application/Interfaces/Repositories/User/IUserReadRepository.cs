@@ -19,7 +19,7 @@ namespace Application.Interfaces.Repositories.User
             SieveModel sieveModel,
             CancellationToken cancellationToken);
 
-        public Task<Result<UserAuth>> GetUserByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken);
+        public Task<UserAuth> GetUserByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken);
 
         public Task<ApplicationUser?> GetByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken);
 
@@ -49,5 +49,7 @@ namespace Application.Interfaces.Repositories.User
         public Task<IList<ApplicationUser>> GetUsersInRoleAsync(
             string roleName,
             CancellationToken cancellationToken = default);
+
+        public Task<IList<string>> GetRolesOfUserAsync(ApplicationUser user);
     }
 }

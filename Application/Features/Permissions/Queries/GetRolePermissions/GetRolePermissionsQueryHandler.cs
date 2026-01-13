@@ -1,31 +1,31 @@
 using Application.ApiContracts.Permission.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.Role;
+using Application.Interfaces.Services;
+using Domain.Constants.Permission;
 using Domain.Entities;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 
 namespace Application.Features.Permissions.Queries.GetRolePermissions;
 
 public class GetRolePermissionsQueryHandler(
-    RoleManager<ApplicationRole> roleManager,
     IRoleReadRepository rolePermissionRepository) : IRequestHandler<GetRolePermissionsQuery, Result<List<PermissionResponse>>>
 {
     public async Task<Result<List<PermissionResponse>>> Handle(
         GetRolePermissionsQuery request,
         CancellationToken cancellationToken)
     {
-        var role = await roleManager.FindByNameAsync(request.RoleName!).ConfigureAwait(false);
+        var role = await rolePermissionRepository.GetRoleByNameAsync(request.RoleName!).ConfigureAwait(false);
         if (role is null)
         {
             return Error.NotFound("Role not found.");
         }
 
-        var permissions = await rolePermissionRepository.GetPermissionNamesByRoleIdAsync(role.Id, cancellationToken)
+        var permissions = await rolePermissionRepository.GetRolesPermissionByRoleIdAsync(role.Id, cancellationToken)
             .ConfigureAwait(false);
 
         var permissionsWithMetadata = permissions
-            .Select(p => new { Name = p, Metadata = Domain.Constants.Permission.PermissionsList.GetMetadata(p) })
+            .Select(p => new { Name = p, Metadata = PermissionsList.GetMetadata(p) })
             .Select(
                 p => new PermissionResponse
                 {

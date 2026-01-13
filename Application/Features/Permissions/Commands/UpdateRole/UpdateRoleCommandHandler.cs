@@ -3,15 +3,14 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Permission;
 using Application.Interfaces.Repositories.Role;
+using Application.Interfaces.Services;
 using Domain.Entities;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 using System.Reflection;
 
 namespace Application.Features.Permissions.Commands.UpdateRolePermissions;
 
 public class UpdateRoleCommandHandler(
-    RoleManager<ApplicationRole> roleManager,
     IRoleReadRepository roleReadRepository,
     IRoleUpdateRepository roleUpdateRepository,
     IPermissionReadRepository permissionReadRepository,
@@ -21,7 +20,7 @@ public class UpdateRoleCommandHandler(
         UpdateRoleCommand request,
         CancellationToken cancellationToken)
     {
-        var role = await roleManager.FindByNameAsync(request.RoleName!).ConfigureAwait(false);
+        var role = await roleReadRepository.GetRoleByNameAsync(request.RoleName!).ConfigureAwait(false);
         if (role is null)
         {
             return Error.NotFound("Role not found.");
@@ -57,7 +56,7 @@ public class UpdateRoleCommandHandler(
                         return Error.BadRequest($"Invalid permissions: {string.Join(", ", invalidPermissions)}");
         }
 
-        var currentRolePermissions = await roleReadRepository.GetRolePermissionsByRoleIdAsync(
+        var currentRolePermissions = await roleReadRepository.GetRolesPermissionByRoleIdAsync(
             role.Id,
             cancellationToken)
             .ConfigureAwait(false);

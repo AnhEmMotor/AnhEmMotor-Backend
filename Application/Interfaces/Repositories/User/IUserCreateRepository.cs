@@ -27,5 +27,6 @@ namespace Application.Interfaces.Repositories.User
             ApplicationUser user,
             IEnumerable<string> roleNames,
             CancellationToken cancellationToken = default);
+
     }
 }

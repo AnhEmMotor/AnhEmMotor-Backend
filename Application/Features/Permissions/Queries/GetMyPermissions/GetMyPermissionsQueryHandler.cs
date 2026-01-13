@@ -1,32 +1,32 @@
 using Application.ApiContracts.Permission.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.Role;
+using Application.Interfaces.Repositories.User;
+using Application.Interfaces.Services;
 using Domain.Entities;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 
 namespace Application.Features.Permissions.Queries.GetMyPermissions;
 
 public class GetMyPermissionsQueryHandler(
-    UserManager<ApplicationUser> userManager,
-    IRoleReadRepository roleReadRepository) : IRequestHandler<GetMyPermissionsQuery, Result<PermissionAndRoleOfUserResponse>>
+    IRoleReadRepository roleReadRepository, IUserReadRepository userReadRepository) : IRequestHandler<GetMyPermissionsQuery, Result<PermissionAndRoleOfUserResponse>>
 {
     public async Task<Result<PermissionAndRoleOfUserResponse>> Handle(
         GetMyPermissionsQuery request,
         CancellationToken cancellationToken)
     {
         var userId = Guid.Parse(request.UserId!);
-        var user = await userManager.FindByIdAsync(userId.ToString()).ConfigureAwait(false);
+        var user = await userReadRepository.GetUserByIDAsync(userId, cancellationToken).ConfigureAwait(false);
         if (user is null)
         {
             return Error.NotFound("User not found.");
         }
-        var userRoles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
-        var roleEntities = await roleReadRepository.GetRolesByNamesAsync(userRoles!, cancellationToken)
+        var userRoles = await userReadRepository.GetRolesOfUserAsync(user).ConfigureAwait(false);
+        var roleEntities = await userReadRepository.GetRolesOfUserAsync(userRoles, cancellationToken)
             .ConfigureAwait(false);
 
         var roleIds = roleEntities.Select(r => r.Id).ToList();
-        var userPermissionNames = await roleReadRepository.GetPermissionNamesByRoleIdsAsync(roleIds, cancellationToken)
+        var userPermissionNames = await roleReadRepository.GetPermissionsNameByRoleIdAsync(roleIds, cancellationToken)
             .ConfigureAwait(false);
 
         var userPermissions = userPermissionNames

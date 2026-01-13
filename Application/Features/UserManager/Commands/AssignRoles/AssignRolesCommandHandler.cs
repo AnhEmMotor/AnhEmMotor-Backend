@@ -28,7 +28,7 @@ public sealed class AssignRolesCommandHandler(
 
         // 1. Bulk Validation: Check t?t c? Role có t?n t?i trong h? th?ng không (1 Query)
         // Repo c?n hàm GetExistingRolesAsync nh?n List<string>
-        var existingSystemRoles = await roleReadRepository.GetRolesByNamesAsync(requestedRoles, cancellationToken)
+        var existingSystemRoles = await roleReadRepository.GetRolesByNameAsync(requestedRoles, cancellationToken)
             .ConfigureAwait(false);
 
         var existingRoleNames = existingSystemRoles.Select(r => r.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -72,7 +72,7 @@ public sealed class AssignRolesCommandHandler(
 
             if (!removeSucceeded)
             {
-                return Result<AssignRoleResponse>.Failure(removeErrors.Select(e => Error.Failure(e)).ToList());
+                return Result<AssignRoleResponse>.Failure([.. removeErrors.Select(e => Error.Failure(e))]);
             }
         }
 
@@ -83,7 +83,7 @@ public sealed class AssignRolesCommandHandler(
 
             if (!addSucceeded)
             {
-                return Result<AssignRoleResponse>.Failure(addErrors.Select(e => Error.Failure(e)).ToList());
+                return Result<AssignRoleResponse>.Failure([.. addErrors.Select(e => Error.Failure(e))]);
             }
         }
 

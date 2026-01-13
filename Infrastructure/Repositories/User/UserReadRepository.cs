@@ -97,7 +97,7 @@ namespace Infrastructure.Repositories.User
                 .ConfigureAwait(false);
         }
 
-        public async Task<Result<UserAuth>> GetUserByRefreshTokenAsync(
+        public async Task<UserAuth> GetUserByRefreshTokenAsync(
             string refreshToken,
             CancellationToken cancellationToken)
         {
@@ -186,6 +186,11 @@ namespace Infrastructure.Repositories.User
             CancellationToken cancellationToken = default)
         {
             return await userManager.GetUsersInRoleAsync(roleName).ConfigureAwait(false);
+        }
+
+        public async Task<IList<string>> GetRolesOfUserAsync(ApplicationUser user)
+        {
+            return await userManager.GetRolesAsync(user).ConfigureAwait(false);
         }
     }
 }

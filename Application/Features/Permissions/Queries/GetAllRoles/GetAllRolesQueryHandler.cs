@@ -9,7 +9,7 @@ public class GetAllRolesQueryHandler(IRoleReadRepository roleReadRepository) : I
 {
     public async Task<Result<List<RoleSelectResponse>>> Handle(GetAllRolesQuery request, CancellationToken cancellationToken)
     {
-        var result = await roleReadRepository.GetAllRoleSelectsAsync(cancellationToken);
+        var result = await roleReadRepository.GetAllRolesSelectAsync(cancellationToken);
         return result;
     }
 }

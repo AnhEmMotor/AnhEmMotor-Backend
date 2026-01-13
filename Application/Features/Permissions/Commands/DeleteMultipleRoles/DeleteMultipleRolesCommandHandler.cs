@@ -1,15 +1,17 @@
 using Application.ApiContracts.Permission.Responses;
 using Application.Common.Models;
+using Application.Interfaces.Repositories.Role;
+using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Services;
 using Domain.Entities;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 
 namespace Application.Features.Permissions.Commands.DeleteMultipleRoles;
 
 public class DeleteMultipleRolesCommandHandler(
-    RoleManager<ApplicationRole> roleManager,
-    UserManager<ApplicationUser> userManager,
+    IRoleReadRepository roleReadRepository,
+    IUserReadRepository userReadRepository, 
+    IRoleDeleteRepository roleDeleteRepository,
     IProtectedEntityManagerService protectedEntityManagerService) : IRequestHandler<DeleteMultipleRolesCommand, Result<RoleDeleteResponse>>
 {
     public async Task<Result<RoleDeleteResponse>> Handle(
@@ -29,14 +31,14 @@ public class DeleteMultipleRolesCommandHandler(
                 continue;
             }
 
-            var role = await roleManager.FindByNameAsync(roleName).ConfigureAwait(false);
+            var role = await roleReadRepository.GetRoleByNameAsync(roleName).ConfigureAwait(false);
             if(role is null)
             {
                 skippedRoles.Add($"{roleName} (Not found)");
                 continue;
             }
 
-            var usersWithRole = await userManager.GetUsersInRoleAsync(roleName).ConfigureAwait(false);
+            var usersWithRole = await userReadRepository.GetUsersInRoleAsync(roleName).ConfigureAwait(false);
             if(usersWithRole.Count > 0)
             {
                 skippedRoles.Add($"{roleName} ({usersWithRole.Count} user(s) assigned)");
@@ -53,10 +55,10 @@ public class DeleteMultipleRolesCommandHandler(
 
         foreach(var roleName in roleNames)
         {
-            var role = await roleManager.FindByNameAsync(roleName).ConfigureAwait(false);
+            var role = await roleReadRepository.GetRoleByNameAsync(roleName).ConfigureAwait(false);
             if(role is not null)
             {
-                var result = await roleManager.DeleteAsync(role).ConfigureAwait(false);
+                var result = await roleDeleteRepository.DeleteAsync(role).ConfigureAwait(false);
                 if(result.Succeeded)
                 {
                     deletedCount++;
