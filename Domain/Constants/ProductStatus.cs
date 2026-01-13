@@ -9,6 +9,8 @@ namespace Domain.Constants
 
         public static readonly string[] AllowedValues = [ ForSale, OutOfBusiness ];
 
+        public static readonly List<string> All = [ ForSale, OutOfBusiness ];
+
         public static bool IsValid(string? value)
         {
             if(string.IsNullOrWhiteSpace(value))

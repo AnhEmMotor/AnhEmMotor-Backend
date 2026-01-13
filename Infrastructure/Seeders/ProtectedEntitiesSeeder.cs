@@ -89,12 +89,12 @@ public static class ProtectedEntitiesSeeder
         foreach (var (email, password) in protectedUsers)
         {
             var user = await userManager.FindByEmailAsync(email).ConfigureAwait(false);
-            if(user is null && superRoles.Count != 0)
+            if(user is null)
             {
                 var newUser = new ApplicationUser { UserName = email, Email = email, Status = UserStatus.Active, };
 
                 var result = await userManager.CreateAsync(newUser, password).ConfigureAwait(false);
-                if(result.Succeeded)
+                if(result.Succeeded && superRoles.Count != 0)
                 {
                     await userManager.AddToRoleAsync(newUser, superRoles[0]).ConfigureAwait(false);
                 }
