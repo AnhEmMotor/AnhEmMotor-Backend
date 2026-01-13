@@ -1,56 +1,39 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 #nullable disable
 
 namespace Infrastructure.Migrations
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public partial class ChangeColumnStructure25122025 : Migration
     {
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Input_Users_CreatedByUserId",
-                table: "Input");
+            migrationBuilder.DropForeignKey(name: "FK_Input_Users_CreatedByUserId", table: "Input");
 
-            migrationBuilder.DropForeignKey(
-                name: "FK_Output_Users_CreatedByUserId",
-                table: "Output");
+            migrationBuilder.DropForeignKey(name: "FK_Output_Users_CreatedByUserId", table: "Output");
 
-            migrationBuilder.DropForeignKey(
-                name: "FK_OutputInfo_ProductVariant_ProductId",
-                table: "OutputInfo");
+            migrationBuilder.DropForeignKey(name: "FK_OutputInfo_ProductVariant_ProductId", table: "OutputInfo");
 
-            migrationBuilder.DropColumn(
-                name: "EmpCode",
-                table: "Output");
+            migrationBuilder.DropColumn(name: "EmpCode", table: "Output");
 
-            migrationBuilder.RenameColumn(
-                name: "ProductId",
-                table: "OutputInfo",
-                newName: "ProductVarientId");
+            migrationBuilder.RenameColumn(name: "ProductId", table: "OutputInfo", newName: "ProductVarientId");
 
             migrationBuilder.RenameIndex(
                 name: "IX_OutputInfo_ProductId",
                 table: "OutputInfo",
                 newName: "IX_OutputInfo_ProductVarientId");
 
-            migrationBuilder.RenameColumn(
-                name: "CreatedByUserId",
-                table: "Output",
-                newName: "FinishedBy");
+            migrationBuilder.RenameColumn(name: "CreatedByUserId", table: "Output", newName: "FinishedBy");
 
             migrationBuilder.RenameIndex(
                 name: "IX_Output_CreatedByUserId",
                 table: "Output",
                 newName: "IX_Output_FinishedBy");
 
-            migrationBuilder.RenameColumn(
-                name: "CreatedByUserId",
-                table: "Input",
-                newName: "CreatedBy");
+            migrationBuilder.RenameColumn(name: "CreatedByUserId", table: "Input", newName: "CreatedBy");
 
             migrationBuilder.RenameIndex(
                 name: "IX_Input_CreatedByUserId",
@@ -177,11 +160,7 @@ namespace Infrastructure.Migrations
                 oldType: "smallint",
                 oldNullable: true);
 
-            migrationBuilder.AddColumn<int>(
-                name: "ParentOutputInfoId",
-                table: "InputInfo",
-                type: "int",
-                nullable: true);
+            migrationBuilder.AddColumn<int>(name: "ParentOutputInfoId", table: "InputInfo", type: "int", nullable: true);
 
             migrationBuilder.AddColumn<Guid>(
                 name: "ConfirmedBy",
@@ -189,18 +168,13 @@ namespace Infrastructure.Migrations
                 type: "uniqueidentifier",
                 nullable: true);
 
-            migrationBuilder.AddColumn<int>(
-                name: "SourceOrderId",
-                table: "Input",
-                type: "int",
-                nullable: true);
+            migrationBuilder.AddColumn<int>(name: "SourceOrderId", table: "Input", type: "int", nullable: true);
 
             migrationBuilder.CreateTable(
                 name: "SupplierContact",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     SupplierId = table.Column<int>(type: "int", nullable: true),
                     Name = table.Column<string>(type: "nvarchar(100)", nullable: true),
                     Phone = table.Column<string>(type: "nvarchar(15)", nullable: true),
@@ -220,25 +194,16 @@ namespace Infrastructure.Migrations
                         principalColumn: "Id");
                 });
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Output_CreatedBy",
-                table: "Output",
-                column: "CreatedBy");
+            migrationBuilder.CreateIndex(name: "IX_Output_CreatedBy", table: "Output", column: "CreatedBy");
 
             migrationBuilder.CreateIndex(
                 name: "IX_InputInfo_ParentOutputInfoId",
                 table: "InputInfo",
                 column: "ParentOutputInfoId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Input_ConfirmedBy",
-                table: "Input",
-                column: "ConfirmedBy");
+            migrationBuilder.CreateIndex(name: "IX_Input_ConfirmedBy", table: "Input", column: "ConfirmedBy");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Input_SourceOrderId",
-                table: "Input",
-                column: "SourceOrderId");
+            migrationBuilder.CreateIndex(name: "IX_Input_SourceOrderId", table: "Input", column: "SourceOrderId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SupplierContact_SupplierId",
@@ -295,124 +260,70 @@ namespace Infrastructure.Migrations
                 principalColumn: "Id");
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Input_Output_SourceOrderId",
-                table: "Input");
+            migrationBuilder.DropForeignKey(name: "FK_Input_Output_SourceOrderId", table: "Input");
 
-            migrationBuilder.DropForeignKey(
-                name: "FK_Input_Users_ConfirmedBy",
-                table: "Input");
+            migrationBuilder.DropForeignKey(name: "FK_Input_Users_ConfirmedBy", table: "Input");
 
-            migrationBuilder.DropForeignKey(
-                name: "FK_Input_Users_CreatedBy",
-                table: "Input");
+            migrationBuilder.DropForeignKey(name: "FK_Input_Users_CreatedBy", table: "Input");
 
-            migrationBuilder.DropForeignKey(
-                name: "FK_InputInfo_OutputInfo_ParentOutputInfoId",
-                table: "InputInfo");
+            migrationBuilder.DropForeignKey(name: "FK_InputInfo_OutputInfo_ParentOutputInfoId", table: "InputInfo");
 
-            migrationBuilder.DropForeignKey(
-                name: "FK_Output_Users_CreatedBy",
-                table: "Output");
+            migrationBuilder.DropForeignKey(name: "FK_Output_Users_CreatedBy", table: "Output");
 
-            migrationBuilder.DropForeignKey(
-                name: "FK_Output_Users_FinishedBy",
-                table: "Output");
+            migrationBuilder.DropForeignKey(name: "FK_Output_Users_FinishedBy", table: "Output");
 
-            migrationBuilder.DropForeignKey(
-                name: "FK_OutputInfo_ProductVariant_ProductVarientId",
-                table: "OutputInfo");
+            migrationBuilder.DropForeignKey(name: "FK_OutputInfo_ProductVariant_ProductVarientId", table: "OutputInfo");
 
-            migrationBuilder.DropTable(
-                name: "SupplierContact");
+            migrationBuilder.DropTable(name: "SupplierContact");
 
-            migrationBuilder.DropIndex(
-                name: "IX_Output_CreatedBy",
-                table: "Output");
+            migrationBuilder.DropIndex(name: "IX_Output_CreatedBy", table: "Output");
 
-            migrationBuilder.DropIndex(
-                name: "IX_InputInfo_ParentOutputInfoId",
-                table: "InputInfo");
+            migrationBuilder.DropIndex(name: "IX_InputInfo_ParentOutputInfoId", table: "InputInfo");
 
-            migrationBuilder.DropIndex(
-                name: "IX_Input_ConfirmedBy",
-                table: "Input");
+            migrationBuilder.DropIndex(name: "IX_Input_ConfirmedBy", table: "Input");
 
-            migrationBuilder.DropIndex(
-                name: "IX_Input_SourceOrderId",
-                table: "Input");
+            migrationBuilder.DropIndex(name: "IX_Input_SourceOrderId", table: "Input");
 
-            migrationBuilder.DropColumn(
-                name: "TaxIdentificationNumber",
-                table: "Supplier");
+            migrationBuilder.DropColumn(name: "TaxIdentificationNumber", table: "Supplier");
 
-            migrationBuilder.DropColumn(
-                name: "MetaDescription",
-                table: "Product");
+            migrationBuilder.DropColumn(name: "MetaDescription", table: "Product");
 
-            migrationBuilder.DropColumn(
-                name: "MetaTitle",
-                table: "Product");
+            migrationBuilder.DropColumn(name: "MetaTitle", table: "Product");
 
-            migrationBuilder.DropColumn(
-                name: "ShortDescription",
-                table: "Product");
+            migrationBuilder.DropColumn(name: "ShortDescription", table: "Product");
 
-            migrationBuilder.DropColumn(
-                name: "CreatedBy",
-                table: "Output");
+            migrationBuilder.DropColumn(name: "CreatedBy", table: "Output");
 
-            migrationBuilder.DropColumn(
-                name: "CustomerAddress",
-                table: "Output");
+            migrationBuilder.DropColumn(name: "CustomerAddress", table: "Output");
 
-            migrationBuilder.DropColumn(
-                name: "CustomerPhone",
-                table: "Output");
+            migrationBuilder.DropColumn(name: "CustomerPhone", table: "Output");
 
-            migrationBuilder.DropColumn(
-                name: "LastStatusChangedAt",
-                table: "Output");
+            migrationBuilder.DropColumn(name: "LastStatusChangedAt", table: "Output");
 
-            migrationBuilder.DropColumn(
-                name: "ParentOutputInfoId",
-                table: "InputInfo");
+            migrationBuilder.DropColumn(name: "ParentOutputInfoId", table: "InputInfo");
 
-            migrationBuilder.DropColumn(
-                name: "ConfirmedBy",
-                table: "Input");
+            migrationBuilder.DropColumn(name: "ConfirmedBy", table: "Input");
 
-            migrationBuilder.DropColumn(
-                name: "SourceOrderId",
-                table: "Input");
+            migrationBuilder.DropColumn(name: "SourceOrderId", table: "Input");
 
-            migrationBuilder.RenameColumn(
-                name: "ProductVarientId",
-                table: "OutputInfo",
-                newName: "ProductId");
+            migrationBuilder.RenameColumn(name: "ProductVarientId", table: "OutputInfo", newName: "ProductId");
 
             migrationBuilder.RenameIndex(
                 name: "IX_OutputInfo_ProductVarientId",
                 table: "OutputInfo",
                 newName: "IX_OutputInfo_ProductId");
 
-            migrationBuilder.RenameColumn(
-                name: "FinishedBy",
-                table: "Output",
-                newName: "CreatedByUserId");
+            migrationBuilder.RenameColumn(name: "FinishedBy", table: "Output", newName: "CreatedByUserId");
 
             migrationBuilder.RenameIndex(
                 name: "IX_Output_FinishedBy",
                 table: "Output",
                 newName: "IX_Output_CreatedByUserId");
 
-            migrationBuilder.RenameColumn(
-                name: "CreatedBy",
-                table: "Input",
-                newName: "CreatedByUserId");
+            migrationBuilder.RenameColumn(name: "CreatedBy", table: "Input", newName: "CreatedByUserId");
 
             migrationBuilder.RenameIndex(
                 name: "IX_Input_CreatedBy",
@@ -464,11 +375,7 @@ namespace Infrastructure.Migrations
                 oldType: "decimal(18,2)",
                 oldNullable: true);
 
-            migrationBuilder.AddColumn<int>(
-                name: "EmpCode",
-                table: "Output",
-                type: "int",
-                nullable: true);
+            migrationBuilder.AddColumn<int>(name: "EmpCode", table: "Output", type: "int", nullable: true);
 
             migrationBuilder.AlterColumn<long>(
                 name: "RemainingCount",

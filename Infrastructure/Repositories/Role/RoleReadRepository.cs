@@ -7,7 +7,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories.Role
 {
-    public class RoleReadRepository(ApplicationDBContext context, RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager) : IRoleReadRepository
+    public class RoleReadRepository(
+        ApplicationDBContext context,
+        RoleManager<ApplicationRole> roleManager,
+        UserManager<ApplicationUser> userManager) : IRoleReadRepository
     {
         public Task<List<ApplicationRole>> GetRolesByNameAsync(
             IEnumerable<string> names,
@@ -53,21 +56,33 @@ namespace Infrastructure.Repositories.Role
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<bool> IsRoleExistAsync(
+        public async Task<bool> IsRoleExistAsync(string roleName, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var result = await roleManager.RoleExistsAsync(roleName)
+                .ContinueWith(t => t.Result, cancellationToken)
+                .ConfigureAwait(false);
+            return result;
+        }
+
+        public async Task<ApplicationRole?> GetRoleByNameAsync(string roleName, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var result = await roleManager.FindByNameAsync(roleName)
+                .ContinueWith(t => t.Result, cancellationToken)
+                .ConfigureAwait(false);
+            return result;
+        }
+
+        public async Task<IList<ApplicationUser>> GetUsersInRoleAsync(
             string roleName,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken)
         {
-            return await roleManager.RoleExistsAsync(roleName).ConfigureAwait(false);
-        }
-
-        public async Task<ApplicationRole?> GetRoleByNameAsync(string roleName)
-        {
-            return await roleManager.FindByNameAsync(roleName).ConfigureAwait(false);
-        }
-
-        public async Task<IList<ApplicationUser>> GetUsersInRoleAsync(string roleName)
-        {
-            return await userManager.GetUsersInRoleAsync(roleName).ConfigureAwait(false);
+            cancellationToken.ThrowIfCancellationRequested();
+            var result = await userManager.GetUsersInRoleAsync(roleName)
+                .ContinueWith(t => t.Result, cancellationToken)
+                .ConfigureAwait(false);
+            return result;
         }
     }
 }

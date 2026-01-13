@@ -46,7 +46,10 @@ public sealed class UpdateProductCommandHandler(
                 .ConfigureAwait(false);
             if(category == null)
             {
-                errors.Add(Error.NotFound($"Product category with Id {command.CategoryId} not found or has been deleted.", nameof(command.CategoryId)));
+                errors.Add(
+                    Error.NotFound(
+                        $"Product category with Id {command.CategoryId} not found or has been deleted.",
+                        nameof(command.CategoryId)));
             }
         }
 
@@ -56,7 +59,10 @@ public sealed class UpdateProductCommandHandler(
                 .ConfigureAwait(false);
             if(brand == null)
             {
-                errors.Add(Error.NotFound($"Brand with Id {command.BrandId} not found or has been deleted.", nameof(command.BrandId)));
+                errors.Add(
+                    Error.NotFound(
+                        $"Brand with Id {command.BrandId} not found or has been deleted.",
+                        nameof(command.BrandId)));
             }
         }
 

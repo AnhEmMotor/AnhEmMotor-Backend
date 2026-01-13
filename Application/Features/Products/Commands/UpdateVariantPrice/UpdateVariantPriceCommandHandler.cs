@@ -11,7 +11,7 @@ namespace Application.Features.Products.Commands.UpdateVariantPrice;
 public sealed class UpdateVariantPriceCommandHandler(
     IProductVariantReadRepository variantReadRepository,
     IProductVariantUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateVariantPriceCommand,Result<ProductVariantLiteResponse?>>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateVariantPriceCommand, Result<ProductVariantLiteResponse?>>
 {
     public async Task<Result<ProductVariantLiteResponse?>> Handle(
         UpdateVariantPriceCommand command,

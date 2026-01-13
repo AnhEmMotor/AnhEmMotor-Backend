@@ -1,7 +1,5 @@
 ﻿
 using Application.Features.Brands.Commands.CreateBrand;
-using Application.Features.Brands.Commands.DeleteManyBrands;
-using Application.Features.Brands.Commands.RestoreManyBrands;
 using Application.Features.Brands.Commands.UpdateBrand;
 using Mapster;
 using BrandEntity = Domain.Entities.Brand;

@@ -3,12 +3,11 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Permission;
 using Application.Interfaces.Repositories.Role;
-using Application.Interfaces.Services;
 using Domain.Entities;
 using MediatR;
 using System.Reflection;
 
-namespace Application.Features.Permissions.Commands.UpdateRolePermissions;
+namespace Application.Features.Permissions.Commands.UpdateRole;
 
 public class UpdateRoleCommandHandler(
     IRoleReadRepository roleReadRepository,
@@ -20,8 +19,9 @@ public class UpdateRoleCommandHandler(
         UpdateRoleCommand request,
         CancellationToken cancellationToken)
     {
-        var role = await roleReadRepository.GetRoleByNameAsync(request.RoleName!).ConfigureAwait(false);
-        if (role is null)
+        var role = await roleReadRepository.GetRoleByNameAsync(request.RoleName!, cancellationToken)
+            .ConfigureAwait(false);
+        if(role is null)
         {
             return Error.NotFound("Role not found.");
         }
@@ -53,7 +53,7 @@ public class UpdateRoleCommandHandler(
         var invalidPermissions = request.Permissions.Where(p => !validSystemPermissions.Contains(p)).ToList();
         if(invalidPermissions.Count != 0)
         {
-                        return Error.BadRequest($"Invalid permissions: {string.Join(", ", invalidPermissions)}");
+            return Error.BadRequest($"Invalid permissions: {string.Join(", ", invalidPermissions)}");
         }
 
         var currentRolePermissions = await roleReadRepository.GetRolesPermissionByRoleIdAsync(
@@ -89,7 +89,8 @@ public class UpdateRoleCommandHandler(
 
             if(orphanedPermissions.Count != 0)
             {
-                        return Error.BadRequest($"Cannot remove last role assignment for: {string.Join(", ", orphanedPermissions)}.");
+                return Error.BadRequest(
+                    $"Cannot remove last role assignment for: {string.Join(", ", orphanedPermissions)}.");
             }
 
             roleUpdateRepository.RemovePermissionsFromRole(rolePermissionsToRemove);

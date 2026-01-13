@@ -15,9 +15,12 @@ public sealed class GetSuppliersListQueryHandler(ISupplierReadRepository reposit
     {
         var query = repository.GetQueryableWithTotalInput();
 
-        return await paginator.ApplyAsync<SupplierWithTotalInputResponse, SupplierResponse>(
+        var result = await paginator.ApplyAsync<SupplierWithTotalInputResponse, SupplierResponse>(
             query,
             request.SieveModel!,
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
+
+        return result;
     }
 }

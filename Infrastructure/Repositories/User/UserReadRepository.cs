@@ -1,8 +1,7 @@
-﻿using Application.ApiContracts.User.Responses;
+﻿using Application.ApiContracts.Auth.Responses;
+using Application.ApiContracts.User.Responses;
 using Application.ApiContracts.UserManager.Responses;
-using Application.Common.Models;
 using Application.Interfaces.Repositories.User;
-using Application.Interfaces.Repositories.Role;
 using Domain.Constants;
 using Domain.Entities;
 using Domain.Primitives;
@@ -11,13 +10,10 @@ using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
 using Sieve.Services;
 using System;
-using Application.ApiContracts.Auth.Responses;
 
 namespace Infrastructure.Repositories.User
 {
-    public class UserReadRepository(
-        UserManager<ApplicationUser> userManager,
-        ISieveProcessor sieveProcessor) : IUserReadRepository
+    public class UserReadRepository(UserManager<ApplicationUser> userManager, ISieveProcessor sieveProcessor) : IUserReadRepository
     {
         public async Task<PagedResult<UserDTOForManagerResponse>> GetPagedListAsync(
             SieveModel sieveModel,
@@ -89,21 +85,22 @@ namespace Infrastructure.Repositories.User
                 sieveModel.PageSize ?? 10);
         }
 
-        public async Task<ApplicationUser?> GetByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken)
-        {
-            return await userManager.Users
-                .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.RefreshToken == refreshToken, cancellationToken)
-                .ConfigureAwait(false);
-        }
-
-        public async Task<UserAuth> GetUserByRefreshTokenAsync(
+        public async Task<ApplicationUser?> GetByRefreshTokenAsync(
             string refreshToken,
             CancellationToken cancellationToken)
         {
+            var result = await userManager.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => string.Compare(u.RefreshToken, refreshToken) == 0, cancellationToken)
+                .ConfigureAwait(false);
+            return result;
+        }
+
+        public async Task<UserAuth> GetUserByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken)
+        {
             var user = await userManager.Users
                 .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.RefreshToken == refreshToken, cancellationToken)
+                .FirstOrDefaultAsync(u => string.Compare(u.RefreshToken, refreshToken) == 0, cancellationToken)
                 .ConfigureAwait(false);
 
             var roles = await userManager.GetRolesAsync(user!).ConfigureAwait(false);
@@ -112,11 +109,11 @@ namespace Infrastructure.Repositories.User
             {
                 Id = user!.Id,
                 UserName = user.UserName,
-                Roles = [.. roles],
+                Roles = [ .. roles ],
                 Email = user.Email,
                 FullName = user.FullName,
                 Status = user.Status,
-                AuthMethods = ["pwd"]
+                AuthMethods = [ "pwd" ]
             };
 
             return UserAuth;
@@ -149,21 +146,31 @@ namespace Infrastructure.Repositories.User
             Guid userId,
             CancellationToken cancellationToken = default)
         {
-            return await userManager.FindByIdAsync(userId.ToString()).ConfigureAwait(false);
+            cancellationToken.ThrowIfCancellationRequested();
+            var result = await userManager.FindByIdAsync(userId.ToString()).ConfigureAwait(false);
+            return result;
         }
 
         public async Task<ApplicationUser?> FindUserByEmailAsync(
             string email,
             CancellationToken cancellationToken = default)
         {
-            return await userManager.FindByEmailAsync(email).ConfigureAwait(false);
+            cancellationToken.ThrowIfCancellationRequested();
+            var result = await userManager.FindByEmailAsync(email)
+                .ContinueWith(t => t.Result, cancellationToken)
+                .ConfigureAwait(false);
+            return result;
         }
 
         public async Task<ApplicationUser?> FindUserByUsernameAsync(
             string username,
             CancellationToken cancellationToken = default)
         {
-            return await userManager.FindByNameAsync(username).ConfigureAwait(false);
+            cancellationToken.ThrowIfCancellationRequested();
+            var result = await userManager.FindByNameAsync(username)
+                .ContinueWith(t => t.Result, cancellationToken)
+                .ConfigureAwait(false);
+            return result;
         }
 
         public async Task<bool> CheckPasswordAsync(
@@ -171,26 +178,42 @@ namespace Infrastructure.Repositories.User
             string password,
             CancellationToken cancellationToken = default)
         {
-            return await userManager.CheckPasswordAsync(user, password).ConfigureAwait(false);
+            cancellationToken.ThrowIfCancellationRequested();
+            var result = await userManager.CheckPasswordAsync(user, password)
+                .ContinueWith(t => t.Result, cancellationToken)
+                .ConfigureAwait(false);
+            return result;
         }
 
         public async Task<IList<string>> GetUserRolesAsync(
             ApplicationUser user,
             CancellationToken cancellationToken = default)
         {
-            return await userManager.GetRolesAsync(user).ConfigureAwait(false);
+            cancellationToken.ThrowIfCancellationRequested();
+            var result = await userManager.GetRolesAsync(user)
+                .ContinueWith(t => t.Result, cancellationToken)
+                .ConfigureAwait(false);
+            return result;
         }
 
         public async Task<IList<ApplicationUser>> GetUsersInRoleAsync(
             string roleName,
             CancellationToken cancellationToken = default)
         {
-            return await userManager.GetUsersInRoleAsync(roleName).ConfigureAwait(false);
+            cancellationToken.ThrowIfCancellationRequested();
+            var result = await userManager.GetUsersInRoleAsync(roleName)
+                .ContinueWith(t => t.Result, cancellationToken)
+                .ConfigureAwait(false);
+            return result;
         }
 
-        public async Task<IList<string>> GetRolesOfUserAsync(ApplicationUser user)
+        public async Task<IList<string>> GetRolesOfUserAsync(ApplicationUser user, CancellationToken cancellationToken)
         {
-            return await userManager.GetRolesAsync(user).ConfigureAwait(false);
+            cancellationToken.ThrowIfCancellationRequested();
+            var result = await userManager.GetRolesAsync(user)
+                .ContinueWith(t => t.Result, cancellationToken)
+                .ConfigureAwait(false);
+            return result;
         }
     }
 }

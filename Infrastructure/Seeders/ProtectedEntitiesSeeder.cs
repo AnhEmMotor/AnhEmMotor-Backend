@@ -7,14 +7,8 @@ using Microsoft.Extensions.Configuration;
 
 namespace Infrastructure.Seeders;
 
-/// <summary>
-/// Seeder để khởi tạo SuperRoles và ProtectedUsers
-/// </summary>
 public static class ProtectedEntitiesSeeder
 {
-    /// <summary>
-    /// Seed SuperRoles và ProtectedUsers từ appsettings
-    /// </summary>
     public static async Task SeedProtectedEntitiesAsync(
         ApplicationDBContext context,
         RoleManager<ApplicationRole> roleManager,

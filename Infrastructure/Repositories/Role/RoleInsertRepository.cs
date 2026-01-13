@@ -2,16 +2,18 @@
 using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Infrastructure.Repositories.Role
 {
     public class RoleInsertRepository(RoleManager<ApplicationRole> roleManager) : IRoleInsertRepository
     {
-        public async Task<IdentityResult> CreateAsync(ApplicationRole role)
+        public async Task<IdentityResult> CreateAsync(ApplicationRole role, CancellationToken cancellationToken)
         {
-            return await roleManager.CreateAsync(role).ConfigureAwait(false);
+            cancellationToken.ThrowIfCancellationRequested();
+            var result = await roleManager.CreateAsync(role)
+                .ContinueWith(t => t.Result, cancellationToken)
+                .ConfigureAwait(false);
+            return result;
         }
     }
 }

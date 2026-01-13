@@ -19,11 +19,9 @@ public sealed class CloneInputCommandHandler(
     IProductVariantReadRepository variantReadRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<CloneInputCommand, Result<InputResponse?>>
 {
-    public async Task<Result<InputResponse?>> Handle(
-        CloneInputCommand command,
-        CancellationToken cancellationToken)
+    public async Task<Result<InputResponse?>> Handle(CloneInputCommand command, CancellationToken cancellationToken)
     {
-        if (!command.Id.HasValue)
+        if(!command.Id.HasValue)
         {
             return Error.BadRequest("Id không được để trống", "Id");
         }
@@ -97,14 +95,16 @@ public sealed class CloneInputCommandHandler(
 
         if(validProducts.Count == 0)
         {
-            return Error.BadRequest("Tất cả sản phẩm trong phiếu nhập gốc đều không còn hợp lệ (đã xoá hoặc không còn bán)", "Products");
+            return Error.BadRequest(
+                "Tất cả sản phẩm trong phiếu nhập gốc đều không còn hợp lệ (đã xoá hoặc không còn bán)",
+                "Products");
         }
 
         var newInput = new InputEntity
         {
             Notes = originalInput.Notes,
             SupplierId = originalInput.SupplierId,
-            StatusId = InputStatus.Working,
+            StatusId = Domain.Constants.Input.InputStatus.Working,
             InputInfos = validProducts,
             CreatedAt = DateTimeOffset.UtcNow,
             UpdatedAt = DateTimeOffset.UtcNow

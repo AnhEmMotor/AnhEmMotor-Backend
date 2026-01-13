@@ -1,26 +1,31 @@
-namespace Domain.Constants;
+namespace Domain.Constants.Input;
 
 public static class InputStatusTransitions
 {
     private static readonly Dictionary<string, HashSet<string>> AllowedTransitions = new()
     {
-        {
-            InputStatus.Working,
-            [InputStatus.Finish, InputStatus.Cancel]
-        },
-        {
-            InputStatus.Finish,
-            []
-        },
-        {
-            InputStatus.Cancel,
-            []
-        }
+        { InputStatus.Working, [ InputStatus.Finish, InputStatus.Cancel ] },
+        { InputStatus.Finish, [] },
+        { InputStatus.Cancel, [] }
     };
 
     public static bool IsTransitionAllowed(string? currentStatus, string? newStatus)
-    { throw new NotImplementedException(); }
+    {
+        if(currentStatus == null || newStatus == null)
+        {
+            return false;
+        }
+
+        return AllowedTransitions.TryGetValue(currentStatus, out var allowedNext) && allowedNext.Contains(newStatus);
+    }
 
     public static HashSet<string> GetAllowedTransitions(string? currentStatus)
-    { throw new NotImplementedException(); }
+    {
+        if(currentStatus != null && AllowedTransitions.TryGetValue(currentStatus, out var nextStates))
+        {
+            return nextStates;
+        }
+
+        return [];
+    }
 }

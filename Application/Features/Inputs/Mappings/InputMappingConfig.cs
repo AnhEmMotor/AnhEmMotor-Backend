@@ -1,7 +1,7 @@
-﻿using Application.ApiContracts.Input.Responses;
+﻿using Application.ApiContracts.Input.Requests;
+using Application.ApiContracts.Input.Responses;
 using Application.Features.Inputs.Commands.CreateInput;
 using Application.Features.Inputs.Commands.UpdateInput;
-using Application.ApiContracts.Input.Requests;
 using Domain.Entities;
 using Mapster;
 
@@ -28,7 +28,7 @@ public sealed class InputMappingConfig : IRegister
                     ? src.ProductVariant.Product.Name
                     : null);
 
-        config.NewConfig<ApiContracts.Input.Requests.UpdateInputInfoRequest, InputInfo>().IgnoreNullValues(true);
+        config.NewConfig<UpdateInputInfoRequest, InputInfo>().IgnoreNullValues(true);
 
         config.NewConfig<UpdateInputCommand, Input>().IgnoreNullValues(true);
     }

@@ -10,9 +10,7 @@ namespace Application.Features.Brands.Commands.CreateBrand;
 
 public sealed class CreateBrandCommandHandler(IBrandInsertRepository repository, IUnitOfWork unitOfWork) : IRequestHandler<CreateBrandCommand, Result<BrandResponse>>
 {
-    public async Task<Result<BrandResponse>> Handle(
-        CreateBrandCommand request,
-        CancellationToken cancellationToken)
+    public async Task<Result<BrandResponse>> Handle(CreateBrandCommand request, CancellationToken cancellationToken)
     {
         var brand = request.Adapt<BrandEntity>();
 

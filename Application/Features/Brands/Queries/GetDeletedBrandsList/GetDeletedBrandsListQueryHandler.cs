@@ -1,11 +1,11 @@
 using Application.ApiContracts.Brand.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
 using Domain.Constants;
+using Domain.Primitives;
 using MediatR;
 using BrandEntity = Domain.Entities.Brand;
-using Domain.Primitives;
-using Application.Common.Models;
 
 namespace Application.Features.Brands.Queries.GetDeletedBrandsList;
 
@@ -17,10 +17,13 @@ public sealed class GetDeletedBrandsListQueryHandler(IBrandReadRepository reposi
     {
         var query = repository.GetQueryable(DataFetchMode.DeletedOnly);
 
-        return await paginator.ApplyAsync<BrandEntity, BrandResponse>(
+        var result = await paginator.ApplyAsync<BrandEntity, BrandResponse>(
             query,
             request.SieveModel!,
             DataFetchMode.DeletedOnly,
-            cancellationToken);
+            cancellationToken)
+            .ConfigureAwait(false);
+
+        return result;
     }
 }

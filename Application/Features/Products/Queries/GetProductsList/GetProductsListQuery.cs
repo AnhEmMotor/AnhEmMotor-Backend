@@ -1,8 +1,8 @@
 ﻿using Application.ApiContracts.Product.Responses;
+using Application.Common.Models;
+using Domain.Primitives;
 using MediatR;
 using Sieve.Models;
-using Domain.Primitives;
-using Application.Common.Models;
 
 namespace Application.Features.Products.Queries.GetProductsList;
 

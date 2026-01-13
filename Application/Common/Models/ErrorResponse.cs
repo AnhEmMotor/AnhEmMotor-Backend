@@ -5,25 +5,22 @@ namespace Application.Common.Models
     public class ErrorResponse(string? message = null)
     {
         public string? Message { get; set; } = message;
+
         public string? Type { get; set; }
+
         public string? Details { get; set; }
+
         public List<ErrorDetail>? Errors { get; set; }
+
         public ErrorResponse? InnerException { get; set; }
 
-        public static ErrorResponse CreateProductionError(string message)
-        {
-            return new ErrorResponse(message);
-        }
+        public static ErrorResponse CreateProductionError(string message) { return new ErrorResponse(message); }
 
         public static ErrorResponse CreateDevelopmentError(Exception ex)
         {
-            var response = new ErrorResponse(ex.Message)
-            {
-                Type = ex.GetType().FullName,
-                Details = ex.ToString()
-            };
+            var response = new ErrorResponse(ex.Message) { Type = ex.GetType().FullName, Details = ex.ToString() };
 
-            if (ex.InnerException != null)
+            if(ex.InnerException != null)
             {
                 response.InnerException = CreateDevelopmentError(ex.InnerException);
             }
@@ -36,7 +33,7 @@ namespace Application.Common.Models
             return new ErrorResponse("One or more validation errors occurred.")
             {
                 Errors =
-                    [.. failures.Select(f => new ErrorDetail { Field = f.PropertyName, Message = f.ErrorMessage })]
+                    [ .. failures.Select(f => new ErrorDetail { Field = f.PropertyName, Message = f.ErrorMessage }) ]
             };
         }
 
@@ -45,9 +42,10 @@ namespace Application.Common.Models
             return new ErrorResponse(error.Message)
             {
                 Type = error.Code,
-                Errors = error.Field is not null || error.Id is not null
-                    ? [new ErrorDetail { Field = error.Field, Message = error.Message, Id = error.Id }]
-                    : null
+                Errors =
+                    error.Field is not null || error.Id is not null
+                        ? [ new ErrorDetail { Field = error.Field, Message = error.Message, Id = error.Id } ]
+                        : null
             };
         }
 
@@ -57,7 +55,7 @@ namespace Application.Common.Models
             return new ErrorResponse(firstError?.Message ?? "One or more errors occurred.")
             {
                 Type = firstError?.Code,
-                Errors = [.. errors.Select(e => new ErrorDetail { Field = e.Field, Message = e.Message, Id = e.Id })]
+                Errors = [ .. errors.Select(e => new ErrorDetail { Field = e.Field, Message = e.Message, Id = e.Id }) ]
             };
         }
     }

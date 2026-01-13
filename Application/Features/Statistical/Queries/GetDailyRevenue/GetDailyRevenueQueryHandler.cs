@@ -11,7 +11,7 @@ public sealed class GetDailyRevenueQueryHandler(IStatisticalReadRepository repos
         GetDailyRevenueQuery request,
         CancellationToken cancellationToken)
     {
-        var result = await repository.GetDailyRevenueAsync(request.Days, cancellationToken);
+        var result = await repository.GetDailyRevenueAsync(request.Days, cancellationToken).ConfigureAwait(false);
         return Result<IEnumerable<DailyRevenueResponse>>.Success(result);
     }
 }

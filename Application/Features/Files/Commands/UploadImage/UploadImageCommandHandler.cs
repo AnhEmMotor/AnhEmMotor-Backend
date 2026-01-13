@@ -16,26 +16,22 @@ public sealed class UploadImageCommandHandler(
 {
     private const long MaxFileSize = 10 * 1024 * 1024;
 
-    public async Task<Result<MediaFileResponse>> Handle(
-        UploadImageCommand request,
-        CancellationToken cancellationToken)
+    public async Task<Result<MediaFileResponse>> Handle(UploadImageCommand request, CancellationToken cancellationToken)
     {
-        if (request.FileContent == null || request.FileContent.Length == 0)
+        if(request.FileContent == null || request.FileContent.Length == 0)
         {
             return Result<MediaFileResponse>.Failure("File is required");
         }
 
-        if (request.FileContent.Length > MaxFileSize)
+        if(request.FileContent.Length > MaxFileSize)
         {
             return Result<MediaFileResponse>.Failure("File size exceeds 10MB limit");
         }
 
-        var saveResult = await fileStorageService.SaveFileAsync(
-            request.FileContent,
-            cancellationToken)
+        var saveResult = await fileStorageService.SaveFileAsync(request.FileContent, cancellationToken)
             .ConfigureAwait(false);
 
-        if (saveResult.IsFailure)
+        if(saveResult.IsFailure)
         {
             return Result<MediaFileResponse>.Failure(saveResult.Error ?? Error.Failure("Unknown upload error"));
         }

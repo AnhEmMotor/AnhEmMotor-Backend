@@ -20,9 +20,7 @@ public sealed class UpdateInputCommandHandler(
     IProductVariantReadRepository variantRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateInputCommand, Result<InputResponse?>>
 {
-    public async Task<Result<InputResponse?>> Handle(
-        UpdateInputCommand request,
-        CancellationToken cancellationToken)
+    public async Task<Result<InputResponse?>> Handle(UpdateInputCommand request, CancellationToken cancellationToken)
     {
         var input = await readRepository.GetByIdWithDetailsAsync(
             request.Id,
@@ -35,16 +33,20 @@ public sealed class UpdateInputCommandHandler(
             return Error.NotFound($"Không tìm thấy phiếu nhập có ID {request.Id}.", "Id");
         }
 
-        if(Domain.Constants.InputStatus.IsCannotEdit(input.StatusId))
+        if(Domain.Constants.Input.InputStatus.IsCannotEdit(input.StatusId))
         {
             if(request.Products.Count != 0)
             {
-                return Error.BadRequest("Không được chỉnh sửa sản phẩm trong phiếu nhập đã hoàn thành hoặc đã hủy.", "Products");
+                return Error.BadRequest(
+                    "Không được chỉnh sửa sản phẩm trong phiếu nhập đã hoàn thành hoặc đã hủy.",
+                    "Products");
             }
 
             if(request.SupplierId != null)
             {
-                return Error.BadRequest("Không được chỉnh sửa mã nhà cung cấp trong phiếu nhập đã hoàn thành hoặc đã hủy.", "Products");
+                return Error.BadRequest(
+                    "Không được chỉnh sửa mã nhà cung cấp trong phiếu nhập đã hoàn thành hoặc đã hủy.",
+                    "Products");
             }
         }
 
@@ -78,14 +80,18 @@ public sealed class UpdateInputCommandHandler(
             {
                 var foundIds = variantsList.Select(v => v.Id).ToList();
                 var missingIds = variantIds.Except(foundIds).ToList();
-                return Error.NotFound($"Không tìm thấy {missingIds.Count} sản phẩm: {string.Join(", ", missingIds)}", "Products");
+                return Error.NotFound(
+                    $"Không tìm thấy {missingIds.Count} sản phẩm: {string.Join(", ", missingIds)}",
+                    "Products");
             }
 
             foreach(var variant in variantsList)
             {
                 if(string.Compare(variant.Product?.StatusId, Domain.Constants.ProductStatus.ForSale) != 0)
                 {
-                    return Error.BadRequest($"Sản phẩm '{variant.Product?.Name ?? variant.Id.ToString()}' không còn được bán.", "Products");
+                    return Error.BadRequest(
+                        $"Sản phẩm '{variant.Product?.Name ?? variant.Id.ToString()}' không còn được bán.",
+                        "Products");
                 }
             }
         }

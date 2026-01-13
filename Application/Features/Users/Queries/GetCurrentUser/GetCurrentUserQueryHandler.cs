@@ -12,7 +12,7 @@ public class GetCurrentUserQueryHandler(IUserReadRepository userReadRepository) 
         var userId = Guid.Parse(request.UserId!);
 
         var user = await userReadRepository.FindUserByIdAsync(userId, cancellationToken).ConfigureAwait(false);
-        if (user is null)
+        if(user is null)
         {
             return Error.NotFound("Invalid user token.");
         }

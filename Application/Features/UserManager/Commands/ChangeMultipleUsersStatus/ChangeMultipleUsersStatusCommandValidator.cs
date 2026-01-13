@@ -8,11 +8,11 @@ public sealed class ChangeMultipleUsersStatusCommandValidator : AbstractValidato
     public ChangeMultipleUsersStatusCommandValidator()
     {
         RuleFor(x => x.UserIds)
-            .NotEmpty().WithMessage("User list cannot be empty.")
-            .Must(ids => ids!.Count <= 50).WithMessage("To ensure performance, limit to 50 users per update.");
-
-        RuleFor(x => x.Status)
             .NotEmpty()
-            .Must(UserStatus.IsValid).WithMessage("Invalid status provided.");
+            .WithMessage("User list cannot be empty.")
+            .Must(ids => ids!.Count <= 50)
+            .WithMessage("To ensure performance, limit to 50 users per update.");
+
+        RuleFor(x => x.Status).NotEmpty().Must(UserStatus.IsValid).WithMessage("Invalid status provided.");
     }
 }

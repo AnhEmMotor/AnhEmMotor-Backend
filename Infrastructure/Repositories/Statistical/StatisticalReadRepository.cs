@@ -1,6 +1,5 @@
 using Application.ApiContracts.Statistical.Responses;
 using Application.Interfaces.Repositories.Statistical;
-using Domain.Constants;
 using Domain.Constants.Order;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
@@ -154,7 +153,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
 
         var confirmedInputs = await context.InputInfos
             .Join(context.InputReceipts, ii => ii.InputId, i => i.Id, (ii, i) => new { ii, i })
-            .Where(x => x.i.StatusId == InputStatus.Finish)
+            .Where(x => x.i.StatusId == Domain.Constants.Input.InputStatus.Finish)
             .GroupBy(x => x.ii.ProductId)
             .Select(g => new { VariantId = g.Key, TotalIn = g.Sum(x => (long)(x.ii.Count ?? 0)) })
             .ToListAsync(cancellationToken)
@@ -211,7 +210,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
 
         var totalInput = await context.InputInfos
                 .Join(context.InputReceipts, ii => ii.InputId, i => i.Id, (ii, i) => new { ii, i })
-                .Where(x => x.ii.ProductId == variantId && x.i.StatusId == InputStatus.Finish)
+                .Where(x => x.ii.ProductId == variantId && x.i.StatusId == Domain.Constants.Input.InputStatus.Finish)
                 .SumAsync(x => (long?)(x.ii.Count ?? 0), cancellationToken)
                 .ConfigureAwait(false) ??
             0;

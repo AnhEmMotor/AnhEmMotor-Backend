@@ -1,4 +1,5 @@
 ﻿using Application.ApiContracts.Brand.Responses;
+using Application.Common.Models;
 using Application.Features.Brands.Commands.CreateBrand;
 using Application.Features.Brands.Commands.DeleteBrand;
 using Application.Features.Brands.Commands.DeleteManyBrands;
@@ -9,14 +10,15 @@ using Application.Features.Brands.Queries.GetBrandById;
 using Application.Features.Brands.Queries.GetBrandsList;
 using Application.Features.Brands.Queries.GetDeletedBrandsList;
 using Asp.Versioning;
+using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
-using static Domain.Constants.Permission.PermissionsList;
 using WebAPI.Controllers.Base;
+using static Domain.Constants.Permission.PermissionsList;
 
 namespace WebAPI.Controllers.V1;
 
@@ -26,15 +28,17 @@ namespace WebAPI.Controllers.V1;
 [ApiVersion("1.0")]
 [SwaggerTag("Quản lý danh sách các thương hiệu sản phẩm")]
 [Route("api/v{version:apiVersion}/[controller]")]
-[ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status500InternalServerError)]
+[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
 public class BrandController(IMediator mediator) : ApiController
 {
     /// <summary>
     /// Lấy danh sách thương hiệu (có phân trang, lọc, sắp xếp - vào được cho mọi người dùng).
     /// </summary>
     [HttpGet]
-    [ProducesResponseType(typeof(Domain.Primitives.PagedResult<BrandResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetBrands([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(PagedResult<BrandResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetBrandsAsync(
+        [FromQuery] SieveModel sieveModel,
+        CancellationToken cancellationToken)
     {
         var query = new GetBrandsListQuery() { SieveModel = sieveModel };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
@@ -46,8 +50,8 @@ public class BrandController(IMediator mediator) : ApiController
     /// </summary>
     [HttpGet("for-manager")]
     [HasPermission(Brands.View)]
-    [ProducesResponseType(typeof(Domain.Primitives.PagedResult<BrandResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetBrandsForManager(
+    [ProducesResponseType(typeof(PagedResult<BrandResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetBrandsForManagerAsync(
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
     {
@@ -61,12 +65,12 @@ public class BrandController(IMediator mediator) : ApiController
     /// </summary>
     [HttpGet("deleted")]
     [HasPermission(Brands.View)]
-    [ProducesResponseType(typeof(Domain.Primitives.PagedResult<BrandResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetDeletedBrands(
+    [ProducesResponseType(typeof(PagedResult<BrandResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetDeletedBrandsAsync(
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
     {
-        var query = new GetDeletedBrandsListQuery() { SieveModel= sieveModel };
+        var query = new GetDeletedBrandsListQuery() { SieveModel = sieveModel };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -77,8 +81,8 @@ public class BrandController(IMediator mediator) : ApiController
     [HttpGet("{id:int}")]
     [HasPermission(Brands.View)]
     [ProducesResponseType(typeof(BrandResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetBrandById(int id, CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetBrandByIdAsync(int id, CancellationToken cancellationToken)
     {
         var query = new GetBrandByIdQuery() { Id = id };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
@@ -91,7 +95,7 @@ public class BrandController(IMediator mediator) : ApiController
     [HttpPost]
     [HasPermission(Brands.Create)]
     [ProducesResponseType(typeof(BrandResponse), StatusCodes.Status201Created)]
-    public async Task<IActionResult> CreateBrand(
+    public async Task<IActionResult> CreateBrandAsync(
         [FromBody] CreateBrandCommand request,
         CancellationToken cancellationToken)
     {
@@ -106,8 +110,8 @@ public class BrandController(IMediator mediator) : ApiController
     [HttpPut("{id:int}")]
     [HasPermission(Brands.Edit)]
     [ProducesResponseType(typeof(BrandResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UpdateBrand(
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateBrandAsync(
         int id,
         [FromBody] UpdateBrandCommand request,
         CancellationToken cancellationToken)
@@ -123,8 +127,8 @@ public class BrandController(IMediator mediator) : ApiController
     [HttpDelete("{id:int}")]
     [HasPermission(Brands.Delete)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> DeleteBrand(int id, CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DeleteBrandAsync(int id, CancellationToken cancellationToken)
     {
         var command = new DeleteBrandCommand() with { Id = id };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
@@ -137,8 +141,8 @@ public class BrandController(IMediator mediator) : ApiController
     [HttpPost("restore/{id:int}")]
     [HasPermission(Brands.Delete)]
     [ProducesResponseType(typeof(BrandResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> RestoreBrand(int id, CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> RestoreBrandAsync(int id, CancellationToken cancellationToken)
     {
         var command = new RestoreBrandCommand() with { Id = id };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
@@ -151,8 +155,8 @@ public class BrandController(IMediator mediator) : ApiController
     [HttpDelete("delete-many")]
     [HasPermission(Brands.Delete)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> DeleteBrands(
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> DeleteBrandsAsync(
         [FromBody] DeleteManyBrandsCommand request,
         CancellationToken cancellationToken)
     {
@@ -167,8 +171,8 @@ public class BrandController(IMediator mediator) : ApiController
     [HttpPost("restore-many")]
     [HasPermission(Brands.Delete)]
     [ProducesResponseType(typeof(List<BrandResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> RestoreBrands(
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> RestoreBrandsAsync(
         [FromBody] RestoreManyBrandsCommand request,
         CancellationToken cancellationToken)
     {

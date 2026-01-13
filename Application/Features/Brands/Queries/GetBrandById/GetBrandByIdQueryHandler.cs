@@ -1,16 +1,14 @@
-using Application.Interfaces.Repositories.Brand;
 using Application.ApiContracts.Brand.Responses;
+using Application.Common.Models;
+using Application.Interfaces.Repositories.Brand;
 using Mapster;
 using MediatR;
-using Application.Common.Models;
 
 namespace Application.Features.Brands.Queries.GetBrandById;
 
 public sealed class GetBrandByIdQueryHandler(IBrandReadRepository repository) : IRequestHandler<GetBrandByIdQuery, Result<BrandResponse>>
 {
-    public async Task<Result<BrandResponse>> Handle(
-        GetBrandByIdQuery request,
-        CancellationToken cancellationToken)
+    public async Task<Result<BrandResponse>> Handle(GetBrandByIdQuery request, CancellationToken cancellationToken)
     {
         var brand = await repository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
 

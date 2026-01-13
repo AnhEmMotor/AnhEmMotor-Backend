@@ -2,8 +2,6 @@ using Application.ApiContracts.Input.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
-
-using Domain.Constants;
 using Mapster;
 using MediatR;
 
@@ -18,7 +16,7 @@ public sealed class UpdateManyInputStatusCommandHandler(
         UpdateManyInputStatusCommand request,
         CancellationToken cancellationToken)
     {
-        if(!InputStatus.IsValid(request.StatusId))
+        if(!Domain.Constants.Input.InputStatus.IsValid(request.StatusId))
         {
             return Error.BadRequest($"Trạng thái '{request.StatusId}' không hợp lệ.", "StatusId");
         }
@@ -31,16 +29,21 @@ public sealed class UpdateManyInputStatusCommandHandler(
         {
             var foundIds = inputsList.Select(i => i.Id).ToList();
             var missingIds = request.Ids.Except(foundIds).ToList();
-            return Error.NotFound($"Không tìm thấy {missingIds.Count} phiếu nhập: {string.Join(", ", missingIds)}", "Ids");
+            return Error.NotFound(
+                $"Không tìm thấy {missingIds.Count} phiếu nhập: {string.Join(", ", missingIds)}",
+                "Ids");
         }
 
         var errors = new List<Error>();
 
         foreach(var input in inputsList)
         {
-            if(InputStatus.IsCannotEdit(input.StatusId))
+            if(Domain.Constants.Input.InputStatus.IsCannotEdit(input.StatusId))
             {
-                errors.Add(Error.BadRequest($"Phiếu nhập {input.Id} đang ở trạng thái '{input.StatusId}' nên không thể chuyển sang '{request.StatusId}'.", "Ids"));
+                errors.Add(
+                    Error.BadRequest(
+                        $"Phiếu nhập {input.Id} đang ở trạng thái '{input.StatusId}' nên không thể chuyển sang '{request.StatusId}'.",
+                        "Ids"));
                 continue;
             }
         }

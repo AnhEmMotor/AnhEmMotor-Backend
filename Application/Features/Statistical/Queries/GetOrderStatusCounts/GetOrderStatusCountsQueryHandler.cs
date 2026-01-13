@@ -11,7 +11,7 @@ public sealed class GetOrderStatusCountsQueryHandler(IStatisticalReadRepository 
         GetOrderStatusCountsQuery request,
         CancellationToken cancellationToken)
     {
-        var result = await repository.GetOrderStatusCountsAsync(cancellationToken);
+        var result = await repository.GetOrderStatusCountsAsync(cancellationToken).ConfigureAwait(false);
         return Result<IEnumerable<OrderStatusCountResponse>>.Success(result);
     }
 }

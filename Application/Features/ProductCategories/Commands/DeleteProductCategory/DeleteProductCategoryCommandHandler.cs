@@ -13,23 +13,23 @@ public sealed class DeleteProductCategoryCommandHandler(
     IProtectedProductCategoryService protectedCategoryService,
     IUnitOfWork unitOfWork) : IRequestHandler<DeleteProductCategoryCommand, Result>
 {
-    public async Task<Result> Handle(
-        DeleteProductCategoryCommand request,
-        CancellationToken cancellationToken)
+    public async Task<Result> Handle(DeleteProductCategoryCommand request, CancellationToken cancellationToken)
     {
         var category = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
 
-        if (category is null)
+        if(category is null)
         {
             return Result.Failure(Error.NotFound($"Product category with Id {request.Id} not found."));
         }
 
-        var isProtected = await protectedCategoryService.IsProtectedAsync(request.Id, cancellationToken).ConfigureAwait(false);
+        var isProtected = await protectedCategoryService.IsProtectedAsync(request.Id, cancellationToken)
+            .ConfigureAwait(false);
 
-        if (isProtected)
+        if(isProtected)
         {
-            return Result.Failure(Error.Validation(
-                $"Cannot delete product category '{category.Name}'. This category is protected and cannot be deleted."));
+            return Result.Failure(
+                Error.Validation(
+                    $"Cannot delete product category '{category.Name}'. This category is protected and cannot be deleted."));
         }
 
         deleteRepository.Delete(category);

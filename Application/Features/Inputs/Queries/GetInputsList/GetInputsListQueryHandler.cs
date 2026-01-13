@@ -16,9 +16,12 @@ public sealed class GetInputsListQueryHandler(IInputReadRepository repository, I
     {
         var query = repository.GetQueryable();
 
-        return await paginator.ApplyAsync<InputEntity, InputResponse>(
+        var result = await paginator.ApplyAsync<InputEntity, InputResponse>(
             query,
             request.SieveModel!,
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
+
+        return result;
     }
 }

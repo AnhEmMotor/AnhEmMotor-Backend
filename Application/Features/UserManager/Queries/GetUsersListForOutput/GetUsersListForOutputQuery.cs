@@ -6,7 +6,7 @@ using Sieve.Models;
 
 namespace Application.Features.UserManager.Queries.GetUsersListForOutput;
 
-public record GetUsersListForOutputQuery: IRequest<Result<PagedResult<UserDTOForOutputResponse>>>
+public record GetUsersListForOutputQuery : IRequest<Result<PagedResult<UserDTOForOutputResponse>>>
 {
     public SieveModel? SieveModel { get; init; }
 }

@@ -1,8 +1,8 @@
 using Application.ApiContracts.Output.Responses;
+using Application.Common.Models;
+using Domain.Primitives;
 using MediatR;
 using Sieve.Models;
-using Domain.Primitives;
-using Application.Common.Models;
 
 namespace Application.Features.Outputs.Queries.GetDeletedOutputsList;
 

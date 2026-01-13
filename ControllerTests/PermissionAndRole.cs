@@ -1,9 +1,8 @@
-using Application.ApiContracts.Permission.Responses;
+﻿using Application.ApiContracts.Permission.Responses;
 using Application.Common.Models;
 using Application.Features.Permissions.Commands.CreateRole;
 using Application.Features.Permissions.Commands.DeleteMultipleRoles;
 using Application.Features.Permissions.Commands.DeleteRole;
-using Application.Features.Permissions.Commands.UpdateRolePermissions;
 using Application.Features.Permissions.Queries.GetAllPermissions;
 using Application.Features.Permissions.Queries.GetAllRoles;
 using Application.Features.Permissions.Queries.GetMyPermissions;
@@ -17,7 +16,6 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System.Security.Claims;
 using WebAPI.Controllers.V1;
-using Xunit;
 
 namespace ControllerTests;
 
@@ -32,32 +30,55 @@ public class PermissionAndRole
         _controller = new PermissionController(_mediatorMock.Object);
 
         var httpContext = new DefaultHttpContext();
-        _controller.ControllerContext = new ControllerContext()
-        {
-            HttpContext = httpContext
-        };
+        _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
     }
 
+#pragma warning disable CRR0035
     [Fact(DisplayName = "PERM_CTRL_001 - Controller gọi GetAllPermissions thành công")]
     public async Task GetAllPermissions_MediatorReturnsData_ReturnsOkWithData()
     {
-        // Arrange
         var expectedData = new Dictionary<string, List<PermissionResponse>>
         {
-            { "Brands", new List<PermissionResponse>
+            {
+                "Brands",
+                new List<PermissionResponse>
                 {
-                    new() { ID = PermissionsList.Brands.View, DisplayName = "View Brands", Description = "Xem danh sách thương hiệu" },
-                    new() { ID = PermissionsList.Brands.Create, DisplayName = "Create Brand", Description = "Tạo thương hiệu mới" }
+                    new()
+                    {
+                        ID = PermissionsList.Brands.View,
+                        DisplayName = "View Brands",
+                        Description = "Xem danh sách thương hiệu"
+                    },
+                    new()
+                    {
+                        ID = PermissionsList.Brands.Create,
+                        DisplayName = "Create Brand",
+                        Description = "Tạo thương hiệu mới"
+                    }
                 }
             },
-            { "Products", new List<PermissionResponse>
+            {
+                "Products",
+                new List<PermissionResponse>
                 {
-                    new() { ID = PermissionsList.Products.View, DisplayName = "View Products", Description = "Xem danh sách sản phẩm" }
+                    new()
+                    {
+                        ID = PermissionsList.Products.View,
+                        DisplayName = "View Products",
+                        Description = "Xem danh sách sản phẩm"
+                    }
                 }
             },
-            { "Roles", new List<PermissionResponse>
+            {
+                "Roles",
+                new List<PermissionResponse>
                 {
-                    new() { ID = PermissionsList.Roles.View, DisplayName = "View Roles", Description = "Xem danh sách vai trò" }
+                    new()
+                    {
+                        ID = PermissionsList.Roles.View,
+                        DisplayName = "View Roles",
+                        Description = "Xem danh sách vai trò"
+                    }
                 }
             }
         };
@@ -65,10 +86,8 @@ public class PermissionAndRole
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetAllPermissionsQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedData);
 
-        // Act
-        var result = await _controller.GetAllPermissions(CancellationToken.None);
+        var result = await _controller.GetAllPermissionsAsync(CancellationToken.None).ConfigureAwait(true);
 
-        // Assert
         result.Should().BeOfType<OkObjectResult>();
         var okResult = result as OkObjectResult;
         okResult!.Value.Should().BeEquivalentTo(expectedData);
@@ -77,7 +96,6 @@ public class PermissionAndRole
     [Fact(DisplayName = "PERM_CTRL_002 - Controller gọi GetMyPermissions thành công")]
     public async Task GetMyPermissions_MediatorReturnsData_ReturnsOkWithPermissions()
     {
-        // Arrange
         var userId = Guid.NewGuid();
         SetupUserClaims(userId);
 
@@ -86,23 +104,19 @@ public class PermissionAndRole
             UserId = userId,
             UserName = "testuser",
             Email = "test@test.com",
-            Roles = ["Manager"],
+            Roles = [ "Manager" ],
             Permissions =
-            [
-                new() { ID = PermissionsList.Brands.View },
-                new() { ID = PermissionsList.Brands.Create },
-                new() { ID = PermissionsList.Products.View },
-                new() { ID = PermissionsList.Products.Create }
-            ]
+                [ new() { ID = PermissionsList.Brands.View }, new() { ID = PermissionsList.Brands.Create }, new()
+                {
+                    ID = PermissionsList.Products.View
+                }, new() { ID = PermissionsList.Products.Create } ]
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetMyPermissionsQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
 
-        // Act
-        var result = await _controller.GetMyPermissions(CancellationToken.None);
+        var result = await _controller.GetMyPermissionsAsync(CancellationToken.None).ConfigureAwait(true);
 
-        // Assert
         result.Should().BeOfType<OkObjectResult>();
         var okResult = result as OkObjectResult;
         var response = okResult!.Value as PermissionAndRoleOfUserResponse;
@@ -113,21 +127,17 @@ public class PermissionAndRole
     [Fact(DisplayName = "PERM_CTRL_003 - Controller gọi GetMyPermissions khi user chưa đăng nhập")]
     public async Task GetMyPermissions_NoUserClaims_ThrowsUnauthorizedException()
     {
-        // Arrange
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetMyPermissionsQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PermissionAndRoleOfUserResponse>.Failure(Error.Unauthorized("User not authenticated")));
 
-        // Act
-        var result = await _controller.GetMyPermissions(CancellationToken.None);
+        var result = await _controller.GetMyPermissionsAsync(CancellationToken.None).ConfigureAwait(true);
 
-        // Assert
         result.Should().BeOfType<UnauthorizedObjectResult>();
     }
 
     [Fact(DisplayName = "PERM_CTRL_004 - Controller gọi GetUserPermissionsById thành công")]
     public async Task GetUserPermissionsById_ValidUserId_ReturnsOkWithPermissions()
     {
-        // Arrange
         var userId = Guid.NewGuid();
 
         var expectedResponse = new PermissionAndRoleOfUserResponse
@@ -135,24 +145,20 @@ public class PermissionAndRole
             UserId = userId,
             UserName = "targetuser",
             Email = "target@test.com",
-            Roles = ["Staff"],
+            Roles = [ "Staff" ],
             Permissions =
-            [
-                new() { ID = PermissionsList.Products.View },
-                new() { ID = PermissionsList.Brands.View },
-                new() { ID = PermissionsList.Files.View },
-                new() { ID = PermissionsList.Files.Upload },
-                new() { ID = PermissionsList.Suppliers.View }
-            ]
+                [ new() { ID = PermissionsList.Products.View }, new() { ID = PermissionsList.Brands.View }, new()
+                {
+                    ID = PermissionsList.Files.View
+                }, new() { ID = PermissionsList.Files.Upload }, new() { ID = PermissionsList.Suppliers.View } ]
         };
 
-        _mediatorMock.Setup(m => m.Send(It.Is<GetUserPermissionsByIdQuery>(q => q.UserId == userId), It.IsAny<CancellationToken>()))
+        _mediatorMock.Setup(
+            m => m.Send(It.Is<GetUserPermissionsByIdQuery>(q => q.UserId == userId), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
 
-        // Act
-        var result = await _controller.GetUserPermissionsById(userId, CancellationToken.None);
+        var result = await _controller.GetUserPermissionsByIdAsync(userId, CancellationToken.None).ConfigureAwait(true);
 
-        // Assert
         result.Should().BeOfType<OkObjectResult>();
         var okResult = result as OkObjectResult;
         var response = okResult!.Value as PermissionAndRoleOfUserResponse;
@@ -164,23 +170,21 @@ public class PermissionAndRole
     [Fact(DisplayName = "PERM_CTRL_005 - Controller gọi GetUserPermissionsById với userId không hợp lệ")]
     public async Task GetUserPermissionsById_InvalidUserId_ThrowsNotFoundException()
     {
-        // Arrange
         var userId = Guid.NewGuid();
 
-        _mediatorMock.Setup(m => m.Send(It.Is<GetUserPermissionsByIdQuery>(q => q.UserId == userId), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<PermissionAndRoleOfUserResponse>.Failure(Error.NotFound($"User with id {userId} not found")));
+        _mediatorMock.Setup(
+            m => m.Send(It.Is<GetUserPermissionsByIdQuery>(q => q.UserId == userId), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(
+                Result<PermissionAndRoleOfUserResponse>.Failure(Error.NotFound($"User with id {userId} not found")));
 
-        // Act
-        var result = await _controller.GetUserPermissionsById(userId, CancellationToken.None);
+        var result = await _controller.GetUserPermissionsByIdAsync(userId, CancellationToken.None).ConfigureAwait(true);
 
-        // Assert
         result.Should().BeOfType<NotFoundObjectResult>();
     }
 
     [Fact(DisplayName = "PERM_CTRL_006 - Controller gọi GetRolePermissions thành công")]
     public async Task GetRolePermissions_ValidRoleName_ReturnsOkWithPermissions()
     {
-        // Arrange
         var roleName = "Manager";
 
         var expectedPermissions = new List<PermissionResponse>
@@ -193,13 +197,14 @@ public class PermissionAndRole
             new() { ID = PermissionsList.Suppliers.View }
         };
 
-        _mediatorMock.Setup(m => m.Send(It.Is<GetRolePermissionsQuery>(q => q.RoleName == roleName), It.IsAny<CancellationToken>()))
+        _mediatorMock.Setup(
+            m => m.Send(
+                It.Is<GetRolePermissionsQuery>(q => string.Compare(q.RoleName, roleName) == 0),
+                It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedPermissions);
 
-        // Act
-        var result = await _controller.GetRolePermissions(roleName, CancellationToken.None);
+        var result = await _controller.GetRolePermissionsAsync(roleName, CancellationToken.None).ConfigureAwait(true);
 
-        // Assert
         result.Should().BeOfType<OkObjectResult>();
         var okResult = result as OkObjectResult;
         var permissions = okResult!.Value as List<PermissionResponse>;
@@ -210,23 +215,22 @@ public class PermissionAndRole
     [Fact(DisplayName = "PERM_CTRL_007 - Controller gọi GetRolePermissions với role không tồn tại")]
     public async Task GetRolePermissions_InvalidRoleName_ThrowsNotFoundException()
     {
-        // Arrange
         var roleName = "InvalidRole";
 
-        _mediatorMock.Setup(m => m.Send(It.Is<GetRolePermissionsQuery>(q => q.RoleName == roleName), It.IsAny<CancellationToken>()))
+        _mediatorMock.Setup(
+            m => m.Send(
+                It.Is<GetRolePermissionsQuery>(q => string.Compare(q.RoleName, roleName) == 0),
+                It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<List<PermissionResponse>>.Failure(Error.NotFound($"Role {roleName} not found")));
 
-        // Act
-        var result = await _controller.GetRolePermissions(roleName, CancellationToken.None);
+        var result = await _controller.GetRolePermissionsAsync(roleName, CancellationToken.None).ConfigureAwait(true);
 
-        // Assert
         result.Should().BeOfType<NotFoundObjectResult>();
     }
 
     [Fact(DisplayName = "PERM_CTRL_009 - Controller gọi GetAllRoles thành công")]
     public async Task GetAllRoles_MediatorReturnsData_ReturnsOkWithRoles()
     {
-        // Arrange
         var expectedRoles = new List<RoleSelectResponse>
         {
             new() { ID = Guid.NewGuid(), Name = "Admin" },
@@ -238,10 +242,8 @@ public class PermissionAndRole
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetAllRolesQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedRoles);
 
-        // Act
-        var result = await _controller.GetAllRoles(CancellationToken.None);
+        var result = await _controller.GetAllRolesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        // Assert
         result.Should().BeOfType<OkObjectResult>();
         var okResult = result as OkObjectResult;
         var roles = okResult!.Value as List<RoleSelectResponse>;
@@ -252,12 +254,11 @@ public class PermissionAndRole
     [Fact(DisplayName = "PERM_CTRL_010 - Controller gọi CreateRole thành công")]
     public async Task CreateRole_ValidRequest_ReturnsOkWithCreatedRole()
     {
-        // Arrange
         var request = new CreateRoleCommand
         {
             RoleName = "NewRole",
             Description = "Test Role",
-            Permissions = [PermissionsList.Brands.View, PermissionsList.Products.View]
+            Permissions = [ PermissionsList.Brands.View, PermissionsList.Products.View ]
         };
 
         var expectedResponse = new RoleCreateResponse
@@ -272,10 +273,8 @@ public class PermissionAndRole
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateRoleCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
 
-        // Act
-        var result = await _controller.CreateRole(request, CancellationToken.None);
+        var result = await _controller.CreateRoleAsync(request, CancellationToken.None).ConfigureAwait(true);
 
-        // Assert
         result.Should().BeOfType<OkObjectResult>();
         var okResult = result as OkObjectResult;
         var response = okResult!.Value as RoleCreateResponse;
@@ -287,54 +286,48 @@ public class PermissionAndRole
     [Fact(DisplayName = "PERM_CTRL_011 - Controller gọi CreateRole với tên trùng")]
     public async Task CreateRole_DuplicateName_ThrowsValidationException()
     {
-        // Arrange
         var request = new CreateRoleCommand
         {
             RoleName = "Admin",
             Description = "Duplicate",
-            Permissions = [PermissionsList.Brands.View]
+            Permissions = [ PermissionsList.Brands.View ]
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateRoleCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new FluentValidation.ValidationException("Role name already exists"));
 
-        // Act
-        Func<Task> act = async () => await _controller.CreateRole(request, CancellationToken.None);
+        Func<Task> act = async () => await _controller.CreateRoleAsync(request, CancellationToken.None)
+            .ConfigureAwait(true);
 
-        // Assert
-        await act.Should().ThrowAsync<FluentValidation.ValidationException>()
-            .WithMessage("*already exists*");
+        await act.Should()
+            .ThrowAsync<FluentValidation.ValidationException>()
+            .WithMessage("*already exists*")
+            .ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "PERM_CTRL_012 - Controller calls UpdateRole successfully")]
     public async Task UpdateRole_ValidRequest_ReturnsOkWithUpdatedRole()
     {
-        // Arrange
         var roleName = "Editor";
-        var request = new UpdateRoleCommand
+        var request = new Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommand
         {
             Description = "Updated Description"
         };
 
-        // [SỬA TẠI ĐÂY]: Dùng đúng class PermissionRoleUpdateResponse thay vì RoleUpdateResponse
-        var expectedResponse = new PermissionRoleUpdateResponse
-        {
-            Message = "Role updated successfully"
-        };
+        var expectedResponse = new PermissionRoleUpdateResponse { Message = "Role updated successfully" };
 
-        // Đảm bảo bọc đúng vào Result wrapper (như bài trước đã nói)
         _mediatorMock
-            .Setup(m => m.Send(It.IsAny<UpdateRoleCommand>(), It.IsAny<CancellationToken>()))
+            .Setup(
+                m => m.Send(
+                    It.IsAny<Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommand>(),
+                    It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PermissionRoleUpdateResponse>.Success(expectedResponse));
 
-        // Act
-        var result = await _controller.UpdateRole(roleName, request, CancellationToken.None);
+        var result = await _controller.UpdateRoleAsync(roleName, request, CancellationToken.None).ConfigureAwait(true);
 
-        // Assert
         result.Should().BeOfType<OkObjectResult>();
         var okResult = result as OkObjectResult;
 
-        // Cast về đúng kiểu để Assert
         var response = okResult!.Value as PermissionRoleUpdateResponse;
         response.Should().NotBeNull();
     }
@@ -342,21 +335,18 @@ public class PermissionAndRole
     [Fact(DisplayName = "PERM_CTRL_013 - Controller gọi DeleteRole thành công")]
     public async Task DeleteRole_ValidRoleName_ReturnsOk()
     {
-        // Arrange
         var roleName = "OldRole";
 
-        var expectedResponse = new RoleDeleteResponse
-        {
-            Message = "Role deleted successfully"
-        };
+        var expectedResponse = new RoleDeleteResponse { Message = "Role deleted successfully" };
 
-        _mediatorMock.Setup(m => m.Send(It.Is<DeleteRoleCommand>(c => c.RoleName == roleName), It.IsAny<CancellationToken>()))
+        _mediatorMock.Setup(
+            m => m.Send(
+                It.Is<DeleteRoleCommand>(c => string.Compare(c.RoleName, roleName) == 0),
+                It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
 
-        // Act
-        var result = await _controller.DeleteRole(roleName, CancellationToken.None);
+        var result = await _controller.DeleteRoleAsync(roleName, CancellationToken.None).ConfigureAwait(true);
 
-        // Assert
         result.Should().BeOfType<OkObjectResult>();
         var okResult = result as OkObjectResult;
         var response = okResult!.Value as RoleDeleteResponse;
@@ -367,37 +357,31 @@ public class PermissionAndRole
     [Fact(DisplayName = "PERM_CTRL_014 - Controller gọi DeleteRole với role không tồn tại")]
     public async Task DeleteRole_NonExistentRole_ThrowsNotFoundException()
     {
-        // Arrange
         var roleName = "NonExistent";
 
-        _mediatorMock.Setup(m => m.Send(It.Is<DeleteRoleCommand>(c => c.RoleName == roleName), It.IsAny<CancellationToken>()))
+        _mediatorMock.Setup(
+            m => m.Send(
+                It.Is<DeleteRoleCommand>(c => string.Compare(c.RoleName, roleName) == 0),
+                It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<RoleDeleteResponse>.Failure(Error.NotFound($"Role {roleName} not found")));
 
-        // Act
-        var result = await _controller.DeleteRole(roleName, CancellationToken.None);
+        var result = await _controller.DeleteRoleAsync(roleName, CancellationToken.None).ConfigureAwait(true);
 
-        // Assert
         result.Should().BeOfType<NotFoundObjectResult>();
     }
 
     [Fact(DisplayName = "PERM_CTRL_015 - Controller gọi DeleteMultipleRoles thành công")]
     public async Task DeleteMultipleRoles_ValidRoleNames_ReturnsOk()
     {
-        // Arrange
         var roleNames = new List<string> { "Role1", "Role2" };
 
-        var expectedResponse = new RoleDeleteResponse
-        {
-            Message = "2 roles deleted successfully"
-        };
+        var expectedResponse = new RoleDeleteResponse { Message = "2 roles deleted successfully" };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteMultipleRolesCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
 
-        // Act
-        var result = await _controller.DeleteMultipleRoles(roleNames, CancellationToken.None);
+        var result = await _controller.DeleteMultipleRolesAsync(roleNames, CancellationToken.None).ConfigureAwait(true);
 
-        // Assert
         result.Should().BeOfType<OkObjectResult>();
         var okResult = result as OkObjectResult;
         var response = okResult!.Value as RoleDeleteResponse;
@@ -405,8 +389,6 @@ public class PermissionAndRole
         response!.Message.Should().Contain("2");
         response.Message.Should().Contain("successfully");
     }
-
-    // Helper Methods
 
     private void SetupUserClaims(Guid userId)
     {
@@ -422,4 +404,5 @@ public class PermissionAndRole
 
         _controller.ControllerContext.HttpContext.User = claimsPrincipal;
     }
+#pragma warning restore CRR0035
 }

@@ -37,24 +37,30 @@ public class ChangeMultipleUsersStatusCommandHandler(
             {
                 if(!string.IsNullOrEmpty(user.Email) && protectedEmails.Contains(user.Email))
                 {
-                    errorMessages.Add(Error.Validation($"User {user.Email} is protected and cannot be deactivated.", "UserIds"));
+                    errorMessages.Add(
+                        Error.Validation($"User {user.Email} is protected and cannot be deactivated.", "UserIds"));
                     continue;
                 }
 
-                var userRoles = await userReadRepository.GetUserRolesAsync(user, cancellationToken).ConfigureAwait(false);
+                var userRoles = await userReadRepository.GetUserRolesAsync(user, cancellationToken)
+                    .ConfigureAwait(false);
                 var isLastActiveInSuperRole = false;
 
                 foreach(var userRole in userRoles)
                 {
                     if(superRoles.Contains(userRole))
                     {
-                        var usersInRole = await userReadRepository.GetUsersInRoleAsync(userRole, cancellationToken).ConfigureAwait(false);
+                        var usersInRole = await userReadRepository.GetUsersInRoleAsync(userRole, cancellationToken)
+                            .ConfigureAwait(false);
                         var activeUsersInRole = usersInRole.Where(u => string.Compare(u.Status, UserStatus.Active) == 0)
                             .ToList();
 
                         if(activeUsersInRole.Count == 1 && activeUsersInRole[0].Id == userId)
                         {
-                            errorMessages.Add(Error.Validation($"User {user.Email} is protected and cannot be deactivated.", "UserIds"));
+                            errorMessages.Add(
+                                Error.Validation(
+                                    $"User {user.Email} is protected and cannot be deactivated.",
+                                    "UserIds"));
                             isLastActiveInSuperRole = true;
                             break;
                         }
@@ -92,7 +98,8 @@ public class ChangeMultipleUsersStatusCommandHandler(
         foreach(var user in usersToUpdate)
         {
             user.Status = request.Status!;
-            var (succeeded, errors) = await userUpdateRepository.UpdateUserAsync(user, cancellationToken).ConfigureAwait(false);
+            var (succeeded, errors) = await userUpdateRepository.UpdateUserAsync(user, cancellationToken)
+                .ConfigureAwait(false);
 
             if(!succeeded)
             {

@@ -12,9 +12,7 @@ public sealed class DeleteOutputCommandHandler(
     IOutputDeleteRepository deleteRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<DeleteOutputCommand, Result>
 {
-    public async Task<Result> Handle(
-        DeleteOutputCommand request,
-        CancellationToken cancellationToken)
+    public async Task<Result> Handle(DeleteOutputCommand request, CancellationToken cancellationToken)
     {
         var output = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
 
@@ -25,7 +23,8 @@ public sealed class DeleteOutputCommandHandler(
 
         if(OrderStatus.IsCannotDelete(output.StatusId))
         {
-            return Result.Failure(Error.BadRequest($"Không thể xóa đơn hàng có trạng thái '{output.StatusId}'.", "StatusId"));
+            return Result.Failure(
+                Error.BadRequest($"Không thể xóa đơn hàng có trạng thái '{output.StatusId}'.", "StatusId"));
         }
 
         deleteRepository.Delete(output);

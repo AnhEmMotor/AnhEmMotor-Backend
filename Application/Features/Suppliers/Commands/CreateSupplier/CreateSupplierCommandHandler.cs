@@ -10,7 +10,9 @@ namespace Application.Features.Suppliers.Commands.CreateSupplier;
 
 public sealed class CreateSupplierCommandHandler(ISupplierInsertRepository repository, IUnitOfWork unitOfWork) : IRequestHandler<CreateSupplierCommand, Result<SupplierResponse>>
 {
-    public async Task<Result<SupplierResponse>> Handle(CreateSupplierCommand request, CancellationToken cancellationToken)
+    public async Task<Result<SupplierResponse>> Handle(
+        CreateSupplierCommand request,
+        CancellationToken cancellationToken)
     {
         var supplier = request.Adapt<Supplier>();
 

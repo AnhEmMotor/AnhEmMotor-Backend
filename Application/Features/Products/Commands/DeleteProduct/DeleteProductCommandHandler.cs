@@ -12,9 +12,7 @@ public sealed class DeleteProductCommandHandler(
     IProductDeleteRepository deleteRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<DeleteProductCommand, Result>
 {
-    public async Task<Result> Handle(
-        DeleteProductCommand command,
-        CancellationToken cancellationToken)
+    public async Task<Result> Handle(DeleteProductCommand command, CancellationToken cancellationToken)
     {
         var product = await readRepository.GetByIdWithDetailsAsync(command.Id, cancellationToken).ConfigureAwait(false);
 

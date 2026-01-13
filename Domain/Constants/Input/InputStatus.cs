@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Domain.Constants
+namespace Domain.Constants.Input
 {
     public static class InputStatus
     {

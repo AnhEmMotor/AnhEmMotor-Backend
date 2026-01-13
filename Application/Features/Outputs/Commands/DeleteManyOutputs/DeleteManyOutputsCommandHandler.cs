@@ -12,9 +12,7 @@ public sealed class DeleteManyOutputsCommandHandler(
     IOutputDeleteRepository deleteRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<DeleteManyOutputsCommand, Result>
 {
-    public async Task<Result> Handle(
-        DeleteManyOutputsCommand request,
-        CancellationToken cancellationToken)
+    public async Task<Result> Handle(DeleteManyOutputsCommand request, CancellationToken cancellationToken)
     {
         var outputs = await readRepository.GetByIdAsync(request.Ids, cancellationToken).ConfigureAwait(false);
 
@@ -24,7 +22,8 @@ public sealed class DeleteManyOutputsCommandHandler(
         {
             var foundIds = outputsList.Select(o => o.Id).ToList();
             var missingIds = request.Ids.Except(foundIds).ToList();
-            return Result.Failure(Error.NotFound($"Không tìm thấy {missingIds.Count} đơn hàng: {string.Join(", ", missingIds)}", "Ids"));
+            return Result.Failure(
+                Error.NotFound($"Không tìm thấy {missingIds.Count} đơn hàng: {string.Join(", ", missingIds)}", "Ids"));
         }
 
         var errors = new List<Error>();

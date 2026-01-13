@@ -12,7 +12,9 @@ public class RegisterCommandHandler(
     IUserCreateRepository userCreateRepository,
     IProtectedEntityManagerService protectedEntityManagerService) : IRequestHandler<RegisterCommand, Result<RegistrationSuccessResponse>>
 {
-    public async Task<Result<RegistrationSuccessResponse>> Handle(RegisterCommand request, CancellationToken cancellationToken)
+    public async Task<Result<RegistrationSuccessResponse>> Handle(
+        RegisterCommand request,
+        CancellationToken cancellationToken)
     {
         var user = new ApplicationUser
         {
@@ -26,7 +28,8 @@ public class RegisterCommandHandler(
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        var (succeeded, errors) = await userCreateRepository.CreateUserAsync(user, request.Password!, cancellationToken).ConfigureAwait(false);
+        var (succeeded, errors) = await userCreateRepository.CreateUserAsync(user, request.Password!, cancellationToken)
+            .ConfigureAwait(false);
 
         if(!succeeded)
         {

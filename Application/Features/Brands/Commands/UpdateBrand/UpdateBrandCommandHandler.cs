@@ -1,8 +1,8 @@
+using Application.ApiContracts.Brand.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
 using Mapster;
-using Application.ApiContracts.Brand.Responses;
 using MediatR;
 
 namespace Application.Features.Brands.Commands.UpdateBrand;
@@ -12,9 +12,7 @@ public sealed class UpdateBrandCommandHandler(
     IBrandUpdateRepository updateRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateBrandCommand, Result<BrandResponse?>>
 {
-    public async Task<Result<BrandResponse?>> Handle(
-        UpdateBrandCommand request,
-        CancellationToken cancellationToken)
+    public async Task<Result<BrandResponse?>> Handle(UpdateBrandCommand request, CancellationToken cancellationToken)
     {
         var brand = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
 

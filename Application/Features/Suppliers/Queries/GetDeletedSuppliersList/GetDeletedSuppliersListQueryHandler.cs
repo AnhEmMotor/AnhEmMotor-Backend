@@ -17,10 +17,12 @@ public sealed class GetDeletedSuppliersListQueryHandler(ISupplierReadRepository 
     {
         var query = repository.GetQueryable(DataFetchMode.DeletedOnly);
 
-        return await paginator.ApplyAsync<SupplierEntity, SupplierResponse>(
+        var result = await paginator.ApplyAsync<SupplierEntity, SupplierResponse>(
             query,
             request.SieveModel!,
             DataFetchMode.DeletedOnly,
-            cancellationToken);
+            cancellationToken)
+            .ConfigureAwait(false);
+        return result;
     }
 }

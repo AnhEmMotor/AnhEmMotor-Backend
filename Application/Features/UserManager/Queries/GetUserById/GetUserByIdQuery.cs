@@ -6,5 +6,5 @@ namespace Application.Features.UserManager.Queries.GetUserById;
 
 public record GetUserByIdQuery : IRequest<Result<UserDTOForManagerResponse>>
 {
-    public Guid? UserId { get; set; }
+    public Guid? UserId { get; init; }
 }

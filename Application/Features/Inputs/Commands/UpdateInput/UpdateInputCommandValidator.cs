@@ -1,5 +1,4 @@
-﻿using Application.Features.Inputs.Commands.CreateInput;
-using FluentValidation;
+﻿using FluentValidation;
 
 namespace Application.Features.Inputs.Commands.UpdateInput;
 

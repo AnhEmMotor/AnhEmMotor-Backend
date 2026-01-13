@@ -11,9 +11,7 @@ public sealed class DeleteInputCommandHandler(
     IInputDeleteRepository deleteRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<DeleteInputCommand, Result>
 {
-    public async Task<Result> Handle(
-        DeleteInputCommand request,
-        CancellationToken cancellationToken)
+    public async Task<Result> Handle(DeleteInputCommand request, CancellationToken cancellationToken)
     {
         var input = await readRepository.GetByIdAsync(request.Id!.Value, cancellationToken).ConfigureAwait(false);
 
@@ -22,9 +20,10 @@ public sealed class DeleteInputCommandHandler(
             return Result.Failure(Error.NotFound($"Không tìm thấy phiếu nhập có ID {request.Id}.", "Id"));
         }
 
-        if(Domain.Constants.InputStatus.IsCannotDelete(input.StatusId))
+        if(Domain.Constants.Input.InputStatus.IsCannotDelete(input.StatusId))
         {
-            return Result.Failure(Error.BadRequest($"Không thể xóa đơn hàng có trạng thái '{input.StatusId}'.", "StatusId"));
+            return Result.Failure(
+                Error.BadRequest($"Không thể xóa đơn hàng có trạng thái '{input.StatusId}'.", "StatusId"));
         }
 
         deleteRepository.Delete(input);

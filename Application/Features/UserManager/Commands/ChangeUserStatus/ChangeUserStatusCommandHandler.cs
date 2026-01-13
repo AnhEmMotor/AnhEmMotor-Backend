@@ -41,20 +41,24 @@ public class ChangeUserStatusCommandHandler(
             {
                 if(superRoles.Contains(userRole))
                 {
-                    var usersInRole = await userReadRepository.GetUsersInRoleAsync(userRole, cancellationToken).ConfigureAwait(false);
+                    var usersInRole = await userReadRepository.GetUsersInRoleAsync(userRole, cancellationToken)
+                        .ConfigureAwait(false);
                     var activeUsersInRole = usersInRole.Where(u => string.Compare(u.Status, UserStatus.Active) == 0)
                         .ToList();
 
                     if(activeUsersInRole.Count == 1 && activeUsersInRole[0].Id == request.UserId)
                     {
-                        return Error.Validation($"Cannot deactivate user. This is the last active user with SuperRole '{userRole}'.", "Status");
+                        return Error.Validation(
+                            $"Cannot deactivate user. This is the last active user with SuperRole '{userRole}'.",
+                            "Status");
                     }
                 }
             }
         }
 
         user.Status = request.Status!;
-        var (succeeded, errors) = await userUpdateRepository.UpdateUserAsync(user, cancellationToken).ConfigureAwait(false);
+        var (succeeded, errors) = await userUpdateRepository.UpdateUserAsync(user, cancellationToken)
+            .ConfigureAwait(false);
         if(!succeeded)
         {
             var validationErrors = errors.Select(e => Error.Validation(e)).ToList();

@@ -28,7 +28,9 @@ public sealed class CreateOutputByManagerCommandHandler(
             .ConfigureAwait(false);
         if(userData == null)
         {
-            return Error.Forbidden("ID này là 1 tài khoản không tồn tại/đã bị xoá/đã bị cấm. Vui lòng kiểm tra lại.", "BuyerId");
+            return Error.Forbidden(
+                "ID này là 1 tài khoản không tồn tại/đã bị xoá/đã bị cấm. Vui lòng kiểm tra lại.",
+                "BuyerId");
         }
 
         var variantIds = request.OutputInfos
@@ -46,14 +48,18 @@ public sealed class CreateOutputByManagerCommandHandler(
         {
             var foundIds = variantsList.Select(v => v.Id).ToList();
             var missingIds = variantIds.Except(foundIds).ToList();
-            return Error.NotFound($"Không tìm thấy {missingIds.Count} sản phẩm: {string.Join(", ", missingIds)}", "Products");
+            return Error.NotFound(
+                $"Không tìm thấy {missingIds.Count} sản phẩm: {string.Join(", ", missingIds)}",
+                "Products");
         }
 
         foreach(var variant in variantsList)
         {
             if(string.Compare(variant.Product?.StatusId, Domain.Constants.ProductStatus.ForSale) != 0)
             {
-                return Error.BadRequest($"Sản phẩm '{variant.Product?.Name ?? variant.Id.ToString()}' không còn được bán.", "Products");
+                return Error.BadRequest(
+                    $"Sản phẩm '{variant.Product?.Name ?? variant.Id.ToString()}' không còn được bán.",
+                    "Products");
             }
         }
         var output = request.Adapt<Output>();

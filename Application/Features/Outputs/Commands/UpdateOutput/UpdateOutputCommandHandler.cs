@@ -18,9 +18,7 @@ public sealed class UpdateOutputCommandHandler(
     IProductVariantReadRepository variantRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateOutputCommand, Result<OutputResponse?>>
 {
-    public async Task<Result<OutputResponse?>> Handle(
-        UpdateOutputCommand request,
-        CancellationToken cancellationToken)
+    public async Task<Result<OutputResponse?>> Handle(UpdateOutputCommand request, CancellationToken cancellationToken)
     {
         if(request.CurrentUserId is null)
         {
@@ -67,14 +65,18 @@ public sealed class UpdateOutputCommandHandler(
             {
                 var foundIds = variantsList.Select(v => v.Id).ToList();
                 var missingIds = variantIds.Except(foundIds).ToList();
-                return Error.NotFound($"Không tìm thấy {missingIds.Count} sản phẩm: {string.Join(", ", missingIds)}", "Products");
+                return Error.NotFound(
+                    $"Không tìm thấy {missingIds.Count} sản phẩm: {string.Join(", ", missingIds)}",
+                    "Products");
             }
 
             foreach(var variant in variantsList)
             {
                 if(string.Compare(variant.Product?.StatusId, Domain.Constants.ProductStatus.ForSale) != 0)
                 {
-                    return Error.BadRequest($"Sản phẩm '{variant.Product?.Name ?? variant.Id.ToString()}' không còn được bán.", "Products");
+                    return Error.BadRequest(
+                        $"Sản phẩm '{variant.Product?.Name ?? variant.Id.ToString()}' không còn được bán.",
+                        "Products");
                 }
             }
         }

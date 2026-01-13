@@ -1,7 +1,6 @@
 using Application.ApiContracts.User.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.User;
-using Domain.Constants;
 using MediatR;
 
 namespace Application.Features.Users.Commands.UpdateCurrentUser;
@@ -40,7 +39,8 @@ public class UpdateCurrentUserCommandHandler(
             user.PhoneNumber = request.PhoneNumber;
         }
 
-        var (succeeded, errors) = await userUpdateRepository.UpdateUserAsync(user, cancellationToken).ConfigureAwait(false);
+        var (succeeded, errors) = await userUpdateRepository.UpdateUserAsync(user, cancellationToken)
+            .ConfigureAwait(false);
         if(!succeeded)
         {
             var validationErrors = errors.Select(e => Error.Validation(e)).ToList();

@@ -10,9 +10,7 @@ public sealed class DeleteBrandCommandHandler(
     IBrandDeleteRepository deleteRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<DeleteBrandCommand, Result>
 {
-    public async Task<Result> Handle(
-        DeleteBrandCommand request,
-        CancellationToken cancellationToken)
+    public async Task<Result> Handle(DeleteBrandCommand request, CancellationToken cancellationToken)
     {
         var brand = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
 

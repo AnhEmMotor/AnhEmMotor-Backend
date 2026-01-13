@@ -8,5 +8,5 @@ namespace Application.Features.UserManager.Queries.GetUsersList;
 
 public record GetUsersListQuery : IRequest<Result<PagedResult<UserDTOForManagerResponse>>>
 {
-    public SieveModel? SieveModel { get; set; }
+    public SieveModel? SieveModel { get; init; }
 }

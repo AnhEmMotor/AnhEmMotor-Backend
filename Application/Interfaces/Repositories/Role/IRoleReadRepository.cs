@@ -1,6 +1,5 @@
 ﻿using Application.ApiContracts.Permission.Responses;
 using Domain.Entities;
-using Microsoft.AspNetCore.Identity;
 using System;
 
 namespace Application.Interfaces.Repositories.Role
@@ -25,12 +24,10 @@ namespace Application.Interfaces.Repositories.Role
 
         public Task<List<RoleSelectResponse>> GetAllRolesSelectAsync(CancellationToken cancellationToken = default);
 
-        public Task<bool> IsRoleExistAsync(
-            string roleName,
-            CancellationToken cancellationToken = default);
+        public Task<bool> IsRoleExistAsync(string roleName, CancellationToken cancellationToken = default);
 
-        public Task<ApplicationRole?> GetRoleByNameAsync(string roleName);
+        public Task<ApplicationRole?> GetRoleByNameAsync(string roleName, CancellationToken cancellationToken);
 
-        public Task<IList<ApplicationUser>> GetUsersInRoleAsync(string roleName);
+        public Task<IList<ApplicationUser>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken);
     }
 }

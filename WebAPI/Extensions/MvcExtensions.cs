@@ -1,5 +1,4 @@
 ﻿using Asp.Versioning;
-using Microsoft.AspNetCore.Mvc;
 using WebAPI.Converters;
 using WebAPI.Middleware;
 

@@ -4,9 +4,6 @@ using Microsoft.Extensions.Configuration;
 
 namespace Infrastructure.Services;
 
-/// <summary>
-/// Implementation service để kiểm tra danh mục sản phẩm có được bảo vệ không
-/// </summary>
 public class ProtectedProductCategoryService(
     IProductCategoryReadRepository readRepository,
     IConfiguration configuration) : IProtectedProductCategoryService
@@ -18,7 +15,7 @@ public class ProtectedProductCategoryService(
     {
         var category = await readRepository.GetByIdAsync(categoryId, cancellationToken).ConfigureAwait(false);
 
-        if (category is null || string.IsNullOrWhiteSpace(category.Name))
+        if(category is null || string.IsNullOrWhiteSpace(category.Name))
         {
             return false;
         }
@@ -29,7 +26,9 @@ public class ProtectedProductCategoryService(
     /// <inheritdoc/>
     public Task<bool> IsProtectedByNameAsync(string categoryName, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(categoryName))
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if(string.IsNullOrWhiteSpace(categoryName))
         {
             return Task.FromResult(false);
         }

@@ -6,5 +6,5 @@ namespace Application.Features.Users.Commands.DeleteCurrentUserAccount;
 
 public record DeleteCurrentUserAccountCommand : IRequest<Result<DeleteUserByUserReponse>>
 {
-    public string? UserId { get; set; }
+    public string? UserId { get; init; }
 }

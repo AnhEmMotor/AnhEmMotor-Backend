@@ -7,7 +7,10 @@ namespace Application.Features.UserManager.Commands.ChangePassword;
 public record ChangePasswordCommand : IRequest<Result<ChangePasswordByManagerResponse>>
 {
     public Guid? UserId { get; init; }
+
     public string? CurrentPassword { get; init; }
+
     public string? NewPassword { get; init; }
+
     public string? CurrentUserId { get; init; }
 }

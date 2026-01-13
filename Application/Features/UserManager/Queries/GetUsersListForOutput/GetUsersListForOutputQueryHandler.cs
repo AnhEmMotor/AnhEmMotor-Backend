@@ -12,7 +12,8 @@ public sealed class GetUsersListForOutputQueryHandler(IUserReadRepository userRe
         GetUsersListForOutputQuery request,
         CancellationToken cancellationToken)
     {
-        var result = await userReadRepository.GetPagedListForOutputAsync(request.SieveModel!, cancellationToken);
+        var result = await userReadRepository.GetPagedListForOutputAsync(request.SieveModel!, cancellationToken)
+            .ConfigureAwait(false);
         return result;
     }
 }

@@ -3,7 +3,6 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Permission;
 using Application.Interfaces.Repositories.Role;
-using Application.Interfaces.Services;
 using Domain.Entities;
 using MediatR;
 using System.Reflection;
@@ -11,7 +10,7 @@ using System.Reflection;
 namespace Application.Features.Permissions.Commands.CreateRole;
 
 public class CreateRoleCommandHandler(
-    IRoleReadRepository roleReadRepository, 
+    IRoleReadRepository roleReadRepository,
     IRoleInsertRepository roleInsertRepository,
     IPermissionReadRepository permissionRepository,
     IRoleUpdateRepository roleUpdateRepository,
@@ -19,7 +18,8 @@ public class CreateRoleCommandHandler(
 {
     public async Task<Result<RoleCreateResponse>> Handle(CreateRoleCommand request, CancellationToken cancellationToken)
     {
-        var roleExists = await roleReadRepository.IsRoleExistAsync(request.RoleName!).ConfigureAwait(false);
+        var roleExists = await roleReadRepository.IsRoleExistAsync(request.RoleName!, cancellationToken)
+            .ConfigureAwait(false);
         if(roleExists)
         {
             return Error.BadRequest("Role already exists.");
@@ -47,7 +47,7 @@ public class CreateRoleCommandHandler(
 
         var role = new ApplicationRole { Name = request.RoleName, Description = request.Description };
 
-        var createResult = await roleInsertRepository.CreateAsync(role).ConfigureAwait(false);
+        var createResult = await roleInsertRepository.CreateAsync(role, cancellationToken).ConfigureAwait(false);
         if(!createResult.Succeeded)
         {
             var errors = string.Join(", ", createResult.Errors.Select(e => e.Description));

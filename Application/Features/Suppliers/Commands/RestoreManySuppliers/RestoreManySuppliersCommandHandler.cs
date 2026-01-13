@@ -12,7 +12,7 @@ namespace Application.Features.Suppliers.Commands.RestoreManySuppliers;
 public sealed class RestoreManySuppliersCommandHandler(
     ISupplierReadRepository readRepository,
     ISupplierUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<RestoreManySuppliersCommand,Result<List<SupplierResponse>?>>
+    IUnitOfWork unitOfWork) : IRequestHandler<RestoreManySuppliersCommand, Result<List<SupplierResponse>?>>
 {
     public async Task<Result<List<SupplierResponse>?>> Handle(
         RestoreManySuppliersCommand request,
@@ -37,8 +37,7 @@ public sealed class RestoreManySuppliersCommandHandler(
             if(!allSupplierMap.ContainsKey(id))
             {
                 errorDetails.Add(Error.NotFound($"Supplier with Id {id} not found."));
-            } 
-            else if(!deletedSupplierSet.Contains(id))
+            } else if(!deletedSupplierSet.Contains(id))
             {
                 errorDetails.Add(Error.BadRequest($"Supplier with Id {id} is not deleted."));
             }

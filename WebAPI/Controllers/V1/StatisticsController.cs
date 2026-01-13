@@ -1,4 +1,5 @@
 ﻿using Application.ApiContracts.Statistical.Responses;
+using Application.Common.Models;
 using Application.Features.Statistical.Queries.GetDailyRevenue;
 using Application.Features.Statistical.Queries.GetDashboardStats;
 using Application.Features.Statistical.Queries.GetMonthlyRevenueProfit;
@@ -10,8 +11,8 @@ using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
-using static Domain.Constants.Permission.PermissionsList;
 using WebAPI.Controllers.Base;
+using static Domain.Constants.Permission.PermissionsList;
 
 namespace WebAPI.Controllers.V1;
 
@@ -22,7 +23,7 @@ namespace WebAPI.Controllers.V1;
 [ApiVersion("1.0")]
 [SwaggerTag("Thống kê và báo cáo")]
 [Route("api/v{version:apiVersion}/[controller]")]
-[ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status500InternalServerError)]
+[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
 public class StatisticsController(IMediator mediator) : ApiController
 {
     /// <summary>
@@ -33,7 +34,7 @@ public class StatisticsController(IMediator mediator) : ApiController
     [HttpGet("daily-revenue")]
     [HasPermission(Statistical.View)]
     [ProducesResponseType(typeof(IEnumerable<DailyRevenueResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetDailyRevenue(
+    public async Task<IActionResult> GetDailyRevenueAsync(
         [FromQuery] int days = 7,
         CancellationToken cancellationToken = default)
     {
@@ -48,7 +49,7 @@ public class StatisticsController(IMediator mediator) : ApiController
     [HttpGet("dashboard-stats")]
     [HasPermission(Statistical.View)]
     [ProducesResponseType(typeof(DashboardStatsResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetDashboardStats(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetDashboardStatsAsync(CancellationToken cancellationToken)
     {
         var query = new GetDashboardStatsQuery();
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
@@ -63,7 +64,7 @@ public class StatisticsController(IMediator mediator) : ApiController
     [HttpGet("monthly-revenue-profit")]
     [HasPermission(Statistical.View)]
     [ProducesResponseType(typeof(IEnumerable<MonthlyRevenueProfitResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetMonthlyRevenueProfit(
+    public async Task<IActionResult> GetMonthlyRevenueProfitAsync(
         [FromQuery] int months = 12,
         CancellationToken cancellationToken = default)
     {
@@ -78,7 +79,7 @@ public class StatisticsController(IMediator mediator) : ApiController
     [HttpGet("order-status-counts")]
     [HasPermission(Statistical.View)]
     [ProducesResponseType(typeof(IEnumerable<OrderStatusCountResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetOrderStatusCounts(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetOrderStatusCountsAsync(CancellationToken cancellationToken)
     {
         var query = new GetOrderStatusCountsQuery();
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
@@ -91,7 +92,7 @@ public class StatisticsController(IMediator mediator) : ApiController
     [HttpGet("product-report-last-month")]
     [HasPermission(Statistical.View)]
     [ProducesResponseType(typeof(IEnumerable<ProductReportResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetProductReportLastMonth(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetProductReportLastMonthAsync(CancellationToken cancellationToken)
     {
         var query = new GetProductReportLastMonthQuery();
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
@@ -104,8 +105,8 @@ public class StatisticsController(IMediator mediator) : ApiController
     [HttpGet("product-stock-price/{variantId:int}")]
     [HasPermission(Statistical.View)]
     [ProducesResponseType(typeof(ProductStockPriceResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetProductStockAndPrice(int variantId, CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetProductStockAndPriceAsync(int variantId, CancellationToken cancellationToken)
     {
         var query = new GetProductStockAndPriceQuery() { VariantId = variantId };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);

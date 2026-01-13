@@ -4,9 +4,6 @@ using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Authorization;
 
-/// <summary>
-/// Policy provider tự động tạo policies dựa trên tên
-/// </summary>
 public class PermissionPolicyProvider(IOptions<AuthorizationOptions> options) : IAuthorizationPolicyProvider
 {
     private const string HasPermissionPrefix = "HasPermission";

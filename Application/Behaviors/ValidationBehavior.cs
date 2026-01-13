@@ -13,7 +13,7 @@ public sealed class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidat
         RequestHandlerDelegate<TResponse> next,
         CancellationToken cancellationToken)
     {
-        if (!validators.Any())
+        if(!validators.Any())
         {
             return await next(cancellationToken).ConfigureAwait(false);
         }
@@ -22,26 +22,21 @@ public sealed class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidat
         var validationResults = await Task.WhenAll(validators.Select(v => v.ValidateAsync(context, cancellationToken)))
             .ConfigureAwait(false);
 
-        var failures = validationResults.Where(r => r.Errors.Count > 0)
-            .SelectMany(r => r.Errors)
-            .ToList();
+        var failures = validationResults.Where(r => r.Errors.Count > 0).SelectMany(r => r.Errors).ToList();
 
-        if (failures.Count > 0)
+        if(failures.Count > 0)
         {
-            var errors = failures.Select(f => Error.Validation(
-                f.ErrorMessage,
-                f.PropertyName,
-                f.CustomState?.ToString()
-            )).ToList();
+            var errors = failures.Select(
+                f => Error.Validation(f.ErrorMessage, f.PropertyName, f.CustomState?.ToString()))
+                .ToList();
 
             var responseType = typeof(TResponse);
 
-            if (responseType.IsGenericType && responseType.GetGenericTypeDefinition() == typeof(Result<>))
+            if(responseType.IsGenericType && responseType.GetGenericTypeDefinition() == typeof(Result<>))
             {
-                var failureMethod = responseType.GetMethod(nameof(Result<>.Failure), [typeof(List<Error>)]);
-                return (TResponse)failureMethod!.Invoke(null, [errors])!;
-            }
-            else if (responseType == typeof(Result))
+                var failureMethod = responseType.GetMethod(nameof(Result<>.Failure), [ typeof(List<Error>) ]);
+                return (TResponse)failureMethod!.Invoke(null, [ errors ])!;
+            } else if(responseType == typeof(Result))
             {
                 return (TResponse)(object)Result.Failure(errors);
             }
