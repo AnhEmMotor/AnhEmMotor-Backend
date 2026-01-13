@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Net.Http.Json;
 using Application.ApiContracts.Supplier.Responses;
 using Application.Features.Suppliers.Commands.DeleteManySuppliers;
@@ -51,7 +51,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         }
 
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Supplier?Page=1&PageSize=10";
+        var response = await _client.GetAsync("/api/v1/Supplier?Page=1&PageSize=10", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -89,7 +89,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         }
 
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Supplier?Page=2&PageSize=5";
+        var response = await _client.GetAsync("/api/v1/Supplier?Page=2&PageSize=5", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -122,7 +122,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         }
 
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Supplier?Filters=Name@=*Test*";
+        var response = await _client.GetAsync("/api/v1/Supplier?Filters=Name@=*Test*", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -153,7 +153,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         }
 
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Supplier?Sorts=Name";
+        var response = await _client.GetAsync("/api/v1/Supplier?Sorts=Name", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -184,7 +184,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         }
 
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Supplier";
+        var response = await _client.GetAsync("/api/v1/Supplier", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -215,7 +215,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         }
 
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Supplier/deleted?Page=1&PageSize=10";
+        var response = await _client.GetAsync("/api/v1/Supplier/deleted?Page=1&PageSize=10", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -249,7 +249,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         }
 
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None$"/api/v1/Supplier/{supplierId}";
+        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -284,7 +284,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         }
 
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None$"/api/v1/Supplier/{supplierId}";
+        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -294,7 +294,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
     public async Task GetSupplierById_NonExistentId_ReturnsNotFound()
     {
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Supplier/999999";
+        var response = await _client.GetAsync("/api/v1/Supplier/999999", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -322,7 +322,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         var request = new DeleteManySuppliersCommand { Ids = supplierIds };
 
         // Act
-        var response = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None"/api/v1/Supplier/delete-many", request;
+        var response = await _client.PostAsJsonAsync("/api/v1/Supplier/delete-many", request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -360,7 +360,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         var request = new DeleteManySuppliersCommand { Ids = supplierIds };
 
         // Act
-        var response = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None"/api/v1/Supplier/delete-many", request;
+        var response = await _client.PostAsJsonAsync("/api/v1/Supplier/delete-many", request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -394,7 +394,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         var request = new RestoreManySuppliersCommand { Ids = supplierIds };
 
         // Act
-        var response = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None"/api/v1/Supplier/restore-many", request;
+        var response = await _client.PostAsJsonAsync("/api/v1/Supplier/restore-many", request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -432,7 +432,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PatchAsJsonAsync(await _client.PatchAsJsonAsync(, CancellationToken.None"/api/v1/Supplier/update-status-many", request);
+        var response = await _client.PatchAsJsonAsync("/api/v1/Supplier/update-status-many", request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -461,7 +461,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
                 StatusId = "active"
             };
             await db.Suppliers.AddAsync(supplier);
-            await db.SaveChangesAsync(CancellationToken.None;;
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             supplierId = supplier.Id;
 
             var inputs = new List<Input>
@@ -485,7 +485,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         }
 
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None$"/api/v1/Supplier/{supplierId}";
+        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -534,7 +534,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         }
 
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None$"/api/v1/Supplier/{supplierId}";
+        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);

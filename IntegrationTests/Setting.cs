@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Net.Http.Json;
 
 using Domain.Entities;
@@ -32,7 +32,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
             
             // Clear existing settings
             db.Settings.RemoveRange(db.Settings);
-            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);ancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
             // Seed settings
             var settings = new List<SettingEntity>
@@ -47,7 +47,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         }
 
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Setting";
+        var response = await _client.GetAsync("/api/v1/Setting", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -80,7 +80,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
 
         // Act
         // Note: Without proper authentication setup, this will test authorization flow
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Setting";
+        var response = await _client.GetAsync("/api/v1/Setting", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         // Depending on auth configuration, should be 401 or 403
@@ -100,7 +100,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         }
 
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Setting";
+        var response = await _client.GetAsync("/api/v1/Setting", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -118,7 +118,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         }
 
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Setting";
+        var response = await _client.GetAsync("/api/v1/Setting", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -157,7 +157,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PutAsJsonAsync(await _client.PutAsJsonAsync(, CancellationToken.None"/api/v1/Setting", request;
+        var response = await _client.PutAsJsonAsync("/api/v1/Setting", request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -202,7 +202,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PutAsJsonAsync(await _client.PutAsJsonAsync(, CancellationToken.None"/api/v1/Setting", request;
+        var response = await _client.PutAsJsonAsync("/api/v1/Setting", request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -232,7 +232,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         var request = new Dictionary<string, long?> { { "Deposit_ratio", 25 } };
 
         // Act
-        var response = await _client.PutAsJsonAsync(await _client.PutAsJsonAsync(, CancellationToken.None"/api/v1/Setting", request;
+        var response = await _client.PutAsJsonAsync("/api/v1/Setting", request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.Unauthorized, HttpStatusCode.Forbidden);
@@ -261,7 +261,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         var request = new Dictionary<string, long?> { { "Deposit_ratio", 25 } };
 
         // Act
-        var response = await _client.PutAsJsonAsync(await _client.PutAsJsonAsync(, CancellationToken.None"/api/v1/Setting", request;
+        var response = await _client.PutAsJsonAsync("/api/v1/Setting", request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -282,7 +282,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         var request = new Dictionary<string, long?> { { "Deposit_ratio", 0 } };
 
         // Act
-        var response = await _client.PutAsJsonAsync(await _client.PutAsJsonAsync(, CancellationToken.None"/api/v1/Setting", request;
+        var response = await _client.PutAsJsonAsync("/api/v1/Setting", request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -316,7 +316,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         var request = new Dictionary<string, long?> { { "Deposit_ratio", 100 } };
 
         // Act
-        var response = await _client.PutAsJsonAsync(await _client.PutAsJsonAsync(, CancellationToken.None"/api/v1/Setting", request;
+        var response = await _client.PutAsJsonAsync("/api/v1/Setting", request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -352,7 +352,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         var request = new Dictionary<string, long?> { { "Deposit_ratio", 5055 } }; // Represents 50.55
 
         // Act
-        var response = await _client.PutAsJsonAsync(await _client.PutAsJsonAsync(, CancellationToken.None"/api/v1/Setting", request;
+        var response = await _client.PutAsJsonAsync("/api/v1/Setting", request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -376,7 +376,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         var request = new Dictionary<string, long?>();
 
         // Act
-        var response = await _client.PutAsJsonAsync(await _client.PutAsJsonAsync(, CancellationToken.None"/api/v1/Setting", request;
+        var response = await _client.PutAsJsonAsync("/api/v1/Setting", request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);

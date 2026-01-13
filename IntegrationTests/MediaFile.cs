@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Net.Http.Json;
 using Application.ApiContracts.File.Responses;
 using Domain.Constants;
@@ -34,7 +34,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         content.Add(new ByteArrayContent(imageBytes), "file", "image.jpg");
 
         // Act
-        var response = await _client.PostAsync(await _client.PostAsync(, CancellationToken.None"/api/v1/MediaFile/upload-image", content;
+        var response = await _client.PostAsync("/api/v1/MediaFile/upload-image", content, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -61,7 +61,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PostAsync(await _client.PostAsync(, CancellationToken.None"/api/v1/MediaFile/upload-images", content;
+        var response = await _client.PostAsync("/api/v1/MediaFile/upload-images", content, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -92,7 +92,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
 
         // Act
-        var response = await _client.DeleteAsync(await _client.DeleteAsync(, CancellationToken.None$"/api/v1/MediaFile/{mediaFile.StoragePath}";
+        var response = await _client.DeleteAsync($"/api/v1/MediaFile/{mediaFile.StoragePath}", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -121,7 +121,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         List<string> request = [.. files.Select(f => f.StoragePath!)];
 
         // Act
-        var response = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None"/api/v1/MediaFile/delete-many", request;
+        var response = await _client.PostAsJsonAsync("/api/v1/MediaFile/delete-many", request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -154,7 +154,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
 
         // Act
-        var response = await _client.PostAsync(await _client.PostAsync(, CancellationToken.None$"/api/v1/MediaFile/restore/{mediaFile.StoragePath}", null;
+        var response = await _client.PostAsync($"/api/v1/MediaFile/restore/{mediaFile.StoragePath}", null, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -183,7 +183,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         List<string> request = [.. files.Select(f => f.StoragePath!)];
 
         // Act
-        var response = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None"/api/v1/MediaFile/restore-many", request;
+        var response = await _client.PostAsJsonAsync("/api/v1/MediaFile/restore-many", request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -216,7 +216,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
 
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None$"/api/v1/MediaFile/view-image/{mediaFile.StoragePath}";
+        var response = await _client.GetAsync($"/api/v1/MediaFile/view-image/{mediaFile.StoragePath}", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -244,7 +244,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
 
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None$"/api/v1/MediaFile/view-image/{mediaFile.StoragePath}?width=300";
+        var response = await _client.GetAsync($"/api/v1/MediaFile/view-image/{mediaFile.StoragePath}?width=300", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -272,7 +272,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
 
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None$"/api/v1/MediaFile/{mediaFile.Id}";
+        var response = await _client.GetAsync($"/api/v1/MediaFile/{mediaFile.Id}", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -308,7 +308,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
 
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/MediaFile?page=1&pageSize=10";
+        var response = await _client.GetAsync("/api/v1/MediaFile?page=1&pageSize=10", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -353,7 +353,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
 
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/MediaFile?filters=ContentType==image/webp";
+        var response = await _client.GetAsync("/api/v1/MediaFile?filters=ContentType==image/webp", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -379,7 +379,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
 
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/MediaFile?sorts=-FileSize";
+        var response = await _client.GetAsync("/api/v1/MediaFile?sorts=-FileSize", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -409,7 +409,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
 
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/MediaFile/deleted?page=1&pageSize=10";
+        var response = await _client.GetAsync("/api/v1/MediaFile/deleted?page=1&pageSize=10", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);

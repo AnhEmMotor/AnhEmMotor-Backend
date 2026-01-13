@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using FluentAssertions;
 using Xunit;
 
@@ -13,7 +13,7 @@ public class Statistics(IntegrationTestWebAppFactory factory) : IClassFixture<In
     public async Task GetDailyRevenue_Last7Days_ReturnsCorrectData()
     {
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Statistics/daily-revenue?days=7";
+        var response = await _client.GetAsync("/api/v1/Statistics/daily-revenue?days=7", CancellationToken.None).ConfigureAwait(true);
 
         // Assert - Vì handler chưa implement nên sẽ fail, nhưng phải compile được
         response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.InternalServerError);
@@ -23,7 +23,7 @@ public class Statistics(IntegrationTestWebAppFactory factory) : IClassFixture<In
     public async Task GetDailyRevenue_OneDay_ReturnsCorrectData()
     {
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Statistics/daily-revenue?days=1";
+        var response = await _client.GetAsync("/api/v1/Statistics/daily-revenue?days=1", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.InternalServerError);
@@ -33,7 +33,7 @@ public class Statistics(IntegrationTestWebAppFactory factory) : IClassFixture<In
     public async Task GetDailyRevenue_ThirtyDays_ReturnsCorrectData()
     {
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Statistics/daily-revenue?days=30";
+        var response = await _client.GetAsync("/api/v1/Statistics/daily-revenue?days=30", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.InternalServerError);
@@ -43,7 +43,7 @@ public class Statistics(IntegrationTestWebAppFactory factory) : IClassFixture<In
     public async Task GetDailyRevenue_NegativeDays_ReturnsBadRequest()
     {
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Statistics/daily-revenue?days=-1";
+        var response = await _client.GetAsync("/api/v1/Statistics/daily-revenue?days=-1", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.BadRequest, HttpStatusCode.InternalServerError);
@@ -53,7 +53,7 @@ public class Statistics(IntegrationTestWebAppFactory factory) : IClassFixture<In
     public async Task GetDailyRevenue_ZeroDays_ReturnsBadRequest()
     {
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Statistics/daily-revenue?days=0";
+        var response = await _client.GetAsync("/api/v1/Statistics/daily-revenue?days=0", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.BadRequest, HttpStatusCode.InternalServerError);
@@ -63,7 +63,7 @@ public class Statistics(IntegrationTestWebAppFactory factory) : IClassFixture<In
     public async Task GetDashboardStats_ReturnsAllMetrics()
     {
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Statistics/dashboard-stats";
+        var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.InternalServerError);
@@ -73,7 +73,7 @@ public class Statistics(IntegrationTestWebAppFactory factory) : IClassFixture<In
     public async Task GetMonthlyRevenueProfit_Last12Months_ReturnsCorrectData()
     {
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Statistics/monthly-revenue-profit?months=12";
+        var response = await _client.GetAsync("/api/v1/Statistics/monthly-revenue-profit?months=12", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.InternalServerError);
@@ -83,7 +83,7 @@ public class Statistics(IntegrationTestWebAppFactory factory) : IClassFixture<In
     public async Task GetMonthlyRevenueProfit_Last3Months_ReturnsCorrectData()
     {
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Statistics/monthly-revenue-profit?months=3";
+        var response = await _client.GetAsync("/api/v1/Statistics/monthly-revenue-profit?months=3", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.InternalServerError);
@@ -93,7 +93,7 @@ public class Statistics(IntegrationTestWebAppFactory factory) : IClassFixture<In
     public async Task GetMonthlyRevenueProfit_NegativeMonths_ReturnsBadRequest()
     {
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Statistics/monthly-revenue-profit?months=-1";
+        var response = await _client.GetAsync("/api/v1/Statistics/monthly-revenue-profit?months=-1", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.BadRequest, HttpStatusCode.InternalServerError);
@@ -103,7 +103,7 @@ public class Statistics(IntegrationTestWebAppFactory factory) : IClassFixture<In
     public async Task GetMonthlyRevenueProfit_ZeroMonths_ReturnsBadRequest()
     {
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Statistics/monthly-revenue-profit?months=0";
+        var response = await _client.GetAsync("/api/v1/Statistics/monthly-revenue-profit?months=0", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.BadRequest, HttpStatusCode.InternalServerError);
@@ -113,7 +113,7 @@ public class Statistics(IntegrationTestWebAppFactory factory) : IClassFixture<In
     public async Task GetOrderStatusCounts_ReturnsAllStatuses()
     {
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Statistics/order-status-counts";
+        var response = await _client.GetAsync("/api/v1/Statistics/order-status-counts", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.InternalServerError);
@@ -123,7 +123,7 @@ public class Statistics(IntegrationTestWebAppFactory factory) : IClassFixture<In
     public async Task GetProductReportLastMonth_ReturnsProductList()
     {
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Statistics/product-report-last-month";
+        var response = await _client.GetAsync("/api/v1/Statistics/product-report-last-month", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.InternalServerError);
@@ -133,7 +133,7 @@ public class Statistics(IntegrationTestWebAppFactory factory) : IClassFixture<In
     public async Task GetProductStockAndPrice_ValidVariantId_ReturnsData()
     {
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Statistics/product-stock-price?variantId=1";
+        var response = await _client.GetAsync("/api/v1/Statistics/product-stock-price?variantId=1", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NotFound, HttpStatusCode.InternalServerError);
@@ -143,7 +143,7 @@ public class Statistics(IntegrationTestWebAppFactory factory) : IClassFixture<In
     public async Task GetProductStockAndPrice_NonExistentVariantId_ReturnsNotFound()
     {
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Statistics/product-stock-price?variantId=999999";
+        var response = await _client.GetAsync("/api/v1/Statistics/product-stock-price?variantId=999999", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.NotFound, HttpStatusCode.InternalServerError);
@@ -153,7 +153,7 @@ public class Statistics(IntegrationTestWebAppFactory factory) : IClassFixture<In
     public async Task GetProductStockAndPrice_NegativeVariantId_ReturnsBadRequest()
     {
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Statistics/product-stock-price?variantId=-1";
+        var response = await _client.GetAsync("/api/v1/Statistics/product-stock-price?variantId=-1", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.BadRequest, HttpStatusCode.InternalServerError);
@@ -163,7 +163,7 @@ public class Statistics(IntegrationTestWebAppFactory factory) : IClassFixture<In
     public async Task GetProductStockAndPrice_ZeroVariantId_ReturnsBadRequest()
     {
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Statistics/product-stock-price?variantId=0";
+        var response = await _client.GetAsync("/api/v1/Statistics/product-stock-price?variantId=0", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().BeOneOf(HttpStatusCode.BadRequest, HttpStatusCode.InternalServerError);
@@ -173,7 +173,7 @@ public class Statistics(IntegrationTestWebAppFactory factory) : IClassFixture<In
     public async Task GetDailyRevenue_ReturnsCorrectFormat()
     {
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Statistics/daily-revenue?days=7";
+        var response = await _client.GetAsync("/api/v1/Statistics/daily-revenue?days=7", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.Content.Headers.ContentType?.MediaType.Should().Be("application/json");
@@ -183,7 +183,7 @@ public class Statistics(IntegrationTestWebAppFactory factory) : IClassFixture<In
     public async Task GetDashboardStats_ReturnsCorrectFormat()
     {
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Statistics/dashboard-stats";
+        var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.Content.Headers.ContentType?.MediaType.Should().Be("application/json");
@@ -193,7 +193,7 @@ public class Statistics(IntegrationTestWebAppFactory factory) : IClassFixture<In
     public async Task GetMonthlyRevenueProfit_ReturnsCorrectFormat()
     {
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Statistics/monthly-revenue-profit?months=12";
+        var response = await _client.GetAsync("/api/v1/Statistics/monthly-revenue-profit?months=12", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.Content.Headers.ContentType?.MediaType.Should().Be("application/json");
@@ -203,7 +203,7 @@ public class Statistics(IntegrationTestWebAppFactory factory) : IClassFixture<In
     public async Task GetOrderStatusCounts_ReturnsCorrectFormat()
     {
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Statistics/order-status-counts";
+        var response = await _client.GetAsync("/api/v1/Statistics/order-status-counts", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.Content.Headers.ContentType?.MediaType.Should().Be("application/json");

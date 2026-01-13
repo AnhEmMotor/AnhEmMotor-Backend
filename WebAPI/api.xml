@@ -34,37 +34,37 @@
             Controller xử lý xác thực và đăng nhập
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.AuthController.Register(Application.Features.Auth.Commands.Register.RegisterCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.AuthController.RegisterAsync(Application.Features.Auth.Commands.Register.RegisterCommand,System.Threading.CancellationToken)">
             <summary>
             Đăng ký tài khoản mới
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.AuthController.Login(Application.Features.Auth.Commands.Login.LoginCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.AuthController.LoginAsync(Application.Features.Auth.Commands.Login.LoginCommand,System.Threading.CancellationToken)">
             <summary>
             Đăng nhập bằng Username/Email và Password
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.AuthController.RefreshToken(System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.AuthController.RefreshTokenAsync(System.Threading.CancellationToken)">
             <summary>
             Làm mới Access Token bằng Refresh Token
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.AuthController.Logout(System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.AuthController.LogoutAsync(System.Threading.CancellationToken)">
             <summary>
             Đăng xuất
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.AuthController.GoogleLogin(Application.Features.Auth.Commands.GoogleLogin.GoogleLoginCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.AuthController.GoogleLoginAsync(Application.Features.Auth.Commands.GoogleLogin.GoogleLoginCommand,System.Threading.CancellationToken)">
             <summary>
             Đăng nhập bằng Google (placeholder - cần cấu hình Google OAuth)
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.AuthController.FacebookLogin">
+        <member name="M:WebAPI.Controllers.V1.AuthController.FacebookLoginAsync">
             <summary>
             Đăng nhập bằng Facebook (placeholder - cần cấu hình Facebook OAuth)
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.AuthController.LoginForManager(Application.Features.Auth.Commands.Login.LoginCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.AuthController.LoginForManagerAsync(Application.Features.Auth.Commands.Login.LoginCommand,System.Threading.CancellationToken)">
             <summary>
             Đăng nhập bằng Username/Email và Password - Dành cho quản lý
             </summary>
@@ -79,52 +79,52 @@
             Quản lý danh sách các thương hiệu sản phẩm (ví dụ: Honda, Yamaha, Suzuki).
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.BrandController.GetBrands(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.BrandController.GetBrandsAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách thương hiệu (có phân trang, lọc, sắp xếp - vào được cho mọi người dùng).
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.BrandController.GetBrandsForManager(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.BrandController.GetBrandsForManagerAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách thương hiệu (có phân trang, lọc, sắp xếp - vào được khi có quyền xem danh sách thương hiệu).
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.BrandController.GetDeletedBrands(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.BrandController.GetDeletedBrandsAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách thương hiệu đã bị xoá (có phân trang, lọc, sắp xếp).
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.BrandController.GetBrandById(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.BrandController.GetBrandByIdAsync(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Lấy thông tin của thương hiệu được chọn.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.BrandController.CreateBrand(Application.Features.Brands.Commands.CreateBrand.CreateBrandCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.BrandController.CreateBrandAsync(Application.Features.Brands.Commands.CreateBrand.CreateBrandCommand,System.Threading.CancellationToken)">
             <summary>
             Tạo thương hiệu mới.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.BrandController.UpdateBrand(System.Int32,Application.Features.Brands.Commands.UpdateBrand.UpdateBrandCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.BrandController.UpdateBrandAsync(System.Int32,Application.Features.Brands.Commands.UpdateBrand.UpdateBrandCommand,System.Threading.CancellationToken)">
             <summary>
             Cập nhật thông tin thương hiệu.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.BrandController.DeleteBrand(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.BrandController.DeleteBrandAsync(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Xoá thương hiệu.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.BrandController.RestoreBrand(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.BrandController.RestoreBrandAsync(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Khôi phục lại thương hiệu đã xoá.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.BrandController.DeleteBrands(Application.Features.Brands.Commands.DeleteManyBrands.DeleteManyBrandsCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.BrandController.DeleteBrandsAsync(Application.Features.Brands.Commands.DeleteManyBrands.DeleteManyBrandsCommand,System.Threading.CancellationToken)">
             <summary>
             Xoá nhiều thương hiệu cùng lúc.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.BrandController.RestoreBrands(Application.Features.Brands.Commands.RestoreManyBrands.RestoreManyBrandsCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.BrandController.RestoreBrandsAsync(Application.Features.Brands.Commands.RestoreManyBrands.RestoreManyBrandsCommand,System.Threading.CancellationToken)">
             <summary>
             Khôi phục nhiều thương hiệu đã xoá cùng lúc.
             </summary>
@@ -139,67 +139,67 @@
             Quản lý phiếu nhập hàng.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.GetInputs(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.GetInputsAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách phiếu nhập (có phân trang, lọc, sắp xếp).
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.GetDeletedInputs(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.GetDeletedInputsAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách phiếu nhập đã bị xóa (có phân trang, lọc, sắp xếp).
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.GetInputById(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.GetInputByIdAsync(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Lấy thông tin chi tiết của phiếu nhập.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.GetInputsBySupplierId(System.Int32,Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.GetInputsBySupplierIdAsync(System.Int32,Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách phiếu nhập theo nhà cung cấp.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.CreateInput(Application.Features.Inputs.Commands.CreateInput.CreateInputCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.CreateInputAsync(Application.Features.Inputs.Commands.CreateInput.CreateInputCommand,System.Threading.CancellationToken)">
             <summary>
             Tạo phiếu nhập mới.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.CloneInput(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.CloneInputAsync(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Clone phiếu nhập từ phiếu nhập gốc. Chỉ clone các sản phẩm còn hợp lệ (chưa xoá, còn đang bán).
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.UpdateInput(System.Int32,Application.Features.Inputs.Commands.UpdateInput.UpdateInputCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.UpdateInputAsync(System.Int32,Application.Features.Inputs.Commands.UpdateInput.UpdateInputCommand,System.Threading.CancellationToken)">
             <summary>
             Cập nhật phiếu nhập.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.UpdateInputStatus(System.Int32,Application.Features.Inputs.Commands.UpdateInputStatus.UpdateInputStatusCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.UpdateInputStatusAsync(System.Int32,Application.Features.Inputs.Commands.UpdateInputStatus.UpdateInputStatusCommand,System.Threading.CancellationToken)">
             <summary>
             Cập nhật trạng thái của phiếu nhập.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.UpdateManyInputStatus(Application.Features.Inputs.Commands.UpdateManyInputStatus.UpdateManyInputStatusCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.UpdateManyInputStatusAsync(Application.Features.Inputs.Commands.UpdateManyInputStatus.UpdateManyInputStatusCommand,System.Threading.CancellationToken)">
             <summary>
             Cập nhật trạng thái của nhiều phiếu nhập cùng lúc.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.DeleteInput(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.DeleteInputAsync(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Xóa phiếu nhập.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.DeleteManyInputs(Application.Features.Inputs.Commands.DeleteManyInputs.DeleteManyInputsCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.DeleteManyInputsAsync(Application.Features.Inputs.Commands.DeleteManyInputs.DeleteManyInputsCommand,System.Threading.CancellationToken)">
             <summary>
             Xóa nhiều phiếu nhập cùng lúc.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.RestoreInput(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.RestoreInputAsync(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Khôi phục phiếu nhập đã bị xóa.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.RestoreManyInputs(Application.Features.Inputs.Commands.RestoreManyInputs.RestoreManyInputsCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.RestoreManyInputsAsync(Application.Features.Inputs.Commands.RestoreManyInputs.RestoreManyInputsCommand,System.Threading.CancellationToken)">
             <summary>
             Khôi phục nhiều phiếu nhập đã bị xóa cùng lúc.
             </summary>
@@ -229,37 +229,37 @@
             Lấy thông tin của tệp media được chọn.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.MediaFileController.UploadImage(Microsoft.AspNetCore.Http.IFormFile,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.MediaFileController.UploadImageAsync(Microsoft.AspNetCore.Http.IFormFile,System.Threading.CancellationToken)">
             <summary>
             Tải lên một tệp ảnh.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.MediaFileController.UploadManyImages(System.Collections.Generic.List{Microsoft.AspNetCore.Http.IFormFile},System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.MediaFileController.UploadManyImagesAsync(System.Collections.Generic.List{Microsoft.AspNetCore.Http.IFormFile},System.Threading.CancellationToken)">
             <summary>
             Tải lên nhiều ảnh cùng lúc.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.MediaFileController.DeleteFile(System.String,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.MediaFileController.DeleteFileAsync(System.String,System.Threading.CancellationToken)">
             <summary>
             Xoá tệp media theo tên file.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.MediaFileController.DeleteFiles(System.Collections.Generic.List{System.String},System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.MediaFileController.DeleteFilesAsync(System.Collections.Generic.List{System.String},System.Threading.CancellationToken)">
             <summary>
             Xoá nhiều tệp media cùng lúc.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.MediaFileController.RestoreFile(System.String,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.MediaFileController.RestoreFileAsync(System.String,System.Threading.CancellationToken)">
             <summary>
             Khôi phục lại tệp media đã xoá theo tên file.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.MediaFileController.RestoreFiles(System.Collections.Generic.List{System.String},System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.MediaFileController.RestoreFilesAsync(System.Collections.Generic.List{System.String},System.Threading.CancellationToken)">
             <summary>
             Khôi phục nhiều tệp media đã xoá cùng lúc.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.MediaFileController.ViewImageWithResize(System.String,System.Nullable{System.Int32},System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.MediaFileController.ViewImageWithResizeAsync(System.String,System.Nullable{System.Int32},System.Threading.CancellationToken)">
             <summary>
             Xem ảnh với khả năng resize theo kích thước mong muốn.
             </summary>
@@ -274,47 +274,47 @@
             Controller quản lý quyền hạn và vai trò
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.PermissionController.GetAllPermissions(System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.PermissionController.GetAllPermissionsAsync(System.Threading.CancellationToken)">
             <summary>
             Lấy tất cả các permissions có trong hệ thống với mô tả
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.PermissionController.GetMyPermissions(System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.PermissionController.GetMyPermissionsAsync(System.Threading.CancellationToken)">
             <summary>
             Lấy các quyền của người dùng hiện tại
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.PermissionController.GetUserPermissionsById(System.Guid,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.PermissionController.GetUserPermissionsByIdAsync(System.Guid,System.Threading.CancellationToken)">
             <summary>
             Lấy các quyền của một người dùng theo User ID
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.PermissionController.GetRolePermissions(System.String,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.PermissionController.GetRolePermissionsAsync(System.String,System.Threading.CancellationToken)">
             <summary>
             Lấy các quyền của một vai trò cụ thể
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.PermissionController.UpdateRole(System.String,Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.PermissionController.UpdateRoleAsync(System.String,Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommand,System.Threading.CancellationToken)">
             <summary>
             Cập nhật quyền cho một vai trò
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.PermissionController.GetAllRoles(System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.PermissionController.GetAllRolesAsync(System.Threading.CancellationToken)">
             <summary>
             Lấy tất cả các vai trò
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.PermissionController.CreateRole(Application.Features.Permissions.Commands.CreateRole.CreateRoleCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.PermissionController.CreateRoleAsync(Application.Features.Permissions.Commands.CreateRole.CreateRoleCommand,System.Threading.CancellationToken)">
             <summary>
             Tạo vai trò mới với các quyền được gán
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.PermissionController.DeleteRole(System.String,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.PermissionController.DeleteRoleAsync(System.String,System.Threading.CancellationToken)">
             <summary>
             Xóa vai trò
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.PermissionController.DeleteMultipleRoles(System.Collections.Generic.List{System.String},System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.PermissionController.DeleteMultipleRolesAsync(System.Collections.Generic.List{System.String},System.Threading.CancellationToken)">
             <summary>
             Xóa nhiều vai trò
             </summary>
@@ -329,52 +329,52 @@
             Quản lý danh mục sản phẩm.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductCategoryController.GetProductCategories(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductCategoryController.GetProductCategoriesAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách danh mục sản phẩm (có phân trang, lọc, sắp xếp - vào được cho mọi người dùng).
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductCategoryController.GetProductCategoriesForManager(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductCategoryController.GetProductCategoriesForManagerAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách danh mục sản phẩm (có phân trang, lọc, sắp xếp - chỉ được vào khi có quyền xem danh mục sản phẩm).
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductCategoryController.GetDeletedProductCategories(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductCategoryController.GetDeletedProductCategoriesAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách danh mục sản phẩm đã bị xoá (có phân trang, lọc, sắp xếp).
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductCategoryController.GetProductCategoryById(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductCategoryController.GetProductCategoryByIdAsync(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Lấy thông tin danh mục sản phẩm theo Id.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductCategoryController.CreateProductCategory(Application.Features.ProductCategories.Commands.CreateProductCategory.CreateProductCategoryCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductCategoryController.CreateProductCategoryAsync(Application.Features.ProductCategories.Commands.CreateProductCategory.CreateProductCategoryCommand,System.Threading.CancellationToken)">
             <summary>
             Tạo mới danh mục sản phẩm.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductCategoryController.UpdateProductCategory(System.Int32,Application.Features.ProductCategories.Commands.UpdateProductCategory.UpdateProductCategoryCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductCategoryController.UpdateProductCategoryAsync(System.Int32,Application.Features.ProductCategories.Commands.UpdateProductCategory.UpdateProductCategoryCommand,System.Threading.CancellationToken)">
             <summary>
             Cập nhật danh mục sản phẩm.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductCategoryController.DeleteProductCategory(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductCategoryController.DeleteProductCategoryAsync(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Xoá danh mục sản phẩm (soft delete).
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductCategoryController.DeleteProductCategories(Application.Features.ProductCategories.Commands.DeleteManyProductCategories.DeleteManyProductCategoriesCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductCategoryController.DeleteProductCategoriesAsync(Application.Features.ProductCategories.Commands.DeleteManyProductCategories.DeleteManyProductCategoriesCommand,System.Threading.CancellationToken)">
             <summary>
             Xoá nhiều danh mục sản phẩm cùng lúc.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductCategoryController.RestoreProductCategory(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductCategoryController.RestoreProductCategoryAsync(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Khôi phục 1 danh mục sản phẩm đã bị xoá.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductCategoryController.RestoreProductCategories(Application.Features.ProductCategories.Commands.RestoreManyProductCategories.RestoreManyProductCategoriesCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductCategoryController.RestoreProductCategoriesAsync(Application.Features.ProductCategories.Commands.RestoreManyProductCategories.RestoreManyProductCategoriesCommand,System.Threading.CancellationToken)">
             <summary>
             Khôi phục nhiều danh mục sản phẩm cùng lúc.
             </summary>
@@ -389,120 +389,120 @@
             Quản lý sản phẩm.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.GetProducts(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetProductsAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách sản phẩm đầy đủ dành cho khách hàng (có phân trang, lọc, tìm kiếm).
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.GetProductsForManager(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetProductsForManagerAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách sản phẩm đầy đủ dành cho người quản lý (có phân trang, lọc, tìm kiếm).
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.GetDeletedProducts(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetDeletedProductsAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách sản phẩm đã bị xoá (có phân trang, lọc, tìm kiếm).
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.GetActiveVariantLiteProducts(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetActiveVariantLiteProductsAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách biến thể sản phẩm của tất cả sản phẩm (có phân trang, lọc, tìm kiếm - chỉ có thể vào khi và chỉ
             khi có quyền xem danh sách sản phẩm).
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.GetActiveVariantLiteProductsPublic(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetActiveVariantLiteProductsPublicAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách biến thể sản phẩm của tất cả sản phẩm (có phân trang, lọc, tìm kiếm - cho phép vào với mọi user).
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.GetActiveVariantLiteProductsForInput(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetActiveVariantLiteProductsForInputAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             `Lấy danh sách biến thể sản phẩm của tất cả sản phẩm (có phân trang, lọc, tìm kiếm - chỉ có thể vào khi và chỉ
             khi có quyền thêm hoặc sửa phiếu nhập).
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.GetActiveVariantLiteProductsForOutput(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetActiveVariantLiteProductsForOutputAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách biến thể sản phẩm của tất cả sản phẩm (có phân trang, lọc, tìm kiếm - chỉ có thể vào khi và chỉ
             khi có quyền thêm hoặc sửa phiếu bán hàng).
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.GetVarientById(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetVarientByIdAsync(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Lấy thông tin chi tiết sản phẩm theo Id (dành cho toàn bộ người dùng khách)
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.GetVarientByIdForManager(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetVarientByIdForManagerAsync(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Lấy thông tin chi tiết sản phẩm theo Id (dành cho người quản lý)
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.GetVariantLiteByProductIdActive(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetVariantLiteByProductIdActiveAsync(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách biến thể theo Id sản phẩm.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.CheckSlugAvailability(System.String,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.CheckSlugAvailabilityAsync(System.String,System.Threading.CancellationToken)">
             <summary>
             Kiểm tra slug có sẵn sàng sử dụng hay không.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.CreateProduct(Application.Features.Products.Commands.CreateProduct.CreateProductCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.CreateProductAsync(Application.Features.Products.Commands.CreateProduct.CreateProductCommand,System.Threading.CancellationToken)">
             <summary>
             Tạo mới sản phẩm với các biến thể.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateProduct(System.Int32,Application.Features.Products.Commands.UpdateProduct.UpdateProductCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateProductAsync(System.Int32,Application.Features.Products.Commands.UpdateProduct.UpdateProductCommand,System.Threading.CancellationToken)">
             <summary>
             Cập nhật sản phẩm theo Id.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.DeleteProduct(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.DeleteProductAsync(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Xoá sản phẩm (soft delete) và cascade xoá ảnh của các biến thể.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.DeleteProducts(Application.Features.Products.Commands.DeleteManyProducts.DeleteManyProductsCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.DeleteProductsAsync(Application.Features.Products.Commands.DeleteManyProducts.DeleteManyProductsCommand,System.Threading.CancellationToken)">
             <summary>
             Xoá nhiều sản phẩm cùng lúc (soft delete) và cascade xoá ảnh.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.RestoreProduct(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.RestoreProductAsync(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Khôi phục sản phẩm đã bị xoá.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.RestoreProducts(Application.Features.Products.Commands.RestoreManyProducts.RestoreManyProductsCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.RestoreProductsAsync(Application.Features.Products.Commands.RestoreManyProducts.RestoreManyProductsCommand,System.Threading.CancellationToken)">
             <summary>
             Khôi phục nhiều sản phẩm cùng lúc.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateProductPrice(System.Int32,Application.Features.Products.Commands.UpdateProductPrice.UpdateProductPriceCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateProductPriceAsync(System.Int32,Application.Features.Products.Commands.UpdateProductPrice.UpdateProductPriceCommand,System.Threading.CancellationToken)">
             <summary>
             Chỉnh giá cho tất cả các biến thể của 1 sản phẩm.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateManyProductPrices(Application.Features.Products.Commands.UpdateManyProductPrices.UpdateManyProductPricesCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateManyProductPricesAsync(Application.Features.Products.Commands.UpdateManyProductPrices.UpdateManyProductPricesCommand,System.Threading.CancellationToken)">
             <summary>
             Chỉnh giá cho nhiều sản phẩm cùng lúc.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateVariantPrice(System.Int32,Application.Features.Products.Commands.UpdateVariantPrice.UpdateVariantPriceCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateVariantPriceAsync(System.Int32,Application.Features.Products.Commands.UpdateVariantPrice.UpdateVariantPriceCommand,System.Threading.CancellationToken)">
             <summary>
             Chỉnh giá cho 1 biến thể sản phẩm.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateManyVariantPrices(Application.Features.Products.Commands.UpdateManyVariantPrices.UpdateManyVariantPricesCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateManyVariantPricesAsync(Application.Features.Products.Commands.UpdateManyVariantPrices.UpdateManyVariantPricesCommand,System.Threading.CancellationToken)">
             <summary>
             Chỉnh giá cho nhiều biến thể sản phẩm cùng lúc.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateProductStatus(System.Int32,Application.Features.Products.Commands.UpdateProductStatus.UpdateProductStatusCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateProductStatusAsync(System.Int32,Application.Features.Products.Commands.UpdateProductStatus.UpdateProductStatusCommand,System.Threading.CancellationToken)">
             <summary>
             Chỉnh trạng thái của 1 sản phẩm.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateManyProductStatuses(Application.Features.Products.Commands.UpdateManyProductStatuses.UpdateManyProductStatusesCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateManyProductStatusesAsync(Application.Features.Products.Commands.UpdateManyProductStatuses.UpdateManyProductStatusesCommand,System.Threading.CancellationToken)">
             <summary>
             Chỉnh trạng thái nhiều sản phẩm cùng lúc.
             </summary>
@@ -517,78 +517,78 @@
             Quản lý đơn hàng/phiếu xuất.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetMyPurchases(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetMyPurchasesAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách đơn hàng của khách hàng hiện tại (dựa trên JWT token).
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetPurchasesByID(Sieve.Models.SieveModel,System.Guid,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetPurchasesByIDAsync(Sieve.Models.SieveModel,System.Guid,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách đơn hàng của id khách hàng (chỉ cho phép vào khi có quyền xem đơn hàng).
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetOutputs(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetOutputsAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách đơn hàng (có phân trang, lọc, sắp xếp).
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetDeletedOutputs(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetDeletedOutputsAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách đơn hàng đã bị xóa (có phân trang, lọc, sắp xếp).
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetOutputById(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetOutputByIdAsync(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Lấy thông tin chi tiết của đơn hàng.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.CreateOutputForAdmin(Application.Features.Outputs.Commands.CreateOutputByManager.CreateOutputByManagerCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.CreateOutputForAdminAsync(Application.Features.Outputs.Commands.CreateOutputByManager.CreateOutputByManagerCommand,System.Threading.CancellationToken)">
             <summary>
             Tạo đơn hàng mới (dành cho người có quyền tạo đơn hàng).
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.CreateOutput(Application.Features.Outputs.Commands.CreateOutput.CreateOutputCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.CreateOutputAsync(Application.Features.Outputs.Commands.CreateOutput.CreateOutputCommand,System.Threading.CancellationToken)">
             <summary>
             Tạo đơn hàng mới (dành cho các tài khoản đã đăng nhập).
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.UpdateOutputForManager(System.Int32,Application.Features.Outputs.Commands.UpdateOutput.UpdateOutputCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.UpdateOutputForManagerAsync(System.Int32,Application.Features.Outputs.Commands.UpdateOutput.UpdateOutputCommand,System.Threading.CancellationToken)">
             <summary>
             Cập nhật đơn hàng (Cho phép sửa đơn hàng do chính mình tạo ra)
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.UpdateOutput(System.Int32,Application.Features.Outputs.Commands.UpdateOutputForManager.UpdateOutputForManagerCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.UpdateOutputAsync(System.Int32,Application.Features.Outputs.Commands.UpdateOutputForManager.UpdateOutputForManagerCommand,System.Threading.CancellationToken)">
             <summary>
             Cập nhật đơn hàng (Cho phép sửa tất cả đơn hàng, nhưng chỉ cho phép cập nhật khi và chỉ khi có quyền chỉnh sửa
             đơn hàng)
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.UpdateOutputStatus(System.Int32,Application.Features.Outputs.Commands.UpdateOutputStatus.UpdateOutputStatusCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.UpdateOutputStatusAsync(System.Int32,Application.Features.Outputs.Commands.UpdateOutputStatus.UpdateOutputStatusCommand,System.Threading.CancellationToken)">
             <summary>
             Cập nhật trạng thái của đơn hàng.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.UpdateManyOutputStatus(Application.Features.Outputs.Commands.UpdateManyOutputStatus.UpdateManyOutputStatusCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.UpdateManyOutputStatusAsync(Application.Features.Outputs.Commands.UpdateManyOutputStatus.UpdateManyOutputStatusCommand,System.Threading.CancellationToken)">
             <summary>
             Cập nhật trạng thái của nhiều đơn hàng cùng lúc.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.DeleteOutput(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.DeleteOutputAsync(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Xóa đơn hàng.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.DeleteManyOutputs(Application.Features.Outputs.Commands.DeleteManyOutputs.DeleteManyOutputsCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.DeleteManyOutputsAsync(Application.Features.Outputs.Commands.DeleteManyOutputs.DeleteManyOutputsCommand,System.Threading.CancellationToken)">
             <summary>
             Xóa nhiều đơn hàng cùng lúc.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.RestoreOutput(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.RestoreOutputAsync(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Khôi phục đơn hàng đã bị xóa.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.RestoreManyOutputs(Application.Features.Outputs.Commands.RestoreManyOutputs.RestoreManyOutputsCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.RestoreManyOutputsAsync(Application.Features.Outputs.Commands.RestoreManyOutputs.RestoreManyOutputsCommand,System.Threading.CancellationToken)">
             <summary>
             Khôi phục nhiều đơn hàng đã bị xóa cùng lúc.
             </summary>
@@ -605,7 +605,7 @@
             </summary>
             <param name="mediator"></param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SettingController.SetSettings(System.Collections.Generic.Dictionary{System.String,System.String},System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SettingController.SetSettingsAsync(System.Collections.Generic.Dictionary{System.String,System.String},System.Threading.CancellationToken)">
             <summary>
             Sửa các cài đặt hệ thống (cập nhật số lượng cảnh báo tồn kho, số lượng mua tối đa, ...)
             </summary>
@@ -613,7 +613,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SettingController.GetAllSettings(System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SettingController.GetAllSettingsAsync(System.Threading.CancellationToken)">
             <summary>
             Lấy các thông số cài đặt hệ thống (số lượng cảnh báo tồn kho, số lượng mua tối đa, ...)
             </summary>
@@ -632,36 +632,36 @@
             </summary>
             <param name="mediator"></param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.StatisticsController.GetDailyRevenue(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.StatisticsController.GetDailyRevenueAsync(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Lấy doanh thu theo ngày trong khoảng thời gian xác định.
             </summary>
             <param name="days">Số ngày tính từ hiện tại trở về trước</param>
             <param name="cancellationToken"></param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.StatisticsController.GetDashboardStats(System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.StatisticsController.GetDashboardStatsAsync(System.Threading.CancellationToken)">
             <summary>
             Lấy các chỉ số tổng hợp cho Dashboard.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.StatisticsController.GetMonthlyRevenueProfit(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.StatisticsController.GetMonthlyRevenueProfitAsync(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Lấy doanh thu và lợi nhuận theo tháng.
             </summary>
             <param name="months">Số tháng tính từ hiện tại trở về trước</param>
             <param name="cancellationToken"></param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.StatisticsController.GetOrderStatusCounts(System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.StatisticsController.GetOrderStatusCountsAsync(System.Threading.CancellationToken)">
             <summary>
             Lấy số lượng đơn hàng theo từng trạng thái.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.StatisticsController.GetProductReportLastMonth(System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.StatisticsController.GetProductReportLastMonthAsync(System.Threading.CancellationToken)">
             <summary>
             Lấy báo cáo sản phẩm của tháng trước.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.StatisticsController.GetProductStockAndPrice(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.StatisticsController.GetProductStockAndPriceAsync(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Lấy giá và tồn kho của một sản phẩm cụ thể.
             </summary>
@@ -676,7 +676,7 @@
             Quản lý danh sách nhà cung cấp.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SupplierController.GetSuppliers(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SupplierController.GetSuppliersAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách nhà cung cấp (có phân trang, lọc, sắp xếp).
             </summary>
@@ -684,7 +684,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SupplierController.GetDeletedSuppliers(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SupplierController.GetDeletedSuppliersAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách nhà cung cấp đã bị xoá (có phân trang, lọc, sắp xếp).
             </summary>
@@ -692,7 +692,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SupplierController.GetSupplierById(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SupplierController.GetSupplierByIdAsync(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Lấy thông tin của nhà cung cấp được chọn.
             </summary>
@@ -700,7 +700,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SupplierController.CreateSupplier(Application.Features.Suppliers.Commands.CreateSupplier.CreateSupplierCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SupplierController.CreateSupplierAsync(Application.Features.Suppliers.Commands.CreateSupplier.CreateSupplierCommand,System.Threading.CancellationToken)">
             <summary>
             Tạo nhà cung cấp mới.
             </summary>
@@ -708,7 +708,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SupplierController.GetSuppliersForInput(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SupplierController.GetSuppliersForInputAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách nhà cung cấp (có phân trang, lọc, sắp xếp - chỉ được vào khi người dùng có quyền thêm và xoá phiếu
             bán hàng).
@@ -717,7 +717,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SupplierController.UpdateSupplier(System.Int32,Application.Features.Suppliers.Commands.UpdateSupplier.UpdateSupplierCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SupplierController.UpdateSupplierAsync(System.Int32,Application.Features.Suppliers.Commands.UpdateSupplier.UpdateSupplierCommand,System.Threading.CancellationToken)">
             <summary>
             Cập nhật thông tin nhà cung cấp.
             </summary>
@@ -726,7 +726,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SupplierController.UpdateSupplierStatus(System.Int32,Application.Features.Suppliers.Commands.UpdateSupplierStatus.UpdateSupplierStatusCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SupplierController.UpdateSupplierStatusAsync(System.Int32,Application.Features.Suppliers.Commands.UpdateSupplierStatus.UpdateSupplierStatusCommand,System.Threading.CancellationToken)">
             <summary>
             Cập nhật trạng thái của nhà cung cấp.
             </summary>
@@ -735,7 +735,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SupplierController.DeleteSupplier(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SupplierController.DeleteSupplierAsync(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Xoá nhà cung cấp.
             </summary>
@@ -743,7 +743,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SupplierController.RestoreSupplier(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SupplierController.RestoreSupplierAsync(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Khôi phục lại nhà cung cấp đã xoá.
             </summary>
@@ -751,7 +751,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SupplierController.DeleteSuppliers(Application.Features.Suppliers.Commands.DeleteManySuppliers.DeleteManySuppliersCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SupplierController.DeleteSuppliersAsync(Application.Features.Suppliers.Commands.DeleteManySuppliers.DeleteManySuppliersCommand,System.Threading.CancellationToken)">
             <summary>
             Xoá nhiều nhà cung cấp cùng lúc.
             </summary>
@@ -759,7 +759,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SupplierController.RestoreSuppliers(Application.Features.Suppliers.Commands.RestoreManySuppliers.RestoreManySuppliersCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SupplierController.RestoreSuppliersAsync(Application.Features.Suppliers.Commands.RestoreManySuppliers.RestoreManySuppliersCommand,System.Threading.CancellationToken)">
             <summary>
             Khôi phục nhiều nhà cung cấp đã xoá cùng lúc.
             </summary>
@@ -767,7 +767,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SupplierController.UpdateManySupplierStatus(Application.Features.Suppliers.Commands.UpdateManySupplierStatus.UpdateManySupplierStatusCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SupplierController.UpdateManySupplierStatusAsync(Application.Features.Suppliers.Commands.UpdateManySupplierStatus.UpdateManySupplierStatusCommand,System.Threading.CancellationToken)">
             <summary>
             Cập nhật trạng thái của nhiều nhà cung cấp cùng lúc.
             </summary>
@@ -785,27 +785,27 @@
             Quản lý người dùng (Bất cứ người dùng nào đã đăng nhập đều có quyền vào đây)
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.UserController.GetCurrentUser(System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.UserController.GetCurrentUserAsync(System.Threading.CancellationToken)">
             <summary>
             Lấy thông tin người dùng hiện tại từ JWT
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.UserController.UpdateCurrentUser(Application.Features.UserManager.Commands.UpdateUser.UpdateUserCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.UserController.UpdateCurrentUserAsync(Application.Features.UserManager.Commands.UpdateUser.UpdateUserCommand,System.Threading.CancellationToken)">
             <summary>
             Đổi thông tin người dùng hiện tại từ JWT
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.UserController.ChangePasswordCurrentUser(Application.Features.UserManager.Commands.ChangePassword.ChangePasswordCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.UserController.ChangePasswordCurrentUserAsync(Application.Features.UserManager.Commands.ChangePassword.ChangePasswordCommand,System.Threading.CancellationToken)">
             <summary>
             Đổi mật khẩu người dùng hiện tại từ JWT
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.UserController.DeleteCurrentUserAccount(System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.UserController.DeleteCurrentUserAccountAsync(System.Threading.CancellationToken)">
             <summary>
             Xoá tài khoản của người dùng từ JWT
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.UserController.RestoreUserAccount(System.Guid,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.UserController.RestoreUserAccountAsync(System.Guid,System.Threading.CancellationToken)">
             <summary>
             Khôi phục tài khoản người dùng
             </summary>
@@ -836,7 +836,7 @@
             </remarks>
             <param name="mediator">The MediatR mediator used to send queries and commands.</param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.UserManagerController.GetAllUsers(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.UserManagerController.GetAllUsersAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách tất cả người dùng (có phân trang, lọc, sắp xếp - chỉ vào được khi người dùng có quyền xem danh
             sách người dùng).
@@ -844,7 +844,7 @@
             <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
             <param name="cancellationToken"></param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.UserManagerController.GetAllUsersForOutput(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.UserManagerController.GetAllUsersForOutputAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách tất cả người dùng (có phân trang, lọc, sắp xếp - chỉ vào được khi người dùng có quyền sửa hoặc xoá
             phiếu bán hàng).
@@ -852,32 +852,32 @@
             <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
             <param name="cancellationToken"></param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.UserManagerController.GetUserById(System.Guid,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.UserManagerController.GetUserByIdAsync(System.Guid,System.Threading.CancellationToken)">
             <summary>
             Lấy thông tin người dùng theo ID
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.UserManagerController.UpdateUser(System.Guid,Application.Features.UserManager.Commands.UpdateUser.UpdateUserCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.UserManagerController.UpdateUserAsync(System.Guid,Application.Features.UserManager.Commands.UpdateUser.UpdateUserCommand,System.Threading.CancellationToken)">
             <summary>
             Cập nhật thông tin người dùng
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.UserManagerController.ChangePassword(System.Guid,Application.Features.UserManager.Commands.ChangePassword.ChangePasswordCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.UserManagerController.ChangePasswordAsync(System.Guid,Application.Features.UserManager.Commands.ChangePassword.ChangePasswordCommand,System.Threading.CancellationToken)">
             <summary>
             Đổi mật khẩu người dùng theo ID (đang đăng nhập)
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.UserManagerController.AssignRoles(System.Guid,Application.Features.UserManager.Commands.AssignRoles.AssignRolesCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.UserManagerController.AssignRolesAsync(System.Guid,Application.Features.UserManager.Commands.AssignRoles.AssignRolesCommand,System.Threading.CancellationToken)">
             <summary>
             Gán roles cho người dùng
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.UserManagerController.ChangeUserStatus(System.Guid,Application.Features.UserManager.Commands.ChangeUserStatus.ChangeUserStatusCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.UserManagerController.ChangeUserStatusAsync(System.Guid,Application.Features.UserManager.Commands.ChangeUserStatus.ChangeUserStatusCommand,System.Threading.CancellationToken)">
             <summary>
             Thay đổi trạng thái của người dùng
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.UserManagerController.ChangeMultipleUsersStatus(Application.Features.UserManager.Commands.ChangeMultipleUsersStatus.ChangeMultipleUsersStatusCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.UserManagerController.ChangeMultipleUsersStatusAsync(Application.Features.UserManager.Commands.ChangeMultipleUsersStatus.ChangeMultipleUsersStatusCommand,System.Threading.CancellationToken)">
             <summary>
             Thay đổi trạng thái của nhiều người dùng
             </summary>

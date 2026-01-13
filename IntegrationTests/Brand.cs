@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Net.Http.Json;
 using Application.ApiContracts.Brand.Responses;
 using Application.Features.Brands.Commands.CreateBrand;
@@ -38,7 +38,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None"/api/v1/Brand", request;
+        var response = await _client.PostAsJsonAsync("/api/v1/Brand", request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -69,7 +69,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
         }
         
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Brand?Page=1&PageSize=10";
+        var response = await _client.GetAsync("/api/v1/Brand?Page=1&PageSize=10", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -97,7 +97,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
         }
 
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Brand?Filters=Name@=Honda Filter";
+        var response = await _client.GetAsync("/api/v1/Brand?Filters=Name@=Honda Filter", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -121,7 +121,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
         }
         
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None$"/api/v1/Brand/{id}";
+        var response = await _client.GetAsync($"/api/v1/Brand/{id}", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -151,7 +151,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PutAsJsonAsync(await _client.PutAsJsonAsync(, CancellationToken.None$"/api/v1/Brand/{id}", request;
+        var response = await _client.PutAsJsonAsync($"/api/v1/Brand/{id}", request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -172,7 +172,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
         }
 
         // Act
-        var response = await _client.DeleteAsync(await _client.DeleteAsync(, CancellationToken.None$"/api/v1/Brand/{id}";
+        var response = await _client.DeleteAsync($"/api/v1/Brand/{id}", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -193,7 +193,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
         }
 
         // Act
-        var response = await _client.PostAsync(await _client.PostAsync(, CancellationToken.None$"/api/v1/Brand/restore/{id}", null;
+        var response = await _client.PostAsync($"/api/v1/Brand/restore/{id}", null, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -222,7 +222,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
         {
             Content = JsonContent.Create(request)
         };
-        var response = await _client.SendAsync(await _client.SendAsync(, CancellationToken.NonerequestMessage;
+        var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -247,7 +247,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
         var request = new RestoreManyBrandsCommand { Ids = ids };
 
         // Act
-        var response = await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None"/api/v1/Brand/restore-many", request;
+        var response = await _client.PostAsJsonAsync("/api/v1/Brand/restore-many", request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -257,7 +257,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
     public async Task BRAND_018_GetDeletedBrands_Success()
     {
         // Act
-        var response = await _client.GetAsync(await _client.GetAsync(, CancellationToken.None"/api/v1/Brand/deleted";
+        var response = await _client.GetAsync("/api/v1/Brand/deleted", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -270,7 +270,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
         var request = new CreateBrandCommand { Name = "Audit Brand", Description = "Audit" };
 
         // Act
-        await _client.PostAsJsonAsync(await _client.PostAsJsonAsync(, CancellationToken.None"/api/v1/Brand", request;
+        await _client.PostAsJsonAsync("/api/v1/Brand", request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         // Verify in DB
@@ -296,7 +296,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
 
         var request = new UpdateBrandCommand { Name = "Audit Update Changed", Description = "Audit" };
 
-        await _client.PutAsJsonAsync(await _client.PutAsJsonAsync(, CancellationToken.None$"/api/v1/Brand/{id}", request;
+        await _client.PutAsJsonAsync($"/api/v1/Brand/{id}", request, CancellationToken.None).ConfigureAwait(true);
 
         using var verifyScope = _factory.Services.CreateScope();
         var verifyDb = verifyScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
