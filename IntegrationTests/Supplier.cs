@@ -55,7 +55,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<SupplierResponse>>();
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<SupplierResponse>>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Items.Should().HaveCount(10);
         content.TotalCount.Should().Be(25);
@@ -93,7 +93,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<SupplierResponse>>();
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<SupplierResponse>>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Items.Should().HaveCount(5);
         content.TotalCount.Should().Be(25);
@@ -126,7 +126,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<SupplierResponse>>();
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<SupplierResponse>>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Items.Should().HaveCount(2);
         content.Items.Should().OnlyContain(s => s.Name!.Contains("Test"));
@@ -157,7 +157,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<SupplierResponse>>();
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<SupplierResponse>>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content.Items?.First().Name.Should().Be("Alpha Supplier");
         content.Items?.Last().Name.Should().Be("Zebra Supplier");
@@ -188,10 +188,10 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<SupplierResponse>>();
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<SupplierResponse>>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.TotalCount.Should().Be(2);
-        content.Items.Should().NotContain(s => s.Name == "Deleted 1");
+        content.Items.Should().NotContain(s => string.Compare(s.Name, "Deleted 1") == 0);
     }
 
     [Fact(DisplayName = "SUP_036 - Lấy danh sách Supplier đã xóa với phân trang")]
@@ -219,10 +219,10 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<SupplierResponse>>();
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<SupplierResponse>>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.TotalCount.Should().Be(2);
-        content.Items.Should().NotContain(s => s.Name == "Active 1");
+        content.Items.Should().NotContain(s => string.Compare(s.Name, "Active 1") == 0);
     }
 
     [Fact(DisplayName = "SUP_037 - Lấy chi tiết Supplier thành công với đầy đủ thông tin")]
@@ -243,7 +243,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
                 StatusId = "active",
                 Notes = "Test notes"
             };
-            await db.Suppliers.AddAsync(supplier);
+            await db.Suppliers.AddAsync(supplier, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
             supplierId = supplier.Id;
         }
@@ -278,7 +278,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
                 StatusId = "active",
                 DeletedAt = DateTime.UtcNow
             };
-            await db.Suppliers.AddAsync(supplier);
+            await db.Suppliers.AddAsync(supplier, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
             supplierId = supplier.Id;
         }
@@ -351,7 +351,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
 
             var input = new Input { SupplierId = supplier2.Id, StatusId = "working" };
-            await db.InputReceipts.AddAsync(input);
+            await db.InputReceipts.AddAsync(input, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
 
             supplierIds = [supplier1.Id, supplier2.Id];
@@ -432,7 +432,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         // Act
-        var response = await _client.PatchAsJsonAsync("/api/v1/Supplier/update-status-many", request).ConfigureAwait(true);
+        var response = await _client.PatchAsJsonAsync("/api/v1/Supplier/update-status-many", request, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -460,7 +460,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
                 Address = "Address",
                 StatusId = "active"
             };
-            await db.Suppliers.AddAsync(supplier);
+            await db.Suppliers.AddAsync(supplier, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             supplierId = supplier.Id;
 
@@ -509,7 +509,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
                 Address = "Address",
                 StatusId = "active"
             };
-            await db.Suppliers.AddAsync(supplier);
+            await db.Suppliers.AddAsync(supplier, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
             supplierId = supplier.Id;
 
@@ -519,7 +519,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
                 new() { SupplierId = supplierId, StatusId = "working" },
                 new() { SupplierId = supplierId, StatusId = "cancelled" }
             };
-            await db.InputReceipts.AddRangeAsync(inputs).ConfigureAwait(true);
+            await db.InputReceipts.AddRangeAsync(inputs, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
 
             // Add InputInfo records - only completed should be counted

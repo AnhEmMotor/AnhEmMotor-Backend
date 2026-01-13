@@ -55,7 +55,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>();
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Items.Should().HaveCount(10);
         content.TotalCount.Should().Be(15);
@@ -87,7 +87,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>();
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Items.Should().HaveCount(5);
         content.TotalCount.Should().Be(12);
@@ -117,11 +117,11 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>();
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Items.Should().HaveCount(2);
-        content.Items.Should().Contain(c => c.Name == "Smartphone");
-        content.Items.Should().Contain(c => c.Name == "Phone Case");
+        content.Items.Should().Contain(c => string.Compare(c.Name, "Smartphone") == 0);
+        content.Items.Should().Contain(c => string.Compare(c.Name, "Phone Case") == 0);
     }
 
     [Fact(DisplayName = "PC_028 - Lấy danh sách danh mục sản phẩm với sorting")]
@@ -137,8 +137,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
             await db.ProductCategories.AddRangeAsync(
                 new ProductCategoryEntity { Name = "Zebra", Description = "Desc", DeletedAt = null },
                 new ProductCategoryEntity { Name = "Apple", Description = "Desc", DeletedAt = null },
-                new ProductCategoryEntity { Name = "Microsoft", Description = "Desc", DeletedAt = null }
-            , CancellationToken.None).ConfigureAwait(true);
+                new ProductCategoryEntity { Name = "Microsoft", Description = "Desc", DeletedAt = null }).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
         }
 
@@ -147,7 +146,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>();
+        var content = await     response.Content.ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Items.Should().HaveCount(3);
         content.Items[0].Name.Should().Be("Apple");
@@ -171,7 +170,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>();
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Items.Should().BeEmpty();
         content.TotalCount.Should().Be(0);
@@ -202,7 +201,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>();
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Items.Should().HaveCount(8);
         content.TotalCount.Should().Be(8);
@@ -236,7 +235,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>();
+        var content = await     response.Content.ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Items.Should().HaveCount(7);
         content.TotalCount.Should().Be(7);
@@ -252,8 +251,8 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var category = new ProductCategoryEntity { Name = "Electronics", Description = "Desc", DeletedAt = null };
-            await db.ProductCategories.AddAsync(category);
-            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
+            await db.ProductCategories.AddAsync(category, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             categoryId = category.Id;
         }
 
@@ -287,8 +286,8 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var category = new ProductCategoryEntity { Name = "Deleted", Description = "Desc", DeletedAt = DateTime.UtcNow };
-            await db.ProductCategories.AddAsync(category);
-            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
+            await db.ProductCategories.AddAsync(category, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             categoryId = category.Id;
         }
 
@@ -330,7 +329,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var category = new ProductCategoryEntity { Name = "Original", Description = "Keep", DeletedAt = null };
-            await db.ProductCategories.AddAsync(category);
+            await db.ProductCategories.AddAsync(category, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
             categoryId = category.Id;
         }
@@ -357,7 +356,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var category = new ProductCategoryEntity { Name = "To Delete API", Description = "Desc", DeletedAt = null };
-            await db.ProductCategories.AddAsync(category);
+            await db.ProductCategories.AddAsync(category, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
             categoryId = category.Id;
         }
@@ -371,7 +370,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var category = await db.ProductCategories.FindAsync(categoryId);
+            var category = await db.ProductCategories.FindAsync(categoryId, CancellationToken.None).ConfigureAwait(true);
             category.Should().NotBeNull();
             category!.DeletedAt.Should().NotBeNull();
         }
@@ -388,7 +387,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
             for (int i = 0; i < 3; i++)
             {
                 var category = new ProductCategoryEntity { Name = $"To Delete Many {i}", Description = "Desc", DeletedAt = null };
-                await db.ProductCategories.AddAsync(category);
+                await db.ProductCategories.AddAsync(category, CancellationToken.None).ConfigureAwait(true);
                 await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
                 categoryIds[i] = category.Id;
             }
@@ -407,7 +406,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             foreach (var id in categoryIds)
             {
-                var category = await db.ProductCategories.FindAsync(id);
+                var category = await db.ProductCategories.FindAsync(id, CancellationToken.None).ConfigureAwait(true);
                 category.Should().NotBeNull();
                 category!.DeletedAt.Should().NotBeNull();
             }
@@ -425,7 +424,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
             for (int i = 0; i < 2; i++)
             {
                 var category = new ProductCategoryEntity { Name = $"Valid {i}", Description = "Desc", DeletedAt = null };
-                await db.ProductCategories.AddAsync(category);
+                await db.ProductCategories.AddAsync(category, CancellationToken.None).ConfigureAwait(true);
                 await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
                 validIds[i] = category.Id;
             }
@@ -444,7 +443,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             foreach (var id in validIds)
             {
-                var category = await db.ProductCategories.FindAsync(id);
+                var category = await db.ProductCategories.FindAsync(id, CancellationToken.None).ConfigureAwait(true);
                 category.Should().NotBeNull();
                 category!.DeletedAt.Should().BeNull();
             }
@@ -461,12 +460,12 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             
             var category1 = new ProductCategoryEntity { Name = "Active", Description = "Desc", DeletedAt = null };
-            await db.ProductCategories.AddAsync(category1);
+            await db.ProductCategories.AddAsync(category1, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
             categoryIds[0] = category1.Id;
 
             var category2 = new ProductCategoryEntity { Name = "Already Deleted", Description = "Desc", DeletedAt = DateTime.UtcNow };
-            await db.ProductCategories.AddAsync(category2);
+            await db.ProductCategories.AddAsync(category2, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
             categoryIds[1] = category2.Id;
         }
@@ -482,7 +481,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var category = await db.ProductCategories.FindAsync(categoryIds[0]);
+            var category = await db.ProductCategories.FindAsync(categoryIds[0], CancellationToken.None).ConfigureAwait(true);
             category.Should().NotBeNull();
             category!.DeletedAt.Should().BeNull();
         }
@@ -499,7 +498,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
             for (int i = 0; i < 3; i++)
             {
                 var category = new ProductCategoryEntity { Name = $"To Restore {i}", Description = "Desc", DeletedAt = DateTime.UtcNow };
-                await db.ProductCategories.AddAsync(category);
+                await db.ProductCategories.AddAsync(category, CancellationToken.None).ConfigureAwait(true);
                 await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
                 categoryIds[i] = category.Id;
             }
@@ -512,7 +511,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<List<ProductCategoryResponse>>();
+        var content = await response.Content.ReadFromJsonAsync<List<ProductCategoryResponse>>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Should().HaveCount(3);
 
@@ -521,7 +520,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             foreach (var id in categoryIds)
             {
-                var category = await db.ProductCategories.FindAsync(id);
+                var category = await db.ProductCategories.FindAsync(id, CancellationToken.None).ConfigureAwait(true);
                 category.Should().NotBeNull();
                 category!.DeletedAt.Should().BeNull();
             }
@@ -538,12 +537,12 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             
             var category1 = new ProductCategoryEntity { Name = "Deleted", Description = "Desc", DeletedAt = DateTime.UtcNow };
-            await db.ProductCategories.AddAsync(category1);
+            await db.ProductCategories.AddAsync(category1, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
             categoryIds[0] = category1.Id;
 
             var category2 = new ProductCategoryEntity { Name = "Active", Description = "Desc", DeletedAt = null };
-            await db.ProductCategories.AddAsync(category2);
+            await db.ProductCategories.AddAsync(category2, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);;
             categoryIds[1] = category2.Id;
         }
@@ -559,7 +558,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var category = await db.ProductCategories.FindAsync(categoryIds[0]);
+            var category = await db.ProductCategories.FindAsync(categoryIds[0], CancellationToken.None).ConfigureAwait(true);
             category.Should().NotBeNull();
             category!.DeletedAt.Should().NotBeNull();
         }
