@@ -1,6 +1,7 @@
-﻿using Application.ApiContracts.Auth.Requests;
+﻿using Application.ApiContracts.Auth.Responses;
 using Application.ApiContracts.User.Responses;
 using Application.ApiContracts.UserManager.Responses;
+using Application.Common.Models;
 using Domain.Entities;
 using Domain.Primitives;
 using Sieve.Models;
@@ -18,9 +19,11 @@ namespace Application.Interfaces.Repositories.User
             SieveModel sieveModel,
             CancellationToken cancellationToken);
 
-        public Task<UserAuthDTO> GetUserByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken);
+        public Task<UserAuth> GetUserByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken);
 
-        public Task<UserAuthDTO?> GetUserByIDAsync(Guid? idUser, CancellationToken cancellationToken);
+        public Task<ApplicationUser?> GetByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken);
+
+        public Task<UserAuth?> GetUserByIDAsync(Guid? idUser, CancellationToken cancellationToken);
 
         public Task<ApplicationUser?> FindUserByIdAsync(
             Guid userId,
@@ -46,5 +49,7 @@ namespace Application.Interfaces.Repositories.User
         public Task<IList<ApplicationUser>> GetUsersInRoleAsync(
             string roleName,
             CancellationToken cancellationToken = default);
+
+        public Task<IList<string>> GetRolesOfUserAsync(ApplicationUser user);
     }
 }

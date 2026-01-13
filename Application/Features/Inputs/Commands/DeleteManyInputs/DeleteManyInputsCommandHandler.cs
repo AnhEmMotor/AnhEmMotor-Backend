@@ -1,3 +1,4 @@
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
 
@@ -8,9 +9,9 @@ namespace Application.Features.Inputs.Commands.DeleteManyInputs;
 public sealed class DeleteManyInputsCommandHandler(
     IInputReadRepository readRepository,
     IInputDeleteRepository deleteRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<DeleteManyInputsCommand, Common.Models.ErrorResponse?>
+    IUnitOfWork unitOfWork) : IRequestHandler<DeleteManyInputsCommand, Result>
 {
-    public async Task<Common.Models.ErrorResponse?> Handle(
+    public async Task<Result> Handle(
         DeleteManyInputsCommand request,
         CancellationToken cancellationToken)
     {
@@ -22,40 +23,27 @@ public sealed class DeleteManyInputsCommandHandler(
         {
             var foundIds = inputsList.Select(i => i.Id).ToList();
             var missingIds = request.Ids.Except(foundIds).ToList();
-            return new Common.Models.ErrorResponse
-            {
-                Errors =
-                    [ new Common.Models.ErrorDetail
-                    {
-                        Field = "Ids",
-                        Message = $"Không tìm thấy {missingIds.Count} phiếu nhập: {string.Join(", ", missingIds)}"
-                    } ]
-            };
+            return Result.Failure(Error.NotFound($"Không tìm thấy {missingIds.Count} phiếu nhập: {string.Join(", ", missingIds)}", "Ids"));
         }
 
-        var errors = new List<Common.Models.ErrorDetail>();
+        var errors = new List<Error>();
 
         foreach(var output in inputsList)
         {
             if(Domain.Constants.InputStatus.IsCannotDelete(output.StatusId))
             {
-                errors.Add(
-                    new Common.Models.ErrorDetail
-                    {
-                        Field = "Ids",
-                        Message = $"Phiếu nhập với Id {output.Id} đã bị xóa trước đó"
-                    });
+                errors.Add(Error.BadRequest($"Phiếu nhập với Id {output.Id} đã bị xóa trước đó", "Ids"));
             }
         }
 
         if(errors.Count > 0)
         {
-            return new Common.Models.ErrorResponse { Errors = errors };
+            return Result.Failure(errors);
         }
 
         deleteRepository.Delete(inputsList);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return null;
+        return Result.Success();
     }
 }

@@ -1,8 +1,10 @@
 using MediatR;
+using Application.Common.Models;
+using Application.ApiContracts.Brand.Responses;
 
 namespace Application.Features.Brands.Commands.CreateBrand;
 
-public sealed record CreateBrandCommand : IRequest<ApiContracts.Brand.Responses.BrandResponse>
+public sealed record CreateBrandCommand : IRequest<Result<BrandResponse>>
 {
     public string? Name { get; init; }
 

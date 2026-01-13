@@ -1,8 +1,10 @@
 using MediatR;
+using Application.ApiContracts.File.Responses;
+using Application.Common.Models;
 
 namespace Application.Features.Files.Commands.UploadImage;
 
-public sealed record UploadImageCommand : IRequest<ApiContracts.File.Responses.MediaFileResponse>
+public sealed record UploadImageCommand : IRequest<Result<MediaFileResponse>>
 {
     public Stream? FileContent { get; init; }
 

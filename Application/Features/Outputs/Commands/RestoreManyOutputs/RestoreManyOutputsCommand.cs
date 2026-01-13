@@ -1,10 +1,10 @@
 using Application.ApiContracts.Output.Responses;
-
+using Application.Common.Models;
 using MediatR;
 
 namespace Application.Features.Outputs.Commands.RestoreManyOutputs;
 
-public sealed record RestoreManyOutputsCommand : IRequest<(List<OutputResponse>? Data, Common.Models.ErrorResponse? Error)>
+public sealed record RestoreManyOutputsCommand : IRequest<Result<List<OutputResponse>?>>
 {
     public ICollection<int> Ids { get; init; } = [];
 }

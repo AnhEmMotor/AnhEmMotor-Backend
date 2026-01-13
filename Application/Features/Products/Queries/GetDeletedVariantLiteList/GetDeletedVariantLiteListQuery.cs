@@ -1,10 +1,12 @@
 using Application.ApiContracts.Product.Responses;
 using MediatR;
 using Sieve.Models;
+using Domain.Primitives;
+using Application.Common.Models;
 
 namespace Application.Features.Products.Queries.GetDeletedVariantLiteList;
 
-public sealed record GetDeletedVariantLiteListQuery : IRequest<Domain.Primitives.PagedResult<ProductVariantLiteResponse>>
+public sealed record GetDeletedVariantLiteListQuery : IRequest<Result<PagedResult<ProductVariantLiteResponse>>>
 {
     public int Page { get; init; } = 1;
 

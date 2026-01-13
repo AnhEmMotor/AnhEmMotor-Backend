@@ -1,4 +1,5 @@
-﻿using Application.ApiContracts.Output.Responses;
+using Application.ApiContracts.Output.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.ProductVariant;
@@ -15,25 +16,10 @@ public sealed class CreateOutputCommandHandler(
     IOutputReadRepository readRepository,
     IOutputInsertRepository insertRepository,
     IProductVariantReadRepository variantRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateOutputCommand, (OutputResponse? Data, Common.Models.ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<CreateOutputCommand, Result<OutputResponse?>>
 {
-    public async Task<(OutputResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
-        CreateOutputCommand request,
-        CancellationToken cancellationToken)
+    public async Task<Result<OutputResponse?>> Handle(CreateOutputCommand request, CancellationToken cancellationToken)
     {
-        if(request.OutputInfos.Count == 0)
-        {
-            return (null, new Common.Models.ErrorResponse
-            {
-                Errors =
-                    [ new Common.Models.ErrorDetail
-                    {
-                        Field = "Products",
-                        Message = "Đơn hàng phải có ít nhất một sản phẩm."
-                    } ]
-            });
-        }
-
         var variantIds = request.OutputInfos
             .Where(p => p.ProductId.HasValue)
             .Select(p => p.ProductId!.Value)
@@ -49,30 +35,18 @@ public sealed class CreateOutputCommandHandler(
         {
             var foundIds = variantsList.Select(v => v.Id).ToList();
             var missingIds = variantIds.Except(foundIds).ToList();
-            return (null, new Common.Models.ErrorResponse
-            {
-                Errors =
-                    [ new Common.Models.ErrorDetail
-                    {
-                        Field = "Products",
-                        Message = $"Không tìm thấy {missingIds.Count} sản phẩm: {string.Join(", ", missingIds)}"
-                    } ]
-            });
+            return Error.NotFound(
+                $"Kh�ng t�m th?y {missingIds.Count} s?n ph?m: {string.Join(", ", missingIds)}",
+                "Products");
         }
 
         foreach(var variant in variantsList)
         {
             if(string.Compare(variant.Product?.StatusId, Domain.Constants.ProductStatus.ForSale) != 0)
             {
-                return (null, new Common.Models.ErrorResponse
-                {
-                    Errors =
-                        [ new Common.Models.ErrorDetail
-                        {
-                            Field = "Products",
-                            Message = $"Sản phẩm '{variant.Product?.Name ?? variant.Id.ToString()}' không còn được bán."
-                        } ]
-                });
+                return Error.BadRequest(
+                    $"S?n ph?m '{variant.Product?.Name ?? variant.Id.ToString()}' kh�ng c�n du?c b�n.",
+                    "Products");
             }
         }
         var output = request.Adapt<Output>();
@@ -91,13 +65,14 @@ public sealed class CreateOutputCommandHandler(
             output.StatusId = OrderStatus.Pending;
         }
 
-        output.BuyerId = request.CurrentUserId;
+        output.BuyerId = request.BuyerId;
 
         insertRepository.Add(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         var created = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
 
-        return (created!.Adapt<OutputResponse>(), null);
+        return created.Adapt<OutputResponse>();
     }
 }
+

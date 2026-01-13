@@ -1,3 +1,5 @@
+using Application.ApiContracts.Product.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Product;
 
@@ -9,19 +11,16 @@ namespace Application.Features.Products.Commands.UpdateProductStatus;
 public sealed class UpdateProductStatusCommandHandler(
     IProductReadRepository readRepository,
     IProductUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateProductStatusCommand, (ApiContracts.Product.Responses.ProductDetailForManagerResponse? Data, Common.Models.ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateProductStatusCommand, Result<ProductDetailForManagerResponse?>>
 {
-    public async Task<(ApiContracts.Product.Responses.ProductDetailForManagerResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
+    public async Task<Result<ProductDetailForManagerResponse?>> Handle(
         UpdateProductStatusCommand command,
         CancellationToken cancellationToken)
     {
         var product = await readRepository.GetByIdWithDetailsAsync(command.Id, cancellationToken).ConfigureAwait(false);
         if(product == null)
         {
-            return (null, new Common.Models.ErrorResponse
-            {
-                Errors = [ new Common.Models.ErrorDetail { Message = $"Sản phẩm với Id {command.Id} không tồn tại." } ]
-            });
+            return Error.NotFound($"Sản phẩm với Id {command.Id} không tồn tại.");
         }
 
         product.StatusId = command.StatusId;
@@ -29,7 +28,7 @@ public sealed class UpdateProductStatusCommandHandler(
         updateRepository.Update(product);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        var response = product.Adapt<ApiContracts.Product.Responses.ProductDetailForManagerResponse>();
-        return (response, null);
+        var response = product.Adapt<ProductDetailForManagerResponse>();
+        return response;
     }
 }

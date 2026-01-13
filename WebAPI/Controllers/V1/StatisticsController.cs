@@ -1,4 +1,4 @@
-using Application.ApiContracts.Statistical.Responses;
+﻿using Application.ApiContracts.Statistical.Responses;
 using Application.Features.Statistical.Queries.GetDailyRevenue;
 using Application.Features.Statistical.Queries.GetDashboardStats;
 using Application.Features.Statistical.Queries.GetMonthlyRevenueProfit;
@@ -6,12 +6,12 @@ using Application.Features.Statistical.Queries.GetOrderStatusCounts;
 using Application.Features.Statistical.Queries.GetProductReportLastMonth;
 using Application.Features.Statistical.Queries.GetProductStockAndPrice;
 using Asp.Versioning;
-
 using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using static Domain.Constants.Permission.PermissionsList;
+using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1;
 
@@ -21,10 +21,9 @@ namespace WebAPI.Controllers.V1;
 /// <param name="mediator"></param>
 [ApiVersion("1.0")]
 [SwaggerTag("Thống kê và báo cáo")]
-[ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status500InternalServerError)]
-public class StatisticsController(IMediator mediator) : ControllerBase
+public class StatisticsController(IMediator mediator) : ApiController
 {
     /// <summary>
     /// Lấy doanh thu theo ngày trong khoảng thời gian xác định.
@@ -38,9 +37,9 @@ public class StatisticsController(IMediator mediator) : ControllerBase
         [FromQuery] int days = 7,
         CancellationToken cancellationToken = default)
     {
-        var query = new GetDailyRevenueQuery(days);
+        var query = new GetDailyRevenueQuery() { Days = days };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-        return Ok(result);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -53,7 +52,7 @@ public class StatisticsController(IMediator mediator) : ControllerBase
     {
         var query = new GetDashboardStatsQuery();
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-        return Ok(result);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -68,9 +67,9 @@ public class StatisticsController(IMediator mediator) : ControllerBase
         [FromQuery] int months = 12,
         CancellationToken cancellationToken = default)
     {
-        var query = new GetMonthlyRevenueProfitQuery(months);
+        var query = new GetMonthlyRevenueProfitQuery() { Months = months };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-        return Ok(result);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -83,7 +82,7 @@ public class StatisticsController(IMediator mediator) : ControllerBase
     {
         var query = new GetOrderStatusCountsQuery();
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-        return Ok(result);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -96,7 +95,7 @@ public class StatisticsController(IMediator mediator) : ControllerBase
     {
         var query = new GetProductReportLastMonthQuery();
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-        return Ok(result);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -108,20 +107,8 @@ public class StatisticsController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetProductStockAndPrice(int variantId, CancellationToken cancellationToken)
     {
-        var query = new GetProductStockAndPriceQuery(variantId);
+        var query = new GetProductStockAndPriceQuery() { VariantId = variantId };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-        if(result is null)
-        {
-            return NotFound(
-                new Application.Common.Models.ErrorResponse
-                {
-                    Errors =
-                        [ new Application.Common.Models.ErrorDetail
-                            {
-                                Message = $"Không tìm thấy sản phẩm có ID {variantId}."
-                            } ]
-                });
-        }
-        return Ok(result);
+        return HandleResult(result);
     }
 }

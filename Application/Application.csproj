@@ -21,7 +21,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="ApiContracts\Auth\Requests\" />
+    <Folder Include="ApiContracts\Brand\Requests\" />
+    <Folder Include="ApiContracts\File\Requests\" />
+    <Folder Include="ApiContracts\Permission\Requests\" />
+    <Folder Include="ApiContracts\ProductCategory\Requests\" />
     <Folder Include="ApiContracts\Statistical\Requests\" />
+    <Folder Include="ApiContracts\Supplier\Requests\" />
+    <Folder Include="ApiContracts\UserManager\Requests\" />
+    <Folder Include="ApiContracts\User\Requests\" />
     <Folder Include="Features\Auth\Commands\Register\" />
     <Folder Include="Features\Auth\Queries\" />
   </ItemGroup>

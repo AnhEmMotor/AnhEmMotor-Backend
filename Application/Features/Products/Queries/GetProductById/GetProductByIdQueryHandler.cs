@@ -1,3 +1,5 @@
+using Application.ApiContracts.Product.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories.Product;
 
 using Mapster;
@@ -5,9 +7,9 @@ using MediatR;
 
 namespace Application.Features.Products.Queries.GetProductById;
 
-public sealed class GetProductByIdQueryHandler(IProductReadRepository readRepository) : IRequestHandler<GetProductByIdQuery, (ApiContracts.Product.Responses.ProductDetailForManagerResponse? Data, Common.Models.ErrorResponse? Error)>
+public sealed class GetProductByIdQueryHandler(IProductReadRepository readRepository) : IRequestHandler<GetProductByIdQuery, Result<ProductDetailForManagerResponse?>>
 {
-    public async Task<(ApiContracts.Product.Responses.ProductDetailForManagerResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
+    public async Task<Result<ProductDetailForManagerResponse?>> Handle(
         GetProductByIdQuery request,
         CancellationToken cancellationToken)
     {
@@ -15,13 +17,10 @@ public sealed class GetProductByIdQueryHandler(IProductReadRepository readReposi
 
         if(product == null)
         {
-            return (null, new Common.Models.ErrorResponse
-            {
-                Errors = [ new Common.Models.ErrorDetail { Message = $"Product with Id {request.Id} not found." } ]
-            });
+            return Error.NotFound($"Product with Id {request.Id} not found.");
         }
 
-        var response = product.Adapt<ApiContracts.Product.Responses.ProductDetailForManagerResponse>();
-        return (response, null);
+        var response = product.Adapt<ProductDetailForManagerResponse>();
+        return response;
     }
 }

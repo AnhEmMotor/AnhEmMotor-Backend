@@ -1,9 +1,9 @@
 using Application.ApiContracts.Input.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Supplier;
-
 using Domain.Constants;
 using Mapster;
 using MediatR;
@@ -17,29 +17,26 @@ public sealed class CloneInputCommandHandler(
     IInputInsertRepository inputInsertRepository,
     ISupplierReadRepository supplierReadRepository,
     IProductVariantReadRepository variantReadRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<CloneInputCommand, (InputResponse? Data, Common.Models.ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<CloneInputCommand, Result<InputResponse?>>
 {
-    public async Task<(InputResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
+    public async Task<Result<InputResponse?>> Handle(
         CloneInputCommand command,
         CancellationToken cancellationToken)
     {
+        if (!command.Id.HasValue)
+        {
+            return Error.BadRequest("Id không được để trống", "Id");
+        }
+
         var originalInput = await inputReadRepository.GetByIdWithDetailsAsync(
-            command.Id,
+            command.Id.Value,
             cancellationToken,
             DataFetchMode.All)
             .ConfigureAwait(false);
 
         if(originalInput is null)
         {
-            return (null, new Common.Models.ErrorResponse
-            {
-                Errors =
-                    [ new Common.Models.ErrorDetail
-                    {
-                        Field = "Id",
-                        Message = $"Phiếu nhập với Id = {command.Id} không tồn tại"
-                    } ]
-            });
+            return Error.NotFound($"Phiếu nhập với Id = {command.Id.Value} không tồn tại", "Id");
         }
 
         var supplier = await supplierReadRepository.GetByIdAsync(
@@ -50,15 +47,7 @@ public sealed class CloneInputCommandHandler(
 
         if(supplier is null || string.Compare(supplier.StatusId, SupplierStatus.Active) != 0)
         {
-            return (null, new Common.Models.ErrorResponse
-            {
-                Errors =
-                    [ new Common.Models.ErrorDetail
-                    {
-                        Field = "SupplierId",
-                        Message = "Nhà cung cấp không tồn tại hoặc không còn hoạt động"
-                    } ]
-            });
+            return Error.BadRequest("Nhà cung cấp không tồn tại hoặc không còn hoạt động", "SupplierId");
         }
 
         var productVariantIds = originalInput.InputInfos
@@ -108,16 +97,7 @@ public sealed class CloneInputCommandHandler(
 
         if(validProducts.Count == 0)
         {
-            return (null, new Common.Models.ErrorResponse
-            {
-                Errors =
-                    [ new Common.Models.ErrorDetail
-                    {
-                        Field = "Products",
-                        Message =
-                            "Tất cả sản phẩm trong phiếu nhập gốc đều không còn hợp lệ (đã xoá hoặc không còn bán)"
-                    } ]
-            });
+            return Error.BadRequest("Tất cả sản phẩm trong phiếu nhập gốc đều không còn hợp lệ (đã xoá hoặc không còn bán)", "Products");
         }
 
         var newInput = new InputEntity
@@ -136,6 +116,7 @@ public sealed class CloneInputCommandHandler(
         var createdInput = await inputReadRepository.GetByIdWithDetailsAsync(newInput.Id, cancellationToken)
             .ConfigureAwait(false);
 
-        return (createdInput!.Adapt<InputResponse>(), null);
+        return createdInput!.Adapt<InputResponse>();
     }
 }
+

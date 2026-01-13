@@ -1,16 +1,17 @@
-﻿using Application.ApiContracts.Output.Responses;
-
+using Application.ApiContracts.Output.Requests;
+using Application.ApiContracts.Output.Responses;
+using Application.Common.Models;
 using MediatR;
+using System.Text.Json.Serialization;
 
 namespace Application.Features.Outputs.Commands.CreateOutput;
 
-public sealed record CreateOutputCommand : IRequest<(OutputResponse? Data, Common.Models.ErrorResponse? Error)>
+public sealed record CreateOutputCommand : IRequest<Result<OutputResponse?>>
 {
-    public string? StatusId { get; init; }
+    public Guid? BuyerId { get; init; }
 
     public string? Notes { get; init; }
 
-    public Guid? CurrentUserId { get; init; }
-
-    public ICollection<OutputInfoResponse> OutputInfos { get; init; } = [];
+    [JsonPropertyName("products")]
+    public List<CreateOutputInfoRequest> OutputInfos { get; init; } = [];
 }

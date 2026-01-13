@@ -1,6 +1,7 @@
 using System.Reflection;
 using Application.ApiContracts.Output.Requests;
 using Application.ApiContracts.Output.Responses;
+using Application.Common.Models;
 using Application.Features.Outputs.Commands.CreateOutput;
 using Application.Features.Outputs.Commands.CreateOutputByManager;
 using Application.Features.Outputs.Commands.DeleteManyOutputs;
@@ -55,7 +56,7 @@ public class SalesOrder
         var sieveModel = new SieveModel();
         var expectedOrder = new OutputResponse { Id = 1, BuyerId = buyerId };
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputsByUserIdQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new PagedResult<OutputResponse>([expectedOrder], 1, 1, 10));
+            .ReturnsAsync(Result<PagedResult<OutputResponse>>.Success(new PagedResult<OutputResponse>([expectedOrder], 1, 1, 10)));
 
         // Act
         var result = await _controller.GetMyPurchases(sieveModel, CancellationToken.None);
@@ -72,7 +73,7 @@ public class SalesOrder
         var buyerId = Guid.NewGuid();
         var sieveModel = new SieveModel();
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputsByUserIdByManagerQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new PagedResult<OutputResponse>([], 0, 1, 10));
+            .ReturnsAsync(Result<PagedResult<OutputResponse>>.Success(new PagedResult<OutputResponse>([], 0, 1, 10)));
 
         // Act
         var result = await _controller.GetPurchasesByID(sieveModel, buyerId, CancellationToken.None);
@@ -88,7 +89,7 @@ public class SalesOrder
         // Arrange
         var sieveModel = new SieveModel { Page = 1, PageSize = 10 };
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputsListQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new PagedResult<OutputResponse>([], 0, 1, 10));
+            .ReturnsAsync(Result<PagedResult<OutputResponse>>.Success(new PagedResult<OutputResponse>([], 0, 1, 10)));
 
         // Act
         var result = await _controller.GetOutputs(sieveModel, CancellationToken.None);
@@ -104,7 +105,7 @@ public class SalesOrder
         // Arrange
         var sieveModel = new SieveModel();
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetDeletedOutputsListQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new PagedResult<OutputResponse>([], 0, 1, 10));
+            .ReturnsAsync(Result<PagedResult<OutputResponse>>.Success(new PagedResult<OutputResponse>([], 0, 1, 10)));
 
         // Act
         var result = await _controller.GetDeletedOutputs(sieveModel, CancellationToken.None);
@@ -121,7 +122,7 @@ public class SalesOrder
         int orderId = 1;
         var expectedOrder = new OutputResponse { Id = orderId };
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputByIdQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((expectedOrder, (Application.Common.Models.ErrorResponse?)null));
+            .ReturnsAsync(Result<OutputResponse?>.Success(expectedOrder));
 
         // Act
         var result = await _controller.GetOutputById(orderId, CancellationToken.None);
@@ -135,14 +136,14 @@ public class SalesOrder
     public async Task CreateOutput_ValidRequest_CreatesOrder()
     {
         // Arrange
-        var request = new CreateOutputRequest
+        var request = new CreateOutputCommand
         {
             BuyerId = Guid.NewGuid(),
             Notes = "Test order"
         };
         var expectedResponse = new OutputResponse { Id = 1, BuyerId = request.BuyerId };
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateOutputCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((expectedResponse, (Application.Common.Models.ErrorResponse?)null));
+            .ReturnsAsync(Result<OutputResponse?>.Success(expectedResponse));
 
         // Act
         var result = await _controller.CreateOutput(request, CancellationToken.None);
@@ -156,13 +157,13 @@ public class SalesOrder
     public async Task CreateOutputForAdmin_WithManagerPermission_CreatesOrder()
     {
         // Arrange
-        var request = new CreateOutputByAdminRequest
+        var request = new CreateOutputByManagerCommand
         {
             BuyerId = Guid.NewGuid(),
             Notes = "Admin order"
         };
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateOutputByManagerCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((new OutputResponse(), (Application.Common.Models.ErrorResponse?)null));
+            .ReturnsAsync(Result<OutputResponse?>.Success(new OutputResponse()));
 
         // Act
         var result = await _controller.CreateOutputForAdmin(request, CancellationToken.None);
@@ -177,12 +178,12 @@ public class SalesOrder
     {
         // Arrange
         int orderId = 1;
-        var request = new UpdateOutputForManagerRequest
+        var request = new UpdateOutputCommand
         {
             Notes = "Updated notes"
         };
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateOutputCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((new OutputResponse { Id = orderId }, (Application.Common.Models.ErrorResponse?)null));
+            .ReturnsAsync(Result<OutputResponse?>.Success(new OutputResponse { Id = orderId }));
 
         // Act
         var result = await _controller.UpdateOutputForManager(orderId, request, CancellationToken.None);
@@ -197,9 +198,9 @@ public class SalesOrder
     {
         // Arrange
         int orderId = 1;
-        var request = new UpdateOutputForManagerRequest();
+        var request = new UpdateOutputForManagerCommand();
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateOutputForManagerCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((new OutputResponse(), (Application.Common.Models.ErrorResponse?)null));
+            .ReturnsAsync(Result<OutputResponse?>.Success(new OutputResponse()));
 
         // Act
         var result = await _controller.UpdateOutput(orderId, request, CancellationToken.None);
@@ -214,9 +215,9 @@ public class SalesOrder
     {
         // Arrange
         int orderId = 1;
-        var request = new UpdateOutputStatusRequest { StatusId = "confirmed_cod" };
+        var request = new UpdateOutputStatusCommand { StatusId = "confirmed_cod" };
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateOutputStatusCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((new OutputResponse { StatusId = "confirmed_cod" }, (Application.Common.Models.ErrorResponse?)null));
+            .ReturnsAsync(Result<OutputResponse?>.Success(new OutputResponse { StatusId = "confirmed_cod" }));
 
         // Act
         var result = await _controller.UpdateOutputStatus(orderId, request, CancellationToken.None);
@@ -230,13 +231,13 @@ public class SalesOrder
     public async Task UpdateManyOutputStatus_ValidRequest_UpdatesMultipleOrders()
     {
         // Arrange
-        var request = new UpdateManyOutputStatusRequest
+        var request = new UpdateManyOutputStatusCommand
         {
             Ids = [1, 2, 3],
             StatusId = "confirmed_cod"
         };
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateManyOutputStatusCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(([], null));
+            .ReturnsAsync(Result<List<OutputResponse>?>.Success([]));
 
         // Act
         var result = await _controller.UpdateManyOutputStatus(request, CancellationToken.None);
@@ -252,7 +253,7 @@ public class SalesOrder
         // Arrange
         int orderId = 1;
         _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteOutputCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((Application.Common.Models.ErrorResponse?)null);
+            .ReturnsAsync(Result.Success());
 
         // Act
         var result = await _controller.DeleteOutput(orderId, CancellationToken.None);
@@ -266,9 +267,9 @@ public class SalesOrder
     public async Task DeleteManyOutputs_ValidRequest_DeletesMultipleOrders()
     {
         // Arrange
-        var request = new DeleteManyOutputsRequest { Ids = [1, 2, 3] };
+        var request = new DeleteManyOutputsCommand { Ids = [1, 2, 3] };
         _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteManyOutputsCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((Application.Common.Models.ErrorResponse?)null);
+            .ReturnsAsync(Result.Success());
 
         // Act
         var result = await _controller.DeleteManyOutputs(request, CancellationToken.None);
@@ -284,7 +285,7 @@ public class SalesOrder
         // Arrange
         int orderId = 1;
         _mediatorMock.Setup(m => m.Send(It.IsAny<RestoreOutputCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((new OutputResponse { Id = orderId }, (Application.Common.Models.ErrorResponse?)null));
+            .ReturnsAsync(Result<OutputResponse?>.Success(new OutputResponse { Id = orderId }));
 
         // Act
         var result = await _controller.RestoreOutput(orderId, CancellationToken.None);
@@ -298,9 +299,9 @@ public class SalesOrder
     public async Task RestoreManyOutputs_DeletedOrders_RestoresMultipleOrders()
     {
         // Arrange
-        var request = new RestoreManyOutputsRequest { Ids = [1, 2, 3] };
+        var request = new RestoreManyOutputsCommand { Ids = [1, 2, 3] };
         _mediatorMock.Setup(m => m.Send(It.IsAny<RestoreManyOutputsCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(([new(), new(), new()], null));
+            .ReturnsAsync(Result<List<OutputResponse>?>.Success([new(), new(), new()]));
 
         // Act
         var result = await _controller.RestoreManyOutputs(request, CancellationToken.None);
@@ -319,7 +320,7 @@ public class SalesOrder
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.CreateOutput(new CreateOutputRequest(), CancellationToken.None));
+            _controller.CreateOutput(new CreateOutputCommand(), CancellationToken.None));
     }
 
     [Fact(DisplayName = "SO_097 - Controller xử lý NotFoundException")]
@@ -343,6 +344,6 @@ public class SalesOrder
 
         // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(() => 
-            _controller.CreateOutput(new CreateOutputRequest(), CancellationToken.None));
+            _controller.CreateOutput(new CreateOutputCommand(), CancellationToken.None));
     }
 }

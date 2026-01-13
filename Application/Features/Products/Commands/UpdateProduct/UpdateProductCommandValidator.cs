@@ -8,22 +8,22 @@ public sealed class UpdateProductCommandValidator : AbstractValidator<UpdateProd
     {
         RuleFor(x => x.Id).GreaterThan(0).WithMessage("Product Id must be greater than 0.");
 
-        RuleFor(x => x.Request.Name)
+        RuleFor(x => x.Name)
             .NotEmpty()
             .WithMessage("Product name is required.")
             .MaximumLength(255)
             .WithMessage("Product name must not exceed 255 characters.");
 
-        RuleFor(x => x.Request.BrandId)
+        RuleFor(x => x.BrandId)
             .GreaterThan(0)
-            .When(x => x.Request.BrandId.HasValue)
+            .When(x => x.BrandId.HasValue)
             .WithMessage("Brand Id must be greater than 0.");
 
-        RuleFor(x => x.Request.CategoryId)
+        RuleFor(x => x.CategoryId)
             .GreaterThan(0)
-            .When(x => x.Request.CategoryId.HasValue)
+            .When(x => x.CategoryId.HasValue)
             .WithMessage("Product Category Id must be greater than 0.");
 
-        RuleFor(x => x.Request.Variants).NotEmpty().WithMessage("At least one product variant is required.");
+        RuleFor(x => x.Variants).NotEmpty().WithMessage("At least one product variant is required.");
     }
 }

@@ -68,5 +68,5 @@ public abstract class ProductWriteRequestBase
     [JsonPropertyName("compression_ratio")]
     public string? CompressionRatio { get; set; }
 
-    public List<ProductVariantWriteRequest> Variants { get; set; } = [];
+    public List<CreateProductVariantRequest> Variants { get; set; } = [];
 }

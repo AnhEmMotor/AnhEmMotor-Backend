@@ -1,3 +1,4 @@
+﻿using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Supplier;
 
@@ -9,19 +10,14 @@ namespace Application.Features.Suppliers.Commands.DeleteManySuppliers;
 public sealed class DeleteManySuppliersCommandHandler(
     ISupplierReadRepository readRepository,
     ISupplierDeleteRepository deleteRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<DeleteManySuppliersCommand, Common.Models.ErrorResponse?>
+    IUnitOfWork unitOfWork) : IRequestHandler<DeleteManySuppliersCommand, Result>
 {
-    public async Task<Common.Models.ErrorResponse?> Handle(
+    public async Task<Result> Handle(
         DeleteManySuppliersCommand request,
         CancellationToken cancellationToken)
     {
-        if(request.Ids.Count == 0)
-        {
-            return null;
-        }
-
         var uniqueIds = request.Ids.Distinct().ToList();
-        var errorDetails = new List<Common.Models.ErrorDetail>();
+        var errorDetails = new List<Error>();
 
         var allSuppliers = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.All)
             .ConfigureAwait(false);
@@ -34,22 +30,17 @@ public sealed class DeleteManySuppliersCommandHandler(
         {
             if(!allSupplierMap.ContainsKey(id))
             {
-                errorDetails.Add(
-                    new Common.Models.ErrorDetail { Field = "Id", Message = $"Supplier with Id {id} not found." });
-            } else if(!activeSupplierSet.Contains(id))
+                errorDetails.Add(Error.NotFound($"Supplier with Id {id} not found.", "Id"));
+            } 
+            else if(!activeSupplierSet.Contains(id))
             {
-                errorDetails.Add(
-                    new Common.Models.ErrorDetail
-                    {
-                        Field = "Id",
-                        Message = $"Supplier with Id {id} has already been deleted."
-                    });
+                errorDetails.Add(Error.BadRequest($"Supplier with Id {id} has already been deleted.", "Id"));
             }
         }
 
         if(errorDetails.Count > 0)
         {
-            return new Common.Models.ErrorResponse { Errors = errorDetails };
+            return Result.Failure(errorDetails);
         }
 
         if(activeSuppliers.ToList().Count > 0)
@@ -58,6 +49,6 @@ public sealed class DeleteManySuppliersCommandHandler(
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        return null;
+        return Result.Success();
     }
 }

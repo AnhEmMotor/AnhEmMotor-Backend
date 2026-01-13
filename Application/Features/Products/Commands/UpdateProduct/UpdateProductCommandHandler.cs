@@ -1,3 +1,5 @@
+using Application.ApiContracts.Product.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
 using Application.Interfaces.Repositories.OptionValue;
@@ -22,74 +24,55 @@ public sealed class UpdateProductCommandHandler(
     IOptionValueInsertRepository optionValueInsertRepository,
     IProductUpdateRepository updateRepository,
     IProductVarientDeleteRepository productVarientDeleteRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateProductCommand, (ApiContracts.Product.Responses.ProductDetailForManagerResponse? Data, Common.Models.ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateProductCommand, Result<ProductDetailForManagerResponse?>>
 {
-    public async Task<(ApiContracts.Product.Responses.ProductDetailForManagerResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
+    public async Task<Result<ProductDetailForManagerResponse?>> Handle(
         UpdateProductCommand command,
         CancellationToken cancellationToken)
     {
-        var errors = new List<Common.Models.ErrorDetail>();
-        var request = command.Request;
+        var errors = new List<Error>();
 
         var product = await productReadRepository.GetByIdWithDetailsAsync(command.Id, cancellationToken)
             .ConfigureAwait(false);
 
         if(product == null)
         {
-            return (null, new Common.Models.ErrorResponse
-            {
-                Errors = [ new Common.Models.ErrorDetail { Message = $"Product with Id {command.Id} not found." } ]
-            });
+            return Error.NotFound($"Product with Id {command.Id} not found.");
         }
 
-        if(request.CategoryId.HasValue)
+        if(command.CategoryId.HasValue)
         {
-            var category = await productCategoryReadRepository.GetByIdAsync(request.CategoryId.Value, cancellationToken)
+            var category = await productCategoryReadRepository.GetByIdAsync(command.CategoryId.Value, cancellationToken)
                 .ConfigureAwait(false);
             if(category == null)
             {
-                errors.Add(
-                    new Common.Models.ErrorDetail
-                    {
-                        Field = nameof(request.CategoryId),
-                        Message = $"Product category with Id {request.CategoryId} not found or has been deleted."
-                    });
+                errors.Add(Error.NotFound($"Product category with Id {command.CategoryId} not found or has been deleted.", nameof(command.CategoryId)));
             }
         }
 
-        if(request.BrandId.HasValue)
+        if(command.BrandId.HasValue)
         {
-            var brand = await brandReadRepository.GetByIdAsync(request.BrandId.Value, cancellationToken)
+            var brand = await brandReadRepository.GetByIdAsync(command.BrandId.Value, cancellationToken)
                 .ConfigureAwait(false);
             if(brand == null)
             {
-                errors.Add(
-                    new Common.Models.ErrorDetail
-                    {
-                        Field = nameof(request.BrandId),
-                        Message = $"Brand with Id {request.BrandId} not found or has been deleted."
-                    });
+                errors.Add(Error.NotFound($"Brand with Id {command.BrandId} not found or has been deleted.", nameof(command.BrandId)));
             }
         }
 
-        if(request.Variants?.Count > 0)
+        if(command.Variants?.Count > 0)
         {
-            var slugs = request.Variants
+            var slugs = command.Variants
                 .Select(v => v.UrlSlug?.Trim())
                 .Where(s => !string.IsNullOrWhiteSpace(s))
                 .ToList();
 
             if(slugs.Count != slugs.Distinct(StringComparer.OrdinalIgnoreCase).Count())
             {
-                errors.Add(
-                    new Common.Models.ErrorDetail
-                    {
-                        Field = "Variants",
-                        Message = "Duplicate slugs found within the request."
-                    });
+                errors.Add(Error.BadRequest("Duplicate slugs found within the command.", "Varients"));
             }
 
-            foreach(var variantReq in request.Variants.Where(v => !string.IsNullOrWhiteSpace(v.UrlSlug)))
+            foreach(var variantReq in command.Variants.Where(v => !string.IsNullOrWhiteSpace(v.UrlSlug)))
             {
                 var existing = await productVariantReadRepository.GetBySlugAsync(
                     variantReq.UrlSlug!.Trim(),
@@ -102,12 +85,7 @@ public sealed class UpdateProductCommandHandler(
                         continue;
                     }
 
-                    errors.Add(
-                        new Common.Models.ErrorDetail
-                        {
-                            Field = "Variants.UrlSlug",
-                            Message = $"Slug '{variantReq.UrlSlug}' is already in use."
-                        });
+                    errors.Add(Error.BadRequest($"Slug '{variantReq.UrlSlug}' is already in use.", "Variants.UrlSlug"));
                 }
             }
         }
@@ -115,34 +93,34 @@ public sealed class UpdateProductCommandHandler(
 
         if(errors.Count > 0)
         {
-            return (null, new Common.Models.ErrorResponse { Errors = errors });
+            return errors;
         }
 
-        product.Name = request.Name?.Trim();
-        product.CategoryId = request.CategoryId;
-        product.BrandId = request.BrandId;
-        product.Description = request.Description?.Trim();
-        product.Weight = request.Weight;
-        product.Dimensions = request.Dimensions?.Trim();
-        product.Wheelbase = request.Wheelbase?.Trim();
-        product.SeatHeight = request.SeatHeight;
-        product.GroundClearance = request.GroundClearance;
-        product.FuelCapacity = request.FuelCapacity;
-        product.TireSize = request.TireSize?.Trim();
-        product.FrontSuspension = request.FrontSuspension?.Trim();
-        product.RearSuspension = request.RearSuspension?.Trim();
-        product.EngineType = request.EngineType?.Trim();
-        product.MaxPower = request.MaxPower?.Trim();
-        product.OilCapacity = request.OilCapacity;
-        product.FuelConsumption = request.FuelConsumption?.Trim();
-        product.TransmissionType = request.TransmissionType?.Trim();
-        product.StarterSystem = request.StarterSystem?.Trim();
-        product.MaxTorque = request.MaxTorque?.Trim();
-        product.Displacement = request.Displacement;
-        product.BoreStroke = request.BoreStroke?.Trim();
-        product.CompressionRatio = request.CompressionRatio?.Trim();
+        product.Name = command.Name?.Trim();
+        product.CategoryId = command.CategoryId;
+        product.BrandId = command.BrandId;
+        product.Description = command.Description?.Trim();
+        product.Weight = command.Weight;
+        product.Dimensions = command.Dimensions?.Trim();
+        product.Wheelbase = command.Wheelbase?.Trim();
+        product.SeatHeight = command.SeatHeight;
+        product.GroundClearance = command.GroundClearance;
+        product.FuelCapacity = command.FuelCapacity;
+        product.TireSize = command.TireSize?.Trim();
+        product.FrontSuspension = command.FrontSuspension?.Trim();
+        product.RearSuspension = command.RearSuspension?.Trim();
+        product.EngineType = command.EngineType?.Trim();
+        product.MaxPower = command.MaxPower?.Trim();
+        product.OilCapacity = command.OilCapacity;
+        product.FuelConsumption = command.FuelConsumption?.Trim();
+        product.TransmissionType = command.TransmissionType?.Trim();
+        product.StarterSystem = command.StarterSystem?.Trim();
+        product.MaxTorque = command.MaxTorque?.Trim();
+        product.Displacement = command.Displacement;
+        product.BoreStroke = command.BoreStroke?.Trim();
+        product.CompressionRatio = command.CompressionRatio?.Trim();
 
-        var allRequestedOptionValues = request.Variants?
+        var allRequestedOptionValues = command.Variants?
             .SelectMany(v => v.OptionValues ?? [])
                 .Where(kvp => int.TryParse(kvp.Key, out _) && !string.IsNullOrWhiteSpace(kvp.Value))
                 .Select(kvp => new { OptionId = int.Parse(kvp.Key), Name = kvp.Value.Trim() })
@@ -159,7 +137,7 @@ public sealed class UpdateProductCommandHandler(
             cancellationToken)
             .ConfigureAwait(false);
 
-        var inputVariants = request.Variants ?? [];
+        var inputVariants = command.Variants ?? [];
         var currentVariants = product.ProductVariants.ToList();
 
         var inputVariantIds = inputVariants.Where(v => v.Id.HasValue).Select(v => v.Id!.Value).ToHashSet();
@@ -205,8 +183,8 @@ public sealed class UpdateProductCommandHandler(
         updateRepository.Update(product);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        var response = product.Adapt<ApiContracts.Product.Responses.ProductDetailForManagerResponse>();
-        return (response, null);
+        var response = product.Adapt<ProductDetailForManagerResponse>();
+        return response;
     }
 
     private static async Task ProcessOptionValuesInMemoryAsync(

@@ -1,6 +1,6 @@
 using System.Reflection;
-using Application.ApiContracts.ProductCategory.Requests;
 using Application.ApiContracts.ProductCategory.Responses;
+using Application.Common.Models;
 using Application.Features.ProductCategories.Commands.CreateProductCategory;
 using Application.Features.ProductCategories.Commands.DeleteProductCategory;
 using Application.Features.ProductCategories.Commands.DeleteManyProductCategories;
@@ -50,7 +50,7 @@ public class ProductCategory
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.CreateProductCategory(new CreateProductCategoryRequest(), CancellationToken.None));
+            _controller.CreateProductCategory(new CreateProductCategoryCommand(), CancellationToken.None));
     }
 
     [Fact(DisplayName = "PC_044 - Kiểm tra phân quyền - Xem danh sách cho manager không có quyền")]
@@ -86,7 +86,7 @@ public class ProductCategory
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.UpdateProductCategory(28, new UpdateProductCategoryRequest(), CancellationToken.None));
+            _controller.UpdateProductCategory(28, new UpdateProductCategoryCommand(), CancellationToken.None));
     }
 
     [Fact(DisplayName = "PC_047 - Kiểm tra phân quyền - Xóa danh mục sản phẩm không có quyền")]
@@ -122,7 +122,7 @@ public class ProductCategory
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.DeleteProductCategories(new DeleteManyProductCategoriesRequest { Ids = [31, 32] }, CancellationToken.None));
+            _controller.DeleteProductCategories(new DeleteManyProductCategoriesCommand { Ids = [31, 32] }, CancellationToken.None));
     }
 
     [Fact(DisplayName = "PC_050 - Kiểm tra phân quyền - Khôi phục nhiều danh mục sản phẩm không có quyền")]
@@ -134,14 +134,14 @@ public class ProductCategory
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.RestoreProductCategories(new RestoreManyProductCategoriesRequest { Ids = [33, 34] }, CancellationToken.None));
+            _controller.RestoreProductCategories(new RestoreManyProductCategoriesCommand { Ids = [33, 34] }, CancellationToken.None));
     }
 
     [Fact(DisplayName = "PC_052 - Xác thực dữ liệu - Tạo với Name quá dài (vượt max length)")]
     public async Task CreateProductCategory_WithTooLongName_ShouldFailValidation()
     {
         // Arrange
-        var request = new CreateProductCategoryRequest 
+        var request = new CreateProductCategoryCommand 
         { 
             Name = new string('a', 300), 
             Description = "Test" 
@@ -170,7 +170,7 @@ public class ProductCategory
     public async Task DeleteManyProductCategories_WithEmptyIds_ShouldFailValidation()
     {
         // Arrange
-        var request = new DeleteManyProductCategoriesRequest { Ids = [] };
+        var request = new DeleteManyProductCategoriesCommand { Ids = [] };
         _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteManyProductCategoriesCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new FluentValidation.ValidationException("Ids list cannot be empty"));
 
@@ -183,7 +183,7 @@ public class ProductCategory
     public async Task RestoreManyProductCategories_WithNullIds_ShouldFailValidation()
     {
         // Arrange
-        var request = new RestoreManyProductCategoriesRequest { Ids = null! };
+        var request = new RestoreManyProductCategoriesCommand { Ids = null! };
         _mediatorMock.Setup(m => m.Send(It.IsAny<RestoreManyProductCategoriesCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new FluentValidation.ValidationException("Ids is required"));
 
@@ -201,7 +201,7 @@ public class ProductCategory
 
         // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(() => 
-            _controller.CreateProductCategory(new CreateProductCategoryRequest(), CancellationToken.None));
+            _controller.CreateProductCategory(new CreateProductCategoryCommand(), CancellationToken.None));
     }
 
     [Fact(DisplayName = "PC_058 - Lấy danh sách danh mục sản phẩm khi chưa đăng nhập (public endpoint)")]
@@ -219,7 +219,7 @@ public class ProductCategory
             pageSize: 10
         );
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetProductCategoriesListQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(expectedResult);
+            .ReturnsAsync(Result<PagedResult<ProductCategoryResponse>>.Success(expectedResult));
 
         // Act
         var result = await _controller.GetProductCategories(new SieveModel(), CancellationToken.None);
@@ -233,9 +233,9 @@ public class ProductCategory
     public async Task GetProductCategoryById_AnonymousUser_ShouldSucceed()
     {
         // Arrange
-        var expectedResult = (Data: new ProductCategoryResponse { Id = 35, Name = "Public Category", Description = "Desc" }, Error: (Application.Common.Models.ErrorResponse?)null);
+        var expectedResult = new ProductCategoryResponse { Id = 35, Name = "Public Category", Description = "Desc" };
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetProductCategoryByIdQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(expectedResult);
+            .ReturnsAsync(Result<ProductCategoryResponse?>.Success(expectedResult));
 
         // Act
         var result = await _controller.GetProductCategoryById(35, CancellationToken.None);
@@ -249,15 +249,15 @@ public class ProductCategory
     public async Task UpdateProductCategory_ConcurrentUpdate_ShouldHandleCorrectly()
     {
         // Arrange
-        var request1 = new UpdateProductCategoryRequest { Name = "Update A" };
-        var request2 = new UpdateProductCategoryRequest { Name = "Update B" };
+        var request1 = new UpdateProductCategoryCommand { Name = "Update A" };
+        var request2 = new UpdateProductCategoryCommand { Name = "Update B" };
 
-        var response1 = (Data: new ProductCategoryResponse { Id = 36, Name = "Update A", Description = "Desc" }, Error: (Application.Common.Models.ErrorResponse?)null);
-        var response2 = (Data: new ProductCategoryResponse { Id = 36, Name = "Update B", Description = "Desc" }, Error: (Application.Common.Models.ErrorResponse?)null);
+        var response1 = new ProductCategoryResponse { Id = 36, Name = "Update A", Description = "Desc" };
+        var response2 = new ProductCategoryResponse { Id = 36, Name = "Update B", Description = "Desc" };
 
         _mediatorMock.SetupSequence(m => m.Send(It.IsAny<UpdateProductCategoryCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(response1)
-            .ReturnsAsync(response2);
+            .ReturnsAsync(Result<ProductCategoryResponse?>.Success(response1))
+            .ReturnsAsync(Result<ProductCategoryResponse?>.Success(response2));
 
         // Act
         var result1 = await _controller.UpdateProductCategory(36, request1, CancellationToken.None);

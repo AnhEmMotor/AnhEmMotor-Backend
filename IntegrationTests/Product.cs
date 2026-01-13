@@ -3,6 +3,8 @@ using System.Net.Http.Json;
 using Application.ApiContracts.Product.Common;
 using Application.ApiContracts.Product.Requests;
 using Application.ApiContracts.Product.Responses;
+using Application.Features.Products.Commands.CreateProduct;
+using Application.Features.Products.Commands.UpdateManyProductStatuses;
 using Domain.Constants;
 using Domain.Entities;
 using Domain.Primitives;
@@ -359,14 +361,14 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
         dbContext.Brands.Add(brand);
         await dbContext.SaveChangesAsync();
 
-        var request = new CreateProductRequest
+        var request = new CreateProductCommand
         {
             Name = "New Product",
             CategoryId = category.Id,
             BrandId = brand.Id,
             Variants =
             [
-                new()
+                new CreateProductVariantRequest()
                 {
                     UrlSlug = "new-product-variant",
                     Price = 20000000,
@@ -402,7 +404,7 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
         dbContext.OptionValues.Add(optionValue);
         await dbContext.SaveChangesAsync();
 
-        var request = new CreateProductRequest
+        var request = new CreateProductCommand
         {
             Name = "New Product",
             CategoryId = category.Id,
@@ -507,7 +509,7 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
         dbContext.Brands.Add(brand);
         await dbContext.SaveChangesAsync();
 
-        var request = new CreateProductRequest
+        var request = new CreateProductCommand
         {
             Name = "Decimal Price Product",
             CategoryId = category.Id,
@@ -560,7 +562,7 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
         dbContext.Products.AddRange(product1, product2);
         await dbContext.SaveChangesAsync();
 
-        var request = new UpdateManyProductStatusesRequest
+        var request = new UpdateManyProductStatusesCommand
         {
             Ids = [product1.Id, product2.Id],
             StatusId = "out-of-stock"
@@ -604,7 +606,7 @@ public class Product(IntegrationTestWebAppFactory factory) : IClassFixture<Integ
         dbContext.Products.AddRange(product1, product2);
         await dbContext.SaveChangesAsync();
 
-        var request = new UpdateManyProductStatusesRequest
+        var request = new UpdateManyProductStatusesCommand
         {
             Ids = [product1.Id, product2.Id],
             StatusId = "out-of-stock"

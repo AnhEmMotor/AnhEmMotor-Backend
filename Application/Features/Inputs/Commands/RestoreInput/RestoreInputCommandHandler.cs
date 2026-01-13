@@ -1,4 +1,5 @@
 using Application.ApiContracts.Input.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
 
@@ -11,31 +12,24 @@ namespace Application.Features.Inputs.Commands.RestoreInput;
 public sealed class RestoreInputCommandHandler(
     IInputReadRepository readRepository,
     IInputUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<RestoreInputCommand, (InputResponse? Data, Common.Models.ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<RestoreInputCommand, Result<InputResponse>>
 {
-    public async Task<(InputResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
+    public async Task<Result<InputResponse>> Handle(
         RestoreInputCommand request,
         CancellationToken cancellationToken)
     {
-        var input = await readRepository.GetByIdAsync(request.Id, cancellationToken, DataFetchMode.DeletedOnly)
+        var input = await readRepository.GetByIdAsync(request.Id!.Value, cancellationToken, DataFetchMode.DeletedOnly)
             .ConfigureAwait(false);
 
         if(input is null)
         {
-            return (null, new Common.Models.ErrorResponse
-            {
-                Errors =
-                    [ new Common.Models.ErrorDetail
-                    {
-                        Field = "Id",
-                        Message = $"Không tìm thấy phiếu nhập đã xóa có ID {request.Id}."
-                    } ]
-            });
+            return Error.NotFound($"Không tìm thấy phiếu nhập đã xóa có ID {request.Id}.", "Id");
         }
 
         updateRepository.Restore(input);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return (input!.Adapt<InputResponse>(), null);
+        return input.Adapt<InputResponse>();
     }
 }
+

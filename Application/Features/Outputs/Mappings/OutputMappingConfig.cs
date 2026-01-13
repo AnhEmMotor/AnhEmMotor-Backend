@@ -24,11 +24,7 @@ public sealed class OutputMappingConfig : IRegister
                     ? src.ProductVariant.Product.Name
                     : null);
 
-        config.NewConfig<ApiContracts.Output.Requests.UpdateOutputForManagerRequest, Output>().IgnoreNullValues(true);
 
-        config.NewConfig<ApiContracts.Output.Requests.UpdateOutputInfoRequest, OutputInfo>().IgnoreNullValues(true);
-
-        config.NewConfig<ApiContracts.Output.Requests.UpdateOutputForManagerRequest, Output>().IgnoreNullValues(true);
         config.NewConfig<ApiContracts.Output.Requests.UpdateOutputInfoRequest, OutputInfo>().IgnoreNullValues(true);
         config.NewConfig<Commands.UpdateOutputForManager.UpdateOutputForManagerCommand, Output>()
             .IgnoreNullValues(true)

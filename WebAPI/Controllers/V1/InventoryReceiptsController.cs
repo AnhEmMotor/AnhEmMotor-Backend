@@ -1,4 +1,4 @@
-using Application.ApiContracts.Input.Responses;
+﻿using Application.ApiContracts.Input.Responses;
 using Application.Features.Inputs.Commands.CloneInput;
 using Application.Features.Inputs.Commands.CreateInput;
 using Application.Features.Inputs.Commands.DeleteInput;
@@ -13,7 +13,6 @@ using Application.Features.Inputs.Queries.GetInputById;
 using Application.Features.Inputs.Queries.GetInputsBySupplierId;
 using Application.Features.Inputs.Queries.GetInputsList;
 using Asp.Versioning;
-
 using Infrastructure.Authorization.Attribute;
 using Mapster;
 using MediatR;
@@ -22,19 +21,18 @@ using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
 using static Domain.Constants.Permission.PermissionsList;
+using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1;
 
 /// <summary>
 /// Quản lý phiếu nhập hàng.
 /// </summary>
-/// <param name="mediator"></param>
 [ApiVersion("1.0")]
 [SwaggerTag("Quản lý phiếu nhập hàng")]
-[ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status500InternalServerError)]
-public class InventoryReceiptsController(IMediator mediator) : ControllerBase
+public class InventoryReceiptsController(IMediator mediator) : ApiController
 {
     /// <summary>
     /// Lấy danh sách phiếu nhập (có phân trang, lọc, sắp xếp).
@@ -44,9 +42,9 @@ public class InventoryReceiptsController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(Domain.Primitives.PagedResult<InputResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetInputs([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
     {
-        var query = new GetInputsListQuery(sieveModel);
-        var pagedResult = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-        return Ok(pagedResult);
+        var query = new GetInputsListQuery() { SieveModel = sieveModel };
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -59,9 +57,9 @@ public class InventoryReceiptsController(IMediator mediator) : ControllerBase
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
     {
-        var query = new GetDeletedInputsListQuery(sieveModel);
-        var pagedResult = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-        return Ok(pagedResult);
+        var query = new GetDeletedInputsListQuery() { SieveModel = sieveModel };
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -73,13 +71,9 @@ public class InventoryReceiptsController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetInputById(int id, CancellationToken cancellationToken)
     {
-        var query = new GetInputByIdQuery(id);
-        var (data, error) = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-        if(error != null)
-        {
-            return NotFound(error);
-        }
-        return Ok(data);
+        var query = new GetInputByIdQuery() { Id  = id };
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -93,9 +87,9 @@ public class InventoryReceiptsController(IMediator mediator) : ControllerBase
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
     {
-        var query = new GetInputsBySupplierIdQuery(supplierId, sieveModel);
-        var pagedResult = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-        return Ok(pagedResult);
+        var query = new GetInputsBySupplierIdQuery() {  SieveModel = sieveModel, SupplierId = supplierId};
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -106,16 +100,12 @@ public class InventoryReceiptsController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(InputResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateInput(
-        [FromBody] Application.ApiContracts.Input.Requests.CreateInputRequest request,
+        [FromBody] CreateInputCommand request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<CreateInputCommand>();
-        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if(error != null)
-        {
-            return BadRequest(error);
-        }
-        return CreatedAtAction(nameof(GetInputById), new { id = data!.Id }, data);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -128,15 +118,9 @@ public class InventoryReceiptsController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CloneInput(int id, CancellationToken cancellationToken)
     {
-        var command = new CloneInputCommand(id);
-        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-
-        if(error != null)
-        {
-            return BadRequest(error);
-        }
-
-        return CreatedAtAction(nameof(GetInputById), new { id = data!.Id }, data);
+        var command = new CloneInputCommand() { Id = id };
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -149,16 +133,12 @@ public class InventoryReceiptsController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateInput(
         int id,
-        [FromBody] Application.ApiContracts.Input.Requests.UpdateInputRequest request,
+        [FromBody] UpdateInputCommand request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<UpdateInputCommand>() with { Id = id };
-        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if(error != null)
-        {
-            return BadRequest(error);
-        }
-        return Ok(data);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -171,7 +151,7 @@ public class InventoryReceiptsController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateInputStatus(
         int id,
-        [FromBody] Application.ApiContracts.Input.Requests.UpdateInputStatusRequest request,
+        [FromBody] UpdateInputStatusCommand request,
         CancellationToken cancellationToken)
     {
         var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -180,12 +160,8 @@ public class InventoryReceiptsController(IMediator mediator) : ControllerBase
             Id = id,
             CurrentUserId = Guid.TryParse(currentUserId, out var guid) ? guid : null
         };
-        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if(error != null)
-        {
-            return BadRequest(error);
-        }
-        return Ok(data);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -196,16 +172,12 @@ public class InventoryReceiptsController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(List<InputResponse>), StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateManyInputStatus(
-        [FromBody] Application.ApiContracts.Input.Requests.UpdateManyInputStatusRequest request,
+        [FromBody] UpdateManyInputStatusCommand request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<UpdateManyInputStatusCommand>();
-        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if(error != null)
-        {
-            return BadRequest(error);
-        }
-        return Ok(data);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -217,13 +189,9 @@ public class InventoryReceiptsController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteInput(int id, CancellationToken cancellationToken)
     {
-        var command = new DeleteInputCommand(id);
-        var error = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if(error != null)
-        {
-            return NotFound(error);
-        }
-        return NoContent();
+        var command = new DeleteInputCommand() { Id = id};
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -234,16 +202,12 @@ public class InventoryReceiptsController(IMediator mediator) : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteManyInputs(
-        [FromBody] Application.ApiContracts.Input.Requests.DeleteManyInputsRequest request,
+        [FromBody] DeleteManyInputsCommand request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<DeleteManyInputsCommand>();
-        var error = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if(error != null)
-        {
-            return NotFound(error);
-        }
-        return NoContent();
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -255,13 +219,9 @@ public class InventoryReceiptsController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RestoreInput(int id, CancellationToken cancellationToken)
     {
-        var command = new RestoreInputCommand(id);
-        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if(error != null)
-        {
-            return NotFound(error);
-        }
-        return Ok(data);
+        var command = new RestoreInputCommand() { Id = id};
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -272,15 +232,11 @@ public class InventoryReceiptsController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(List<InputResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RestoreManyInputs(
-        [FromBody] Application.ApiContracts.Input.Requests.RestoreManyInputsRequest request,
+        [FromBody] RestoreManyInputsCommand request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<RestoreManyInputsCommand>();
-        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if(error != null)
-        {
-            return NotFound(error);
-        }
-        return Ok(data);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 }

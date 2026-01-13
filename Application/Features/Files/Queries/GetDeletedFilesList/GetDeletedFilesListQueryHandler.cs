@@ -1,7 +1,10 @@
 using Application.ApiContracts.File.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.LocalFile;
 using Application.Interfaces.Repositories.MediaFile;
 using Domain.Constants;
+using Domain.Primitives;
 using MediatR;
 using MediaFileEntity = Domain.Entities.MediaFile;
 
@@ -9,10 +12,10 @@ namespace Application.Features.Files.Queries.GetDeletedFilesList;
 
 public sealed class GetDeletedFilesListQueryHandler(
     IMediaFileReadRepository repository,
-    Interfaces.Repositories.LocalFile.IFileStorageService fileStorageService,
-    ISievePaginator paginator) : IRequestHandler<GetDeletedFilesListQuery, Domain.Primitives.PagedResult<MediaFileResponse>>
+    IFileStorageService fileStorageService,
+    ISievePaginator paginator) : IRequestHandler<GetDeletedFilesListQuery, Result<PagedResult<MediaFileResponse>>>
 {
-    public async Task<Domain.Primitives.PagedResult<MediaFileResponse>> Handle(
+    public async Task<Result<PagedResult<MediaFileResponse>>> Handle(
         GetDeletedFilesListQuery request,
         CancellationToken cancellationToken)
     {
@@ -20,7 +23,7 @@ public sealed class GetDeletedFilesListQueryHandler(
 
         var result = await paginator.ApplyAsync<MediaFileEntity, MediaFileResponse>(
             query,
-            request.SieveModel,
+            request.SieveModel!,
             DataFetchMode.DeletedOnly,
             cancellationToken)
             .ConfigureAwait(false);

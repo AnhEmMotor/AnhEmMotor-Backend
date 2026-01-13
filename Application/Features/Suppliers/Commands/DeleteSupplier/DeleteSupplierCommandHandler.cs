@@ -1,3 +1,4 @@
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Supplier;
 
@@ -8,9 +9,9 @@ namespace Application.Features.Suppliers.Commands.DeleteSupplier;
 public sealed class DeleteSupplierCommandHandler(
     ISupplierReadRepository readRepository,
     ISupplierDeleteRepository deleteRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<DeleteSupplierCommand, Common.Models.ErrorResponse?>
+    IUnitOfWork unitOfWork) : IRequestHandler<DeleteSupplierCommand, Result>
 {
-    public async Task<Common.Models.ErrorResponse?> Handle(
+    public async Task<Result> Handle(
         DeleteSupplierCommand request,
         CancellationToken cancellationToken)
     {
@@ -18,15 +19,12 @@ public sealed class DeleteSupplierCommandHandler(
 
         if(supplier == null)
         {
-            return new Common.Models.ErrorResponse
-            {
-                Errors = [ new Common.Models.ErrorDetail { Message = $"Supplier with Id {request.Id} not found." } ]
-            };
+            return Result.Failure(Error.NotFound($"Supplier with Id {request.Id} not found."));
         }
 
         deleteRepository.Delete(supplier);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return null;
+        return Result.Success();
     }
 }

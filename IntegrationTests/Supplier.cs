@@ -1,7 +1,9 @@
 using System.Net;
 using System.Net.Http.Json;
-using Application.ApiContracts.Supplier.Requests;
 using Application.ApiContracts.Supplier.Responses;
+using Application.Features.Suppliers.Commands.DeleteManySuppliers;
+using Application.Features.Suppliers.Commands.RestoreManySuppliers;
+using Application.Features.Suppliers.Commands.UpdateManySupplierStatus;
 using Domain.Entities;
 using Domain.Primitives;
 using FluentAssertions;
@@ -316,7 +318,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
             supplierIds = [.. suppliers.Select(s => s.Id)];
         }
 
-        var request = new DeleteManySuppliersRequest { Ids = supplierIds };
+        var request = new DeleteManySuppliersCommand { Ids = supplierIds };
 
         // Act
         var response = await _client.PostAsJsonAsync("/api/v1/Supplier/delete-many", request);
@@ -354,7 +356,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
             supplierIds = [supplier1.Id, supplier2.Id];
         }
 
-        var request = new DeleteManySuppliersRequest { Ids = supplierIds };
+        var request = new DeleteManySuppliersCommand { Ids = supplierIds };
 
         // Act
         var response = await _client.PostAsJsonAsync("/api/v1/Supplier/delete-many", request);
@@ -388,7 +390,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
             supplierIds = [.. suppliers.Select(s => s.Id)];
         }
 
-        var request = new RestoreManySuppliersRequest { Ids = supplierIds };
+        var request = new RestoreManySuppliersCommand { Ids = supplierIds };
 
         // Act
         var response = await _client.PostAsJsonAsync("/api/v1/Supplier/restore-many", request);
@@ -422,7 +424,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
             supplierIds = [.. suppliers.Select(s => s.Id)];
         }
 
-        var request = new UpdateManySupplierStatusRequest 
+        var request = new UpdateManySupplierStatusCommand
         { 
             Ids = supplierIds,
             StatusId = "inactive"

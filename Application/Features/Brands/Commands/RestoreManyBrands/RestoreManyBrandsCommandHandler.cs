@@ -1,7 +1,10 @@
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
 using Domain.Constants;
+using Domain.Entities;
 using Mapster;
+using Application.ApiContracts.Brand.Responses;
 using MediatR;
 
 namespace Application.Features.Brands.Commands.RestoreManyBrands;
@@ -9,52 +12,53 @@ namespace Application.Features.Brands.Commands.RestoreManyBrands;
 public sealed class RestoreManyBrandsCommandHandler(
     IBrandReadRepository readRepository,
     IBrandUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<RestoreManyBrandsCommand, (List<ApiContracts.Brand.Responses.BrandResponse>? Data, Common.Models.ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<RestoreManyBrandsCommand, Result<List<BrandResponse>?>>
 {
-    public async Task<(List<ApiContracts.Brand.Responses.BrandResponse>? Data, Common.Models.ErrorResponse? Error)> Handle(
+    public async Task<Result<List<BrandResponse>?>> Handle(
         RestoreManyBrandsCommand request,
         CancellationToken cancellationToken)
     {
-        if(request.Ids == null || request.Ids.Count == 0)
-        {
-            return ([], null);
-        }
-
         var uniqueIds = request.Ids.Distinct().ToList();
-        var errorDetails = new List<Common.Models.ErrorDetail>();
 
-        var allBrands = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.All)
-            .ConfigureAwait(false);
-        var deletedBrands = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.DeletedOnly)
+        var existingBrands = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.All)
             .ConfigureAwait(false);
 
-        var allBrandMap = allBrands.ToDictionary(b => b.Id);
-        var deletedBrandSet = deletedBrands.Select(b => b.Id).ToHashSet();
+        var existingBrandsMap = existingBrands.ToDictionary(b => b.Id);
+        var brandsToRestore = new List<Brand>();
+        var errors = new List<Error>();
 
-        foreach(var id in uniqueIds)
+        foreach (var id in uniqueIds)
         {
-            if(!allBrandMap.ContainsKey(id))
+            if (!existingBrandsMap.TryGetValue(id, out var brand))
             {
-                errorDetails.Add(
-                    new Common.Models.ErrorDetail { Field = "Id", Message = $"Brand with Id {id} not found." });
-            } else if(!deletedBrandSet.Contains(id))
-            {
-                errorDetails.Add(
-                    new Common.Models.ErrorDetail { Field = "Id", Message = $"Brand with Id {id} is not deleted." });
+                errors.Add(Error.NotFound($"Brand with Id {id} not found.", "Id"));
+                continue;
             }
+
+            if (brand.DeletedAt == null)
+            {
+                errors.Add(Error.BadRequest($"Brand with Id {id} is not deleted.", "Id"));
+                continue;
+            }
+
+            brandsToRestore.Add(brand);
         }
 
-        if(errorDetails.Count > 0)
+        if (errors.Count > 0)
         {
-            return (null, new Common.Models.ErrorResponse { Errors = errorDetails });
+            if (typeof(Result<List<BrandResponse>?>).GetMethod("Failure", [typeof(List<Error>)]) != null)
+            {
+                 return (Result<List<BrandResponse>?>)(object)Result.Failure(errors); 
+            }
+            return (Result<List<BrandResponse>?>)(object)Result.Failure(errors[0]); 
         }
 
-        if(deletedBrands.ToList().Count > 0)
+        if (brandsToRestore.Count > 0)
         {
-            updateRepository.Restore(deletedBrands);
+            updateRepository.Restore(brandsToRestore);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        return (deletedBrands.Adapt<List<ApiContracts.Brand.Responses.BrandResponse>>(), null);
+        return brandsToRestore.Adapt<List<BrandResponse>>();
     }
 }

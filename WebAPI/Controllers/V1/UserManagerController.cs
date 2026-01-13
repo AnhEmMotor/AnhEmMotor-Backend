@@ -1,6 +1,4 @@
-﻿using Application.ApiContracts.User.Requests;
-using Application.ApiContracts.User.Responses;
-using Application.ApiContracts.UserManager.Requests;
+﻿using Application.ApiContracts.User.Responses;
 using Application.ApiContracts.UserManager.Responses;
 using Application.Features.UserManager.Commands.AssignRoles;
 using Application.Features.UserManager.Commands.ChangeMultipleUsersStatus;
@@ -11,7 +9,6 @@ using Application.Features.UserManager.Queries.GetUserById;
 using Application.Features.UserManager.Queries.GetUsersList;
 using Application.Features.UserManager.Queries.GetUsersListForOutput;
 using Asp.Versioning;
-
 using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -19,6 +16,7 @@ using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
 using static Domain.Constants.Permission.PermissionsList;
+using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1;
 
@@ -37,8 +35,7 @@ namespace WebAPI.Controllers.V1;
 [SwaggerTag("Quản lý người dùng (Chỉ có người dùng có quyền mới được vào đây)")]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status500InternalServerError)]
-[ApiController]
-public class UserManagerController(IMediator mediator) : ControllerBase
+public class UserManagerController(IMediator mediator) : ApiController
 {
     /// <summary>
     /// Lấy danh sách tất cả người dùng (có phân trang, lọc, sắp xếp - chỉ vào được khi người dùng có quyền xem danh
@@ -51,9 +48,9 @@ public class UserManagerController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(Domain.Primitives.PagedResult<UserDTOForManagerResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllUsers([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
     {
-        var query = new GetUsersListQuery(sieveModel);
-        var pagedResult = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-        return Ok(pagedResult);
+        var query = new GetUsersListQuery() { SieveModel = sieveModel };
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -69,9 +66,9 @@ public class UserManagerController(IMediator mediator) : ControllerBase
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
     {
-        var query = new GetUsersListForOutputQuery(sieveModel);
-        var pagedResult = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-        return Ok(pagedResult);
+        var query = new GetUsersListForOutputQuery() { SieveModel = sieveModel };
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -83,8 +80,8 @@ public class UserManagerController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetUserById(Guid userId, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetUserByIdQuery(userId), cancellationToken).ConfigureAwait(true);
-        return Ok(result);
+        var result = await mediator.Send(new GetUserByIdQuery() { UserId = userId }, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -97,15 +94,16 @@ public class UserManagerController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateUser(
         Guid userId,
-        [FromBody] UpdateUserRequest model,
+        [FromBody] UpdateUserCommand model,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new UpdateUserCommand(userId, model), cancellationToken).ConfigureAwait(true);
-        return Ok(result);
+        var modelToSend = model with { UserId = userId };
+        var result = await mediator.Send(modelToSend, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
-    /// Đổi mật khẩu người dùng theo ID
+    /// Đổi mật khẩu người dùng theo ID (đang đăng nhập)
     /// </summary>
     [HttpPost("{userId:guid}/change-password")]
     [HasPermission(Users.ChangePassword)]
@@ -116,13 +114,13 @@ public class UserManagerController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> ChangePassword(
         Guid userId,
-        [FromBody] ChangePasswordRequest model,
+        [FromBody] ChangePasswordCommand model,
         CancellationToken cancellationToken)
     {
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var result = await mediator.Send(new ChangePasswordCommand(userId, model, currentUserId), cancellationToken)
+        var modelToSend = model with { UserId = userId };
+        var result = await mediator.Send(modelToSend, cancellationToken)
             .ConfigureAwait(true);
-        return Ok(result);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -137,11 +135,12 @@ public class UserManagerController(IMediator mediator) : ControllerBase
     [HasPermission(Users.AssignRoles)]
     public async Task<IActionResult> AssignRoles(
         Guid userId,
-        [FromBody] AssignRolesRequest model,
+        [FromBody] AssignRolesCommand model,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new AssignRolesCommand(userId, model), cancellationToken).ConfigureAwait(true);
-        return Ok(result);
+        var modelToSend = model with { UserId = userId };
+        var result = await mediator.Send(modelToSend, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -154,12 +153,12 @@ public class UserManagerController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> ChangeUserStatus(
         Guid userId,
-        [FromBody] ChangeUserStatusRequest model,
+        [FromBody] ChangeUserStatusCommand model,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new ChangeUserStatusCommand(userId, model), cancellationToken)
-            .ConfigureAwait(true);
-        return Ok(result);
+        var modelToSend = model with { UserId = userId };
+        var result = await mediator.Send(modelToSend, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
 
@@ -172,11 +171,10 @@ public class UserManagerController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     [HasPermission(Users.Edit)]
     public async Task<IActionResult> ChangeMultipleUsersStatus(
-        [FromBody] ChangeMultipleUsersStatusRequest model,
+        [FromBody] ChangeMultipleUsersStatusCommand model,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new ChangeMultipleUsersStatusCommand(model), cancellationToken)
-            .ConfigureAwait(true);
-        return Ok(result);
+        var result = await mediator.Send(new ChangeMultipleUsersStatusCommand() { Status = model.Status, UserIds = model.UserIds }, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 }

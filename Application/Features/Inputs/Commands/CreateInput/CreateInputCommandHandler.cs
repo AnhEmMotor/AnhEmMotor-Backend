@@ -1,4 +1,5 @@
 using Application.ApiContracts.Input.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
 using Application.Interfaces.Repositories.ProductVariant;
@@ -17,9 +18,9 @@ public sealed class CreateInputCommandHandler(
     IInputReadRepository readRepository,
     ISupplierReadRepository supplierRepository,
     IProductVariantReadRepository variantRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateInputCommand, (InputResponse? Data, Common.Models.ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<CreateInputCommand, Result<InputResponse?>>
 {
-    public async Task<(InputResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
+    public async Task<Result<InputResponse?>> Handle(
         CreateInputCommand request,
         CancellationToken cancellationToken)
     {
@@ -33,28 +34,12 @@ public sealed class CreateInputCommandHandler(
 
             if(supplier is null)
             {
-                return (null, new Common.Models.ErrorResponse
-                {
-                    Errors =
-                        [ new Common.Models.ErrorDetail
-                        {
-                            Field = "SupplierId",
-                            Message = $"Nhà cung cấp {request.SupplierId} không tồn tại hoặc đã bị xóa."
-                        } ]
-                });
+                return Error.NotFound($"Nhà cung cấp {request.SupplierId} không tồn tại hoặc đã bị xóa.", "SupplierId");
             }
 
             if(string.Compare(supplier.StatusId, SupplierStatus.Active) != 0)
             {
-                return (null, new Common.Models.ErrorResponse
-                {
-                    Errors =
-                        [ new Common.Models.ErrorDetail
-                        {
-                            Field = "SupplierId",
-                            Message = $"Nhà cung cấp {supplier.Name} không ở trạng thái 'active'."
-                        } ]
-                });
+                return Error.BadRequest($"Nhà cung cấp {supplier.Name} không ở trạng thái 'active'.", "SupplierId");
             }
         }
 
@@ -72,28 +57,7 @@ public sealed class CreateInputCommandHandler(
 
                 if(variant is null)
                 {
-                    return (null, new Common.Models.ErrorResponse
-                    {
-                        Errors =
-                            [ new Common.Models.ErrorDetail
-                            {
-                                Field = "Products",
-                                Message = $"Sản phẩm {product.ProductId} không tồn tại hoặc đã bị xóa."
-                            } ]
-                    });
-                }
-
-                if(string.Compare(variant.Product?.StatusId, ProductStatus.ForSale) != 0)
-                {
-                    return (null, new Common.Models.ErrorResponse
-                    {
-                        Errors =
-                            [ new Common.Models.ErrorDetail
-                            {
-                                Field = "Products",
-                                Message = $"Sản phẩm {variant.Product?.Name} không ở trạng thái 'for-sale'."
-                            } ]
-                    });
+                    return Error.BadRequest($"Sản phẩm {product.ProductId} không tồn tại hoặc đã bị xóa.", "Products");
                 }
             }
         }
@@ -114,6 +78,6 @@ public sealed class CreateInputCommandHandler(
 
         var created = await readRepository.GetByIdWithDetailsAsync(input.Id, cancellationToken).ConfigureAwait(false);
 
-        return (created!.Adapt<InputResponse>(), null);
+        return created!.Adapt<InputResponse>();
     }
 }

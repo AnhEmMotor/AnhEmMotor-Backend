@@ -1,53 +1,40 @@
 using Application.ApiContracts.User.Responses;
-using Application.Common.Exceptions;
+using Application.Common.Models;
 using Application.Interfaces.Repositories.User;
-using FluentValidation;
-using FluentValidation.Results;
 using MediatR;
 
 namespace Application.Features.Users.Commands.ChangePasswordCurrentUser;
 
 public class ChangePasswordCurrentUserCommandHandler(
     IUserReadRepository userReadRepository,
-    IUserUpdateRepository userUpdateRepository) : IRequestHandler<ChangePasswordCurrentUserCommand, ChangePasswordUserByUserResponse>
+    IUserUpdateRepository userUpdateRepository) : IRequestHandler<ChangePasswordCurrentUserCommand, Result<ChangePasswordUserByUserResponse>>
 {
-    public async Task<ChangePasswordUserByUserResponse> Handle(
+    public async Task<Result<ChangePasswordUserByUserResponse>> Handle(
         ChangePasswordCurrentUserCommand request,
         CancellationToken cancellationToken)
     {
-        if(string.Compare(request.Model.CurrentPassword, request.Model.NewPassword) == 0)
+        var userId = Guid.Parse(request.UserId!);
+
+        var user = await userReadRepository.FindUserByIdAsync(userId, cancellationToken).ConfigureAwait(false);
+        if(user is null)
         {
-            throw new ValidationException(
-                [ new ValidationFailure("newPassword", "New password can not dupplicate current password.") ]);
+            return Error.NotFound("User not found.");
         }
-
-        if(string.IsNullOrEmpty(request.UserId) || !Guid.TryParse(request.UserId, out var userId))
-        {
-            throw new UnauthorizedException("Invalid user token.");
-        }
-
-        cancellationToken.ThrowIfCancellationRequested();
-
-        var user = await userReadRepository.FindUserByIdAsync(userId, cancellationToken).ConfigureAwait(false) ??
-            throw new NotFoundException("User not found.");
 
         var (succeeded, errors) = await userUpdateRepository.ChangePasswordAsync(
             user,
-            request.Model.CurrentPassword,
-            request.Model.NewPassword,
+            request.CurrentPassword!,
+            request.NewPassword!,
             cancellationToken)
             .ConfigureAwait(false);
 
         if(!succeeded)
         {
-            var failures = new List<ValidationFailure>();
-            foreach(var error in errors)
-            {
-                failures.Add(new ValidationFailure(string.Empty, error));
-            }
-            throw new ValidationException(failures);
+            var validationErrors = errors.Select(e => Error.Validation(e)).ToList();
+            return Result<ChangePasswordUserByUserResponse>.Failure(validationErrors);
         }
 
         return new ChangePasswordUserByUserResponse() { Message = "Password changed successfully." };
     }
 }
+

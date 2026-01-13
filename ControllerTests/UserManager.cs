@@ -1,8 +1,6 @@
-using Application.ApiContracts.User.Requests;
 using Application.ApiContracts.User.Responses;
-using Application.ApiContracts.UserManager.Requests;
 using Application.ApiContracts.UserManager.Responses;
-using Application.Common.Exceptions;
+using Application.Common.Models;
 using Application.Features.UserManager.Commands.AssignRoles;
 using Application.Features.UserManager.Commands.ChangeMultipleUsersStatus;
 using Application.Features.UserManager.Commands.ChangePassword;
@@ -98,7 +96,7 @@ public class UserManager
         response.TotalCount.Should().Be(10);
 
         _mediatorMock.Verify(m => m.Send(
-            It.Is<GetUsersListQuery>(q => q.SieveModel.Filters == "Status==Active"),
+            It.Is<GetUsersListQuery>(q => q.SieveModel!.Filters == "Status==Active"),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -125,7 +123,7 @@ public class UserManager
         okResult.StatusCode.Should().Be(StatusCodes.Status200OK);
 
         _mediatorMock.Verify(m => m.Send(
-            It.Is<GetUsersListQuery>(q => q.SieveModel.Sorts == "FullName"),
+            It.Is<GetUsersListQuery>(q => q.SieveModel!.Sorts == "FullName"),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -136,15 +134,17 @@ public class UserManager
         var sieveModel = new SieveModel();
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetUsersListQuery>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new ForbiddenException("Không có quyền truy cập"));
+            .ReturnsAsync(Result<PagedResult<UserDTOForManagerResponse>>.Failure(Error.Forbidden("Không có quyền truy cập")));
 
-        // Act & Assert
-        await Assert.ThrowsAsync<ForbiddenException>(() =>
-            _controller.GetAllUsers(sieveModel, CancellationToken.None));
+        // Act
+        var result = await _controller.GetAllUsers(sieveModel, CancellationToken.None);
+
+        // Assert
+        result.Should().BeOfType<ForbidResult>();
 
         _mediatorMock.Verify(m => m.Send(
             It.IsAny<GetUsersListQuery>(),
-            It.IsAny<CancellationToken>()), Times.Once);
+            It.IsAny<CancellationToken>()), Times.Once());
     }
 
     [Fact(DisplayName = "UMGR_005 - Lấy danh sách người dùng cho phiếu bán hàng (for-output) với quyền phù hợp")]
@@ -179,7 +179,7 @@ public class UserManager
 
         _mediatorMock.Verify(m => m.Send(
             It.IsAny<GetUsersListForOutputQuery>(),
-            It.IsAny<CancellationToken>()), Times.Once);
+            It.IsAny<CancellationToken>()), Times.Once());
     }
 
     [Fact(DisplayName = "UMGR_006 - Lấy danh sách người dùng for-output không có quyền")]
@@ -189,15 +189,17 @@ public class UserManager
         var sieveModel = new SieveModel();
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetUsersListForOutputQuery>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new ForbiddenException("Không có quyền truy cập"));
+            .ReturnsAsync(Result<PagedResult<UserDTOForOutputResponse>>.Failure(Error.Forbidden("Không có quyền truy cập")));
 
-        // Act & Assert
-        await Assert.ThrowsAsync<ForbiddenException>(() =>
-            _controller.GetAllUsersForOutput(sieveModel, CancellationToken.None));
+        // Act
+        var result = await _controller.GetAllUsersForOutput(sieveModel, CancellationToken.None);
+
+        // Assert
+        result.Should().BeOfType<ForbidResult>();
 
         _mediatorMock.Verify(m => m.Send(
             It.IsAny<GetUsersListForOutputQuery>(),
-            It.IsAny<CancellationToken>()), Times.Once);
+            It.IsAny<CancellationToken>()), Times.Once());
     }
 
     [Fact(DisplayName = "UMGR_007 - Lấy thông tin người dùng theo ID thành công")]
@@ -219,7 +221,7 @@ public class UserManager
 
         _mediatorMock.Verify(m => m.Send(
             It.Is<GetUserByIdQuery>(q => q.UserId == userId),
-            It.IsAny<CancellationToken>()), Times.Once);
+            It.IsAny<CancellationToken>()), Times.Once());
     }
 
     [Fact(DisplayName = "UMGR_008 - Lấy thông tin người dùng không tồn tại")]
@@ -229,15 +231,17 @@ public class UserManager
         var userId = Guid.NewGuid();
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetUserByIdQuery>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new NotFoundException($"User {userId} not found"));
+            .ReturnsAsync(Result<UserDTOForManagerResponse>.Failure(Error.NotFound($"User {userId} not found")));
 
-        // Act & Assert
-        await Assert.ThrowsAsync<NotFoundException>(() =>
-            _controller.GetUserById(userId, CancellationToken.None));
+        // Act
+        var result = await _controller.GetUserById(userId, CancellationToken.None);
+
+        // Assert
+        result.Should().BeOfType<NotFoundObjectResult>();
 
         _mediatorMock.Verify(m => m.Send(
             It.Is<GetUserByIdQuery>(q => q.UserId == userId),
-            It.IsAny<CancellationToken>()), Times.Once);
+            It.IsAny<CancellationToken>()), Times.Once());
     }
 
     [Fact(DisplayName = "UMGR_009 - Cập nhật thông tin người dùng thành công")]
@@ -245,7 +249,7 @@ public class UserManager
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var request = new UpdateUserRequest
+        var request = new UpdateUserCommand
         {
             FullName = "Updated Name",
             Gender = GenderStatus.Female,
@@ -265,8 +269,8 @@ public class UserManager
         okResult.StatusCode.Should().Be(StatusCodes.Status200OK);
 
         _mediatorMock.Verify(m => m.Send(
-            It.Is<UpdateUserCommand>(c => c.UserId == userId && c.Model == request),
-            It.IsAny<CancellationToken>()), Times.Once);
+            It.Is<UpdateUserCommand>(c => c.UserId == userId),
+            It.IsAny<CancellationToken>()), Times.Once());
     }
 
     [Fact(DisplayName = "UMGR_010 - Cập nhật thông tin người dùng với email rỗng hoặc không hợp lệ")]
@@ -274,22 +278,24 @@ public class UserManager
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var request = new UpdateUserRequest
+        var request = new UpdateUserCommand
         {
             FullName = "Test User",
             PhoneNumber = ""  // Invalid phone
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateUserCommand>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new BadRequestException("Số điện thoại không hợp lệ"));
+            .ReturnsAsync(Result<UserDTOForManagerResponse>.Failure(Error.BadRequest("Số điện thoại không hợp lệ")));
 
-        // Act & Assert
-        await Assert.ThrowsAsync<BadRequestException>(() =>
-            _controller.UpdateUser(userId, request, CancellationToken.None));
+        // Act
+        var result = await _controller.UpdateUser(userId, request, CancellationToken.None);
+
+        // Assert
+        result.Should().BeOfType<BadRequestObjectResult>();
 
         _mediatorMock.Verify(m => m.Send(
             It.IsAny<UpdateUserCommand>(),
-            It.IsAny<CancellationToken>()), Times.Once);
+            It.IsAny<CancellationToken>()), Times.Once());
     }
 
     [Fact(DisplayName = "UMGR_011 - Cập nhật username trùng với user khác")]
@@ -297,21 +303,23 @@ public class UserManager
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var request = new UpdateUserRequest
+        var request = new UpdateUserCommand
         {
             FullName = "Test User"
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateUserCommand>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new BadRequestException("Username đã tồn tại"));
+            .ReturnsAsync(Result<UserDTOForManagerResponse>.Failure(Error.BadRequest("Username đã tồn tại")));
 
-        // Act & Assert
-        await Assert.ThrowsAsync<BadRequestException>(() =>
-            _controller.UpdateUser(userId, request, CancellationToken.None));
+        // Act
+        var result = await _controller.UpdateUser(userId, request, CancellationToken.None);
+
+        // Assert
+        result.Should().BeOfType<BadRequestObjectResult>();
 
         _mediatorMock.Verify(m => m.Send(
             It.IsAny<UpdateUserCommand>(),
-            It.IsAny<CancellationToken>()), Times.Once);
+            It.IsAny<CancellationToken>()), Times.Once());
     }
 
     [Fact(DisplayName = "UMGR_012 - Đổi mật khẩu người dùng thành công")]
@@ -319,7 +327,7 @@ public class UserManager
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var request = new ChangePasswordRequest
+        var request = new ChangePasswordCommand
         {
             NewPassword = "NewPass@123"
         };
@@ -341,8 +349,8 @@ public class UserManager
         response.Message.Should().Be("Đổi mật khẩu thành công");
 
         _mediatorMock.Verify(m => m.Send(
-            It.Is<ChangePasswordCommand>(c => c.UserId == userId && c.Model == request),
-            It.IsAny<CancellationToken>()), Times.Once);
+            It.Is<ChangePasswordCommand>(c => c.UserId == userId),
+            It.IsAny<CancellationToken>()), Times.Once());
     }
 
     [Fact(DisplayName = "UMGR_013 - Đổi mật khẩu với password không đạt yêu cầu")]
@@ -350,21 +358,23 @@ public class UserManager
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var request = new ChangePasswordRequest
+        var request = new ChangePasswordCommand
         {
             NewPassword = "123"
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<ChangePasswordCommand>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new BadRequestException("Mật khẩu không đủ mạnh"));
+            .ReturnsAsync(Result<ChangePasswordByManagerResponse>.Failure(Error.BadRequest("Mật khẩu không đủ mạnh")));
 
-        // Act & Assert
-        await Assert.ThrowsAsync<BadRequestException>(() =>
-            _controller.ChangePassword(userId, request, CancellationToken.None));
+        // Act
+        var result = await _controller.ChangePassword(userId, request, CancellationToken.None);
+
+        // Assert
+        result.Should().BeOfType<BadRequestObjectResult>();
 
         _mediatorMock.Verify(m => m.Send(
             It.IsAny<ChangePasswordCommand>(),
-            It.IsAny<CancellationToken>()), Times.Once);
+            It.IsAny<CancellationToken>()), Times.Once());
     }
 
     [Fact(DisplayName = "UMGR_014 - Gán roles cho người dùng thành công")]
@@ -372,7 +382,7 @@ public class UserManager
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var request = new AssignRolesRequest
+        var request = new AssignRolesCommand
         {
             RoleNames = ["Manager", "Staff"]
         };
@@ -398,8 +408,8 @@ public class UserManager
         response.Roles.Should().Contain("Manager");
 
         _mediatorMock.Verify(m => m.Send(
-            It.Is<AssignRolesCommand>(c => c.UserId == userId && c.Model == request),
-            It.IsAny<CancellationToken>()), Times.Once);
+            It.Is<AssignRolesCommand>(c => c.UserId == userId),
+            It.IsAny<CancellationToken>()), Times.Once());
     }
 
     [Fact(DisplayName = "UMGR_015 - Gán role không tồn tại cho người dùng")]
@@ -407,21 +417,23 @@ public class UserManager
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var request = new AssignRolesRequest
+        var request = new AssignRolesCommand
         {
             RoleNames = ["InvalidRole"]
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<AssignRolesCommand>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new BadRequestException("Role không tồn tại"));
+            .ReturnsAsync(Result<AssignRoleResponse>.Failure(Error.BadRequest("Role không tồn tại")));
 
-        // Act & Assert
-        await Assert.ThrowsAsync<BadRequestException>(() =>
-            _controller.AssignRoles(userId, request, CancellationToken.None));
+        // Act
+        var result = await _controller.AssignRoles(userId, request, CancellationToken.None);
+
+        // Assert
+        result.Should().BeOfType<BadRequestObjectResult>();
 
         _mediatorMock.Verify(m => m.Send(
             It.IsAny<AssignRolesCommand>(),
-            It.IsAny<CancellationToken>()), Times.Once);
+            It.IsAny<CancellationToken>()), Times.Once());
     }
 
     [Fact(DisplayName = "UMGR_016 - Thay đổi trạng thái người dùng thành Banned")]
@@ -429,7 +441,7 @@ public class UserManager
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var request = new ChangeUserStatusRequest
+        var request = new ChangeUserStatusCommand
         {
             Status = UserStatus.Banned
         };
@@ -451,8 +463,8 @@ public class UserManager
         response.Message.Should().Be("Thay đổi trạng thái thành công");
 
         _mediatorMock.Verify(m => m.Send(
-            It.Is<ChangeUserStatusCommand>(c => c.UserId == userId && c.Model == request),
-            It.IsAny<CancellationToken>()), Times.Once);
+            It.Is<ChangeUserStatusCommand>(c => c.UserId == userId),
+            It.IsAny<CancellationToken>()), Times.Once());
     }
 
     [Fact(DisplayName = "UMGR_017 - Super Admin cố gắng tự ban chính mình")]
@@ -460,28 +472,30 @@ public class UserManager
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var request = new ChangeUserStatusRequest
+        var request = new ChangeUserStatusCommand
         {
             Status = UserStatus.Banned
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<ChangeUserStatusCommand>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new BadRequestException("Super Admin không thể tự ban chính mình"));
+            .ReturnsAsync(Result<ChangeStatusUserByManagerResponse>.Failure(Error.BadRequest("Super Admin không thể tự ban chính mình")));
 
-        // Act & Assert
-        await Assert.ThrowsAsync<BadRequestException>(() =>
-            _controller.ChangeUserStatus(userId, request, CancellationToken.None));
+        // Act
+        var result = await _controller.ChangeUserStatus(userId, request, CancellationToken.None);
+
+        // Assert
+        result.Should().BeOfType<BadRequestObjectResult>();
 
         _mediatorMock.Verify(m => m.Send(
             It.IsAny<ChangeUserStatusCommand>(),
-            It.IsAny<CancellationToken>()), Times.Once);
+            It.IsAny<CancellationToken>()), Times.Once());
     }
 
     [Fact(DisplayName = "UMGR_018 - Thay đổi trạng thái nhiều người dùng thành công")]
     public async Task ChangeMultipleUsersStatus_WithValidUsers_ReturnsOk()
     {
         // Arrange
-        var request = new ChangeMultipleUsersStatusRequest
+        var request = new ChangeMultipleUsersStatusCommand
         {
             UserIds = [Guid.NewGuid(), Guid.NewGuid()],
             Status = UserStatus.Banned
@@ -504,7 +518,7 @@ public class UserManager
         response.Message.Should().Be("Thay đổi trạng thái thành công");
 
         _mediatorMock.Verify(m => m.Send(
-            It.Is<ChangeMultipleUsersStatusCommand>(c => c.Model == request),
+            It.Is<ChangeMultipleUsersStatusCommand>(c => c.Status == request.Status),
             It.IsAny<CancellationToken>()), Times.Once);
     }
 }

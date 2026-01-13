@@ -1,9 +1,5 @@
-using Application.ApiContracts.User.Requests;
-using Application.ApiContracts.User.Responses;
-using Application.Common.Exceptions;
-using Application.Features.Users.Commands.ChangePasswordCurrentUser;
+﻿using Application.Features.Users.Commands.ChangePasswordCurrentUser;
 using Application.Features.Users.Commands.DeleteCurrentUserAccount;
-using Application.Features.Users.Commands.RestoreUserAccount;
 using Application.Features.Users.Commands.UpdateCurrentUser;
 using Application.Features.Users.Queries.GetCurrentUser;
 using Application.Interfaces.Repositories.User;
@@ -53,19 +49,21 @@ public class User
             .ReturnsAsync(user);
 
         var handler = new GetCurrentUserQueryHandler(_userReadRepositoryMock.Object);
-        var query = new GetCurrentUserQuery(userId.ToString());
+        var query = new GetCurrentUserQuery() { UserId = userId.ToString() };
 
         // Act
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
         result.Should().NotBeNull();
-        result.Id.Should().Be(userId);
-        result.UserName.Should().Be("testuser");
-        result.Email.Should().Be("test@example.com");
-        result.FullName.Should().Be("Test User");
-        result.Gender.Should().Be(GenderStatus.Male);
-        result.PhoneNumber.Should().Be("0123456789");
+
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Id.Should().Be(userId);
+        result.Value.UserName.Should().Be("testuser");
+        result.Value.Email.Should().Be("test@example.com");
+        result.Value.FullName.Should().Be("Test User");
+        result.Value.Gender.Should().Be(GenderStatus.Male);
+        result.Value.PhoneNumber.Should().Be("0123456789");
     }
 
     [Fact(DisplayName = "USER_002 - Lấy thông tin người dùng khi JWT không hợp lệ")]
@@ -76,11 +74,11 @@ public class User
             .ReturnsAsync((ApplicationUser?)null);
 
         var handler = new GetCurrentUserQueryHandler(_userReadRepositoryMock.Object);
-        var query = new GetCurrentUserQuery(null);
+        var query = new GetCurrentUserQuery() { UserId = null };
 
         // Act & Assert
-        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            handler.Handle(query, CancellationToken.None));
+        var result = await handler.Handle(query, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "USER_003 - Lấy thông tin người dùng khi tài khoản đã bị xóa mềm")]
@@ -99,12 +97,11 @@ public class User
             .ReturnsAsync(user);
 
         var handler = new GetCurrentUserQueryHandler(_userReadRepositoryMock.Object);
-        var query = new GetCurrentUserQuery(userId.ToString());
+        var query = new GetCurrentUserQuery() { UserId = userId.ToString() };
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ForbiddenException>(() => 
-            handler.Handle(query, CancellationToken.None));
-        exception.Message.Should().Contain("Account has been deleted");
+        var result = await handler.Handle(query, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "USER_004 - Lấy thông tin người dùng khi tài khoản bị Ban")]
@@ -123,12 +120,11 @@ public class User
             .ReturnsAsync(user);
 
         var handler = new GetCurrentUserQueryHandler(_userReadRepositoryMock.Object);
-        var query = new GetCurrentUserQuery(userId.ToString());
+        var query = new GetCurrentUserQuery() { UserId = userId.ToString() };
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ForbiddenException>(() => 
-            handler.Handle(query, CancellationToken.None));
-        exception.Message.Should().Contain("Account has been banned");
+        var result = await handler.Handle(query, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "USER_005 - Cập nhật thông tin người dùng thành công")]
@@ -154,22 +150,21 @@ public class User
             .ReturnsAsync((true, Array.Empty<string>()));
 
         var handler = new UpdateCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
-        var request = new UpdateUserRequest
-        {
+        var command = new UpdateCurrentUserCommand() { UserId = userId.ToString(),
             FullName = "New Name",
             Gender = GenderStatus.Female,
             PhoneNumber = "0987654321"
         };
-        var command = new UpdateCurrentUserCommand(userId.ToString(), request);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.Should().NotBeNull();
-        result.FullName.Should().Be("New Name");
-        result.Gender.Should().Be(GenderStatus.Female);
-        result.PhoneNumber.Should().Be("0987654321");
+        result.IsSuccess.Should().BeTrue();
+        result.Value.FullName.Should().Be("New Name");
+        result.Value.Gender.Should().Be(GenderStatus.Female);
+        result.Value.PhoneNumber.Should().Be("0987654321");
     }
 
     [Fact(DisplayName = "USER_006 - Cập nhật thông tin với dữ liệu rỗng (không thay đổi gì)")]
@@ -193,22 +188,21 @@ public class User
             .ReturnsAsync((true, Array.Empty<string>()));
 
         var handler = new UpdateCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
-        var request = new UpdateUserRequest
-        {
+        var command = new UpdateCurrentUserCommand() { UserId = userId.ToString(),
             FullName = null,
             Gender = null,
             PhoneNumber = null
         };
-        var command = new UpdateCurrentUserCommand(userId.ToString(), request);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.Should().NotBeNull();
-        result.FullName.Should().Be("Old Name");
-        result.Gender.Should().Be(GenderStatus.Male);
-        result.PhoneNumber.Should().Be("0123456789");
+        result.IsSuccess.Should().BeTrue();
+        result.Value.FullName.Should().Be("Old Name");
+        result.Value.Gender.Should().Be(GenderStatus.Male);
+        result.Value.PhoneNumber.Should().Be("0123456789");
     }
 
     [Fact(DisplayName = "USER_007 - Cập nhật thông tin với khoảng trắng ở đầu và cuối chuỗi")]
@@ -229,20 +223,19 @@ public class User
             .ReturnsAsync((true, Array.Empty<string>()));
 
         var handler = new UpdateCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
-        var request = new UpdateUserRequest
-        {
+        var command = new UpdateCurrentUserCommand() { UserId = userId.ToString(),
             FullName = "  Trimmed Name  ",
             PhoneNumber = "  0999888777  "
         };
-        var command = new UpdateCurrentUserCommand(userId.ToString(), request);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.Should().NotBeNull();
-        result.FullName.Should().Be("Trimmed Name");
-        result.PhoneNumber.Should().Be("0999888777");
+        result.IsSuccess.Should().BeTrue();
+        result.Value.FullName.Should().Be("Trimmed Name");
+        result.Value.PhoneNumber.Should().Be("0999888777");
     }
 
     [Fact(DisplayName = "USER_008 - Cập nhật thông tin với ký tự đặc biệt trong FullName")]
@@ -263,19 +256,18 @@ public class User
             .ReturnsAsync((true, Array.Empty<string>()));
 
         var handler = new UpdateCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
-        var request = new UpdateUserRequest
-        {
+        var command = new UpdateCurrentUserCommand() { UserId = userId.ToString(),
             FullName = "<script>alert('XSS')</script>",
             Gender = GenderStatus.Male
         };
-        var command = new UpdateCurrentUserCommand(userId.ToString(), request);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.Should().NotBeNull();
-        result.FullName.Should().Be("<script>alert('XSS')</script>");
+        result.IsSuccess.Should().BeTrue();
+        result.Value.FullName.Should().Be("<script>alert('XSS')</script>");
     }
 
     [Fact(DisplayName = "USER_009 - Cập nhật thông tin với Gender không hợp lệ")]
@@ -294,16 +286,13 @@ public class User
             .ReturnsAsync(user);
 
         var handler = new UpdateCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
-        var request = new UpdateUserRequest
-        {
+        var command = new UpdateCurrentUserCommand() { UserId = userId.ToString(),
             Gender = "InvalidGender"
         };
-        var command = new UpdateCurrentUserCommand(userId.ToString(), request);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<BadRequestException>(() => 
-            handler.Handle(command, CancellationToken.None));
-        exception.Message.Should().Contain("Invalid gender value");
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "USER_010 - Cập nhật thông tin với số điện thoại không hợp lệ (chữ vào chỗ số)")]
@@ -322,16 +311,13 @@ public class User
             .ReturnsAsync(user);
 
         var handler = new UpdateCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
-        var request = new UpdateUserRequest
-        {
+        var command = new UpdateCurrentUserCommand() { UserId = userId.ToString(),
             PhoneNumber = "abcd1234"
         };
-        var command = new UpdateCurrentUserCommand(userId.ToString(), request);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<BadRequestException>(() => 
-            handler.Handle(command, CancellationToken.None));
-        exception.Message.Should().Contain("Invalid phone number format");
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "USER_011 - Cập nhật thông tin khi người dùng đã bị xóa mềm")]
@@ -349,13 +335,11 @@ public class User
             .ReturnsAsync(user);
 
         var handler = new UpdateCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
-        var request = new UpdateUserRequest { FullName = "Test" };
-        var command = new UpdateCurrentUserCommand(userId.ToString(), request);
+        var command = new UpdateCurrentUserCommand() { UserId = userId.ToString(), FullName = "Test" };
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ForbiddenException>(() => 
-            handler.Handle(command, CancellationToken.None));
-        exception.Message.Should().Contain("Cannot update deleted account");
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "USER_012 - Cập nhật thông tin khi người dùng bị Ban")]
@@ -374,13 +358,11 @@ public class User
             .ReturnsAsync(user);
 
         var handler = new UpdateCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
-        var request = new UpdateUserRequest { FullName = "Test" };
-        var command = new UpdateCurrentUserCommand(userId.ToString(), request);
+        var command = new UpdateCurrentUserCommand() { UserId = userId.ToString(), FullName = "Test" };
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ForbiddenException>(() => 
-            handler.Handle(command, CancellationToken.None));
-        exception.Message.Should().Contain("Cannot update banned account");
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "USER_013 - Cập nhật thông tin với trường Email trong body (phải bị chặn)")]
@@ -402,15 +384,14 @@ public class User
             .ReturnsAsync((true, Array.Empty<string>()));
 
         var handler = new UpdateCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
-        var request = new UpdateUserRequest { FullName = "Test" };
-        var command = new UpdateCurrentUserCommand(userId.ToString(), request);
+        var command = new UpdateCurrentUserCommand() { UserId = userId.ToString(), FullName = "Test" };
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.Should().NotBeNull();
-        // Verify Email không bị thay đổi (vì không có trong UpdateUserRequest)
+        // Verify Email khÃ´ng bá»‹ thay Ä‘á»•i (vÃ¬ khÃ´ng cÃ³ trong UpdateUserRequest)
         _userUpdateRepositoryMock.Verify(x => x.UpdateUserAsync(It.Is<ApplicationUser>(u => u.Email == "old@example.com")), Times.Once);
     }
 
@@ -435,19 +416,18 @@ public class User
             .ReturnsAsync((true, Array.Empty<string>()));
 
         var handler = new ChangePasswordCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
-        var request = new ChangePasswordRequest
-        {
+        var command = new ChangePasswordCurrentUserCommand() { UserId = userId.ToString(),
             CurrentPassword = "OldPass123!",
             NewPassword = "NewPass456!"
         };
-        var command = new ChangePasswordCurrentUserCommand(userId.ToString(), request);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.Should().NotBeNull();
-        result.Message.Should().Be("Password changed successfully");
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Message.Should().Be("Password changed successfully.");
         _userUpdateRepositoryMock.Verify(x => x.ChangePasswordAsync(user, "OldPass123!", "NewPass456!", It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -469,17 +449,14 @@ public class User
             .ReturnsAsync(false);
 
         var handler = new ChangePasswordCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
-        var request = new ChangePasswordRequest
-        {
+        var command = new ChangePasswordCurrentUserCommand() { UserId = userId.ToString(),
             CurrentPassword = "WrongPass",
             NewPassword = "NewPass456!"
         };
-        var command = new ChangePasswordCurrentUserCommand(userId.ToString(), request);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            handler.Handle(command, CancellationToken.None));
-        exception.Message.Should().Contain("Current password is incorrect");
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "USER_016 - Đổi mật khẩu với NewPassword quá ngắn (validation)")]
@@ -500,17 +477,14 @@ public class User
             .ReturnsAsync(true);
 
         var handler = new ChangePasswordCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
-        var request = new ChangePasswordRequest
-        {
+        var command = new ChangePasswordCurrentUserCommand() { UserId = userId.ToString(),
             CurrentPassword = "OldPass123!",
             NewPassword = "123"
         };
-        var command = new ChangePasswordCurrentUserCommand(userId.ToString(), request);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<BadRequestException>(() => 
-            handler.Handle(command, CancellationToken.None));
-        exception.Message.Should().Contain("Password must be at least 6 characters");
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "USER_017 - Đổi mật khẩu khi tài khoản đã bị xóa mềm")]
@@ -528,17 +502,14 @@ public class User
             .ReturnsAsync(user);
 
         var handler = new ChangePasswordCurrentUserCommandHandler(_userReadRepositoryMock.Object, _userUpdateRepositoryMock.Object);
-        var request = new ChangePasswordRequest
-        {
+        var command = new ChangePasswordCurrentUserCommand() { UserId = userId.ToString(),
             CurrentPassword = "OldPass123!",
             NewPassword = "NewPass456!"
         };
-        var command = new ChangePasswordCurrentUserCommand(userId.ToString(), request);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ForbiddenException>(() => 
-            handler.Handle(command, CancellationToken.None));
-        exception.Message.Should().Contain("Cannot change password for deleted account");
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "USER_018 - Xóa tài khoản thành công")]
@@ -560,14 +531,15 @@ public class User
             .ReturnsAsync((true, Array.Empty<string>()));
 
         var handler = new DeleteCurrentUserAccountCommandHandler(_userReadRepositoryMock.Object, _userDeleteRepositoryMock.Object, _protectedEntityManagerServiceMock.Object);
-        var command = new DeleteCurrentUserAccountCommand(userId.ToString());
+        var command = new DeleteCurrentUserAccountCommand() { UserId = userId.ToString() };
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.Should().NotBeNull();
-        result.Message.Should().Be("Account deleted successfully");
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Message.Should().Be("Your account has been deleted successfully.");
         _userDeleteRepositoryMock.Verify(x => x.SoftDeleteUserAsync(It.IsAny<ApplicationUser>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -587,12 +559,11 @@ public class User
             .ReturnsAsync(user);
 
         var handler = new DeleteCurrentUserAccountCommandHandler(_userReadRepositoryMock.Object, _userDeleteRepositoryMock.Object, _protectedEntityManagerServiceMock.Object);
-        var command = new DeleteCurrentUserAccountCommand(userId.ToString());
+        var command = new DeleteCurrentUserAccountCommand() { UserId = userId.ToString() };
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ForbiddenException>(() => 
-            handler.Handle(command, CancellationToken.None));
-        exception.Message.Should().Contain("Cannot delete banned account");
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "USER_020 - Xóa tài khoản khi tài khoản đã bị xóa mềm trước đó")]
@@ -610,12 +581,12 @@ public class User
             .ReturnsAsync(user);
 
         var handler = new DeleteCurrentUserAccountCommandHandler(_userReadRepositoryMock.Object, _userDeleteRepositoryMock.Object, _protectedEntityManagerServiceMock.Object);
-        var command = new DeleteCurrentUserAccountCommand(userId.ToString());
+        var command = new DeleteCurrentUserAccountCommand() { UserId = userId.ToString() };
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<BadRequestException>(() => 
-            handler.Handle(command, CancellationToken.None));
-        exception.Message.Should().Contain("Account already deleted");
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 }
+
 

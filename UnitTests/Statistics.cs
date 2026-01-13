@@ -1,4 +1,4 @@
-using Application.ApiContracts.Statistical.Responses;
+﻿using Application.ApiContracts.Statistical.Responses;
 using Application.Features.Statistical.Queries.GetDailyRevenue;
 using Application.Features.Statistical.Queries.GetDashboardStats;
 using Application.Features.Statistical.Queries.GetMonthlyRevenueProfit;
@@ -26,7 +26,7 @@ public class Statistics
     public async Task Handle_ValidDays7_Returns7DaysData()
     {
         // Arrange
-        var query = new GetDailyRevenueQuery(7);
+        var query = new GetDailyRevenueQuery() { Days = 7 };
         var expectedData = new List<DailyRevenueResponse>();
         for (int i = 0; i < 7; i++)
         {
@@ -47,14 +47,14 @@ public class Statistics
 
         // Assert
         result.Should().NotBeNull();
-        result.Should().HaveCount(7);
+        result.Value.Should().HaveCount(7);
     }
 
     [Fact(DisplayName = "STAT_042 - Unit - GetDailyRevenueQueryHandler với days = 1")]
     public async Task Handle_Days1_Returns1DayData()
     {
         // Arrange
-        var query = new GetDailyRevenueQuery(1);
+        var query = new GetDailyRevenueQuery { Days = 1 };
         var expectedData = new List<DailyRevenueResponse>
         {
             new() { ReportDay = DateOnly.FromDateTime(DateTime.Now), TotalRevenue = 5000000 }
@@ -69,15 +69,15 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.Should().HaveCount(1);
-        result.First().TotalRevenue.Should().Be(5000000);
+        result.Value.Should().HaveCount(1);
+        result.Value.First().TotalRevenue.Should().Be(5000000);
     }
 
     [Fact(DisplayName = "STAT_043 - Unit - GetDailyRevenueQueryHandler tính tổng doanh thu đúng")]
     public async Task Handle_Days3_CalculatesTotalRevenueCorrectly()
     {
         // Arrange
-        var query = new GetDailyRevenueQuery(3);
+        var query = new GetDailyRevenueQuery { Days = 3 };
         var expectedData = new List<DailyRevenueResponse>
         {
             new() { ReportDay = DateOnly.FromDateTime(DateTime.Now.AddDays(-2)), TotalRevenue = 1000000 },
@@ -94,7 +94,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        var total = result.Sum(x => x.TotalRevenue);
+        var total = result.Value.Sum(x => x.TotalRevenue);
         total.Should().Be(4500000m);
     }
 
@@ -102,7 +102,7 @@ public class Statistics
     public async Task Handle_ZeroRevenue_Returns5DaysWithZero()
     {
         // Arrange
-        var query = new GetDailyRevenueQuery(5);
+        var query = new GetDailyRevenueQuery { Days = 5 };
         var expectedData = new List<DailyRevenueResponse>();
         for (int i = 0; i < 5; i++)
         {
@@ -122,15 +122,15 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.Should().HaveCount(5);
-        result.All(x => x.TotalRevenue == 0).Should().BeTrue();
+        result.Value.Should().HaveCount(5);
+        result.Value.All(x => x.TotalRevenue == 0).Should().BeTrue();
     }
 
     [Fact(DisplayName = "STAT_045 - Unit - GetDailyRevenueQueryHandler với số thập phân")]
     public async Task Handle_DecimalRevenue_PreservesDecimalPlaces()
     {
         // Arrange
-        var query = new GetDailyRevenueQuery(2);
+        var query = new GetDailyRevenueQuery { Days = 2 };
         var expectedData = new List<DailyRevenueResponse>
         {
             new() { ReportDay = DateOnly.FromDateTime(DateTime.Now.AddDays(-1)), TotalRevenue = 1234567.89m },
@@ -146,15 +146,15 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.First().TotalRevenue.Should().Be(1234567.89m);
-        result.Last().TotalRevenue.Should().Be(9876543.21m);
+        result.Value.First().TotalRevenue.Should().Be(1234567.89m);
+        result.Value.Last().TotalRevenue.Should().Be(9876543.21m);
     }
 
     [Fact(DisplayName = "STAT_046 - Unit - GetDailyRevenueQueryHandler gọi repository đúng tham số")]
     public async Task Handle_Days10_CallsRepositoryWithCorrectParameter()
     {
         // Arrange
-        var query = new GetDailyRevenueQuery(10);
+        var query = new GetDailyRevenueQuery { Days = 10 };
         _repositoryMock.Setup(r => r.GetDailyRevenueAsync(10, It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
 
@@ -171,7 +171,7 @@ public class Statistics
     public async Task Handle_NullData_ReturnsEmptyList()
     {
         // Arrange
-        var query = new GetDailyRevenueQuery(7);
+        var query = new GetDailyRevenueQuery { Days = 7 };
         _repositoryMock.Setup(r => r.GetDailyRevenueAsync(7, It.IsAny<CancellationToken>()))
             .ReturnsAsync((IEnumerable<DailyRevenueResponse>)null!);
 
@@ -181,14 +181,14 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.Should().BeNull();
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "STAT_048 - Unit - GetDailyRevenueQueryHandler format ngày đúng")]
     public async Task Handle_Days3_ReturnsCorrectDateFormat()
     {
         // Arrange
-        var query = new GetDailyRevenueQuery(3);
+        var query = new GetDailyRevenueQuery { Days = 3 };
         var date1 = DateOnly.FromDateTime(DateTime.Now.AddDays(-2));
         var date2 = DateOnly.FromDateTime(DateTime.Now.AddDays(-1));
         var date3 = DateOnly.FromDateTime(DateTime.Now);
@@ -209,9 +209,9 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.Should().HaveCount(3);
-        result.First().ReportDay.Should().Be(date1);
-        result.Last().ReportDay.Should().Be(date3);
+        result.Value.Should().HaveCount(3);
+        result.Value.First().ReportDay.Should().Be(date1);
+        result.Value.Last().ReportDay.Should().Be(date3);
     }
 
     [Fact(DisplayName = "STAT_049 - Unit - GetDashboardStatsQueryHandler tính lastMonthRevenue")]
@@ -237,7 +237,7 @@ public class Statistics
 
         // Assert
         result.Should().NotBeNull();
-        result!.LastMonthRevenue.Should().Be(50000000);
+        result.Value!.LastMonthRevenue.Should().Be(50000000);
     }
 
     [Fact(DisplayName = "STAT_050 - Unit - GetDashboardStatsQueryHandler tính lastMonthProfit")]
@@ -262,7 +262,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result!.LastMonthProfit.Should().Be(12000000);
+        result.Value!.LastMonthProfit.Should().Be(12000000);
     }
 
     [Fact(DisplayName = "STAT_051 - Unit - GetDashboardStatsQueryHandler tính pendingOrderCount")]
@@ -287,7 +287,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result!.PendingOrdersCount.Should().Be(15);
+        result.Value!.PendingOrdersCount.Should().Be(15);
     }
 
     [Fact(DisplayName = "STAT_052 - Unit - GetDashboardStatsQueryHandler tính newUserCount")]
@@ -312,7 +312,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result!.NewCustomersCount.Should().Be(25);
+        result.Value!.NewCustomersCount.Should().Be(25);
     }
 
     [Fact(DisplayName = "STAT_053 - Unit - GetDashboardStatsQueryHandler với lợi nhuận âm")]
@@ -337,7 +337,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result!.LastMonthProfit.Should().Be(-5000000);
+        result.Value!.LastMonthProfit.Should().Be(-5000000);
     }
 
     [Fact(DisplayName = "STAT_054 - Unit - GetDashboardStatsQueryHandler với tất cả = 0")]
@@ -362,10 +362,10 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result!.LastMonthRevenue.Should().Be(0);
-        result.LastMonthProfit.Should().Be(0);
-        result.PendingOrdersCount.Should().Be(0);
-        result.NewCustomersCount.Should().Be(0);
+        result.Value!.LastMonthRevenue.Should().Be(0);
+        result.Value.LastMonthProfit.Should().Be(0);
+        result.Value.PendingOrdersCount.Should().Be(0);
+        result.Value.NewCustomersCount.Should().Be(0);
     }
 
     [Fact(DisplayName = "STAT_055 - Unit - GetDashboardStatsQueryHandler gọi nhiều repository methods")]
@@ -389,7 +389,7 @@ public class Statistics
     public async Task Handle_Months12_Returns12MonthsData()
     {
         // Arrange
-        var query = new GetMonthlyRevenueProfitQuery(12);
+        var query = new GetMonthlyRevenueProfitQuery() { Months = 12 };
         var expectedData = new List<MonthlyRevenueProfitResponse>();
         for (int i = 0; i < 12; i++)
         {
@@ -410,14 +410,14 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.Should().HaveCount(12);
+        result.Value.Should().HaveCount(12);
     }
 
     [Fact(DisplayName = "STAT_057 - Unit - GetMonthlyRevenueProfitQueryHandler với months = 1")]
     public async Task Handle_Months1_Returns1MonthData()
     {
         // Arrange
-        var query = new GetMonthlyRevenueProfitQuery(1);
+        var query = new GetMonthlyRevenueProfitQuery() { Months = 1};
         var expectedData = new List<MonthlyRevenueProfitResponse>
         {
             new()
@@ -437,15 +437,15 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.Should().HaveCount(1);
-        result.First().TotalRevenue.Should().Be(10000000);
+        result.Value.Should().HaveCount(1);
+        result.Value.First().TotalRevenue.Should().Be(10000000);
     }
 
     [Fact(DisplayName = "STAT_058 - Unit - GetMonthlyRevenueProfitQueryHandler tính profit chính xác")]
     public async Task Handle_Months3_CalculatesProfitCorrectly()
     {
         // Arrange
-        var query = new GetMonthlyRevenueProfitQuery(3);
+        var query = new GetMonthlyRevenueProfitQuery() { Months = 3 };
         var expectedData = new List<MonthlyRevenueProfitResponse>
         {
             new() { ReportMonth = DateOnly.FromDateTime(DateTime.Now.AddMonths(-2)), TotalRevenue = 10000000, TotalProfit = 4000000 },
@@ -462,16 +462,16 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.ElementAt(0).TotalProfit.Should().Be(4000000);
-        result.ElementAt(1).TotalProfit.Should().Be(3000000);
-        result.ElementAt(2).TotalProfit.Should().Be(5000000);
+        result.Value.ElementAt(0).TotalProfit.Should().Be(4000000);
+        result.Value.ElementAt(1).TotalProfit.Should().Be(3000000);
+        result.Value.ElementAt(2).TotalProfit.Should().Be(5000000);
     }
 
     [Fact(DisplayName = "STAT_059 - Unit - GetMonthlyRevenueProfitQueryHandler với tháng không có doanh thu")]
     public async Task Handle_Months2_MonthWithNoRevenue_ReturnsZeroProfit()
     {
         // Arrange
-        var query = new GetMonthlyRevenueProfitQuery(2);
+        var query = new GetMonthlyRevenueProfitQuery() { Months = 2 };
         var expectedData = new List<MonthlyRevenueProfitResponse>
         {
             new() { ReportMonth = DateOnly.FromDateTime(DateTime.Now.AddMonths(-1)), TotalRevenue = 0, TotalProfit = 0 },
@@ -487,15 +487,15 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.First().TotalProfit.Should().Be(0);
-        result.Last().TotalProfit.Should().Be(2000000);
+        result.Value.First().TotalProfit.Should().Be(0);
+        result.Value.Last().TotalProfit.Should().Be(2000000);
     }
 
     [Fact(DisplayName = "STAT_060 - Unit - GetMonthlyRevenueProfitQueryHandler format tháng đúng")]
     public async Task Handle_Months6_ReturnsCorrectMonthFormat()
     {
         // Arrange
-        var query = new GetMonthlyRevenueProfitQuery(6);
+        var query = new GetMonthlyRevenueProfitQuery() { Months = 6 };
         var expectedData = new List<MonthlyRevenueProfitResponse>();
         for (int i = 0; i < 6; i++)
         {
@@ -517,15 +517,15 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.Should().HaveCount(6);
-        result.All(x => x.ReportMonth.Day == 1).Should().BeTrue();
+        result.Value.Should().HaveCount(6);
+        result.Value.All(x => x.ReportMonth.Day == 1).Should().BeTrue();
     }
 
     [Fact(DisplayName = "STAT_061 - Unit - GetMonthlyRevenueProfitQueryHandler sắp xếp theo thứ tự")]
     public async Task Handle_Months5_ReturnsSortedData()
     {
         // Arrange
-        var query = new GetMonthlyRevenueProfitQuery(5);
+        var query = new GetMonthlyRevenueProfitQuery() { Months = 5 };
         var expectedData = new List<MonthlyRevenueProfitResponse>();
         for (int i = 4; i >= 0; i--)
         {
@@ -546,15 +546,15 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.Should().HaveCount(5);
-        result.Should().BeInAscendingOrder(x => x.ReportMonth);
+        result.Value.Should().HaveCount(5);
+        result.Value.Should().BeInAscendingOrder(x => x.ReportMonth);
     }
 
     [Fact(DisplayName = "STAT_062 - Unit - GetMonthlyRevenueProfitQueryHandler với số thập phân")]
     public async Task Handle_Months2_PreservesDecimalInProfit()
     {
         // Arrange
-        var query = new GetMonthlyRevenueProfitQuery(2);
+        var query = new GetMonthlyRevenueProfitQuery() { Months = 2 };
         var expectedData = new List<MonthlyRevenueProfitResponse>
         {
             new() { ReportMonth = DateOnly.FromDateTime(DateTime.Now.AddMonths(-1)), TotalRevenue = 1234567.89m, TotalProfit = 1000000.77m },
@@ -570,15 +570,15 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.First().TotalProfit.Should().Be(1000000.77m);
-        result.Last().TotalProfit.Should().Be(7000000.10m);
+        result.Value.First().TotalProfit.Should().Be(1000000.77m);
+        result.Value.Last().TotalProfit.Should().Be(7000000.10m);
     }
 
     [Fact(DisplayName = "STAT_063 - Unit - GetMonthlyRevenueProfitQueryHandler gọi repository đúng")]
     public async Task Handle_Months8_CallsRepositoryWithCorrectParameter()
     {
         // Arrange
-        var query = new GetMonthlyRevenueProfitQuery(8);
+        var query = new GetMonthlyRevenueProfitQuery() { Months = 8 };
         _repositoryMock.Setup(r => r.GetMonthlyRevenueProfitAsync(8, It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
 
@@ -611,7 +611,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        var pendingCount = result.First(x => x.StatusName == OrderStatus.Pending);
+        var pendingCount = result.Value.First(x => x.StatusName == OrderStatus.Pending);
         pendingCount.OrderCount.Should().Be(10);
     }
 
@@ -634,7 +634,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.First().OrderCount.Should().Be(15);
+        result.Value.First().OrderCount.Should().Be(15);
     }
 
     [Fact(DisplayName = "STAT_066 - Unit - GetOrderStatusCountsQueryHandler đếm Delivering")]
@@ -656,7 +656,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.First().OrderCount.Should().Be(8);
+        result.Value.First().OrderCount.Should().Be(8);
     }
 
     [Fact(DisplayName = "STAT_067 - Unit - GetOrderStatusCountsQueryHandler đếm WaitingPickup")]
@@ -678,7 +678,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.First().OrderCount.Should().Be(5);
+        result.Value.First().OrderCount.Should().Be(5);
     }
 
     [Fact(DisplayName = "STAT_068 - Unit - GetOrderStatusCountsQueryHandler đếm Completed")]
@@ -700,7 +700,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.First().OrderCount.Should().Be(50);
+        result.Value.First().OrderCount.Should().Be(50);
     }
 
     [Fact(DisplayName = "STAT_069 - Unit - GetOrderStatusCountsQueryHandler đếm Cancelled")]
@@ -722,7 +722,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.First().OrderCount.Should().Be(3);
+        result.Value.First().OrderCount.Should().Be(3);
     }
 
     [Fact(DisplayName = "STAT_070 - Unit - GetOrderStatusCountsQueryHandler tất cả = 0")]
@@ -746,7 +746,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.All(x => x.OrderCount == 0).Should().BeTrue();
+        result.Value.All(x => x.OrderCount == 0).Should().BeTrue();
     }
 
     [Fact(DisplayName = "STAT_071 - Unit - GetOrderStatusCountsQueryHandler tổng số đúng")]
@@ -770,7 +770,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        var total = result.Sum(x => x.OrderCount);
+        var total = result.Value.Sum(x => x.OrderCount);
         total.Should().Be(30);
     }
 
@@ -817,7 +817,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.Should().HaveCount(10);
+        result.Value.Should().HaveCount(10);
     }
 
     [Fact(DisplayName = "STAT_074 - Unit - GetProductReportLastMonthQueryHandler tính soldQuantity")]
@@ -839,7 +839,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.First().SoldLastMonth.Should().Be(25);
+        result.Value.First().SoldLastMonth.Should().Be(25);
     }
 
     [Fact(DisplayName = "STAT_075 - Unit - GetProductReportLastMonthQueryHandler hiển thị stockQuantity")]
@@ -861,7 +861,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.First().StockQuantity.Should().Be(150);
+        result.Value.First().StockQuantity.Should().Be(150);
     }
 
     [Fact(DisplayName = "STAT_076 - Unit - GetProductReportLastMonthQueryHandler với sản phẩm chưa bán")]
@@ -883,8 +883,8 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.First().SoldLastMonth.Should().Be(0);
-        result.First().StockQuantity.Should().Be(200);
+        result.Value.First().SoldLastMonth.Should().Be(0);
+        result.Value.First().StockQuantity.Should().Be(200);
     }
 
     [Fact(DisplayName = "STAT_077 - Unit - GetProductReportLastMonthQueryHandler với sản phẩm hết hàng")]
@@ -906,8 +906,8 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.First().SoldLastMonth.Should().Be(50);
-        result.First().StockQuantity.Should().Be(0);
+        result.Value.First().SoldLastMonth.Should().Be(50);
+        result.Value.First().StockQuantity.Should().Be(0);
     }
 
     [Fact(DisplayName = "STAT_078 - Unit - GetProductReportLastMonthQueryHandler hiển thị tên sản phẩm")]
@@ -929,7 +929,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.First().ProductName.Should().Be("Xe máy Honda Wave");
+        result.Value.First().ProductName.Should().Be("Xe máy Honda Wave");
     }
 
     [Fact(DisplayName = "STAT_079 - Unit - GetProductReportLastMonthQueryHandler bao gồm sản phẩm xóa")]
@@ -952,8 +952,8 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.Should().HaveCount(2);
-        result.Any(x => x.ProductName == "Deleted Product").Should().BeTrue();
+        result.Value.Should().HaveCount(2);
+        result.Value.Any(x => x.ProductName == "Deleted Product").Should().BeTrue();
     }
 
     [Fact(DisplayName = "STAT_080 - Unit - GetProductReportLastMonthQueryHandler sắp xếp theo số lượng bán")]
@@ -977,7 +977,7 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.Should().BeInDescendingOrder(x => x.SoldLastMonth);
+        result.Value.Should().BeInDescendingOrder(x => x.SoldLastMonth);
     }
 
     [Fact(DisplayName = "STAT_081 - Unit - GetProductReportLastMonthQueryHandler gọi repository")]
@@ -1001,7 +1001,7 @@ public class Statistics
     public async Task Handle_VariantId10_ReturnsPriceAndStock()
     {
         // Arrange
-        var query = new GetProductStockAndPriceQuery(10);
+        var query = new GetProductStockAndPriceQuery() { VariantId = 10};
         var expectedData = new ProductStockPriceResponse
         {
             UnitPrice = 2500000,
@@ -1018,15 +1018,15 @@ public class Statistics
 
         // Assert
         result.Should().NotBeNull();
-        result!.UnitPrice.Should().Be(2500000);
-        result.StockQuantity.Should().Be(50);
+        result.Value!.UnitPrice.Should().Be(2500000);
+        result.Value.StockQuantity.Should().Be(50);
     }
 
     [Fact(DisplayName = "STAT_083 - Unit - GetProductStockAndPriceQueryHandler với giá = 0")]
     public async Task Handle_VariantId5_ZeroPrice_ReturnsZeroPrice()
     {
         // Arrange
-        var query = new GetProductStockAndPriceQuery(5);
+        var query = new GetProductStockAndPriceQuery() { VariantId = 5 };
         var expectedData = new ProductStockPriceResponse
         {
             UnitPrice = 0,
@@ -1042,15 +1042,15 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result!.UnitPrice.Should().Be(0);
-        result.StockQuantity.Should().Be(100);
+        result.Value!.UnitPrice.Should().Be(0);
+        result.Value.StockQuantity.Should().Be(100);
     }
 
     [Fact(DisplayName = "STAT_084 - Unit - GetProductStockAndPriceQueryHandler với tồn kho = 0")]
     public async Task Handle_VariantId8_ZeroStock_ReturnsZeroStock()
     {
         // Arrange
-        var query = new GetProductStockAndPriceQuery(8);
+        var query = new GetProductStockAndPriceQuery() { VariantId = 8 };
         var expectedData = new ProductStockPriceResponse
         {
             UnitPrice = 1000000,
@@ -1066,15 +1066,15 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result!.UnitPrice.Should().Be(1000000);
-        result.StockQuantity.Should().Be(0);
+        result.Value!.UnitPrice.Should().Be(1000000);
+        result.Value.StockQuantity.Should().Be(0);
     }
 
     [Fact(DisplayName = "STAT_085 - Unit - GetProductStockAndPriceQueryHandler với giá thập phân")]
     public async Task Handle_VariantId12_DecimalPrice_PreservesDecimal()
     {
         // Arrange
-        var query = new GetProductStockAndPriceQuery(12);
+        var query = new GetProductStockAndPriceQuery() { VariantId = 12 };
         var expectedData = new ProductStockPriceResponse
         {
             UnitPrice = 1234567.89m,
@@ -1090,14 +1090,14 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result!.UnitPrice.Should().Be(1234567.89m);
+        result.Value!.UnitPrice.Should().Be(1234567.89m);
     }
 
     [Fact(DisplayName = "STAT_086 - Unit - GetProductStockAndPriceQueryHandler gọi repository đúng ID")]
     public async Task Handle_VariantId15_CallsRepositoryWithCorrectId()
     {
         // Arrange
-        var query = new GetProductStockAndPriceQuery(15);
+        var query = new GetProductStockAndPriceQuery() {  VariantId = 15 };
         _repositoryMock.Setup(r => r.GetProductStockAndPriceAsync(15, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ProductStockPriceResponse());
 
@@ -1114,7 +1114,7 @@ public class Statistics
     public async Task Handle_VariantId999_NonExistent_ReturnsNull()
     {
         // Arrange
-        var query = new GetProductStockAndPriceQuery(999);
+        var query = new GetProductStockAndPriceQuery() {  VariantId = 999 };
         _repositoryMock.Setup(r => r.GetProductStockAndPriceAsync(999, It.IsAny<CancellationToken>()))
             .ReturnsAsync((ProductStockPriceResponse?)null);
 
@@ -1124,14 +1124,14 @@ public class Statistics
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.Should().BeNull();
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "STAT_088 - Unit - GetProductStockAndPriceQueryHandler với variant đã xóa")]
     public async Task Handle_VariantId20_Deleted_ReturnsData()
     {
         // Arrange
-        var query = new GetProductStockAndPriceQuery(20);
+        var query = new GetProductStockAndPriceQuery() {  VariantId = 20 };
         var expectedData = new ProductStockPriceResponse
         {
             UnitPrice = 500000,
@@ -1148,6 +1148,6 @@ public class Statistics
 
         // Assert
         result.Should().NotBeNull();
-        result!.UnitPrice.Should().Be(500000);
+        result.Value!.UnitPrice.Should().Be(500000);
     }
 }

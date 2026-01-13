@@ -1,4 +1,5 @@
 using Application.ApiContracts.Input.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
 using Application.Interfaces.Repositories.ProductVariant;
@@ -17,9 +18,9 @@ public sealed class UpdateInputCommandHandler(
     IInputDeleteRepository deleteRepository,
     ISupplierReadRepository supplierRepository,
     IProductVariantReadRepository variantRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateInputCommand, (InputResponse? Data, Common.Models.ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateInputCommand, Result<InputResponse?>>
 {
-    public async Task<(InputResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
+    public async Task<Result<InputResponse?>> Handle(
         UpdateInputCommand request,
         CancellationToken cancellationToken)
     {
@@ -31,43 +32,19 @@ public sealed class UpdateInputCommandHandler(
 
         if(input is null)
         {
-            return (null, new Common.Models.ErrorResponse
-            {
-                Errors =
-                    [ new Common.Models.ErrorDetail
-                    {
-                        Field = "Id",
-                        Message = $"Không tìm thấy phiếu nhập có ID {request.Id}."
-                    } ]
-            });
+            return Error.NotFound($"Không tìm thấy phiếu nhập có ID {request.Id}.", "Id");
         }
 
         if(Domain.Constants.InputStatus.IsCannotEdit(input.StatusId))
         {
             if(request.Products.Count != 0)
             {
-                return (null, new Common.Models.ErrorResponse
-                {
-                    Errors =
-                        [ new Common.Models.ErrorDetail
-                        {
-                            Field = "Products",
-                            Message = "Không được chỉnh sửa sản phẩm trong phiếu nhập đã hoàn thành hoặc đã hủy."
-                        } ]
-                });
+                return Error.BadRequest("Không được chỉnh sửa sản phẩm trong phiếu nhập đã hoàn thành hoặc đã hủy.", "Products");
             }
 
             if(request.SupplierId != null)
             {
-                return (null, new Common.Models.ErrorResponse
-                {
-                    Errors =
-                        [ new Common.Models.ErrorDetail
-                        {
-                            Field = "Products",
-                            Message = "Không được chỉnh sửa mã nhà cung cấp trong phiếu nhập đã hoàn thành hoặc đã hủy."
-                        } ]
-                });
+                return Error.BadRequest("Không được chỉnh sửa mã nhà cung cấp trong phiếu nhập đã hoàn thành hoặc đã hủy.", "Products");
             }
         }
 
@@ -81,15 +58,7 @@ public sealed class UpdateInputCommandHandler(
 
             if(supplier is null || string.Compare(supplier.StatusId, Domain.Constants.SupplierStatus.Active) != 0)
             {
-                return (null, new Common.Models.ErrorResponse
-                {
-                    Errors =
-                        [ new Common.Models.ErrorDetail
-                        {
-                            Field = "SupplierId",
-                            Message = "Nhà cung cấp không hợp lệ hoặc không còn hoạt động."
-                        } ]
-                });
+                return Error.BadRequest("Nhà cung cấp không hợp lệ hoặc không còn hoạt động.", "SupplierId");
             }
         }
 
@@ -109,31 +78,14 @@ public sealed class UpdateInputCommandHandler(
             {
                 var foundIds = variantsList.Select(v => v.Id).ToList();
                 var missingIds = variantIds.Except(foundIds).ToList();
-                return (null, new Common.Models.ErrorResponse
-                {
-                    Errors =
-                        [ new Common.Models.ErrorDetail
-                        {
-                            Field = "Products",
-                            Message = $"Không tìm thấy {missingIds.Count} sản phẩm: {string.Join(", ", missingIds)}"
-                        } ]
-                });
+                return Error.NotFound($"Không tìm thấy {missingIds.Count} sản phẩm: {string.Join(", ", missingIds)}", "Products");
             }
 
             foreach(var variant in variantsList)
             {
                 if(string.Compare(variant.Product?.StatusId, Domain.Constants.ProductStatus.ForSale) != 0)
                 {
-                    return (null, new Common.Models.ErrorResponse
-                    {
-                        Errors =
-                            [ new Common.Models.ErrorDetail
-                            {
-                                Field = "Products",
-                                Message =
-                                    $"Sản phẩm '{variant.Product?.Name ?? variant.Id.ToString()}' không còn được bán."
-                            } ]
-                    });
+                    return Error.BadRequest($"Sản phẩm '{variant.Product?.Name ?? variant.Id.ToString()}' không còn được bán.", "Products");
                 }
             }
         }
@@ -176,6 +128,6 @@ public sealed class UpdateInputCommandHandler(
 
         var updated = await readRepository.GetByIdWithDetailsAsync(input.Id, cancellationToken).ConfigureAwait(false);
 
-        return (updated!.Adapt<InputResponse>(), null);
+        return updated!.Adapt<InputResponse>();
     }
 }

@@ -1,7 +1,10 @@
 using System.Net;
 using System.Net.Http.Json;
-using Application.ApiContracts.ProductCategory.Requests;
 using Application.ApiContracts.ProductCategory.Responses;
+using Application.Features.ProductCategories.Commands.CreateProductCategory;
+using Application.Features.ProductCategories.Commands.DeleteManyProductCategories;
+using Application.Features.ProductCategories.Commands.RestoreManyProductCategories;
+using Application.Features.ProductCategories.Commands.UpdateProductCategory;
 using Domain.Entities;
 using Domain.Primitives;
 using FluentAssertions;
@@ -300,7 +303,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
     public async Task CreateProductCategory_ValidRequest_ShouldCreateCategory()
     {
         // Arrange
-        var request = new CreateProductCategoryRequest
+        var request = new CreateProductCategoryCommand
         {
             Name = "API Test",
             Description = "Integration test"
@@ -332,7 +335,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
             categoryId = category.Id;
         }
 
-        var request = new UpdateProductCategoryRequest { Name = "API Updated" };
+        var request = new UpdateProductCategoryCommand { Name = "API Updated" };
 
         // Act
         var response = await _client.PutAsJsonAsync($"/api/v1/ProductCategory/{categoryId}", request);
@@ -391,7 +394,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
             }
         }
 
-        var request = new DeleteManyProductCategoriesRequest { Ids = [.. categoryIds] };
+        var request = new DeleteManyProductCategoriesCommand { Ids = [.. categoryIds] };
 
         // Act
         var response = await _client.PostAsJsonAsync("/api/v1/ProductCategory/delete-many", request);
@@ -428,7 +431,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
             }
         }
 
-        var request = new DeleteManyProductCategoriesRequest { Ids = [validIds[0], 999, validIds[1]] };
+        var request = new DeleteManyProductCategoriesCommand { Ids = [validIds[0], 999, validIds[1]] };
 
         // Act
         var response = await _client.PostAsJsonAsync("/api/v1/ProductCategory/delete-many", request);
@@ -468,7 +471,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
             categoryIds[1] = category2.Id;
         }
 
-        var request = new DeleteManyProductCategoriesRequest { Ids = [.. categoryIds] };
+        var request = new DeleteManyProductCategoriesCommand { Ids = [.. categoryIds] };
 
         // Act
         var response = await _client.PostAsJsonAsync("/api/v1/ProductCategory/delete-many", request);
@@ -502,7 +505,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
             }
         }
 
-        var request = new RestoreManyProductCategoriesRequest { Ids = [.. categoryIds] };
+        var request = new RestoreManyProductCategoriesCommand { Ids = [.. categoryIds] };
 
         // Act
         var response = await _client.PostAsJsonAsync("/api/v1/ProductCategory/restore-many", request);
@@ -545,7 +548,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
             categoryIds[1] = category2.Id;
         }
 
-        var request = new RestoreManyProductCategoriesRequest { Ids = [.. categoryIds] };
+        var request = new RestoreManyProductCategoriesCommand { Ids = [.. categoryIds] };
 
         // Act
         var response = await _client.PostAsJsonAsync("/api/v1/ProductCategory/restore-many", request);

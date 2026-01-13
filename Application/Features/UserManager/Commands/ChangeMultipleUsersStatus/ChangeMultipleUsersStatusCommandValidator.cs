@@ -3,21 +3,16 @@ using FluentValidation;
 
 namespace Application.Features.UserManager.Commands.ChangeMultipleUsersStatus;
 
-public class ChangeMultipleUsersStatusCommandValidator : AbstractValidator<ChangeMultipleUsersStatusCommand>
+public sealed class ChangeMultipleUsersStatusCommandValidator : AbstractValidator<ChangeMultipleUsersStatusCommand>
 {
     public ChangeMultipleUsersStatusCommandValidator()
     {
-        throw new NotImplementedException();
-    }
+        RuleFor(x => x.UserIds)
+            .NotEmpty().WithMessage("User list cannot be empty.")
+            .Must(ids => ids!.Count <= 50).WithMessage("To ensure performance, limit to 50 users per update.");
 
-    public static bool IsValidStatus(string status)
-    {
-        throw new NotImplementedException();
+        RuleFor(x => x.Status)
+            .NotEmpty()
+            .Must(UserStatus.IsValid).WithMessage("Invalid status provided.");
     }
-
-    public static IReadOnlyList<string> ValidStatuses => new[]
-    {
-        UserStatus.Active,
-        UserStatus.Banned
-    };
 }

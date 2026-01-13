@@ -1,4 +1,5 @@
-using Application.ApiContracts.Supplier.Responses;
+﻿using Application.ApiContracts.Supplier.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Supplier;
 
@@ -11,19 +12,14 @@ namespace Application.Features.Suppliers.Commands.RestoreManySuppliers;
 public sealed class RestoreManySuppliersCommandHandler(
     ISupplierReadRepository readRepository,
     ISupplierUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<RestoreManySuppliersCommand, (List<SupplierResponse>? Data, Common.Models.ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<RestoreManySuppliersCommand,Result<List<SupplierResponse>?>>
 {
-    public async Task<(List<SupplierResponse>? Data, Common.Models.ErrorResponse? Error)> Handle(
+    public async Task<Result<List<SupplierResponse>?>> Handle(
         RestoreManySuppliersCommand request,
         CancellationToken cancellationToken)
     {
-        if(request.Ids.Count == 0)
-        {
-            return ([], null);
-        }
-
         var uniqueIds = request.Ids.Distinct().ToList();
-        var errorDetails = new List<Common.Models.ErrorDetail>();
+        var errorDetails = new List<Error>();
 
         var allSuppliers = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.All)
             .ConfigureAwait(false);
@@ -40,18 +36,17 @@ public sealed class RestoreManySuppliersCommandHandler(
         {
             if(!allSupplierMap.ContainsKey(id))
             {
-                errorDetails.Add(
-                    new Common.Models.ErrorDetail { Field = "Id", Message = $"Supplier with Id {id} not found." });
-            } else if(!deletedSupplierSet.Contains(id))
+                errorDetails.Add(Error.NotFound($"Supplier with Id {id} not found."));
+            } 
+            else if(!deletedSupplierSet.Contains(id))
             {
-                errorDetails.Add(
-                    new Common.Models.ErrorDetail { Field = "Id", Message = $"Supplier with Id {id} is not deleted." });
+                errorDetails.Add(Error.BadRequest($"Supplier with Id {id} is not deleted."));
             }
         }
 
         if(errorDetails.Count > 0)
         {
-            return (null, new Common.Models.ErrorResponse { Errors = errorDetails });
+            return errorDetails;
         }
 
         if(deletedSuppliers.ToList().Count > 0)
@@ -60,6 +55,6 @@ public sealed class RestoreManySuppliersCommandHandler(
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        return (deletedSuppliers.Adapt<List<SupplierResponse>>(), null);
+        return deletedSuppliers.Adapt<List<SupplierResponse>>();
     }
 }

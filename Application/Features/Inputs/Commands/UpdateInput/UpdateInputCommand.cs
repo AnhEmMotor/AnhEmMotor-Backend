@@ -1,10 +1,11 @@
+using Application.ApiContracts.Input.Requests;
 using Application.ApiContracts.Input.Responses;
-
+using Application.Common.Models;
 using MediatR;
 
 namespace Application.Features.Inputs.Commands.UpdateInput;
 
-public sealed record UpdateInputCommand : IRequest<(InputResponse? Data, Common.Models.ErrorResponse? Error)>
+public sealed record UpdateInputCommand : IRequest<Result<InputResponse?>>
 {
     public int Id { get; init; }
 
@@ -14,5 +15,5 @@ public sealed record UpdateInputCommand : IRequest<(InputResponse? Data, Common.
 
     public string? Notes { get; init; }
 
-    public ICollection<UpdateInputProductCommand> Products { get; init; } = [];
+    public ICollection<UpdateInputInfoRequest> Products { get; init; } = [];
 }

@@ -1,4 +1,5 @@
-using Application.ApiContracts.Supplier.Responses;
+﻿using Application.ApiContracts.Supplier.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Supplier;
 
@@ -11,32 +12,13 @@ namespace Application.Features.Suppliers.Commands.UpdateManySupplierStatus;
 public sealed class UpdateManySupplierStatusCommandHandler(
     ISupplierReadRepository readRepository,
     ISupplierUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateManySupplierStatusCommand, (List<SupplierResponse>? Data, Common.Models.ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateManySupplierStatusCommand, Result<List<SupplierResponse>?>>
 {
-    public async Task<(List<SupplierResponse>? Data, Common.Models.ErrorResponse? Error)> Handle(
+    public async Task<Result<List<SupplierResponse>?>> Handle(
         UpdateManySupplierStatusCommand request,
         CancellationToken cancellationToken)
     {
-        if(request.Ids.Count == 0)
-        {
-            return ([], null);
-        }
-
-        if(!SupplierStatusConstants.IsValid(request.StatusId))
-        {
-            return (null, new Common.Models.ErrorResponse
-            {
-                Errors =
-                    [ new Common.Models.ErrorDetail
-                    {
-                        Field = "StatusId",
-                        Message =
-                            $"Invalid status '{request.StatusId}'. Must be one of: {string.Join(", ", SupplierStatusConstants.AllowedValues)}"
-                    } ]
-            });
-        }
-
-        var errorDetails = new List<Common.Models.ErrorDetail>();
+        var errorDetails = new List<Error>();
         var ids = request.Ids.Distinct().ToList();
 
         var suppliers = await readRepository.GetByIdAsync(ids, cancellationToken).ConfigureAwait(false);
@@ -46,14 +28,13 @@ public sealed class UpdateManySupplierStatusCommandHandler(
         {
             if(!supplierMap.ContainsKey(id))
             {
-                errorDetails.Add(
-                    new Common.Models.ErrorDetail { Field = "Id", Message = $"Supplier with Id {id} not found." });
+                errorDetails.Add(Error.NotFound($"Supplier with Id {id} not found.", "Id"));
             }
         }
 
         if(errorDetails.Count > 0)
         {
-            return (null, new Common.Models.ErrorResponse { Errors = errorDetails });
+            return errorDetails;
         }
 
         foreach(var supplier in suppliers)
@@ -64,6 +45,6 @@ public sealed class UpdateManySupplierStatusCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return (suppliers.Adapt<List<SupplierResponse>>(), null);
+        return suppliers.Adapt<List<SupplierResponse>>();
     }
 }

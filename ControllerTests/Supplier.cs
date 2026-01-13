@@ -1,5 +1,5 @@
-using Application.ApiContracts.Supplier.Requests;
 using Application.ApiContracts.Supplier.Responses;
+using Application.Common.Models;
 using Application.Features.Suppliers.Commands.CreateSupplier;
 using Application.Features.Suppliers.Commands.DeleteManySuppliers;
 using Application.Features.Suppliers.Commands.DeleteSupplier;
@@ -45,7 +45,7 @@ public class Supplier
     public async Task CreateSupplier_Success_ReturnsCreatedSupplier()
     {
         // Arrange
-        var request = new CreateSupplierRequest
+        var request = new CreateSupplierCommand
         {
             Name = "API Supplier",
             Phone = "0123456789",
@@ -62,7 +62,7 @@ public class Supplier
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateSupplierCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(expectedResponse);
+            .ReturnsAsync(Result<SupplierResponse>.Success(expectedResponse));
 
         // Act
         var result = await _controller.CreateSupplier(request, CancellationToken.None);
@@ -80,7 +80,7 @@ public class Supplier
     public async Task CreateSupplier_NoPermission_ReturnsForbidden()
     {
         // Arrange
-        var request = new CreateSupplierRequest
+        var request = new CreateSupplierCommand
         {
             Name = "No Permission",
             Phone = "0123456789",
@@ -99,7 +99,7 @@ public class Supplier
     public async Task CreateSupplier_Unauthorized_ReturnsUnauthorized()
     {
         // Arrange
-        var request = new CreateSupplierRequest
+        var request = new CreateSupplierCommand
         {
             Name = "Unauthorized",
             Phone = "0123456789",
@@ -127,7 +127,7 @@ public class Supplier
         var expectedResponse = new PagedResult<SupplierResponse>(items, 15, 1, 10);
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetSuppliersListQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(expectedResponse);
+            .ReturnsAsync(Result<PagedResult<SupplierResponse>>.Success(expectedResponse));
 
         // Act
         var result = await _controller.GetSuppliers(sieveModel, CancellationToken.None);
@@ -153,7 +153,7 @@ public class Supplier
         var expectedResponse = new PagedResult<SupplierResponse>(items, 10, 1, 10);
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetSuppliersListQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(expectedResponse);
+            .ReturnsAsync(Result<PagedResult<SupplierResponse>>.Success(expectedResponse));
 
         // Act
         var result = await _controller.GetSuppliersForInput(sieveModel, CancellationToken.None);
@@ -179,7 +179,7 @@ public class Supplier
         var expectedResponse = new PagedResult<SupplierResponse>(items, 10, 1, 10);
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetSuppliersListQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(expectedResponse);
+            .ReturnsAsync(Result<PagedResult<SupplierResponse>>.Success(expectedResponse));
 
         // Act
         var result = await _controller.GetSuppliers(sieveModel, CancellationToken.None);
@@ -204,7 +204,7 @@ public class Supplier
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetSupplierByIdQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((expectedResponse, (Application.Common.Models.ErrorResponse?)null));
+            .ReturnsAsync(Result<SupplierResponse?>.Success(expectedResponse));
 
         // Act
         var result = await _controller.GetSupplierById(1, CancellationToken.None);
@@ -229,7 +229,7 @@ public class Supplier
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetSupplierByIdQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((expectedResponse, (Application.Common.Models.ErrorResponse?)null));
+            .ReturnsAsync(Result<SupplierResponse?>.Success(expectedResponse));
 
         // Act
         var result = await _controller.GetSupplierById(1, CancellationToken.None);
@@ -257,7 +257,7 @@ public class Supplier
     public async Task UpdateSupplier_NoPermission_ReturnsForbidden()
     {
         // Arrange
-        var request = new UpdateSupplierRequest { Name = "Updated" };
+        var request = new UpdateSupplierCommand { Name = "Updated" };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateSupplierCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException("No permission"));
@@ -297,7 +297,7 @@ public class Supplier
     public async Task DeleteManySuppliers_PartialFailure_ReturnsError()
     {
         // Arrange
-        var request = new DeleteManySuppliersRequest
+        var request = new DeleteManySuppliersCommand
         {
             Ids = [1, 2, 3]
         };
@@ -326,7 +326,7 @@ public class Supplier
     public async Task UpdateManySupplierStatus_NoPermission_ReturnsForbidden()
     {
         // Arrange
-        var request = new UpdateManySupplierStatusRequest
+        var request = new UpdateManySupplierStatusCommand
         {
             Ids = [1, 2],
             StatusId = "inactive"

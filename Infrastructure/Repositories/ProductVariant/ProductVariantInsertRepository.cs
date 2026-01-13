@@ -5,6 +5,7 @@ namespace Infrastructure.Repositories.ProductVariant
 {
     public class ProductVariantInsertRepository : IProductVariantInsertRepository
     {
-        public void Add(ProductVariantEntity variant) { throw new NotImplementedException(); }
+        public void Add(ProductVariantEntity variant) { 
+            throw new NotImplementedException(); }
     }
 }

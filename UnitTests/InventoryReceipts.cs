@@ -1,4 +1,4 @@
-using Application.ApiContracts.Input.Requests;
+﻿using Application.ApiContracts.Input.Requests;
 using Application.Features.Inputs.Commands.CreateInput;
 using Application.Features.Inputs.Commands.UpdateInput;
 using Application.Features.Inputs.Commands.UpdateInputStatus;
@@ -21,8 +21,8 @@ public class InventoryReceipts
     public void CreateInputProductValidator_NegativeQuantity_ReturnsValidationError()
     {
         // Arrange
-        var validator = new CreateInputProductCommandValidator();
-        var command = new CreateInputProductCommand
+        var validator = new CreateInputInfoCommandValidator();
+        var command = new CreateInputInfoRequest
         {
             ProductId = 1,
             Count = -5,
@@ -40,8 +40,8 @@ public class InventoryReceipts
     public void CreateInputProductValidator_ZeroQuantity_ReturnsValidationError()
     {
         // Arrange
-        var validator = new CreateInputProductCommandValidator();
-        var command = new CreateInputProductCommand
+        var validator = new CreateInputInfoCommandValidator();
+        var command = new CreateInputInfoRequest
         {
             ProductId = 1,
             Count = 0,
@@ -59,8 +59,8 @@ public class InventoryReceipts
     public void CreateInputProductValidator_NegativeInputPrice_ReturnsValidationError()
     {
         // Arrange
-        var validator = new CreateInputProductCommandValidator();
-        var command = new CreateInputProductCommand
+        var validator = new CreateInputInfoCommandValidator();
+        var command = new CreateInputInfoRequest
         {
             ProductId = 1,
             Count = 10,
@@ -78,8 +78,8 @@ public class InventoryReceipts
     public void CreateInputProductValidator_ExcessiveDecimalPlaces_ReturnsValidationError()
     {
         // Arrange
-        var validator = new CreateInputProductCommandValidator();
-        var command = new CreateInputProductCommand
+        var validator = new CreateInputInfoCommandValidator();
+        var command = new CreateInputInfoRequest
         {
             ProductId = 1,
             Count = 10,
@@ -123,7 +123,7 @@ public class InventoryReceipts
             SupplierId = null,
             Products =
             [
-                new CreateInputProductCommand { ProductId = 1, Count = 10, InputPrice = 100000 }
+                new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }
             ]
         };
 
@@ -160,7 +160,7 @@ public class InventoryReceipts
             SupplierId = 1,
             Products =
             [
-                new CreateInputProductCommand { ProductId = 1, Count = 10, InputPrice = 100000 }
+                new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }
             ]
         };
 
@@ -175,8 +175,8 @@ public class InventoryReceipts
     public void CreateInputProductValidator_NullProductId_ReturnsValidationError()
     {
         // Arrange
-        var validator = new CreateInputProductCommandValidator();
-        var command = new CreateInputProductCommand
+        var validator = new CreateInputInfoCommandValidator();
+        var command = new CreateInputInfoRequest
         {
             ProductId = null,
             Count = 10,
@@ -194,8 +194,8 @@ public class InventoryReceipts
     public void UpdateInputProductValidator_NegativeQuantity_ReturnsValidationError()
     {
         // Arrange
-        var validator = new UpdateInputProductCommandValidator();
-        var command = new UpdateInputProductCommand
+        var validator = new UpdateInputInfoCommandValidator();
+        var command = new UpdateInputInfoRequest
         {
             ProductId = 1,
             Count = -10,
@@ -244,12 +244,13 @@ public class InventoryReceipts
             SupplierId = 1,
             Products =
             [
-                new CreateInputProductCommand { ProductId = 1, Count = 10, InputPrice = 100000 }
+                new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }
             ]
         };
 
         // Act & Assert
-        await Assert.ThrowsAsync<Exception>(() => handler.Handle(command, CancellationToken.None));
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "INPUT_054 - Handler xử lý UpdateInput ném ngoại lệ khi không tìm thấy Input")]
@@ -278,11 +279,9 @@ public class InventoryReceipts
         };
 
         // Act
-        var (Data, Error) = await handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        Data.Should().BeNull();
-        Error.Should().NotBeNull();
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.Value.Should().BeNull();
+        result.IsFailure.Should().BeTrue();
     }
 
     [Fact(DisplayName = "INPUT_055 - Handler xử lý UpdateInputStatus kiểm tra transition hợp lệ")]
@@ -384,7 +383,7 @@ public class InventoryReceipts
             SupplierId = -1,
             Products =
             [
-                new CreateInputProductCommand { ProductId = 1, Count = 10, InputPrice = 100000 }
+                new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }
             ]
         };
 
@@ -407,8 +406,8 @@ public class InventoryReceipts
             SupplierId = 1,
             Products =
             [
-                new UpdateInputProductCommand { ProductId = 1, Count = 10, InputPrice = 100 },
-                new UpdateInputProductCommand { ProductId = 1, Count = 5, InputPrice = 200 }
+                new UpdateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100 },
+                new UpdateInputInfoRequest { ProductId = 1, Count = 5, InputPrice = 200 }
             ]
         };
 

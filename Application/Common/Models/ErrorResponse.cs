@@ -39,5 +39,26 @@ namespace Application.Common.Models
                     [.. failures.Select(f => new ErrorDetail { Field = f.PropertyName, Message = f.ErrorMessage })]
             };
         }
+
+        public static ErrorResponse FromError(Error error)
+        {
+            return new ErrorResponse(error.Message)
+            {
+                Type = error.Code,
+                Errors = error.Field is not null || error.Id is not null
+                    ? [new ErrorDetail { Field = error.Field, Message = error.Message, Id = error.Id }]
+                    : null
+            };
+        }
+
+        public static ErrorResponse FromErrors(List<Error> errors)
+        {
+            var firstError = errors.FirstOrDefault();
+            return new ErrorResponse(firstError?.Message ?? "One or more errors occurred.")
+            {
+                Type = firstError?.Code,
+                Errors = [.. errors.Select(e => new ErrorDetail { Field = e.Field, Message = e.Message, Id = e.Id })]
+            };
+        }
     }
 }

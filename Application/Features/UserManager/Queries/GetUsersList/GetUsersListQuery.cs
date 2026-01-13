@@ -1,7 +1,12 @@
 using Application.ApiContracts.User.Responses;
+using Application.Common.Models;
+using Domain.Primitives;
 using MediatR;
 using Sieve.Models;
 
 namespace Application.Features.UserManager.Queries.GetUsersList;
 
-public sealed record GetUsersListQuery(SieveModel SieveModel) : IRequest<Domain.Primitives.PagedResult<UserDTOForManagerResponse>>;
+public record GetUsersListQuery : IRequest<Result<PagedResult<UserDTOForManagerResponse>>>
+{
+    public SieveModel? SieveModel { get; set; }
+}

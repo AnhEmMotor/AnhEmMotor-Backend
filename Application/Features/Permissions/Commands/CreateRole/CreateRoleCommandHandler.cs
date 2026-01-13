@@ -1,34 +1,33 @@
-using Application.ApiContracts.Permission.Responses;
-using Application.Common.Exceptions;
+﻿using Application.ApiContracts.Permission.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Permission;
 using Application.Interfaces.Repositories.Role;
+using Application.Interfaces.Services;
 using Domain.Entities;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 using System.Reflection;
 
 namespace Application.Features.Permissions.Commands.CreateRole;
 
 public class CreateRoleCommandHandler(
-    RoleManager<ApplicationRole> roleManager,
+    IRoleReadRepository roleReadRepository, 
+    IRoleInsertRepository roleInsertRepository,
     IPermissionReadRepository permissionRepository,
     IRoleUpdateRepository roleUpdateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateRoleCommand, RoleCreateResponse>
+    IUnitOfWork unitOfWork) : IRequestHandler<CreateRoleCommand, Result<RoleCreateResponse>>
 {
-    public async Task<RoleCreateResponse> Handle(CreateRoleCommand request, CancellationToken cancellationToken)
+    public async Task<Result<RoleCreateResponse>> Handle(CreateRoleCommand request, CancellationToken cancellationToken)
     {
-        var model = request.Model;
-
-        var roleExists = await roleManager.RoleExistsAsync(model.RoleName).ConfigureAwait(false);
+        var roleExists = await roleReadRepository.IsRoleExistAsync(request.RoleName!).ConfigureAwait(false);
         if(roleExists)
         {
-            throw new BadRequestException("Role already exists.");
+            return Error.BadRequest("Role already exists.");
         }
 
-        if(model.Permissions is null || model.Permissions.Count == 0)
+        if(request.Permissions is null || request.Permissions.Count == 0)
         {
-            throw new BadRequestException("At least one permission must be assigned to the role.");
+            return Error.BadRequest("At least one permission must be assigned to the role.");
         }
 
         var allPermissions = typeof(Domain.Constants.Permission.PermissionsList)
@@ -40,23 +39,23 @@ public class CreateRoleCommandHandler(
             .Where(permission => permission is not null)
             .ToList();
 
-        var invalidPermissions = model.Permissions.Except(allPermissions!).ToList();
+        var invalidPermissions = request.Permissions.Except(allPermissions!).ToList();
         if(invalidPermissions.Count != 0)
         {
-            throw new BadRequestException($"Invalid permissions: {string.Join(", ", invalidPermissions)}");
+            return Error.BadRequest($"Invalid permissions: {string.Join(", ", invalidPermissions)}");
         }
 
-        var role = new ApplicationRole { Name = model.RoleName, Description = model.Description };
+        var role = new ApplicationRole { Name = request.RoleName, Description = request.Description };
 
-        var createResult = await roleManager.CreateAsync(role).ConfigureAwait(false);
+        var createResult = await roleInsertRepository.CreateAsync(role).ConfigureAwait(false);
         if(!createResult.Succeeded)
         {
             var errors = string.Join(", ", createResult.Errors.Select(e => e.Description));
-            throw new BadRequestException(errors);
+            return Error.BadRequest(errors);
         }
 
         var permissionsInDb = await permissionRepository.GetPermissionsByNamesAsync(
-            model.Permissions,
+            request.Permissions,
             cancellationToken)
             .ConfigureAwait(false);
 
@@ -69,11 +68,11 @@ public class CreateRoleCommandHandler(
 
         return new RoleCreateResponse()
         {
-            Message = $"Role '{model.RoleName}' created successfully with {rolePermissions.Count} permission(s).",
+            Message = $"Role '{request.RoleName}' created successfully with {rolePermissions.Count} permission(s).",
             RoleId = role.Id,
             RoleName = role.Name,
             Description = role.Description,
-            Permissions = model.Permissions
+            Permissions = request.Permissions
         };
     }
 }

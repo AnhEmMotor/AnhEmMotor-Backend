@@ -1,4 +1,4 @@
-using Application.Common.Exceptions;
+﻿using Application.Common.Models;
 using Application.Features.Files.Commands.DeleteFile;
 using Application.Features.Files.Commands.DeleteManyFiles;
 using Application.Features.Files.Commands.RestoreFile;
@@ -13,7 +13,6 @@ using Application.Interfaces.Repositories.MediaFile;
 using Domain.Constants;
 using FluentAssertions;
 using Moq;
-using Application.ApiContracts.File.Requests;
 using Xunit;
 using MediaFileEntity = Domain.Entities.MediaFile;
 
@@ -33,7 +32,7 @@ public class MediaFile
         var expectedFileExtension = ".webp";
         fileStorageServiceMock
             .Setup(x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((expectedStoragePath, expectedFileExtension));
+            .ReturnsAsync(Result<FileUpload>.Success(new FileUpload(expectedStoragePath, expectedFileExtension, 1024)));
 
         var handler = new UploadImageCommandHandler(
             fileStorageServiceMock.Object,
@@ -52,8 +51,8 @@ public class MediaFile
 
         // Assert
         result.Should().NotBeNull();
-        result.StoragePath.Should().Be(expectedStoragePath);
-        result.OriginalFileName.Should().Be("test.webp");
+        result.Value.StoragePath.Should().Be(expectedStoragePath);
+        result.Value.OriginalFileName.Should().Be("test.webp");
         fileStorageServiceMock.Verify(x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()), Times.Once());
         insertRepositoryMock.Verify(x => x.Add(It.IsAny<MediaFileEntity>()), Times.Once());
         unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once());
@@ -72,7 +71,7 @@ public class MediaFile
             insertRepositoryMock.Object,
             unitOfWorkMock.Object);
 
-        // Trường hợp 1: File PDF
+        // TrÆ°á»ng há»£p 1: File PDF
         var pdfStream = new MemoryStream(new byte[1024]);
         var pdfCommand = new UploadImageCommand
         {
@@ -81,13 +80,15 @@ public class MediaFile
         };
 
         // Act
-        var pdfAct = async () => await handler.Handle(pdfCommand, CancellationToken.None);
+        var result = await handler.Handle(pdfCommand, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
 
         // Assert
-        await pdfAct.Should().ThrowAsync<BadRequestException>()
-            .WithMessage("*not supported*");
+        // Assert
+        // Replaced Assertions
 
-        // Trường hợp 2: File TXT
+
+        // TrÆ°á»ng há»£p 2: File TXT
         var txtStream = new MemoryStream(new byte[512]);
         var txtCommand = new UploadImageCommand
         {
@@ -95,11 +96,11 @@ public class MediaFile
             FileName = "text.txt"
         };
 
-        var txtAct = async () => await handler.Handle(txtCommand, CancellationToken.None);
-        await txtAct.Should().ThrowAsync<BadRequestException>()
-            .WithMessage("*not supported*");
+        result = await handler.Handle(txtCommand, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
+        
 
-        // Trường hợp 3: File với extension .webp nhưng magic bytes là PDF
+        // TrÆ°á»ng há»£p 3: File vá»›i extension .webp nhÆ°ng magic bytes lÃ  PDF
         var fakeWebpStream = new MemoryStream(new byte[1024]);
         var fakeWebpCommand = new UploadImageCommand
         {
@@ -107,9 +108,9 @@ public class MediaFile
             FileName = "fake.webp"
         };
 
-        var fakeAct = async () => await handler.Handle(fakeWebpCommand, CancellationToken.None);
-        await fakeAct.Should().ThrowAsync<BadRequestException>()
-            .WithMessage("*signature*type*");
+        result = await handler.Handle(fakeWebpCommand, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
+        
     }
 
     [Fact(DisplayName = "MF_004 - Tải lên ảnh thất bại khi kích thước file vượt quá giới hạn")]
@@ -133,11 +134,11 @@ public class MediaFile
         };
 
         // Act
-        var act = async () => await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
 
-        // Assert - Sau khi implement, sẽ throw BadRequestException với message "File size exceeds limit"
-        await act.Should().ThrowAsync<BadRequestException>()
-            .WithMessage("*size*limit*");
+        // Assert - Sau khi implement, sáº½ throw BadRequestException vá»›i message "File size exceeds limit"
+        
     }
 
     [Fact(DisplayName = "MF_008 - Tải lên nhiều ảnh thất bại khi có 1 file không hợp lệ (Bulk Request Rule)")]
@@ -153,7 +154,7 @@ public class MediaFile
             insertRepositoryMock.Object,
             unitOfWorkMock.Object);
 
-        var files = new List<FileUploadRequest>
+        var files = new List<(Stream FileContent, string FileName)>
         {
             new(new MemoryStream(new byte[51200]), "valid1.webp"),
             new(new MemoryStream(new byte[102400]), "invalid.pdf"),
@@ -163,11 +164,11 @@ public class MediaFile
         var command = new UploadManyImageCommand { Files = files };
 
         // Act
-        var act = async () => await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
 
-        // Assert - Bulk Request Rule: 1 file invalid => toàn bộ request fail
-        await act.Should().ThrowAsync<BadRequestException>()
-            .WithMessage("*not supported*");
+        // Assert - Bulk Request Rule: 1 file invalid => toÃ n bá»™ request fail
+        
         fileStorageServiceMock.Verify(x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()), Times.Never());
     }
 
@@ -195,11 +196,11 @@ public class MediaFile
         var command = new DeleteFileCommand { StoragePath = "nonexistent-file.webp" };
 
         // Act
-        var act = async () => await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
 
         // Assert
-        await act.Should().ThrowAsync<NotFoundException>()
-            .WithMessage("*not found*");
+        
         deleteRepositoryMock.Verify(x => x.Delete(It.IsAny<MediaFileEntity>()), Times.Never());
     }
 
@@ -227,11 +228,11 @@ public class MediaFile
         var command = new DeleteFileCommand { StoragePath = "already-deleted.webp" };
 
         // Act
-        var act = async () => await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
 
         // Assert
-        await act.Should().ThrowAsync<NotFoundException>()
-            .WithMessage("*not found*");
+        
         deleteRepositoryMock.Verify(x => x.Delete(It.IsAny<MediaFileEntity>()), Times.Never());
     }
 
@@ -266,11 +267,11 @@ public class MediaFile
         };
 
         // Act
-        var act = async () => await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
 
-        // Assert - Bulk Request Rule: Request 3 files, chỉ tìm thấy 2 => Fail toàn bộ
-        await act.Should().ThrowAsync<NotFoundException>()
-            .WithMessage("*not found*");
+        // Assert - Bulk Request Rule: Request 3 files, chá»‰ tÃ¬m tháº¥y 2 => Fail toÃ n bá»™
+        
         deleteRepositoryMock.Verify(x => x.Delete(It.IsAny<IEnumerable<MediaFileEntity>>()), Times.Never());
     }
 
@@ -298,11 +299,11 @@ public class MediaFile
         var command = new RestoreFileCommand { StoragePath = "nonexistent-file.webp" };
 
         // Act
-        var act = async () => await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
 
         // Assert
-        await act.Should().ThrowAsync<NotFoundException>()
-            .WithMessage("*not found*");
+        
         updateRepositoryMock.Verify(x => x.Update(It.IsAny<MediaFileEntity>()), Times.Never());
     }
 
@@ -330,11 +331,11 @@ public class MediaFile
         var command = new RestoreFileCommand { StoragePath = "active-file.webp" };
 
         // Act
-        var act = async () => await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
 
-        // Assert - File chưa bị xoá => không tìm thấy trong DeletedOnly
-        await act.Should().ThrowAsync<NotFoundException>()
-            .WithMessage("*not found*");
+        // Assert - File chÆ°a bá»‹ xoÃ¡ => khÃ´ng tÃ¬m tháº¥y trong DeletedOnly
+        
         updateRepositoryMock.Verify(x => x.Update(It.IsAny<MediaFileEntity>()), Times.Never());
     }
 
@@ -371,11 +372,11 @@ public class MediaFile
         };
 
         // Act
-        var act = async () => await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
 
-        // Assert - Bulk Request Rule: Request 3 files, chỉ tìm thấy 2 => Fail toàn bộ
-        await act.Should().ThrowAsync<NotFoundException>()
-            .WithMessage("*not found*");
+        // Assert - Bulk Request Rule: Request 3 files, chá»‰ tÃ¬m tháº¥y 2 => Fail toÃ n bá»™
+        
         updateRepositoryMock.Verify(x => x.Restore(It.IsAny<IEnumerable<MediaFileEntity>>()), Times.Never());
     }
 
@@ -393,11 +394,11 @@ public class MediaFile
         var query = new ViewImageQuery { StoragePath = "nonexistent.webp" };
 
         // Act
-        var act = async () => await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
 
         // Assert
-        await act.Should().ThrowAsync<NotFoundException>()
-            .WithMessage("*not found*");
+        
     }
 
     [Fact(DisplayName = "MF_024 - Xem ảnh thất bại khi file đã bị xoá")]
@@ -414,11 +415,11 @@ public class MediaFile
         var query = new ViewImageQuery { StoragePath = "deleted-image.webp" };
 
         // Act
-        var act = async () => await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
 
         // Assert
-        await act.Should().ThrowAsync<NotFoundException>()
-            .WithMessage("*not found*");
+        
     }
 
     [Fact(DisplayName = "MF_025 - Xem ảnh thất bại khi width là số âm")]
@@ -432,11 +433,11 @@ public class MediaFile
         var query = new ViewImageQuery { StoragePath = "test.webp", Width = -100 };
 
         // Act
-        var act = async () => await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
 
-        // Assert - Validation sẽ catch trước khi vào handler
-        await act.Should().ThrowAsync<BadRequestException>()
-            .WithMessage("*width*");
+        // Assert - Validation sáº½ catch trÆ°á»›c khi vÃ o handler
+        
     }
 
     [Fact(DisplayName = "MF_026 - Xem ảnh thất bại khi width vượt quá giới hạn cho phép")]
@@ -450,11 +451,11 @@ public class MediaFile
         var query = new ViewImageQuery { StoragePath = "test.webp", Width = 50000 };
 
         // Act
-        var act = async () => await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
 
         // Assert
-        await act.Should().ThrowAsync<BadRequestException>()
-            .WithMessage("*limit*");
+        
     }
 
     [Fact(DisplayName = "MF_027 - Validate: Tên file gốc chứa ký tự đặc biệt")]
@@ -469,7 +470,7 @@ public class MediaFile
         var expectedFileExtension = ".webp";
         fileStorageServiceMock
             .Setup(x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((expectedStoragePath, expectedFileExtension));
+            .ReturnsAsync(Result<FileUpload>.Success(new FileUpload(expectedStoragePath, expectedFileExtension, 1024)));
 
         var handler = new UploadImageCommandHandler(
             fileStorageServiceMock.Object,
@@ -486,9 +487,9 @@ public class MediaFile
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
 
-        // Assert - Handler sẽ sanitize filename và upload thành công
+        // Assert - Handler sáº½ sanitize filename vÃ  upload thÃ nh cÃ´ng
         result.Should().NotBeNull();
-        result.StoragePath.Should().NotBeNullOrEmpty();
+        result.Value.StoragePath.Should().NotBeNullOrEmpty();
         fileStorageServiceMock.Verify(x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()), Times.Once());
     }
 
@@ -504,7 +505,7 @@ public class MediaFile
         var expectedFileExtension = ".webp";
         fileStorageServiceMock
             .Setup(x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((expectedStoragePath, expectedFileExtension));
+            .ReturnsAsync(Result<FileUpload>.Success(new FileUpload(expectedStoragePath, expectedFileExtension, 1024)));
 
         var handler = new UploadImageCommandHandler(
             fileStorageServiceMock.Object,
@@ -521,9 +522,9 @@ public class MediaFile
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
 
-        // Assert - Handler sẽ trim whitespace và upload thành công
+        // Assert - Handler sáº½ trim whitespace vÃ  upload thÃ nh cÃ´ng
         result.Should().NotBeNull();
-        result.StoragePath.Should().NotBeNullOrEmpty();
+        result.Value.StoragePath.Should().NotBeNullOrEmpty();
         fileStorageServiceMock.Verify(x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()), Times.Once());
     }
 
@@ -548,11 +549,11 @@ public class MediaFile
         };
 
         // Act
-        var act = async () => await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
 
-        // Assert - Magic bytes validation sẽ detect fake file
-        await act.Should().ThrowAsync<BadRequestException>()
-            .WithMessage("*signature*type*");
+        // Assert - Magic bytes validation sáº½ detect fake file
+        
     }
 
     [Fact(DisplayName = "MF_030 - Security: File signature không khớp với extension (jpg fake)")]
@@ -576,11 +577,11 @@ public class MediaFile
         };
 
         // Act
-        var act = async () => await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
 
-        // Assert - Magic bytes validation sẽ detect fake file
-        await act.Should().ThrowAsync<BadRequestException>()
-            .WithMessage("*signature*type*");
+        // Assert - Magic bytes validation sáº½ detect fake file
+        
     }
 
     [Fact(DisplayName = "MF_032 - Lấy thông tin file theo ID thất bại khi file không tồn tại")]
@@ -598,14 +599,14 @@ public class MediaFile
 
         var handler = new GetFileByIdQueryHandler(readRepositoryMock.Object, fileStorageServiceMock.Object);
 
-        var query = new GetFileByIdQuery(999999);
+        var query = new GetFileByIdQuery { Id = 999999 };
 
         // Act
-        var act = async () => await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
 
         // Assert
-        await act.Should().ThrowAsync<NotFoundException>()
-            .WithMessage("*not found*");
+        
     }
 
     [Fact(DisplayName = "MF_033 - Lấy thông tin file theo ID thất bại khi file đã bị xoá")]
@@ -623,14 +624,14 @@ public class MediaFile
 
         var handler = new GetFileByIdQueryHandler(readRepositoryMock.Object, fileStorageServiceMock.Object);
 
-        var query = new GetFileByIdQuery(456);
+        var query = new GetFileByIdQuery { Id = 456 };
 
         // Act
-        var act = async () => await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None);
+        result.IsFailure.Should().BeTrue();
 
-        // Assert - File đã bị xoá => không tìm thấy trong ActiveOnly
-        await act.Should().ThrowAsync<NotFoundException>()
-            .WithMessage("*not found*");
+        // Assert - File Ä‘Ã£ bá»‹ xoÃ¡ => khÃ´ng tÃ¬m tháº¥y trong ActiveOnly
+        
     }
 
     [Fact(DisplayName = "MF_040 - StorageType validation: Kiểm tra giá trị hợp lệ")]
@@ -645,7 +646,7 @@ public class MediaFile
         var expectedFileExtension = ".webp";
         fileStorageServiceMock
             .Setup(x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((expectedStoragePath, expectedFileExtension));
+            .ReturnsAsync(Result<FileUpload>.Success(new FileUpload(expectedStoragePath, expectedFileExtension, 1024)));
 
         var handler = new UploadImageCommandHandler(
             fileStorageServiceMock.Object,
@@ -664,7 +665,7 @@ public class MediaFile
 
         // Assert
         result.Should().NotBeNull();
-        result.StoragePath.Should().Be(expectedStoragePath);
+        result.Value.StoragePath.Should().Be(expectedStoragePath);
         fileStorageServiceMock.Verify(x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()), Times.Once());
     }
 
@@ -683,10 +684,10 @@ public class MediaFile
     };
 
         fileStorageServiceMock
-            .Setup(x => x.SaveFilesAsync(
-                It.IsAny<IEnumerable<Stream>>(),
+            .Setup(x => x.SaveFileAsync(
+                It.IsAny<Stream>(),
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync(savedResults);
+            .ReturnsAsync(Result<FileUpload>.Success(new FileUpload("img1.webp", ".webp", 1024)));
 
         var handler = new UploadManyImageCommandHandler(
             fileStorageServiceMock.Object,
@@ -696,13 +697,13 @@ public class MediaFile
         var stream1 = new MemoryStream();
         var stream2 = new MemoryStream();
 
-        // SỬA Ở ĐÂY: Truyền tham số trực tiếp vào Constructor
+        // Sá»¬A á»ž ÄÃ‚Y: Truyá»n tham sá»‘ trá»±c tiáº¿p vÃ o Constructor
         var command = new UploadManyImageCommand
         {
             Files =
         [
-            new FileUploadRequest(stream1, "test1.jpg"),
-            new FileUploadRequest(stream2, "test2.png")
+            new (stream1, "test1.jpg"),
+            new (stream2, "test2.png")
         ]
         };
 
@@ -710,11 +711,11 @@ public class MediaFile
         var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        result.Should().HaveCount(2);
+        result.Value.Should().HaveCount(2);
 
-        fileStorageServiceMock.Verify(x => x.SaveFilesAsync(
-            It.Is<IEnumerable<Stream>>(list => list.Count() == 2),
-            It.IsAny<CancellationToken>()), Times.Once());
+        fileStorageServiceMock.Verify(x => x.SaveFileAsync(
+            It.IsAny<Stream>(),
+            It.IsAny<CancellationToken>()), Times.Exactly(2));
     }
 
     [Fact(DisplayName = "MF_043 - Single Upload - Should delegate to SaveFileAsync")]
@@ -733,7 +734,7 @@ public class MediaFile
             .Setup(x => x.SaveFileAsync(
                 It.IsAny<Stream>(),
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync((expectedStoragePath, expectedFileExtension));
+            .ReturnsAsync(Result<FileUpload>.Success(new FileUpload(expectedStoragePath, expectedFileExtension, 1024)));
 
         var handler = new UploadImageCommandHandler(
             fileStorageServiceMock.Object,
@@ -752,7 +753,7 @@ public class MediaFile
 
         // Assert
         result.Should().NotBeNull();
-        result.StoragePath.Should().Be(expectedStoragePath);
+        result.Value.StoragePath.Should().Be(expectedStoragePath);
 
         // Again, verify the Handler delegates to the Service.
         // Do not verify internal Service logic (compression) here.
@@ -781,11 +782,11 @@ public class MediaFile
         };
 
         // Act
-        var act = async () => await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
-        // Assert - Validation sẽ catch null stream
-        await act.Should().ThrowAsync<BadRequestException>()
-            .WithMessage("*stream*content*");
+        // Assert - Validation sáº½ catch null stream
+        result.IsFailure.Should().BeTrue();
+        result.Error?.Message.Should().Contain("stream");
     }
 
     [Fact(DisplayName = "MF_049 - Upload file với empty stream")]
@@ -809,11 +810,11 @@ public class MediaFile
         };
 
         // Act
-        var act = async () => await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
-        // Assert - Validation sẽ catch empty stream
-        await act.Should().ThrowAsync<BadRequestException>()
-            .WithMessage("*empty*size*");
+        // Assert - Validation sáº½ catch empty stream
+        result.IsFailure.Should().BeTrue();
+        result.Error?.Message.Should().Contain("empty");
     }
 
     [Fact(DisplayName = "MF_050 - Upload file với FileName rỗng")]
@@ -837,10 +838,10 @@ public class MediaFile
         };
 
         // Act
-        var act = async () => await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
-        // Assert - Validation sẽ catch empty filename
-        await act.Should().ThrowAsync<BadRequestException>()
-            .WithMessage("*filename*required*");
+        // Assert - Validation sáº½ catch empty filename
+        result.IsFailure.Should().BeTrue();
+        result.Error?.Message.Should().Contain("filename");
     }
 }

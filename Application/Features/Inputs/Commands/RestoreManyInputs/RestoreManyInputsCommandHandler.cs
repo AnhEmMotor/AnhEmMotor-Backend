@@ -1,4 +1,5 @@
 using Application.ApiContracts.Input.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
 
@@ -11,9 +12,9 @@ namespace Application.Features.Inputs.Commands.RestoreManyInputs;
 public sealed class RestoreManyInputsCommandHandler(
     IInputReadRepository readRepository,
     IInputUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<RestoreManyInputsCommand, (List<InputResponse>? Data, Common.Models.ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<RestoreManyInputsCommand, Result<List<InputResponse>>>
 {
-    public async Task<(List<InputResponse>? Data, Common.Models.ErrorResponse? Error)> Handle(
+    public async Task<Result<List<InputResponse>>> Handle(
         RestoreManyInputsCommand request,
         CancellationToken cancellationToken)
     {
@@ -26,21 +27,12 @@ public sealed class RestoreManyInputsCommandHandler(
         {
             var foundIds = inputsList.Select(i => i.Id).ToList();
             var missingIds = request.Ids.Except(foundIds).ToList();
-            return (null, new Common.Models.ErrorResponse
-            {
-                Errors =
-                    [ new Common.Models.ErrorDetail
-                    {
-                        Field = "Ids",
-                        Message =
-                            $"Không tìm thấy {missingIds.Count} phiếu nhập đã xóa: {string.Join(", ", missingIds)}"
-                    } ]
-            });
+            return Error.NotFound($"Không tìm thấy {missingIds.Count} phiếu nhập đã xóa: {string.Join(", ", missingIds)}", "Ids");
         }
 
         updateRepository.Restore(inputsList);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return (inputs.Adapt<List<InputResponse>>(), null);
+        return inputs.Adapt<List<InputResponse>>();
     }
 }

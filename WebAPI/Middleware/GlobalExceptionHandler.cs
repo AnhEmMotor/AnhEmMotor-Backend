@@ -1,5 +1,4 @@
-﻿using Application.Common.Exceptions;
-using Application.Common.Models;
+﻿using Application.Common.Models;
 using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using System.Net;
@@ -17,8 +16,11 @@ namespace WebAPI.Middleware;
 /// </remarks>
 /// <param name="environment">The hosting environment used to determine whether detailed error information should be included in responses.</param>
 /// <param name="logger">The logger used to record exception details and validation failures.</param>
-public class GlobalExceptionHandler(IWebHostEnvironment environment, ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
+public partial class GlobalExceptionHandler(IWebHostEnvironment environment, ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
 {
+    [LoggerMessage(Level = LogLevel.Error, Message = "CRITICAL: An unhandled exception occurred. TraceId: {TraceId}")]
+    private partial void LogUnhandledException(Exception exception, string traceId);
+
     /// <summary>
     /// Attempts to handle the specified exception by writing an appropriate error response to the HTTP context
     /// asynchronously.
@@ -41,32 +43,20 @@ public class GlobalExceptionHandler(IWebHostEnvironment environment, ILogger<Glo
         Exception exception,
         CancellationToken cancellationToken)
     {
-        var (statusCode, message) = exception switch
-        {
-            ValidationException _ => ((int)HttpStatusCode.BadRequest, null),
-            UnauthorizedException ex => ((int)HttpStatusCode.Unauthorized, ex.Message),
-            ForbiddenException ex => ((int)HttpStatusCode.Forbidden, ex.Message),
-            NotFoundException ex => ((int)HttpStatusCode.NotFound, ex.Message),
-            BadHttpRequestException ex => ((int)HttpStatusCode.BadRequest, ex.Message),
-            NotImplementedException ex => ((int)HttpStatusCode.NotImplemented, ex.Message),
-            _ => ((int)HttpStatusCode.InternalServerError, "An unexpected error occurred. Please try again later.")
-        };
+        LogUnhandledException(exception, httpContext.TraceIdentifier);
 
-        if (statusCode == (int)HttpStatusCode.InternalServerError)
-        {
-            logger.LogError(exception, "An unhandled exception occurred while processing the request");
-        }
-
-        var errorResponse = exception is ValidationException valEx
-            ? ErrorResponse.CreateValidationError(valEx.Errors)
-            : (environment.IsDevelopment() && statusCode == 500 
-                ? ErrorResponse.CreateDevelopmentError(exception)
-                : ErrorResponse.CreateProductionError(message ?? "An unexpected error occurred. Please try again later."));
+        var errorResponse = environment.IsDevelopment()
+            ? ErrorResponse.CreateDevelopmentError(exception)
+            : ErrorResponse.CreateProductionError("An unexpected system error occurred. Please contact support.");
 
         httpContext.Response.ContentType = "application/json";
-        httpContext.Response.StatusCode = statusCode;
 
-        await httpContext.Response.WriteAsJsonAsync(errorResponse, cancellationToken).ConfigureAwait(false);
+        httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
+
+        await httpContext.Response
+            .WriteAsJsonAsync(errorResponse, cancellationToken)
+            .ConfigureAwait(false);
+
         return true;
     }
 }

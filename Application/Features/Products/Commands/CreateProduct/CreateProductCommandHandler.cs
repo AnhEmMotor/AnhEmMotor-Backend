@@ -1,3 +1,5 @@
+﻿using Application.ApiContracts.Product.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
 using Application.Interfaces.Repositories.Option;
@@ -22,96 +24,82 @@ public sealed class CreateProductCommandHandler(
     IOptionReadRepository optionReadRepository,
     IProductInsertRepository productInsertRepository,
     IOptionValueInsertRepository optionValueInsertRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateProductCommand, (ApiContracts.Product.Responses.ProductDetailForManagerResponse? Data, Common.Models.ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<CreateProductCommand, Result<ProductDetailForManagerResponse?>>
 {
-    public async Task<(ApiContracts.Product.Responses.ProductDetailForManagerResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
+    public async Task<Result<ProductDetailForManagerResponse?>> Handle(
         CreateProductCommand request,
         CancellationToken cancellationToken)
     {
-        var errors = new List<Common.Models.ErrorDetail>();
+        var errors = new List<Error>();
 
+        // 1. Check Category (Logic cũ)
         var category = await productCategoryReadRepository.GetByIdAsync(request.CategoryId!.Value, cancellationToken)
             .ConfigureAwait(false);
-        if(category == null)
+        if (category == null)
         {
-            errors.Add(
-                new Common.Models.ErrorDetail
-                {
-                    Field = nameof(request.CategoryId),
-                    Message = $"Product category with Id {request.CategoryId} not found or has been deleted."
-                });
+            errors.Add(Error.NotFound($"Product category with Id {request.CategoryId} not found.", nameof(request.CategoryId)));
         }
 
-        if(request.BrandId.HasValue)
+        // 2. Check Brand (Logic cũ)
+        if (request.BrandId.HasValue)
         {
             var brand = await brandReadRepository.GetByIdAsync(request.BrandId.Value, cancellationToken)
                 .ConfigureAwait(false);
-            if(brand == null)
+            if (brand == null)
             {
-                errors.Add(
-                    new Common.Models.ErrorDetail
-                    {
-                        Field = nameof(request.BrandId),
-                        Message = $"Brand with Id {request.BrandId} not found or has been deleted."
-                    });
+                errors.Add(Error.BadRequest($"Brand with Id {request.BrandId} not found.", nameof(request.BrandId)));
             }
         }
 
-        if(request.Variants?.Count > 0)
+        // 3. Check Slug DB (Logic cũ - Loop DB Check)
+        // Đã bỏ đoạn check trùng nội bộ vì Validator làm rồi
+        if (request.Variants?.Count > 0)
         {
             var slugs = request.Variants
                 .Select(v => v.UrlSlug?.Trim())
                 .Where(s => !string.IsNullOrWhiteSpace(s))
+                .Distinct(StringComparer.OrdinalIgnoreCase) // Thêm Distinct để tránh query trùng 1 slug nhiều lần
                 .ToList();
-            if(slugs.Count != slugs.Distinct(StringComparer.OrdinalIgnoreCase).Count())
-            {
-                errors.Add(
-                    new Common.Models.ErrorDetail
-                    {
-                        Field = "Variants",
-                        Message = "Duplicate slugs found within the request."
-                    });
-            }
 
-            foreach(var slug in slugs)
+            foreach (var slug in slugs)
             {
+                // Vẫn giữ logic check từng cái như bạn muốn
                 var existing = await productVariantReadRepository.GetBySlugAsync(slug!, cancellationToken)
                     .ConfigureAwait(false);
-                if(existing != null)
+                if (existing != null)
                 {
-                    errors.Add(
-                        new Common.Models.ErrorDetail
-                        {
-                            Field = "Variants.UrlSlug",
-                            Message = $"Slug '{slug}' is already in use."
-                        });
+                    errors.Add(Error.BadRequest($"Slug '{slug}' is already in use.", "Variants.UrlSlug"));
                 }
             }
         }
 
+        // Return sớm nếu lỗi Validate logic DB
+        if (errors.Count > 0) return (Result<ProductDetailForManagerResponse?>)(object)Result.Failure(errors);
+
+        // 4. Logic Xử lý OptionValues (Logic cũ: Loop -> Check -> Insert -> Save)
         var optionIdToValueMap = new Dictionary<int, Dictionary<string, int>>();
 
-        if(request.Variants?.Count > 0)
+        if (request.Variants?.Count > 0)
         {
+            // Bước 4.1: Gom nhóm dữ liệu từ Request (Memory)
             var allOptionValues = new Dictionary<int, HashSet<string>>();
 
-            foreach(var variantReq in request.Variants)
+            foreach (var variantReq in request.Variants)
             {
-                if(variantReq.OptionValues?.Count > 0)
+                if (variantReq.OptionValues?.Count > 0)
                 {
-                    foreach(var kvp in variantReq.OptionValues)
+                    foreach (var kvp in variantReq.OptionValues)
                     {
-                        if(int.TryParse(kvp.Key, out var optionId))
+                        if (int.TryParse(kvp.Key, out var optionId))
                         {
                             var valueName = kvp.Value?.Trim();
-                            if(!string.IsNullOrWhiteSpace(valueName))
+                            if (!string.IsNullOrWhiteSpace(valueName))
                             {
-                                if(!allOptionValues.TryGetValue(optionId, out HashSet<string>? value))
+                                if (!allOptionValues.TryGetValue(optionId, out HashSet<string>? value))
                                 {
                                     value = [];
                                     allOptionValues[optionId] = value;
                                 }
-
                                 value.Add(valueName);
                             }
                         }
@@ -119,55 +107,49 @@ public sealed class CreateProductCommandHandler(
                 }
             }
 
-            foreach(var optionKvp in allOptionValues)
+            // Bước 4.2: Xử lý DB (Loop lồng Loop)
+            foreach (var optionKvp in allOptionValues)
             {
                 var optionId = optionKvp.Key;
                 var valueNames = optionKvp.Value;
 
                 var option = await optionReadRepository.GetByIdAsync(optionId, cancellationToken).ConfigureAwait(false);
-                if(option == null)
+                if (option == null)
                 {
-                    errors.Add(
-                        new Common.Models.ErrorDetail
-                        {
-                            Field = "Variants.OptionValues",
-                            Message = $"Option with Id {optionId} not found."
-                        });
-                    continue;
+                    // Lỗi Logic: Option không tồn tại -> Return ngay hoặc add Error (Ở đây tôi return lỗi luôn cho an toàn dòng chảy)
+                    return Error.NotFound($"Option with Id {optionId} not found.", "Variants.OptionValues");
                 }
 
                 var valueMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
-                foreach(var valueName in valueNames)
+                foreach (var valueName in valueNames)
                 {
+                    // Check từng value
                     var existingValue = await optionValueReadRepository.GetByIdAndNameAsync(
                         optionId,
                         valueName,
                         cancellationToken)
                         .ConfigureAwait(false);
 
-                    if(existingValue != null)
+                    if (existingValue != null)
                     {
                         valueMap[valueName] = existingValue.Id;
-                    } else
+                    }
+                    else
                     {
+                        // Insert & Save ngay lập tức để lấy ID
                         var newValue = new OptionValueEntity { OptionId = optionId, Name = valueName };
                         optionValueInsertRepository.Add(newValue);
                         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-                        valueMap[valueName] = newValue.Id;
+                        valueMap[valueName] = newValue.Id; // EF Core tự điền ID sau khi Save
                     }
                 }
-
                 optionIdToValueMap[optionId] = valueMap;
             }
         }
 
-        if(errors.Count > 0)
-        {
-            return (null, new Common.Models.ErrorResponse { Errors = errors });
-        }
-
+        // 5. Logic Tạo Product (Map và Gán ID từ Map trên)
         var product = new ProductEntity
         {
             Name = request.Name?.Trim(),
@@ -197,9 +179,9 @@ public sealed class CreateProductCommandHandler(
             ProductVariants = []
         };
 
-        if(request.Variants?.Count > 0)
+        if (request.Variants?.Count > 0)
         {
-            foreach(var variantReq in request.Variants)
+            foreach (var variantReq in request.Variants)
             {
                 var variant = new ProductVariant
                 {
@@ -210,39 +192,41 @@ public sealed class CreateProductCommandHandler(
                     VariantOptionValues = []
                 };
 
-                if(variantReq.PhotoCollection?.Count > 0)
+                // Map Photos
+                if (variantReq.PhotoCollection?.Count > 0)
                 {
-                    foreach(var photoUrl in variantReq.PhotoCollection.Where(p => !string.IsNullOrWhiteSpace(p)))
+                    foreach (var photoUrl in variantReq.PhotoCollection.Where(p => !string.IsNullOrWhiteSpace(p)))
                     {
                         variant.ProductCollectionPhotos.Add(new ProductCollectionPhoto { ImageUrl = photoUrl.Trim() });
                     }
                 }
 
-                if(variantReq.OptionValues?.Count > 0)
+                // Map Option Values (Dùng Map đã tạo ở bước 4)
+                if (variantReq.OptionValues?.Count > 0)
                 {
-                    foreach(var kvp in variantReq.OptionValues)
+                    foreach (var kvp in variantReq.OptionValues)
                     {
-                        if(int.TryParse(kvp.Key, out var optionId))
+                        if (int.TryParse(kvp.Key, out var optionId))
                         {
                             var valueName = kvp.Value?.Trim();
-                            if(!string.IsNullOrWhiteSpace(valueName) &&
-                                optionIdToValueMap.TryGetValue(optionId, out Dictionary<string, int>? value) &&
-                                value.TryGetValue(valueName, out var valueId))
+                            // Logic gán ID: Phải khớp với Map đã insert ở trên
+                            if (!string.IsNullOrWhiteSpace(valueName) &&
+                               optionIdToValueMap.TryGetValue(optionId, out Dictionary<string, int>? value) &&
+                               value.TryGetValue(valueName, out var valueId))
                             {
                                 variant.VariantOptionValues.Add(new VariantOptionValue { OptionValueId = valueId });
                             }
                         }
                     }
                 }
-
                 product.ProductVariants.Add(variant);
             }
         }
 
+        // Save Final
         productInsertRepository.Add(product);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        var response = product.Adapt<ApiContracts.Product.Responses.ProductDetailForManagerResponse>();
-        return (response, null);
+        return product.Adapt<ProductDetailForManagerResponse>();
     }
 }

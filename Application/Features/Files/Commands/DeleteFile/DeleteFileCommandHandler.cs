@@ -1,3 +1,4 @@
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.MediaFile;
 
@@ -10,9 +11,9 @@ public sealed class DeleteFileCommandHandler(
     IMediaFileReadRepository readRepository,
     IMediaFileDeleteRepository deleteRepository,
     IUnitOfWork unitOfWork,
-    Interfaces.Repositories.LocalFile.IFileStorageService fileStorageService) : IRequestHandler<DeleteFileCommand, Common.Models.ErrorResponse?>
+    Interfaces.Repositories.LocalFile.IFileStorageService fileStorageService) : IRequestHandler<DeleteFileCommand, Result>
 {
-    public async Task<Common.Models.ErrorResponse?> Handle(
+    public async Task<Result> Handle(
         DeleteFileCommand request,
         CancellationToken cancellationToken)
     {
@@ -24,10 +25,7 @@ public sealed class DeleteFileCommandHandler(
 
         if(mediaFile is null)
         {
-            return new Common.Models.ErrorResponse
-            {
-                Errors = [ new Common.Models.ErrorDetail { Message = "File not found." } ]
-            };
+            return Result.Failure(Error.NotFound("File not found."));
         }
 
         deleteRepository.Delete(mediaFile);
@@ -43,6 +41,6 @@ public sealed class DeleteFileCommandHandler(
             }
         }
 
-        return null;
+        return Result.Success();
     }
 }

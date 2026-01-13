@@ -1,7 +1,8 @@
 using System.Net;
 using System.Net.Http.Json;
-using Application.ApiContracts.Permission.Requests;
 using Application.ApiContracts.Permission.Responses;
+using Application.Features.Permissions.Commands.CreateRole;
+using Application.Features.Permissions.Commands.UpdateRolePermissions;
 using Domain.Constants.Permission;
 using Domain.Entities;
 using FluentAssertions;
@@ -172,7 +173,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
 
         await AuthenticateAsUserAsync(adminUser.Email!);
 
-        var request = new CreateRoleRequest
+        var request = new CreateRoleCommand
         {
             RoleName = "NewRole_INT007",
             Description = "Integration Test Role",
@@ -210,7 +211,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
 
         await AuthenticateAsUserAsync(normalUser.Email!);
 
-        var request = new CreateRoleRequest
+        var request = new CreateRoleCommand
         {
             RoleName = "Unauthorized_INT008",
             Description = "Should fail",
@@ -241,7 +242,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
 
         await AuthenticateAsUserAsync(adminUser.Email!);
 
-        var request = new CreateRoleRequest
+        var request = new CreateRoleCommand
         {
             RoleName = "DuplicateRole_INT009",
             Description = "Duplicate attempt",
@@ -272,7 +273,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
 
         await AuthenticateAsUserAsync(adminUser.Email!);
 
-        var request = new UpdateRoleRequest
+        var request = new UpdateRoleCommand
         {
             Permissions = [PermissionsList.Products.View, PermissionsList.Products.Create, PermissionsList.Products.Edit]
         };
@@ -307,7 +308,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
 
         await AuthenticateAsUserAsync(adminUser.Email!);
 
-        var request = new UpdateRoleRequest
+        var request = new UpdateRoleCommand
         {
             Description = "Updated Description"
         };

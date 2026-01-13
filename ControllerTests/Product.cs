@@ -1,3 +1,4 @@
+using Application.Common.Models;
 using Application.Features.Products.Commands.CreateProduct;
 using Application.Features.Products.Commands.DeleteManyProducts;
 using Application.Features.Products.Commands.DeleteProduct;
@@ -53,7 +54,7 @@ public class Product
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.CreateProduct(new Application.ApiContracts.Product.Requests.CreateProductRequest(), CancellationToken.None));
+            _controller.CreateProduct(new CreateProductCommand(), CancellationToken.None));
     }
 
     [Fact(DisplayName = "PRODUCT_082 - API tạo sản phẩm trả về 401 khi user chưa đăng nhập")]
@@ -65,7 +66,7 @@ public class Product
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.CreateProduct(new Application.ApiContracts.Product.Requests.CreateProductRequest(), CancellationToken.None));
+            _controller.CreateProduct(new CreateProductCommand(), CancellationToken.None));
     }
 
     [Fact(DisplayName = "PRODUCT_083 - API lấy danh sách sản phẩm for-manager trả về 403 khi user không có quyền")]
@@ -116,7 +117,7 @@ public class Product
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.UpdateProduct(1, new Application.ApiContracts.Product.Requests.UpdateProductRequest(), CancellationToken.None));
+            _controller.UpdateProduct(1, new UpdateProductCommand(), CancellationToken.None));
     }
 
     [Fact(DisplayName = "PRODUCT_087 - API lấy deleted products trả về 403 khi user không có quyền view")]
@@ -152,7 +153,7 @@ public class Product
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.UpdateProductPrice(1, new Application.ApiContracts.Product.Requests.UpdateProductPriceRequest(), CancellationToken.None));
+            _controller.UpdateProductPrice(1, new UpdateProductPriceCommand(), CancellationToken.None));
     }
 
     [Fact(DisplayName = "PRODUCT_090 - API update variant price trả về 403 khi user không có quyền")]
@@ -164,7 +165,7 @@ public class Product
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.UpdateVariantPrice(1, new Application.ApiContracts.Product.Requests.UpdateVariantPriceRequest(), CancellationToken.None));
+            _controller.UpdateVariantPrice(1, new UpdateVariantPriceCommand(), CancellationToken.None));
     }
 
     [Fact(DisplayName = "PRODUCT_091 - API update many product prices trả về 403 khi user không có quyền")]
@@ -176,7 +177,7 @@ public class Product
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.UpdateManyProductPrices(new Application.ApiContracts.Product.Requests.UpdateManyProductPricesRequest(), CancellationToken.None));
+            _controller.UpdateManyProductPrices(new UpdateManyProductPricesCommand(), CancellationToken.None));
     }
 
     [Fact(DisplayName = "PRODUCT_092 - API update product status trả về 403 khi user không có quyền")]
@@ -188,7 +189,7 @@ public class Product
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.UpdateProductStatus(1, new Application.ApiContracts.Product.Requests.UpdateProductStatusRequest(), CancellationToken.None));
+            _controller.UpdateProductStatus(1, new UpdateProductStatusCommand(), CancellationToken.None));
     }
 
     [Fact(DisplayName = "PRODUCT_093 - API update many product statuses trả về 403 khi user không có quyền")]
@@ -200,7 +201,7 @@ public class Product
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.UpdateManyProductStatuses(new Application.ApiContracts.Product.Requests.UpdateManyProductStatusesRequest(), CancellationToken.None));
+            _controller.UpdateManyProductStatuses(new UpdateManyProductStatusesCommand(), CancellationToken.None));
     }
 
     [Fact(DisplayName = "PRODUCT_094 - API delete many products trả về 403 khi user không có quyền")]
@@ -212,7 +213,7 @@ public class Product
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.DeleteProducts(new Application.ApiContracts.Product.Requests.DeleteManyProductsRequest(), CancellationToken.None));
+            _controller.DeleteProducts(new DeleteManyProductsCommand(), CancellationToken.None));
     }
 
     [Fact(DisplayName = "PRODUCT_095 - API restore product trả về 403 khi user không có quyền")]
@@ -236,7 +237,7 @@ public class Product
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => 
-            _controller.RestoreProducts(new Application.ApiContracts.Product.Requests.RestoreManyProductsRequest(), CancellationToken.None));
+            _controller.RestoreProducts(new RestoreManyProductsCommand(), CancellationToken.None));
     }
 
     [Fact(DisplayName = "PRODUCT_097 - API variants-lite/for-input trả về 403 khi user không có quyền input")]
@@ -268,11 +269,13 @@ public class Product
     {
         // Arrange
         _senderMock.Setup(m => m.Send(It.IsAny<CreateProductCommand>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new Application.Common.Exceptions.BadRequestException("Name là bắt buộc"));
+            .ReturnsAsync(Result<Application.ApiContracts.Product.Responses.ProductDetailForManagerResponse?>.Failure(Error.BadRequest("Name là bắt buộc")));
 
-        // Act & Assert
-        await Assert.ThrowsAsync<Application.Common.Exceptions.BadRequestException>(() => 
-            _controller.CreateProduct(new Application.ApiContracts.Product.Requests.CreateProductRequest(), CancellationToken.None));
+        // Act
+        var result = await _controller.CreateProduct(new CreateProductCommand(), CancellationToken.None);
+
+        // Assert
+        Assert.IsType<BadRequestObjectResult>(result);
     }
 
     [Fact(DisplayName = "PRODUCT_100 - API hỗ trợ pagination với custom page size")]

@@ -1,61 +1,50 @@
 using Application.ApiContracts.User.Responses;
-using Application.Common.Exceptions;
+using Application.Common.Models;
 using Application.Interfaces.Repositories.User;
 using Domain.Constants;
-using FluentValidation;
-using FluentValidation.Results;
 using MediatR;
 
 namespace Application.Features.Users.Commands.UpdateCurrentUser;
 
 public class UpdateCurrentUserCommandHandler(
     IUserReadRepository userReadRepository,
-    IUserUpdateRepository userUpdateRepository) : IRequestHandler<UpdateCurrentUserCommand, UserDTOForManagerResponse>
+    IUserUpdateRepository userUpdateRepository) : IRequestHandler<UpdateCurrentUserCommand, Result<UserDTOForManagerResponse>>
 {
-    public async Task<UserDTOForManagerResponse> Handle(
+    public async Task<Result<UserDTOForManagerResponse>> Handle(
         UpdateCurrentUserCommand request,
         CancellationToken cancellationToken)
     {
-        if(!GenderStatus.IsValid(request.Model.Gender))
-        {
-            throw new ValidationException([ new ValidationFailure("gender", "Invalid gender. Please check again.") ]);
-        }
+        var userId = Guid.Parse(request.UserId!);
 
-        if(string.IsNullOrEmpty(request.UserId) || !Guid.TryParse(request.UserId, out var userId))
+        var user = await userReadRepository.FindUserByIdAsync(userId, cancellationToken).ConfigureAwait(false);
+        if(user is null)
         {
-            throw new UnauthorizedException("Invalid user token.");
+            return Error.NotFound("User not found.");
         }
-
-        var user = await userReadRepository.FindUserByIdAsync(userId, cancellationToken).ConfigureAwait(false) ??
-            throw new NotFoundException("User not found.");
 
         cancellationToken.ThrowIfCancellationRequested();
 
 
-        if(!string.IsNullOrWhiteSpace(request.Model.FullName))
+        if(!string.IsNullOrWhiteSpace(request.FullName))
         {
-            user.FullName = request.Model.FullName;
+            user.FullName = request.FullName;
         }
 
-        if(!string.IsNullOrWhiteSpace(request.Model.Gender))
+        if(!string.IsNullOrWhiteSpace(request.Gender))
         {
-            user.Gender = request.Model.Gender;
+            user.Gender = request.Gender;
         }
 
-        if(!string.IsNullOrWhiteSpace(request.Model.PhoneNumber))
+        if(!string.IsNullOrWhiteSpace(request.PhoneNumber))
         {
-            user.PhoneNumber = request.Model.PhoneNumber;
+            user.PhoneNumber = request.PhoneNumber;
         }
 
         var (succeeded, errors) = await userUpdateRepository.UpdateUserAsync(user, cancellationToken).ConfigureAwait(false);
         if(!succeeded)
         {
-            var failures = new List<ValidationFailure>();
-            foreach(var error in errors)
-            {
-                failures.Add(new ValidationFailure(string.Empty, error));
-            }
-            throw new ValidationException(failures);
+            var validationErrors = errors.Select(e => Error.Validation(e)).ToList();
+            return Result<UserDTOForManagerResponse>.Failure(validationErrors);
         }
 
         var roles = await userReadRepository.GetUserRolesAsync(user, cancellationToken).ConfigureAwait(false);
@@ -75,3 +64,4 @@ public class UpdateCurrentUserCommandHandler(
         };
     }
 }
+

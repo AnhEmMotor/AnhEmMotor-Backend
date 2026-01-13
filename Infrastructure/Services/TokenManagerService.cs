@@ -1,6 +1,6 @@
-using Application.ApiContracts.Auth.Requests;
+using Application.ApiContracts.Auth.Responses;
+using Application.Common.Constants;
 using Application.Interfaces.Services;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -11,59 +11,67 @@ using System.Text.Json;
 
 namespace Infrastructure.Services;
 
-public class TokenManagerService(IConfiguration configuration) : ITokenManagerService
+public class TokenManagerService : ITokenManagerService
 {
-    public Task<string> CreateAccessTokenAsync(
-        UserAuthDTO user,
-        DateTimeOffset expiryTime,
-        CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
+    private readonly string _issuer;
+    private readonly string _audience;
+    private readonly SymmetricSecurityKey _authSigningKey;
+    private readonly int _accessTokenExpiryMinutes;
+    private readonly int _refreshTokenExpiryDays;
 
+    public TokenManagerService(IConfiguration configuration)
+    {
+        var jwtKey = configuration["Jwt:Key"];
+        var issuer = configuration["Jwt:Issuer"];
+        var audience = configuration["Jwt:Audience"];
+        var accessTokenExpiry = configuration["Jwt:AccessTokenExpiryInMinutes"];
+        var refreshTokenExpiry = configuration["Jwt:RefreshTokenExpiryInDays"];
+
+        if (string.IsNullOrEmpty(jwtKey)) throw new InvalidOperationException("Jwt:Key is missing.");
+        if (string.IsNullOrEmpty(issuer)) throw new InvalidOperationException("Jwt:Issuer is missing.");
+        if (string.IsNullOrEmpty(audience)) throw new InvalidOperationException("Jwt:Audience is missing.");
+
+        _authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
+        _issuer = issuer;
+        _audience = audience;
+
+        _accessTokenExpiryMinutes = int.TryParse(accessTokenExpiry, out var accessMinutes) && accessMinutes > 0 ? accessMinutes : 15;
+        _refreshTokenExpiryDays = int.TryParse(refreshTokenExpiry, out var refreshDays) && refreshDays > 0 ? refreshDays : 7;
+    }
+
+    public string CreateAccessToken(UserAuth user, DateTimeOffset expiryTime)
+    {
         var claims = new List<Claim>
         {
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
-            new(JwtRegisteredClaimNames.Name, user.Username ?? string.Empty),
-            new("full_name", user.FullName ?? string.Empty),
-            new("status", user.Status ?? string.Empty)
+            new(JwtRegisteredClaimNames.Name, user.UserName ?? string.Empty),
+            new(ClaimJWTPayload.FullName, user.FullName ?? string.Empty),
+            new(ClaimJWTPayload.Status, user.Status ?? string.Empty)
         };
 
-        if(user.AuthMethods is { Length: > 0 })
+        if (user.AuthMethods is { Length: > 0 })
         {
-            claims.Add(new Claim("amr", JsonSerializer.Serialize(user.AuthMethods), JsonClaimValueTypes.JsonArray));
+            claims.Add(new Claim(ClaimJWTPayload.Amr, JsonSerializer.Serialize(user.AuthMethods), JsonClaimValueTypes.JsonArray));
         }
 
-        if(user.Roles is null)
+        if (user.Roles is not null)
         {
-            throw new InvalidOperationException("User roles cannot be null.");
+            foreach (var role in user.Roles)
+            {
+                claims.Add(new Claim(ClaimJWTPayload.Role, role));
+            }
         }
-
-        foreach(var role in user.Roles)
-        {
-            claims.Add(new Claim("role", role));
-        }
-
-        var jwtKey = configuration["Jwt:Key"];
-        if(string.IsNullOrEmpty(jwtKey))
-        {
-            throw new InvalidOperationException("Jwt:Key is missing in configuration.");
-        }
-
-        var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
-
 
         var token = new JwtSecurityToken(
-            issuer: configuration["Jwt:Issuer"],
-            audience: configuration["Jwt:Audience"],
+            issuer: _issuer,
+            audience: _audience,
             expires: expiryTime.UtcDateTime,
             claims: claims,
-            signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256));
+            signingCredentials: new SigningCredentials(_authSigningKey, SecurityAlgorithms.HmacSha256));
 
-        var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
-
-        return Task.FromResult(tokenString);
+        return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
     public string CreateRefreshToken()
@@ -76,14 +84,7 @@ public class TokenManagerService(IConfiguration configuration) : ITokenManagerSe
 
     public string? GetClaimFromToken(string token, string claimType)
     {
-        var jwtKey = configuration["Jwt:Key"];
-        if(string.IsNullOrEmpty(jwtKey))
-        {
-            return null;
-        }
-
         var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.UTF8.GetBytes(jwtKey);
 
         try
         {
@@ -92,33 +93,27 @@ public class TokenManagerService(IConfiguration configuration) : ITokenManagerSe
                 new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    IssuerSigningKey = _authSigningKey,
                     ValidateIssuer = false,
                     ValidateAudience = false,
                     ClockSkew = TimeSpan.Zero
                 },
                 out SecurityToken validatedToken);
 
-            if(validatedToken is JwtSecurityToken jwtToken)
+            if (validatedToken is JwtSecurityToken jwtToken)
             {
-                return jwtToken.Claims.FirstOrDefault(c => string.Compare(c.Type, claimType) == 0)?.Value;
+                return jwtToken.Claims.FirstOrDefault(c => c.Type == claimType)?.Value;
             }
-        } catch
+        }
+        catch
         {
+            return null;
         }
 
         return null;
     }
 
-    public int GetRefreshTokenExpiryDays()
-    {
-        var refreshTokenExpiryInMinutes = configuration.GetValue<int>("Jwt:RefreshTokenExpiryInDays");
-        return refreshTokenExpiryInMinutes > 0 ? refreshTokenExpiryInMinutes : 7;
-    }
+    public int GetRefreshTokenExpiryDays() => _refreshTokenExpiryDays;
 
-    public int GetAccessTokenExpiryMinutes()
-    {
-        var jwtExpiryInMinutes = configuration.GetValue<int>("Jwt:AccessTokenExpiryInMinutes");
-        return jwtExpiryInMinutes > 0 ? jwtExpiryInMinutes : 15;
-    }
+    public int GetAccessTokenExpiryMinutes() => _accessTokenExpiryMinutes;
 }

@@ -1,5 +1,4 @@
-﻿using Application.ApiContracts.Supplier.Requests;
-using Application.ApiContracts.Supplier.Responses;
+﻿using Application.ApiContracts.Supplier.Responses;
 using Application.Features.Suppliers.Commands.CreateSupplier;
 using Application.Features.Suppliers.Commands.DeleteManySuppliers;
 using Application.Features.Suppliers.Commands.DeleteSupplier;
@@ -12,7 +11,6 @@ using Application.Features.Suppliers.Queries.GetDeletedSuppliersList;
 using Application.Features.Suppliers.Queries.GetSupplierById;
 using Application.Features.Suppliers.Queries.GetSuppliersList;
 using Asp.Versioning;
-
 using Infrastructure.Authorization.Attribute;
 using Mapster;
 using MediatR;
@@ -20,19 +18,18 @@ using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using static Domain.Constants.Permission.PermissionsList;
+using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1;
 
 /// <summary>
 /// Quản lý danh sách nhà cung cấp.
 /// </summary>
-/// <param name="mediator"></param>
 [ApiVersion("1.0")]
 [SwaggerTag("Quản lý danh sách nhà cung cấp")]
-[ApiController]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status500InternalServerError)]
-public class SupplierController(IMediator mediator) : ControllerBase
+public class SupplierController(IMediator mediator) : ApiController
 {
     /// <summary>
     /// Lấy danh sách nhà cung cấp (có phân trang, lọc, sắp xếp).
@@ -47,9 +44,9 @@ public class SupplierController(IMediator mediator) : ControllerBase
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
     {
-        var query = new GetSuppliersListQuery(sieveModel);
-        var pagedResult = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-        return Ok(pagedResult);
+        var query = new GetSuppliersListQuery() { SieveModel = sieveModel };
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -65,9 +62,9 @@ public class SupplierController(IMediator mediator) : ControllerBase
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
     {
-        var query = new GetDeletedSuppliersListQuery(sieveModel);
-        var pagedResult = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-        return Ok(pagedResult);
+        var query = new GetDeletedSuppliersListQuery() { SieveModel = sieveModel };
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -82,13 +79,9 @@ public class SupplierController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetSupplierById(int id, CancellationToken cancellationToken)
     {
-        var query = new GetSupplierByIdQuery(id);
-        var (data, error) = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-        if(error != null)
-        {
-            return NotFound(error);
-        }
-        return Ok(data);
+        var query = new GetSupplierByIdQuery() { Id = id };
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -101,12 +94,12 @@ public class SupplierController(IMediator mediator) : ControllerBase
     [HasPermission(Suppliers.Create)]
     [ProducesResponseType(typeof(SupplierResponse), StatusCodes.Status201Created)]
     public async Task<IActionResult> CreateSupplier(
-        [FromBody] CreateSupplierRequest request,
+        [FromBody] CreateSupplierCommand request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<CreateSupplierCommand>();
-        var response = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return StatusCode(StatusCodes.Status201Created, response);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -134,18 +127,12 @@ public class SupplierController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateSupplier(
         int id,
-        [FromBody] UpdateSupplierRequest request,
+        [FromBody] UpdateSupplierCommand request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<UpdateSupplierCommand>() with { Id = id };
-        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-
-        if(error != null)
-        {
-            return NotFound(error);
-        }
-
-        return Ok(data);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -161,19 +148,12 @@ public class SupplierController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateSupplierStatus(
         int id,
-        [FromBody] UpdateSupplierStatusRequest request,
+        [FromBody] UpdateSupplierStatusCommand request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<UpdateSupplierStatusCommand>() with { Id = id };
-
-        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
-
-        if(error != null)
-        {
-            return NotFound(error);
-        }
-
-        return Ok(data);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -189,12 +169,8 @@ public class SupplierController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> DeleteSupplier(int id, CancellationToken cancellationToken)
     {
         var command = new DeleteSupplierCommand() with { Id = id };
-        var error = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        if(error != null)
-        {
-            return NotFound(error);
-        }
-        return NoContent();
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -210,14 +186,8 @@ public class SupplierController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> RestoreSupplier(int id, CancellationToken cancellationToken)
     {
         var command = new RestoreSupplierCommand() with { Id = id };
-        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-
-        if(error != null)
-        {
-            return NotFound(error);
-        }
-
-        return Ok(data);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -231,18 +201,12 @@ public class SupplierController(IMediator mediator) : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteSuppliers(
-        [FromBody] DeleteManySuppliersRequest request,
+        [FromBody] DeleteManySuppliersCommand request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<DeleteManySuppliersCommand>();
-        var error = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
-
-        if(error != null)
-        {
-            return BadRequest(error);
-        }
-
-        return NoContent();
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -256,18 +220,12 @@ public class SupplierController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(List<SupplierResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RestoreSuppliers(
-        [FromBody] RestoreManySuppliersRequest request,
+        [FromBody] RestoreManySuppliersCommand request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<RestoreManySuppliersCommand>();
-        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
-
-        if(error != null)
-        {
-            return BadRequest(error);
-        }
-
-        return Ok(data);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -281,17 +239,11 @@ public class SupplierController(IMediator mediator) : ControllerBase
     [ProducesResponseType(typeof(List<SupplierResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateManySupplierStatus(
-        [FromBody] UpdateManySupplierStatusRequest request,
+        [FromBody] UpdateManySupplierStatusCommand request,
         CancellationToken cancellationToken)
     {
         var command = request.Adapt<UpdateManySupplierStatusCommand>();
-        var (data, error) = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
-
-        if(error != null)
-        {
-            return BadRequest(error);
-        }
-
-        return Ok(data);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
+        return HandleResult(result);
     }
 }

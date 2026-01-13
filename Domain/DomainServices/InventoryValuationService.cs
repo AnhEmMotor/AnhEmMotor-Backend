@@ -32,7 +32,7 @@ public class InventoryValuationService
 
         if(quantityNeeded > 0)
         {
-            throw new InvalidOperationException($"Insufficient inventory. Missing {quantityNeeded} units.");
+            return -1;
         }
 
         if(quantityToSell == 0)

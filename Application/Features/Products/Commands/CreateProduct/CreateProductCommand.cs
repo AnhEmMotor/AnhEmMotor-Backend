@@ -1,10 +1,11 @@
 using Application.ApiContracts.Product.Requests;
-
+using Application.ApiContracts.Product.Responses;
+using Application.Common.Models;
 using MediatR;
 
 namespace Application.Features.Products.Commands.CreateProduct;
 
-public sealed record CreateProductCommand : IRequest<(ApiContracts.Product.Responses.ProductDetailForManagerResponse? Data, Common.Models.ErrorResponse? Error)>
+public sealed record CreateProductCommand : IRequest<Result<ProductDetailForManagerResponse?>>
 {
     public string? Name { get; init; }
 
@@ -54,5 +55,5 @@ public sealed record CreateProductCommand : IRequest<(ApiContracts.Product.Respo
 
     public string? CompressionRatio { get; init; }
 
-    public List<ProductVariantWriteRequest> Variants { get; init; } = [];
+    public List<CreateProductVariantRequest> Variants { get; init; } = [];
 }

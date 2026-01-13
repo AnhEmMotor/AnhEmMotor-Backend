@@ -1,23 +1,21 @@
 using Application.ApiContracts.User.Responses;
-using Application.Common.Exceptions;
+using Application.Common.Models;
 using Application.Interfaces.Repositories.User;
 using MediatR;
 
 namespace Application.Features.Users.Queries.GetCurrentUser;
 
-public class GetCurrentUserQueryHandler(IUserReadRepository userReadRepository) : IRequestHandler<GetCurrentUserQuery, UserResponse>
+public class GetCurrentUserQueryHandler(IUserReadRepository userReadRepository) : IRequestHandler<GetCurrentUserQuery, Result<UserResponse>>
 {
-    public async Task<UserResponse> Handle(GetCurrentUserQuery request, CancellationToken cancellationToken)
+    public async Task<Result<UserResponse>> Handle(GetCurrentUserQuery request, CancellationToken cancellationToken)
     {
-        if(string.IsNullOrEmpty(request.UserId) || !Guid.TryParse(request.UserId, out var userId))
+        var userId = Guid.Parse(request.UserId!);
+
+        var user = await userReadRepository.FindUserByIdAsync(userId, cancellationToken).ConfigureAwait(false);
+        if (user is null)
         {
-            throw new UnauthorizedException("Invalid user token.");
+            return Error.NotFound("Invalid user token.");
         }
-
-        cancellationToken.ThrowIfCancellationRequested();
-
-        var user = await userReadRepository.FindUserByIdAsync(userId, cancellationToken).ConfigureAwait(false) ??
-            throw new NotFoundException("User not found.");
 
         return new UserResponse()
         {

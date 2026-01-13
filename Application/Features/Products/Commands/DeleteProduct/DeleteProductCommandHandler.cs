@@ -1,4 +1,6 @@
-﻿using Application.Interfaces.Repositories;
+﻿using Application.Common.Extensions;
+using Application.Common.Models;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Product;
 
 using MediatR;
@@ -8,9 +10,9 @@ namespace Application.Features.Products.Commands.DeleteProduct;
 public sealed class DeleteProductCommandHandler(
     IProductReadRepository readRepository,
     IProductDeleteRepository deleteRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<DeleteProductCommand, Common.Models.ErrorResponse?>
+    IUnitOfWork unitOfWork) : IRequestHandler<DeleteProductCommand, Result>
 {
-    public async Task<Common.Models.ErrorResponse?> Handle(
+    public async Task<Result> Handle(
         DeleteProductCommand command,
         CancellationToken cancellationToken)
     {
@@ -18,10 +20,7 @@ public sealed class DeleteProductCommandHandler(
 
         if(product == null)
         {
-            return new Common.Models.ErrorResponse
-            {
-                Errors = [ new Common.Models.ErrorDetail { Message = $"Product with Id {command.Id} not found." } ]
-            };
+            return Result.Failure(Error.NotFound($"Product with Id {command.Id} not found."));
         }
 
         var imageFileNames = new List<string>();
@@ -29,14 +28,14 @@ public sealed class DeleteProductCommandHandler(
         {
             if(!string.IsNullOrWhiteSpace(variant.CoverImageUrl))
             {
-                imageFileNames.Add(ExtractFileName(variant.CoverImageUrl));
+                imageFileNames.Add(StringExtensions.ExtractFileName(variant.CoverImageUrl));
             }
 
             foreach(var photo in variant.ProductCollectionPhotos)
             {
                 if(!string.IsNullOrWhiteSpace(photo.ImageUrl))
                 {
-                    imageFileNames.Add(ExtractFileName(photo.ImageUrl));
+                    imageFileNames.Add(StringExtensions.ExtractFileName(photo.ImageUrl));
                 }
             }
         }
@@ -45,16 +44,6 @@ public sealed class DeleteProductCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return null;
-    }
-
-    private static string ExtractFileName(string urlOrFileName)
-    {
-        var fileName = urlOrFileName.Trim();
-        if(fileName.Contains('/'))
-        {
-            fileName = fileName.Split('/').Last();
-        }
-        return fileName;
+        return Result.Success();
     }
 }

@@ -1,4 +1,5 @@
 using Application.ApiContracts.Supplier.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories.Supplier;
 
 using Mapster;
@@ -6,9 +7,9 @@ using MediatR;
 
 namespace Application.Features.Suppliers.Queries.GetSupplierById;
 
-public sealed class GetSupplierByIdQueryHandler(ISupplierReadRepository repository) : IRequestHandler<GetSupplierByIdQuery, (SupplierResponse? Data, Common.Models.ErrorResponse? Error)>
+public sealed class GetSupplierByIdQueryHandler(ISupplierReadRepository repository) : IRequestHandler<GetSupplierByIdQuery, Result<SupplierResponse?>>
 {
-    public async Task<(SupplierResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
+    public async Task<Result<SupplierResponse?>> Handle(
         GetSupplierByIdQuery request,
         CancellationToken cancellationToken)
     {
@@ -16,12 +17,9 @@ public sealed class GetSupplierByIdQueryHandler(ISupplierReadRepository reposito
 
         if(supplier == null)
         {
-            return (null, new Common.Models.ErrorResponse
-            {
-                Errors = [ new Common.Models.ErrorDetail { Message = $"Supplier with Id {request.Id} not found." } ]
-            });
+            return Error.NotFound($"Supplier with Id {request.Id} not found.");
         }
 
-        return (supplier.Adapt<SupplierResponse>(), null);
+        return supplier.Adapt<SupplierResponse>();
     }
 }

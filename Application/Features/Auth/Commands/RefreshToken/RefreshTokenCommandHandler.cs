@@ -1,54 +1,74 @@
 ﻿using Application.ApiContracts.Auth.Responses;
-using Application.Common.Exceptions;
+using Application.Common.Constants;
+using Application.Common.Models;
 using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Services;
+using Mapster;
 using MediatR;
 
 namespace Application.Features.Auth.Commands.RefreshToken;
 
-public class RefreshTokenCommandHandler(
+public sealed class RefreshTokenCommandHandler(
     ITokenManagerService tokenService,
     IUserReadRepository userReadRepository,
     IUserUpdateRepository userUpdateRepository,
-    IHttpTokenAccessorService httpTokenAccessor) : IRequestHandler<RefreshTokenCommand, GetAccessTokenFromRefreshTokenResponse>
+    IHttpTokenAccessorService httpTokenAccessor) // Vẫn giữ để set cookie response
+    : IRequestHandler<RefreshTokenCommand, Result<GetAccessTokenFromRefreshTokenResponse>>
 {
-    public async Task<GetAccessTokenFromRefreshTokenResponse> Handle(
-        RefreshTokenCommand request,
+    public async Task<Result<GetAccessTokenFromRefreshTokenResponse>> Handle(
+        RefreshTokenCommand request, // Dùng request, không dùng accessor để get
         CancellationToken cancellationToken)
     {
-        var currentRefreshToken = httpTokenAccessor.GetRefreshTokenFromCookie();
-        if(string.IsNullOrEmpty(currentRefreshToken))
-        {
-            throw new UnauthorizedException("Refresh token is missing.");
-        }
+        // 1. Validation Logic: Đã bị loại bỏ nhờ FluentValidation pipeline
+        // Không còn check string.IsNullOrEmpty(request.RefreshToken)
 
-        var user = await userReadRepository.GetUserByRefreshTokenAsync(currentRefreshToken, cancellationToken)
+        // 2. Database Logic (Bắt buộc ở lại Handler)
+        var user = await userReadRepository.GetByRefreshTokenAsync(request.RefreshToken!, cancellationToken)
             .ConfigureAwait(false);
 
-        var authHeader = httpTokenAccessor.GetAuthorizationValueFromHeader();
-        if(!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer "))
+        if (user == null)
         {
-            var oldAccessToken = authHeader["Bearer ".Length..];
-            var oldStatusClaim = tokenService.GetClaimFromToken(oldAccessToken, "status");
+            // Đây là Logic check data tồn tại, Validator KHÔNG làm được
+            return Error.Unauthorized("Invalid refresh token.");
+        }
 
-            if(!string.IsNullOrEmpty(oldStatusClaim) &&
+        // 3. Domain Logic (Bắt buộc ở lại Handler)
+        if (user.RefreshTokenExpiryTime <= DateTimeOffset.UtcNow)
+        {
+            return Error.Unauthorized("Refresh token has expired. Please login again.");
+        }
+
+        if (user.Status != "Active" || user.DeletedAt != null)
+        {
+            return Error.Forbidden("Account is not available.");
+        }
+
+        // 4. Business Logic phức tạp (Check khớp token cũ)
+        if (!string.IsNullOrEmpty(request.AccessToken))
+        {
+            var oldStatusClaim = tokenService.GetClaimFromToken(request.AccessToken, ClaimJWTPayload.Status);
+
+            // Logic so sánh trạng thái user trong token cũ và DB
+            if (!string.IsNullOrEmpty(oldStatusClaim) &&
                 !string.Equals(oldStatusClaim, user.Status, StringComparison.OrdinalIgnoreCase))
             {
-                throw new UnauthorizedException("User status has changed. Please login again.");
+                return Error.Unauthorized("User status has changed. Please login again.");
             }
         }
 
+        // 5. Execution Logic (Tạo token mới)
+        var userDto = user.Adapt<UserAuth>();
         var accessExpiryMinutes = tokenService.GetAccessTokenExpiryMinutes();
         var refreshExpiryDays = tokenService.GetRefreshTokenExpiryDays();
-
         var now = DateTimeOffset.UtcNow;
+
         var accessTokenExpiresAt = now.AddMinutes(accessExpiryMinutes);
         var refreshTokenExpiresAt = now.AddDays(refreshExpiryDays);
 
-        var newAccessToken = await tokenService.CreateAccessTokenAsync(user, accessTokenExpiresAt, cancellationToken)
-            .ConfigureAwait(false);
+        var newAccessToken = tokenService.CreateAccessToken(userDto, accessTokenExpiresAt);
         var newRefreshToken = tokenService.CreateRefreshToken();
 
+        // 6. Side Effect (Update DB)
         await userUpdateRepository.UpdateRefreshTokenAsync(
             user.Id,
             newRefreshToken,
@@ -56,6 +76,7 @@ public class RefreshTokenCommandHandler(
             cancellationToken)
             .ConfigureAwait(false);
 
+        // 7. Side Effect (Set Cookie - Output)
         httpTokenAccessor.SetRefreshTokenToCookie(newRefreshToken, refreshTokenExpiresAt);
 
         return new GetAccessTokenFromRefreshTokenResponse

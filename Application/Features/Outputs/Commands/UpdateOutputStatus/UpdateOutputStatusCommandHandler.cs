@@ -1,4 +1,5 @@
 using Application.ApiContracts.Output.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 
@@ -12,9 +13,9 @@ namespace Application.Features.Outputs.Commands.UpdateOutputStatus;
 public sealed class UpdateOutputStatusCommandHandler(
     IOutputReadRepository readRepository,
     IOutputUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateOutputStatusCommand, (OutputResponse? Data, Common.Models.ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateOutputStatusCommand, Result<OutputResponse?>>
 {
-    public async Task<(OutputResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
+    public async Task<Result<OutputResponse?>> Handle(
         UpdateOutputStatusCommand request,
         CancellationToken cancellationToken)
     {
@@ -26,43 +27,18 @@ public sealed class UpdateOutputStatusCommandHandler(
 
         if(output is null)
         {
-            return (null, new Common.Models.ErrorResponse
-            {
-                Errors =
-                    [ new Common.Models.ErrorDetail
-                    {
-                        Field = "Id",
-                        Message = $"Không tìm thấy đơn hàng có ID {request.Id}."
-                    } ]
-            });
+            return Error.NotFound($"Không tìm thấy đơn hàng có ID {request.Id}.", "Id");
         }
 
         if(!OrderStatus.IsValid(request.StatusId))
         {
-            return (null, new Common.Models.ErrorResponse
-            {
-                Errors =
-                    [ new Common.Models.ErrorDetail
-                    {
-                        Field = "StatusId",
-                        Message = $"Trạng thái '{request.StatusId}' không hợp lệ."
-                    } ]
-            });
+            return Error.BadRequest($"Trạng thái '{request.StatusId}' không hợp lệ.", "StatusId");
         }
 
         if(!OrderStatusTransitions.IsTransitionAllowed(output.StatusId, request.StatusId))
         {
             var allowed = OrderStatusTransitions.GetAllowedTransitions(output.StatusId);
-            return (null, new Common.Models.ErrorResponse
-            {
-                Errors =
-                    [ new Common.Models.ErrorDetail
-                    {
-                        Field = "StatusId",
-                        Message =
-                            $"Không thể chuyển từ '{output.StatusId}' sang '{request.StatusId}'. Chỉ được chuyển sang: {string.Join(", ", allowed)}"
-                    } ]
-            });
+            return Error.BadRequest($"Không thể chuyển từ '{output.StatusId}' sang '{request.StatusId}'. Chỉ được chuyển sang: {string.Join(", ", allowed)}", "StatusId");
         }
 
         if(string.Compare(request.StatusId, OrderStatus.Completed) == 0)
@@ -81,16 +57,7 @@ public sealed class UpdateOutputStatusCommandHandler(
 
                     if(stock < outputInfo.Count.Value)
                     {
-                        return (null, new Common.Models.ErrorResponse
-                        {
-                            Errors =
-                                [ new Common.Models.ErrorDetail
-                                {
-                                    Field = "Products",
-                                    Message =
-                                        $"Sản phẩm ID {outputInfo.ProductVarientId} không đủ tồn kho. Hiện có: {stock}, cần: {outputInfo.Count.Value}"
-                                } ]
-                        });
+                        return Error.BadRequest($"Sản phẩm ID {outputInfo.ProductVarientId} không đủ tồn kho. Hiện có: {stock}, cần: {outputInfo.Count.Value}", "Products");
                     }
                 }
             }
@@ -104,6 +71,6 @@ public sealed class UpdateOutputStatusCommandHandler(
 
         var updated = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
 
-        return (updated!.Adapt<OutputResponse>(), null);
+        return updated.Adapt<OutputResponse>();
     }
 }

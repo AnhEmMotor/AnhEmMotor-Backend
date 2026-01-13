@@ -1,4 +1,5 @@
 using Application.ApiContracts.Output.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories.Output;
 
 using Mapster;
@@ -6,9 +7,9 @@ using MediatR;
 
 namespace Application.Features.Outputs.Queries.GetOutputById;
 
-public sealed class GetOutputByIdQueryHandler(IOutputReadRepository repository) : IRequestHandler<GetOutputByIdQuery, (OutputResponse? Data, Common.Models.ErrorResponse? Error)>
+public sealed class GetOutputByIdQueryHandler(IOutputReadRepository repository) : IRequestHandler<GetOutputByIdQuery, Result<OutputResponse?>>
 {
-    public async Task<(OutputResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
+    public async Task<Result<OutputResponse?>> Handle(
         GetOutputByIdQuery request,
         CancellationToken cancellationToken)
     {
@@ -16,12 +17,9 @@ public sealed class GetOutputByIdQueryHandler(IOutputReadRepository repository) 
 
         if(output is null)
         {
-            return (null, new Common.Models.ErrorResponse
-            {
-                Errors = [ new Common.Models.ErrorDetail { Message = $"Không tìm thấy đơn hàng có ID {request.Id}." } ]
-            });
+            return Error.NotFound($"Không tìm thấy đơn hàng có ID {request.Id}.");
         }
 
-        return (output.Adapt<OutputResponse>(), null);
+        return output.Adapt<OutputResponse>();
     }
 }

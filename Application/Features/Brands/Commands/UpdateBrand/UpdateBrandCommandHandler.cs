@@ -1,6 +1,8 @@
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
 using Mapster;
+using Application.ApiContracts.Brand.Responses;
 using MediatR;
 
 namespace Application.Features.Brands.Commands.UpdateBrand;
@@ -8,9 +10,9 @@ namespace Application.Features.Brands.Commands.UpdateBrand;
 public sealed class UpdateBrandCommandHandler(
     IBrandReadRepository readRepository,
     IBrandUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateBrandCommand, (ApiContracts.Brand.Responses.BrandResponse? Data, Common.Models.ErrorResponse? Error)>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateBrandCommand, Result<BrandResponse?>>
 {
-    public async Task<(ApiContracts.Brand.Responses.BrandResponse? Data, Common.Models.ErrorResponse? Error)> Handle(
+    public async Task<Result<BrandResponse?>> Handle(
         UpdateBrandCommand request,
         CancellationToken cancellationToken)
     {
@@ -18,11 +20,7 @@ public sealed class UpdateBrandCommandHandler(
 
         if(brand == null)
         {
-            return (null, new Common.Models.ErrorResponse
-            {
-                Errors =
-                    [ new Common.Models.ErrorDetail { Field = "Id", Message = $"Brand with Id {request.Id} not found." } ]
-            });
+            return Error.NotFound($"Brand with Id {request.Id} not found.", "Id");
         }
 
         request.Adapt(brand);
@@ -30,6 +28,6 @@ public sealed class UpdateBrandCommandHandler(
         updateRepository.Update(brand);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return (brand.Adapt<ApiContracts.Brand.Responses.BrandResponse>(), null);
+        return brand.Adapt<BrandResponse>();
     }
 }

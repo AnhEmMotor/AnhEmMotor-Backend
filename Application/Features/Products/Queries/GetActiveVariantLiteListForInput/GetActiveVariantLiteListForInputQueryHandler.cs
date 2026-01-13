@@ -1,4 +1,5 @@
 ﻿using Application.ApiContracts.Product.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Repositories.ProductVariant;
 using Domain.Primitives;
 using Mapster;
@@ -6,9 +7,9 @@ using MediatR;
 
 namespace Application.Features.Products.Queries.GetActiveVariantLiteListForInput
 {
-    public class GetActiveVariantLiteListForInputQueryHandler(IProductVariantReadRepository repository) : IRequestHandler<GetActiveVariantLiteListForInputQuery, PagedResult<ProductVariantLiteResponseForInput>>
+    public class GetActiveVariantLiteListForInputQueryHandler(IProductVariantReadRepository repository) : IRequestHandler<GetActiveVariantLiteListForInputQuery, Result<PagedResult<ProductVariantLiteResponseForInput>>>
     {
-        public async Task<PagedResult<ProductVariantLiteResponseForInput>> Handle(
+        public async Task<Result<PagedResult<ProductVariantLiteResponseForInput>>> Handle(
             GetActiveVariantLiteListForInputQuery request,
             CancellationToken cancellationToken)
         {

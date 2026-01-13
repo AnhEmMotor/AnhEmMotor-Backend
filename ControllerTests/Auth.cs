@@ -1,5 +1,3 @@
-using Application.ApiContracts.Auth.Requests;
-using Application.ApiContracts.Auth.Responses;
 using Application.Common.Models;
 using Application.Features.Auth.Commands.Login;
 using Application.Features.Auth.Commands.Logout;
@@ -36,7 +34,7 @@ public class Auth
     public async Task AUTH_REG_002_1_Register_MissingPassword()
     {
         // Arrange
-        var request = new RegisterRequest
+        var request = new RegisterCommand
         {
             Email = "test@example.com",
             Username = "testuser",
@@ -55,7 +53,7 @@ public class Auth
     public async Task AUTH_REG_002_2_Register_MissingEmailAndUsername()
     {
         // Arrange
-        var request = new RegisterRequest
+        var request = new RegisterCommand
         {
             Email = "", // Missing
             Username = "", // Missing
@@ -74,7 +72,7 @@ public class Auth
     public async Task AUTH_REG_002_3_Register_MissingFullName()
     {
         // Arrange
-        var request = new RegisterRequest
+        var request = new RegisterCommand
         {
             Email = "test@example.com",
             Username = "testuser",
@@ -93,7 +91,7 @@ public class Auth
     public async Task AUTH_LOG_002_Login_Fail_WrongCreds()
     {
         // Arrange
-        var request = new LoginRequest { UsernameOrEmail = "user", Password = "wrong" };
+        var request = new LoginCommand { UsernameOrEmail = "user", Password = "wrong" };
         
         // Mock Mediator to return Failure
         // Assuming Handler returns Result<LoginResponse>
@@ -117,7 +115,7 @@ public class Auth
     public async Task AUTH_MGR_002_Login_Manager_Fail_Forbidden()
     {
         // Arrange
-        var request = new LoginRequest { UsernameOrEmail = "staff", Password = "123" };
+        var request = new LoginCommand { UsernameOrEmail = "staff", Password = "123" };
         
         _mediatorMock.Setup(m => m.Send(It.IsAny<LoginCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException("Forbidden"));
@@ -131,7 +129,7 @@ public class Auth
     {
         // Arrange
         _mediatorMock.Setup(m => m.Send(It.IsAny<LogoutCommand>(), It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
+            .ReturnsAsync(Result.Success());
 
         // Act
         var result = await _controller.Logout(CancellationToken.None);

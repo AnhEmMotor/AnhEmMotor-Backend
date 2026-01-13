@@ -1,4 +1,5 @@
-﻿using Application.Interfaces.Repositories.LocalFile;
+﻿using Application.Common.Models;
+using Application.Interfaces.Repositories.LocalFile;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using SixLabors.ImageSharp;
@@ -16,68 +17,54 @@ public class LocalFileStorageService(IWebHostEnvironment environment, IHttpConte
 
     private readonly List<string> _allowedMimeTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
 
-    public async Task<(string StoragePath, string FileExtension)> SaveFileAsync(
-        Stream file,
-        CancellationToken cancellationToken)
+    public async Task<Result<FileUpload>> SaveFileAsync(
+    Stream file,
+    CancellationToken cancellationToken)
     {
-        if (file == null || file.Length == 0)
-            throw new ArgumentException("File is empty.");
-
-        if (file.Length > MaxFileSize)
-            throw new ArgumentException("File size exceeds 10MB limit.");
-
-        if (!Directory.Exists(_uploadFolder))
-            Directory.CreateDirectory(_uploadFolder);
-
-        IImageFormat format;
         try
         {
-            if (file.CanSeek)
-                file.Position = 0;
+            if (file == null || file.Length == 0)
+            {
+                return Result<FileUpload>.Failure("File stream is empty");
+            }
 
-            format = await Image.DetectFormatAsync(file, cancellationToken).ConfigureAwait(false);
+            if (!Directory.Exists(_uploadFolder))
+            {
+                Directory.CreateDirectory(_uploadFolder);
+            }
+
+            if (file.CanSeek)
+            {
+                file.Position = 0;
+            }
+
+            var format = await Image.DetectFormatAsync(file, cancellationToken).ConfigureAwait(false);
 
             if (format == null)
-                throw new ArgumentException("File is not a recognized image format.");
+            {
+                return Result<FileUpload>.Failure("Unable to detect image format");
+            }
 
             if (!_allowedMimeTypes.Contains(format.DefaultMimeType))
             {
-                throw new ArgumentException(
-                    $"File type {format.DefaultMimeType} is not allowed. Only JPG, PNG, GIF, WEBP.");
+                return Result<FileUpload>.Failure($"Format {format.DefaultMimeType} is not supported");
             }
-        }
-        catch (Exception)
-        {
-            throw new ArgumentException("File is corrupted or not a valid image.");
-        }
 
-        var storagePath = $"{Guid.NewGuid()}.webp";
-        var fullPath = Path.Combine(_uploadFolder, storagePath);
+            var storageFileName = $"{Guid.NewGuid()}.webp";
+            var fullPath = Path.Combine(_uploadFolder, storageFileName);
 
-        try
-        {
             using var compressedStream = await CompressImageAsync(file, 75, DefaultMaxWidth, cancellationToken).ConfigureAwait(false);
+            var compressedSize = compressedStream.Length;
+
             using var fileStream = new FileStream(fullPath, FileMode.Create);
             await compressedStream.CopyToAsync(fileStream, cancellationToken).ConfigureAwait(false);
 
-            return (storagePath, ".webp");
+            return new FileUpload(storageFileName, ".webp", compressedSize);
         }
         catch (Exception ex)
         {
-            throw new InvalidOperationException("Failed to process image.", ex);
+            return Result<FileUpload>.Failure(ex.Message);
         }
-    }
-
-    public async Task<List<(string StoragePath, string FileExtension)>> SaveFilesAsync(
-        IEnumerable<Stream> files,
-        CancellationToken cancellationToken)
-    {
-        var results = new List<(string, string)>();
-        foreach (var file in files)
-        {
-            results.Add(await SaveFileAsync(file, cancellationToken).ConfigureAwait(false));
-        }
-        return results;
     }
 
     public bool DeleteFile(string storagePath)

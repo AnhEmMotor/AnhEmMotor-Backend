@@ -1,9 +1,10 @@
 using Application.ApiContracts.Supplier.Responses;
+using Application.Common.Models;
 using MediatR;
 
 namespace Application.Features.Suppliers.Commands.CreateSupplier;
 
-public sealed record CreateSupplierCommand : IRequest<SupplierResponse>
+public sealed record CreateSupplierCommand : IRequest<Result<SupplierResponse>>
 {
     public string? Name { get; init; }
 

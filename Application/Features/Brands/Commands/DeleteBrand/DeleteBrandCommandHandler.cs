@@ -8,9 +8,9 @@ namespace Application.Features.Brands.Commands.DeleteBrand;
 public sealed class DeleteBrandCommandHandler(
     IBrandReadRepository readRepository,
     IBrandDeleteRepository deleteRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<DeleteBrandCommand, ErrorResponse?>
+    IUnitOfWork unitOfWork) : IRequestHandler<DeleteBrandCommand, Result>
 {
-    public async Task<ErrorResponse?> Handle(
+    public async Task<Result> Handle(
         DeleteBrandCommand request,
         CancellationToken cancellationToken)
     {
@@ -18,16 +18,12 @@ public sealed class DeleteBrandCommandHandler(
 
         if(brand == null)
         {
-            return new ErrorResponse
-            {
-                Errors =
-                    [ new ErrorDetail { Field = "Id", Message = $"Brand with Id {request.Id} not found." } ]
-            };
+            return Result.Failure(Error.NotFound($"Brand with Id {request.Id} not found.", "Id"));
         }
 
         deleteRepository.Delete(brand);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return null;
+        return Result.Success();
     }
 }

@@ -1,6 +1,11 @@
-
+using Application.ApiContracts.Product.Responses;
+using Application.Common.Models;
 using MediatR;
 
 namespace Application.Features.Products.Commands.RestoreManyProducts;
 
-public sealed record RestoreManyProductsCommand(List<int> Ids) : IRequest<(List<ApiContracts.Product.Responses.ProductDetailForManagerResponse>? Data, Common.Models.ErrorResponse? Error)>;
+public sealed record RestoreManyProductsCommand : IRequest<Result<List<ProductDetailForManagerResponse>?>>
+{
+    public List<int>? Ids { get; init; }
+}
+

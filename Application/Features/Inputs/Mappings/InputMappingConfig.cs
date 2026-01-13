@@ -1,6 +1,7 @@
-using Application.ApiContracts.Input.Responses;
+﻿using Application.ApiContracts.Input.Responses;
 using Application.Features.Inputs.Commands.CreateInput;
 using Application.Features.Inputs.Commands.UpdateInput;
+using Application.ApiContracts.Input.Requests;
 using Domain.Entities;
 using Mapster;
 
@@ -10,11 +11,8 @@ public sealed class InputMappingConfig : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {
-        config.NewConfig<ApiContracts.Input.Requests.CreateInputRequest, CreateInputCommand>();
-        config.NewConfig<ApiContracts.Input.Requests.CreateInputInfoRequest, CreateInputProductCommand>();
-
         config.NewConfig<CreateInputCommand, Input>();
-        config.NewConfig<CreateInputProductCommand, InputInfo>();
+        config.NewConfig<CreateInputInfoRequest, InputInfo>();
 
         config.NewConfig<Input, InputResponse>()
             .Map(dest => dest.SupplierName, src => src.Supplier != null ? src.Supplier.Name : null)

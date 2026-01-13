@@ -1,7 +1,10 @@
 using System.Net;
 using System.Net.Http.Json;
-using Application.ApiContracts.Brand.Requests;
 using Application.ApiContracts.Brand.Responses;
+using Application.Features.Brands.Commands.CreateBrand;
+using Application.Features.Brands.Commands.DeleteManyBrands;
+using Application.Features.Brands.Commands.RestoreManyBrands;
+using Application.Features.Brands.Commands.UpdateBrand;
 using Domain.Entities;
 using Domain.Primitives;
 using FluentAssertions;
@@ -27,7 +30,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
     public async Task BRAND_001_CreateBrand_Success()
     {
         // Arrange
-        var request = new CreateBrandRequest
+        var request = new CreateBrandCommand
         {
             Name = "Honda Integration",
             Description = "Integration Test"
@@ -140,7 +143,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
             id = brand.Id;
         }
 
-        var request = new UpdateBrandRequest
+        var request = new UpdateBrandCommand
         {
             Name = "Brand Updated",
             Description = "Updated Desc"
@@ -211,7 +214,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
             ids.Add(b2.Id);
         }
 
-        var request = new DeleteManyBrandsRequest { Ids = ids };
+        var request = new DeleteManyBrandsCommand { Ids = ids };
 
         // Act
         var requestMessage = new HttpRequestMessage(HttpMethod.Delete, "/api/v1/Brand/delete-many")
@@ -240,7 +243,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
             ids.Add(b2.Id);
         }
 
-        var request = new RestoreManyBrandsRequest { Ids = ids };
+        var request = new RestoreManyBrandsCommand { Ids = ids };
 
         // Act
         var response = await _client.PostAsJsonAsync("/api/v1/Brand/restore-many", request);
@@ -263,7 +266,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
     public async Task BRAND_049_CreateBrand_CheckAuditing()
     {
         // Arrange
-        var request = new CreateBrandRequest { Name = "Audit Brand", Description = "Audit" };
+        var request = new CreateBrandCommand { Name = "Audit Brand", Description = "Audit" };
 
         // Act
         var response = await _client.PostAsJsonAsync("/api/v1/Brand", request);
@@ -290,7 +293,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
             id = brand.Id;
         }
 
-        var request = new UpdateBrandRequest { Name = "Audit Update Changed", Description = "Audit" };
+        var request = new UpdateBrandCommand { Name = "Audit Update Changed", Description = "Audit" };
 
         var response = await _client.PutAsJsonAsync($"/api/v1/Brand/{id}", request);
 

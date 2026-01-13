@@ -1,7 +1,6 @@
-﻿using Application.ApiContracts.Auth.Requests;
-using Application.ApiContracts.User.Responses;
+﻿using Application.ApiContracts.User.Responses;
 using Application.ApiContracts.UserManager.Responses;
-using Application.Common.Exceptions;
+using Application.Common.Models;
 using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Repositories.Role;
 using Domain.Constants;
@@ -12,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
 using Sieve.Services;
 using System;
+using Application.ApiContracts.Auth.Responses;
 
 namespace Infrastructure.Repositories.User
 {
@@ -89,39 +89,40 @@ namespace Infrastructure.Repositories.User
                 sieveModel.PageSize ?? 10);
         }
 
-        public async Task<UserAuthDTO> GetUserByRefreshTokenAsync(
+        public async Task<ApplicationUser?> GetByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken)
+        {
+            return await userManager.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.RefreshToken == refreshToken, cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        public async Task<UserAuth> GetUserByRefreshTokenAsync(
             string refreshToken,
             CancellationToken cancellationToken)
         {
             var user = await userManager.Users
-                    .FirstOrDefaultAsync(u => string.Compare(u.RefreshToken, refreshToken) == 0, cancellationToken)
-                    .ConfigureAwait(false) ??
-                throw new UnauthorizedException("Invalid refresh token.");
-            if(user.RefreshTokenExpiryTime <= DateTimeOffset.UtcNow)
-            {
-                throw new UnauthorizedException("Refresh token has expired. Please login again.");
-            }
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.RefreshToken == refreshToken, cancellationToken)
+                .ConfigureAwait(false);
 
-            if(string.Compare(user.Status, UserStatus.Active) != 0 || user.DeletedAt != null)
-            {
-                throw new ForbiddenException("Account is not available.");
-            }
+            var roles = await userManager.GetRolesAsync(user!).ConfigureAwait(false);
 
-            var roles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
-
-            return new UserAuthDTO()
+            var UserAuth = new UserAuth
             {
-                Id = user.Id,
-                Username = user.UserName,
-                Roles = [ .. roles ],
+                Id = user!.Id,
+                UserName = user.UserName,
+                Roles = [.. roles],
                 Email = user.Email,
                 FullName = user.FullName,
                 Status = user.Status,
-                AuthMethods = [ "pwd" ]
+                AuthMethods = ["pwd"]
             };
+
+            return UserAuth;
         }
 
-        public async Task<UserAuthDTO?> GetUserByIDAsync(Guid? idUser, CancellationToken cancellationToken)
+        public async Task<UserAuth?> GetUserByIDAsync(Guid? idUser, CancellationToken cancellationToken)
         {
             if(idUser == null)
                 return null;
@@ -133,10 +134,10 @@ namespace Infrastructure.Repositories.User
             if(user == null)
                 return null;
             var roles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
-            return new UserAuthDTO()
+            return new UserAuth()
             {
                 Id = user.Id,
-                Username = user.UserName,
+                UserName = user.UserName,
                 Roles = [ .. roles ],
                 Email = user.Email,
                 FullName = user.FullName,
@@ -185,6 +186,11 @@ namespace Infrastructure.Repositories.User
             CancellationToken cancellationToken = default)
         {
             return await userManager.GetUsersInRoleAsync(roleName).ConfigureAwait(false);
+        }
+
+        public async Task<IList<string>> GetRolesOfUserAsync(ApplicationUser user)
+        {
+            return await userManager.GetRolesAsync(user).ConfigureAwait(false);
         }
     }
 }

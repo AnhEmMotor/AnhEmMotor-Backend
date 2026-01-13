@@ -1,28 +1,33 @@
 using Application.ApiContracts.Permission.Responses;
-using Application.Common.Exceptions;
+using Application.Common.Models;
 using Application.Interfaces.Repositories.Role;
+using Application.Interfaces.Repositories.User;
+using Application.Interfaces.Services;
 using Domain.Entities;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 
 namespace Application.Features.Permissions.Queries.GetUserPermissionsById;
 
 public class GetUserPermissionsByIdQueryHandler(
-    UserManager<ApplicationUser> userManager,
-    IRoleReadRepository roleReadRepository) : IRequestHandler<GetUserPermissionsByIdQuery, PermissionAndRoleOfUserResponse>
+    IUserReadRepository userReadRepository,
+    IRoleReadRepository roleReadRepository) : IRequestHandler<GetUserPermissionsByIdQuery, Result<PermissionAndRoleOfUserResponse>>
 {
-    public async Task<PermissionAndRoleOfUserResponse> Handle(
+    public async Task<Result<PermissionAndRoleOfUserResponse>> Handle(
         GetUserPermissionsByIdQuery request,
         CancellationToken cancellationToken)
     {
-        var user = await userManager.FindByIdAsync(request.UserId.ToString()).ConfigureAwait(false) ??
-            throw new NotFoundException("User not found.");
-        var userRoles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
-        var roleEntities = await roleReadRepository.GetRolesByNamesAsync(userRoles!, cancellationToken)
+        var user = await userReadRepository.FindUserByIdAsync(request.UserId!.Value, cancellationToken).ConfigureAwait(false);
+        if (user is null)
+        {
+            return Error.NotFound("User not found.");
+        }
+
+        var userRoles = await userReadRepository.GetRolesOfUserAsync(user).ConfigureAwait(false);
+        var roleEntities = await roleReadRepository.GetRolesByNameAsync(userRoles, cancellationToken)
             .ConfigureAwait(false);
 
         var roleIds = roleEntities.Select(r => r.Id).ToList();
-        var userPermissionNames = await roleReadRepository.GetPermissionNamesByRoleIdsAsync(roleIds, cancellationToken)
+        var userPermissionNames = await roleReadRepository.GetPermissionsNameByRoleIdAsync(roleIds, cancellationToken)
             .ConfigureAwait(false);
 
         var userPermissions = userPermissionNames

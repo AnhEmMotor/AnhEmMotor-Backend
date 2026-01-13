@@ -1,4 +1,4 @@
-using Application.Features.Settings.Commands.SetSettings;
+﻿using Application.Features.Settings.Commands.SetSettings;
 using Application.Features.Settings.Queries.GetAllSettings;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Setting;
@@ -26,7 +26,7 @@ public class Setting
     {
         // Arrange
         var validator = new SetSettingsCommandValidator();
-        var request = new SetSettingsCommand(new Dictionary<string, string?> { { "Deposit_ratio", "1" } });
+        var request = new SetSettingsCommand { Settings = new Dictionary<string, string?> { { "Deposit_ratio", "1" } } };
 
         // Act
         var result = validator.TestValidate(request);
@@ -40,7 +40,7 @@ public class Setting
     {
         // Arrange
         var validator = new SetSettingsCommandValidator();
-        var request = new SetSettingsCommand(new Dictionary<string, string?> { { "Deposit_ratio", "99" } });
+        var request = new SetSettingsCommand { Settings = new Dictionary<string, string?> { { "Deposit_ratio", "99" } } };
 
         // Act
         var result = validator.TestValidate(request);
@@ -54,7 +54,7 @@ public class Setting
     {
         // Arrange
         var validator = new SetSettingsCommandValidator();
-        var request = new SetSettingsCommand(new Dictionary<string, string?> { { "Deposit_ratio", "50.5" } });
+        var request = new SetSettingsCommand { Settings = new Dictionary<string, string?> { { "Deposit_ratio", "50.5" } } };
 
         // Act
         var result = validator.TestValidate(request);
@@ -68,7 +68,7 @@ public class Setting
     {
         // Arrange
         var validator = new SetSettingsCommandValidator();
-        var request = new SetSettingsCommand(new Dictionary<string, string?> { { "Deposit_ratio", "0.9" } });
+        var request = new SetSettingsCommand { Settings = new Dictionary<string, string?> { { "Deposit_ratio", "0.9" } } };
 
         // Act
         var result = validator.TestValidate(request);
@@ -83,7 +83,7 @@ public class Setting
     {
         // Arrange
         var validator = new SetSettingsCommandValidator();
-        var request = new SetSettingsCommand(new Dictionary<string, string?> { { "Deposit_ratio", "99.1" } });
+        var request = new SetSettingsCommand { Settings = new Dictionary<string, string?> { { "Deposit_ratio", "99.1" } } };
 
         // Act
         var result = validator.TestValidate(request);
@@ -98,7 +98,7 @@ public class Setting
     {
         // Arrange
         var validator = new SetSettingsCommandValidator();
-        var request = new SetSettingsCommand(new Dictionary<string, string?> { { "Deposit_ratio", "abc" } });
+        var request = new SetSettingsCommand { Settings = new Dictionary<string, string?> { { "Deposit_ratio", "abc" } } };
 
         // Act
         var result = validator.TestValidate(request);
@@ -113,7 +113,7 @@ public class Setting
     {
         // Arrange
         var validator = new SetSettingsCommandValidator();
-        var request = new SetSettingsCommand(new Dictionary<string, string?> { { "Inventory_alert_level", "100" } });
+        var request = new SetSettingsCommand { Settings = new Dictionary<string, string?> { { "Inventory_alert_level", "100" } } };
 
         // Act
         var result = validator.TestValidate(request);
@@ -127,7 +127,7 @@ public class Setting
     {
         // Arrange
         var validator = new SetSettingsCommandValidator();
-        var request = new SetSettingsCommand(new Dictionary<string, string?> { { "Inventory_alert_level", "50.5" } });
+        var request = new SetSettingsCommand { Settings = new Dictionary<string, string?> { { "Inventory_alert_level", "50.5" } } };
 
         // Act
         var result = validator.TestValidate(request);
@@ -142,7 +142,7 @@ public class Setting
     {
         // Arrange
         var validator = new SetSettingsCommandValidator();
-        var request = new SetSettingsCommand(new Dictionary<string, string?> { { "Order_value_exceeds", "text" } });
+        var request = new SetSettingsCommand { Settings = new Dictionary<string, string?> { { "Order_value_exceeds", "text" } } };
 
         // Act
         var result = validator.TestValidate(request);
@@ -157,7 +157,7 @@ public class Setting
     {
         // Arrange
         var validator = new SetSettingsCommandValidator();
-        var request = new SetSettingsCommand(new Dictionary<string, string?> { { "Z-bike_threshold_for_meeting", "-5" } });
+        var request = new SetSettingsCommand { Settings = new Dictionary<string, string?> { { "Z-bike_threshold_for_meeting", "-5" } } };
 
         // Act
         var result = validator.TestValidate(request);
@@ -171,7 +171,7 @@ public class Setting
     {
         // Arrange
         var validator = new SetSettingsCommandValidator();
-        var request = new SetSettingsCommand([]);
+        var request = new SetSettingsCommand { Settings = [] };
 
         // Act
         var result = validator.TestValidate(request);
@@ -186,7 +186,7 @@ public class Setting
     {
         // Arrange
         var validator = new SetSettingsCommandValidator();
-        var request = new SetSettingsCommand(new Dictionary<string, string?> { { "Deposit_ratio", " 50 " } });
+        var request = new SetSettingsCommand { Settings = new Dictionary<string, string?> { { "Deposit_ratio", " 50 " } } };
 
         // Act
         var result = validator.TestValidate(request);
@@ -220,11 +220,11 @@ public class Setting
 
         // Assert
         result.Should().NotBeNull();
-        result.Should().HaveCount(4);
-        result["Deposit_ratio"].Should().Be("50.5");
-        result["Inventory_alert_level"].Should().Be("10");
-        result["Order_value_exceeds"].Should().Be("50000000");
-        result["Z-bike_threshold_for_meeting"].Should().Be("5");
+        result.Value.Should().HaveCount(4);
+        result.Value["Deposit_ratio"].Should().Be("50.5");
+        result.Value["Inventory_alert_level"].Should().Be("10");
+        result.Value["Order_value_exceeds"].Should().Be("50000000");
+        result.Value["Z-bike_threshold_for_meeting"].Should().Be("5");
     }
 
     [Fact(DisplayName = "SETTING_027 - Handler SetSettings - Gọi Update repository với đúng data")]
@@ -241,14 +241,14 @@ public class Setting
             .ReturnsAsync(existingSettings);
 
         var handler = new SetSettingsCommandHandler(_settingRepoMock.Object, _unitOfWorkMock.Object);
-        var command = new SetSettingsCommand(new Dictionary<string, string?>
+        var command = new SetSettingsCommand { Settings = new Dictionary<string, string?>
         {
             { "Deposit_ratio", "50" },
             { "Inventory_alert_level", "10" }
-        });
+        } };
 
         // Act
-        var (Data, Error) = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
         _settingRepoMock.Verify(x => x.Update(It.Is<IEnumerable<SettingEntity>>(s => 

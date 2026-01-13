@@ -1,10 +1,7 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using Application.ApiContracts.Auth.Requests;
 using Application.ApiContracts.Auth.Responses;
-using Application.ApiContracts.User.Requests;
-using Application.ApiContracts.UserManager.Requests;
 using Application.ApiContracts.UserManager.Responses;
 using Domain.Primitives;
 using Application.Common.Models;
@@ -18,6 +15,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Sieve.Models;
 using Xunit;
+using Application.Features.Auth.Commands.Login;
+using Application.Features.UserManager.Commands.UpdateUser;
+using Application.Features.UserManager.Commands.ChangePassword;
+using Application.Features.UserManager.Commands.AssignRoles;
+using Application.Features.UserManager.Commands.ChangeUserStatus;
+using Application.Features.UserManager.Commands.ChangeMultipleUsersStatus;
 
 namespace IntegrationTests;
 
@@ -81,7 +84,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         await userManager.AddToRoleAsync(user, roleName);
 
         // Login to get token
-        var loginRequest = new LoginRequest
+        var loginRequest = new LoginCommand
         {
             UsernameOrEmail = username,
             Password = password
@@ -178,7 +181,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
 
         var targetUser = await CreateUserAsync("targetUser021", "target021@test.com", "Pass@123");
 
-        var request = new UpdateUserRequest
+        var request = new UpdateUserCommand
         {
             FullName = "  Test User  ",
             PhoneNumber = "  0912345678  "
@@ -210,7 +213,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
 
         var targetUser = await CreateUserAsync("targetUser022", "target022@test.com", "Pass@123");
 
-        var request = new UpdateUserRequest
+        var request = new UpdateUserCommand
         {
             FullName = "Test User"
         };
@@ -240,7 +243,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
 
         var targetUser = await CreateUserAsync("targetUser023", "target023@test.com", "Pass@123", phoneNumber: "0987654321");
 
-        var request = new UpdateUserRequest
+        var request = new UpdateUserCommand
         {
             PhoneNumber = "0912345678"
         };
@@ -265,7 +268,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         var targetUser = await CreateUserAsync("targetUser024", "target024@test.com", "Pass@123", phoneNumber: "0912345678");
         var existingUser = await CreateUserAsync("existingUser024", "existing024@test.com", "Pass@123", phoneNumber: null);
 
-        var request = new UpdateUserRequest
+        var request = new UpdateUserCommand
         {
             PhoneNumber = null
         };
@@ -305,7 +308,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
             await db.SaveChangesAsync();
         }
 
-        var request = new ChangePasswordRequest { NewPassword = "NewPass@123" };
+        var request = new ChangePasswordCommand { NewPassword = "NewPass@123" };
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
@@ -350,7 +353,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
             await userManager.AddToRoleAsync(targetUser, staffRole.Name!);
         }
 
-        var request = new AssignRolesRequest { RoleNames = [managerRole.Name!] };
+        var request = new AssignRolesCommand { RoleNames = [managerRole.Name!] };
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
@@ -392,7 +395,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
             await userManager.AddToRoleAsync(targetUser, staffRole.Name!);
         }
 
-        var request = new AssignRolesRequest { RoleNames = [] };
+        var request = new AssignRolesCommand { RoleNames = [] };
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
@@ -423,7 +426,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
             "targetUser028", "target028@test.com", "Pass@123",
             UserStatus.Banned, DateTimeOffset.UtcNow.AddDays(-1));
 
-        var request = new ChangeUserStatusRequest { Status = UserStatus.Active };
+        var request = new ChangeUserStatusCommand { Status = UserStatus.Active };
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
@@ -446,7 +449,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         var user2 = await CreateUserAsync("user029_2", "user029_2@test.com", "Pass@123", UserStatus.Active);
         var nonExistentId = Guid.NewGuid();
 
-        var request = new ChangeMultipleUsersStatusRequest
+        var request = new ChangeMultipleUsersStatusCommand
         {
             UserIds = [user1.Id, nonExistentId, user2.Id],
             Status = UserStatus.Banned
@@ -479,7 +482,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
 
         var targetUser = await CreateUserAsync("targetUser030", "target030@test.com", "Pass@123");
 
-        var request = new ChangeMultipleUsersStatusRequest
+        var request = new ChangeMultipleUsersStatusCommand
         {
             UserIds = [adminUser.Id, targetUser.Id],
             Status = UserStatus.Banned
@@ -504,7 +507,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
 
         var targetUser = await CreateUserAsync("targetUser031", "target031@test.com", "Pass@123");
 
-        var request = new UpdateUserRequest { FullName = "Deleted User Updated" };
+        var request = new UpdateUserCommand { FullName = "Deleted User Updated" };
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
@@ -546,7 +549,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
 
         var targetUser = await CreateUserAsync("targetUser033", "target033@test.com", "OldPass@123");
 
-        var request = new UpdateUserRequest { FullName = "New Name" };
+        var request = new UpdateUserCommand { FullName = "New Name" };
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
@@ -557,7 +560,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         // Verify password unchanged by attempting login with old password
-        var loginRequest = new LoginRequest { UsernameOrEmail = "targetUser033", Password = "OldPass@123" };
+        var loginRequest = new LoginCommand { UsernameOrEmail = "targetUser033", Password = "OldPass@123" };
         var loginResponse = await _client.PostAsJsonAsync("/api/v1/Auth/login", loginRequest);
         loginResponse.StatusCode.Should().Be(HttpStatusCode.OK);
     }
@@ -617,7 +620,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
 
         var targetUser = await CreateUserAsync("targetUser035", "target035@test.com", "Pass@123");
 
-        var request = new ChangePasswordRequest { NewPassword = "NewPass@123" };
+        var request = new ChangePasswordCommand { NewPassword = "NewPass@123" };
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
@@ -649,7 +652,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
             await roleManager.CreateAsync(managerRole);
         }
 
-        var request = new AssignRolesRequest { RoleNames = [managerRole.Name!] };
+        var request = new AssignRolesCommand { RoleNames = [managerRole.Name!] };
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 

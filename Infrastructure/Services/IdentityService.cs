@@ -1,60 +1,47 @@
-﻿using Application.ApiContracts.Auth.Requests;
-using Application.Common.Exceptions;
+﻿using Application.ApiContracts.Auth.Responses;
+using Application.Common.Models;
 using Application.Interfaces.Services;
 using Domain.Constants;
 using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 
-namespace Infrastructure.Services
+namespace Infrastructure.Services;
+
+public class IdentityService(
+    UserManager<ApplicationUser> userManager,
+    SignInManager<ApplicationUser> signInManager) : IIdentityService
 {
-    public class IdentityService(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager) : IIdentityService
+    public async Task<Result<UserAuth>> AuthenticateAsync(
+        string usernameOrEmail,
+        string password,
+        CancellationToken cancellationToken)
     {
-        public async Task<UserAuthDTO> AuthenticateAsync(
-            string usernameOrEmail,
-            string password,
-            CancellationToken cancellationToken)
+        ApplicationUser? user;
+
+
+        if(usernameOrEmail.Contains('@'))
         {
-            ApplicationUser? user;
+            user = await userManager.FindByEmailAsync(usernameOrEmail).ConfigureAwait(false);
+        }
+        else
+        {
+            user = await userManager.FindByNameAsync(usernameOrEmail).ConfigureAwait(false);
+        }
 
-            cancellationToken.ThrowIfCancellationRequested();
+        var result = await signInManager.CheckPasswordSignInAsync(user!, password, lockoutOnFailure: false)
+            .ConfigureAwait(false);
 
-            if(usernameOrEmail.Contains('@'))
-            {
-                user = await userManager.FindByEmailAsync(usernameOrEmail).ConfigureAwait(false);
-            } else
-            {
-                user = await userManager.FindByNameAsync(usernameOrEmail).ConfigureAwait(false);
-            }
+        var roles = await userManager.GetRolesAsync(user!).ConfigureAwait(false);
 
-            if(user is null)
-            {
-                throw new UnauthorizedException("Invalid credentials.");
-            }
-
-            if(string.Compare(user.Status, UserStatus.Active) != 0 || user.DeletedAt is not null)
-            {
-                throw new UnauthorizedException("Account is not available.");
-            }
-
-            var result = await signInManager.CheckPasswordSignInAsync(user, password, lockoutOnFailure: false)
-                .ConfigureAwait(false);
-
-            if(!result.Succeeded)
-            {
-                throw new UnauthorizedException("Invalid credentials.");
-            }
-
-            var roles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
-            return new UserAuthDTO()
-            {
-                Id = user.Id,
-                Username = user.UserName,
+        return new UserAuth
+        {
+            Id = user!.Id,
+                UserName = user.UserName,
                 Roles = [ .. roles ],
                 AuthMethods = [ "amr" ],
                 Email = user.Email,
                 FullName = user.FullName,
                 Status = user.Status
-            };
-        }
+        };
     }
 }
