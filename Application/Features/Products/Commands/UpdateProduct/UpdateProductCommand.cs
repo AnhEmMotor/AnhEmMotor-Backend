@@ -10,69 +10,69 @@ public sealed record UpdateProductCommand : IRequest<Result<ProductDetailForMana
 {
     public int Id { get; init; }
 
-    public string? Name { get; set; }
+    public string? Name { get; init; }
 
     [JsonPropertyName("category_id")]
-    public int? CategoryId { get; set; }
+    public int? CategoryId { get; init; }
 
     [JsonPropertyName("brand_id")]
-    public int? BrandId { get; set; }
+    public int? BrandId { get; init; }
 
-    public string? Description { get; set; }
+    public string? Description { get; init; }
 
-    public decimal? Weight { get; set; }
+    public decimal? Weight { get; init; }
 
-    public string? Dimensions { get; set; }
+    public string? Dimensions { get; init; }
 
-    public string? Wheelbase { get; set; }
+    public string? Wheelbase { get; init; }
 
     [JsonPropertyName("seat_height")]
-    public decimal? SeatHeight { get; set; }
+    public decimal? SeatHeight { get; init; }
 
     [JsonPropertyName("ground_clearance")]
-    public decimal? GroundClearance { get; set; }
+    public decimal? GroundClearance { get; init; }
 
     [JsonPropertyName("fuel_capacity")]
-    public decimal? FuelCapacity { get; set; }
+    public decimal? FuelCapacity { get; init; }
 
     [JsonPropertyName("tire_size")]
-    public string? TireSize { get; set; }
+    public string? TireSize { get; init; }
 
     [JsonPropertyName("front_suspension")]
-    public string? FrontSuspension { get; set; }
+    public string? FrontSuspension { get; init; }
 
     [JsonPropertyName("rear_suspension")]
-    public string? RearSuspension { get; set; }
+    public string? RearSuspension { get; init; }
 
     [JsonPropertyName("engine_type")]
-    public string? EngineType { get; set; }
+    public string? EngineType { get; init; }
 
     [JsonPropertyName("max_power")]
-    public string? MaxPower { get; set; }
+    public string? MaxPower { get; init; }
 
     [JsonPropertyName("oil_capacity")]
-    public decimal? OilCapacity { get; set; }
+    public decimal? OilCapacity { get; init; }
 
     [JsonPropertyName("fuel_consumption")]
-    public string? FuelConsumption { get; set; }
+    public string? FuelConsumption { get; init; }
 
     [JsonPropertyName("transmission_type")]
-    public string? TransmissionType { get; set; }
+    public string? TransmissionType { get; init; }
 
     [JsonPropertyName("starter_system")]
-    public string? StarterSystem { get; set; }
+    public string? StarterSystem { get; init; }
 
     [JsonPropertyName("max_torque")]
-    public string? MaxTorque { get; set; }
+    public string? MaxTorque { get; init; }
 
-    public decimal? Displacement { get; set; }
+    public decimal? Displacement { get; init; }
 
     [JsonPropertyName("bore_stroke")]
-    public string? BoreStroke { get; set; }
+    public string? BoreStroke { get; init; }
 
     [JsonPropertyName("compression_ratio")]
-    public string? CompressionRatio { get; set; }
+    public string? CompressionRatio { get; init; }
 
-    public List<UpdateProductVariantRequest> Variants { get; set; } = [];
+    public List<UpdateProductVariantRequest> Variants { get; init; } = [];
 }
 

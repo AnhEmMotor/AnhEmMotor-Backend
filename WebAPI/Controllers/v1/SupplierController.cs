@@ -1,4 +1,5 @@
 ﻿using Application.ApiContracts.Supplier.Responses;
+using Application.Common.Models;
 using Application.Features.Suppliers.Commands.CreateSupplier;
 using Application.Features.Suppliers.Commands.DeleteManySuppliers;
 using Application.Features.Suppliers.Commands.DeleteSupplier;
@@ -11,6 +12,7 @@ using Application.Features.Suppliers.Queries.GetDeletedSuppliersList;
 using Application.Features.Suppliers.Queries.GetSupplierById;
 using Application.Features.Suppliers.Queries.GetSuppliersList;
 using Asp.Versioning;
+using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using Mapster;
 using MediatR;
@@ -28,7 +30,7 @@ namespace WebAPI.Controllers.V1;
 [ApiVersion("1.0")]
 [SwaggerTag("Quản lý danh sách nhà cung cấp")]
 [Route("api/v{version:apiVersion}/[controller]")]
-[ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status500InternalServerError)]
+[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
 public class SupplierController(IMediator mediator) : ApiController
 {
     /// <summary>
@@ -39,7 +41,7 @@ public class SupplierController(IMediator mediator) : ApiController
     /// <returns></returns>
     [HttpGet]
     [RequiresAnyPermissions(Suppliers.View, Inputs.Edit, Inputs.Create)]
-    [ProducesResponseType(typeof(Domain.Primitives.PagedResult<SupplierResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedResult<SupplierResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetSuppliersAsync(
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
@@ -57,7 +59,7 @@ public class SupplierController(IMediator mediator) : ApiController
     /// <returns></returns>
     [HttpGet("deleted")]
     [HasPermission(Suppliers.View)]
-    [ProducesResponseType(typeof(Domain.Primitives.PagedResult<SupplierResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedResult<SupplierResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetDeletedSuppliersAsync(
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
@@ -76,7 +78,7 @@ public class SupplierController(IMediator mediator) : ApiController
     [HttpGet("{id:int}")]
     [HasPermission(Suppliers.View)]
     [ProducesResponseType(typeof(SupplierResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetSupplierByIdAsync(int id, CancellationToken cancellationToken)
     {
         var query = new GetSupplierByIdQuery() { Id = id };
@@ -125,7 +127,7 @@ public class SupplierController(IMediator mediator) : ApiController
     [HttpPut("{id:int}")]
     [HasPermission(Suppliers.Edit)]
     [ProducesResponseType(typeof(SupplierResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateSupplierAsync(
         int id,
         [FromBody] UpdateSupplierCommand request,
@@ -146,7 +148,7 @@ public class SupplierController(IMediator mediator) : ApiController
     [HttpPatch("{id:int}/status")]
     [HasPermission(Suppliers.Edit)]
     [ProducesResponseType(typeof(SupplierResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateSupplierStatusAsync(
         int id,
         [FromBody] UpdateSupplierStatusCommand request,
@@ -166,7 +168,7 @@ public class SupplierController(IMediator mediator) : ApiController
     [HttpDelete("{id:int}")]
     [HasPermission(Suppliers.Delete)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteSupplierAsync(int id, CancellationToken cancellationToken)
     {
         var command = new DeleteSupplierCommand() with { Id = id };
@@ -183,7 +185,7 @@ public class SupplierController(IMediator mediator) : ApiController
     [HttpPost("restore/{id:int}")]
     [HasPermission(Suppliers.Delete)]
     [ProducesResponseType(typeof(SupplierResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RestoreSupplierAsync(int id, CancellationToken cancellationToken)
     {
         var command = new RestoreSupplierCommand() with { Id = id };
@@ -200,7 +202,7 @@ public class SupplierController(IMediator mediator) : ApiController
     [HttpDelete("delete-many")]
     [HasPermission(Suppliers.Delete)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteSuppliersAsync(
         [FromBody] DeleteManySuppliersCommand request,
         CancellationToken cancellationToken)
@@ -219,7 +221,7 @@ public class SupplierController(IMediator mediator) : ApiController
     [HttpPost("restore-many")]
     [HasPermission(Suppliers.Delete)]
     [ProducesResponseType(typeof(List<SupplierResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RestoreSuppliersAsync(
         [FromBody] RestoreManySuppliersCommand request,
         CancellationToken cancellationToken)
@@ -238,7 +240,7 @@ public class SupplierController(IMediator mediator) : ApiController
     [HttpPatch("update-status-many")]
     [HasPermission(Suppliers.Edit)]
     [ProducesResponseType(typeof(List<SupplierResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateManySupplierStatusAsync(
         [FromBody] UpdateManySupplierStatusCommand request,
         CancellationToken cancellationToken)

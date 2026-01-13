@@ -47,7 +47,6 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
             }
             await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         }
 
         var response = await _client.GetAsync("/api/v1/Supplier?Page=1&PageSize=10", CancellationToken.None)
@@ -87,7 +86,6 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
             }
             await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         }
 
         var response = await _client.GetAsync("/api/v1/Supplier?Page=2&PageSize=5", CancellationToken.None)
@@ -121,7 +119,6 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
             };
             await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         }
 
         var response = await _client.GetAsync("/api/v1/Supplier?Filters=Name@=*Test*", CancellationToken.None)
@@ -153,7 +150,6 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
             };
             await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         }
 
         var response = await _client.GetAsync("/api/v1/Supplier?Sorts=Name", CancellationToken.None)
@@ -199,7 +195,6 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
             };
             await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         }
 
         var response = await _client.GetAsync("/api/v1/Supplier", CancellationToken.None).ConfigureAwait(true);
@@ -244,7 +239,6 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
             };
             await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         }
 
         var response = await _client.GetAsync("/api/v1/Supplier/deleted?Page=1&PageSize=10", CancellationToken.None)
@@ -526,7 +520,6 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
             };
             await db.InputInfos.AddRangeAsync(inputInfos, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         }
 
         var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}", CancellationToken.None)
@@ -576,7 +569,6 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
             };
             await db.InputInfos.AddRangeAsync(inputInfos, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         }
 
         var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}", CancellationToken.None)

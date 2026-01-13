@@ -8,7 +8,7 @@ public record UpdateRoleCommand : IRequest<Result<PermissionRoleUpdateResponse>>
 {
     public string? RoleName { get; init; }
 
-    public List<string>? Permissions { get; set; } = [];
+    public List<string>? Permissions { get; init; } = [];
 
-    public string? Description { get; set; }
+    public string? Description { get; init; }
 }

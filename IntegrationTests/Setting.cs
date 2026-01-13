@@ -38,7 +38,6 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
             };
             await db.Settings.AddRangeAsync(settings, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         }
 
         var response = await _client.GetAsync("/api/v1/Setting", CancellationToken.None).ConfigureAwait(true);
@@ -66,7 +65,6 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
             var settings = new List<SettingEntity> { new() { Key = "Deposit_ratio", Value = "50" } };
             await db.Settings.AddRangeAsync(settings, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         }
 
         var response = await _client.GetAsync("/api/v1/Setting", CancellationToken.None).ConfigureAwait(true);
@@ -85,7 +83,6 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
                 .AddAsync(new() { Key = "Deposit_ratio", Value = "50" }, CancellationToken.None)
                 .ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         }
 
         var response = await _client.GetAsync("/api/v1/Setting", CancellationToken.None).ConfigureAwait(true);
@@ -101,7 +98,6 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             db.Settings.RemoveRange(db.Settings);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         }
 
         var response = await _client.GetAsync("/api/v1/Setting", CancellationToken.None).ConfigureAwait(true);
@@ -131,7 +127,6 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
             };
             await db.Settings.AddRangeAsync(initialSettings, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         }
 
         var request = new Dictionary<string, long?>
@@ -178,7 +173,6 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
             };
             await db.Settings.AddRangeAsync(initialSettings, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         }
 
         var request = new Dictionary<string, long?> { { "Deposit_ratio", 25 } };
@@ -207,7 +201,6 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
                 .AddAsync(new() { Key = "Deposit_ratio", Value = "50" }, CancellationToken.None)
                 .ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         }
 
         var request = new Dictionary<string, long?> { { "Deposit_ratio", 25 } };
@@ -235,7 +228,6 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
                 .AddAsync(new() { Key = "Deposit_ratio", Value = "50" }, CancellationToken.None)
                 .ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         }
 
         var request = new Dictionary<string, long?> { { "Deposit_ratio", 25 } };
@@ -256,7 +248,6 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
                 .AddAsync(new() { Key = "Deposit_ratio", Value = "50" }, CancellationToken.None)
                 .ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         }
 
         var request = new Dictionary<string, long?> { { "Deposit_ratio", 0 } };
@@ -291,7 +282,6 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
                 .AddAsync(new() { Key = "Deposit_ratio", Value = "50" }, CancellationToken.None)
                 .ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         }
 
         var request = new Dictionary<string, long?> { { "Deposit_ratio", 100 } };
@@ -326,7 +316,6 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
                 .AddAsync(new() { Key = "Deposit_ratio", Value = "50" }, CancellationToken.None)
                 .ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         }
 
         var request = new Dictionary<string, long?> { { "Deposit_ratio", 5055 } };
@@ -352,7 +341,6 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
                 .AddAsync(new() { Key = "Deposit_ratio", Value = "50" }, CancellationToken.None)
                 .ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         }
 
         var request = new Dictionary<string, long?>();

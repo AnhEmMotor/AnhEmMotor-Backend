@@ -312,7 +312,6 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
             user!.RefreshToken = "valid_refresh_token";
             user.RefreshTokenExpiryTime = DateTimeOffset.UtcNow.AddDays(7);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         }
 
         var request = new ChangePasswordCommand { NewPassword = "NewPass@123" };
@@ -602,7 +601,6 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
             var user = await db.Users.FindAsync(targetUser.Id).ConfigureAwait(true);
             user!.RefreshToken = originalRefreshToken;
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         }
 
         var maliciousRequest = new { FullName = "New Name", RefreshToken = "hacker_token", Id = Guid.NewGuid() };

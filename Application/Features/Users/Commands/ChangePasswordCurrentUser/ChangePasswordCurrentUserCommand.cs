@@ -6,9 +6,9 @@ namespace Application.Features.Users.Commands.ChangePasswordCurrentUser;
 
 public record ChangePasswordCurrentUserCommand : IRequest<Result<ChangePasswordUserByUserResponse>>
 {
-    public string? UserId { get; set; }
+    public string? UserId { get; init; }
 
-    public string? CurrentPassword { get; set; }
+    public string? CurrentPassword { get; init; }
 
-    public string? NewPassword { get; set; }
+    public string? NewPassword { get; init; }
 }

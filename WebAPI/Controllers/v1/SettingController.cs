@@ -1,4 +1,5 @@
 ﻿using Application.Common.Attributes;
+using Application.Common.Models;
 using Application.Features.Settings.Commands.SetSettings;
 using Application.Features.Settings.Queries.GetAllSettings;
 using Asp.Versioning;
@@ -18,7 +19,7 @@ namespace WebAPI.Controllers.V1;
 [SwaggerTag("Quản lý cài đặt hệ thống: cập nhật số lượng cảnh báo tồn kho, số lượng mua tối đa, ...")]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/[controller]")]
-[ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status500InternalServerError)]
+[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
 public class SettingController(IMediator mediator) : ApiController
 {
     /// <summary>
@@ -30,7 +31,7 @@ public class SettingController(IMediator mediator) : ApiController
     [HttpPut]
     [HasPermission(Settings.Edit)]
     [ProducesResponseType(typeof(Dictionary<string, long?>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> SetSettingsAsync(
         [FromBody][ValidSettingKeys] Dictionary<string, string?> request,
         CancellationToken cancellationToken)

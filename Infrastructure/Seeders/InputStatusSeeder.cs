@@ -3,16 +3,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Seeders;
 
-/// <summary>
-/// Seeder để khởi tạo các trạng thái đầu vào từ constants
-/// </summary>
 public static class InputStatusSeeder
 {
-    /// <summary>
-    /// Seed các trạng thái đầu vào từ Domain.Constants.InputStatus
-    /// </summary>
-    /// <param name="context">Database context</param>
-    /// <param name="cancellationToken">Cancellation token</param>
     public static async Task SeedAsync(ApplicationDBContext context, CancellationToken cancellationToken)
     {
         var allStatuses = Domain.Constants.Input.InputStatus.AllowedValues;

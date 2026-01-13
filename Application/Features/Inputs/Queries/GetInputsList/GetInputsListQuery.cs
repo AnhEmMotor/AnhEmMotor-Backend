@@ -8,5 +8,5 @@ namespace Application.Features.Inputs.Queries.GetInputsList;
 
 public sealed record GetInputsListQuery : IRequest<Result<PagedResult<InputResponse>>>
 {
-    public SieveModel? SieveModel { get; set; }
+    public SieveModel? SieveModel { get; init; }
 }

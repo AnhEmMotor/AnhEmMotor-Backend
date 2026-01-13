@@ -2,9 +2,6 @@ using FluentValidation;
 
 namespace Application.Features.Products.Queries.CheckSlugAvailability;
 
-/// <summary>
-/// Validator for CheckSlugAvailabilityQuery.
-/// </summary>
 public sealed class CheckSlugAvailabilityQueryValidator : AbstractValidator<CheckSlugAvailabilityQuery>
 {
     public CheckSlugAvailabilityQueryValidator()

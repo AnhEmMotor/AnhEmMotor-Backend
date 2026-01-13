@@ -1,4 +1,5 @@
 ﻿using Application.ApiContracts.Permission.Responses;
+using Application.Common.Models;
 using Application.Features.Permissions.Commands.CreateRole;
 using Application.Features.Permissions.Commands.DeleteMultipleRoles;
 using Application.Features.Permissions.Commands.DeleteRole;
@@ -24,7 +25,7 @@ namespace WebAPI.Controllers.V1;
 [ApiVersion("1.0")]
 [SwaggerTag("Controller quản lý quyền hạn và vai trò")]
 [Route("api/v{version:apiVersion}/[controller]")]
-[ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status500InternalServerError)]
+[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
 public class PermissionController(IMediator mediator) : ApiController
 {
     /// <summary>
@@ -45,8 +46,8 @@ public class PermissionController(IMediator mediator) : ApiController
     [HttpGet("my-permissions")]
     [Authorize]
     [ProducesResponseType(typeof(List<PermissionAndRoleOfUserResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetMyPermissionsAsync(CancellationToken cancellationToken)
     {
         var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -61,7 +62,7 @@ public class PermissionController(IMediator mediator) : ApiController
     [HttpGet("users/{userId:guid}/permissions")]
     [HasPermission(Domain.Constants.Permission.PermissionsList.Users.View)]
     [ProducesResponseType(typeof(List<PermissionAndRoleOfUserResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetUserPermissionsByIdAsync(Guid userId, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetUserPermissionsByIdQuery() { UserId = userId }, cancellationToken)
@@ -75,7 +76,7 @@ public class PermissionController(IMediator mediator) : ApiController
     [HttpGet("roles/{roleName}/permissions")]
     [HasPermission(Domain.Constants.Permission.PermissionsList.Roles.View)]
     [ProducesResponseType(typeof(List<PermissionResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetRolePermissionsAsync(string roleName, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetRolePermissionsQuery() { RoleName = roleName }, cancellationToken)
@@ -88,8 +89,8 @@ public class PermissionController(IMediator mediator) : ApiController
     /// </summary>
     [HttpPut("roles/{roleName}")]
     [HasPermission(Domain.Constants.Permission.PermissionsList.Roles.AssignPermissions)]
-    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(PermissionRoleUpdateResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> UpdateRoleAsync(
         string roleName,
@@ -125,7 +126,7 @@ public class PermissionController(IMediator mediator) : ApiController
     /// </summary>
     [HttpPost("roles")]
     [HasPermission(Domain.Constants.Permission.PermissionsList.Roles.Create)]
-    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(RoleCreateResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> CreateRoleAsync(
         [FromBody] CreateRoleCommand model,
@@ -148,8 +149,8 @@ public class PermissionController(IMediator mediator) : ApiController
     /// </summary>
     [HttpDelete("roles/{roleName}")]
     [HasPermission(Domain.Constants.Permission.PermissionsList.Roles.Delete)]
-    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(RoleDeleteResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> DeleteRoleAsync(string roleName, CancellationToken cancellationToken)
     {
@@ -163,7 +164,7 @@ public class PermissionController(IMediator mediator) : ApiController
     /// </summary>
     [HttpPost("roles/delete-multiple")]
     [HasPermission(Domain.Constants.Permission.PermissionsList.Roles.Delete)]
-    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(RoleDeleteResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> DeleteMultipleRolesAsync(
         [FromBody] List<string> roleNames,

@@ -3,16 +3,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Seeders;
 
-/// <summary>
-/// Seeder để khởi tạo các trạng thái đơn hàng từ constants
-/// </summary>
 public static class OutputStatusSeeder
 {
-    /// <summary>
-    /// Seed các trạng thái đơn hàng từ Domain.Constants.Order.OrderStatus
-    /// </summary>
-    /// <param name="context">Database context</param>
-    /// <param name="cancellationToken">Cancellation token</param>
     public static async Task SeedAsync(ApplicationDBContext context, CancellationToken cancellationToken)
     {
         var allStatuses = Domain.Constants.Order.OrderStatus.All;

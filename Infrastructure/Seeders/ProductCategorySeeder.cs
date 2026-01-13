@@ -5,17 +5,8 @@ using Microsoft.Extensions.Configuration;
 
 namespace Infrastructure.Seeders;
 
-/// <summary>
-/// Seeder để khởi tạo các danh mục sản phẩm được bảo vệ từ appsettings
-/// </summary>
 public static class ProductCategorySeeder
 {
-    /// <summary>
-    /// Seed các danh mục sản phẩm được bảo vệ từ appsettings
-    /// </summary>
-    /// <param name="context">Database context</param>
-    /// <param name="configuration">Configuration để đọc ProtectedProductCategory</param>
-    /// <param name="cancellationToken">Cancellation token</param>
     public static async Task SeedAsync(
         ApplicationDBContext context,
         IConfiguration configuration,

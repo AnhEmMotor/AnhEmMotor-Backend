@@ -52,7 +52,6 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
             }
             await db.ProductCategories.AddRangeAsync(categories, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         }
 
         var response = await _client.GetAsync("/api/v1/ProductCategory?Page=1&PageSize=10", CancellationToken.None)
@@ -86,7 +85,6 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
             }
             await db.ProductCategories.AddRangeAsync(categories, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         }
 
         var response = await _client.GetAsync("/api/v1/ProductCategory?Page=2&PageSize=5", CancellationToken.None)
@@ -119,7 +117,6 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
                     new ProductCategoryEntity { Name = "Laptop", Description = "Desc", DeletedAt = null })
                 .ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         }
 
         var response = await _client.GetAsync("/api/v1/ProductCategory?Filters=Name@=Phone", CancellationToken.None)
@@ -151,7 +148,6 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
                     new ProductCategoryEntity { Name = "Microsoft", Description = "Desc", DeletedAt = null })
                 .ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         }
 
         var response = await _client.GetAsync("/api/v1/ProductCategory?Sorts=Name", CancellationToken.None)
@@ -176,7 +172,6 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             db.ProductCategories.RemoveRange(db.ProductCategories);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         }
 
         var response = await _client.GetAsync("/api/v1/ProductCategory?Page=1&PageSize=10", CancellationToken.None)
@@ -209,7 +204,6 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
             }
             await db.ProductCategories.AddRangeAsync(categories, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         }
 
         var response = await _client.GetAsync(
@@ -253,7 +247,6 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
             }
             await db.ProductCategories.AddRangeAsync(categories, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         }
 
         var response = await _client.GetAsync(

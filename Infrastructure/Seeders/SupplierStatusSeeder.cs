@@ -3,16 +3,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Seeders;
 
-/// <summary>
-/// Seeder để khởi tạo các trạng thái nhà cung cấp từ constants
-/// </summary>
 public static class SupplierStatusSeeder
 {
-    /// <summary>
-    /// Seed các trạng thái nhà cung cấp từ Domain.Constants.Supplier.SupplierStatus
-    /// </summary>
-    /// <param name="context">Database context</param>
-    /// <param name="cancellationToken">Cancellation token</param>
     public static async Task SeedAsync(ApplicationDBContext context, CancellationToken cancellationToken)
     {
         var allStatuses = Domain.Constants.SupplierStatus.All;

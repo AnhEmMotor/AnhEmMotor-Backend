@@ -3,16 +3,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Seeders;
 
-/// <summary>
-/// Seeder để khởi tạo các trạng thái sản phẩm từ constants
-/// </summary>
 public static class ProductStatusSeeder
 {
-    /// <summary>
-    /// Seed các trạng thái sản phẩm từ Domain.Constants.Product.ProductStatus
-    /// </summary>
-    /// <param name="context">Database context</param>
-    /// <param name="cancellationToken">Cancellation token</param>
     public static async Task SeedAsync(ApplicationDBContext context, CancellationToken cancellationToken)
     {
         var allStatuses = Domain.Constants.ProductStatus.All;

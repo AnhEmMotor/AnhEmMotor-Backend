@@ -399,7 +399,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
             var userToDelete = await db.Users.FindAsync(user!.Id).ConfigureAwait(true);
             userToDelete!.DeletedAt = DateTimeOffset.UtcNow;
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         }
 
         var testResponse2 = await _client.GetAsync("/api/v1/User/me", CancellationToken.None).ConfigureAwait(true);
@@ -430,7 +429,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
             var userToBan = await db.Users.FindAsync(user!.Id).ConfigureAwait(true);
             userToBan!.Status = UserStatus.Banned;
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         }
 
         var testResponse2 = await _client.GetAsync("/api/v1/User/me", CancellationToken.None).ConfigureAwait(true);

@@ -6,5 +6,5 @@ namespace Application.Features.Statistical.Queries.GetMonthlyRevenueProfit;
 
 public sealed record GetMonthlyRevenueProfitQuery : IRequest<Result<IEnumerable<MonthlyRevenueProfitResponse>>>
 {
-    public int Months { get; set; } = 12;
+    public int Months { get; init; } = 12;
 }

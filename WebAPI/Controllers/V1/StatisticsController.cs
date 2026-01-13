@@ -1,4 +1,5 @@
 ﻿using Application.ApiContracts.Statistical.Responses;
+using Application.Common.Models;
 using Application.Features.Statistical.Queries.GetDailyRevenue;
 using Application.Features.Statistical.Queries.GetDashboardStats;
 using Application.Features.Statistical.Queries.GetMonthlyRevenueProfit;
@@ -22,7 +23,7 @@ namespace WebAPI.Controllers.V1;
 [ApiVersion("1.0")]
 [SwaggerTag("Thống kê và báo cáo")]
 [Route("api/v{version:apiVersion}/[controller]")]
-[ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status500InternalServerError)]
+[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
 public class StatisticsController(IMediator mediator) : ApiController
 {
     /// <summary>
@@ -104,7 +105,7 @@ public class StatisticsController(IMediator mediator) : ApiController
     [HttpGet("product-stock-price/{variantId:int}")]
     [HasPermission(Statistical.View)]
     [ProducesResponseType(typeof(ProductStockPriceResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetProductStockAndPriceAsync(int variantId, CancellationToken cancellationToken)
     {
         var query = new GetProductStockAndPriceQuery() { VariantId = variantId };

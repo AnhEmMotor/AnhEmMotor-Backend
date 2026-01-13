@@ -191,7 +191,7 @@ public class ProductCategory
     public async Task GetProductCategories_AnonymousUser_ShouldSucceed()
     {
         var expectedResult = new PagedResult<ProductCategoryResponse>(
-            items:[ new ProductCategoryResponse { Id = 1, Name = "Category 1", Description = "Desc" }, new ProductCategoryResponse
+            items: [ new ProductCategoryResponse { Id = 1, Name = "Category 1", Description = "Desc" }, new ProductCategoryResponse
             {
                 Id = 2,
                 Name = "Category 2",

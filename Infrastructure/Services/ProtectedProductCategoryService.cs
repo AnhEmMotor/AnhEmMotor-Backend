@@ -4,9 +4,6 @@ using Microsoft.Extensions.Configuration;
 
 namespace Infrastructure.Services;
 
-/// <summary>
-/// Implementation service để kiểm tra danh mục sản phẩm có được bảo vệ không
-/// </summary>
 public class ProtectedProductCategoryService(
     IProductCategoryReadRepository readRepository,
     IConfiguration configuration) : IProtectedProductCategoryService

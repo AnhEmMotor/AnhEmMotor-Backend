@@ -1,13 +1,7 @@
 namespace Domain.Constants.Permission;
 
-/// <summary>
-/// Định nghĩa các quyền trong hệ thống với metadata (tên, mô tả)
-/// </summary>
 public static class PermissionsList
 {
-    /// <summary>
-    /// Quyền quản lý thương hiệu
-    /// </summary>
     public static class Brands
     {
         public const string View = "Permissions.Brands.View";
@@ -16,9 +10,6 @@ public static class PermissionsList
         public const string Delete = "Permissions.Brands.Delete";
     }
 
-    /// <summary>
-    /// Quyền quản lý sản phẩm
-    /// </summary>
     public static class Products
     {
         public const string View = "Permissions.Products.View";
@@ -29,9 +20,6 @@ public static class PermissionsList
         public const string ChangeStatus = "Permissions.Products.ChangeStatus";
     }
 
-    /// <summary>
-    /// Quyền quản lý danh mục sản phẩm
-    /// </summary>
     public static class ProductCategories
     {
         public const string View = "Permissions.ProductCategories.View";
@@ -40,9 +28,6 @@ public static class PermissionsList
         public const string Delete = "Permissions.ProductCategories.Delete";
     }
 
-    /// <summary>
-    /// Quyền quản lý nhà cung cấp
-    /// </summary>
     public static class Suppliers
     {
         public const string View = "Permissions.Suppliers.View";
@@ -51,9 +36,6 @@ public static class PermissionsList
         public const string Delete = "Permissions.Suppliers.Delete";
     }
 
-    /// <summary>
-    /// Quyền quản lý đơn nhập hàng
-    /// </summary>
     public static class Inputs
     {
         public const string View = "Permissions.Inputs.View";
@@ -63,9 +45,6 @@ public static class PermissionsList
         public const string ChangeStatus = "Permissions.Inputs.ChangeStatus";
     }
 
-    /// <summary>
-    /// Quyền quản lý đơn xuất hàng
-    /// </summary>
     public static class Outputs
     {
         public const string View = "Permissions.Outputs.View";
@@ -75,9 +54,6 @@ public static class PermissionsList
         public const string ChangeStatus = "Permissions.Outputs.ChangeStatus";
     }
 
-    /// <summary>
-    /// Quyền quản lý tệp tin
-    /// </summary>
     public static class Files
     {
         public const string View = "Permissions.Files.View";
@@ -85,27 +61,18 @@ public static class PermissionsList
         public const string Delete = "Permissions.Files.Delete";
     }
 
-    /// <summary>
-    /// Quyền quản lý cài đặt
-    /// </summary>
     public static class Settings
     {
         public const string View = "Permissions.Settings.View";
         public const string Edit = "Permissions.Settings.Edit";
     }
 
-    /// <summary>
-    /// Quyền xem thống kê
-    /// </summary>
     public static class Statistical
     {
         public const string View = "Permissions.Statistical.View";
         public const string Export = "Permissions.Statistical.Export";
     }
 
-    /// <summary>
-    /// Quyền quản lý vai trò và phân quyền
-    /// </summary>
     public static class Roles
     {
         public const string View = "Permissions.Roles.View";
@@ -115,9 +82,6 @@ public static class PermissionsList
         public const string AssignPermissions = "Permissions.Roles.AssignPermissions";
     }
 
-    /// <summary>
-    /// Quyền quản lý người dùng
-    /// </summary>
     public static class Users
     {
         public const string View = "Permissions.Users.View";
@@ -133,9 +97,6 @@ public static class PermissionsList
         public const string DoAnything = "Permissions.Test.DoAnything";
     }
 
-    /// <summary>
-    /// Metadata của các permissions (tên hiển thị, mô tả)
-    /// </summary>
     private static readonly Dictionary<string, PermissionMetadata> PermissionMetadataMap = new()
     {
         { Brands.View, new PermissionMetadata("View Brands", "Xem danh sách thương hiệu") },
@@ -204,11 +165,6 @@ public static class PermissionsList
         { Test.DoAnything, new PermissionMetadata("Do Anything", "Thực hiện bất cứ việc gì") },
     };
 
-    /// <summary>
-    /// Lấy metadata (tên hiển thị, mô tả) của một permission
-    /// </summary>
-    /// <param name="permissionName">Tên permission</param>
-    /// <returns>Metadata chứa DisplayName và Description, hoặc null nếu không tìm thấy</returns>
     public static PermissionMetadata? GetMetadata(string permissionName)
     { return PermissionMetadataMap.TryGetValue(permissionName, out var metadata) ? metadata : null; }
 }
