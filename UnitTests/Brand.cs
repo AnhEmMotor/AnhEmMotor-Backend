@@ -210,7 +210,7 @@ public class Brand
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<Domain.Constants.DataFetchMode>())).ReturnsAsync(brand);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -228,7 +228,7 @@ public class Brand
             .ReturnsAsync((BrandEntities?)null);
 
         // Act & Assert
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
 

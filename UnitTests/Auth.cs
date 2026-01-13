@@ -69,7 +69,7 @@ public class Auth
         var command = new RegisterCommand { Username = "user", Email = "email@test.com", Password = "pass", FullName = "name", PhoneNumber = "phone", Gender = "Male" };
 
         // Act & Assert
-        await Assert.ThrowsAsync<Exception>(() => handler.Handle(command, CancellationToken.None));
+        await Assert.ThrowsAsync<Exception>(() => handler.Handle(command, CancellationToken.None)).ConfigureAwait(true);
     }
 #pragma warning restore CRR0035
 }

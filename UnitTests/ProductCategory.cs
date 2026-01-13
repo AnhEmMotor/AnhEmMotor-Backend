@@ -1,4 +1,4 @@
-using Application.Features.ProductCategories.Commands.CreateProductCategory;
+﻿using Application.Features.ProductCategories.Commands.CreateProductCategory;
 using Application.Features.ProductCategories.Commands.DeleteProductCategory;
 using Application.Features.ProductCategories.Commands.UpdateProductCategory;
 using Application.Features.ProductCategories.Commands.RestoreProductCategory;
@@ -43,13 +43,13 @@ public class ProductCategory
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>())).Returns(new List<ProductCategoryEntity>().AsQueryable());
 
         // Act
-        var resultObj = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         resultObj.Value.Should().NotBeNull();
         resultObj.Value.Name.Should().Be("Điện thoại");
         resultObj.Value.Description.Should().Be("Các sản phẩm điện thoại");
-        _insertRepoMock.Verify(x => x.Add(It.Is<ProductCategoryEntity>(c => c.Name == "Điện thoại")), Times.Once);
+        _insertRepoMock.Verify(x => x.Add(It.Is<ProductCategoryEntity>(c => string.Compare(c.Name, "Điện thoại") == 0)), Times.Once);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -64,7 +64,7 @@ public class ProductCategory
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>())).Returns(new List<ProductCategoryEntity>().AsQueryable());
 
         // Act
-        var resultObj = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         resultObj.Value.Should().NotBeNull();
@@ -83,7 +83,7 @@ public class ProductCategory
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>())).Returns(new List<ProductCategoryEntity>().AsQueryable());
 
         // Act
-        var resultObj = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         resultObj.Value.Should().NotBeNull();
@@ -101,7 +101,7 @@ public class ProductCategory
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>())).Returns(new List<ProductCategoryEntity>().AsQueryable());
 
         // Act
-        var resultObj = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         resultObj.Value.Should().NotBeNull();
@@ -118,7 +118,7 @@ public class ProductCategory
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>())).Returns(new List<ProductCategoryEntity>().AsQueryable());
 
         // Act
-        var resultObj = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         resultObj.Value.Should().NotBeNull();
@@ -135,7 +135,7 @@ public class ProductCategory
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>())).Returns(new List<ProductCategoryEntity>().AsQueryable());
 
         // Act
-        var resultObj = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         resultObj.Value.Should().NotBeNull();
@@ -184,7 +184,7 @@ public class ProductCategory
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>())).Returns(existingCategories);
 
         // Act & Assert
-        var resultObj = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         resultObj.IsFailure.Should().BeTrue();
     }
 
@@ -202,7 +202,7 @@ public class ProductCategory
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>())).Returns(existingCategories);
 
         // Act & Assert
-        var resultObj = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         resultObj.IsFailure.Should().BeTrue();
     }
 
@@ -220,7 +220,7 @@ public class ProductCategory
         _readRepoMock.Setup(x => x.GetQueryable(Domain.Constants.DataFetchMode.All)).Returns(existingCategories);
 
         // Act & Assert
-        var resultObj = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         resultObj.IsFailure.Should().BeTrue();
     }
 
@@ -234,7 +234,7 @@ public class ProductCategory
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>())).Returns(new List<ProductCategoryEntity>().AsQueryable());
 
         // Act
-        var resultObj = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         resultObj.Value.Should().NotBeNull();
@@ -254,14 +254,14 @@ public class ProductCategory
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>())).Returns(new List<ProductCategoryEntity>().AsQueryable());
 
         // Act
-        var resultObj = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         resultObj.Value.Should().NotBeNull();
         resultObj.Value!.Name.Should().Be("Updated Name");
         resultObj.Value.Description.Should().Be("Updated Description");
         resultObj.IsSuccess.Should().BeTrue();
-        _updateRepoMock.Verify(x => x.Update(It.Is<ProductCategoryEntity>(c => c.Name == "Updated Name")), Times.Once);
+        _updateRepoMock.Verify(x => x.Update(It.Is<ProductCategoryEntity>(c => string.Compare(c.Name, "Updated Name") == 0)), Times.Once);
     }
 
     [Fact(DisplayName = "PC_014 - Cập nhật danh mục sản phẩm chỉ Name")]
@@ -276,7 +276,7 @@ public class ProductCategory
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>())).Returns(new List<ProductCategoryEntity>().AsQueryable());
 
         // Act
-        var resultObj = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         resultObj.Value.Should().NotBeNull();
@@ -297,7 +297,7 @@ public class ProductCategory
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>())).Returns(new List<ProductCategoryEntity>().AsQueryable());
 
         // Act
-        var resultObj = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         resultObj.Value.Should().NotBeNull();
@@ -337,7 +337,7 @@ public class ProductCategory
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>())).Returns(existingCategories);
 
         // Act
-        var resultObj = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         resultObj.IsFailure.Should().BeTrue();
@@ -354,7 +354,7 @@ public class ProductCategory
             .ReturnsAsync((ProductCategoryEntity?)null);
 
         // Act
-        var resultObj = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         resultObj.IsFailure.Should().BeTrue();
@@ -371,7 +371,7 @@ public class ProductCategory
             .ReturnsAsync(new ProductCategoryEntity { Id = 7, Name = "Deleted", DeletedAt = DateTime.UtcNow });
 
         // Act
-        var resultObj = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         resultObj.IsFailure.Should().BeTrue();
@@ -390,7 +390,7 @@ public class ProductCategory
             .ReturnsAsync(false);
 
         // Act
-        var resultObj = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         resultObj.IsSuccess.Should().BeTrue();
@@ -409,7 +409,7 @@ public class ProductCategory
             .ReturnsAsync((ProductCategoryEntity?)null);
 
         // Act
-        var resultObj = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         resultObj.IsFailure.Should().BeTrue();
@@ -426,7 +426,7 @@ public class ProductCategory
             .ReturnsAsync(new ProductCategoryEntity { Id = 9, Name = "Already Deleted", DeletedAt = DateTime.UtcNow });
 
         // Act
-        var resultObj = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         resultObj.IsFailure.Should().BeTrue();
@@ -443,7 +443,7 @@ public class ProductCategory
             .ReturnsAsync(new ProductCategoryEntity { Id = 10, Name = "To Restore", DeletedAt = DateTime.UtcNow });
 
         // Act
-        var resultObj = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         resultObj.IsSuccess.Should().BeTrue();
@@ -463,7 +463,7 @@ public class ProductCategory
             .ReturnsAsync((ProductCategoryEntity?)null);
 
         // Act
-        var resultObj = await handler.Handle(command, CancellationToken.None);
+        var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         resultObj.IsFailure.Should().BeTrue();

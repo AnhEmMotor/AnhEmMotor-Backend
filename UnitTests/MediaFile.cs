@@ -81,7 +81,7 @@ public class MediaFile
         };
 
         // Act
-        var result = await handler.Handle(pdfCommand, CancellationToken.None);
+        var result = await handler.Handle(pdfCommand, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
 
         // Assert
@@ -97,7 +97,7 @@ public class MediaFile
             FileName = "text.txt"
         };
 
-        result = await handler.Handle(txtCommand, CancellationToken.None);
+        result = await handler.Handle(txtCommand, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
         
 
@@ -109,7 +109,7 @@ public class MediaFile
             FileName = "fake.webp"
         };
 
-        result = await handler.Handle(fakeWebpCommand, CancellationToken.None);
+        result = await handler.Handle(fakeWebpCommand, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
         
     }
@@ -395,7 +395,7 @@ public class MediaFile
         var query = new ViewImageQuery { StoragePath = "nonexistent.webp" };
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
 
         // Assert
@@ -416,7 +416,7 @@ public class MediaFile
         var query = new ViewImageQuery { StoragePath = "deleted-image.webp" };
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
 
         // Assert
@@ -434,7 +434,7 @@ public class MediaFile
         var query = new ViewImageQuery { StoragePath = "test.webp", Width = -100 };
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
 
         // Assert - Validation sáº½ catch trÆ°á»›c khi vÃ o handler
@@ -452,7 +452,7 @@ public class MediaFile
         var query = new ViewImageQuery { StoragePath = "test.webp", Width = 50000 };
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
 
         // Assert
@@ -603,7 +603,7 @@ public class MediaFile
         var query = new GetFileByIdQuery { Id = 999999 };
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
 
         // Assert
@@ -628,7 +628,7 @@ public class MediaFile
         var query = new GetFileByIdQuery { Id = 456 };
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
 
         // Assert - File Ä‘Ã£ bá»‹ xoÃ¡ => khÃ´ng tÃ¬m tháº¥y trong ActiveOnly
@@ -677,12 +677,6 @@ public class MediaFile
         var fileStorageServiceMock = new Mock<IFileStorageService>();
         var insertRepositoryMock = new Mock<IMediaFileInsertRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
-
-        var savedResults = new List<(string, string)>
-    {
-        ("img1.webp", ".webp"),
-        ("img2.webp", ".webp")
-    };
 
         fileStorageServiceMock
             .Setup(x => x.SaveFileAsync(

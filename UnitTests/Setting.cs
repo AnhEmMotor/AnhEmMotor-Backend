@@ -217,7 +217,7 @@ public class Setting
         var query = new GetAllSettingsQuery();
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -249,13 +249,13 @@ public class Setting
         } };
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         _settingRepoMock.Verify(x => x.Update(It.Is<IEnumerable<SettingEntity>>(s => 
             s.Count() == 2 &&
-            s.Any(setting => setting.Key == "Deposit_ratio" && setting.Value == "50") &&
-            s.Any(setting => setting.Key == "Inventory_alert_level" && setting.Value == "10")
+            s.Any(setting => string.Compare(setting.Key, "Deposit_ratio") == 0 && string.Compare(setting.Value, "50") == 0) &&
+            s.Any(setting => string.Compare(setting.Key, "Inventory_alert_level") == 0 && string.Compare(setting.Value, "10") == 0)
         )), Times.Once);
         
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);

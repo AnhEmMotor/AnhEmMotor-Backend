@@ -26,32 +26,6 @@ namespace UnitTests;
 
 public class PermissionAndRole
 {
-    private static Mock<UserManager<ApplicationUser>> CreateUserManagerMock()
-    {
-        var userStoreMock = new Mock<IUserStore<ApplicationUser>>();
-        return new Mock<UserManager<ApplicationUser>>(
-            userStoreMock.Object,
-            Mock.Of<IOptions<IdentityOptions>>(),
-            Mock.Of<IPasswordHasher<ApplicationUser>>(),
-            Array.Empty<IUserValidator<ApplicationUser>>(),
-            Array.Empty<IPasswordValidator<ApplicationUser>>(),
-            Mock.Of<ILookupNormalizer>(),
-            Mock.Of<IdentityErrorDescriber>(),
-            Mock.Of<IServiceProvider>(),
-            Mock.Of<ILogger<UserManager<ApplicationUser>>>());
-    }
-
-    private static Mock<RoleManager<ApplicationRole>> CreateRoleManagerMock()
-    {
-        var roleStoreMock = new Mock<IRoleStore<ApplicationRole>>();
-        return new Mock<RoleManager<ApplicationRole>>(
-            roleStoreMock.Object,
-            Array.Empty<IRoleValidator<ApplicationRole>>(),
-            Mock.Of<ILookupNormalizer>(),
-            Mock.Of<IdentityErrorDescriber>(),
-            Mock.Of<ILogger<RoleManager<ApplicationRole>>>());
-    }
-
 #pragma warning disable CRR0035
     [Fact(DisplayName = "PERM_001 - Lấy tất cả permissions thành công")]
     public async Task GetAllPermissions_NoParams_ReturnsGroupedPermissions()
@@ -61,7 +35,7 @@ public class PermissionAndRole
         var query = new GetAllPermissionsQuery();
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -76,7 +50,6 @@ public class PermissionAndRole
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var roleId = Guid.NewGuid();
 
         var userReadRepoMock = new Mock<IUserReadRepository>();
         var roleReadRepoMock = new Mock<IRoleReadRepository>();
@@ -84,8 +57,8 @@ public class PermissionAndRole
         var user = new ApplicationUser { Id = userId, UserName = "testuser", Email = "test@example.com" };
         userReadRepoMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
-        userReadRepoMock.Setup(x => x.GetRolesOfUserAsync(user))
-            .ReturnsAsync(new List<string> { "Manager" });
+        userReadRepoMock.Setup(x => x.GetRolesOfUserAsync(user, CancellationToken.None))
+            .ReturnsAsync(["Manager"]);
 
         var roles = new List<ApplicationRole> { new() { Id = Guid.NewGuid(), Name = "Manager" } };
         roleReadRepoMock.Setup(x => x.GetRolesByNameAsync(It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
@@ -107,7 +80,7 @@ public class PermissionAndRole
         var query = new GetMyPermissionsQuery { UserId = userId.ToString() };
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -127,17 +100,17 @@ public class PermissionAndRole
         var user = new ApplicationUser { Id = userId, UserName = "testuser", Email = "test@example.com" };
         userReadRepoMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
-        userReadRepoMock.Setup(x => x.GetRolesOfUserAsync(user))
-            .ReturnsAsync(new List<string>());
+        userReadRepoMock.Setup(x => x.GetRolesOfUserAsync(user, CancellationToken.None))
+            .ReturnsAsync([]);
 
         roleReadRepoMock.Setup(x => x.GetRolesByNameAsync(It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<ApplicationRole>());
+            .ReturnsAsync([]);
 
         var handler = new GetMyPermissionsQueryHandler(roleReadRepoMock.Object, userReadRepoMock.Object);
         var query = new GetMyPermissionsQuery { UserId = userId.ToString() };
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -150,7 +123,6 @@ public class PermissionAndRole
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var roleId = Guid.NewGuid();
 
         var userReadRepoMock = new Mock<IUserReadRepository>();
         var roleReadRepoMock = new Mock<IRoleReadRepository>();
@@ -158,8 +130,8 @@ public class PermissionAndRole
         var user = new ApplicationUser { Id = userId, UserName = "staffuser", Email = "staff@test.com" };
         userReadRepoMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
-        userReadRepoMock.Setup(x => x.GetRolesOfUserAsync(user))
-            .ReturnsAsync(new List<string> { "Staff" });
+        userReadRepoMock.Setup(x => x.GetRolesOfUserAsync(user, CancellationToken.None))
+            .ReturnsAsync(["Staff"]);
 
         var roles = new List<ApplicationRole> { new() { Id = Guid.NewGuid(), Name = "Staff" } };
         roleReadRepoMock.Setup(x => x.GetRolesByNameAsync(It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
@@ -179,7 +151,7 @@ public class PermissionAndRole
         var query = new GetUserPermissionsByIdQuery { UserId = userId };
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -204,7 +176,7 @@ public class PermissionAndRole
         var query = new GetUserPermissionsByIdQuery { UserId = userId };
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
 
@@ -216,7 +188,7 @@ public class PermissionAndRole
         var roleReadRepoMock = new Mock<IRoleReadRepository>();
 
         var role = new ApplicationRole { Id = roleId, Name = "Manager" };
-        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("Manager"))
+        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("Manager", CancellationToken.None))
             .ReturnsAsync(role);
 
         var permissions = new List<string>
@@ -234,7 +206,7 @@ public class PermissionAndRole
         var query = new GetRolePermissionsQuery { RoleName = "Manager" };
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -247,14 +219,14 @@ public class PermissionAndRole
         // Arrange
         var roleReadRepoMock = new Mock<IRoleReadRepository>();
 
-        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("NonExistentRole"))
+        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("NonExistentRole", CancellationToken.None))
             .ReturnsAsync((ApplicationRole?)null);
 
         var handler = new GetRolePermissionsQueryHandler(roleReadRepoMock.Object);
         var query = new GetRolePermissionsQuery { RoleName = "NonExistentRole" };
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
 
@@ -266,7 +238,7 @@ public class PermissionAndRole
         var roleReadRepoMock = new Mock<IRoleReadRepository>();
 
         var role = new ApplicationRole { Id = roleId, Name = "Manager" };
-        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("Manager"))
+        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("Manager", CancellationToken.None))
             .ReturnsAsync(role);
 
         var permissions = new List<string>
@@ -282,7 +254,7 @@ public class PermissionAndRole
         var query = new GetRolePermissionsQuery { RoleName = "  Manager  " };
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -309,11 +281,11 @@ public class PermissionAndRole
             It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(permissions);
 
-        roleReadRepoMock.Setup(x => x.IsRoleExistAsync("NewRole"))
+        roleReadRepoMock.Setup(x => x.IsRoleExistAsync("NewRole", CancellationToken.None))
             .ReturnsAsync(false);
 
         var createdRole = new ApplicationRole { Id = Guid.NewGuid(), Name = "NewRole", Description = "Test role" };
-        roleInsertRepoMock.Setup(x => x.CreateAsync(It.IsAny<ApplicationRole>()))
+        roleInsertRepoMock.Setup(x => x.CreateAsync(It.IsAny<ApplicationRole>(), CancellationToken.None))
             .ReturnsAsync(IdentityResult.Success)
             .Callback<ApplicationRole>(r => { r.Id = createdRole.Id; });
 
@@ -341,7 +313,7 @@ public class PermissionAndRole
         var roleUpdateRepoMock = new Mock<IRoleUpdateRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
 
-        roleReadRepoMock.Setup(x => x.IsRoleExistAsync("Manager"))
+        roleReadRepoMock.Setup(x => x.IsRoleExistAsync("Manager", CancellationToken.None))
             .ReturnsAsync(true);
 
         var handler = new CreateRoleCommandHandler(roleReadRepoMock.Object, roleInsertRepoMock.Object, permissionRepoMock.Object, roleUpdateRepoMock.Object, unitOfWorkMock.Object);
@@ -433,7 +405,7 @@ public class PermissionAndRole
         var roleUpdateRepoMock = new Mock<IRoleUpdateRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
 
-        roleReadRepoMock.Setup(x => x.IsRoleExistAsync("InvalidPermRole"))
+        roleReadRepoMock.Setup(x => x.IsRoleExistAsync("InvalidPermRole", CancellationToken.None))
             .ReturnsAsync(false);
 
         permissionRepoMock.Setup(x => x.GetPermissionsByNamesAsync(
@@ -485,7 +457,7 @@ public class PermissionAndRole
         var unitOfWorkMock = new Mock<IUnitOfWork>();
 
         var role = new ApplicationRole { Id = roleId, Name = "Manager", Description = "Old description" };
-        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("Manager"))
+        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("Manager", CancellationToken.None))
             .ReturnsAsync(role);
 
         var handler = new Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommandHandler(roleReadRepoMock.Object, roleUpdateRepoMock.Object, permissionRepoMock.Object, unitOfWorkMock.Object);
@@ -512,7 +484,7 @@ public class PermissionAndRole
         var unitOfWorkMock = new Mock<IUnitOfWork>();
 
         var role = new ApplicationRole { Id = roleId, Name = "Manager", Description = "Test" };
-        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("Manager"))
+        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("Manager", CancellationToken.None))
             .ReturnsAsync(role);
 
         var oldPermissions = new List<RolePermission>
@@ -564,7 +536,7 @@ public class PermissionAndRole
         var unitOfWorkMock = new Mock<IUnitOfWork>();
 
         var role = new ApplicationRole { Id = roleId, Name = "Manager", Description = "Original description" };
-        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("Manager"))
+        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("Manager", CancellationToken.None))
             .ReturnsAsync(role);
 
         var handler = new Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommandHandler(roleReadRepoMock.Object, roleUpdateRepoMock.Object, permissionRepoMock.Object, unitOfWorkMock.Object);
@@ -593,7 +565,7 @@ public class PermissionAndRole
         var roleUpdateRepoMock = new Mock<IRoleUpdateRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
 
-        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("NonExistentRole"))
+        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("NonExistentRole", CancellationToken.None))
             .ReturnsAsync((ApplicationRole?)null);
 
         var handler = new Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommandHandler(roleReadRepoMock.Object, roleUpdateRepoMock.Object, permissionRepoMock.Object, unitOfWorkMock.Object);
@@ -618,11 +590,11 @@ public class PermissionAndRole
         var protectedEntityServiceMock = new Mock<IProtectedEntityManagerService>();
 
         var role = new ApplicationRole { Id = roleId, Name = "OldRole" };
-        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("OldRole"))
+        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("OldRole", CancellationToken.None))
             .ReturnsAsync(role);
-        roleReadRepoMock.Setup(x => x.GetUsersInRoleAsync("OldRole"))
-            .ReturnsAsync(new List<ApplicationUser>());
-        roleDeleteRepoMock.Setup(x => x.DeleteAsync(role))
+        roleReadRepoMock.Setup(x => x.GetUsersInRoleAsync("OldRole", CancellationToken.None))
+            .ReturnsAsync([]);
+        roleDeleteRepoMock.Setup(x => x.DeleteAsync(role, CancellationToken.None))
             .ReturnsAsync(IdentityResult.Success);
 
         var handler = new DeleteRoleCommandHandler(roleReadRepoMock.Object, roleDeleteRepoMock.Object, protectedEntityServiceMock.Object);
@@ -634,7 +606,7 @@ public class PermissionAndRole
         // Assert
         result.Should().NotBeNull();
         result.Value.Message.Should().Contain("successfully");
-        roleDeleteRepoMock.Verify(x => x.DeleteAsync(role), Times.Once);
+        roleDeleteRepoMock.Verify(x => x.DeleteAsync(role, CancellationToken.None), Times.Once);
     }
 
     [Fact(DisplayName = "PERM_020 - Xóa nhiều roles thành công")]
@@ -650,14 +622,14 @@ public class PermissionAndRole
         var role2 = new ApplicationRole { Id = Guid.NewGuid(), Name = "Role2" };
         var role3 = new ApplicationRole { Id = Guid.NewGuid(), Name = "Role3" };
 
-        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("Role1")).ReturnsAsync(role1);
-        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("Role2")).ReturnsAsync(role2);
-        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("Role3")).ReturnsAsync(role3);
+        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("Role1", CancellationToken.None)).ReturnsAsync(role1);
+        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("Role2", CancellationToken.None)).ReturnsAsync(role2);
+        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("Role3", CancellationToken.None)).ReturnsAsync(role3);
 
         userReadRepoMock.Setup(x => x.GetUsersInRoleAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<ApplicationUser>());
+            .ReturnsAsync([]);
 
-        roleDeleteRepoMock.Setup(x => x.DeleteAsync(It.IsAny<ApplicationRole>()))
+        roleDeleteRepoMock.Setup(x => x.DeleteAsync(It.IsAny<ApplicationRole>(), CancellationToken.None))
             .ReturnsAsync(IdentityResult.Success);
 
         var handler = new DeleteMultipleRolesCommandHandler(roleReadRepoMock.Object, userReadRepoMock.Object, roleDeleteRepoMock.Object, protectedEntityServiceMock.Object);

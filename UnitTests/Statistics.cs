@@ -44,7 +44,7 @@ public class Statistics
         var handler = new GetDailyRevenueQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -67,7 +67,7 @@ public class Statistics
         var handler = new GetDailyRevenueQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Value.Should().HaveCount(1);
@@ -92,7 +92,7 @@ public class Statistics
         var handler = new GetDailyRevenueQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         var total = result.Value.Sum(x => x.TotalRevenue);
@@ -120,7 +120,7 @@ public class Statistics
         var handler = new GetDailyRevenueQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Value.Should().HaveCount(5);
@@ -144,7 +144,7 @@ public class Statistics
         var handler = new GetDailyRevenueQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Value.First().TotalRevenue.Should().Be(1234567.89m);
@@ -162,7 +162,7 @@ public class Statistics
         var handler = new GetDailyRevenueQueryHandler(_repositoryMock.Object);
 
         // Act
-        await handler.Handle(query, CancellationToken.None);
+        await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         _repositoryMock.Verify(r => r.GetDailyRevenueAsync(10, It.IsAny<CancellationToken>()), Times.Once);
@@ -179,7 +179,7 @@ public class Statistics
         var handler = new GetDailyRevenueQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -207,7 +207,7 @@ public class Statistics
         var handler = new GetDailyRevenueQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Value.Should().HaveCount(3);
@@ -234,7 +234,7 @@ public class Statistics
         var handler = new GetDashboardStatsQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -260,7 +260,7 @@ public class Statistics
         var handler = new GetDashboardStatsQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Value!.LastMonthProfit.Should().Be(12000000);
@@ -285,7 +285,7 @@ public class Statistics
         var handler = new GetDashboardStatsQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Value!.PendingOrdersCount.Should().Be(15);
@@ -310,7 +310,7 @@ public class Statistics
         var handler = new GetDashboardStatsQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Value!.NewCustomersCount.Should().Be(25);
@@ -335,7 +335,7 @@ public class Statistics
         var handler = new GetDashboardStatsQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Value!.LastMonthProfit.Should().Be(-5000000);
@@ -360,7 +360,7 @@ public class Statistics
         var handler = new GetDashboardStatsQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Value!.LastMonthRevenue.Should().Be(0);
@@ -380,7 +380,7 @@ public class Statistics
         var handler = new GetDashboardStatsQueryHandler(_repositoryMock.Object);
 
         // Act
-        await handler.Handle(query, CancellationToken.None);
+        await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         _repositoryMock.Verify(r => r.GetDashboardStatsAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -408,7 +408,7 @@ public class Statistics
         var handler = new GetMonthlyRevenueProfitQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Value.Should().HaveCount(12);
@@ -435,7 +435,7 @@ public class Statistics
         var handler = new GetMonthlyRevenueProfitQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Value.Should().HaveCount(1);
@@ -460,7 +460,7 @@ public class Statistics
         var handler = new GetMonthlyRevenueProfitQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Value.ElementAt(0).TotalProfit.Should().Be(4000000);
@@ -485,7 +485,7 @@ public class Statistics
         var handler = new GetMonthlyRevenueProfitQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Value.First().TotalProfit.Should().Be(0);
@@ -515,7 +515,7 @@ public class Statistics
         var handler = new GetMonthlyRevenueProfitQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Value.Should().HaveCount(6);
@@ -544,7 +544,7 @@ public class Statistics
         var handler = new GetMonthlyRevenueProfitQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Value.Should().HaveCount(5);
@@ -568,7 +568,7 @@ public class Statistics
         var handler = new GetMonthlyRevenueProfitQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Value.First().TotalProfit.Should().Be(1000000.77m);
@@ -586,7 +586,7 @@ public class Statistics
         var handler = new GetMonthlyRevenueProfitQueryHandler(_repositoryMock.Object);
 
         // Act
-        await handler.Handle(query, CancellationToken.None);
+        await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         _repositoryMock.Verify(r => r.GetMonthlyRevenueProfitAsync(8, It.IsAny<CancellationToken>()), Times.Once);
@@ -609,10 +609,10 @@ public class Statistics
         var handler = new GetOrderStatusCountsQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
-        var pendingCount = result.Value.First(x => x.StatusName == OrderStatus.Pending);
+        var pendingCount = result.Value.First(x => string.Compare(x.StatusName, OrderStatus.Pending) == 0);
         pendingCount.OrderCount.Should().Be(10);
     }
 
@@ -632,7 +632,7 @@ public class Statistics
         var handler = new GetOrderStatusCountsQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Value.First().OrderCount.Should().Be(15);
@@ -654,7 +654,7 @@ public class Statistics
         var handler = new GetOrderStatusCountsQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Value.First().OrderCount.Should().Be(8);
@@ -676,7 +676,7 @@ public class Statistics
         var handler = new GetOrderStatusCountsQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Value.First().OrderCount.Should().Be(5);
@@ -698,7 +698,7 @@ public class Statistics
         var handler = new GetOrderStatusCountsQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Value.First().OrderCount.Should().Be(50);
@@ -720,7 +720,7 @@ public class Statistics
         var handler = new GetOrderStatusCountsQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Value.First().OrderCount.Should().Be(3);
@@ -744,7 +744,7 @@ public class Statistics
         var handler = new GetOrderStatusCountsQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Value.All(x => x.OrderCount == 0).Should().BeTrue();
@@ -768,7 +768,7 @@ public class Statistics
         var handler = new GetOrderStatusCountsQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         var total = result.Value.Sum(x => x.OrderCount);
@@ -786,7 +786,7 @@ public class Statistics
         var handler = new GetOrderStatusCountsQueryHandler(_repositoryMock.Object);
 
         // Act
-        await handler.Handle(query, CancellationToken.None);
+        await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         _repositoryMock.Verify(r => r.GetOrderStatusCountsAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -815,7 +815,7 @@ public class Statistics
         var handler = new GetProductReportLastMonthQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Value.Should().HaveCount(10);
@@ -837,7 +837,7 @@ public class Statistics
         var handler = new GetProductReportLastMonthQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Value.First().SoldLastMonth.Should().Be(25);
@@ -859,7 +859,7 @@ public class Statistics
         var handler = new GetProductReportLastMonthQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Value.First().StockQuantity.Should().Be(150);
@@ -881,7 +881,7 @@ public class Statistics
         var handler = new GetProductReportLastMonthQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Value.First().SoldLastMonth.Should().Be(0);
@@ -904,7 +904,7 @@ public class Statistics
         var handler = new GetProductReportLastMonthQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Value.First().SoldLastMonth.Should().Be(50);
@@ -927,7 +927,7 @@ public class Statistics
         var handler = new GetProductReportLastMonthQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Value.First().ProductName.Should().Be("Xe máy Honda Wave");
@@ -950,11 +950,11 @@ public class Statistics
         var handler = new GetProductReportLastMonthQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Value.Should().HaveCount(2);
-        result.Value.Any(x => x.ProductName == "Deleted Product").Should().BeTrue();
+        result.Value.Any(x => string.Compare(x.ProductName, "Deleted Product") == 0).Should().BeTrue();
     }
 
     [Fact(DisplayName = "STAT_080 - Unit - GetProductReportLastMonthQueryHandler sắp xếp theo số lượng bán")]
@@ -975,7 +975,7 @@ public class Statistics
         var handler = new GetProductReportLastMonthQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Value.Should().BeInDescendingOrder(x => x.SoldLastMonth);
@@ -992,7 +992,7 @@ public class Statistics
         var handler = new GetProductReportLastMonthQueryHandler(_repositoryMock.Object);
 
         // Act
-        await handler.Handle(query, CancellationToken.None);
+        await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         _repositoryMock.Verify(r => r.GetProductReportLastMonthAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -1015,7 +1015,7 @@ public class Statistics
         var handler = new GetProductStockAndPriceQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -1040,7 +1040,7 @@ public class Statistics
         var handler = new GetProductStockAndPriceQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Value!.UnitPrice.Should().Be(0);
@@ -1064,7 +1064,7 @@ public class Statistics
         var handler = new GetProductStockAndPriceQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Value!.UnitPrice.Should().Be(1000000);
@@ -1088,7 +1088,7 @@ public class Statistics
         var handler = new GetProductStockAndPriceQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Value!.UnitPrice.Should().Be(1234567.89m);
@@ -1105,7 +1105,7 @@ public class Statistics
         var handler = new GetProductStockAndPriceQueryHandler(_repositoryMock.Object);
 
         // Act
-        await handler.Handle(query, CancellationToken.None);
+        await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         _repositoryMock.Verify(r => r.GetProductStockAndPriceAsync(15, It.IsAny<CancellationToken>()), Times.Once);
@@ -1122,7 +1122,7 @@ public class Statistics
         var handler = new GetProductStockAndPriceQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -1145,7 +1145,7 @@ public class Statistics
         var handler = new GetProductStockAndPriceQueryHandler(_repositoryMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();

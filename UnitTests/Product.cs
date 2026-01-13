@@ -1496,7 +1496,7 @@ public class Product
         var handler = new CheckSlugAvailabilityQueryHandler(_variantReadRepoMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -1513,7 +1513,7 @@ public class Product
         var handler = new CheckSlugAvailabilityQueryHandler(_variantReadRepoMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -1530,7 +1530,7 @@ public class Product
         var handler = new CheckSlugAvailabilityQueryHandler(_variantReadRepoMock.Object);
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();

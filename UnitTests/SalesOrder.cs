@@ -1,4 +1,4 @@
-using Application.ApiContracts.Output.Responses;
+﻿using Application.ApiContracts.Output.Responses;
 using Application.Features.Outputs.Commands.CreateOutput;
 using Application.Features.Outputs.Commands.CreateOutputByManager;
 using Application.Features.Outputs.Commands.DeleteOutput;
@@ -122,7 +122,7 @@ public class SalesOrder
         _insertRepoMock.Setup(x => x.Add(It.IsAny<Output>()))
             .Callback<Output>((output) => capturedOutput = output);
 
-        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         capturedOutput.Should().NotBeNull();
         capturedOutput!.OutputInfos.Should().HaveCount(2);
@@ -151,7 +151,7 @@ public class SalesOrder
         _insertRepoMock.Setup(x => x.Add(It.IsAny<Output>()))
             .Callback<Output>((output) => capturedOutput = output);
 
-        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         capturedOutput.Should().NotBeNull();
         capturedOutput!.OutputInfos.Should().HaveCount(3);
@@ -201,7 +201,7 @@ public class SalesOrder
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);
 
-        await handler.Handle(command, CancellationToken.None);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         existingOutput.StatusId.Should().Be("confirmed_cod");
         _updateRepoMock.Verify(x => x.Update(It.IsAny<Output>()), Times.Once);
@@ -227,7 +227,7 @@ public class SalesOrder
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);
 
-        await handler.Handle(command, CancellationToken.None);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         existingOutput.StatusId.Should().Be("confirmed_cod");
         _updateRepoMock.Verify(x => x.Update(It.IsAny<Output>()), Times.Once);
@@ -252,7 +252,7 @@ public class SalesOrder
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);
 
-        await handler.Handle(command, CancellationToken.None);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         existingOutput.StatusId.Should().Be("delivering");
         _updateRepoMock.Verify(x => x.Update(It.IsAny<Output>()), Times.Once);
@@ -277,7 +277,7 @@ public class SalesOrder
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);
 
-        await handler.Handle(command, CancellationToken.None);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         existingOutput.StatusId.Should().Be("completed");
         _updateRepoMock.Verify(x => x.Update(It.IsAny<Output>()), Times.Once);
@@ -302,7 +302,7 @@ public class SalesOrder
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);
 
-        await handler.Handle(command, CancellationToken.None);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         existingOutput.StatusId.Should().Be("deposit_50");
         _updateRepoMock.Verify(x => x.Update(It.IsAny<Output>()), Times.Once);
@@ -327,7 +327,7 @@ public class SalesOrder
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);
 
-        await handler.Handle(command, CancellationToken.None);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         existingOutput.StatusId.Should().Be("confirmed_50");
         _updateRepoMock.Verify(x => x.Update(It.IsAny<Output>()), Times.Once);
@@ -352,7 +352,7 @@ public class SalesOrder
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);
 
-        await handler.Handle(command, CancellationToken.None);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         existingOutput.StatusId.Should().Be("delivering");
         _updateRepoMock.Verify(x => x.Update(It.IsAny<Output>()), Times.Once);
@@ -377,7 +377,7 @@ public class SalesOrder
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);
 
-        await handler.Handle(command, CancellationToken.None);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         existingOutput.StatusId.Should().Be("refund");
         _updateRepoMock.Verify(x => x.Update(It.IsAny<Output>()), Times.Once);
@@ -426,7 +426,7 @@ public class SalesOrder
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);
 
-        await handler.Handle(command, CancellationToken.None);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         existingOutput.LastStatusChangedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
     }
@@ -451,7 +451,7 @@ public class SalesOrder
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);
 
-        await handler.Handle(command, CancellationToken.None);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         existingOutput.FinishedBy.Should().Be(currentUserId);
     }
@@ -528,7 +528,7 @@ public class SalesOrder
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);
 
-        await handler.Handle(command, CancellationToken.None);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         _updateRepoMock.Verify(x => x.Update(It.IsAny<Output>()), Times.Once);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -554,7 +554,7 @@ public class SalesOrder
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);
 
-        await handler.Handle(command, CancellationToken.None);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         _updateRepoMock.Verify(x => x.Update(It.IsAny<Output>()), Times.Once);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -574,7 +574,7 @@ public class SalesOrder
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);
 
-        await handler.Handle(command, CancellationToken.None);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         _deleteRepoMock.Verify(x => x.Delete(It.IsAny<Output>()), Times.Once);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -594,7 +594,7 @@ public class SalesOrder
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);
 
-        await handler.Handle(command, CancellationToken.None);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         existingOutput.DeletedAt.Should().NotBeNull();
         existingOutput.DeletedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
@@ -614,7 +614,7 @@ public class SalesOrder
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), DataFetchMode.All))
             .ReturnsAsync(deletedOutput);
 
-        await handler.Handle(command, CancellationToken.None);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         deletedOutput.DeletedAt.Should().BeNull();
         _updateRepoMock.Verify(x => x.Update(It.IsAny<Output>()), Times.Once);
@@ -639,7 +639,7 @@ public class SalesOrder
         _readRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutputs);
 
-        await handler.Handle(command, CancellationToken.None);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         _deleteRepoMock.Verify(x => x.Delete(It.IsAny<IEnumerable<Output>>()), Times.Once);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -664,7 +664,7 @@ public class SalesOrder
         _readRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), DataFetchMode.All))
             .ReturnsAsync(deletedOutputs);
 
-        await handler.Handle(command, CancellationToken.None);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         deletedOutputs.Should().AllSatisfy(x => x.DeletedAt.Should().BeNull());
     }
@@ -692,7 +692,7 @@ public class SalesOrder
         _readRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutputs);
 
-        await handler.Handle(command, CancellationToken.None);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         existingOutputs.Should().AllSatisfy(x => x.StatusId.Should().Be("confirmed_cod"));
     }
@@ -708,7 +708,7 @@ public class SalesOrder
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);
 
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         result.Should().NotBeNull();
         result.Value!.Id.Should().Be(1);
@@ -732,7 +732,7 @@ public class SalesOrder
 
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(userOutputs);
 
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         result.Should().NotBeNull();
         _paginatorMock.Verify(x => x.ApplyAsync<Output, OutputResponse>(It.IsAny<IQueryable<Output>>(), It.IsAny<SieveModel>(), It.IsAny<DataFetchMode?>(), It.IsAny<CancellationToken>()), Times.Once);
@@ -755,7 +755,7 @@ public class SalesOrder
 
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(outputs);
 
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         result.Should().NotBeNull();
         _paginatorMock.Verify(x => x.ApplyAsync<Output, OutputResponse>(It.IsAny<IQueryable<Output>>(), It.IsAny<SieveModel>(), It.IsAny<DataFetchMode?>(), It.IsAny<CancellationToken>()), Times.Once);
@@ -778,7 +778,7 @@ public class SalesOrder
 
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(outputs);
 
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         result.Should().NotBeNull();
         _paginatorMock.Verify(x => x.ApplyAsync<Output, OutputResponse>(It.IsAny<IQueryable<Output>>(), It.IsAny<SieveModel>(), It.IsAny<DataFetchMode?>(), It.IsAny<CancellationToken>()), Times.Once);
@@ -801,7 +801,7 @@ public class SalesOrder
 
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(outputs);
 
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         result.Should().NotBeNull();
         _paginatorMock.Verify(x => x.ApplyAsync<Output, OutputResponse>(It.IsAny<IQueryable<Output>>(), It.IsAny<SieveModel>(), It.IsAny<DataFetchMode?>(), It.IsAny<CancellationToken>()), Times.Once);
@@ -824,7 +824,7 @@ public class SalesOrder
 
         _readRepoMock.Setup(x => x.GetQueryable(DataFetchMode.DeletedOnly)).Returns(deletedOutputs);
 
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         result.Should().NotBeNull();
         _paginatorMock.Verify(x => x.ApplyAsync<Output, OutputResponse>(It.IsAny<IQueryable<Output>>(), It.IsAny<SieveModel>(), It.IsAny<DataFetchMode?>(), It.IsAny<CancellationToken>()), Times.Once);
@@ -855,7 +855,7 @@ public class SalesOrder
         _insertRepoMock.Setup(x => x.Add(It.IsAny<Output>()))
             .Callback<Output>((output) => capturedOutput = output);
 
-        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         capturedOutput.Should().NotBeNull();
         capturedOutput!.OutputInfos.Should().HaveCount(4);
@@ -884,7 +884,7 @@ public class SalesOrder
         _insertRepoMock.Setup(x => x.Add(It.IsAny<Output>()))
             .Callback<Output>((output) => capturedOutput = output);
 
-        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         capturedOutput.Should().NotBeNull();
         capturedOutput!.OutputInfos.Should().HaveCount(2);
@@ -1047,7 +1047,7 @@ public class SalesOrder
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);
 
-        await handler.Handle(command, CancellationToken.None);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         existingOutput.FinishedBy.Should().Be(finishedBy);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -1073,7 +1073,7 @@ public class SalesOrder
         _insertRepoMock.Setup(x => x.Add(It.IsAny<Output>()))
             .Callback<Output>((output) => capturedOutput = output);
 
-        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         capturedOutput.Should().NotBeNull();
         capturedOutput!.CreatedBy.Should().Be(createdBy);
@@ -1089,7 +1089,7 @@ public class SalesOrder
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), DataFetchMode.ActiveOnly))
             .ReturnsAsync((Output?)null);
 
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         result.IsFailure.Should().BeTrue();
     }
@@ -1111,7 +1111,7 @@ public class SalesOrder
 
         _readRepoMock.Setup(x => x.GetQueryable(DataFetchMode.ActiveOnly)).Returns(outputs);
 
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         result.Should().NotBeNull();
         _readRepoMock.Verify(x => x.GetQueryable(DataFetchMode.ActiveOnly), Times.Once);
@@ -1267,7 +1267,7 @@ public class SalesOrder
 
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(outputs);
 
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         result.Should().NotBeNull();
         _paginatorMock.Verify(x => x.ApplyAsync<Output, OutputResponse>(It.IsAny<IQueryable<Output>>(), It.IsAny<SieveModel>(), It.IsAny<DataFetchMode?>(), It.IsAny<CancellationToken>()), Times.Once);
@@ -1290,7 +1290,7 @@ public class SalesOrder
 
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(outputs);
 
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         result.Should().NotBeNull();
         _paginatorMock.Verify(x => x.ApplyAsync<Output, OutputResponse>(It.IsAny<IQueryable<Output>>(), It.IsAny<SieveModel>(), It.IsAny<DataFetchMode?>(), It.IsAny<CancellationToken>()), Times.Once);
@@ -1373,7 +1373,7 @@ public class SalesOrder
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);
 
-        await handler.Handle(command, CancellationToken.None);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         existingOutput.StatusId.Should().Be("refund");
         _updateRepoMock.Verify(x => x.Update(It.IsAny<Output>()), Times.Once);
@@ -1426,7 +1426,7 @@ public class SalesOrder
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);
 
-        await handler.Handle(command, CancellationToken.None);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         existingOutput.Notes.Should().Be("Cập nhật: Giao vào sáng mai");
         _updateRepoMock.Verify(x => x.Update(It.IsAny<Output>()), Times.Once);
@@ -1449,7 +1449,7 @@ public class SalesOrder
 
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(outputs);
 
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         result.Should().NotBeNull();
         _paginatorMock.Verify(x => x.ApplyAsync<Output, OutputResponse>(It.IsAny<IQueryable<Output>>(), It.IsAny<SieveModel>(), It.IsAny<DataFetchMode?>(), It.IsAny<CancellationToken>()), Times.Once);
@@ -1472,7 +1472,7 @@ public class SalesOrder
 
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(outputs);
 
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         result.Should().NotBeNull();
         _paginatorMock.Verify(x => x.ApplyAsync<Output, OutputResponse>(It.IsAny<IQueryable<Output>>(), It.IsAny<SieveModel>(), It.IsAny<DataFetchMode?>(), It.IsAny<CancellationToken>()), Times.Once);

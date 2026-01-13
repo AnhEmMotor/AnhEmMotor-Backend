@@ -53,7 +53,7 @@ public class User
         var query = new GetCurrentUserQuery() { UserId = userId.ToString() };
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().NotBeNull();
@@ -78,7 +78,7 @@ public class User
         var query = new GetCurrentUserQuery() { UserId = null };
 
         // Act & Assert
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
 
@@ -101,7 +101,7 @@ public class User
         var query = new GetCurrentUserQuery() { UserId = userId.ToString() };
 
         // Act & Assert
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
 
@@ -124,7 +124,7 @@ public class User
         var query = new GetCurrentUserQuery() { UserId = userId.ToString() };
 
         // Act & Assert
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
 
@@ -393,7 +393,7 @@ public class User
         // Assert
         result.Should().NotBeNull();
         // Verify Email khÃ´ng bá»‹ thay Ä‘á»•i (vÃ¬ khÃ´ng cÃ³ trong UpdateUserRequest)
-        _userUpdateRepositoryMock.Verify(x => x.UpdateUserAsync(It.Is<ApplicationUser>(u => u.Email == "old@example.com")), Times.Once);
+        _userUpdateRepositoryMock.Verify(x => x.UpdateUserAsync(It.Is<ApplicationUser>(u => string.Compare(u.Email, "old@example.com") == 0), CancellationToken.None), Times.Once);
     }
 
     [Fact(DisplayName = "USER_014 - Đổi mật khẩu thành công")]
