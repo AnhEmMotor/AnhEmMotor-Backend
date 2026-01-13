@@ -4,6 +4,7 @@ using Application.Features.ProductCategories.Commands.UpdateProductCategory;
 using Application.Features.ProductCategories.Commands.RestoreProductCategory;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductCategory;
+using Application.Interfaces.Services;
 using Domain.Entities;
 using FluentAssertions;
 using FluentValidation.TestHelper;
@@ -19,6 +20,7 @@ public class ProductCategory
     private readonly Mock<IProductCategoryUpdateRepository> _updateRepoMock;
     private readonly Mock<IProductCategoryDeleteRepository> _deleteRepoMock;
     private readonly Mock<IProductCategoryReadRepository> _readRepoMock;
+    private readonly Mock<IProtectedProductCategoryService> _protectedCategoryServiceMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
 
     public ProductCategory()
@@ -27,6 +29,7 @@ public class ProductCategory
         _updateRepoMock = new Mock<IProductCategoryUpdateRepository>();
         _deleteRepoMock = new Mock<IProductCategoryDeleteRepository>();
         _readRepoMock = new Mock<IProductCategoryReadRepository>();
+        _protectedCategoryServiceMock = new Mock<IProtectedProductCategoryService>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
     }
 
@@ -377,11 +380,13 @@ public class ProductCategory
     public async Task DeleteProductCategory_ValidId_ShouldSucceed()
     {
         // Arrange
-        var handler = new DeleteProductCategoryCommandHandler(_readRepoMock.Object, _deleteRepoMock.Object, _unitOfWorkMock.Object);
+        var handler = new DeleteProductCategoryCommandHandler(_readRepoMock.Object, _deleteRepoMock.Object, _protectedCategoryServiceMock.Object, _unitOfWorkMock.Object);
         var command = new DeleteProductCategoryCommand { Id = 8 };
 
         _readRepoMock.Setup(x => x.GetByIdAsync(8, It.IsAny<CancellationToken>(), It.IsAny<Domain.Constants.DataFetchMode>()))
             .ReturnsAsync(new ProductCategoryEntity { Id = 8, Name = "To Delete", DeletedAt = null });
+        _protectedCategoryServiceMock.Setup(x => x.IsProtectedAsync(8, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
 
         // Act
         var resultObj = await handler.Handle(command, CancellationToken.None);
@@ -396,7 +401,7 @@ public class ProductCategory
     public async Task DeleteProductCategory_NotFound_ShouldThrowException()
     {
         // Arrange
-        var handler = new DeleteProductCategoryCommandHandler(_readRepoMock.Object, _deleteRepoMock.Object, _unitOfWorkMock.Object);
+        var handler = new DeleteProductCategoryCommandHandler(_readRepoMock.Object, _deleteRepoMock.Object, _protectedCategoryServiceMock.Object, _unitOfWorkMock.Object);
         var command = new DeleteProductCategoryCommand { Id = 999 };
 
         _readRepoMock.Setup(x => x.GetByIdAsync(999, It.IsAny<CancellationToken>(), It.IsAny<Domain.Constants.DataFetchMode>()))
@@ -413,7 +418,7 @@ public class ProductCategory
     public async Task DeleteProductCategory_AlreadyDeleted_ShouldThrowException()
     {
         // Arrange
-        var handler = new DeleteProductCategoryCommandHandler(_readRepoMock.Object, _deleteRepoMock.Object, _unitOfWorkMock.Object);
+        var handler = new DeleteProductCategoryCommandHandler(_readRepoMock.Object, _deleteRepoMock.Object, _protectedCategoryServiceMock.Object, _unitOfWorkMock.Object);
         var command = new DeleteProductCategoryCommand { Id = 9 };
 
         _readRepoMock.Setup(x => x.GetByIdAsync(9, It.IsAny<CancellationToken>(), It.IsAny<Domain.Constants.DataFetchMode>()))

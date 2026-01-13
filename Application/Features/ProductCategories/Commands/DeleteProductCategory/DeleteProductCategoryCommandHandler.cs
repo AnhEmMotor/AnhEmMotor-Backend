@@ -1,6 +1,7 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductCategory;
+using Application.Interfaces.Services;
 
 using MediatR;
 
@@ -9,6 +10,7 @@ namespace Application.Features.ProductCategories.Commands.DeleteProductCategory;
 public sealed class DeleteProductCategoryCommandHandler(
     IProductCategoryReadRepository readRepository,
     IProductCategoryDeleteRepository deleteRepository,
+    IProtectedProductCategoryService protectedCategoryService,
     IUnitOfWork unitOfWork) : IRequestHandler<DeleteProductCategoryCommand, Result>
 {
     public async Task<Result> Handle(
@@ -17,9 +19,17 @@ public sealed class DeleteProductCategoryCommandHandler(
     {
         var category = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
 
-        if(category == null)
+        if (category is null)
         {
             return Result.Failure(Error.NotFound($"Product category with Id {request.Id} not found."));
+        }
+
+        var isProtected = await protectedCategoryService.IsProtectedAsync(request.Id, cancellationToken).ConfigureAwait(false);
+
+        if (isProtected)
+        {
+            return Result.Failure(Error.Validation(
+                $"Cannot delete product category '{category.Name}'. This category is protected and cannot be deleted."));
         }
 
         deleteRepository.Delete(category);

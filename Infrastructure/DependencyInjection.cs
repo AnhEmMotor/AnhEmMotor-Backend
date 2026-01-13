@@ -53,6 +53,7 @@ public static class DependencyInjection
         services.AddScoped<IHttpTokenAccessorService, HttpTokenAccessorService>();
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<IProtectedEntityManagerService, ProtectedEntityManagerService>();
+        services.AddScoped<IProtectedProductCategoryService, ProtectedProductCategoryService>();
         services.AddScoped<IFileStorageService, LocalFileStorageService>();
         services.AddScoped<ISievePaginator, SievePaginator>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
