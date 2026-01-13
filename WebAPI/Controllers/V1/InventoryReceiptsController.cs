@@ -40,7 +40,9 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     [HttpGet]
     [HasPermission(Inputs.View)]
     [ProducesResponseType(typeof(Domain.Primitives.PagedResult<InputResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetInputsAsync([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetInputsAsync(
+        [FromQuery] SieveModel sieveModel,
+        CancellationToken cancellationToken)
     {
         var query = new GetInputsListQuery() { SieveModel = sieveModel };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);

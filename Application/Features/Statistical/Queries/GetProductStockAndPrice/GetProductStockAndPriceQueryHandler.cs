@@ -11,7 +11,8 @@ public sealed class GetProductStockAndPriceQueryHandler(IStatisticalReadReposito
         GetProductStockAndPriceQuery request,
         CancellationToken cancellationToken)
     {
-        var result = await repository.GetProductStockAndPriceAsync(request.VariantId, cancellationToken).ConfigureAwait(false);
+        var result = await repository.GetProductStockAndPriceAsync(request.VariantId, cancellationToken)
+            .ConfigureAwait(false);
         return result;
     }
 }

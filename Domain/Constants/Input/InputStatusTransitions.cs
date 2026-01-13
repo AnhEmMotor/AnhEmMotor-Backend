@@ -1,6 +1,3 @@
-using Domain.Constants;
-using Domain;
-
 namespace Domain.Constants.Input;
 
 public static class InputStatusTransitions
@@ -14,7 +11,7 @@ public static class InputStatusTransitions
 
     public static bool IsTransitionAllowed(string? currentStatus, string? newStatus)
     {
-        if (currentStatus == null || newStatus == null)
+        if(currentStatus == null || newStatus == null)
         {
             return false;
         }
@@ -24,7 +21,7 @@ public static class InputStatusTransitions
 
     public static HashSet<string> GetAllowedTransitions(string? currentStatus)
     {
-        if (currentStatus != null && AllowedTransitions.TryGetValue(currentStatus, out var nextStates))
+        if(currentStatus != null && AllowedTransitions.TryGetValue(currentStatus, out var nextStates))
         {
             return nextStates;
         }

@@ -43,7 +43,9 @@ public class ProductController(ISender sender) : ApiController
     /// </summary>
     [HttpGet]
     [ProducesResponseType(typeof(Domain.Primitives.PagedResult<ProductDetailResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetProductsAsync([FromQuery] SieveModel request, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetProductsAsync(
+        [FromQuery] SieveModel request,
+        CancellationToken cancellationToken)
     {
         var query = GetProductsListQuery.FromRequest(request);
         var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
@@ -173,7 +175,9 @@ public class ProductController(ISender sender) : ApiController
     [HasPermission(Products.View)]
     [ProducesResponseType(typeof(ProductDetailForManagerResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetVarientByIdForManagerAsync(int id, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetVarientByIdForManagerAsync(
+        int id,
+        CancellationToken cancellationToken = default)
     {
         var result = await sender.Send(new GetProductByIdQuery() { Id = id }, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
@@ -203,7 +207,9 @@ public class ProductController(ISender sender) : ApiController
     [HttpGet("check-slug")]
     [RequiresAnyPermissions(Products.Create, Products.Edit)]
     [ProducesResponseType(typeof(SlugAvailabilityResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> CheckSlugAvailabilityAsync([FromQuery] string slug, CancellationToken cancellationToken)
+    public async Task<IActionResult> CheckSlugAvailabilityAsync(
+        [FromQuery] string slug,
+        CancellationToken cancellationToken)
     {
         var result = await sender.Send(new CheckSlugAvailabilityQuery() { Slug = slug }, cancellationToken)
             .ConfigureAwait(true);

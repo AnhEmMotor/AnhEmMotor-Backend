@@ -1,16 +1,12 @@
-﻿using ControllerTests;
-using FluentAssertions;
+﻿using FluentAssertions;
 
 [assembly: FluentAssertions.Extensibility.AssertionEngineInitializer(
-    typeof(AssertionEngineInitializer),
-    nameof(AssertionEngineInitializer.AcknowledgeSoftWarning))]
+    typeof(UnitTests.AssertionEngineInitializer),
+    nameof(UnitTests.AssertionEngineInitializer.AcknowledgeSoftWarning))]
 
-namespace ControllerTests;
+namespace UnitTests;
 
 public static class AssertionEngineInitializer
 {
-    public static void AcknowledgeSoftWarning()
-    {
-        License.Accepted = true;
-    }
+    public static void AcknowledgeSoftWarning() { License.Accepted = true; }
 }

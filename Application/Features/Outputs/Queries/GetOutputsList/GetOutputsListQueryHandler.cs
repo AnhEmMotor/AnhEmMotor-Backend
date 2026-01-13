@@ -1,4 +1,3 @@
-using Application.ApiContracts.Brand.Responses;
 using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
@@ -20,7 +19,8 @@ public sealed class GetOutputsListQueryHandler(IOutputReadRepository repository,
         var result = await paginator.ApplyAsync<OutputEntity, OutputResponse>(
             query,
             request.SieveModel!,
-            cancellationToken: cancellationToken).ConfigureAwait(false);
+            cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
 
         return result;
     }

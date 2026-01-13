@@ -1,13 +1,13 @@
+using Application.Interfaces.Services;
+using Domain.Entities;
 using Infrastructure.DBContexts;
+using Infrastructure.Services;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Domain.Entities;
-using Microsoft.AspNetCore.Identity;
-using Application.Interfaces.Services;
-using Infrastructure.Services;
-using Microsoft.Data.Sqlite;
 using System.Data.Common;
 
 namespace IntegrationTests;
@@ -26,52 +26,47 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>
     {
         builder.UseEnvironment("Test");
 
-        builder.ConfigureServices(services =>
-        {
-            var descriptor = services.SingleOrDefault(
-                d => d.ServiceType ==
-                    typeof(DbContextOptions<ApplicationDBContext>));
-
-            if (descriptor != null)
+        builder.ConfigureServices(
+            services =>
             {
-                services.Remove(descriptor);
-            }
+                var descriptor = services.SingleOrDefault(
+                    d => d.ServiceType == typeof(DbContextOptions<ApplicationDBContext>));
 
-            var dbConnectionDescriptor = services.SingleOrDefault(
-                d => d.ServiceType ==
-                    typeof(DbConnection));
+                if(descriptor != null)
+                {
+                    services.Remove(descriptor);
+                }
 
-            if (dbConnectionDescriptor != null)
-            {
-                services.Remove(dbConnectionDescriptor);
-            }
+                var dbConnectionDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbConnection));
 
-            services.AddSingleton<DbConnection>(_connection);
+                if(dbConnectionDescriptor != null)
+                {
+                    services.Remove(dbConnectionDescriptor);
+                }
 
-            services.AddDbContext<ApplicationDBContext>((container, options) =>
-            {
-                var connection = container.GetRequiredService<DbConnection>();
-                options.UseSqlite(connection);
+                services.AddSingleton<DbConnection>(_connection);
+
+                services.AddDbContext<ApplicationDBContext>(
+                    (container, options) =>
+                    {
+                        var connection = container.GetRequiredService<DbConnection>();
+                        options.UseSqlite(connection);
+                    });
+
+                services.AddIdentity<ApplicationUser, ApplicationRole>()
+                    .AddEntityFrameworkStores<ApplicationDBContext>()
+                    .AddDefaultTokenProviders();
+
+                services.AddScoped<IIdentityService, IdentityService>();
+
+                var sp = services.BuildServiceProvider();
+
+                using var scope = sp.CreateScope();
+                var scopedServices = scope.ServiceProvider;
+                var db = scopedServices.GetRequiredService<ApplicationDBContext>();
+
+                db.Database.EnsureCreated();
             });
-
-            // Register Identity if not already (Program.cs skips AddInfrastructureServices in Test)
-            services.AddIdentity<ApplicationUser, ApplicationRole>()
-                .AddEntityFrameworkStores<ApplicationDBContext>()
-                .AddDefaultTokenProviders();
-            
-            services.AddScoped<IIdentityService, IdentityService>();
-            
-            // Build the service provider
-            var sp = services.BuildServiceProvider();
-
-            // Create a scope to obtain a reference to the database context (ApplicationDbContext)
-            using var scope = sp.CreateScope();
-            var scopedServices = scope.ServiceProvider;
-            var db = scopedServices.GetRequiredService<ApplicationDBContext>();
-
-            // Ensure the database is created.
-            db.Database.EnsureCreated();
-        });
     }
 
     protected override void Dispose(bool disposing)

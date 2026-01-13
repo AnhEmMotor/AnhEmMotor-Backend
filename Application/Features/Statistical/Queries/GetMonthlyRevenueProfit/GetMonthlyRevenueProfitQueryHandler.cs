@@ -11,7 +11,8 @@ public sealed class GetMonthlyRevenueProfitQueryHandler(IStatisticalReadReposito
         GetMonthlyRevenueProfitQuery request,
         CancellationToken cancellationToken)
     {
-        var result = await repository.GetMonthlyRevenueProfitAsync(request.Months, cancellationToken).ConfigureAwait(false);
+        var result = await repository.GetMonthlyRevenueProfitAsync(request.Months, cancellationToken)
+            .ConfigureAwait(false);
         return Result<IEnumerable<MonthlyRevenueProfitResponse>>.Success(result);
     }
 }

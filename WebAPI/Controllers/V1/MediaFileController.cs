@@ -133,7 +133,9 @@ public class MediaFileController(IMediator mediator) : ApiController
     [RequiresAnyPermissions(Products.Edit, Products.Create)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> DeleteFilesAsync([FromBody] List<string> request, CancellationToken cancellationToken)
+    public async Task<IActionResult> DeleteFilesAsync(
+        [FromBody] List<string> request,
+        CancellationToken cancellationToken)
     {
         var command = request.Adapt<DeleteManyFilesCommand>();
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
@@ -161,7 +163,9 @@ public class MediaFileController(IMediator mediator) : ApiController
     [RequiresAnyPermissions(Products.Edit, Products.Create)]
     [ProducesResponseType(typeof(List<MediaFileResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> RestoreFilesAsync([FromBody] List<string> request, CancellationToken cancellationToken)
+    public async Task<IActionResult> RestoreFilesAsync(
+        [FromBody] List<string> request,
+        CancellationToken cancellationToken)
     {
         var command = request.Adapt<RestoreManyFilesCommand>();
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);

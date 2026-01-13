@@ -31,7 +31,7 @@ public class ProtectedProductCategoryService(
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        if (string.IsNullOrWhiteSpace(categoryName))
+        if(string.IsNullOrWhiteSpace(categoryName))
         {
             return Task.FromResult(false);
         }

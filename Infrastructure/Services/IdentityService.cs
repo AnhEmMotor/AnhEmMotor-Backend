@@ -17,23 +17,22 @@ public class IdentityService(UserManager<ApplicationUser> userManager) : IIdenti
 
         ApplicationUser? user;
 
-        if (usernameOrEmail.Contains('@'))
+        if(usernameOrEmail.Contains('@'))
         {
             user = await userManager.FindByEmailAsync(usernameOrEmail).ConfigureAwait(false);
-        }
-        else
+        } else
         {
             user = await userManager.FindByNameAsync(usernameOrEmail).ConfigureAwait(false);
         }
 
-        if (user == null)
+        if(user == null)
         {
             return Error.Unauthorized("Wrong username/email or password.");
         }
 
         var isPasswordValid = await userManager.CheckPasswordAsync(user, password).ConfigureAwait(false);
 
-        if (!isPasswordValid)
+        if(!isPasswordValid)
         {
             return Error.Unauthorized("Wrong username/email or password.");
         }
@@ -46,8 +45,8 @@ public class IdentityService(UserManager<ApplicationUser> userManager) : IIdenti
         {
             Id = user.Id,
             UserName = user.UserName,
-            Roles = [.. roles],
-            AuthMethods = ["amr"],
+            Roles = [ .. roles ],
+            AuthMethods = [ "amr" ],
             Email = user.Email,
             FullName = user.FullName,
             Status = user.Status

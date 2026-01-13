@@ -1,4 +1,3 @@
-using Application.ApiContracts.Brand.Responses;
 using Application.ApiContracts.Supplier.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
@@ -22,7 +21,8 @@ public sealed class GetDeletedSuppliersListQueryHandler(ISupplierReadRepository 
             query,
             request.SieveModel!,
             DataFetchMode.DeletedOnly,
-            cancellationToken).ConfigureAwait(false);
+            cancellationToken)
+            .ConfigureAwait(false);
         return result;
     }
 }

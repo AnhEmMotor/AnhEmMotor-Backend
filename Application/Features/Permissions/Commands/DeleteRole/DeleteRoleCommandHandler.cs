@@ -27,7 +27,8 @@ public class DeleteRoleCommandHandler(
             return Error.BadRequest("Cannot delete SuperRole.");
         }
 
-        var usersWithRole = await roleReadRepository.GetUsersInRoleAsync(roleName!, cancellationToken).ConfigureAwait(false);
+        var usersWithRole = await roleReadRepository.GetUsersInRoleAsync(roleName!, cancellationToken)
+            .ConfigureAwait(false);
         if(usersWithRole.Count > 0)
         {
             return Error.BadRequest(

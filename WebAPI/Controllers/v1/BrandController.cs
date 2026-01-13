@@ -34,7 +34,9 @@ public class BrandController(IMediator mediator) : ApiController
     /// </summary>
     [HttpGet]
     [ProducesResponseType(typeof(Domain.Primitives.PagedResult<BrandResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetBrandsAsync([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetBrandsAsync(
+        [FromQuery] SieveModel sieveModel,
+        CancellationToken cancellationToken)
     {
         var query = new GetBrandsListQuery() { SieveModel = sieveModel };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);

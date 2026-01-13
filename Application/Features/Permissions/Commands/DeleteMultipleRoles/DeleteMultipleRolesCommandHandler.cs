@@ -37,7 +37,8 @@ public class DeleteMultipleRolesCommandHandler(
                 continue;
             }
 
-            var usersWithRole = await userReadRepository.GetUsersInRoleAsync(roleName, cancellationToken).ConfigureAwait(false);
+            var usersWithRole = await userReadRepository.GetUsersInRoleAsync(roleName, cancellationToken)
+                .ConfigureAwait(false);
             if(usersWithRole.Count > 0)
             {
                 skippedRoles.Add($"{roleName} ({usersWithRole.Count} user(s) assigned)");

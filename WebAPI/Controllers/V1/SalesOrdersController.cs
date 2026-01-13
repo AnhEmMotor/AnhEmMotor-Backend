@@ -97,7 +97,9 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     [HttpGet]
     [HasPermission(Outputs.View)]
     [ProducesResponseType(typeof(PagedResult<OutputResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetOutputsAsync([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetOutputsAsync(
+        [FromQuery] SieveModel sieveModel,
+        CancellationToken cancellationToken)
     {
         var query = new GetOutputsListQuery() { SieveModel = sieveModel };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);

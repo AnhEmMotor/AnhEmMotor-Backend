@@ -145,25 +145,32 @@ namespace Infrastructure.Repositories.User
         public async Task<ApplicationUser?> FindUserByIdAsync(
             Guid userId,
             CancellationToken cancellationToken = default)
-        { 
+        {
             cancellationToken.ThrowIfCancellationRequested();
-            var result = await userManager.FindByIdAsync(userId.ToString()).ConfigureAwait(false); return result; }
+            var result = await userManager.FindByIdAsync(userId.ToString()).ConfigureAwait(false);
+            return result;
+        }
 
         public async Task<ApplicationUser?> FindUserByEmailAsync(
             string email,
             CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var result = await userManager.FindByEmailAsync(email).ContinueWith(t => t.Result, cancellationToken).ConfigureAwait(false); return result;
+            var result = await userManager.FindByEmailAsync(email)
+                .ContinueWith(t => t.Result, cancellationToken)
+                .ConfigureAwait(false);
+            return result;
         }
 
         public async Task<ApplicationUser?> FindUserByUsernameAsync(
             string username,
             CancellationToken cancellationToken = default)
-        { 
+        {
             cancellationToken.ThrowIfCancellationRequested();
-            var result = await userManager.FindByNameAsync(username).ContinueWith(t => t.Result, cancellationToken).ConfigureAwait(false);
-            return result;   
+            var result = await userManager.FindByNameAsync(username)
+                .ContinueWith(t => t.Result, cancellationToken)
+                .ConfigureAwait(false);
+            return result;
         }
 
         public async Task<bool> CheckPasswordAsync(
@@ -172,16 +179,20 @@ namespace Infrastructure.Repositories.User
             CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var result = await userManager.CheckPasswordAsync(user, password).ContinueWith(t => t.Result, cancellationToken).ConfigureAwait(false); 
+            var result = await userManager.CheckPasswordAsync(user, password)
+                .ContinueWith(t => t.Result, cancellationToken)
+                .ConfigureAwait(false);
             return result;
         }
 
         public async Task<IList<string>> GetUserRolesAsync(
             ApplicationUser user,
             CancellationToken cancellationToken = default)
-        { 
+        {
             cancellationToken.ThrowIfCancellationRequested();
-            var result = await userManager.GetRolesAsync(user).ContinueWith(t => t.Result, cancellationToken).ConfigureAwait(false); 
+            var result = await userManager.GetRolesAsync(user)
+                .ContinueWith(t => t.Result, cancellationToken)
+                .ConfigureAwait(false);
             return result;
         }
 
@@ -190,14 +201,18 @@ namespace Infrastructure.Repositories.User
             CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var result = await userManager.GetUsersInRoleAsync(roleName).ContinueWith(t => t.Result, cancellationToken).ConfigureAwait(false); 
+            var result = await userManager.GetUsersInRoleAsync(roleName)
+                .ContinueWith(t => t.Result, cancellationToken)
+                .ConfigureAwait(false);
             return result;
         }
 
         public async Task<IList<string>> GetRolesOfUserAsync(ApplicationUser user, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var result = await userManager.GetRolesAsync(user).ContinueWith(t => t.Result, cancellationToken).ConfigureAwait(false); 
+            var result = await userManager.GetRolesAsync(user)
+                .ContinueWith(t => t.Result, cancellationToken)
+                .ConfigureAwait(false);
             return result;
         }
     }

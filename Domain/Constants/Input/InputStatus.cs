@@ -1,6 +1,4 @@
 ﻿using System;
-using Domain.Constants;
-using Domain;
 
 namespace Domain.Constants.Input
 {

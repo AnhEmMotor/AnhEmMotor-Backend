@@ -10,7 +10,9 @@ namespace Infrastructure.Repositories.Role
         public async Task<IdentityResult> CreateAsync(ApplicationRole role, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var result = await roleManager.CreateAsync(role).ContinueWith(t => t.Result, cancellationToken).ConfigureAwait(false);
+            var result = await roleManager.CreateAsync(role)
+                .ContinueWith(t => t.Result, cancellationToken)
+                .ConfigureAwait(false);
             return result;
         }
     }

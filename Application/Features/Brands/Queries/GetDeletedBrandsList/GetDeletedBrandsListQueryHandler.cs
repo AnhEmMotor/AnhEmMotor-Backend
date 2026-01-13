@@ -21,7 +21,8 @@ public sealed class GetDeletedBrandsListQueryHandler(IBrandReadRepository reposi
             query,
             request.SieveModel!,
             DataFetchMode.DeletedOnly,
-            cancellationToken).ConfigureAwait(false);
+            cancellationToken)
+            .ConfigureAwait(false);
 
         return result;
     }

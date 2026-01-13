@@ -40,7 +40,7 @@ public class Result<T> : Result
     {
         get
         {
-            if (IsFailure)
+            if(IsFailure)
             {
                 throw new InvalidOperationException("Cannot access the value of a failed result.");
             }

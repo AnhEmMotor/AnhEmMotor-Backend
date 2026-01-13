@@ -45,7 +45,9 @@ public class UserManagerController(IMediator mediator) : ApiController
     [HttpGet]
     [RequiresAnyPermissions(Users.View)]
     [ProducesResponseType(typeof(Domain.Primitives.PagedResult<UserDTOForManagerResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetAllUsersAsync([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAllUsersAsync(
+        [FromQuery] SieveModel sieveModel,
+        CancellationToken cancellationToken)
     {
         var query = new GetUsersListQuery() { SieveModel = sieveModel };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);

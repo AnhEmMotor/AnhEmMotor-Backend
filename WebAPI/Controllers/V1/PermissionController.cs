@@ -127,7 +127,9 @@ public class PermissionController(IMediator mediator) : ApiController
     [HasPermission(Domain.Constants.Permission.PermissionsList.Roles.Create)]
     [ProducesResponseType(typeof(Application.Common.Models.ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(RoleCreateResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> CreateRoleAsync([FromBody] CreateRoleCommand model, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateRoleAsync(
+        [FromBody] CreateRoleCommand model,
+        CancellationToken cancellationToken)
     {
         var result = await mediator.Send(
             new CreateRoleCommand()

@@ -18,7 +18,8 @@ public class CreateRoleCommandHandler(
 {
     public async Task<Result<RoleCreateResponse>> Handle(CreateRoleCommand request, CancellationToken cancellationToken)
     {
-        var roleExists = await roleReadRepository.IsRoleExistAsync(request.RoleName!, cancellationToken).ConfigureAwait(false);
+        var roleExists = await roleReadRepository.IsRoleExistAsync(request.RoleName!, cancellationToken)
+            .ConfigureAwait(false);
         if(roleExists)
         {
             return Error.BadRequest("Role already exists.");

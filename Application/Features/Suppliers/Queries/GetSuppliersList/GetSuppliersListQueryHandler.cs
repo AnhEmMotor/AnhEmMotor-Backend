@@ -1,4 +1,3 @@
-using Application.ApiContracts.Brand.Responses;
 using Application.ApiContracts.Supplier.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
@@ -19,7 +18,8 @@ public sealed class GetSuppliersListQueryHandler(ISupplierReadRepository reposit
         var result = await paginator.ApplyAsync<SupplierWithTotalInputResponse, SupplierResponse>(
             query,
             request.SieveModel!,
-            cancellationToken: cancellationToken).ConfigureAwait(false);
+            cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
 
         return result;
     }
