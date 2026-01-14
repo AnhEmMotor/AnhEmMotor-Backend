@@ -23,6 +23,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Sieve.Models;
+using System.Security.Claims;
 using WebAPI.Controllers.V1;
 
 namespace ControllerTests;
@@ -46,6 +47,20 @@ public class SalesOrder
     public async Task GetMyPurchases_UserAuthenticated_ReturnsOrders()
     {
         var buyerId = Guid.NewGuid();
+
+        // Tạo các Claims giả
+        var claims = new List<Claim>
+        {
+            new(ClaimTypes.NameIdentifier, buyerId.ToString())
+        };
+        var identity = new ClaimsIdentity(claims, "TestAuthType");
+        var claimsPrincipal = new ClaimsPrincipal(identity);
+
+        // Gán ClaimsPrincipal vào ControllerContext
+        _controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = claimsPrincipal }
+        };
         var sieveModel = new SieveModel();
         var expectedOrder = new OutputResponse { Id = 1, BuyerId = buyerId };
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputsByUserIdQuery>(), It.IsAny<CancellationToken>()))
@@ -66,7 +81,9 @@ public class SalesOrder
     {
         var buyerId = Guid.NewGuid();
         var sieveModel = new SieveModel();
-        _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputsByUserIdByManagerQuery>(), It.IsAny<CancellationToken>()))
+
+        // Sửa class Query ở đây cho khớp với Controller
+        _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputsByUserIdQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PagedResult<OutputResponse>>.Success(new PagedResult<OutputResponse>([], 0, 1, 10)));
 
         var result = await _controller.GetPurchasesByIDAsync(sieveModel, buyerId, CancellationToken.None)
@@ -74,7 +91,7 @@ public class SalesOrder
 
         result.Should().NotBeNull();
         _mediatorMock.Verify(
-            m => m.Send(It.IsAny<GetOutputsByUserIdByManagerQuery>(), It.IsAny<CancellationToken>()),
+            m => m.Send(It.IsAny<GetOutputsByUserIdQuery>(), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
