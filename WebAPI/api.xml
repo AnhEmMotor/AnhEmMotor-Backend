@@ -64,7 +64,7 @@
             Đăng nhập bằng Facebook (placeholder - cần cấu hình Facebook OAuth)
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.AuthController.LoginForManagerAsync(Application.Features.Auth.Commands.Login.LoginCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.AuthController.LoginForManagerAsync(Application.Features.Auth.Commands.LoginForManager.LoginForManagerCommand,System.Threading.CancellationToken)">
             <summary>
             Đăng nhập bằng Username/Email và Password - Dành cho quản lý
             </summary>

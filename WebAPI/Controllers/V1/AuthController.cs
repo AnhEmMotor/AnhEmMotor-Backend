@@ -2,6 +2,7 @@
 using Application.Common.Models;
 using Application.Features.Auth.Commands.GoogleLogin;
 using Application.Features.Auth.Commands.Login;
+using Application.Features.Auth.Commands.LoginForManager;
 using Application.Features.Auth.Commands.Logout;
 using Application.Features.Auth.Commands.RefreshToken;
 using Application.Features.Auth.Commands.Register;
@@ -124,8 +125,19 @@ public class AuthController(IMediator mediator) : ApiController
     /// Đăng nhập bằng Username/Email và Password - Dành cho quản lý
     /// </summary>
     [HttpPost("login/for-manager")]
+    [AnonymousOnly]
+    [SwaggerOperation(
+        Summary = "Đăng nhập cho quản lý",
+        Description = "Đăng nhập với Username/Email và Password. Chỉ cho phép người dùng có ít nhất một quyền trong hệ thống.")]
+    [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> LoginForManagerAsync(
-        [FromBody] LoginCommand command,
+        [FromBody] LoginForManagerCommand command,
         CancellationToken cancellationToken)
-    { throw new NotImplementedException(); }
+    {
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+
+        return HandleResult(result);
+    }
 }
