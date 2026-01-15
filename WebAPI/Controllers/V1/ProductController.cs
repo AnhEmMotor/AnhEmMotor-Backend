@@ -223,7 +223,7 @@ public class ProductController(ISender sender) : ApiController
     {
         var command = request.Adapt<CreateProductCommand>();
         var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
+        return HandleCreated(result, nameof(GetVarientByIdAsync), new { id = result.IsSuccess ? result.Value?.Id : 0 });
     }
 
     /// <summary>

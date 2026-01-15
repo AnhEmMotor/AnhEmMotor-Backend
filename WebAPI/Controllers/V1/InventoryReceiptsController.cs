@@ -109,7 +109,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     {
         var command = request.Adapt<CreateInputCommand>();
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
+        return HandleCreated(result, nameof(GetInputByIdAsync), new { id = result.IsSuccess ? result.Value?.Id : null } );
     }
 
     /// <summary>
@@ -124,7 +124,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     {
         var command = new CloneInputCommand() { Id = id };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
+        return HandleCreated(result, nameof(GetInputByIdAsync), new { id = result.IsSuccess ? result.Value?.Id : null });
     }
 
     /// <summary>

@@ -101,7 +101,7 @@ public class SupplierController(IMediator mediator) : ApiController
     {
         var command = request.Adapt<CreateSupplierCommand>();
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
+        return HandleCreated(result, nameof(GetSupplierByIdAsync), new { id = result.IsSuccess ? result.Value?.Id : 0 });
     }
 
     /// <summary>
@@ -112,10 +112,13 @@ public class SupplierController(IMediator mediator) : ApiController
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpGet("for-input")]
+    [ProducesResponseType(typeof(PagedResult<SupplierResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetSuppliersForInputAsync(
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
-    { throw new NotImplementedException(); }
+    {
+        throw new NotImplementedException();
+    }
 
     /// <summary>
     /// Cập nhật thông tin nhà cung cấp.

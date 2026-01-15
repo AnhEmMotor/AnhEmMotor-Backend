@@ -16,6 +16,24 @@
              <param name="result"></param>
              <returns></returns>
         </member>
+        <member name="M:WebAPI.Controllers.Base.ApiController.HandleCreated``1(Application.Common.Models.Result{``0},System.String,System.Object)">
+            <summary>
+            
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="result"></param>
+            <param name="actionName"></param>
+            <param name="routeValues"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WebAPI.Controllers.Base.ApiController.HandleCreated``1(Application.Common.Models.Result{``0})">
+            <summary>
+            
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="result"></param>
+            <returns></returns>
+        </member>
         <member name="M:WebAPI.Controllers.Base.ApiController.HandleResult``1(Application.Common.Models.Result{``0})">
              <summary>
             

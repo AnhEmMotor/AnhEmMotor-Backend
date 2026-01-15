@@ -141,7 +141,7 @@ public class PermissionController(IMediator mediator) : ApiController
             },
             cancellationToken)
             .ConfigureAwait(true);
-        return HandleResult(result);
+        return HandleCreated(result);
     }
 
     /// <summary>

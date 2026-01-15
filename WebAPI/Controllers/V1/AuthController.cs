@@ -40,7 +40,7 @@ public class AuthController(IMediator mediator) : ApiController
     {
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
 
-        return HandleResult(result);
+        return HandleCreated(result);
     }
 
     /// <summary>

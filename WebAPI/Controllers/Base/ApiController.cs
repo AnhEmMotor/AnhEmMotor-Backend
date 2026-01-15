@@ -21,6 +21,38 @@ public abstract class ApiController : ControllerBase
             return NoContent();
         return MapErrorsToResponse(result);
     }
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="result"></param>
+    /// <param name="actionName"></param>
+    /// <param name="routeValues"></param>
+    /// <returns></returns>
+    protected IActionResult HandleCreated<T>(Result<T> result, string actionName, object? routeValues = null)
+    {
+        if (result.IsSuccess)
+        {
+            return CreatedAtAction(actionName, routeValues, result.Value);
+        }
+        return MapErrorsToResponse(result);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="result"></param>
+    /// <returns></returns>
+    protected IActionResult HandleCreated<T>(Result<T> result)
+    {
+        if (result.IsSuccess)
+        {
+            return StatusCode(StatusCodes.Status201Created, result.Value);
+        }
+        return MapErrorsToResponse(result);
+    }
 
     /// <summary>
     ///

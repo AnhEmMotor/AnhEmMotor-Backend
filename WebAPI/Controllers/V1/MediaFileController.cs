@@ -86,7 +86,7 @@ public class MediaFileController(IMediator mediator) : ApiController
             return BadRequest();
         var command = new UploadImageCommand { FileContent = file.OpenReadStream(), FileName = file.FileName };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
+        return HandleCreated(result, nameof(GetFileByIdAsync), new { id = result.IsSuccess ? result.Value.Id : null } );
     }
 
     /// <summary>
@@ -111,7 +111,7 @@ public class MediaFileController(IMediator mediator) : ApiController
         var command = new UploadManyImageCommand { Files = fileDtos };
 
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
+        return HandleCreated(result);
     }
 
     /// <summary>

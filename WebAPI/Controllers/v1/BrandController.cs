@@ -101,7 +101,7 @@ public class BrandController(IMediator mediator) : ApiController
     {
         var command = request.Adapt<CreateBrandCommand>();
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
+        return HandleCreated(result, nameof(GetBrandByIdAsync), new { id = result.IsSuccess ? result.Value.Id : null });
     }
 
     /// <summary>

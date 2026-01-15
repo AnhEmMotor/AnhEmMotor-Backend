@@ -101,7 +101,7 @@ public class ProductCategoryController(IMediator mediator) : ApiController
     {
         var command = request.Adapt<CreateProductCategoryCommand>();
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
+        return HandleCreated(result, nameof(GetProductCategoryByIdAsync), new { id = result.IsSuccess ? result.Value.Id : null });
     }
 
     /// <summary>
