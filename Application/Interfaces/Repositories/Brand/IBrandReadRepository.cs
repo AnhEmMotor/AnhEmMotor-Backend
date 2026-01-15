@@ -20,5 +20,10 @@ namespace Application.Interfaces.Repositories.Brand
             IEnumerable<int> ids,
             CancellationToken cancellationToken,
             DataFetchMode mode = DataFetchMode.ActiveOnly);
+
+        public Task<IEnumerable<BrandEntity>> GetByNameAsync(
+            string name,
+            CancellationToken cancellationToken,
+            DataFetchMode dataFetchMode = DataFetchMode.ActiveOnly);
     }
 }
