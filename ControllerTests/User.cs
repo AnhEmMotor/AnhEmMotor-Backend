@@ -1,8 +1,6 @@
 ﻿using Application.ApiContracts.User.Responses;
+using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Models;
-using Application.Features.UserManager.Commands.ChangePassword;
-using Application.Features.UserManager.Commands.UpdateUser;
-using Application.Features.Users.Commands.ChangePasswordCurrentUser;
 using Application.Features.Users.Commands.DeleteCurrentUserAccount;
 using Application.Features.Users.Commands.RestoreUserAccount;
 using Application.Features.Users.Commands.UpdateCurrentUser;
@@ -13,6 +11,7 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using System.Security.Claims;
 using WebAPI.Controllers.V1;
 
 namespace ControllerTests;
@@ -70,26 +69,40 @@ public class User
     [Fact(DisplayName = "USER_038 - Controller - PUT /api/v1/User/me gọi đúng Command")]
     public async Task UpdateCurrentUser_CallsCorrectCommand_ReturnsOk()
     {
-        var request = new UpdateUserCommand { FullName = "Test", Gender = GenderStatus.Male };
+        var userId = Guid.NewGuid();
+        var request = new UpdateCurrentUserCommand { FullName = "Test", Gender = GenderStatus.Male };
+
+        var claims = new List<Claim>
+    {
+        new(ClaimTypes.NameIdentifier, userId.ToString())
+    };
+        var identity = new ClaimsIdentity(claims, "TestAuthType");
+        var claimsPrincipal = new ClaimsPrincipal(identity);
+
+        _controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = claimsPrincipal }
+        };
 
         var expectedResponse = new UserDTOForManagerResponse
         {
-            Id = Guid.NewGuid(),
+            Id = userId,
             FullName = "Test",
             Gender = GenderStatus.Male
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateCurrentUserCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(expectedResponse);
+            .ReturnsAsync(Result<UserDTOForManagerResponse>.Success(expectedResponse));
 
         var result = await _controller.UpdateCurrentUserAsync(request, CancellationToken.None).ConfigureAwait(true);
 
         result.Should().BeOfType<OkObjectResult>();
         var okResult = result as OkObjectResult;
         okResult!.Value.Should().BeEquivalentTo(expectedResponse);
+
         _mediatorMock.Verify(
             m => m.Send(
-                It.Is<UpdateCurrentUserCommand>(c => string.Compare(c.UserId, request.UserId.ToString()) == 0),
+                It.Is<UpdateCurrentUserCommand>(c => string.Compare(c.UserId, userId.ToString()) == 0),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -97,7 +110,7 @@ public class User
     [Fact(DisplayName = "USER_039 - Controller - PUT /api/v1/User/me với body null hoặc rỗng")]
     public async Task UpdateCurrentUser_EmptyBody_CallsMediator()
     {
-        var request = new UpdateUserCommand();
+        var request = new UpdateCurrentUserCommand();
 
         var expectedResponse = new UserDTOForManagerResponse { Id = Guid.NewGuid() };
 
@@ -115,7 +128,7 @@ public class User
     [Fact(DisplayName = "USER_040 - Controller - PUT /api/v1/User/me xử lý ValidationException")]
     public async Task UpdateCurrentUser_ValidationException_ThrowsValidationException()
     {
-        var request = new UpdateUserCommand { PhoneNumber = "invalid" };
+        var request = new UpdateCurrentUserCommand { PhoneNumber = "invalid" };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateCurrentUserCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<UserDTOForManagerResponse>.Failure(Error.BadRequest("Invalid phone number format")));
@@ -128,12 +141,19 @@ public class User
     [Fact(DisplayName = "USER_041 - Controller - POST /api/v1/User/change-password gọi đúng Command")]
     public async Task ChangePassword_CallsCorrectCommand_ReturnsOk()
     {
-        var request = new ChangePasswordCommand { CurrentPassword = "Old", NewPassword = "New" };
+        var userId = Guid.NewGuid();
+        var request = new Application.Features.Users.Commands.ChangePassword.ChangePasswordCommand { CurrentPassword = "Old", NewPassword = "New" };
+        var expectedResponse = new ChangePasswordByUserResponse { Message = "Password changed successfully" };
 
-        var expectedResponse = new ChangePasswordUserByUserResponse { Message = "Password changed successfully" };
+        var claims = new List<Claim> { new(ClaimTypes.NameIdentifier, userId.ToString()) };
+        var identity = new ClaimsIdentity(claims, "TestAuthType");
+        _controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(identity) }
+        };
 
-        _mediatorMock.Setup(m => m.Send(It.IsAny<ChangePasswordCurrentUserCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(expectedResponse);
+        _mediatorMock.Setup(m => m.Send(It.IsAny<Application.Features.Users.Commands.ChangePassword.ChangePasswordCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<ChangePasswordByUserResponse>.Success(expectedResponse));
 
         var result = await _controller.ChangePasswordCurrentUserAsync(request, CancellationToken.None)
             .ConfigureAwait(true);
@@ -141,9 +161,14 @@ public class User
         result.Should().BeOfType<OkObjectResult>();
         var okResult = result as OkObjectResult;
         okResult!.Value.Should().BeEquivalentTo(expectedResponse);
+
         _mediatorMock.Verify(
             m => m.Send(
-                It.Is<ChangePasswordCurrentUserCommand>(c => string.Compare(c.UserId, request.CurrentUserId) == 0),
+                It.Is<Application.Features.Users.Commands.ChangePassword.ChangePasswordCommand>(c =>
+                    c.UserId == userId.ToString() &&
+                    c.NewPassword == "New" &&
+                    c.CurrentPassword == "Old"
+                ),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -151,10 +176,10 @@ public class User
     [Fact(DisplayName = "USER_042 - Controller - POST /api/v1/User/change-password với body thiếu trường")]
     public async Task ChangePassword_MissingField_ThrowsValidationException()
     {
-        var request = new ChangePasswordCommand { CurrentPassword = "Old", NewPassword = string.Empty };
+        var request = new Application.Features.Users.Commands.ChangePassword.ChangePasswordCommand { CurrentPassword = "Old", NewPassword = string.Empty };
 
-        _mediatorMock.Setup(m => m.Send(It.IsAny<ChangePasswordCurrentUserCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<ChangePasswordUserByUserResponse>.Failure(Error.BadRequest("NewPassword is required")));
+        _mediatorMock.Setup(m => m.Send(It.IsAny<Application.Features.Users.Commands.ChangePassword.ChangePasswordCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<ChangePasswordByUserResponse>.Failure(Error.BadRequest("NewPassword is required")));
 
         var result = await _controller.ChangePasswordCurrentUserAsync(request, CancellationToken.None)
             .ConfigureAwait(true);
@@ -165,9 +190,9 @@ public class User
     [Fact(DisplayName = "USER_043 - Controller - POST /api/v1/User/change-password xử lý UnauthorizedException")]
     public async Task ChangePassword_UnauthorizedException_ThrowsUnauthorizedException()
     {
-        var request = new ChangePasswordCommand { CurrentPassword = "Wrong", NewPassword = "New" };
+        var request = new Application.Features.Users.Commands.ChangePassword.ChangePasswordCommand { CurrentPassword = "Wrong", NewPassword = "New" };
 
-        _mediatorMock.Setup(m => m.Send(It.IsAny<ChangePasswordCurrentUserCommand>(), It.IsAny<CancellationToken>()))
+        _mediatorMock.Setup(m => m.Send(It.IsAny<Application.Features.Users.Commands.ChangePassword.ChangePasswordCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException("Current password is incorrect"));
 
         await   Assert.ThrowsAsync<UnauthorizedAccessException>(
@@ -178,7 +203,7 @@ public class User
     [Fact(DisplayName = "USER_044 - Controller - POST /api/v1/User/delete-account gọi đúng Command")]
     public async Task DeleteAccount_CallsCorrectCommand_ReturnsOk()
     {
-        var expectedResponse = new DeleteUserByUserReponse { Message = "Account deleted successfully" };
+        var expectedResponse = new DeleteAccountByUserReponse { Message = "Account deleted successfully" };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteCurrentUserAccountCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
@@ -194,14 +219,15 @@ public class User
     }
 
     [Fact(DisplayName = "USER_045 - Controller - POST /api/v1/User/delete-account xử lý ForbiddenException")]
-    public async Task DeleteAccount_ForbiddenException_ThrowsForbiddenException()
+    public async Task DeleteAccount_ForbiddenException_ReturnsForbiddenObjectResult()
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteCurrentUserAccountCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<DeleteUserByUserReponse>.Failure(Error.Forbidden("Cannot delete banned account")));
+            .ReturnsAsync(Result<DeleteAccountByUserReponse>.Failure(Error.Forbidden("Cannot delete banned account")));
 
         var result = await _controller.DeleteCurrentUserAccountAsync(CancellationToken.None).ConfigureAwait(true);
 
-        result.Should().BeOfType<ForbidResult>();
+        var objectResult = result.Should().BeOfType<ObjectResult>().Subject;
+        objectResult.StatusCode.Should().Be(StatusCodes.Status403Forbidden);
     }
 
     [Fact(DisplayName = "USER_046 - Controller - POST /api/v1/User/{userId}/restore gọi đúng Command")]
@@ -278,16 +304,23 @@ public class User
 
         var hasControllerLevelAuthorize = controllerAttributes.Length > 0;
 
-        if(!hasControllerLevelAuthorize)
+        if (!hasControllerLevelAuthorize)
         {
-            foreach(var method in methods)
+            foreach (var method in methods)
             {
+                // Bỏ qua các hàm có AllowAnonymous
+                var allowAnonymous = method.GetCustomAttributes(
+                    typeof(Microsoft.AspNetCore.Authorization.AllowAnonymousAttribute), true);
+
+                if (allowAnonymous.Length > 0) continue;
+
                 var methodAttributes = method.GetCustomAttributes(
-                    typeof(Microsoft.AspNetCore.Authorization.AuthorizeAttribute),
-                    true);
-                methodAttributes.Should().NotBeEmpty($"Method {method.Name} should have [Authorize] attribute");
+                    typeof(Microsoft.AspNetCore.Authorization.AuthorizeAttribute), true);
+
+                methodAttributes.Should().NotBeEmpty($"Method {method.Name} should be secured or explicitly AllowAnonymous");
             }
-        } else
+        }
+        else
         {
             hasControllerLevelAuthorize.Should().BeTrue();
         }
