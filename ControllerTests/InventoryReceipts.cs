@@ -296,7 +296,7 @@ public class InventoryReceipts
 
         var result = await _controller.CreateInputAsync(request, CancellationToken.None).ConfigureAwait(true);
 
-        result.Should().BeOfType<OkObjectResult>();
+        result.Should().BeOfType<CreatedAtActionResult>();
         _mediatorMock.Verify(m => m.Send(It.IsAny<CreateInputCommand>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 

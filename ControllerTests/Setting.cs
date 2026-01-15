@@ -69,7 +69,7 @@ public class Setting
                 It.IsAny<CancellationToken>()),
             Times.Once);
 
-        var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+        var okResult = result.Should().BeOfType<CreatedAtActionResult>().Subject;
         var returnedDict = okResult.Value.Should().BeAssignableTo<Dictionary<string, string?>>().Subject;
         returnedDict.Should().HaveCount(2);
         returnedDict["Deposit_ratio"].Should().Be("50");
@@ -129,7 +129,7 @@ public class Setting
 
         var result = await _controller.SetSettingsAsync(request, CancellationToken.None).ConfigureAwait(true);
 
-        var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+        var okResult = result.Should().BeOfType<CreatedAtActionResult>().Subject;
         var returnedDict = okResult.Value.Should().BeAssignableTo<Dictionary<string, string?>>().Subject;
         returnedDict["Deposit_ratio"].Should().Be("50");
     }
@@ -146,7 +146,7 @@ public class Setting
 
         var result = await _controller.SetSettingsAsync(request, CancellationToken.None).ConfigureAwait(true);
 
-        var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+        var okResult = result.Should().BeOfType<CreatedAtActionResult>().Subject;
         var returnedDict = okResult.Value.Should().BeAssignableTo<Dictionary<string, string?>>().Subject;
         returnedDict["Inventory_alert_level"].Should().Be("2147483647");
     }
