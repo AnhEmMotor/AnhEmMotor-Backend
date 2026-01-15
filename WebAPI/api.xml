@@ -808,12 +808,12 @@
             Lấy thông tin người dùng hiện tại từ JWT
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.UserController.UpdateCurrentUserAsync(Application.Features.UserManager.Commands.UpdateUser.UpdateUserCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.UserController.UpdateCurrentUserAsync(Application.Features.Users.Commands.UpdateCurrentUser.UpdateCurrentUserCommand,System.Threading.CancellationToken)">
             <summary>
             Đổi thông tin người dùng hiện tại từ JWT
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.UserController.ChangePasswordCurrentUserAsync(Application.Features.UserManager.Commands.ChangePassword.ChangePasswordCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.UserController.ChangePasswordCurrentUserAsync(Application.Features.Users.Commands.ChangePassword.ChangePasswordCommand,System.Threading.CancellationToken)">
             <summary>
             Đổi mật khẩu người dùng hiện tại từ JWT
             </summary>
@@ -880,7 +880,7 @@
             Cập nhật thông tin người dùng
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.UserManagerController.ChangePasswordAsync(System.Guid,Application.Features.UserManager.Commands.ChangePassword.ChangePasswordCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.UserManagerController.ChangePasswordAsync(System.Guid,Application.Features.UserManager.Commands.ChangePasswordByManager.ChangePasswordByManagerCommand,System.Threading.CancellationToken)">
             <summary>
             Đổi mật khẩu người dùng theo ID (đang đăng nhập)
             </summary>

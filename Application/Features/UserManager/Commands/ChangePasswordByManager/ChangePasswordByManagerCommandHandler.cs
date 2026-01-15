@@ -2,15 +2,19 @@ using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.User;
 using MediatR;
+using Application;
+using Application.Features;
+using Application.Features.UserManager;
+using Application.Features.UserManager.Commands;
 
-namespace Application.Features.UserManager.Commands.ChangePassword;
+namespace Application.Features.UserManager.Commands.ChangePasswordByManager;
 
-public class ChangePasswordCommandHandler(
+public class ChangePasswordByManagerCommandHandler(
     IUserReadRepository userReadRepository,
-    IUserUpdateRepository userUpdateRepository) : IRequestHandler<ChangePasswordCommand, Result<ChangePasswordByManagerResponse>>
+    IUserUpdateRepository userUpdateRepository) : IRequestHandler<ChangePasswordByManagerCommand, Result<ChangePasswordByManagerResponse>>
 {
     public async Task<Result<ChangePasswordByManagerResponse>> Handle(
-        ChangePasswordCommand request,
+        ChangePasswordByManagerCommand request,
         CancellationToken cancellationToken)
     {
         if(string.IsNullOrEmpty(request.CurrentUserId) || !Guid.TryParse(request.CurrentUserId, out var currentUserGuid))

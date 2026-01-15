@@ -1,10 +1,14 @@
 using FluentValidation;
+using Application;
+using Application.Features;
+using Application.Features.Users;
+using Application.Features.Users.Commands;
 
-namespace Application.Features.Users.Commands.ChangePasswordCurrentUser;
+namespace Application.Features.Users.Commands.ChangePassword;
 
-public sealed class ChangePasswordCurrentUserCommandValidator : AbstractValidator<ChangePasswordCurrentUserCommand>
+public sealed class ChangePasswordCommandValidator : AbstractValidator<ChangePasswordCommand>
 {
-    public ChangePasswordCurrentUserCommandValidator()
+    public ChangePasswordCommandValidator()
     {
         RuleFor(x => x.UserId)
             .NotEmpty()

@@ -1,5 +1,4 @@
 ﻿using Application.ApiContracts.Auth.Responses;
-using Application.ApiContracts.User.Responses;
 using Application.ApiContracts.UserManager.Responses;
 using Domain.Entities;
 using Domain.Primitives;

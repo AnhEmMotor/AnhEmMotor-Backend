@@ -1,7 +1,7 @@
 ﻿using Application.ApiContracts.Auth.Responses;
 using Application.ApiContracts.User.Responses;
+using Application.ApiContracts.UserManager.Responses;
 using Application.Features.Auth.Commands.Login;
-using Application.Features.UserManager.Commands.ChangePassword;
 using Application.Features.UserManager.Commands.UpdateUser;
 using Domain.Constants;
 using Domain.Entities;
@@ -30,9 +30,9 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         string username,
         string email,
         string password,
-        CancellationToken cancellationToken = default,
         string status = UserStatus.Active,
-        DateTimeOffset? deletedAt = null)
+        DateTimeOffset? deletedAt = null,
+        CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
         using var scope = _factory.Services.CreateScope();
@@ -70,9 +70,8 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
             "user021",
             "user021@test.com",
             "Pass123!",
-            CancellationToken.None,
             UserStatus.Active,
-            DateTimeOffset.UtcNow.AddDays(-3))
+            DateTimeOffset.UtcNow.AddDays(-3), CancellationToken.None)
             .ConfigureAwait(true);
 
         var response = await _client.PostAsync($"/api/v1/User/{user!.Id}/restore", null).ConfigureAwait(true);
@@ -98,9 +97,8 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
             "user022",
             "user022@test.com",
             "Pass123!",
-            CancellationToken.None,
             UserStatus.Active,
-            null)
+            null, CancellationToken.None)
             .ConfigureAwait(true);
 
         var response = await _client.PostAsync($"/api/v1/User/{user!.Id}/restore", null).ConfigureAwait(true);
@@ -117,9 +115,8 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
             "user023",
             "user023@test.com",
             "Pass123!",
-            CancellationToken.None,
             UserStatus.Banned,
-            DateTimeOffset.UtcNow.AddDays(-5))
+            DateTimeOffset.UtcNow.AddDays(-5), CancellationToken.None)
             .ConfigureAwait(true);
 
         var response = await _client.PostAsync($"/api/v1/User/{user!.Id}/restore", null).ConfigureAwait(true);
@@ -148,7 +145,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
             "user025",
             "user025@test.com",
             "Pass123!",
-            CancellationToken.None)
+            cancellationToken: CancellationToken.None)
             .ConfigureAwait(true);
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -183,7 +180,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
             "user027",
             "user027@test.com",
             "Pass123!",
-            CancellationToken.None)
+            cancellationToken: CancellationToken.None)
             .ConfigureAwait(true);
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -222,7 +219,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
             "user028",
             "user028@test.com",
             "Pass123!",
-            CancellationToken.None)
+            cancellationToken: CancellationToken.None)
             .ConfigureAwait(true);
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -243,12 +240,12 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
             "user029",
             "user029@test.com",
             "OldPass123!",
-            CancellationToken.None)
+            cancellationToken: CancellationToken.None)
             .ConfigureAwait(true);
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        var changePasswordRequest = new ChangePasswordCommand
+        var changePasswordRequest = new Application.Features.UserManager.Commands.ChangePasswordByManager.ChangePasswordByManagerCommand
         {
             CurrentPassword = "OldPass123!",
             NewPassword = "NewPass456!"
@@ -259,7 +256,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
-            .ReadFromJsonAsync<ChangePasswordUserByUserResponse>(CancellationToken.None)
+            .ReadFromJsonAsync<ChangePasswordByUserResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Message.Should().Be("Password changed successfully");
@@ -279,12 +276,12 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
             "user030",
             "user030@test.com",
             "OldPass123!",
-            CancellationToken.None)
+            cancellationToken: CancellationToken.None)
             .ConfigureAwait(true);
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        var changePasswordRequest = new ChangePasswordCommand
+        var changePasswordRequest = new Application.Features.UserManager.Commands.ChangePasswordByManager.ChangePasswordByManagerCommand
         {
             CurrentPassword = "WrongPassword",
             NewPassword = "NewPass456!"
@@ -305,7 +302,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
             "user031",
             "user031@test.com",
             "Pass123!",
-            CancellationToken.None)
+            cancellationToken: CancellationToken.None)
             .ConfigureAwait(true);
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -314,7 +311,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
-            .ReadFromJsonAsync<DeleteUserByUserReponse>(CancellationToken.None)
+            .ReadFromJsonAsync<DeleteAccountByUserReponse>(CancellationToken.None)
             .ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Message.Should().Be("Account deleted successfully");
@@ -336,8 +333,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
             "user032",
             "user032@test.com",
             "Pass123!",
-            CancellationToken.None,
-            UserStatus.Banned)
+            UserStatus.Banned, cancellationToken: CancellationToken.None)
             .ConfigureAwait(true);
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -356,7 +352,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
             "user033",
             "user033@test.com",
             "Pass123!",
-            CancellationToken.None)
+            cancellationToken: CancellationToken.None)
             .ConfigureAwait(true);
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token1);
@@ -364,7 +360,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         var testResponse1 = await _client.GetAsync("/api/v1/User/me").ConfigureAwait(true);
         testResponse1.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var changePasswordRequest = new ChangePasswordCommand
+        var changePasswordRequest = new Application.Features.UserManager.Commands.ChangePasswordByManager.ChangePasswordByManagerCommand
         {
             CurrentPassword = "Pass123!",
             NewPassword = "NewPass456!"
@@ -385,7 +381,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
             "user034",
             "user034@test.com",
             "Pass123!",
-            CancellationToken.None)
+            cancellationToken: CancellationToken.None)
             .ConfigureAwait(true);
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -415,7 +411,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
             "user035",
             "user035@test.com",
             "Pass123!",
-            CancellationToken.None)
+            cancellationToken: CancellationToken.None)
             .ConfigureAwait(true);
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);

@@ -9,9 +9,9 @@ namespace Application.Features.Users.Commands.DeleteCurrentUserAccount;
 public class DeleteCurrentUserAccountCommandHandler(
     IUserReadRepository userReadRepository,
     IUserDeleteRepository userDeleteRepository,
-    IProtectedEntityManagerService protectedEntityManagerService) : IRequestHandler<DeleteCurrentUserAccountCommand, Result<DeleteUserByUserReponse>>
+    IProtectedEntityManagerService protectedEntityManagerService) : IRequestHandler<DeleteCurrentUserAccountCommand, Result<DeleteAccountByUserReponse>>
 {
-    public async Task<Result<DeleteUserByUserReponse>> Handle(
+    public async Task<Result<DeleteAccountByUserReponse>> Handle(
         DeleteCurrentUserAccountCommand request,
         CancellationToken cancellationToken)
     {
@@ -44,9 +44,9 @@ public class DeleteCurrentUserAccountCommandHandler(
         if(!succeeded)
         {
             var validationErrors = errors.Select(e => Error.Validation(e)).ToList();
-            return Result<DeleteUserByUserReponse>.Failure(validationErrors);
+            return Result<DeleteAccountByUserReponse>.Failure(validationErrors);
         }
 
-        return new DeleteUserByUserReponse() { Message = "Your account has been deleted successfully.", };
+        return new DeleteAccountByUserReponse() { Message = "Your account has been deleted successfully.", };
     }
 }

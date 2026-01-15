@@ -1,9 +1,7 @@
-﻿using Application.ApiContracts.User.Responses;
-using Application.ApiContracts.UserManager.Responses;
+﻿using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Models;
 using Application.Features.UserManager.Commands.AssignRoles;
 using Application.Features.UserManager.Commands.ChangeMultipleUsersStatus;
-using Application.Features.UserManager.Commands.ChangePassword;
 using Application.Features.UserManager.Commands.ChangeUserStatus;
 using Application.Features.UserManager.Commands.UpdateUser;
 using Application.Features.UserManager.Queries.GetUserById;
@@ -118,7 +116,7 @@ public class UserManagerController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> ChangePasswordAsync(
         Guid userId,
-        [FromBody] ChangePasswordCommand model,
+        [FromBody] Application.Features.UserManager.Commands.ChangePasswordByManager.ChangePasswordByManagerCommand model,
         CancellationToken cancellationToken)
     {
         var modelToSend = model with { UserId = userId };

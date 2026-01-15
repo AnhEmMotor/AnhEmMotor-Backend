@@ -2,15 +2,19 @@ using Application.ApiContracts.User.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.User;
 using MediatR;
+using Application;
+using Application.Features;
+using Application.Features.Users;
+using Application.Features.Users.Commands;
 
-namespace Application.Features.Users.Commands.ChangePasswordCurrentUser;
+namespace Application.Features.Users.Commands.ChangePassword;
 
-public class ChangePasswordCurrentUserCommandHandler(
+public class ChangePasswordCommandHandler(
     IUserReadRepository userReadRepository,
-    IUserUpdateRepository userUpdateRepository) : IRequestHandler<ChangePasswordCurrentUserCommand, Result<ChangePasswordUserByUserResponse>>
+    IUserUpdateRepository userUpdateRepository) : IRequestHandler<ChangePasswordCommand, Result<ChangePasswordByUserResponse>>
 {
-    public async Task<Result<ChangePasswordUserByUserResponse>> Handle(
-        ChangePasswordCurrentUserCommand request,
+    public async Task<Result<ChangePasswordByUserResponse>> Handle(
+        ChangePasswordCommand request,
         CancellationToken cancellationToken)
     {
         var userId = Guid.Parse(request.UserId!);
@@ -31,10 +35,10 @@ public class ChangePasswordCurrentUserCommandHandler(
         if(!succeeded)
         {
             var validationErrors = errors.Select(e => Error.Validation(e)).ToList();
-            return Result<ChangePasswordUserByUserResponse>.Failure(validationErrors);
+            return Result<ChangePasswordByUserResponse>.Failure(validationErrors);
         }
 
-        return new ChangePasswordUserByUserResponse() { Message = "Password changed successfully." };
+        return new ChangePasswordByUserResponse() { Message = "Password changed successfully." };
     }
 }
 

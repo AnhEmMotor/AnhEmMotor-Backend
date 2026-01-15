@@ -2,7 +2,6 @@
 using Application.Features.Auth.Commands.Login;
 using Application.Features.UserManager.Commands.AssignRoles;
 using Application.Features.UserManager.Commands.ChangeMultipleUsersStatus;
-using Application.Features.UserManager.Commands.ChangePassword;
 using Application.Features.UserManager.Commands.ChangeUserStatus;
 using Application.Features.UserManager.Commands.UpdateUser;
 using Domain.Constants;
@@ -314,7 +313,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var request = new ChangePasswordCommand { NewPassword = "NewPass@123" };
+        var request = new Application.Features.UserManager.Commands.ChangePasswordByManager.ChangePasswordByManagerCommand { NewPassword = "NewPass@123" };
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
@@ -634,7 +633,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
 
         var targetUser = await CreateUserAsync("targetUser035", "target035@test.com", "Pass@123").ConfigureAwait(true);
 
-        var request = new ChangePasswordCommand { NewPassword = "NewPass@123" };
+        var request = new Application.Features.UserManager.Commands.ChangePasswordByManager.ChangePasswordByManagerCommand { NewPassword = "NewPass@123" };
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 

@@ -1,10 +1,14 @@
 using FluentValidation;
+using Application;
+using Application.Features;
+using Application.Features.UserManager;
+using Application.Features.UserManager.Commands;
 
-namespace Application.Features.UserManager.Commands.ChangePassword;
+namespace Application.Features.UserManager.Commands.ChangePasswordByManager;
 
-public class ChangePasswordCommandValidator : AbstractValidator<ChangePasswordCommand>
+public class ChangePasswordByManagerCommandValidator : AbstractValidator<ChangePasswordByManagerCommand>
 {
-    public ChangePasswordCommandValidator() { throw new NotImplementedException(); }
+    public ChangePasswordByManagerCommandValidator() { throw new NotImplementedException(); }
 
     public static bool IsStrongPassword(string password) { throw new NotImplementedException(); }
 
