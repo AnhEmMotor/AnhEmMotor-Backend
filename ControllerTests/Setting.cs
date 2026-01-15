@@ -70,17 +70,17 @@ public class Setting
             Times.Once);
 
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
-        var returnedDict = okResult.Value.Should().BeAssignableTo<Dictionary<string, long?>>().Subject;
+        var returnedDict = okResult.Value.Should().BeAssignableTo<Dictionary<string, string?>>().Subject;
         returnedDict.Should().HaveCount(2);
-        returnedDict["Deposit_ratio"].Should().Be(50);
+        returnedDict["Deposit_ratio"].Should().Be("50");
     }
 
     [Fact(DisplayName = "SETTING_032 - Controller SetSettings - Trả về BadRequest khi validation fail")]
     public async Task SETTING_032_Controller_SetSettings_ValidationFail_ReturnsBadRequest()
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<SetSettingsCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(
-                Result<Dictionary<string, string?>?>.Failure(Error.Validation("Settings", "Validation failed")));
+    .ReturnsAsync(
+        Result<Dictionary<string, string?>?>.Failure(Error.Validation("Validation failed", "Settings")));
 
         var request = new Dictionary<string, string?> { { "Deposit_ratio", "0" } };
 
@@ -88,7 +88,9 @@ public class Setting
 
         var badRequestResult = result.Should().BeOfType<BadRequestObjectResult>().Subject;
         var returnedError = badRequestResult.Value.Should().BeOfType<ErrorResponse>().Subject;
-        returnedError.Errors.Should().Contain(e => string.Compare(e.Message, "Validation failed") == 0);
+
+        returnedError.Errors.Should().ContainSingle()
+            .Which.Message.Should().Be("Validation failed");
     }
 
     [Fact(DisplayName = "SETTING_033 - Controller GetAllSettings - Có attribute Authorize phù hợp")]
@@ -128,8 +130,8 @@ public class Setting
         var result = await _controller.SetSettingsAsync(request, CancellationToken.None).ConfigureAwait(true);
 
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
-        var returnedDict = okResult.Value.Should().BeAssignableTo<Dictionary<string, long?>>().Subject;
-        returnedDict["Deposit_ratio"].Should().Be(50);
+        var returnedDict = okResult.Value.Should().BeAssignableTo<Dictionary<string, string?>>().Subject;
+        returnedDict["Deposit_ratio"].Should().Be("50");
     }
 
     [Fact(DisplayName = "SETTING_039 - SetSettings - Integer field với giá trị rất lớn")]
@@ -145,8 +147,8 @@ public class Setting
         var result = await _controller.SetSettingsAsync(request, CancellationToken.None).ConfigureAwait(true);
 
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
-        var returnedDict = okResult.Value.Should().BeAssignableTo<Dictionary<string, long?>>().Subject;
-        returnedDict["Inventory_alert_level"].Should().Be(2147483647);
+        var returnedDict = okResult.Value.Should().BeAssignableTo<Dictionary<string, string?>>().Subject;
+        returnedDict["Inventory_alert_level"].Should().Be("2147483647");
     }
 #pragma warning restore CRR0035
 }
