@@ -15,6 +15,8 @@ public sealed class SupplierMappingConfig : IRegister
 
         config.NewConfig<Supplier, SupplierResponse>();
 
+        config.NewConfig<Supplier, SupplierForInputManagerResponse>();
+
         config.NewConfig<UpdateSupplierCommand, Supplier>().IgnoreNullValues(true);
 
         config.NewConfig<UpdateSupplierStatusCommand, Supplier>().IgnoreNullValues(true);
