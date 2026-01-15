@@ -1,5 +1,4 @@
-﻿using Application.Features.UserManager.Commands.ChangePassword;
-using Application.Features.UserManager.Commands.UpdateUser;
+﻿using Application.Features.UserManager.Commands.UpdateUser;
 using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Services;
 using Domain.Constants;
@@ -109,13 +108,13 @@ public class UserManager
     [Fact(DisplayName = "UMGR_043 - Validate Password strength requirements")]
     public void ValidatePassword_VariousStrengths_ReturnsCorrectValidation()
     {
-        ChangePasswordCommandValidator.IsStrongPassword("Pass@123").Should().BeTrue();
+        Application.Features.UserManager.Commands.ChangePasswordByManager.ChangePasswordByManagerCommandValidator.IsStrongPassword("Pass@123").Should().BeTrue();
 
-        ChangePasswordCommandValidator.IsStrongPassword("password").Should().BeFalse();
+        Application.Features.UserManager.Commands.ChangePasswordByManager.ChangePasswordByManagerCommandValidator.IsStrongPassword("password").Should().BeFalse();
 
-        ChangePasswordCommandValidator.IsStrongPassword("Pass123").Should().BeFalse();
+        Application.Features.UserManager.Commands.ChangePasswordByManager.ChangePasswordByManagerCommandValidator.IsStrongPassword("Pass123").Should().BeFalse();
 
-        ChangePasswordCommandValidator.IsStrongPassword("P@1").Should().BeFalse();
+        Application.Features.UserManager.Commands.ChangePasswordByManager.ChangePasswordByManagerCommandValidator.IsStrongPassword("P@1").Should().BeFalse();
     }
 #pragma warning restore CRR0035
 }

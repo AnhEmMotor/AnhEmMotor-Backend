@@ -11,7 +11,7 @@ public class Auth
 {
 #pragma warning disable CRR0035
     [Fact(DisplayName = "AUTH_REG_004 - Validate Format (Unit) - TH1: Email sai định dạng")]
-    public void AUTH_REG_004_1_Register_InvalidEmail()
+    public async Task AUTH_REG_004_1_Register_InvalidEmail()
     {
         var userReadRepositoryMock = new Mock<IUserReadRepository>();
         var validator = new RegisterCommandValidator(userReadRepositoryMock.Object);
@@ -25,12 +25,14 @@ public class Auth
             PhoneNumber = "0123456789",
             Gender = "Male"
         };
-        var result = validator.TestValidate(command);
+
+        var result = await validator.TestValidateAsync(command);
+
         result.ShouldHaveValidationErrorFor(x => x.Email);
     }
 
     [Fact(DisplayName = "AUTH_REG_004 - Validate Format (Unit) - TH2: Password ngắn")]
-    public void AUTH_REG_004_2_Register_PasswordTooShort()
+    public async Task AUTH_REG_004_2_Register_PasswordTooShort()
     {
         var userReadRepositoryMock = new Mock<IUserReadRepository>();
         var validator = new RegisterCommandValidator(userReadRepositoryMock.Object);
@@ -44,12 +46,14 @@ public class Auth
             PhoneNumber = "0123456789",
             Gender = "Male"
         };
-        var result = validator.TestValidate(command);
+
+        var result = await validator.TestValidateAsync(command);
+
         result.ShouldHaveValidationErrorFor(x => x.Password);
     }
 
     [Fact(DisplayName = "AUTH_REG_004 - Validate Format (Unit) - TH3: Username chứa ký tự đặc biệt")]
-    public void AUTH_REG_004_3_Register_UsernameSpecialChars()
+    public async Task AUTH_REG_004_3_Register_UsernameSpecialChars()
     {
         var userReadRepositoryMock = new Mock<IUserReadRepository>();
         var validator = new RegisterCommandValidator(userReadRepositoryMock.Object);
@@ -63,7 +67,9 @@ public class Auth
             PhoneNumber = "0123456789",
             Gender = "Male"
         };
-        var result = validator.TestValidate(command);
+
+        var result = await validator.TestValidateAsync(command);
+
         result.ShouldHaveValidationErrorFor(x => x.Username);
     }
 

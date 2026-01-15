@@ -1,5 +1,4 @@
-﻿using Application.Features.Users.Commands.ChangePasswordCurrentUser;
-using Application.Features.Users.Commands.DeleteCurrentUserAccount;
+﻿using Application.Features.Users.Commands.DeleteCurrentUserAccount;
 using Application.Features.Users.Commands.UpdateCurrentUser;
 using Application.Features.Users.Queries.GetCurrentUser;
 using Application.Interfaces.Repositories.User;
@@ -378,10 +377,10 @@ public class User
             x => x.ChangePasswordAsync(user, "OldPass123!", "NewPass456!", It.IsAny<CancellationToken>()))
             .ReturnsAsync((true, Array.Empty<string>()));
 
-        var handler = new ChangePasswordCurrentUserCommandHandler(
+        var handler = new Application.Features.Users.Commands.ChangePassword.ChangePasswordCommandHandler(
             _userReadRepositoryMock.Object,
             _userUpdateRepositoryMock.Object);
-        var command = new ChangePasswordCurrentUserCommand()
+        var command = new Application.Features.Users.Commands.ChangePassword.ChangePasswordCommand()
         {
             UserId = userId.ToString(),
             CurrentPassword = "OldPass123!",
@@ -409,10 +408,10 @@ public class User
         _userReadRepositoryMock.Setup(x => x.CheckPasswordAsync(user, "WrongPass", It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
 
-        var handler = new ChangePasswordCurrentUserCommandHandler(
+        var handler = new Application.Features.Users.Commands.ChangePassword.ChangePasswordCommandHandler(
             _userReadRepositoryMock.Object,
             _userUpdateRepositoryMock.Object);
-        var command = new ChangePasswordCurrentUserCommand()
+        var command = new Application.Features.Users.Commands.ChangePassword.ChangePasswordCommand()
         {
             UserId = userId.ToString(),
             CurrentPassword = "WrongPass",
@@ -434,10 +433,10 @@ public class User
         _userReadRepositoryMock.Setup(x => x.CheckPasswordAsync(user, "OldPass123!", It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
-        var handler = new ChangePasswordCurrentUserCommandHandler(
+        var handler = new Application.Features.Users.Commands.ChangePassword.ChangePasswordCommandHandler(
             _userReadRepositoryMock.Object,
             _userUpdateRepositoryMock.Object);
-        var command = new ChangePasswordCurrentUserCommand()
+        var command = new Application.Features.Users.Commands.ChangePassword.ChangePasswordCommand()
         {
             UserId = userId.ToString(),
             CurrentPassword = "OldPass123!",
@@ -457,10 +456,10 @@ public class User
         _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
 
-        var handler = new ChangePasswordCurrentUserCommandHandler(
+        var handler = new Application.Features.Users.Commands.ChangePassword.ChangePasswordCommandHandler(
             _userReadRepositoryMock.Object,
             _userUpdateRepositoryMock.Object);
-        var command = new ChangePasswordCurrentUserCommand()
+        var command = new Application.Features.Users.Commands.ChangePassword.ChangePasswordCommand()
         {
             UserId = userId.ToString(),
             CurrentPassword = "OldPass123!",
