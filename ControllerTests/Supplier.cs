@@ -9,7 +9,7 @@ using Application.Features.Suppliers.Commands.UpdateSupplier;
 using Application.Features.Suppliers.Queries.GetDeletedSuppliersList;
 using Application.Features.Suppliers.Queries.GetSupplierById;
 using Application.Features.Suppliers.Queries.GetSuppliersList;
-
+using Application.Features.Suppliers.Queries.GetSuppliersListForInputManager;
 using Domain.Primitives;
 using FluentAssertions;
 using MediatR;
@@ -55,9 +55,16 @@ public class Supplier
 
         var result = await _controller.CreateSupplierAsync(request, CancellationToken.None).ConfigureAwait(true);
 
-        var createdResult = result.Should().BeOfType<CreatedResult>().Subject;
-        createdResult.StatusCode.Should().Be(StatusCodes.Status201Created);
-        var response = createdResult.Value.Should().BeOfType<SupplierResponse>().Subject;
+        // Sửa BeOfType từ CreatedResult thành CreatedAtActionResult
+        var createdAtActionResult = result.Should().BeOfType<CreatedAtActionResult>().Subject;
+
+        createdAtActionResult.StatusCode.Should().Be(StatusCodes.Status201Created);
+
+        // Kiểm tra thêm ActionName và RouteValues để đảm bảo Logic Mapping đúng
+        createdAtActionResult.ActionName.Should().Be("GetSupplierByIdAsync"); // Hoặc tên hàm Get của bạn
+        createdAtActionResult.RouteValues?["id"].Should().Be(1);
+
+        var response = createdAtActionResult.Value.Should().BeOfType<SupplierResponse>().Subject;
         response.Id.Should().Be(1);
         response.Name.Should().Be("API Supplier");
         response.StatusId.Should().Be("active");
@@ -116,24 +123,30 @@ public class Supplier
     public async Task GetSuppliersForInput_ReturnsOnlyActiveSuppliers()
     {
         var sieveModel = new SieveModel();
-        var items = new List<SupplierResponse>
-        {
-            new() { Id = 1, Name = "Supplier 1", StatusId = "active" },
-            new() { Id = 2, Name = "Supplier 2", StatusId = "active" }
-        };
-        var expectedResponse = new PagedResult<SupplierResponse>(items, 10, 1, 10);
 
-        _mediatorMock.Setup(m => m.Send(It.IsAny<GetSuppliersListQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<PagedResult<SupplierResponse>>.Success(expectedResponse));
+        // 1. Sửa kiểu dữ liệu ở đây thành SupplierForInputManagerResponse
+        var items = new List<SupplierForInputManagerResponse>
+    {
+        new() { Id = 1, Name = "Supplier 1" },
+        new() { Id = 2, Name = "Supplier 2" }
+    };
+
+        // 2. Đảm bảo PagedResult cũng đi theo kiểu dữ liệu mới
+        var expectedResponse = new PagedResult<SupplierForInputManagerResponse>(items, 10, 1, 10);
+
+        // 3. Mock Setup bây giờ sẽ khớp kiểu hoàn toàn
+        _mediatorMock.Setup(m => m.Send(It.IsAny<GetSuppliersListForInputManagerQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<PagedResult<SupplierForInputManagerResponse>>.Success(expectedResponse));
 
         var result = await _controller.GetSuppliersForInputAsync(sieveModel, CancellationToken.None)
             .ConfigureAwait(true);
 
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
-        var response = okResult.Value.Should().BeOfType<PagedResult<SupplierResponse>>().Subject;
+
+        // 4. Ép kiểu trả về đúng để Assert
+        var response = okResult.Value.Should().BeOfType<PagedResult<SupplierForInputManagerResponse>>().Subject;
+
         response.Items.Should().HaveCount(2);
-        response.Items.Should().OnlyContain(s => string.Compare(s.StatusId, "active") == 0);
-        response.Items.First().TotalInput.Should().BeNull();
     }
 
     [Fact(
