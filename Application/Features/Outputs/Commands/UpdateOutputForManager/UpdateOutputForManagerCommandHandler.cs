@@ -33,6 +33,11 @@ public sealed class UpdateOutputForManagerCommandHandler(
             return Error.NotFound($"Không tìm thấy đơn hàng có ID {request.Id}.", "Id");
         }
 
+        if (output.CreatedBy != request.CurrentUserId)
+        {
+            return Error.Forbidden("Bạn không có quyền chỉnh sửa đơn hàng này.", "Permission");
+        }
+
         var variantIds = request.OutputInfos
             .Where(p => p.ProductId.HasValue)
             .Select(p => p.ProductId!.Value)
@@ -99,7 +104,11 @@ public sealed class UpdateOutputForManagerCommandHandler(
                 }
             } else
             {
-                var newInfo = productRequest.Adapt<OutputInfo>();
+                var newInfo = new OutputInfo
+                {
+                    ProductVarientId = productRequest.ProductId,
+                    Count = productRequest.Count
+                };
                 if(currentVariant != null)
                 {
                     newInfo.Price = currentVariant.Price;

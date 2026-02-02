@@ -15,6 +15,7 @@ namespace UnitTests;
 
 public class InventoryReceipts
 {
+#pragma warning disable IDE0079 
 #pragma warning disable CRR0035
     [Fact(DisplayName = "INPUT_007 - Tạo phiếu nhập với Quantity là số âm")]
     public void CreateInputProductValidator_NegativeQuantity_ReturnsValidationError()
@@ -311,4 +312,5 @@ public class InventoryReceipts
         result.ShouldHaveValidationErrorFor(x => x.Products);
     }
 #pragma warning restore CRR0035
+#pragma warning restore IDE0079
 }

@@ -19,6 +19,7 @@ namespace UnitTests;
 
 public class MediaFile
 {
+#pragma warning disable IDE0079 
 #pragma warning disable CRR0035
     [Fact(DisplayName = "MF_001 - Tải lên ảnh thành công với định dạng WEBP hợp lệ")]
     public async Task UploadImage_ValidWebp_Success()
@@ -681,4 +682,5 @@ public class MediaFile
         result.Error?.Message.Should().Contain("Filename");
     }
 #pragma warning restore CRR0035
+#pragma warning restore IDE0079
 }

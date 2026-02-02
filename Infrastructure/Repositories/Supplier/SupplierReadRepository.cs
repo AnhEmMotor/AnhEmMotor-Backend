@@ -1,4 +1,4 @@
-using Application.ApiContracts.Supplier.Responses;
+﻿using Application.ApiContracts.Supplier.Responses;
 using Application.Interfaces.Repositories.Supplier;
 using Domain.Constants;
 using Infrastructure.DBContexts;
@@ -68,5 +68,23 @@ public class SupplierReadRepository(ApplicationDBContext context) : ISupplierRea
             .Where(s => ids.Contains(s.Id))
             .ToListAsync(cancellationToken)
             .ContinueWith<IEnumerable<SupplierEntity>>(t => t.Result, cancellationToken);
+    }
+
+    public async Task<bool> IsNameExistsAsync(string name, int? excludeId = null, CancellationToken cancellationToken = default)
+    {
+        return await GetQueryable(DataFetchMode.All)
+            .AnyAsync(x => x.Name == name && (!excludeId.HasValue || x.Id != excludeId), cancellationToken);
+    }
+
+    public async Task<bool> IsPhoneExistsAsync(string phone, int? excludeId = null, CancellationToken cancellationToken = default)
+    {
+        return await GetQueryable(DataFetchMode.All)
+            .AnyAsync(x => x.Phone == phone && (!excludeId.HasValue || x.Id != excludeId), cancellationToken);
+    }
+
+    public async Task<bool> IsTaxIdExistsAsync(string taxId, int? excludeId = null, CancellationToken cancellationToken = default)
+    {
+        return await GetQueryable(DataFetchMode.All)
+            .AnyAsync(x => x.TaxIdentificationNumber == taxId && (!excludeId.HasValue || x.Id != excludeId), cancellationToken);
     }
 }

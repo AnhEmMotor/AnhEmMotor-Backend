@@ -1,4 +1,5 @@
-﻿using Application.Features.UserManager.Commands.UpdateUser;
+﻿using Application.Features.UserManager.Commands.ChangePasswordByManager;
+using Application.Features.UserManager.Commands.UpdateUser;
 using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Services;
 using Domain.Constants;
@@ -9,23 +10,7 @@ namespace UnitTests;
 
 public class UserManager
 {
-    private readonly Mock<IUserReadRepository> _userReadRepositoryMock;
-    private readonly Mock<IUserUpdateRepository> _userUpdateRepositoryMock;
-    private readonly Mock<IUserCreateRepository> _userCreateRepositoryMock;
-    private readonly Mock<IUserDeleteRepository> _userDeleteRepositoryMock;
-
-    private readonly Mock<IProtectedEntityManagerService> _protectedEntityManagerServiceMock;
-
-    public UserManager()
-    {
-        _userReadRepositoryMock = new Mock<IUserReadRepository>();
-        _userUpdateRepositoryMock = new Mock<IUserUpdateRepository>();
-        _userCreateRepositoryMock = new Mock<IUserCreateRepository>();
-        _userDeleteRepositoryMock = new Mock<IUserDeleteRepository>();
-
-        _protectedEntityManagerServiceMock = new Mock<IProtectedEntityManagerService>();
-    }
-
+#pragma warning disable IDE0079 
 #pragma warning disable CRR0035
     [Fact(DisplayName = "UMGR_037 - Validate FullName không được rỗng")]
     public void ValidateFullName_EmptyString_ValidationFails()
@@ -108,13 +93,14 @@ public class UserManager
     [Fact(DisplayName = "UMGR_043 - Validate Password strength requirements")]
     public void ValidatePassword_VariousStrengths_ReturnsCorrectValidation()
     {
-        Application.Features.UserManager.Commands.ChangePasswordByManager.ChangePasswordByManagerCommandValidator.IsStrongPassword("Pass@123").Should().BeTrue();
+        ChangePasswordByManagerCommandValidator.IsStrongPassword("Pass@123").Should().BeTrue();
 
-        Application.Features.UserManager.Commands.ChangePasswordByManager.ChangePasswordByManagerCommandValidator.IsStrongPassword("password").Should().BeFalse();
+        ChangePasswordByManagerCommandValidator.IsStrongPassword("password").Should().BeFalse();
 
-        Application.Features.UserManager.Commands.ChangePasswordByManager.ChangePasswordByManagerCommandValidator.IsStrongPassword("Pass123").Should().BeFalse();
+        ChangePasswordByManagerCommandValidator.IsStrongPassword("Pass123").Should().BeFalse();
 
-        Application.Features.UserManager.Commands.ChangePasswordByManager.ChangePasswordByManagerCommandValidator.IsStrongPassword("P@1").Should().BeFalse();
+        ChangePasswordByManagerCommandValidator.IsStrongPassword("P@1").Should().BeFalse();
     }
 #pragma warning restore CRR0035
+#pragma warning restore IDE0079
 }

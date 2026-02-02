@@ -32,6 +32,7 @@ public class Brand
         _unitOfWorkMock = new Mock<IUnitOfWork>();
     }
 
+#pragma warning disable IDE0079 
 #pragma warning disable CRR0035
     [Fact(DisplayName = "BRAND_002 - Tạo thương hiệu với tên rỗng")]
     public void BRAND_002_CreateBrand_EmptyName_ShouldFailValidation()
@@ -413,4 +414,5 @@ public class Brand
         result.ShouldNotHaveValidationErrorFor(x => x.Name);
     }
 #pragma warning restore CRR0035
+#pragma warning restore IDE0079
 }

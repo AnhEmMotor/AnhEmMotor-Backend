@@ -1,9 +1,8 @@
-using Application.ApiContracts.Output.Responses;
+﻿using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.ProductVariant;
-
 using Domain.Constants;
 using Domain.Constants.Order;
 using Domain.Entities;
@@ -36,7 +35,7 @@ public sealed class CreateOutputCommandHandler(
             var foundIds = variantsList.Select(v => v.Id).ToList();
             var missingIds = variantIds.Except(foundIds).ToList();
             return Error.NotFound(
-                $"Kh�ng t�m th?y {missingIds.Count} s?n ph?m: {string.Join(", ", missingIds)}",
+                $"Không tìm thấy {missingIds.Count} sản phẩm: {string.Join(", ", missingIds)}",
                 "Products");
         }
 
@@ -45,7 +44,7 @@ public sealed class CreateOutputCommandHandler(
             if(string.Compare(variant.Product?.StatusId, Domain.Constants.ProductStatus.ForSale) != 0)
             {
                 return Error.BadRequest(
-                    $"S?n ph?m '{variant.Product?.Name ?? variant.Id.ToString()}' kh�ng c�n du?c b�n.",
+                    $"Sản phẩm '{variant.Product?.Name ?? variant.Id.ToString()}' không còn được bán.",
                     "Products");
             }
         }
@@ -65,7 +64,8 @@ public sealed class CreateOutputCommandHandler(
             output.StatusId = OrderStatus.Pending;
         }
 
-        output.BuyerId = request.BuyerId;
+        output.BuyerId = request.BuyerId; 
+        output.CreatedBy = request.BuyerId;
 
         insertRepository.Add(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

@@ -24,5 +24,9 @@ namespace Application.Interfaces.Repositories.Supplier
             IEnumerable<int> ids,
             CancellationToken cancellationToken,
             DataFetchMode mode = DataFetchMode.ActiveOnly);
+
+        public Task<bool> IsNameExistsAsync(string name, int? excludeId = null, CancellationToken cancellationToken = default);
+        public Task<bool> IsPhoneExistsAsync(string phone, int? excludeId = null, CancellationToken cancellationToken = default);
+        public Task<bool> IsTaxIdExistsAsync(string taxId, int? excludeId = null, CancellationToken cancellationToken = default);
     }
 }

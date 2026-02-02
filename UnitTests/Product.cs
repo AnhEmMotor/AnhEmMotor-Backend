@@ -59,9 +59,11 @@ public class Product
         _optionValueReadRepoMock = new Mock<IOptionValueReadRepository>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
     }
+#pragma warning disable IDE0079 
 #pragma warning disable CRR0035
 
     [Fact(DisplayName = "PRODUCT_001 - Tạo sản phẩm thành công với 1 biến thể không có optionValues")]
+// Remove unnecessary suppression
     public async Task CreateProduct_SingleVariantNoOptions_Success()
     {
         var command = new CreateProductCommand
@@ -1082,7 +1084,7 @@ public class Product
     {
         var command = new DeleteManyProductsCommand { Ids = [ 1, 2, 3 ] };
 
-        _productReadRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>()))
+        _productReadRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(
                 [ new() { Id = 1, StatusId = "for-sale", DeletedAt = null }, new()
                 {
@@ -1110,7 +1112,7 @@ public class Product
     {
         var command = new DeleteManyProductsCommand { Ids = [ 1, 2, 3 ] };
 
-        _productReadRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>()))
+        _productReadRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(
                 [ new() { Id = 1, StatusId = "for-sale", DeletedAt = null }, new()
                 {
@@ -1134,7 +1136,7 @@ public class Product
     {
         var command = new DeleteManyProductsCommand { Ids = [ 1, 2, 3 ] };
 
-        _productReadRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>()))
+        _productReadRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(
                 [ new() { Id = 1, StatusId = "for-sale", DeletedAt = null }, new()
                 {
@@ -1288,4 +1290,5 @@ public class Product
         result.Should().NotBeNull();
     }
 #pragma warning restore CRR0035
+#pragma warning restore IDE0079
 }

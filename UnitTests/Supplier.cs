@@ -30,11 +30,12 @@ public class Supplier
         _unitOfWorkMock = new Mock<IUnitOfWork>();
     }
 
+#pragma warning disable IDE0079 
 #pragma warning disable CRR0035
     [Fact(DisplayName = "SUP_001 - Tạo Supplier thành công với đầy đủ thông tin")]
     public async Task CreateSupplier_WithFullInformation_Success()
     {
-        var handler = new CreateSupplierCommandHandler(_insertRepoMock.Object, _unitOfWorkMock.Object);
+        var handler = new CreateSupplierCommandHandler(_readRepoMock.Object, _insertRepoMock.Object, _unitOfWorkMock.Object);
         var command = new CreateSupplierCommand
         {
             Name = "Supplier A",
@@ -60,7 +61,7 @@ public class Supplier
     [Fact(DisplayName = "SUP_002 - Tạo Supplier thành công với thông tin tối thiểu (chỉ Name, Phone, Address)")]
     public async Task CreateSupplier_WithMinimalInfo_Success()
     {
-        var handler = new CreateSupplierCommandHandler(_insertRepoMock.Object, _unitOfWorkMock.Object);
+        var handler = new CreateSupplierCommandHandler(_readRepoMock.Object, _insertRepoMock.Object, _unitOfWorkMock.Object);
         var command = new CreateSupplierCommand { Name = "Supplier B", Phone = "0987654321", Address = "456 Street" };
 
         var emptySuppliers = new List<SupplierEntity>().AsQueryable();
@@ -78,7 +79,7 @@ public class Supplier
     [Fact(DisplayName = "SUP_003 - Tạo Supplier thành công với Email thay vì Phone")]
     public async Task CreateSupplier_WithEmailInsteadOfPhone_Success()
     {
-        var handler = new CreateSupplierCommandHandler(_insertRepoMock.Object, _unitOfWorkMock.Object);
+        var handler = new CreateSupplierCommandHandler(_readRepoMock.Object, _insertRepoMock.Object, _unitOfWorkMock.Object);
         var command = new CreateSupplierCommand
         {
             Name = "Supplier C",
@@ -139,40 +140,68 @@ public class Supplier
     [Fact(DisplayName = "SUP_007 - Tạo Supplier thất bại khi Name đã tồn tại")]
     public async Task CreateSupplier_DuplicateName_ThrowsException()
     {
-        var handler = new CreateSupplierCommandHandler(_insertRepoMock.Object, _unitOfWorkMock.Object);
+        // Arrange
+        var handler = new CreateSupplierCommandHandler(
+            _readRepoMock.Object,
+            _insertRepoMock.Object,
+             // Nhớ inject cái này vào constructor handler
+            _unitOfWorkMock.Object);
+
         var command = new CreateSupplierCommand
         {
             Name = "Supplier Existing",
-            Phone = "0111111111",
-            Address = "123 Street"
+            // Các field khác không quan trọng trong ngữ cảnh test này
         };
 
-        var existingSuppliers = new List<SupplierEntity> { new() { Name = "Supplier Existing", DeletedAt = null } }.AsQueryable(
-            );
-        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(existingSuppliers);
+        // SETUP ĐƠN GIẢN: Hỏi có tồn tại không? Trả về CÓ (true).
+        _readRepoMock.Setup(x => x.IsNameExistsAsync(command.Name, It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(true);
 
-        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        // Act
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        // Assert
         result.IsFailure.Should().BeTrue();
+
+        // Verify: Đảm bảo Insert KHÔNG bao giờ được gọi
+        _insertRepoMock.Verify(x => x.Add(It.IsAny<SupplierEntity>()), Times.Never);
     }
 
     [Fact(DisplayName = "SUP_008 - Tạo Supplier thất bại khi Phone đã tồn tại")]
     public async Task CreateSupplier_DuplicatePhone_ThrowsException()
     {
-        var handler = new CreateSupplierCommandHandler(_insertRepoMock.Object, _unitOfWorkMock.Object);
-        var command = new CreateSupplierCommand { Name = "Supplier New", Phone = "0123456789", Address = "123 Street" };
+        var handler = new CreateSupplierCommandHandler(
+            _readRepoMock.Object,
+            _insertRepoMock.Object,
+            _unitOfWorkMock.Object);
 
-        var existingSuppliers = new List<SupplierEntity> { new() { Phone = "0123456789", DeletedAt = null } }.AsQueryable(
-            );
-        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(existingSuppliers);
+        var command = new CreateSupplierCommand
+        {
+            Name = "Supplier New",
+            Phone = "0123456789",
+            Address = "123 Street"
+        };
 
-        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        _readRepoMock.Setup(x => x.IsPhoneExistsAsync(command.Phone, It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(true);
+
+        _readRepoMock.Setup(x => x.IsNameExistsAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(false);
+
+        var result = await handler.Handle(command, CancellationToken.None);
+
         result.IsFailure.Should().BeTrue();
+        _insertRepoMock.Verify(x => x.Add(It.IsAny<SupplierEntity>()), Times.Never);
     }
 
     [Fact(DisplayName = "SUP_009 - Tạo Supplier thất bại khi TaxIdentificationNumber đã tồn tại")]
     public async Task CreateSupplier_DuplicateTaxId_ThrowsException()
     {
-        var handler = new CreateSupplierCommandHandler(_insertRepoMock.Object, _unitOfWorkMock.Object);
+        var handler = new CreateSupplierCommandHandler(
+            _readRepoMock.Object,
+            _insertRepoMock.Object,
+            _unitOfWorkMock.Object);
+
         var command = new CreateSupplierCommand
         {
             Name = "Supplier Tax",
@@ -181,14 +210,19 @@ public class Supplier
             TaxIdentificationNumber = "1234567890"
         };
 
-        var existingSuppliers = new List<SupplierEntity>
-        {
-            new() { TaxIdentificationNumber = "1234567890", DeletedAt = null }
-        }.AsQueryable();
-        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(existingSuppliers);
+        _readRepoMock.Setup(x => x.IsTaxIdExistsAsync(command.TaxIdentificationNumber, It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(true);
 
-        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        _readRepoMock.Setup(x => x.IsNameExistsAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(false);
+
+        _readRepoMock.Setup(x => x.IsPhoneExistsAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(false);
+
+        var result = await handler.Handle(command, CancellationToken.None);
+
         result.IsFailure.Should().BeTrue();
+        _insertRepoMock.Verify(x => x.Add(It.IsAny<SupplierEntity>()), Times.Never);
     }
 
     [Fact(DisplayName = "SUP_011 - Tạo Supplier với Email không hợp lệ")]
@@ -560,4 +594,5 @@ public class Supplier
         result.IsFailure.Should().BeTrue();
     }
 #pragma warning restore CRR0035
+#pragma warning restore IDE0079
 }

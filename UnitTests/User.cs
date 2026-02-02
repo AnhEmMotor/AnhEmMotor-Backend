@@ -25,6 +25,7 @@ public class User
         _protectedEntityManagerServiceMock = new Mock<IProtectedEntityManagerService>();
     }
 
+#pragma warning disable IDE0079 
 #pragma warning disable CRR0035
     [Fact(DisplayName = "USER_001 - Lấy thông tin người dùng hiện tại thành công")]
     public async Task GetCurrentUser_Success_ReturnsUserResponse()
@@ -542,6 +543,7 @@ public class User
         result.IsFailure.Should().BeTrue();
     }
 #pragma warning restore CRR0035
+#pragma warning restore IDE0079
 }
 
 

@@ -25,6 +25,7 @@ namespace UnitTests;
 
 public class PermissionAndRole
 {
+#pragma warning disable IDE0079 
 #pragma warning disable CRR0035
     [Fact(DisplayName = "PERM_001 - Lấy tất cả permissions thành công")]
     public async Task GetAllPermissions_NoParams_ReturnsGroupedPermissions()
@@ -581,4 +582,5 @@ public class PermissionAndRole
             Times.Exactly(3));
     }
 #pragma warning restore CRR0035
+#pragma warning restore IDE0079
 }

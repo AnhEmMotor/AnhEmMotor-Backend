@@ -1,3 +1,4 @@
+using Application.ApiContracts.Output.Requests;
 using Application.ApiContracts.Output.Responses;
 using Domain.Entities;
 using Mapster;
@@ -13,7 +14,7 @@ public sealed class OutputMappingConfig : IRegister
                 dest => dest.Total,
                 src => src.OutputInfos != null ? src.OutputInfos.Sum(oi => (oi.Count ?? 0) * (oi.Price ?? 0)) : 0)
             .Map(dest => dest.BuyerName, src => src.Buyer != null ? src.Buyer.FullName : null)
-            .Map(dest => dest.CompletedByUserName, src => src.CreatedBy != null ? src.FinishedByUser!.FullName : null)
+            .Map(dest => dest.CompletedByUserName, src => src.FinishedByUser != null ? src.FinishedByUser.FullName : null)
             .Map(dest => dest.CreatedByUserId, src => src.CreatedBy)
             .Map(dest => dest.Products, src => src.OutputInfos);
 
@@ -25,7 +26,15 @@ public sealed class OutputMappingConfig : IRegister
                     : null);
 
 
-        config.NewConfig<ApiContracts.Output.Requests.UpdateOutputInfoRequest, OutputInfo>().IgnoreNullValues(true);
+        config.NewConfig<CreateOutputInfoRequest, OutputInfo>()
+            .Map(dest => dest.ProductVarientId, src => src.ProductId)
+            .IgnoreNullValues(true);
+
+        config.NewConfig<UpdateOutputInfoRequest, OutputInfo>()
+            .Map(dest => dest.ProductVarientId, src => src.ProductId)
+            .Map(dest => dest.Count, src => src.Count)
+            .Ignore(dest => dest.Id)
+            .IgnoreNullValues(true);
         config.NewConfig<Commands.UpdateOutputForManager.UpdateOutputForManagerCommand, Output>()
             .IgnoreNullValues(true)
             .Ignore(dest => dest.OutputInfos);
