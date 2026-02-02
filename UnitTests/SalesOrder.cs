@@ -23,6 +23,8 @@ using Domain.Entities;
 using FluentAssertions;
 using Moq;
 using Sieve.Models;
+using ProductEntity = Domain.Entities.Product;
+using ProductStatus = Domain.Constants.ProductStatus;
 
 namespace UnitTests;
 
@@ -53,18 +55,39 @@ public class SalesOrder
     [Fact(DisplayName = "SO_001 - CreateOutput tạo đơn hàng thành công")]
     public async Task CreateOutput_ValidRequest_ShouldCallInsertRepository()
     {
+        var productId = 1;
+        var command = new CreateOutputCommand
+        {
+            OutputInfos = [new() { ProductId = productId, Count = 5 }]
+        };
+
+        var mockVariant = new ProductVariant
+        {
+            Id = productId,
+            Price = 100,
+            Product = new ProductEntity { StatusId = ProductStatus.ForSale }
+        };
+
+        _variantRepoMock.Setup(x => x.GetByIdAsync(
+            It.IsAny<List<int>>(),
+            It.IsAny<CancellationToken>(),
+            It.IsAny<DataFetchMode>()))
+            .ReturnsAsync(new List<ProductVariant> { mockVariant });
+
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Output { Id = 100 });
+
         var handler = new CreateOutputCommandHandler(
             _readRepoMock.Object,
             _insertRepoMock.Object,
             _variantRepoMock.Object,
             _unitOfWorkMock.Object);
 
-        var command = new CreateOutputCommand { OutputInfos = [ new() { ProductId = 1, Count = 5 } ] };
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
+        result.IsSuccess.Should().BeTrue(); 
         result.Value.Should().NotBeNull();
-        result.Value!.Id.Should().BeGreaterThan(0);
+        result.Value!.Id.Should().Be(100);
         _insertRepoMock.Verify(x => x.Add(It.IsAny<Output>()), Times.Once);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }

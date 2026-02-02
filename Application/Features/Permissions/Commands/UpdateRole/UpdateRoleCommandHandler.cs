@@ -1,4 +1,4 @@
-using Application.ApiContracts.Permission.Responses;
+﻿using Application.ApiContracts.Permission.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Permission;
@@ -20,22 +20,37 @@ public class UpdateRoleCommandHandler(
         CancellationToken cancellationToken)
     {
         var role = await roleReadRepository.GetRoleByNameAsync(request.RoleName!, cancellationToken)
-            .ConfigureAwait(false);
-        if(role is null)
+        .ConfigureAwait(false);
+        if (role is null)
         {
             return Error.NotFound("Role not found.");
         }
+
         var isRoleUpdated = false;
 
-        if(request.Description is not null && string.Compare(role.Description, request.Description) != 0)
+        // 1. Cập nhật Description
+        if (request.Description is not null && string.Compare(role.Description, request.Description) != 0)
         {
             role.Description = request.Description;
             isRoleUpdated = true;
         }
 
-        if(request.Permissions!.Count == 0)
+        // 2. Kiểm tra an toàn cho Permissions
+        // Nếu Permissions là null -> Người dùng không muốn cập nhật Permissions
+        if (request.Permissions == null)
         {
-            if(isRoleUpdated)
+            if (isRoleUpdated)
+            {
+                await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+            return new PermissionRoleUpdateResponse();
+        }
+
+        // 3. Nếu Permissions rỗng -> Có thể logic của bạn là không làm gì hoặc xóa hết.
+        // Dựa trên code cũ của bạn, tôi giữ nguyên logic "nếu rỗng thì thoát" nhưng thêm kiểm tra null.
+        if (request.Permissions.Count == 0)
+        {
+            if (isRoleUpdated)
             {
                 await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }

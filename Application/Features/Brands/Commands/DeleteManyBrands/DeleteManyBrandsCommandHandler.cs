@@ -1,10 +1,11 @@
 ﻿using Application.Common.Models;
-using Application.Features.Brands.Commands.DeleteManyBrands;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
 using Domain.Constants;
 using Domain.Entities;
 using MediatR;
+
+namespace Application.Features.Brands.Commands.DeleteManyBrands;
 
 public sealed class DeleteManyBrandsCommandHandler(
     IBrandReadRepository readRepository,

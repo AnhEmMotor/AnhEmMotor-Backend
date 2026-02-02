@@ -18,12 +18,17 @@ public sealed class UploadImageCommandHandler(
 
     public async Task<Result<MediaFileResponse>> Handle(UploadImageCommand request, CancellationToken cancellationToken)
     {
-        if(request.FileContent == null || request.FileContent.Length == 0)
+        if (string.IsNullOrWhiteSpace(request.FileName))
         {
-            return Result<MediaFileResponse>.Failure("File is required");
+            return Result<MediaFileResponse>.Failure("Filename is required");
         }
 
-        if(request.FileContent.Length > MaxFileSize)
+        if (request.FileContent == null || request.FileContent.Length == 0)
+        {
+            return Result<MediaFileResponse>.Failure("File is empty or required");
+        }
+
+        if (request.FileContent.Length > MaxFileSize)
         {
             return Result<MediaFileResponse>.Failure("File size exceeds 10MB limit");
         }

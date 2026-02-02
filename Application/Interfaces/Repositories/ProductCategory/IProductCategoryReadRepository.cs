@@ -7,6 +7,17 @@ public interface IProductCategoryReadRepository
 {
     public IQueryable<CategoryEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly);
 
+    public Task<bool> ExistsByNameAsync(
+        string name,
+        CancellationToken cancellationToken,
+        DataFetchMode mode = DataFetchMode.ActiveOnly);
+
+    public Task<bool> ExistsByNameExceptIdAsync(
+        string name,
+        int id,
+        CancellationToken cancellationToken,
+        DataFetchMode mode = DataFetchMode.ActiveOnly);
+
     public Task<IEnumerable<CategoryEntity>> GetAllAsync(
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);

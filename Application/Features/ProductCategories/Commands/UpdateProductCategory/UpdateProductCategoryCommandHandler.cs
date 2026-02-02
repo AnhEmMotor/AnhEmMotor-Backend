@@ -1,8 +1,8 @@
-using Application.ApiContracts.ProductCategory.Responses;
+﻿using Application.ApiContracts.ProductCategory.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductCategory;
-
+using Domain.Constants;
 using Mapster;
 using MediatR;
 
@@ -14,17 +14,43 @@ public sealed class UpdateProductCategoryCommandHandler(
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateProductCategoryCommand, Result<ProductCategoryResponse?>>
 {
     public async Task<Result<ProductCategoryResponse?>> Handle(
-        UpdateProductCategoryCommand request,
-        CancellationToken cancellationToken)
+    UpdateProductCategoryCommand request,
+    CancellationToken cancellationToken)
     {
+        // Lấy bản ghi (mặc định ActiveOnly)
         var category = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
 
-        if(category == null)
+        // PC_019 & NotFound: Nếu không thấy hoặc đã bị xóa
+        if (category == null || category.DeletedAt != null)
         {
-            return Error.NotFound($"Product category with Id {request.Id} not found.");
+            return Result<ProductCategoryResponse?>.Failure(
+                Error.NotFound($"Product category with Id {request.Id} not found or has been deleted."));
         }
 
-        request.Adapt(category);
+        if (!string.IsNullOrWhiteSpace(request.Name))
+        {
+            var nameToUpdate = request.Name.Trim();
+
+            // PC_017: Check trùng tên với thằng khác
+            var isDuplicate = await readRepository.ExistsByNameExceptIdAsync(
+                nameToUpdate,
+                request.Id,
+                cancellationToken,
+                DataFetchMode.All).ConfigureAwait(false);
+
+            if (isDuplicate)
+            {
+                return Result<ProductCategoryResponse?>.Failure(
+                    Error.Conflict($"Category name '{nameToUpdate}' already exists."));
+            }
+
+            category.Name = nameToUpdate;
+        }
+
+        if (request.Description != null)
+        {
+            category.Description = request.Description.Trim();
+        }
 
         updateRepository.Update(category);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

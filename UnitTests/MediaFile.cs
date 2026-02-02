@@ -60,6 +60,10 @@ public class MediaFile
         var insertRepositoryMock = new Mock<IMediaFileInsertRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
 
+        fileStorageServiceMock
+            .Setup(x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<FileUpload>.Failure("Unsupported file format"));
+
         var handler = new UploadImageCommandHandler(
             fileStorageServiceMock.Object,
             insertRepositoryMock.Object,
@@ -76,7 +80,6 @@ public class MediaFile
 
         result = await handler.Handle(txtCommand, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
-
 
         var fakeWebpStream = new MemoryStream(new byte[1024]);
         var fakeWebpCommand = new UploadImageCommand { FileContent = fakeWebpStream, FileName = "fake.webp" };
@@ -442,6 +445,11 @@ public class MediaFile
         var insertRepositoryMock = new Mock<IMediaFileInsertRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
 
+        // SỬA Ở ĐÂY: Dùng FileUpload thay vì SavedFile
+        fileStorageServiceMock
+            .Setup(x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<FileUpload>.Failure("Invalid file signature"));
+
         var handler = new UploadImageCommandHandler(
             fileStorageServiceMock.Object,
             insertRepositoryMock.Object,
@@ -451,7 +459,10 @@ public class MediaFile
         var command = new UploadImageCommand { FileContent = fakeStream, FileName = "fake.webp" };
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+
         result.IsFailure.Should().BeTrue();
+        fileStorageServiceMock.Verify(x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()), Times.Once);
+        insertRepositoryMock.Verify(x => x.Add(It.IsAny<MediaFileEntity>()), Times.Never);
     }
 
     [Fact(DisplayName = "MF_030 - Security: File signature không khớp với extension (jpg fake)")]
@@ -460,6 +471,10 @@ public class MediaFile
         var fileStorageServiceMock = new Mock<IFileStorageService>();
         var insertRepositoryMock = new Mock<IMediaFileInsertRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
+
+        fileStorageServiceMock
+            .Setup(x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<FileUpload>.Failure("Invalid file signature"));
 
         var handler = new UploadImageCommandHandler(
             fileStorageServiceMock.Object,
@@ -470,7 +485,10 @@ public class MediaFile
         var command = new UploadImageCommand { FileContent = fakeStream, FileName = "fake.jpg" };
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+
         result.IsFailure.Should().BeTrue();
+        fileStorageServiceMock.Verify(x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()), Times.Once);
+        insertRepositoryMock.Verify(x => x.Add(It.IsAny<MediaFileEntity>()), Times.Never);
     }
 
     [Fact(DisplayName = "MF_032 - Lấy thông tin file theo ID thất bại khi file không tồn tại")]
@@ -616,7 +634,7 @@ public class MediaFile
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         result.IsFailure.Should().BeTrue();
-        result.Error?.Message.Should().Contain("stream");
+        result.Error?.Message.Should().Be("File is empty or required");
     }
 
     [Fact(DisplayName = "MF_049 - Upload file với empty stream")]
@@ -652,13 +670,15 @@ public class MediaFile
             insertRepositoryMock.Object,
             unitOfWorkMock.Object);
 
-        var stream = new MemoryStream(new byte[51200]);
+        // Stream có dữ liệu để vượt qua check null stream
+        var stream = new MemoryStream(new byte[10]);
         var command = new UploadImageCommand { FileContent = stream, FileName = string.Empty };
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         result.IsFailure.Should().BeTrue();
-        result.Error?.Message.Should().Contain("filename");
+        // Đảm bảo thông báo lỗi khớp với code trong Handler
+        result.Error?.Message.Should().Contain("Filename");
     }
 #pragma warning restore CRR0035
 }

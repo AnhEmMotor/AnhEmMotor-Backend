@@ -1,4 +1,4 @@
-using Application.Common.Models;
+﻿using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductCategory;
 using Application.Interfaces.Services;
@@ -15,9 +15,11 @@ public sealed class DeleteProductCategoryCommandHandler(
 {
     public async Task<Result> Handle(DeleteProductCategoryCommand request, CancellationToken cancellationToken)
     {
+        // Mặc định lấy ActiveOnly
         var category = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
 
-        if(category is null)
+        // SỬA TẠI ĐÂY: Kiểm tra cả null và trạng thái đã xóa
+        if (category is null || category.DeletedAt is not null)
         {
             return Result.Failure(Error.NotFound($"Product category with Id {request.Id} not found."));
         }
@@ -25,7 +27,7 @@ public sealed class DeleteProductCategoryCommandHandler(
         var isProtected = await protectedCategoryService.IsProtectedAsync(request.Id, cancellationToken)
             .ConfigureAwait(false);
 
-        if(isProtected)
+        if (isProtected)
         {
             return Result.Failure(
                 Error.Validation(

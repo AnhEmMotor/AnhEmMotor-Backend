@@ -88,6 +88,57 @@ public class ApplicationDBContext(DbContextOptions<ApplicationDBContext> options
             .HasForeignKey(rp => rp.PermissionId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        // Check if using SQLite and remove SQL Server-specific configurations
+        var isSqlite = Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite";
+
+        if(isSqlite)
+        {
+            // Remove SQL Server-specific annotations for SQLite compatibility
+            foreach(var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                // Remove table filters that use SQL Server syntax
+                var tableName = entityType.GetTableName();
+
+                if(tableName == "Roles")
+                {
+                    var index = entityType.GetIndexes()
+                        .FirstOrDefault(i => i.GetDatabaseName() == "RoleNameIndex");
+
+                    if(index is not null)
+                    {
+                        index.SetFilter(null);
+                    }
+                }
+
+                if(tableName == "Users")
+                {
+                    var index = entityType.GetIndexes()
+                        .FirstOrDefault(i => i.GetDatabaseName() == "UserNameIndex");
+
+                    if(index is not null)
+                    {
+                        index.SetFilter(null);
+                    }
+                }
+
+                // Clear SQL Server-specific column types
+                foreach(var property in entityType.GetProperties())
+                {
+                    var columnType = property.GetColumnType();
+
+                    if(columnType is not null &&
+                       (columnType.Contains("nvarchar(MAX)", StringComparison.OrdinalIgnoreCase) ||
+                        columnType.Contains("uniqueidentifier", StringComparison.OrdinalIgnoreCase) ||
+                        columnType.Contains("datetimeoffset", StringComparison.OrdinalIgnoreCase) ||
+                        columnType.Contains("rowversion", StringComparison.OrdinalIgnoreCase) ||
+                        columnType.Contains("bit", StringComparison.OrdinalIgnoreCase)))
+                    {
+                        property.SetColumnType(null);
+                    }
+                }
+            }
+        }
+
         foreach(var entityType in modelBuilder.Model.GetEntityTypes())
         {
             if(typeof(BaseEntity).IsAssignableFrom(entityType.ClrType))

@@ -27,30 +27,29 @@ public sealed class CreateProductCommandHandler(
     IUnitOfWork unitOfWork) : IRequestHandler<CreateProductCommand, Result<ProductDetailForManagerResponse?>>
 {
     public async Task<Result<ProductDetailForManagerResponse?>> Handle(
-        CreateProductCommand request,
-        CancellationToken cancellationToken)
+    CreateProductCommand request,
+    CancellationToken cancellationToken)
     {
         var errors = new List<Error>();
 
         var category = await productCategoryReadRepository.GetByIdAsync(request.CategoryId!.Value, cancellationToken)
             .ConfigureAwait(false);
-        if(category == null)
+        if (category == null)
         {
-            errors.Add(
-                Error.NotFound($"Product category with Id {request.CategoryId} not found.", nameof(request.CategoryId)));
+            errors.Add(Error.NotFound($"Product category with Id {request.CategoryId} not found.", nameof(request.CategoryId)));
         }
 
-        if(request.BrandId.HasValue)
+        if (request.BrandId.HasValue)
         {
             var brand = await brandReadRepository.GetByIdAsync(request.BrandId.Value, cancellationToken)
                 .ConfigureAwait(false);
-            if(brand == null)
+            if (brand == null)
             {
                 errors.Add(Error.BadRequest($"Brand with Id {request.BrandId} not found.", nameof(request.BrandId)));
             }
         }
 
-        if(request.Variants?.Count > 0)
+        if (request.Variants?.Count > 0)
         {
             var slugs = request.Variants
                 .Select(v => v.UrlSlug?.Trim())
@@ -58,38 +57,41 @@ public sealed class CreateProductCommandHandler(
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
-            foreach(var slug in slugs)
+            foreach (var slug in slugs)
             {
                 var existing = await productVariantReadRepository.GetBySlugAsync(slug!, cancellationToken)
                     .ConfigureAwait(false);
-                if(existing != null)
+                if (existing != null)
                 {
                     errors.Add(Error.BadRequest($"Slug '{slug}' is already in use.", "Variants.UrlSlug"));
                 }
             }
         }
 
-        if(errors.Count > 0)
-            return (Result<ProductDetailForManagerResponse?>)(object)Result.Failure(errors);
+        if (errors.Count > 0)
+        {
+            // SỬA TẠI ĐÂY: Trả về Result<T> thay vì ép kiểu object
+            return Result<ProductDetailForManagerResponse?>.Failure(errors);
+        }
 
         var optionIdToValueMap = new Dictionary<int, Dictionary<string, int>>();
 
-        if(request.Variants?.Count > 0)
+        if (request.Variants?.Count > 0)
         {
             var allOptionValues = new Dictionary<int, HashSet<string>>();
 
-            foreach(var variantReq in request.Variants)
+            foreach (var variantReq in request.Variants)
             {
-                if(variantReq.OptionValues?.Count > 0)
+                if (variantReq.OptionValues?.Count > 0)
                 {
-                    foreach(var kvp in variantReq.OptionValues)
+                    foreach (var kvp in variantReq.OptionValues)
                     {
-                        if(int.TryParse(kvp.Key, out var optionId))
+                        if (int.TryParse(kvp.Key, out var optionId))
                         {
                             var valueName = kvp.Value?.Trim();
-                            if(!string.IsNullOrWhiteSpace(valueName))
+                            if (!string.IsNullOrWhiteSpace(valueName))
                             {
-                                if(!allOptionValues.TryGetValue(optionId, out HashSet<string>? value))
+                                if (!allOptionValues.TryGetValue(optionId, out HashSet<string>? value))
                                 {
                                     value = [];
                                     allOptionValues[optionId] = value;
@@ -101,20 +103,22 @@ public sealed class CreateProductCommandHandler(
                 }
             }
 
-            foreach(var optionKvp in allOptionValues)
+            foreach (var optionKvp in allOptionValues)
             {
                 var optionId = optionKvp.Key;
                 var valueNames = optionKvp.Value;
 
                 var option = await optionReadRepository.GetByIdAsync(optionId, cancellationToken).ConfigureAwait(false);
-                if(option == null)
+                if (option == null)
                 {
-                    return Error.NotFound($"Option with Id {optionId} not found.", "Variants.OptionValues");
+                    // SỬA TẠI ĐÂY: Đồng bộ kiểu trả về
+                    return Result<ProductDetailForManagerResponse?>.Failure(
+                        Error.NotFound($"Option with Id {optionId} not found.", "Variants.OptionValues"));
                 }
 
                 var valueMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
-                foreach(var valueName in valueNames)
+                foreach (var valueName in valueNames)
                 {
                     var existingValue = await optionValueReadRepository.GetByIdAndNameAsync(
                         optionId,
@@ -122,10 +126,11 @@ public sealed class CreateProductCommandHandler(
                         cancellationToken)
                         .ConfigureAwait(false);
 
-                    if(existingValue != null)
+                    if (existingValue != null)
                     {
                         valueMap[valueName] = existingValue.Id;
-                    } else
+                    }
+                    else
                     {
                         var newValue = new OptionValueEntity { OptionId = optionId, Name = valueName };
                         optionValueInsertRepository.Add(newValue);
@@ -167,9 +172,9 @@ public sealed class CreateProductCommandHandler(
             ProductVariants = []
         };
 
-        if(request.Variants?.Count > 0)
+        if (request.Variants?.Count > 0)
         {
-            foreach(var variantReq in request.Variants)
+            foreach (var variantReq in request.Variants)
             {
                 var variant = new ProductVariant
                 {
@@ -180,22 +185,22 @@ public sealed class CreateProductCommandHandler(
                     VariantOptionValues = []
                 };
 
-                if(variantReq.PhotoCollection?.Count > 0)
+                if (variantReq.PhotoCollection?.Count > 0)
                 {
-                    foreach(var photoUrl in variantReq.PhotoCollection.Where(p => !string.IsNullOrWhiteSpace(p)))
+                    foreach (var photoUrl in variantReq.PhotoCollection.Where(p => !string.IsNullOrWhiteSpace(p)))
                     {
                         variant.ProductCollectionPhotos.Add(new ProductCollectionPhoto { ImageUrl = photoUrl.Trim() });
                     }
                 }
 
-                if(variantReq.OptionValues?.Count > 0)
+                if (variantReq.OptionValues?.Count > 0)
                 {
-                    foreach(var kvp in variantReq.OptionValues)
+                    foreach (var kvp in variantReq.OptionValues)
                     {
-                        if(int.TryParse(kvp.Key, out var optionId))
+                        if (int.TryParse(kvp.Key, out var optionId))
                         {
                             var valueName = kvp.Value?.Trim();
-                            if(!string.IsNullOrWhiteSpace(valueName) &&
+                            if (!string.IsNullOrWhiteSpace(valueName) &&
                                 optionIdToValueMap.TryGetValue(optionId, out Dictionary<string, int>? value) &&
                                 value.TryGetValue(valueName, out var valueId))
                             {
@@ -211,6 +216,6 @@ public sealed class CreateProductCommandHandler(
         productInsertRepository.Add(product);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return product.Adapt<ProductDetailForManagerResponse>();
+        return Result<ProductDetailForManagerResponse?>.Success(product.Adapt<ProductDetailForManagerResponse>());
     }
 }

@@ -47,6 +47,6 @@ public sealed class UpdateManyProductPricesCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return productIds;
+        return Result<List<int>?>.Success(productIds);
     }
 }

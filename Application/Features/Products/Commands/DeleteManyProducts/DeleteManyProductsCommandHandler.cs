@@ -16,38 +16,43 @@ public sealed class DeleteManyProductsCommandHandler(
     {
         var uniqueIds = command.Ids!.Distinct().ToList();
 
-        var activeProducts = await readRepository.GetByIdAsync(uniqueIds, cancellationToken).ConfigureAwait(false);
-        var allProducts = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.ActiveOnly)
+        // CHỈ GỌI DB 1 LẦN: Lấy tất cả bao gồm cả những sản phẩm đã bị xóa (Soft Deleted)
+        // Giả sử DataFetchMode.All bao gồm cả deleted, nếu không hãy điều chỉnh Repo
+        var allProducts = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.All)
             .ConfigureAwait(false);
 
         var allProductsMap = allProducts.ToDictionary(p => p.Id!);
-        var activeProductsSet = activeProducts.Select(p => p.Id!).ToHashSet();
-
         var errorDetails = new List<Error>();
 
-        foreach(var id in uniqueIds)
+        foreach (var id in uniqueIds)
         {
-            if(!allProductsMap.ContainsKey(id))
+            // Bước 1: Kiểm tra tồn tại
+            if (!allProductsMap.TryGetValue(id, out var product))
             {
                 errorDetails.Add(Error.NotFound($"Product not found, Product ID: {id}"));
+                continue; // Bỏ qua các kiểm tra sau cho ID này
             }
 
-            if(!activeProductsSet.Contains(id))
+            // Bước 2: Kiểm tra trạng thái (Ví dụ: dựa trên IsDeleted hoặc StatusId)
+            // Giả sử logic của bạn là check xem nó có còn "Active" không
+            if (product.DeletedAt != null) // Hoặc logic IsActive của bạn
             {
-                var productName = allProductsMap[id].Name;
-                errorDetails.Add(
-                    Error.BadRequest($"Product has already been deleted, Product ID: {id}, Product Name: {productName}"));
+                errorDetails.Add(Error.BadRequest(
+                    $"Product has already been deleted, Product ID: {id}, Product Name: {product.Name}"));
             }
         }
 
-        if(errorDetails.Count > 0)
+        if (errorDetails.Count > 0)
         {
             return Result.Failure(errorDetails);
         }
 
-        if(activeProducts.ToList().Count > 0)
+        // Lọc ra danh sách thực sự cần xóa (những thằng đang active)
+        var productsToDelete = allProductsMap.Values.Where(p => p.DeletedAt == null).ToList();
+
+        if (productsToDelete.Count > 0)
         {
-            deleteRepository.Delete(activeProducts);
+            deleteRepository.Delete(productsToDelete);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 

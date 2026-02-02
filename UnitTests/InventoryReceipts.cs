@@ -5,6 +5,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Supplier;
+using Domain.Constants;
 using Domain.Entities;
 using FluentAssertions;
 using FluentValidation.TestHelper;
@@ -52,7 +53,7 @@ public class InventoryReceipts
     public void CreateInputProductValidator_ExcessiveDecimalPlaces_ReturnsValidationError()
     {
         var validator = new CreateInputInfoCommandValidator();
-        var command = new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000123456 };
+        var command = new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 10000012.3456m };
 
         var result = validator.TestValidate(command);
 
@@ -177,21 +178,29 @@ public class InventoryReceipts
         var mockReadRepo = new Mock<IInputReadRepository>();
         var mockUpdateRepo = new Mock<IInputUpdateRepository>();
 
-        mockReadRepo.Setup(x => x.GetByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+        mockReadRepo.Setup(x => x.GetByIdWithDetailsAsync(
+                It.IsAny<int>(),
+                It.IsAny<CancellationToken>(),
+                It.IsAny<DataFetchMode>()))
             .ReturnsAsync((Input?)null);
 
         var handler = new UpdateInputCommandHandler(
             mockReadRepo.Object,
-            mockUpdateRepo.Object,
+            Mock.Of<IInputUpdateRepository>(),
             Mock.Of<IInputDeleteRepository>(),
             Mock.Of<ISupplierReadRepository>(),
             Mock.Of<IProductVariantReadRepository>(),
             Mock.Of<IUnitOfWork>());
+
         var command = new UpdateInputCommand { Id = 9999, Notes = "Updated", SupplierId = 2, Products = [] };
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-        result.Value.Should().BeNull();
+
+        // Assert chuẩn xác:
         result.IsFailure.Should().BeTrue();
+
+        // Code của Error.NotFound mặc định là "NotFound". Chấp nhận sự thật này.
+        result.Error?.Code.Should().Be("NotFound");
     }
 
     [Fact(DisplayName = "INPUT_055 - Handler xử lý UpdateInputStatus kiểm tra transition hợp lệ")]
