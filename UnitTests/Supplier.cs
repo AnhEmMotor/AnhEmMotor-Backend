@@ -154,7 +154,7 @@ public class Supplier
         };
 
         // SETUP ĐƠN GIẢN: Hỏi có tồn tại không? Trả về CÓ (true).
-        _readRepoMock.Setup(x => x.IsNameExistsAsync(command.Name, It.IsAny<int>(), It.IsAny<CancellationToken>()))
+        _readRepoMock.Setup(x => x.IsNameExistsAsync(command.Name, It.IsAny<int?>(), It.IsAny<CancellationToken>()))
                      .ReturnsAsync(true);
 
         // Act
@@ -182,10 +182,10 @@ public class Supplier
             Address = "123 Street"
         };
 
-        _readRepoMock.Setup(x => x.IsPhoneExistsAsync(command.Phone, It.IsAny<int>(), It.IsAny<CancellationToken>()))
+        _readRepoMock.Setup(x => x.IsPhoneExistsAsync(command.Phone, It.IsAny<int?>(), It.IsAny<CancellationToken>()))
                      .ReturnsAsync(true);
 
-        _readRepoMock.Setup(x => x.IsNameExistsAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+        _readRepoMock.Setup(x => x.IsNameExistsAsync(It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
                      .ReturnsAsync(false);
 
         var result = await handler.Handle(command, CancellationToken.None);
@@ -210,13 +210,13 @@ public class Supplier
             TaxIdentificationNumber = "1234567890"
         };
 
-        _readRepoMock.Setup(x => x.IsTaxIdExistsAsync(command.TaxIdentificationNumber, It.IsAny<int>(), It.IsAny<CancellationToken>()))
+        _readRepoMock.Setup(x => x.IsTaxIdExistsAsync(command.TaxIdentificationNumber, It.IsAny<int?>(), It.IsAny<CancellationToken>()))
                      .ReturnsAsync(true);
 
-        _readRepoMock.Setup(x => x.IsNameExistsAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+        _readRepoMock.Setup(x => x.IsNameExistsAsync(It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
                      .ReturnsAsync(false);
 
-        _readRepoMock.Setup(x => x.IsPhoneExistsAsync(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+        _readRepoMock.Setup(x => x.IsPhoneExistsAsync(It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
                      .ReturnsAsync(false);
 
         var result = await handler.Handle(command, CancellationToken.None);
@@ -346,21 +346,16 @@ public class Supplier
     }
 
     [Fact(DisplayName = "SUP_017 - Cập nhật Supplier thất bại khi body rỗng")]
-    public async Task UpdateSupplier_WithEmptyBody_ThrowsException()
+
+    public void UpdateSupplier_WithEmptyBody_ThrowsException()
     {
-        var handler = new UpdateSupplierCommandHandler(
-            _readRepoMock.Object,
-            _updateRepoMock.Object,
-            _unitOfWorkMock.Object);
         var command = new UpdateSupplierCommand { Id = 1 };
+        var validator = new UpdateSupplierCommandValidator();
 
-        var existingSupplier = new SupplierEntity { Id = 1, Name = "Original Name", StatusId = "active" };
+        var result = validator.Validate(command);
 
-        _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
-            .ReturnsAsync(existingSupplier);
-
-        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-        result.IsFailure.Should().BeTrue();
+        result.IsValid.Should().BeFalse();
+        result.Errors.Should().Contain(x => x.ErrorMessage.Contains("At least one field must be provided"));
     }
 
     [Fact(DisplayName = "SUP_018 - Cập nhật Supplier thất bại khi Name trùng với Supplier khác")]
@@ -377,8 +372,8 @@ public class Supplier
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingSupplier);
 
-        var existingSuppliers = new List<SupplierEntity> { new() { Id = 2, Name = "Supplier Existing" } }.AsQueryable();
-        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(existingSuppliers);
+        _readRepoMock.Setup(x => x.IsNameExistsAsync(It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+             .ReturnsAsync(true);
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();

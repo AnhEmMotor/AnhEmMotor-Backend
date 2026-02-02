@@ -19,6 +19,8 @@ public sealed class UpdateSupplierCommandValidator : AbstractValidator<UpdateSup
         return !string.IsNullOrWhiteSpace(command.Name) ||
                !string.IsNullOrWhiteSpace(command.Phone) ||
                !string.IsNullOrWhiteSpace(command.Email) ||
+               !string.IsNullOrWhiteSpace(command.Address) ||
+               !string.IsNullOrWhiteSpace(command.Notes) ||
                !string.IsNullOrWhiteSpace(command.TaxIdentificationNumber);
     }
 }
