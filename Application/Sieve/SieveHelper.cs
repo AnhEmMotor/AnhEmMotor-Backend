@@ -27,7 +27,7 @@ namespace Application.Sieve
 
             sieveModel.Sorts = mode switch
             {
-                DataFetchMode.DeletedOnly => "-deletedAt",
+                DataFetchMode.DeletedOnly => "-id",
                 DataFetchMode.ActiveOnly => "-id",
                 DataFetchMode.All => "-id",
                 _ => "-id",

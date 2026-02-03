@@ -61,7 +61,7 @@ public class Supplier
         createdAtActionResult.StatusCode.Should().Be(StatusCodes.Status201Created);
 
         // Kiểm tra thêm ActionName và RouteValues để đảm bảo Logic Mapping đúng
-        createdAtActionResult.ActionName.Should().Be("GetSupplierByIdAsync"); // Hoặc tên hàm Get của bạn
+        createdAtActionResult.ActionName.Should().Be("GetSupplierById"); // Hoặc tên hàm Get của bạn
         createdAtActionResult.RouteValues?["id"].Should().Be(1);
 
         var response = createdAtActionResult.Value.Should().BeOfType<SupplierResponse>().Subject;

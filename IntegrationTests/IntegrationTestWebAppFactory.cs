@@ -39,7 +39,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>
         {
             config.AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["Jwt:Key"] = "ThisIsMySuperSecretAndLongEnoughKeyForJWTGeneration12345!@$#@#",
+                ["Jwt:Key"] = "ThisIsMySuperSecretAndLongEnoughKeyForJWTGenerationHehehe!@$#@#",
                 ["Jwt:Issuer"] = "https://test.api.anhemmotor.com",
                 ["Jwt:Audience"] = "https://test.anhemmotor.com",
                 ["Jwt:AccessTokenExpiryInMinutes"] = "15",

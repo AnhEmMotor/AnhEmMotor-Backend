@@ -30,8 +30,6 @@ public static class AuthenticationExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        var jwtKey = configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key missing");
-
         services.AddAuthentication(
             options =>
             {
@@ -42,6 +40,8 @@ public static class AuthenticationExtensions
             .AddJwtBearer(
                 options =>
                 {
+                    var jwtKey = configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key missing");
+
                     options.SaveToken = true;
                     options.RequireHttpsMetadata = false;
                     options.TokenValidationParameters = new TokenValidationParameters

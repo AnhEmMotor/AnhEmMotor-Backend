@@ -67,7 +67,7 @@ public class BrandController(IMediator mediator) : ApiController
     /// Lấy danh sách thương hiệu đã bị xoá (có phân trang, lọc, sắp xếp).
     /// </summary>
     [HttpGet("deleted")]
-    [HasPermission(Brands.View)]
+    [HasPermission(Brands.Delete)]
     [ProducesResponseType(typeof(PagedResult<BrandResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetDeletedBrandsAsync(
         [FromQuery] SieveModel sieveModel,

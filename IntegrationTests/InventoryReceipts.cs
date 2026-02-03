@@ -6,12 +6,16 @@ using Application.Features.Inputs.Commands.RestoreManyInputs;
 using Application.Features.Inputs.Commands.UpdateInput;
 using Application.Features.Inputs.Commands.UpdateInputStatus;
 using Application.Features.Inputs.Commands.UpdateManyInputStatus;
+using Azure.Core;
+using Domain.Constants.Permission;
 using Domain.Primitives;
 using FluentAssertions;
 using Infrastructure.DBContexts;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace IntegrationTests;
 
@@ -30,6 +34,13 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "INPUT_001 - Tạo phiếu nhập hàng thành công (Happy Path)")]
     public async Task CreateInput_Success_ReturnsOk()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+
         var request = new UpdateInputCommand
         {
             Notes = "Nhập hàng tháng 1",
@@ -37,7 +48,10 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
             Products = [ new UpdateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 } ]
         };
 
-        var response = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", request).ConfigureAwait(true);
+        var requestMessage = new HttpRequestMessage(HttpMethod.Post, "/api/v1/InventoryReceipts");
+        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+        requestMessage.Content = JsonContent.Create(request);
+        var response = await _client.SendAsync(requestMessage);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -61,6 +75,13 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "INPUT_002 - Tạo phiếu nhập với nhiều sản phẩm và tính toán chính xác tổng tiền")]
     public async Task CreateInput_MultipleProducts_CalculatesTotalCorrectly()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+
         var request = new CreateInputCommand
         {
             Notes = "Test",
@@ -74,7 +95,10 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
                 } ]
         };
 
-        var response = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", request).ConfigureAwait(true);
+        var requestMessage = new HttpRequestMessage(HttpMethod.Post, "/api/v1/InventoryReceipts");
+        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+        requestMessage.Content = JsonContent.Create(request);
+        var response = await _client.SendAsync(requestMessage);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -89,6 +113,13 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "INPUT_004 - Tạo phiếu nhập với SupplierId không tồn tại")]
     public async Task CreateInput_NonExistentSupplier_ReturnsNotFound()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+
         var request = new CreateInputCommand
         {
             Notes = "Test",
@@ -96,7 +127,10 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
             Products = [ new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 } ]
         };
 
-        var response = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", request).ConfigureAwait(true);
+        var requestMessage = new HttpRequestMessage(HttpMethod.Post, "/api/v1/InventoryReceipts");
+        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+        requestMessage.Content = JsonContent.Create(request);
+        var response = await _client.SendAsync(requestMessage);
 
         response.StatusCode.Should().BeOneOf(HttpStatusCode.NotFound, HttpStatusCode.BadRequest);
     }
@@ -104,6 +138,13 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "INPUT_005 - Tạo phiếu nhập với ProductId không tồn tại")]
     public async Task CreateInput_NonExistentProduct_ReturnsNotFound()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+
         var request = new CreateInputCommand
         {
             Notes = "Test",
@@ -111,7 +152,10 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
             Products = [ new CreateInputInfoRequest { ProductId = 9999, Count = 10, InputPrice = 100000 } ]
         };
 
-        var response = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", request).ConfigureAwait(true);
+        var requestMessage = new HttpRequestMessage(HttpMethod.Post, "/api/v1/InventoryReceipts");
+        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+        requestMessage.Content = JsonContent.Create(request);
+        var response = await _client.SendAsync(requestMessage);
 
         response.StatusCode.Should().BeOneOf(HttpStatusCode.NotFound, HttpStatusCode.BadRequest);
     }
@@ -119,6 +163,13 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "INPUT_006 - Tạo phiếu nhập với Product đã bị xóa hoặc không còn bán")]
     public async Task CreateInput_DeletedProduct_ReturnsBadRequest()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+
         var request = new CreateInputCommand
         {
             Notes = "Test",
@@ -126,7 +177,12 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
             Products = [ new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 } ]
         };
 
-        var response = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", request).ConfigureAwait(true);
+
+        var requestMessage = new HttpRequestMessage(HttpMethod.Post, "/api/v1/InventoryReceipts");
+        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+        requestMessage.Content = JsonContent.Create(request);
+        var response = await _client.SendAsync(requestMessage);
+
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -134,6 +190,13 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "INPUT_012 - Tạo phiếu nhập với Notes chứa script XSS")]
     public async Task CreateInput_XSSInNotes_SanitizesInput()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+
         var request = new CreateInputCommand
         {
             Notes = "<script>alert('XSS')</script>",
@@ -141,7 +204,10 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
             Products = [ new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 } ]
         };
 
-        var response = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", request).ConfigureAwait(true);
+        var requestMessage = new HttpRequestMessage(HttpMethod.Post, "/api/v1/InventoryReceipts");
+        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+        requestMessage.Content = JsonContent.Create(request);
+        var response = await _client.SendAsync(requestMessage);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
@@ -157,7 +223,16 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "INPUT_016 - Lấy danh sách phiếu nhập có phân trang")]
     public async Task GetInputs_WithPagination_ReturnsCorrectPage()
     {
-        var response = await _client.GetAsync("/api/v1/InventoryReceipts?page=1&pageSize=10").ConfigureAwait(true);
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+
+        var requestMessage = new HttpRequestMessage(HttpMethod.Get, "/api/v1/InventoryReceipts?page=1&pageSize=10");
+        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+        var response = await _client.SendAsync(requestMessage);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -171,8 +246,16 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "INPUT_017 - Lấy danh sách phiếu nhập với filter theo StatusId")]
     public async Task GetInputs_FilterByStatus_ReturnsFilteredResults()
     {
-        var response = await _client.GetAsync("/api/v1/InventoryReceipts?filters=StatusId==working")
-            .ConfigureAwait(true);
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+
+        var requestMessage = new HttpRequestMessage(HttpMethod.Get, "/api/v1/InventoryReceipts?filters=StatusId==working");
+        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+        var response = await _client.SendAsync(requestMessage);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -187,7 +270,16 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "INPUT_018 - Lấy danh sách phiếu nhập với sort theo InputDate descending")]
     public async Task GetInputs_SortByInputDateDesc_ReturnsSortedResults()
     {
-        var response = await _client.GetAsync("/api/v1/InventoryReceipts?sorts=-InputDate").ConfigureAwait(true);
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+
+        var requestMessage = new HttpRequestMessage(HttpMethod.Get, "/api/v1/InventoryReceipts?sorts=-InputDate");
+        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+        var response = await _client.SendAsync(requestMessage);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -200,9 +292,18 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "INPUT_020 - Lấy chi tiết phiếu nhập thành công")]
     public async Task GetInputById_ExistingInput_ReturnsCompleteDetails()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+
         int inputId = 1;
 
-        var response = await _client.GetAsync($"/api/v1/InventoryReceipts/{inputId}").ConfigureAwait(true);
+        var requestMessage = new HttpRequestMessage(HttpMethod.Get, "/api/v1/InventoryReceipts?sorts=-InputDate");
+        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+        var response = await _client.SendAsync(requestMessage);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -219,9 +320,18 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "INPUT_021 - Lấy chi tiết phiếu nhập không tồn tại")]
     public async Task GetInputById_NonExistentInput_ReturnsNotFound()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+
         int inputId = 9999;
 
-        var response = await _client.GetAsync($"/api/v1/InventoryReceipts/{inputId}").ConfigureAwait(true);
+        var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/InventoryReceipts/{inputId}");
+        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+        var response = await _client.SendAsync(requestMessage);
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -229,14 +339,23 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "INPUT_023 - Cập nhật phiếu nhập thành công ở trạng thái working")]
     public async Task UpdateInput_WorkingStatus_UpdatesSuccessfully()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+
         var createRequest = new CreateInputCommand
         {
             Notes = "Original",
             SupplierId = 1,
             Products = [ new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 } ]
         };
-        var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest)
-            .ConfigureAwait(true);
+        var requestMessage = new HttpRequestMessage(HttpMethod.Post, "/api/v1/InventoryReceipts");
+        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+        requestMessage.Content = JsonContent.Create(createRequest);
+        var createResponse = await _client.SendAsync(requestMessage);
         var createdInput = await createResponse.Content
             .ReadFromJsonAsync<InputResponse>(CancellationToken.None)
             .ConfigureAwait(true);
@@ -248,8 +367,10 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
             Products = [ new UpdateInputInfoRequest { ProductId = 2, Count = 20, InputPrice = 200000 } ]
         };
 
-        var response = await _client.PutAsJsonAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}", updateRequest)
-            .ConfigureAwait(true);
+        var requestUpdateMessage = new HttpRequestMessage(HttpMethod.Put, $"/api/v1/InventoryReceipts/{createdInput!.Id}");
+        requestUpdateMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+        requestUpdateMessage.Content = JsonContent.Create(updateRequest);
+        var response = await _client.SendAsync(requestMessage);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -263,6 +384,13 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "INPUT_024 - Cập nhật phiếu nhập ở trạng thái finished (không cho phép)")]
     public async Task UpdateInput_FinishedStatus_ReturnsBadRequest()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+
         var createRequest = new CreateInputCommand
         {
             Notes = "Original",
@@ -292,6 +420,13 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "INPUT_025 - Cập nhật phiếu nhập ở trạng thái cancelled (không cho phép)")]
     public async Task UpdateInput_CancelledStatus_ReturnsBadRequest()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+
         var createRequest = new CreateInputCommand
         {
             Notes = "Original",
@@ -321,6 +456,13 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "INPUT_028 - Cập nhật trạng thái phiếu nhập từ working sang finished")]
     public async Task UpdateInputStatus_WorkingToFinished_UpdatesSuccessfully()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+
         var createRequest = new CreateInputCommand
         {
             Notes = "Test",
@@ -357,6 +499,13 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "INPUT_029 - Cập nhật trạng thái phiếu nhập từ working sang cancelled")]
     public async Task UpdateInputStatus_WorkingToCancelled_UpdatesSuccessfully()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+
         var createRequest = new CreateInputCommand
         {
             Notes = "Test",
@@ -387,6 +536,13 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "INPUT_032 - Cập nhật trạng thái nhiều phiếu nhập cùng lúc")]
     public async Task UpdateManyInputStatus_MultipleInputs_UpdatesAllSuccessfully()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+
         var ids = new List<int>();
         for(int i = 0; i < 3; i++)
         {
@@ -430,6 +586,13 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "INPUT_033 - Cập nhật trạng thái nhiều phiếu nhập với một số Id không tồn tại")]
     public async Task UpdateManyInputStatus_SomeNonExistent_HandlesPartially()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+
         var createRequest = new CreateInputCommand
         {
             Notes = "Test",
@@ -460,6 +623,13 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "INPUT_034 - Xóa phiếu nhập thành công ở trạng thái working")]
     public async Task DeleteInput_WorkingStatus_DeletesSuccessfully()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+
         var createRequest = new CreateInputCommand
         {
             Notes = "Test",
@@ -485,6 +655,13 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "INPUT_038 - Xóa nhiều phiếu nhập cùng lúc")]
     public async Task DeleteManyInputs_MultipleInputs_DeletesAllSuccessfully()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+
         var ids = new List<int>();
         for(int i = 0; i < 3; i++)
         {
@@ -519,6 +696,13 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "INPUT_039 - Khôi phục phiếu nhập đã xóa thành công")]
     public async Task RestoreInput_DeletedInput_RestoresSuccessfully()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+
         var createRequest = new CreateInputCommand
         {
             Notes = "Test",
@@ -547,6 +731,13 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "INPUT_041 - Khôi phục nhiều phiếu nhập đã xóa cùng lúc")]
     public async Task RestoreManyInputs_MultipleDeletedInputs_RestoresAllSuccessfully()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+
         var ids = new List<int>();
         for(int i = 0; i < 3; i++)
         {
@@ -585,6 +776,13 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "INPUT_042 - Clone phiếu nhập thành công")]
     public async Task CloneInput_ValidInput_CreatesNewInput()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+
         var createRequest = new CreateInputCommand
         {
             Notes = "Original",
@@ -612,6 +810,13 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "INPUT_043 - Clone phiếu nhập với sản phẩm đã bị xóa")]
     public async Task CloneInput_WithDeletedProduct_ClonesOnlyValidProducts()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+
         var createRequest = new CreateInputCommand
         {
             Notes = "Original",
@@ -653,6 +858,13 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "INPUT_046 - Lấy danh sách phiếu nhập theo SupplierId")]
     public async Task GetInputsBySupplierId_ValidSupplierId_ReturnsFilteredInputs()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+
         int supplierId = 1;
 
         var response = await _client.GetAsync($"/api/v1/InventoryReceipts/by-supplier/{supplierId}?page=1&pageSize=10")
@@ -669,6 +881,13 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "INPUT_047 - Lấy danh sách phiếu nhập đã xóa")]
     public async Task GetDeletedInputs_ReturnsOnlyDeletedInputs()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+
         var response = await _client.GetAsync("/api/v1/InventoryReceipts/deleted?page=1&pageSize=10")
             .ConfigureAwait(true);
 
@@ -682,6 +901,13 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "INPUT_066 - Tạo phiếu nhập với ImportPrice là 0")]
     public async Task CreateInput_ZeroImportPrice_AllowsFreeProducts()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+
         var request = new CreateInputCommand
         {
             Notes = "Free products",
@@ -701,6 +927,13 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "INPUT_068 - Cập nhật trạng thái phiếu nhập với ConfirmedBy được ghi nhận đúng")]
     public async Task UpdateInputStatus_TracksConfirmedByCorrectly()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+
         var createRequest = new CreateInputCommand
         {
             Notes = "Test",
@@ -732,6 +965,13 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "INPUT_069 - Lấy danh sách phiếu nhập với nhiều filter kết hợp")]
     public async Task GetInputs_MultipleCombinedFilters_ReturnsFilteredResults()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+
         var response = await _client.GetAsync("/api/v1/InventoryReceipts?filters=StatusId==working,SupplierId==1")
             .ConfigureAwait(true);
 
