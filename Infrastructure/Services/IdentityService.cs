@@ -2,6 +2,7 @@
 using Application.Common.Models;
 using Application.Interfaces.Services;
 using Domain.Entities;
+using Domain.Constants;
 using Microsoft.AspNetCore.Identity;
 
 namespace Infrastructure.Services;
@@ -35,6 +36,11 @@ public class IdentityService(UserManager<ApplicationUser> userManager) : IIdenti
         if(!isPasswordValid)
         {
             return Error.Unauthorized("Wrong username/email or password.");
+        }
+
+        if (user.Status == UserStatus.Banned)
+        {
+            return Error.Forbidden("User is banned.");
         }
 
         cancellationToken.ThrowIfCancellationRequested();

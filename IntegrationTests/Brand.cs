@@ -3,6 +3,8 @@ using Application.Features.Brands.Commands.CreateBrand;
 using Application.Features.Brands.Commands.DeleteManyBrands;
 using Application.Features.Brands.Commands.RestoreManyBrands;
 using Application.Features.Brands.Commands.UpdateBrand;
+using Domain.Constants.Permission;
+using Domain.Entities;
 using Domain.Primitives;
 using FluentAssertions;
 using Infrastructure.DBContexts;
@@ -28,10 +30,18 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "BRAND_001 - CreateBrand - Success")]
     public async Task BRAND_001_CreateBrand_Success()
     {
+        var username = "loginuser";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(
+           _factory.Services,
+           username,
+           password,
+           [PermissionsList.Brands.Create],
+           email: "testemail@gmail.com");
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         var request = new CreateBrandCommand { Name = "Honda Integration", Description = "Integration Test" };
-
         var response = await _client.PostAsJsonAsync("/api/v1/Brand", request).ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
             .ReadFromJsonAsync<BrandResponse>(CancellationToken.None)

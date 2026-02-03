@@ -32,7 +32,7 @@ public class AuthController(IMediator mediator) : ApiController
     [HttpPost("register")]
     [AnonymousOnly]
     [SwaggerOperation(Summary = "Đăng ký tài khoản mới", Description = "Tạo 1 tài khoản mới (với email và password)")]
-    [ProducesResponseType(typeof(RegistrationSuccessResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(RegisterResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RegisterAsync(
         [FromBody] RegisterCommand command,
@@ -80,7 +80,7 @@ public class AuthController(IMediator mediator) : ApiController
     /// Đăng xuất
     /// </summary>
     [HttpPost("logout")]
-    [ProducesResponseType(typeof(LogoutSuccessResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(LogoutResponse), StatusCodes.Status200OK)]
     [Authorize]
     public async Task<IActionResult> LogoutAsync(CancellationToken cancellationToken)
     {
@@ -91,7 +91,7 @@ public class AuthController(IMediator mediator) : ApiController
             return HandleResult(result);
 
         Response.Cookies.Delete("refreshToken");
-        return Ok(new LogoutSuccessResponse());
+        return Ok(new LogoutResponse());
     }
 
     /// <summary>

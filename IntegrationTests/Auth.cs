@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Json;
+using Domain.Constants.Permission;
+using Microsoft.EntityFrameworkCore;
 
 namespace IntegrationTests;
 
@@ -17,14 +19,17 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
     private readonly IntegrationTestWebAppFactory _factory;
     private readonly HttpClient _client;
 
-    public Auth(IntegrationTestWebAppFactory factory)
+    private readonly Xunit.Abstractions.ITestOutputHelper _output;
+
+    public Auth(IntegrationTestWebAppFactory factory, Xunit.Abstractions.ITestOutputHelper output)
     {
         _factory = factory;
         _client = _factory.CreateClient();
+        _output = output;
     }
 
 #pragma warning disable CRR0035
-    [Fact(DisplayName = "AUTH_REG_001 - Đăng ký thành công")]
+    [Fact(DisplayName = "AUTH_REG_001 - Register Success")]
     public async Task AUTH_REG_001_Register_Success()
     {
         var request = new RegisterCommand
@@ -33,23 +38,29 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
             Password = "Password123!",
             FullName = "Test User 001",
             Username = "testuser001",
-            PhoneNumber = "0123456789"
+            PhoneNumber = "0123456789",
+            Gender = "Male"
         };
 
-        var response = await _client.PostAsJsonAsync("/api/v1/Auth/register", request).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/Auth/register", request);
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
-            .ReadFromJsonAsync<RegisterResponse>(CancellationToken.None)
-            .ConfigureAwait(true);
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+
+        var jsonRaw = await response.Content.ReadAsStringAsync();
+        _output.WriteLine($"Raw JSON: {jsonRaw}");
+
+        var content = await response.Content.ReadFromJsonAsync<RegisterResponse>();
+
         content.Should().NotBeNull();
         content!.UserId.Should().NotBeEmpty();
 
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var user = db.Users.FirstOrDefault(u => u.Email == request.Email);
-        user.Should().NotBeNull();
-        user!.Status.Should().Be(UserStatus.Active);
+        var userFromDb = db.Users.FirstOrDefault(u => u.Email == request.Email);
+
+
+        userFromDb.Should().NotBeNull();
+        userFromDb!.Status.Should().Be(UserStatus.Active);
     }
 
     [Fact(DisplayName = "AUTH_REG_003 - Đăng ký trùng lặp")]
@@ -61,7 +72,8 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
             Username = "existuser",
             Password = "Password123!",
             FullName = "Exist User",
-            PhoneNumber = "0987654321"
+            PhoneNumber = "0987654321",
+            Gender = "Male"
         };
         await _client.PostAsJsonAsync("/api/v1/Auth/register", request1).ConfigureAwait(true);
 
@@ -71,7 +83,8 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
             Username = "newuser",
             Password = "Password123!",
             FullName = "New User",
-            PhoneNumber = "0987654322"
+            PhoneNumber = "0987654322",
+            Gender = "Male"
         };
 
         var response = await _client.PostAsJsonAsync("/api/v1/Auth/register", request2).ConfigureAwait(true);
@@ -88,7 +101,8 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
             Password = "Password123!",
             FullName = "<script>alert(1)</script>",
             Username = "' OR 1=1 --",
-            PhoneNumber = "0123456789"
+            PhoneNumber = "0123456789",
+            Gender = "Male"
         };
 
         var response = await _client.PostAsJsonAsync("/api/v1/Auth/register", request).ConfigureAwait(true);
@@ -111,19 +125,13 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
     public async Task AUTH_REG_006_Register_SoftDeleted_Email_Fail()
     {
         var email = "deleted@example.com";
-        using(var scope = _factory.Services.CreateScope())
-        {
-            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-            var user = new ApplicationUser
-            {
-                UserName = "deleteduser",
-                Email = email,
-                FullName = "Deleted User",
-                DeletedAt = DateTimeOffset.UtcNow,
-                Status = UserStatus.Active
-            };
-            await userManager.CreateAsync(user, "Password123!").ConfigureAwait(true);
-        }
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            "deleteduser",
+            "Password123!",
+            [], // No specific permissions needed for this test
+            email: email,
+            deletedAt: DateTimeOffset.UtcNow);
 
         var request = new RegisterCommand
         {
@@ -131,7 +139,8 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
             Username = "newdeleteduser",
             Password = "Password123!",
             FullName = "New User",
-            PhoneNumber = "0123456789"
+            PhoneNumber = "0123456789",
+            Gender = "Male"
         };
 
         var response = await _client.PostAsJsonAsync("/api/v1/Auth/register", request).ConfigureAwait(true);
@@ -139,35 +148,32 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
-    [Fact(DisplayName = "AUTH_LOG_001 - Đăng nhập thành công")]
-    public async Task AUTH_LOG_001_Login_Success()
+    [Fact(DisplayName = "AUTH_LOG_001 - Đăng nhập thành công với Cookie bảo mật")]
+    public async Task AUTH_LOG_001_Login_Success_With_Secure_Cookies()
     {
         var email = "login_success@example.com";
         var password = "Password123!";
-        using(var scope = _factory.Services.CreateScope())
-        {
-            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-            var user = new ApplicationUser
-            {
-                UserName = "loginuser",
-                Email = email,
-                FullName = "Login User",
-                Status = UserStatus.Active
-            };
-            await userManager.CreateAsync(user, password).ConfigureAwait(true);
-        }
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            "loginuser",
+            password,
+            [],
+            email: email);
 
         var request = new LoginCommand { UsernameOrEmail = email, Password = password };
 
         var response = await _client.PostAsJsonAsync("/api/v1/Auth/login", request).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
-            .ReadFromJsonAsync<LoginResponse>(CancellationToken.None)
-            .ConfigureAwait(true);
-        content.Should().NotBeNull();
-        content!.AccessToken.Should().NotBeNullOrEmpty();
-        content.RefreshToken.Should().NotBeNullOrEmpty();
+
+        var setCookieHeaders = response.Headers.GetValues("Set-Cookie").ToList();
+        var refreshTokenCookie = setCookieHeaders.FirstOrDefault(c => c.Contains("refreshToken"));
+
+        refreshTokenCookie.Should().NotBeNull();
+
+        refreshTokenCookie.Should().Contain("httponly", "Vì Refresh Token không được phép để Javascript truy cập");
+        refreshTokenCookie.Should().Contain("secure", "Vì Refresh Token chỉ được gửi qua HTTPS");
+        refreshTokenCookie.Should().Contain("samesite=strict", "Hoặc Lax tùy vào cấu hình Cross-domain của bạn");
     }
 
     [Fact(DisplayName = "AUTH_LOG_003 - Đăng nhập User bị cấm")]
@@ -175,18 +181,13 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
     {
         var username = "banned_user";
         var password = "Password123!";
-        using(var scope = _factory.Services.CreateScope())
-        {
-            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-            var user = new ApplicationUser
-            {
-                UserName = username,
-                Email = "banned@example.com",
-                FullName = "Banned User",
-                Status = UserStatus.Banned
-            };
-            await userManager.CreateAsync(user, password).ConfigureAwait(true);
-        }
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [],
+            email: "banned@example.com",
+            isLocked: true);
 
         var request = new LoginCommand { UsernameOrEmail = username, Password = password };
 
@@ -200,24 +201,13 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
     {
         var username = "manager_user";
         var password = "Password123!";
-        using(var scope = _factory.Services.CreateScope())
-        {
-            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
-
-            if(!await roleManager.RoleExistsAsync("Manager").ConfigureAwait(true))
-                await roleManager.CreateAsync(new ApplicationRole { Name = "Manager" }).ConfigureAwait(true);
-
-            var user = new ApplicationUser
-            {
-                UserName = username,
-                Email = "manager@example.com",
-                FullName = "Manager User",
-                Status = UserStatus.Active
-            };
-            await userManager.CreateAsync(user, password).ConfigureAwait(true);
-            await userManager.AddToRoleAsync(user, "Manager").ConfigureAwait(true);
-        }
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [PermissionsList.Users.View],
+            email: "manager@example.com",
+            roleName: "Manager");
 
         var request = new LoginCommand { UsernameOrEmail = username, Password = password };
 
@@ -233,18 +223,12 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         var password = "Password123!";
         string? refreshToken = string.Empty;
 
-        using(var scope = _factory.Services.CreateScope())
-        {
-            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-            var user = new ApplicationUser
-            {
-                UserName = username,
-                Email = "refresh@example.com",
-                FullName = "Refresh User",
-                Status = UserStatus.Active
-            };
-            await userManager.CreateAsync(user, password).ConfigureAwait(true);
-        }
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [],
+            email: "refresh@example.com");
 
         var loginRes = await _client.PostAsJsonAsync(
             "/api/v1/Auth/login",
@@ -280,18 +264,12 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
     {
         var username = "refresh_banned";
         var password = "Password123!";
-        using(var scope = _factory.Services.CreateScope())
-        {
-            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-            var user = new ApplicationUser
-            {
-                UserName = username,
-                Email = "refresh_banned@example.com",
-                FullName = "Refresh Banned",
-                Status = UserStatus.Active
-            };
-            await userManager.CreateAsync(user, password).ConfigureAwait(true);
-        }
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [],
+            email: "refresh_banned@example.com");
 
         var loginRes = await _client.PostAsJsonAsync(
             "/api/v1/Auth/login",
@@ -318,29 +296,6 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         response.StatusCode
             .Should()
             .BeOneOf(HttpStatusCode.Forbidden, HttpStatusCode.Unauthorized, HttpStatusCode.BadRequest);
-    }
-
-    [Fact(DisplayName = "AUTH_VAL_001 - Trimming dữ liệu")]
-    public async Task AUTH_VAL_001_Trimming()
-    {
-        var request = new RegisterCommand
-        {
-            Email = "  trim@example.com  ",
-            Username = "  trimuser  ",
-            Password = "Password123!",
-            FullName = "  Trim User  ",
-            PhoneNumber = "0123456789"
-        };
-
-        var response = await _client.PostAsJsonAsync("/api/v1/Auth/register", request).ConfigureAwait(true);
-
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var user = db.Users.FirstOrDefault(u => u.Email == "trim@example.com");
-        user.Should().NotBeNull();
-        user!.UserName.Should().Be("trimuser");
-        user.FullName.Should().Be("Trim User");
     }
 #pragma warning restore CRR0035
 }

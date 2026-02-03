@@ -1,7 +1,7 @@
 ﻿
 namespace Application.ApiContracts.Auth.Responses
 {
-    public class LogoutSuccessResponse
+    public class LogoutResponse
     {
         public string Message { get; set; } = "Logout successful!";
     }

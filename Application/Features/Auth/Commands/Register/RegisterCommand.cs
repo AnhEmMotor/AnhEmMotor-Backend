@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Application.Features.Auth.Commands.Register;
 
-public record RegisterCommand : IRequest<Result<RegistrationSuccessResponse>>
+public record RegisterCommand : IRequest<Result<RegisterResponse>>
 {
     public string? Username { get; init; }
 
