@@ -3,6 +3,7 @@ using Application.Common.Models;
 using Application.Features.Settings.Commands.SetSettings;
 using Application.Features.Settings.Queries.GetAllSettings;
 using Asp.Versioning;
+using Domain.Constants;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -38,7 +39,7 @@ public class SettingController(IMediator mediator) : ApiController
     {
         var command = new SetSettingsCommand() { Settings = request };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleCreated(result, nameof(GetAllSettingsAsync));
+        return HandleCreated(result, RouteNames.Settings.GetAllSettings);
 
     }
 
@@ -47,7 +48,7 @@ public class SettingController(IMediator mediator) : ApiController
     /// </summary>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    [HttpGet]
+    [HttpGet(Name = RouteNames.Settings.GetAllSettings)]
     [HasPermission(Settings.View)]
     [ProducesResponseType(typeof(Dictionary<string, long?>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllSettingsAsync(CancellationToken cancellationToken)

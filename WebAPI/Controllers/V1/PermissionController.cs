@@ -17,6 +17,7 @@ using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
 using WebAPI.Controllers.Base;
 using Domain.Constants.Permission;
+using Domain.Constants;
 
 namespace WebAPI.Controllers.V1;
 
@@ -74,7 +75,7 @@ public class PermissionController(IMediator mediator) : ApiController
     /// <summary>
     /// Lấy các quyền của một vai trò cụ thể
     /// </summary>
-    [HttpGet("roles/{roleName}/permissions")]
+    [HttpGet("roles/{roleName}/permissions", Name = RouteNames.Permission.GetRolePermissions)]
     [HasPermission(PermissionsList.Roles.View)]
     [ProducesResponseType(typeof(List<PermissionResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -142,7 +143,7 @@ public class PermissionController(IMediator mediator) : ApiController
             },
             cancellationToken)
             .ConfigureAwait(true);
-        return HandleCreated(result, nameof(GetRolePermissionsAsync), new { id = result.IsSuccess ? result.Value.RoleId : null });
+        return HandleCreated(result, RouteNames.Permission.GetRolePermissions, new { id = result.IsSuccess ? result.Value.RoleId : null });
     }
 
     /// <summary>

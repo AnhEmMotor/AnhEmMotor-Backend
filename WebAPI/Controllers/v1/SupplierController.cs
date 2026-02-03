@@ -13,6 +13,7 @@ using Application.Features.Suppliers.Queries.GetSupplierById;
 using Application.Features.Suppliers.Queries.GetSuppliersList;
 using Application.Features.Suppliers.Queries.GetSuppliersListForInputManager;
 using Asp.Versioning;
+using Domain.Constants;
 using Domain.Entities;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
@@ -77,7 +78,7 @@ public class SupplierController(IMediator mediator) : ApiController
     /// <param name="id">Mã nhà cung cấp cần lấy thông tin.</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    [HttpGet("{id:int}")]
+    [HttpGet("{id:int}", Name = RouteNames.Supplier.GetById)]
     [HasPermission(Suppliers.View)]
     [ProducesResponseType(typeof(SupplierResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -103,7 +104,7 @@ public class SupplierController(IMediator mediator) : ApiController
     {
         var command = request.Adapt<CreateSupplierCommand>();
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleCreated(result, nameof(GetSupplierByIdAsync), new { id = result.IsSuccess ? result.Value?.Id : 0 });
+        return HandleCreated(result, RouteNames.Supplier.GetById, new { id = result.IsSuccess ? result.Value?.Id : 0 });
     }
 
     /// <summary>

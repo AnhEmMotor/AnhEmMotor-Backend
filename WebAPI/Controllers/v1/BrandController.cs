@@ -10,10 +10,13 @@ using Application.Features.Brands.Queries.GetBrandById;
 using Application.Features.Brands.Queries.GetBrandsList;
 using Application.Features.Brands.Queries.GetDeletedBrandsList;
 using Asp.Versioning;
+using Domain.Constants;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using Mapster;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
@@ -78,7 +81,7 @@ public class BrandController(IMediator mediator) : ApiController
     /// <summary>
     /// Lấy thông tin của thương hiệu được chọn.
     /// </summary>
-    [HttpGet("{id:int}")]
+    [HttpGet("{id:int}", Name = RouteNames.Brands.GetById)]
     [HasPermission(Brands.View)]
     [ProducesResponseType(typeof(BrandResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -101,7 +104,7 @@ public class BrandController(IMediator mediator) : ApiController
     {
         var command = request.Adapt<CreateBrandCommand>();
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleCreated(result, nameof(GetBrandByIdAsync), new { id = result.IsSuccess ? result.Value.Id : null });
+        return HandleCreated(result, RouteNames.Brands.GetById, new { id = result.IsSuccess ? result.Value.Id : 0 });
     }
 
     /// <summary>

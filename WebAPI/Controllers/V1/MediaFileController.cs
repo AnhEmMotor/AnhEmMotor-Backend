@@ -11,6 +11,7 @@ using Application.Features.Files.Queries.GetFileById;
 using Application.Features.Files.Queries.GetFilesList;
 using Application.Features.Files.Queries.ViewImage;
 using Asp.Versioning;
+using Domain.Constants;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using Mapster;
@@ -63,7 +64,8 @@ public class MediaFileController(IMediator mediator) : ApiController
     /// <summary>
     /// Lấy thông tin của tệp media được chọn.
     /// </summary>
-    [NonAction]
+    [HttpGet("{id:int}", Name = RouteNames.MediaFile.GetById)]
+    [RequiresAnyPermissions(Products.Edit, Products.Create)]
     [ProducesResponseType(typeof(MediaFileResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetFileByIdAsync(int id, CancellationToken cancellationToken)
@@ -86,7 +88,7 @@ public class MediaFileController(IMediator mediator) : ApiController
             return BadRequest();
         var command = new UploadImageCommand { FileContent = file.OpenReadStream(), FileName = file.FileName };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleCreated(result, nameof(GetFileByIdAsync), new { id = result.IsSuccess ? result.Value.Id : null } );
+        return HandleCreated(result, RouteNames.MediaFile.GetById, new { id = result.IsSuccess ? result.Value.Id : null } );
     }
 
     /// <summary>

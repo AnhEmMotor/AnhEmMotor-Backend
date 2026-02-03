@@ -39,7 +39,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>
         {
             config.AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["Jwt:Key"] = "TestSecretKeyForJWTGenerationInIntegrationTests123456!@#",
+                ["Jwt:Key"] = "ThisIsMySuperSecretAndLongEnoughKeyForJWTGeneration12345!@$#@#",
                 ["Jwt:Issuer"] = "https://test.api.anhemmotor.com",
                 ["Jwt:Audience"] = "https://test.anhemmotor.com",
                 ["Jwt:AccessTokenExpiryInMinutes"] = "15",
@@ -74,6 +74,12 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>
                     })
                     .AddEntityFrameworkStores<ApplicationDBContext>()
                     .AddDefaultTokenProviders();
+
+                services.Configure<Microsoft.AspNetCore.Authentication.AuthenticationOptions>(options =>
+                {
+                    options.DefaultAuthenticateScheme = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme;
+                });
 
                 // Register Authorization services
                 services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();

@@ -10,7 +10,9 @@ using FluentAssertions;
 using Infrastructure.DBContexts;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using Xunit.Abstractions;
 using BrandEntities = Domain.Entities.Brand;
 
 namespace IntegrationTests;
@@ -19,6 +21,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
 {
     private readonly IntegrationTestWebAppFactory _factory;
     private readonly HttpClient _client;
+    private readonly ITestOutputHelper _output;
 
     public Brand(IntegrationTestWebAppFactory factory)
     {
@@ -32,22 +35,46 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
     {
         var username = "loginuser";
         var password = "ThisIsStrongPassword1@";
+
         await IntegrationTestHelper.CreateUserWithPermissionsAsync(
-           _factory.Services,
-           username,
-           password,
-           [PermissionsList.Brands.Create],
-           email: "testemail@gmail.com");
+            _factory.Services,
+            username,
+            password,
+            [PermissionsList.Brands.Create],
+            email: "testemail@gmail.com");
+
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
-        _client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-        var request = new CreateBrandCommand { Name = "Honda Integration", Description = "Integration Test" };
-        var response = await _client.PostAsJsonAsync("/api/v1/Brand", request).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
-            .ReadFromJsonAsync<BrandResponse>(CancellationToken.None)
-            .ConfigureAwait(true);
-        content.Should().NotBeNull();
-        content!.Name.Should().Be("Honda Integration");
+
+        loginResponse.Should().NotBeNull();
+        loginResponse.AccessToken.Should().NotBeNullOrWhiteSpace();
+
+        var command = new CreateBrandCommand { Name = "Honda Integration", Description = "Integration Test" };
+
+        var requestMessage = new HttpRequestMessage(HttpMethod.Post, "/api/v1/brand");
+        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+        requestMessage.Content = JsonContent.Create(command);
+
+        var response = await _client.SendAsync(requestMessage);
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            throw new Exception($"API returned 401. Response Body: {errorContent}");
+        }
+
+        if (response.StatusCode == HttpStatusCode.InternalServerError)
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            throw new Exception($"API returned 500. Response Body: {errorContent}");
+        }
+
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+
+        var responseData = await response.Content
+            .ReadFromJsonAsync<BrandResponse>(CancellationToken.None);
+
+        responseData.Should().NotBeNull();
+        responseData!.Name.Should().Be("Honda Integration");
     }
 
     [Fact(DisplayName = "BRAND_006 - GetBrands - Pagination")]
