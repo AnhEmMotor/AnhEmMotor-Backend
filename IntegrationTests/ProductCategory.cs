@@ -636,6 +636,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var category = await db.ProductCategories.FindAsync(categoryIds[0]);
+            category.Should().NotBeNull();
             category!.DeletedAt.Should().NotBeNull();
         }
     }
