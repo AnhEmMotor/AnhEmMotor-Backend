@@ -20,6 +20,8 @@ public sealed class GetDeletedVariantLiteListQueryHandler(IProductVariantReadRep
         var (variants, totalCount) = await repository.GetPagedVariantsAsync(
             page,
             pageSize,
+            request.Filters,
+            request.Sorts,
             cancellationToken,
             DataFetchMode.DeletedOnly)
             .ConfigureAwait(false);

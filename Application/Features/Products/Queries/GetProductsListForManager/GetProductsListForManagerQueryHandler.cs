@@ -24,6 +24,8 @@ public sealed class GetProductsListForManagerQueryHandler(IProductReadRepository
             normalizedStatusIds,
             request.Page,
             request.PageSize,
+            request.Filters,
+            request.Sorts,
             cancellationToken)
             .ConfigureAwait(false);
 

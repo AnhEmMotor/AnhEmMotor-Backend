@@ -11,7 +11,7 @@ public class ChangePasswordByManagerCommandValidator : AbstractValidator<ChangeP
             .Must(IsStrongPassword).WithMessage("Password must be strong.");
     }
 
-    public static bool IsStrongPassword(string password)
+    public static bool IsStrongPassword(string? password)
     {
         if (string.IsNullOrEmpty(password)) return false;
         return MeetsMinimumLength(password) &&

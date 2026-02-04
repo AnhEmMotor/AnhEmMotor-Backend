@@ -2,11 +2,13 @@
 using Domain.Constants;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
+using Sieve.Models;
+using Sieve.Services;
 using ProductEntity = Domain.Entities.Product;
 
 namespace Infrastructure.Repositories.Product;
 
-public class ProductReadRepository(ApplicationDBContext context) : IProductReadRepository
+public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor sieveProcessor) : IProductReadRepository
 {
     public IQueryable<ProductEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
     { return context.GetQuery<ProductEntity>(mode).Include(p => p.ProductCategory).Include(p => p.Brand); }
@@ -103,13 +105,28 @@ public class ProductReadRepository(ApplicationDBContext context) : IProductReadR
     public async Task<(List<ProductEntity> Items, int TotalCount)> GetPagedDeletedProductsAsync(
         int page,
         int pageSize,
+        string? filters,
+        string? sorts,
         CancellationToken cancellationToken)
     {
         var query = context.DeletedOnly<ProductEntity>();
+        
+        var normalizedPage = Math.Max(page, 1);
+        var normalizedPageSize = Math.Max(pageSize, 1);
+
+        var sieveModel = new SieveModel
+        {
+            Filters = filters,
+            Sorts = sorts,
+            Page = normalizedPage,
+            PageSize = normalizedPageSize
+        };
+
+        query = sieveProcessor.Apply(sieveModel, query, applyPagination: false);
 
         var totalCount = await query.CountAsync(cancellationToken).ConfigureAwait(false);
 
-        var items = await query
+        IQueryable<ProductEntity> dbQuery = query
             .Include(p => p.ProductCategory)
             .Include(p => p.Brand)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
@@ -122,10 +139,16 @@ public class ProductReadRepository(ApplicationDBContext context) : IProductReadR
             .ThenInclude(v => v.InputInfos)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.OutputInfos)
-            .ThenInclude(oi => oi.OutputOrder)
-            .OrderByDescending(p => p.DeletedAt)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
+            .ThenInclude(oi => oi.OutputOrder);
+
+        if (string.IsNullOrWhiteSpace(sorts))
+        {
+            dbQuery = dbQuery.OrderByDescending(p => p.DeletedAt);
+        }
+
+        var items = await dbQuery
+            .Skip((normalizedPage - 1) * normalizedPageSize)
+            .Take(normalizedPageSize)
             .AsSplitQuery()
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
@@ -138,6 +161,8 @@ public class ProductReadRepository(ApplicationDBContext context) : IProductReadR
         List<string> statusIds,
         int page,
         int pageSize,
+        string? filters,
+        string? sorts,
         CancellationToken cancellationToken)
     {
         var normalizedPage = Math.Max(page, 1);
@@ -159,9 +184,19 @@ public class ProductReadRepository(ApplicationDBContext context) : IProductReadR
             query = query.Where(p => p.StatusId != null && statusIds.Contains(p.StatusId));
         }
 
+        var sieveModel = new SieveModel
+        {
+            Filters = filters,
+            Sorts = sorts,
+            Page = normalizedPage,
+            PageSize = normalizedPageSize
+        };
+
+        query = sieveProcessor.Apply(sieveModel, query, applyPagination: false);
+
         var totalCount = await query.CountAsync(cancellationToken).ConfigureAwait(false);
 
-        var entities = await query
+        IQueryable<ProductEntity> dbQuery = query
             .Include(p => p.ProductCategory)
             .Include(p => p.Brand)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
@@ -178,9 +213,14 @@ public class ProductReadRepository(ApplicationDBContext context) : IProductReadR
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.VariantOptionValues)
             .ThenInclude(vov => vov.OptionValue)
-            .ThenInclude(ov => ov!.Option)
+            .ThenInclude(ov => ov!.Option);
 
-            .OrderByDescending(p => p.CreatedAt)
+        if (string.IsNullOrWhiteSpace(sorts))
+        {
+            dbQuery = dbQuery.OrderByDescending(p => p.CreatedAt);
+        }
+
+        var entities = await dbQuery
             .Skip((normalizedPage - 1) * normalizedPageSize)
             .Take(normalizedPageSize)
             .AsSplitQuery()

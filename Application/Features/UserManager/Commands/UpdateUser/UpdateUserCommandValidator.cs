@@ -4,7 +4,7 @@ using FluentValidation;
 
 namespace Application.Features.UserManager.Commands.UpdateUser;
 
-public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
+public partial class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
 {
     public UpdateUserCommandValidator()
     {
@@ -21,33 +21,38 @@ public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
             .When(x => !string.IsNullOrEmpty(x.Gender));
     }
 
-    public static bool IsValidEmail(string email)
+    public static bool IsValidEmail(string? email)
     {
         if (string.IsNullOrWhiteSpace(email)) return false;
         // Simple regex for email validation
         // Allow user+tag@example.co.uk
         // Allow user.name@example.com
-        var regex = new Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$");
+        var regex = RegexCheckEmail();
         return regex.IsMatch(email);
     }
 
-    public static bool IsValidPhoneNumber(string phoneNumber)
+    public static bool IsValidPhoneNumber(string? phoneNumber)
     {
         if (string.IsNullOrWhiteSpace(phoneNumber)) return false;
         // Vietnamese phone number format: starts with 0 or 84 or +84, followed by 9 digits
-        var regex = new Regex(@"^(0|84|\+84)[0-9]{9}$");
+        var regex = RegexCheckPhone();
         return regex.IsMatch(phoneNumber);
     }
 
-    public static bool IsValidGender(string gender)
+    public static bool IsValidGender(string? gender)
     {
         return ValidGenders.Contains(gender);
     }
 
-    public static IReadOnlyList<string> ValidGenders => new[]
-    {
+    public static IReadOnlyList<string> ValidGenders =>
+    [
         GenderStatus.Male,
         GenderStatus.Female,
         GenderStatus.Other
-    };
+    ];
+
+    [GeneratedRegex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$")]
+    private static partial Regex RegexCheckEmail();
+    [GeneratedRegex(@"^(0|84|\+84)[0-9]{9}$")]
+    private static partial Regex RegexCheckPhone();
 }

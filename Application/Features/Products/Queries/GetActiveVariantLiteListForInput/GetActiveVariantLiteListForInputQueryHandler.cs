@@ -16,7 +16,12 @@ namespace Application.Features.Products.Queries.GetActiveVariantLiteListForInput
             var page = Math.Max(request.Page, 1);
             var pageSize = Math.Max(request.PageSize, 1);
 
-            var (variants, totalCount) = await repository.GetPagedVariantsAsync(page, pageSize, cancellationToken)
+            var (variants, totalCount) = await repository.GetPagedVariantsAsync(
+                page,
+                pageSize,
+                request.Filters,
+                request.Sorts,
+                cancellationToken)
                 .ConfigureAwait(false);
 
             var responses = variants.Select(v => v.Adapt<ProductVariantLiteResponseForInput>()).ToList();

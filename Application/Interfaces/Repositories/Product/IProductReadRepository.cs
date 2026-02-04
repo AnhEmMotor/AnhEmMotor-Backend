@@ -34,6 +34,8 @@ public interface IProductReadRepository
     public Task<(List<ProductEntity> Items, int TotalCount)> GetPagedDeletedProductsAsync(
         int page,
         int pageSize,
+        string? filters,
+        string? sorts,
         CancellationToken cancellationToken);
 
     public Task<(List<ProductEntity> Items, int TotalCount)> GetPagedProductsAsync(
@@ -41,5 +43,7 @@ public interface IProductReadRepository
         List<string> statusIds,
         int page,
         int pageSize,
+        string? filters,
+        string? sorts,
         CancellationToken cancellationToken);
 }

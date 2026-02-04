@@ -91,7 +91,7 @@ public class MediaFile
     public void RestoreFileAsync_HasCorrectPermissionsAttribute()
     {
         var methodInfo = typeof(MediaFileController).GetMethod(nameof(MediaFileController.RestoreFileAsync));
-        var attribute = methodInfo.GetCustomAttribute<RequiresAnyPermissionsAttribute>();
+        var attribute = methodInfo?.GetCustomAttribute<RequiresAnyPermissionsAttribute>();
 
         Assert.NotNull(attribute);
 

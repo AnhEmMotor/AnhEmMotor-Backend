@@ -27,7 +27,11 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<Brand>(p => p.Id).CanSort();
         mapper.Property<Input>(p => p.Id).CanSort();
         mapper.Property<Output>(p => p.Id).CanSort();
-        mapper.Property<Product>(p => p.Id).CanSort();
+        mapper.Property<Product>(p => p.Id).CanSort().CanFilter();
+        mapper.Property<Product>(p => p.Name).CanSort().CanFilter();
+        mapper.Property<Product>(p => p.BrandId).CanFilter();
+        mapper.Property<Product>(p => p.CategoryId).CanFilter();
+        mapper.Property<Product>(p => p.StatusId).CanFilter();
         mapper.Property<ProductVariant>(p => p.Id).CanSort();
         mapper.Property<Supplier>(p => p.Id).CanSort();
 
