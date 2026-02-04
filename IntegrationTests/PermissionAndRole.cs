@@ -294,13 +294,13 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
     public async Task CreateRole_DuplicateName_ReturnsBadRequest()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
-        var username = $"user_{uniqueId}";
+        var username = $"user{uniqueId}";
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, "Password123!", [PermissionsList.Roles.Create]);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, "Password123!");
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         // Pre-create role
-        var roleName = $"Duplicate_{uniqueId}";
+        var roleName = $"Duplicate{uniqueId}";
         await CreateRoleWithPermissionsInternalAsync(roleName, []);
 
         var request = new CreateRoleCommand
@@ -325,28 +325,39 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
         await CreateRoleWithPermissionsInternalAsync(roleName, [PermissionsList.Brands.View, PermissionsList.Brands.Create]);
 
         var username = $"admin_{uniqueId}";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, "Password123!", [PermissionsList.Roles.AssignPermissions]);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, "Password123!", [PermissionsList.Roles.Edit]);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, "Password123!");
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        // Ensure update permissions exist
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+            await EnsurePermissionExistsAsync(db, PermissionsList.Products.View);
+            await EnsurePermissionExistsAsync(db, PermissionsList.Products.Create);
+            await EnsurePermissionExistsAsync(db, PermissionsList.Products.Edit);
+        }
 
         var request = new Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommand
         {
             Permissions = [PermissionsList.Products.View, PermissionsList.Products.Create, PermissionsList.Products.Edit]
         };
 
-        var response = await _client.PutAsJsonAsync($"/api/v1/Permission/roles/{roleName}/permissions", request)
+        var response = await _client.PutAsJsonAsync($"/api/v1/Permission/roles/{roleName}", request)
             .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var roleInDb = await db.Roles
-            .Include(r => r.RolePermissions)
-            .FirstOrDefaultAsync(r => r.Name == roleName, CancellationToken.None)
-            .ConfigureAwait(true);
-        roleInDb.Should().NotBeNull();
-        roleInDb!.RolePermissions.Should().HaveCount(3);
+        using (var verifyScope = _factory.Services.CreateScope())
+        {
+            var db = verifyScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+            var roleInDb = await db.Roles
+                .Include(r => r.RolePermissions)
+                .FirstOrDefaultAsync(r => r.Name == roleName, CancellationToken.None)
+                .ConfigureAwait(true);
+            roleInDb.Should().NotBeNull();
+            roleInDb!.RolePermissions.Should().HaveCount(3);
+        }
     }
 
     [Fact(DisplayName = "PERM_INT_011 - API cập nhật role (description) thành công")]

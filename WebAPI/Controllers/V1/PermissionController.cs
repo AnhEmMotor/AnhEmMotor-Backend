@@ -90,7 +90,7 @@ public class PermissionController(IMediator mediator) : ApiController
     /// Cập nhật quyền cho một vai trò
     /// </summary>
     [HttpPut("roles/{roleName}")]
-    [HasPermission(PermissionsList.Roles.AssignPermissions)]
+    [HasPermission(PermissionsList.Roles.Edit)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(PermissionRoleUpdateResponse), StatusCodes.Status200OK)]
