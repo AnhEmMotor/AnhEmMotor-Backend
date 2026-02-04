@@ -37,7 +37,7 @@ public class MediaFileController(IMediator mediator) : ApiController
     /// Lấy danh sách tệp media (có phân trang, lọc, sắp xếp).
     /// </summary>
     [HttpGet]
-    [HasPermission(Files.View)]
+    [HasPermission(Products.View)]
     [ProducesResponseType(typeof(PagedResult<MediaFileResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetFilesAsync(
         [FromQuery] SieveModel sieveModel,
@@ -52,7 +52,7 @@ public class MediaFileController(IMediator mediator) : ApiController
     /// Lấy danh sách tệp media đã bị xoá (có phân trang, lọc, sắp xếp).
     /// </summary>
     [HttpGet("deleted")]
-    [HasPermission(Files.View)]
+    [HasPermission(Products.View)]
     [ProducesResponseType(typeof(PagedResult<MediaFileResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetDeletedFilesAsync(
         [FromQuery] SieveModel sieveModel,
@@ -152,7 +152,7 @@ public class MediaFileController(IMediator mediator) : ApiController
     /// Khôi phục lại tệp media đã xoá theo tên file.
     /// </summary>
     [HttpPost("restore/{storagePath}")]
-    [HasPermission(Files.Delete)]
+    [RequiresAnyPermissions(Products.Edit, Products.Create)]
     [ProducesResponseType(typeof(MediaFileResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RestoreFileAsync(string storagePath, CancellationToken cancellationToken)
@@ -166,7 +166,7 @@ public class MediaFileController(IMediator mediator) : ApiController
     /// Khôi phục nhiều tệp media đã xoá cùng lúc.
     /// </summary>
     [HttpPost("restore-many")]
-    [HasPermission(Files.Delete)]
+    [RequiresAnyPermissions(Products.Edit, Products.Create)]
     [ProducesResponseType(typeof(List<MediaFileResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RestoreFilesAsync(

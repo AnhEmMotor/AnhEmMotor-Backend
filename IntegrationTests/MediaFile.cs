@@ -29,7 +29,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Files.Upload], email);
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.Create], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
@@ -56,6 +56,14 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "MF_007 - Tải lên nhiều ảnh cùng lúc thành công")]
     public async Task UploadManyImages_ValidFiles_Success()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.Create], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         using var scope = _factory.Services.CreateScope();
 
         var content = new MultipartFormDataContent
@@ -83,7 +91,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Files.Delete], email);
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.Edit], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
@@ -105,9 +113,11 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
 
         var response = await _client.DeleteAsync($"/api/v1/MediaFile/{mediaFile.StoragePath}").ConfigureAwait(true);
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
-        var deletedFile = await db.MediaFiles.FindAsync(mediaFile.Id, CancellationToken.None).ConfigureAwait(true);
+        using var verifyScope = _factory.Services.CreateScope();
+        var verifyDb = verifyScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        var deletedFile = await verifyDb.MediaFiles.FindAsync(mediaFile.Id, CancellationToken.None).ConfigureAwait(true);
         deletedFile.Should().NotBeNull();
         deletedFile!.DeletedAt.Should().NotBeNull();
     }
@@ -115,6 +125,14 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "MF_013 - Xoá nhiều file cùng lúc thành công")]
     public async Task DeleteManyFiles_ExistingFiles_Success()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.Edit], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
@@ -145,11 +163,11 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         db.MediaFiles.AddRange(files);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        List<string> request = [ .. files.Select(f => f.StoragePath!) ];
+        var requestBody = new { StoragePaths = files.Select(f => f.StoragePath!).ToList() };
 
         var requestMessage = new HttpRequestMessage(HttpMethod.Delete, "/api/v1/MediaFile/delete-many")
         {
-            Content = JsonContent.Create(request)
+            Content = JsonContent.Create(requestBody)
         };
         var response = await _client.SendAsync(requestMessage).ConfigureAwait(true);
 
@@ -169,7 +187,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Files.Delete], email);
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.Edit], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
@@ -194,7 +212,9 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var restoredFile = await db.MediaFiles.FindAsync(mediaFile.Id, CancellationToken.None).ConfigureAwait(true);
+        using var verifyScope = _factory.Services.CreateScope();
+        var verifyDb = verifyScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        var restoredFile = await verifyDb.MediaFiles.FindAsync(mediaFile.Id, CancellationToken.None).ConfigureAwait(true);
         restoredFile.Should().NotBeNull();
         restoredFile!.DeletedAt.Should().BeNull();
     }
@@ -206,7 +226,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Files.Delete], email);
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.Edit], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
@@ -240,9 +260,9 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         db.MediaFiles.AddRange(files);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        List<string> request = [ .. files.Select(f => f.StoragePath!) ];
+        var requestBody = new { StoragePaths = files.Select(f => f.StoragePath!).ToList() };
 
-        var response = await _client.PostAsJsonAsync("/api/v1/MediaFile/restore-many", request).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/MediaFile/restore-many", requestBody).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
@@ -316,7 +336,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Files.View], email);
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.Edit], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
@@ -358,7 +378,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Files.View], email);
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.View], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
@@ -393,7 +413,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Files.View], email);
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.View], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
@@ -447,7 +467,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Files.View], email);
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.View], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
@@ -513,7 +533,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Files.View], email);
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.View], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
