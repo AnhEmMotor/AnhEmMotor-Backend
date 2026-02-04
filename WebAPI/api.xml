@@ -262,7 +262,7 @@
             Xoá tệp media theo tên file.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.MediaFileController.DeleteFilesAsync(System.Collections.Generic.List{System.String},System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.MediaFileController.DeleteFilesAsync(Application.Features.Files.Commands.DeleteManyFiles.DeleteManyFilesCommand,System.Threading.CancellationToken)">
             <summary>
             Xoá nhiều tệp media cùng lúc.
             </summary>
@@ -272,7 +272,7 @@
             Khôi phục lại tệp media đã xoá theo tên file.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.MediaFileController.RestoreFilesAsync(System.Collections.Generic.List{System.String},System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.MediaFileController.RestoreFilesAsync(Application.Features.Files.Commands.RestoreManyFiles.RestoreManyFilesCommand,System.Threading.CancellationToken)">
             <summary>
             Khôi phục nhiều tệp media đã xoá cùng lúc.
             </summary>

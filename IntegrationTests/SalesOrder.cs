@@ -7,6 +7,7 @@ using Application.Features.Outputs.Commands.UpdateManyOutputStatus;
 using Application.Features.Outputs.Commands.UpdateOutputForManager;
 using Application.Features.Outputs.Commands.UpdateOutputStatus;
 using FluentAssertions;
+using IntegrationTests.SetupClass;
 using System.Net;
 using System.Net.Http.Json;
 

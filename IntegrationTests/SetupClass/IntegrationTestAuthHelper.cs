@@ -8,9 +8,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net.Http.Json;
 
-namespace IntegrationTests;
+namespace IntegrationTests.SetupClass;
 
-public static class IntegrationTestHelper
+public static class IntegrationTestAuthHelper
 {
     public static async Task<ApplicationUser> CreateUserWithPermissionsAsync(
         IServiceProvider services,

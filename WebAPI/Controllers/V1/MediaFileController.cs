@@ -140,11 +140,10 @@ public class MediaFileController(IMediator mediator) : ApiController
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteFilesAsync(
-        [FromBody] List<string> request,
+        [FromBody] DeleteManyFilesCommand request,
         CancellationToken cancellationToken)
     {
-        var command = request.Adapt<DeleteManyFilesCommand>();
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(request, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -170,11 +169,10 @@ public class MediaFileController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(List<MediaFileResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RestoreFilesAsync(
-        [FromBody] List<string> request,
+        [FromBody] RestoreManyFilesCommand request,
         CancellationToken cancellationToken)
     {
-        var command = request.Adapt<RestoreManyFilesCommand>();
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(request, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 

@@ -7,6 +7,7 @@ using Domain.Constants;
 using Domain.Entities;
 using FluentAssertions;
 using Infrastructure.DBContexts;
+using IntegrationTests.SetupClass;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;

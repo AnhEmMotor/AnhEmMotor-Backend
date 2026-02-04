@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using Infrastructure.DBContexts;
+using IntegrationTests.SetupClass;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Json;

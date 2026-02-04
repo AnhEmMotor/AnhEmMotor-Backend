@@ -7,6 +7,7 @@ using System.Net.Http.Json;
 using Domain.Constants.Permission;
 using System.Net.Http.Headers;
 using MediaFileEntity = Domain.Entities.MediaFile;
+using IntegrationTests.SetupClass;
 
 namespace IntegrationTests;
 
@@ -29,17 +30,33 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.Create], email);
-        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        using var scope = _factory.Services.CreateScope();
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [PermissionsList.Products.Create],
+            email);
 
-        var content = new MultipartFormDataContent();
-        var imageBytes = new byte[204800];
-        content.Add(new ByteArrayContent(imageBytes), "file", "image.jpg");
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password);
 
-        var response = await _client.PostAsync("/api/v1/MediaFile/upload-image", content).ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        var content = IntegrationTestFileHelper.CreateSingleImageForm();
+
+        var response = await _client.PostAsync(
+            "/api/v1/MediaFile/upload-image",
+            content);
+
+        if (response.StatusCode != HttpStatusCode.Created)
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            throw new Exception($"API returned {response.StatusCode}. Response Body: {errorContent}");
+        }
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         var result = await response.Content
@@ -48,8 +65,8 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         result.Should().NotBeNull();
         result!.Id.Should().BeGreaterThan(0);
         result.StorageType.Should().Be("local");
-        result.StoragePath.Should().EndWith(".jpg");
-        result.ContentType.Should().Be("image/jpeg");
+        result.StoragePath.Should().EndWith(".webp");
+        result.ContentType.Should().Be("image/webp");
         result.FileSize.Should().BeGreaterThan(0);
     }
 
@@ -60,8 +77,8 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.Create], email);
-        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.Create], email);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         using var scope = _factory.Services.CreateScope();
@@ -91,8 +108,8 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.Edit], email);
-        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.Edit], email);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         using var scope = _factory.Services.CreateScope();
@@ -129,8 +146,8 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.Edit], email);
-        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.Edit], email);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         using var scope = _factory.Services.CreateScope();
@@ -187,8 +204,8 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.Edit], email);
-        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.Edit], email);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         using var scope = _factory.Services.CreateScope();
@@ -226,8 +243,8 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.Edit], email);
-        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.Edit], email);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         using var scope = _factory.Services.CreateScope();
@@ -336,8 +353,8 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.Edit], email);
-        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.Edit], email);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         using var scope = _factory.Services.CreateScope();
@@ -378,8 +395,8 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.View], email);
-        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.View], email);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         using var scope = _factory.Services.CreateScope();
@@ -413,8 +430,8 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.View], email);
-        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.View], email);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         using var scope = _factory.Services.CreateScope();
@@ -467,8 +484,8 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.View], email);
-        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.View], email);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         using var scope = _factory.Services.CreateScope();
@@ -533,8 +550,8 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.View], email);
-        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.View], email);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         using var scope = _factory.Services.CreateScope();

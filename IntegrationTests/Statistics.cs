@@ -1,4 +1,5 @@
 using FluentAssertions;
+using IntegrationTests.SetupClass;
 using System.Net;
 
 namespace IntegrationTests;

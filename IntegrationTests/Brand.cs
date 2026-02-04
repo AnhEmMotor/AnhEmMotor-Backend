@@ -7,6 +7,7 @@ using Domain.Constants.Permission;
 using Domain.Primitives;
 using FluentAssertions;
 using Infrastructure.DBContexts;
+using IntegrationTests.SetupClass;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Headers;
@@ -34,8 +35,8 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
-        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
 
         var command = new CreateBrandCommand { Name = "Honda Integration", Description = "Integration Test" };
         var requestMessage = new HttpRequestMessage(HttpMethod.Post, "/api/v1/brand");
@@ -128,8 +129,8 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.View], email);
-        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.View], email);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
 
         int id;
         using(var scope = _factory.Services.CreateScope())
@@ -161,8 +162,8 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Edit], email);
-        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Edit], email);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
 
         int id;
         using(var scope = _factory.Services.CreateScope())
@@ -191,8 +192,8 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Delete], email);
-        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Delete], email);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
 
         int id;
         using(var scope = _factory.Services.CreateScope())
@@ -219,8 +220,8 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Delete], email);
-        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Delete], email);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
 
         int id;
         using(var scope = _factory.Services.CreateScope())
@@ -247,8 +248,8 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Delete], email);
-        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Delete], email);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
 
         var ids = new List<int>();
         using(var scope = _factory.Services.CreateScope())
@@ -280,8 +281,8 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Delete], email);
-        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Delete], email);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
 
         var ids = new List<int>();
         using(var scope = _factory.Services.CreateScope())
@@ -313,8 +314,8 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Delete], email);
-        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Delete], email);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
 
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, "/api/v1/brand/deleted");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
@@ -342,8 +343,8 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
-        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
 
         var request = new CreateBrandCommand { Name = "Audit Brand", Description = "Audit" };
 
@@ -366,8 +367,8 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Edit], email);
-        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Edit], email);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
 
         int id;
         using(var scope = _factory.Services.CreateScope())

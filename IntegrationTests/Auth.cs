@@ -11,6 +11,7 @@ using System.Net;
 using System.Net.Http.Json;
 using Domain.Constants.Permission;
 using Microsoft.EntityFrameworkCore;
+using IntegrationTests.SetupClass;
 
 namespace IntegrationTests;
 
@@ -125,7 +126,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
     public async Task AUTH_REG_006_Register_SoftDeleted_Email_Fail()
     {
         var email = "deleted@example.com";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
             _factory.Services,
             "deleteduser",
             "Password123!",
@@ -153,7 +154,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
     {
         var email = "login_success@example.com";
         var password = "Password123!";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
             _factory.Services,
             "loginuser",
             password,
@@ -181,7 +182,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
     {
         var username = "banned_user";
         var password = "Password123!";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
             _factory.Services,
             username,
             password,
@@ -201,7 +202,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
     {
         var username = "manager_user";
         var password = "Password123!";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
             _factory.Services,
             username,
             password,
@@ -223,7 +224,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         var password = "Password123!";
         string? refreshToken = string.Empty;
 
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
             _factory.Services,
             username,
             password,
@@ -264,7 +265,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
     {
         var username = "refresh_banned";
         var password = "Password123!";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
             _factory.Services,
             username,
             password,

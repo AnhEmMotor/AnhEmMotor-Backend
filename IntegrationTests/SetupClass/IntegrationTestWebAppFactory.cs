@@ -18,7 +18,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Data.Common;
 
-namespace IntegrationTests;
+namespace IntegrationTests.SetupClass;
 
 public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>
 {
