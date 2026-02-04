@@ -143,7 +143,7 @@ public class PermissionController(IMediator mediator) : ApiController
             },
             cancellationToken)
             .ConfigureAwait(true);
-        return HandleCreated(result, RouteNames.Permission.GetRolePermissions, new { id = result.IsSuccess ? result.Value.RoleId : null });
+        return HandleCreated(result, RouteNames.Permission.GetRolePermissions, new { roleName = result.IsSuccess ? result.Value.RoleName : null });
     }
 
     /// <summary>
