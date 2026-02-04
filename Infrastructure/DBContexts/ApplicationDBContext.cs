@@ -135,6 +135,11 @@ public class ApplicationDBContext(DbContextOptions<ApplicationDBContext> options
                     {
                         property.SetColumnType(null);
                     }
+
+                    if (property.ClrType == typeof(DateTimeOffset) || property.ClrType == typeof(DateTimeOffset?))
+                    {
+                        property.SetValueConverter(typeof(Microsoft.EntityFrameworkCore.Storage.ValueConversion.DateTimeOffsetToBinaryConverter));
+                    }
                 }
             }
         }

@@ -25,6 +25,7 @@ public class InputReadRepository(ApplicationDBContext context) : IInputReadRepos
             .ThenInclude(x => x.ProductVariant)
             .ThenInclude(x => x!.Product)
             .Include(x => x.Supplier)
+            .Include(x => x.CreatedByUser)
             .Include(x => x.InputStatus);
     }
 
