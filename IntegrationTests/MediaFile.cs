@@ -4,6 +4,8 @@ using Infrastructure.DBContexts;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Json;
+using Domain.Constants.Permission;
+using System.Net.Http.Headers;
 using MediaFileEntity = Domain.Entities.MediaFile;
 
 namespace IntegrationTests;
@@ -23,6 +25,14 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "MF_002 - Tải lên ảnh thành công với định dạng JPG hợp lệ")]
     public async Task UploadImage_ValidJpg_Success()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Files.Upload], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         using var scope = _factory.Services.CreateScope();
 
         var content = new MultipartFormDataContent();
@@ -31,7 +41,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
 
         var response = await _client.PostAsync("/api/v1/MediaFile/upload-image", content).ConfigureAwait(true);
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
         var result = await response.Content
             .ReadFromJsonAsync<MediaFileResponse>(CancellationToken.None)
             .ConfigureAwait(true);
@@ -57,7 +67,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
 
         var response = await _client.PostAsync("/api/v1/MediaFile/upload-images", content).ConfigureAwait(true);
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
         var results = await response.Content
             .ReadFromJsonAsync<List<MediaFileResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
@@ -69,6 +79,14 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "MF_009 - Xoá file thành công (Soft Delete)")]
     public async Task DeleteFile_ExistingFile_Success()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Files.Delete], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
@@ -129,9 +147,13 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
 
         List<string> request = [ .. files.Select(f => f.StoragePath!) ];
 
-        var response = await _client.PostAsJsonAsync("/api/v1/MediaFile/delete-many", request).ConfigureAwait(true);
+        var requestMessage = new HttpRequestMessage(HttpMethod.Delete, "/api/v1/MediaFile/delete-many")
+        {
+            Content = JsonContent.Create(request)
+        };
+        var response = await _client.SendAsync(requestMessage).ConfigureAwait(true);
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
         foreach(var file in files)
         {
@@ -143,6 +165,14 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "MF_015 - Khôi phục file đã xoá thành công")]
     public async Task RestoreFile_DeletedFile_Success()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Files.Delete], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
@@ -172,6 +202,14 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "MF_019 - Khôi phục nhiều file cùng lúc thành công")]
     public async Task RestoreManyFiles_DeletedFiles_Success()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Files.Delete], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
@@ -274,6 +312,14 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "MF_031 - Lấy thông tin file theo ID thành công")]
     public async Task GetFileById_ExistingFile_Success()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Files.View], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
@@ -308,6 +354,14 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "MF_035 - Lấy danh sách file thành công với phân trang")]
     public async Task GetFilesList_WithPagination_Success()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Files.View], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
@@ -335,6 +389,14 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "MF_036 - Lấy danh sách file với filter theo ContentType")]
     public async Task GetFilesList_FilterByContentType_Success()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Files.View], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
@@ -381,6 +443,14 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "MF_037 - Lấy danh sách file với sorting theo FileSize giảm dần")]
     public async Task GetFilesList_SortByFileSizeDesc_Success()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Files.View], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
@@ -439,6 +509,14 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "MF_038 - Lấy danh sách file đã xoá thành công")]
     public async Task GetDeletedFilesList_WithPagination_Success()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Files.View], email);
+        var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
