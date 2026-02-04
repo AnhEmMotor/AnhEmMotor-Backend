@@ -1,6 +1,7 @@
 ﻿using Application.ApiContracts.File.Responses;
 using FluentAssertions;
 using Infrastructure.DBContexts;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Json;
@@ -81,14 +82,12 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        using var scope = _factory.Services.CreateScope();
-
-        var content = new MultipartFormDataContent
-        {
-            { new ByteArrayContent(new byte[51200]), "files", "image1.webp" },
-            { new ByteArrayContent(new byte[61440]), "files", "image2.jpg" },
-            { new ByteArrayContent(new byte[71680]), "files", "image3.webp" }
-        };
+        var validBytes = IntegrationTestFileHelper.GetValidJpgBytes();
+        var content = IntegrationTestFileHelper.CreateManyImagesForm(
+            ("files", "image1.jpg", "image/jpeg", validBytes),
+            ("files", "image2.jpg", "image/jpeg", validBytes),
+            ("files", "image3.jpg", "image/jpeg", validBytes)
+        );
 
         var response = await _client.PostAsync("/api/v1/MediaFile/upload-images", content).ConfigureAwait(true);
 
@@ -99,6 +98,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         results.Should().NotBeNull();
         results.Should().HaveCount(3);
         results!.All(r => r.Id > 0).Should().BeTrue();
+        results.All(r => r.ContentType == "image/webp").Should().BeTrue();
     }
 
     [Fact(DisplayName = "MF_009 - Xoá file thành công (Soft Delete)")]
@@ -134,7 +134,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
 
         using var verifyScope = _factory.Services.CreateScope();
         var verifyDb = verifyScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var deletedFile = await verifyDb.MediaFiles.FindAsync(mediaFile.Id, CancellationToken.None).ConfigureAwait(true);
+        var deletedFile = await verifyDb.MediaFiles.IgnoreQueryFilters().FirstOrDefaultAsync(x => x.Id == mediaFile.Id, CancellationToken.None).ConfigureAwait(true);
         deletedFile.Should().NotBeNull();
         deletedFile!.DeletedAt.Should().NotBeNull();
     }
@@ -146,41 +146,22 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.Edit], email);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.Edit, PermissionsList.Products.Create], email);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        var validBytes = IntegrationTestFileHelper.GetValidJpgBytes();
+        var content = IntegrationTestFileHelper.CreateManyImagesForm(
+            ("files", "delete1.jpg", "image/jpeg", validBytes),
+            ("files", "delete2.jpg", "image/jpeg", validBytes),
+            ("files", "delete3.jpg", "image/jpeg", validBytes)
+        );
 
-        var files = new List<MediaFileEntity>
-        {
-            new()
-            {
-                StorageType = "local",
-                StoragePath = "delete-many-1.webp",
-                ContentType = "image/webp",
-                DeletedAt = null
-            },
-            new()
-            {
-                StorageType = "local",
-                StoragePath = "delete-many-2.jpg",
-                ContentType = "image/jpeg",
-                DeletedAt = null
-            },
-            new()
-            {
-                StorageType = "local",
-                StoragePath = "delete-many-3.webp",
-                ContentType = "image/webp",
-                DeletedAt = null
-            }
-        };
-        db.MediaFiles.AddRange(files);
-        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+        var uploadRes = await _client.PostAsync("/api/v1/MediaFile/upload-images", content);
+        uploadRes.EnsureSuccessStatusCode();
+        var uploadedFiles = await uploadRes.Content.ReadFromJsonAsync<List<MediaFileResponse>>();
 
-        var requestBody = new { StoragePaths = files.Select(f => f.StoragePath!).ToList() };
+        var requestBody = new { StoragePaths = uploadedFiles!.Select(f => f.StoragePath!).ToList() };
 
         var requestMessage = new HttpRequestMessage(HttpMethod.Delete, "/api/v1/MediaFile/delete-many")
         {
@@ -190,9 +171,13 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
-        foreach(var file in files)
+        using var verifyScope = _factory.Services.CreateScope();
+        var verifyDb = verifyScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        
+        foreach(var file in uploadedFiles!)
         {
-            var deletedFile = await db.MediaFiles.FindAsync(file.Id, CancellationToken.None).ConfigureAwait(true);
+            var deletedFile = await verifyDb.MediaFiles.IgnoreQueryFilters().FirstOrDefaultAsync(f => f.Id == file.Id, CancellationToken.None).ConfigureAwait(true);
+            deletedFile.Should().NotBeNull();
             deletedFile!.DeletedAt.Should().NotBeNull();
         }
     }
@@ -243,49 +228,43 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.Edit], email);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.Edit, PermissionsList.Products.Create], email);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        // 1. Upload files
+        var validBytes = IntegrationTestFileHelper.GetValidJpgBytes();
+        var content = IntegrationTestFileHelper.CreateManyImagesForm(
+            ("files", "restore1.jpg", "image/jpeg", validBytes),
+            ("files", "restore2.jpg", "image/jpeg", validBytes),
+            ("files", "restore3.jpg", "image/jpeg", validBytes)
+        );
 
-        var files = new List<MediaFileEntity>
+        var uploadRes = await _client.PostAsync("/api/v1/MediaFile/upload-images", content);
+        uploadRes.EnsureSuccessStatusCode();
+        var uploadedFiles = await uploadRes.Content.ReadFromJsonAsync<List<MediaFileResponse>>();
+
+        // 2. Delete files
+        var requestBody = new { StoragePaths = uploadedFiles!.Select(f => f.StoragePath!).ToList() };
+        var deleteMessage = new HttpRequestMessage(HttpMethod.Delete, "/api/v1/MediaFile/delete-many")
         {
-            new()
-            {
-                StorageType = "local",
-                StoragePath = "restore-many-1.webp",
-                ContentType = "image/webp",
-                DeletedAt = DateTimeOffset.Parse("2025-01-01T00:00:00Z")
-            },
-            new()
-            {
-                StorageType = "local",
-                StoragePath = "restore-many-2.jpg",
-                ContentType = "image/jpeg",
-                DeletedAt = DateTimeOffset.Parse("2025-01-01T00:00:00Z")
-            },
-            new()
-            {
-                StorageType = "local",
-                StoragePath = "restore-many-3.webp",
-                ContentType = "image/webp",
-                DeletedAt = DateTimeOffset.Parse("2025-01-01T00:00:00Z")
-            }
+            Content = JsonContent.Create(requestBody)
         };
-        db.MediaFiles.AddRange(files);
-        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+        var deleteRes = await _client.SendAsync(deleteMessage);
+        deleteRes.EnsureSuccessStatusCode();
 
-        var requestBody = new { StoragePaths = files.Select(f => f.StoragePath!).ToList() };
+        // 3. Restore files
+        var restoreRes = await _client.PostAsJsonAsync("/api/v1/MediaFile/restore-many", requestBody).ConfigureAwait(true);
 
-        var response = await _client.PostAsJsonAsync("/api/v1/MediaFile/restore-many", requestBody).ConfigureAwait(true);
+        restoreRes.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        using var verifyScope = _factory.Services.CreateScope();
+        var verifyDb = verifyScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        foreach(var file in files)
+        foreach(var file in uploadedFiles!)
         {
-            var restoredFile = await db.MediaFiles.FindAsync(file.Id, CancellationToken.None).ConfigureAwait(true);
+            var restoredFile = await verifyDb.MediaFiles.FindAsync(file.Id, CancellationToken.None).ConfigureAwait(true);
+            restoredFile.Should().NotBeNull();
             restoredFile!.DeletedAt.Should().BeNull();
         }
     }
@@ -293,24 +272,21 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "MF_021 - Xem ảnh thành công với kích thước gốc")]
     public async Task ViewImage_OriginalSize_Success()
     {
-        using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.Create, PermissionsList.Products.View], email);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var mediaFile = new MediaFileEntity
-        {
-            StorageType = "local",
-            StoragePath = "view-original.webp",
-            OriginalFileName = "view.webp",
-            ContentType = "image/webp",
-            FileExtension = ".webp",
-            FileSize = 100000,
-            DeletedAt = null
-        };
-        db.MediaFiles.Add(mediaFile);
-        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+        var content = IntegrationTestFileHelper.CreateSingleImageForm();
+        var uploadRes = await _client.PostAsync("/api/v1/MediaFile/upload-image", content);
+        uploadRes.EnsureSuccessStatusCode();
+        var uploadedFile = await uploadRes.Content.ReadFromJsonAsync<MediaFileResponse>();
 
         var response = await _client.GetAsync(
-            $"/api/v1/MediaFile/view-image/{mediaFile.StoragePath}",
+            $"/api/v1/MediaFile/view-image/{uploadedFile!.StoragePath}",
             CancellationToken.None)
             .ConfigureAwait(true);
 
@@ -321,24 +297,21 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "MF_022 - Xem ảnh thành công với resize theo width")]
     public async Task ViewImage_WithResize_Success()
     {
-        using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.Create, PermissionsList.Products.View], email);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var mediaFile = new MediaFileEntity
-        {
-            StorageType = "local",
-            StoragePath = "view-resize.webp",
-            OriginalFileName = "resize.webp",
-            ContentType = "image/webp",
-            FileExtension = ".webp",
-            FileSize = 500000,
-            DeletedAt = null
-        };
-        db.MediaFiles.Add(mediaFile);
-        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+        var content = IntegrationTestFileHelper.CreateSingleImageForm();
+        var uploadRes = await _client.PostAsync("/api/v1/MediaFile/upload-image", content);
+        uploadRes.EnsureSuccessStatusCode();
+        var uploadedFile = await uploadRes.Content.ReadFromJsonAsync<MediaFileResponse>();
 
         var response = await _client.GetAsync(
-            $"/api/v1/MediaFile/view-image/{mediaFile.StoragePath}?width=300",
+            $"/api/v1/MediaFile/view-image/{uploadedFile!.StoragePath}?width=300",
             CancellationToken.None)
             .ConfigureAwait(true);
 
