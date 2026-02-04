@@ -8,13 +8,19 @@ using Application.Features.Inputs.Commands.UpdateInputStatus;
 using Application.Features.Inputs.Commands.UpdateManyInputStatus;
 using Azure.Core;
 using Domain.Constants.Permission;
+using Domain.Entities;
 using Domain.Primitives;
 using FluentAssertions;
 using Infrastructure.DBContexts;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using BrandEntity = Domain.Entities.Brand;
+using ProductCategoryEntity = Domain.Entities.ProductCategory;
+using SupplierEntity = Domain.Entities.Supplier;
+using ProductEntity = Domain.Entities.Product;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace IntegrationTests;
@@ -38,22 +44,105 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Inputs.Create], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var request = new UpdateInputCommand
+        // Required Data Creation
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+
+        // Ensure Statuses exist
+        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        if (!await db.ProductStatuses.AnyAsync(x => x.Key == productStatusId))
+        {
+            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
+        }
+
+        var supplierStatusId = Domain.Constants.SupplierStatus.Active;
+        if (!await db.SupplierStatuses.AnyAsync(x => x.Key == supplierStatusId))
+        {
+            db.SupplierStatuses.Add(new SupplierStatus { Key = supplierStatusId });
+        }
+
+        var inputStatusId = Domain.Constants.Input.InputStatus.Working;
+        if (!await db.InputStatuses.AnyAsync(x => x.Key == inputStatusId))
+        {
+            db.InputStatuses.Add(new InputStatus { Key = inputStatusId });
+        }
+
+        await db.SaveChangesAsync();
+
+        // Create Brand
+        var brand = new BrandEntity { Name = $"Brand_{uniqueId}" };
+        db.Brands.Add(brand);
+        await db.SaveChangesAsync();
+
+        // Create Category
+        var category = new ProductCategoryEntity { Name = $"Category_{uniqueId}" };
+        db.ProductCategories.Add(category);
+        await db.SaveChangesAsync();
+
+        // Create Supplier
+        var supplier = new SupplierEntity
+        {
+            Name = $"Supplier_{uniqueId}",
+            StatusId = supplierStatusId,
+            Email = $"supplier_{uniqueId}@example.com",
+            Phone = "0123456789"
+        };
+        db.Suppliers.Add(supplier);
+        await db.SaveChangesAsync();
+
+        // Create Product
+        var product = new ProductEntity
+        {
+            Name = $"Product_{uniqueId}",
+            BrandId = brand.Id,
+            CategoryId = category.Id,
+            StatusId = productStatusId,
+            Weight = 10,
+            SeatHeight = 10,
+            GroundClearance = 10,
+            FuelCapacity = 10,
+            Displacement = 10,
+            OilCapacity = 10
+        };
+        db.Products.Add(product);
+        await db.SaveChangesAsync();
+
+        // Create ProductVariant
+        var variant = new ProductVariant
+        {
+            ProductId = product.Id,
+            Price = 500000,
+            UrlSlug = $"slug-{uniqueId}"
+        };
+        db.ProductVariants.Add(variant);
+        await db.SaveChangesAsync();
+
+        // End Data Creation
+
+        var request = new CreateInputCommand
         {
             Notes = "Nhập hàng tháng 1",
-            SupplierId = 1,
-            Products = [ new UpdateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 } ]
+            SupplierId = supplier.Id,
+            Products = [ new CreateInputInfoRequest { ProductId = variant.Id, Count = 10, InputPrice = 100000 } ]
         };
 
-        var requestMessage = new HttpRequestMessage(HttpMethod.Post, "/api/v1/InventoryReceipts");
-        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-        requestMessage.Content = JsonContent.Create(request);
+        var requestMessage = new HttpRequestMessage(HttpMethod.Post, "/api/v1/InventoryReceipts")
+        {
+            Content = JsonContent.Create(request)
+        };
         var response = await _client.SendAsync(requestMessage);
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        if (response.StatusCode == HttpStatusCode.InternalServerError)
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            throw new Exception($"API returned 500. Response Body: {errorContent}");
+        }
+
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
         var content = await response.Content
             .ReadFromJsonAsync<InputResponse>(CancellationToken.None)
             .ConfigureAwait(true);
@@ -65,8 +154,6 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         content.Products[0].InputPrice.Should().Be(100000);
         content.TotalPayable.Should().Be(1000000);
 
-        using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var input = db.InputReceipts.FirstOrDefault(i => i.Id == content.Id);
         input.Should().NotBeNull();
         input!.StatusId.Should().Be(Domain.Constants.Input.InputStatus.Working);
@@ -79,8 +166,9 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Inputs.Create], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var request = new CreateInputCommand
         {
@@ -96,7 +184,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         var requestMessage = new HttpRequestMessage(HttpMethod.Post, "/api/v1/InventoryReceipts");
-        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         requestMessage.Content = JsonContent.Create(request);
         var response = await _client.SendAsync(requestMessage);
 
@@ -117,8 +205,9 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Inputs.Create], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var request = new CreateInputCommand
         {
@@ -128,7 +217,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         var requestMessage = new HttpRequestMessage(HttpMethod.Post, "/api/v1/InventoryReceipts");
-        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         requestMessage.Content = JsonContent.Create(request);
         var response = await _client.SendAsync(requestMessage);
 
@@ -142,8 +231,9 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Inputs.Create], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var request = new CreateInputCommand
         {
@@ -153,7 +243,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         var requestMessage = new HttpRequestMessage(HttpMethod.Post, "/api/v1/InventoryReceipts");
-        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         requestMessage.Content = JsonContent.Create(request);
         var response = await _client.SendAsync(requestMessage);
 
@@ -167,8 +257,9 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Inputs.Create], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var request = new CreateInputCommand
         {
@@ -179,7 +270,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
 
 
         var requestMessage = new HttpRequestMessage(HttpMethod.Post, "/api/v1/InventoryReceipts");
-        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         requestMessage.Content = JsonContent.Create(request);
         var response = await _client.SendAsync(requestMessage);
 
@@ -194,8 +285,9 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Inputs.Create], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var request = new CreateInputCommand
         {
@@ -205,7 +297,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         };
 
         var requestMessage = new HttpRequestMessage(HttpMethod.Post, "/api/v1/InventoryReceipts");
-        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         requestMessage.Content = JsonContent.Create(request);
         var response = await _client.SendAsync(requestMessage);
 
@@ -227,11 +319,12 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Inputs.View], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, "/api/v1/InventoryReceipts?page=1&pageSize=10");
-        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         var response = await _client.SendAsync(requestMessage);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -250,11 +343,12 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Inputs.View], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, "/api/v1/InventoryReceipts?filters=StatusId==working");
-        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         var response = await _client.SendAsync(requestMessage);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -274,11 +368,12 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Inputs.View], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, "/api/v1/InventoryReceipts?sorts=-InputDate");
-        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         var response = await _client.SendAsync(requestMessage);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -296,13 +391,14 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Inputs.View], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         int inputId = 1;
 
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, "/api/v1/InventoryReceipts?sorts=-InputDate");
-        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         var response = await _client.SendAsync(requestMessage);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -324,13 +420,14 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Inputs.View], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         int inputId = 9999;
 
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/InventoryReceipts/{inputId}");
-        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         var response = await _client.SendAsync(requestMessage);
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -343,8 +440,9 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Inputs.Edit], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var createRequest = new CreateInputCommand
         {
@@ -353,7 +451,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
             Products = [ new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 } ]
         };
         var requestMessage = new HttpRequestMessage(HttpMethod.Post, "/api/v1/InventoryReceipts");
-        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         requestMessage.Content = JsonContent.Create(createRequest);
         var createResponse = await _client.SendAsync(requestMessage);
         var createdInput = await createResponse.Content
@@ -388,8 +486,9 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Inputs.Edit], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var createRequest = new CreateInputCommand
         {
@@ -424,8 +523,9 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Inputs.Edit], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var createRequest = new CreateInputCommand
         {
@@ -460,8 +560,9 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Inputs.Edit], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var createRequest = new CreateInputCommand
         {
@@ -503,8 +604,9 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Inputs.Edit], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var createRequest = new CreateInputCommand
         {
@@ -540,8 +642,9 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Inputs.Edit], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var ids = new List<int>();
         for(int i = 0; i < 3; i++)
@@ -590,8 +693,9 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Inputs.Edit], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var createRequest = new CreateInputCommand
         {
@@ -627,8 +731,9 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Inputs.Delete], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var createRequest = new CreateInputCommand
         {
@@ -659,8 +764,9 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Inputs.Delete], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var ids = new List<int>();
         for(int i = 0; i < 3; i++)
@@ -700,8 +806,9 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Inputs.Delete], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var createRequest = new CreateInputCommand
         {
@@ -735,8 +842,9 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Inputs.Delete], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var ids = new List<int>();
         for(int i = 0; i < 3; i++)
@@ -780,8 +888,9 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Inputs.Create], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var createRequest = new CreateInputCommand
         {
@@ -814,8 +923,9 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Inputs.Create], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var createRequest = new CreateInputCommand
         {
@@ -862,8 +972,9 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Suppliers.View], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         int supplierId = 1;
 
@@ -885,8 +996,9 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Inputs.Create], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var response = await _client.GetAsync("/api/v1/InventoryReceipts/deleted?page=1&pageSize=10")
             .ConfigureAwait(true);
@@ -905,8 +1017,9 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Inputs.Create], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var request = new CreateInputCommand
         {
@@ -924,15 +1037,16 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         content!.TotalPayable.Should().Be(0);
     }
 
-    [Fact(DisplayName = "INPUT_068 - Cập nhật trạng thái phiếu nhập với ConfirmedBy được ghi nhận đúng")]
+    [Fact(DisplayName = "INPUT_068 - Kiểm tra ConfirmedBy được ghi nhận đúng khi cập nhật phiếu nhập")]
     public async Task UpdateInputStatus_TracksConfirmedByCorrectly()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Inputs.Edit], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var createRequest = new CreateInputCommand
         {
@@ -969,8 +1083,9 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
+        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Inputs.View], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var response = await _client.GetAsync("/api/v1/InventoryReceipts?filters=StatusId==working,SupplierId==1")
             .ConfigureAwait(true);
