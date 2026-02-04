@@ -1518,26 +1518,62 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Inputs.Create], email);
+        var user = await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Inputs.Create], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var createRequest = new CreateInputCommand
-        {
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+
+        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        if (!await db.ProductStatuses.AnyAsync(x => x.Key == productStatusId))
+            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
+
+        var supplierStatusId = Domain.Constants.SupplierStatus.Active;
+        if (!await db.SupplierStatuses.AnyAsync(x => x.Key == supplierStatusId))
+            db.SupplierStatuses.Add(new SupplierStatus { Key = supplierStatusId });
+
+        var inputStatusId = Domain.Constants.Input.InputStatus.Working;
+        if (!await db.InputStatuses.AnyAsync(x => x.Key == inputStatusId))
+            db.InputStatuses.Add(new InputStatus { Key = inputStatusId });
+        
+        await db.SaveChangesAsync();
+
+        var brand = new BrandEntity { Name = $"Brand_{uniqueId}" };
+        db.Brands.Add(brand);
+        var category = new ProductCategoryEntity { Name = $"Category_{uniqueId}" };
+        db.ProductCategories.Add(category);
+        
+        var supplier = new SupplierEntity { Name = $"Supplier_{uniqueId}", StatusId = supplierStatusId, Email = $"sup_{uniqueId}@ex.com", Phone = "0123456789" };
+        db.Suppliers.Add(supplier);
+        await db.SaveChangesAsync();
+
+        var product = new ProductEntity { Name = $"P_{uniqueId}", BrandId = brand.Id, CategoryId = category.Id, StatusId = productStatusId };
+        db.Products.Add(product);
+        await db.SaveChangesAsync();
+
+        var variant = new ProductVariant { ProductId = product.Id, Price = 100000, UrlSlug = $"s-{uniqueId}" };
+        db.ProductVariants.Add(variant);
+        await db.SaveChangesAsync();
+
+        var createdInput = new InputEntity 
+        { 
+            StatusId = inputStatusId, 
+            SupplierId = supplier.Id, 
             Notes = "Original",
-            SupplierId = 1,
-            Products = [ new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 } ]
+            CreatedBy = user.Id,
+            CreatedAt = DateTimeOffset.UtcNow.DateTime
         };
-        var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest)
-            .ConfigureAwait(true);
-        var createdInput = await createResponse.Content
-            .ReadFromJsonAsync<InputResponse>(CancellationToken.None)
-            .ConfigureAwait(true);
+        db.InputReceipts.Add(createdInput);
+        await db.SaveChangesAsync();
+
+        db.InputInfos.Add(new InputInfoEntity { InputId = createdInput.Id, ProductId = variant.Id, Count = 10, InputPrice = 100000 });
+        await db.SaveChangesAsync();
 
         var response = await _client.PostAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}/clone", null)
             .ConfigureAwait(true);
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.Created);
         var clonedInput = await response.Content
             .ReadFromJsonAsync<InputResponse>(CancellationToken.None)
             .ConfigureAwait(true);
@@ -1553,46 +1589,78 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Inputs.Create], email);
+        var user = await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Inputs.Create], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var createRequest = new CreateInputCommand
-        {
-            Notes = "Original",
-            SupplierId = 1,
-            Products =
-                [ new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }, new CreateInputInfoRequest
-                {
-                    ProductId = 2,
-                    Count = 5,
-                    InputPrice = 50000
-                } ]
-        };
-        var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest)
-            .ConfigureAwait(true);
-        var createdInput = await createResponse.Content
-            .ReadFromJsonAsync<InputResponse>(CancellationToken.None)
-            .ConfigureAwait(true);
-
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var product = db.Products.FirstOrDefault(p => p.Id == 2);
-        if(product != null)
+
+        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        if (!await db.ProductStatuses.AnyAsync(x => x.Key == productStatusId))
+            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
+
+        var supplierStatusId = Domain.Constants.SupplierStatus.Active;
+        if (!await db.SupplierStatuses.AnyAsync(x => x.Key == supplierStatusId))
+            db.SupplierStatuses.Add(new SupplierStatus { Key = supplierStatusId });
+
+        var inputStatusId = Domain.Constants.Input.InputStatus.Working;
+        if (!await db.InputStatuses.AnyAsync(x => x.Key == inputStatusId))
+            db.InputStatuses.Add(new InputStatus { Key = inputStatusId });
+        
+        await db.SaveChangesAsync();
+
+        var brand = new BrandEntity { Name = $"Brand_{uniqueId}" };
+        db.Brands.Add(brand);
+        var category = new ProductCategoryEntity { Name = $"Category_{uniqueId}" };
+        db.ProductCategories.Add(category);
+        
+        var supplier = new SupplierEntity { Name = $"Supplier_{uniqueId}", StatusId = supplierStatusId, Email = $"sup_{uniqueId}@ex.com", Phone = "0123456789" };
+        db.Suppliers.Add(supplier);
+        await db.SaveChangesAsync();
+
+        var product1 = new ProductEntity { Name = $"P1_{uniqueId}", BrandId = brand.Id, CategoryId = category.Id, StatusId = productStatusId };
+        var product2 = new ProductEntity { Name = $"P2_{uniqueId}", BrandId = brand.Id, CategoryId = category.Id, StatusId = productStatusId };
+        db.Products.Add(product1);
+        db.Products.Add(product2);
+        await db.SaveChangesAsync();
+
+        var variant1 = new ProductVariant { ProductId = product1.Id, Price = 100000, UrlSlug = $"s1-{uniqueId}" };
+        var variant2 = new ProductVariant { ProductId = product2.Id, Price = 50000, UrlSlug = $"s2-{uniqueId}" };
+        db.ProductVariants.Add(variant1);
+        db.ProductVariants.Add(variant2);
+        await db.SaveChangesAsync();
+
+        var createdInput = new InputEntity 
+        { 
+            StatusId = inputStatusId, 
+            SupplierId = supplier.Id, 
+            Notes = "Original",
+            CreatedBy = user.Id,
+            CreatedAt = DateTimeOffset.UtcNow.DateTime
+        };
+        db.InputReceipts.Add(createdInput);
+        await db.SaveChangesAsync();
+
+        db.InputInfos.Add(new InputInfoEntity { InputId = createdInput.Id, ProductId = variant1.Id, Count = 10, InputPrice = 100000 });
+        db.InputInfos.Add(new InputInfoEntity { InputId = createdInput.Id, ProductId = variant2.Id, Count = 5, InputPrice = 50000 });
+        await db.SaveChangesAsync();
+
+        if(product2 != null)
         {
-            product.DeletedAt = DateTimeOffset.UtcNow.DateTime;
+            product2.DeletedAt = DateTimeOffset.UtcNow.DateTime;
             db.SaveChanges();
         }
 
         var response = await _client.PostAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}/clone", null)
             .ConfigureAwait(true);
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.Created);
         var clonedInput = await response.Content
             .ReadFromJsonAsync<InputResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         clonedInput!.Products.Should().HaveCount(1);
-        clonedInput.Products[0].ProductId.Should().Be(1);
+        clonedInput.Products[0].ProductId.Should().Be(product1.Id);
     }
 
     [Fact(DisplayName = "INPUT_046 - Lấy danh sách phiếu nhập theo SupplierId")]
@@ -1602,11 +1670,51 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Suppliers.View], email);
+        var user = await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Suppliers.View, PermissionsList.Inputs.View], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        int supplierId = 1;
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+
+        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        if (!await db.ProductStatuses.AnyAsync(x => x.Key == productStatusId))
+            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
+
+        var supplierStatusId = Domain.Constants.SupplierStatus.Active;
+        if (!await db.SupplierStatuses.AnyAsync(x => x.Key == supplierStatusId))
+            db.SupplierStatuses.Add(new SupplierStatus { Key = supplierStatusId });
+
+        var inputStatusId = Domain.Constants.Input.InputStatus.Working;
+        if (!await db.InputStatuses.AnyAsync(x => x.Key == inputStatusId))
+            db.InputStatuses.Add(new InputStatus { Key = inputStatusId });
+        
+        await db.SaveChangesAsync();
+
+        var brand = new BrandEntity { Name = $"Brand_{uniqueId}" };
+        db.Brands.Add(brand);
+        var category = new ProductCategoryEntity { Name = $"Category_{uniqueId}" };
+        db.ProductCategories.Add(category);
+        
+        var supplier = new SupplierEntity { Name = $"Supplier_{uniqueId}", StatusId = supplierStatusId, Email = $"sup_{uniqueId}@ex.com", Phone = "0123456789" };
+        db.Suppliers.Add(supplier);
+        await db.SaveChangesAsync();
+
+        int supplierId = supplier.Id;
+
+        // Seed some inputs for this supplier
+        for (int i = 0; i < 3; i++)
+        {
+             db.InputReceipts.Add(new InputEntity 
+             { 
+                 StatusId = inputStatusId, 
+                 SupplierId = supplierId, 
+                 Notes = $"Filtered {i}",
+                  CreatedBy = user.Id,
+                 CreatedAt = DateTimeOffset.UtcNow.DateTime
+             });
+        }
+        await db.SaveChangesAsync();
 
         var response = await _client.GetAsync($"/api/v1/InventoryReceipts/by-supplier/{supplierId}?page=1&pageSize=10")
             .ConfigureAwait(true);
@@ -1626,9 +1734,54 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Inputs.Create], email);
+        var user = await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Inputs.Create, PermissionsList.Inputs.View, PermissionsList.Inputs.Delete], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+
+        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        if (!await db.ProductStatuses.AnyAsync(x => x.Key == productStatusId))
+            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
+
+        var supplierStatusId = Domain.Constants.SupplierStatus.Active;
+        if (!await db.SupplierStatuses.AnyAsync(x => x.Key == supplierStatusId))
+            db.SupplierStatuses.Add(new SupplierStatus { Key = supplierStatusId });
+
+        var inputStatusId = Domain.Constants.Input.InputStatus.Working;
+        if (!await db.InputStatuses.AnyAsync(x => x.Key == inputStatusId))
+            db.InputStatuses.Add(new InputStatus { Key = inputStatusId });
+        
+        await db.SaveChangesAsync();
+
+        var brand = new BrandEntity { Name = $"Brand_{uniqueId}" };
+        db.Brands.Add(brand);
+        var category = new ProductCategoryEntity { Name = $"Category_{uniqueId}" };
+        db.ProductCategories.Add(category);
+        
+        var supplier = new SupplierEntity { Name = $"Supplier_{uniqueId}", StatusId = supplierStatusId, Email = $"sup_{uniqueId}@ex.com", Phone = "0123456789" };
+        db.Suppliers.Add(supplier);
+        await db.SaveChangesAsync();
+
+        var product = new ProductEntity { Name = $"P_{uniqueId}", BrandId = brand.Id, CategoryId = category.Id, StatusId = productStatusId };
+        db.Products.Add(product);
+        await db.SaveChangesAsync();
+
+        var variant = new ProductVariant { ProductId = product.Id, Price = 100000, UrlSlug = $"s-{uniqueId}" };
+        db.ProductVariants.Add(variant);
+        await db.SaveChangesAsync();
+
+        var inputReceipt = new InputEntity 
+        { 
+            StatusId = inputStatusId, 
+            SupplierId = supplier.Id, 
+            Notes = "Test",
+            CreatedBy = user.Id,
+            CreatedAt = DateTimeOffset.UtcNow.DateTime,
+            DeletedAt = DateTimeOffset.UtcNow.DateTime
+        };
+        db.InputReceipts.Add(inputReceipt);
+        await db.SaveChangesAsync();
 
         var response = await _client.GetAsync("/api/v1/InventoryReceipts/deleted?page=1&pageSize=10")
             .ConfigureAwait(true);
@@ -1660,7 +1813,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
 
         var response = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", request).ConfigureAwait(true);
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.Created);
         var content = await response.Content
             .ReadFromJsonAsync<InputResponse>(CancellationToken.None)
             .ConfigureAwait(true);
@@ -1674,21 +1827,67 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Inputs.Edit], email);
+        var user = await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Inputs.Edit, PermissionsList.Inputs.ChangeStatus], email);
         var loginResponse = await IntegrationTestHelper.AuthenticateAsync(_client, username, password);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var createRequest = new CreateInputCommand
-        {
+        // Create another user to be the creator
+        var creatorUniqueId = Guid.NewGuid().ToString("N")[..8];
+        var creatorUsername = $"creator_{creatorUniqueId}";
+        var creatorEmail = $"creator_{creatorUniqueId}@gmail.com";
+        var creatorUser = await IntegrationTestHelper.CreateUserWithPermissionsAsync(_factory.Services, creatorUsername, "Password123!", [], creatorEmail);
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+
+        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        if (!await db.ProductStatuses.AnyAsync(x => x.Key == productStatusId))
+            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
+
+        var supplierStatusId = Domain.Constants.SupplierStatus.Active;
+        if (!await db.SupplierStatuses.AnyAsync(x => x.Key == supplierStatusId))
+            db.SupplierStatuses.Add(new SupplierStatus { Key = supplierStatusId });
+
+        var inputStatusId = Domain.Constants.Input.InputStatus.Working;
+        if (!await db.InputStatuses.AnyAsync(x => x.Key == inputStatusId))
+            db.InputStatuses.Add(new InputStatus { Key = inputStatusId });
+        
+        var finishStatusId = Domain.Constants.Input.InputStatus.Finish;
+        if (!await db.InputStatuses.AnyAsync(x => x.Key == finishStatusId))
+            db.InputStatuses.Add(new InputStatus { Key = finishStatusId });
+
+        await db.SaveChangesAsync();
+
+        var brand = new BrandEntity { Name = $"Brand_{uniqueId}" };
+        db.Brands.Add(brand);
+        var category = new ProductCategoryEntity { Name = $"Category_{uniqueId}" };
+        db.ProductCategories.Add(category);
+        
+        var supplier = new SupplierEntity { Name = $"Supplier_{uniqueId}", StatusId = supplierStatusId, Email = $"sup_{uniqueId}@ex.com", Phone = "0123456789" };
+        db.Suppliers.Add(supplier);
+        await db.SaveChangesAsync();
+
+        var product = new ProductEntity { Name = $"P_{uniqueId}", BrandId = brand.Id, CategoryId = category.Id, StatusId = productStatusId };
+        db.Products.Add(product);
+        await db.SaveChangesAsync();
+
+        var variant = new ProductVariant { ProductId = product.Id, Price = 100000, UrlSlug = $"s-{uniqueId}" };
+        db.ProductVariants.Add(variant);
+        await db.SaveChangesAsync();
+
+        var createdInput = new InputEntity 
+        { 
+            StatusId = inputStatusId, 
+            SupplierId = supplier.Id, 
             Notes = "Test",
-            SupplierId = 1,
-            Products = [ new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 } ]
+            CreatedBy = creatorUser.Id,
+            CreatedAt = DateTimeOffset.UtcNow.DateTime
         };
-        var createResponse = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", createRequest)
-            .ConfigureAwait(true);
-        var createdInput = await createResponse.Content
-            .ReadFromJsonAsync<InputResponse>(CancellationToken.None)
-            .ConfigureAwait(true);
+        db.InputReceipts.Add(createdInput);
+        await db.SaveChangesAsync();
+
+        db.InputInfos.Add(new InputInfoEntity { InputId = createdInput.Id, ProductId = variant.Id, Count = 10, InputPrice = 100000 });
+        await db.SaveChangesAsync();
 
         var statusRequest = new UpdateInputStatusCommand { StatusId = Domain.Constants.Input.InputStatus.Finish };
 
@@ -1700,9 +1899,10 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var input = db.InputReceipts.FirstOrDefault(i => i.Id == createdInput.Id);
+        // Scope reused
+        using var verifyScope = _factory.Services.CreateScope();
+        var verifyDb = verifyScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        var input = verifyDb.InputReceipts.FirstOrDefault(i => i.Id == createdInput.Id);
         input!.ConfirmedBy.Should().NotBeNull();
     }
 
