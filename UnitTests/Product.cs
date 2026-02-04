@@ -41,6 +41,7 @@ public class Product
     private readonly Mock<IOptionValueInsertRepository> _optionValueInsertRepoMock;
     private readonly Mock<IOptionValueReadRepository> _optionValueReadRepoMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
+    private readonly Mock<IProductVariantInsertRepository> _productVariantInsertRepository;
 
     public Product()
     {
@@ -58,6 +59,7 @@ public class Product
         _optionValueInsertRepoMock = new Mock<IOptionValueInsertRepository>();
         _optionValueReadRepoMock = new Mock<IOptionValueReadRepository>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
+        _productVariantInsertRepository = new Mock<IProductVariantInsertRepository>();
     }
 #pragma warning disable IDE0079 
 #pragma warning disable CRR0035
@@ -95,6 +97,7 @@ public class Product
             _optionValueReadRepoMock.Object,
             _optionReadRepoMock.Object,
             _productInsertRepoMock.Object,
+            _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
             _unitOfWorkMock.Object);
 
@@ -139,6 +142,7 @@ public class Product
             _optionValueReadRepoMock.Object,
             _optionReadRepoMock.Object,
             _productInsertRepoMock.Object,
+            _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
             _unitOfWorkMock.Object);
 
@@ -168,6 +172,7 @@ public class Product
             _optionValueReadRepoMock.Object,
             _optionReadRepoMock.Object,
             _productInsertRepoMock.Object,
+            _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
             _unitOfWorkMock.Object);
 
@@ -199,6 +204,7 @@ public class Product
             _optionValueReadRepoMock.Object,
             _optionReadRepoMock.Object,
             _productInsertRepoMock.Object,
+            _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
             _unitOfWorkMock.Object);
 
@@ -228,6 +234,7 @@ public class Product
             _optionValueReadRepoMock.Object,
             _optionReadRepoMock.Object,
             _productInsertRepoMock.Object,
+            _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
             _unitOfWorkMock.Object);
 
@@ -259,6 +266,7 @@ public class Product
             _optionValueReadRepoMock.Object,
             _optionReadRepoMock.Object,
             _productInsertRepoMock.Object,
+            _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
             _unitOfWorkMock.Object);
 
@@ -292,6 +300,7 @@ public class Product
             _optionValueReadRepoMock.Object,
             _optionReadRepoMock.Object,
             _productInsertRepoMock.Object,
+            _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
             _unitOfWorkMock.Object);
 
@@ -325,6 +334,7 @@ public class Product
             _optionValueReadRepoMock.Object,
             _optionReadRepoMock.Object,
             _productInsertRepoMock.Object,
+            _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
             _unitOfWorkMock.Object);
 
@@ -376,6 +386,7 @@ public class Product
             _optionValueReadRepoMock.Object,
             _optionReadRepoMock.Object,
             _productInsertRepoMock.Object,
+            _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
             _unitOfWorkMock.Object);
 
@@ -523,6 +534,7 @@ public class Product
             _optionValueReadRepoMock.Object,
             _optionReadRepoMock.Object,
             _productInsertRepoMock.Object,
+            _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
             _unitOfWorkMock.Object);
 
@@ -613,6 +625,7 @@ public class Product
             _optionValueReadRepoMock.Object,
             _optionReadRepoMock.Object,
             _productInsertRepoMock.Object,
+            _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
             _unitOfWorkMock.Object);
 

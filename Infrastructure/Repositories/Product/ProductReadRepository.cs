@@ -41,6 +41,17 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             .Include(p => p.ProductCategory)
             .Include(p => p.Brand)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
+            .ThenInclude(v => v.VariantOptionValues)
+            .ThenInclude(vov => vov.OptionValue)
+            .ThenInclude(ov => ov!.Option)
+            .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
+            .ThenInclude(v => v.ProductCollectionPhotos)
+            .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
+            .ThenInclude(v => v.InputInfos)
+            .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
+            .ThenInclude(v => v.OutputInfos)
+            .ThenInclude(oi => oi.OutputOrder)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(p => p.Id == id, cancellationToken)
             .ContinueWith(t => t.Result, cancellationToken);
     }

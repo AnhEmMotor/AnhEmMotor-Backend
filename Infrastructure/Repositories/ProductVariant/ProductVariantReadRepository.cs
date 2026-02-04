@@ -42,7 +42,7 @@ namespace Infrastructure.Repositories.ProductVariant
             DataFetchMode mode = DataFetchMode.ActiveOnly)
         {
             return context.GetQuery<ProductVariantEntity>(mode)
-                .Where(v => v.ProductId == productId)
+                .Where(v => v.ProductId == productId && (mode != DataFetchMode.ActiveOnly || v.DeletedAt == null))
                 .Include(v => v.Product)
                 .Include(v => v.ProductCollectionPhotos)
                 .Include(v => v.InputInfos)

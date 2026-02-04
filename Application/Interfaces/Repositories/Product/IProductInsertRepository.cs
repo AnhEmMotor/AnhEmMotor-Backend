@@ -1,4 +1,5 @@
 using ProductEntity = Domain.Entities.Product;
+using System.Collections.Generic;
 
 namespace Application.Interfaces.Repositories.Product;
 

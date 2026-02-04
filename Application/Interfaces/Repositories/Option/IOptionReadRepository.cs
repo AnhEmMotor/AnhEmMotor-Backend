@@ -21,5 +21,10 @@ namespace Application.Interfaces.Repositories.Option
             IEnumerable<int> ids,
             CancellationToken cancellationToken,
             DataFetchMode mode = DataFetchMode.ActiveOnly);
+
+        public Task<IEnumerable<OptionEntity>> GetByNamesAsync(
+            IEnumerable<string> names,
+            CancellationToken cancellationToken,
+            DataFetchMode mode = DataFetchMode.ActiveOnly);
     }
 }

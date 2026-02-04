@@ -41,5 +41,16 @@ namespace Infrastructure.Repositories.Option
                 .ToListAsync(cancellationToken)
                 .ContinueWith<IEnumerable<OptionEntity>>(t => t.Result, cancellationToken);
         }
+
+        public Task<IEnumerable<OptionEntity>> GetByNamesAsync(
+            IEnumerable<string> names,
+            CancellationToken cancellationToken,
+            DataFetchMode mode = DataFetchMode.ActiveOnly)
+        {
+            return GetQueryable(mode)
+                .Where(o => o.Name != null && names.Contains(o.Name))
+                .ToListAsync(cancellationToken)
+                .ContinueWith<IEnumerable<OptionEntity>>(t => t.Result, cancellationToken);
+        }
     }
 }

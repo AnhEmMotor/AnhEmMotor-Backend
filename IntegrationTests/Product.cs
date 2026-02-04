@@ -624,18 +624,18 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>
         db.Products.Add(product);
         await db.SaveChangesAsync();
 
-        var v1 = new ProductVariant { ProductId = product.Id, UrlSlug = $"v1_{uniqueId}", Price = 100, DeletedAt = null };
-        var v2 = new ProductVariant { ProductId = product.Id, UrlSlug = $"v2_{uniqueId}", Price = 200, DeletedAt = DateTimeOffset.UtcNow };
+        var v1 = new ProductVariant { ProductId = product.Id, UrlSlug = $"v1-{uniqueId}", Price = 100, DeletedAt = null };
+        var v2 = new ProductVariant { ProductId = product.Id, UrlSlug = $"v2-{uniqueId}", Price = 200, DeletedAt = DateTimeOffset.UtcNow };
         db.ProductVariants.AddRange(v1, v2);
         await db.SaveChangesAsync();
 
-        var response = await _client.GetAsync($"/api/v1/product/{product.Id}/variants");
+        var response = await _client.GetAsync($"/api/v1/product/{product.Id}/variants-lite");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductVariantLiteResponse>>();
+        var content = await response.Content.ReadFromJsonAsync<List<ProductVariantLiteResponse>>();
         content.Should().NotBeNull();
-        content!.Items.Should().Contain(v => v.Id == v1.Id);
-        content.Items.Should().NotContain(v => v.Id == v2.Id);
+        content!.Should().Contain(v => v.Id == v1.Id);
+        content.Should().NotContain(v => v.Id == v2.Id);
     }
 
     [Fact(DisplayName = "PRODUCT_074 - Tạo sản phẩm tự động tạo OptionValue mới nếu chưa tồn tại")]
@@ -672,7 +672,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>
             [
                 new CreateProductVariantRequest
                 {
-                    UrlSlug = $"slug_{uniqueId}",
+                    UrlSlug = $"slug-{uniqueId}",
                     Price = 20000000,
                     OptionValues = new Dictionary<string, string> { { $"Color_{uniqueId}", "Green" } }
                 }
@@ -681,6 +681,11 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>
 
         var response = await _client.PostAsJsonAsync("/api/v1/product", request);
 
+        if (response.StatusCode != HttpStatusCode.Created)
+        {
+            var error = await response.Content.ReadAsStringAsync();
+            _output.WriteLine($"PRODUCT_074 Failed: {response.StatusCode} - {error}");
+        }
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         
         var options = await db.Options.Where(o => o.Name == $"Color_{uniqueId}").FirstOrDefaultAsync();
@@ -734,7 +739,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>
             [
                 new CreateProductVariantRequest
                 {
-                    UrlSlug = $"slug_{uniqueId}",
+                    UrlSlug = $"slug-{uniqueId}",
                     Price = 20000000,
                     OptionValues = new Dictionary<string, string> { { optionName, optionValueName } }
                 }
@@ -797,7 +802,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>
         db.OptionValues.AddRange(val1, val2);
         await db.SaveChangesAsync();
 
-        var variant = new ProductVariant { ProductId = product.Id, Price = 100, UrlSlug = $"v_{uniqueId}" };
+        var variant = new ProductVariant { ProductId = product.Id, Price = 100, UrlSlug = $"v-{uniqueId}" };
         db.ProductVariants.Add(variant);
         await db.SaveChangesAsync();
         
@@ -855,15 +860,15 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>
         db.Products.Add(product);
         await db.SaveChangesAsync();
 
-        var variant = new ProductVariant { ProductId = product.Id, UrlSlug = $"simple_{uniqueId}", Price = 100 };
+        var variant = new ProductVariant { ProductId = product.Id, UrlSlug = $"simple-{uniqueId}", Price = 100 };
         db.ProductVariants.Add(variant);
         await db.SaveChangesAsync();
 
-        var response = await _client.GetAsync($"/api/v1/product/{product.Id}/variants");
+        var response = await _client.GetAsync($"/api/v1/product/{product.Id}/variants-lite");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductVariantLiteResponse>>();
-        content!.Items?.First().VariantName.Should().BeNullOrEmpty();
+        var content = await response.Content.ReadFromJsonAsync<List<ProductVariantLiteResponse>>();
+        content!.First().VariantName.Should().BeNullOrEmpty();
     }
 
     [Fact(DisplayName = "PRODUCT_078 - Tạo sản phẩm với Price có 2 chữ số thập phân được lưu chính xác")]
@@ -898,7 +903,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>
             BrandId = brand.Id,
             Variants =
             [
-                new CreateProductVariantRequest { UrlSlug = $"dec_{uniqueId}", Price = 20000000.99m }
+                new CreateProductVariantRequest { UrlSlug = $"dec-{uniqueId}", Price = 20000000.99m }
             ]
         };
 
@@ -950,12 +955,14 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>
             StatusId = outStockStatusId
         };
 
-        var response = await _client.PutAsJsonAsync("/api/v1/product/many/status", request);
+        var response = await _client.PatchAsJsonAsync("/api/v1/product/statuses", request);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         
         var dbP1 = await db.Products.FindAsync(p1.Id);
         var dbP2 = await db.Products.FindAsync(p2.Id);
+        await db.Entry(dbP1!).ReloadAsync();
+        await db.Entry(dbP2!).ReloadAsync();
         dbP1!.StatusId.Should().Be(outStockStatusId);
         dbP2!.StatusId.Should().Be(outStockStatusId);
     }

@@ -2,7 +2,9 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
+using Domain.Constants;
 using Application.Interfaces.Repositories.Option;
+
 using Application.Interfaces.Repositories.OptionValue;
 using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.ProductCategory;
@@ -12,7 +14,9 @@ using Domain.Entities;
 using Mapster;
 using MediatR;
 using OptionValueEntity = Domain.Entities.OptionValue;
+using OptionEntity = Domain.Entities.Option;
 using ProductEntity = Domain.Entities.Product;
+using InfraOptionEntity = Domain.Entities.Option;
 
 namespace Application.Features.Products.Commands.CreateProduct;
 
@@ -23,6 +27,7 @@ public sealed class CreateProductCommandHandler(
     IOptionValueReadRepository optionValueReadRepository,
     IOptionReadRepository optionReadRepository,
     IProductInsertRepository productInsertRepository,
+    IProductVariantInsertRepository productVariantInsertRepository,
     IOptionValueInsertRepository optionValueInsertRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateProductCommand, Result<ProductDetailForManagerResponse?>>
 {
@@ -75,10 +80,14 @@ public sealed class CreateProductCommandHandler(
         }
 
         var optionIdToValueMap = new Dictionary<int, Dictionary<string, int>>();
+        var optionNameMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
         if (request.Variants?.Count > 0)
         {
             var allOptionValues = new Dictionary<int, HashSet<string>>();
+
+            // Step 1: Detect Option Names vs IDs
+            var potentialOptionNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var variantReq in request.Variants)
             {
@@ -86,7 +95,67 @@ public sealed class CreateProductCommandHandler(
                 {
                     foreach (var kvp in variantReq.OptionValues)
                     {
-                        if (int.TryParse(kvp.Key, out var optionId))
+                        if (!int.TryParse(kvp.Key, out _))
+                        {
+                            var keyName = kvp.Key?.Trim();
+                            if (!string.IsNullOrWhiteSpace(keyName))
+                            {
+                                potentialOptionNames.Add(keyName);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Step 2: Resolve Option Names to IDs
+            if (potentialOptionNames.Count > 0)
+            {
+                var existingOptions = await optionReadRepository.GetByNamesAsync(potentialOptionNames, cancellationToken, DataFetchMode.All)
+                    .ConfigureAwait(false);
+
+                foreach (var opt in existingOptions)
+                {
+                    if (opt.Name != null)
+                        optionNameMap[opt.Name] = opt.Id;
+                }
+
+                var missingNames = potentialOptionNames.Where(n => !optionNameMap.ContainsKey(n)).ToList();
+                if (missingNames.Count > 0)
+                {
+                    var newOptions = missingNames.Select(n => new OptionEntity { Name = n }).ToList();
+                    productVariantInsertRepository.AddOptionRange(newOptions);
+                    await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                    foreach (var opt in newOptions)
+                    {
+                        if (opt.Name != null)
+                            optionNameMap[opt.Name] = opt.Id;
+                    }
+                }
+            }
+
+            // Step 3: Populate allOptionValues
+            foreach (var variantReq in request.Variants)
+            {
+                if (variantReq.OptionValues?.Count > 0)
+                {
+                    foreach (var kvp in variantReq.OptionValues)
+                    {
+                        int optionId = 0;
+                        if (int.TryParse(kvp.Key, out var parsedId))
+                        {
+                            optionId = parsedId;
+                        }
+                        else
+                        {
+                            var keyName = kvp.Key?.Trim();
+                            if (!string.IsNullOrWhiteSpace(keyName) && optionNameMap.TryGetValue(keyName, out var mappedId))
+                            {
+                                optionId = mappedId;
+                            }
+                        }
+
+                        if (optionId > 0)
                         {
                             var valueName = kvp.Value?.Trim();
                             if (!string.IsNullOrWhiteSpace(valueName))
@@ -111,7 +180,6 @@ public sealed class CreateProductCommandHandler(
                 var option = await optionReadRepository.GetByIdAsync(optionId, cancellationToken).ConfigureAwait(false);
                 if (option == null)
                 {
-                    // SỬA TẠI ĐÂY: Đồng bộ kiểu trả về
                     return Result<ProductDetailForManagerResponse?>.Failure(
                         Error.NotFound($"Option with Id {optionId} not found.", "Variants.OptionValues"));
                 }
@@ -197,11 +265,26 @@ public sealed class CreateProductCommandHandler(
                 {
                     foreach (var kvp in variantReq.OptionValues)
                     {
+                        int? resolvedOptionId = null;
                         if (int.TryParse(kvp.Key, out var optionId))
+                        {
+                            resolvedOptionId = optionId;
+                        }
+                        else
+                        {
+                            // Try map from Name
+                            var keyName = kvp.Key?.Trim();
+                            if (!string.IsNullOrWhiteSpace(keyName) && optionNameMap.TryGetValue(keyName, out var mappedId))
+                            {
+                                resolvedOptionId = mappedId;
+                            }
+                        }
+
+                        if (resolvedOptionId.HasValue)
                         {
                             var valueName = kvp.Value?.Trim();
                             if (!string.IsNullOrWhiteSpace(valueName) &&
-                                optionIdToValueMap.TryGetValue(optionId, out Dictionary<string, int>? value) &&
+                                optionIdToValueMap.TryGetValue(resolvedOptionId.Value, out Dictionary<string, int>? value) &&
                                 value.TryGetValue(valueName, out var valueId))
                             {
                                 variant.VariantOptionValues.Add(new VariantOptionValue { OptionValueId = valueId });
