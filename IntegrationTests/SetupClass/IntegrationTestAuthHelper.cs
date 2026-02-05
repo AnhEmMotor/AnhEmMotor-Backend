@@ -72,7 +72,8 @@ public static class IntegrationTestAuthHelper
             FullName = $"Test User {username}",
             Status = isLocked ? UserStatus.Banned : UserStatus.Active,
             DeletedAt = deletedAt,
-            PhoneNumber = phoneNumber // Added
+            PhoneNumber = phoneNumber, // Added
+            EmailConfirmed = true
         };
 
         var userResult = await userManager.CreateAsync(user, password);

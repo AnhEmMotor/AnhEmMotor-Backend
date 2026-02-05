@@ -14,6 +14,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Security.Claims;
 using WebAPI.Controllers.Base;
 using static Domain.Constants.Permission.PermissionsList;
 
@@ -176,7 +177,7 @@ public class UserManagerController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var result = await mediator.Send(
-            new ChangeMultipleUsersStatusCommand() { Status = model.Status, UserIds = model.UserIds },
+            new ChangeMultipleUsersStatusCommand() { Status = model.Status, UserIds = model.UserIds, CurrentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier) },
             cancellationToken)
             .ConfigureAwait(true);
         return HandleResult(result);

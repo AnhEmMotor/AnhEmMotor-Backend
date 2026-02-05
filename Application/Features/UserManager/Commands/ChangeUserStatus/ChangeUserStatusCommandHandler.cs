@@ -22,6 +22,11 @@ public class ChangeUserStatusCommandHandler(
             return Error.NotFound("User not found.");
         }
 
+        if(user.DeletedAt is not null)
+        {
+            return Error.BadRequest("Cannot change status of a deleted user.");
+        }
+
         cancellationToken.ThrowIfCancellationRequested();
 
         if(string.Compare(request.Status, UserStatus.Banned) == 0)

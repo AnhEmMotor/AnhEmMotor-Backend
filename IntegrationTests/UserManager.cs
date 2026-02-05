@@ -490,7 +490,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         var targetUser = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"target_{uniqueId}", "Pass@123");
 
         // Update Active user to use Deleted User's Phone
-        var request = new UpdateUserCommand { PhoneNumber = deletedPhone };
+        var request = new UpdateUserCommand { PhoneNumber = deletedPhone, FullName = "Update Attempt" };
 
         var response = await _client.PutAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}", request);
 
@@ -561,6 +561,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         var response = await _client.PutAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}", request);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
+        _client.DefaultRequestHeaders.Authorization = null;
         var userLogin = await IntegrationTestAuthHelper.AuthenticateAsync(_client, $"target_{uniqueId}", "OldPass@123");
         userLogin.AccessToken.Should().NotBeNullOrEmpty();
     }
@@ -607,7 +608,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var adminName = $"admin_{uniqueId}";
 
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, adminName, "Pass@123", [PermissionsList.Users.Edit]);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, adminName, "Pass@123", [PermissionsList.Users.Edit, PermissionsList.Users.ChangePassword]);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, adminName, "Pass@123");
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
