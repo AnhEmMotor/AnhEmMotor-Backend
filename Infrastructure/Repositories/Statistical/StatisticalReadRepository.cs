@@ -13,16 +13,28 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         CancellationToken cancellationToken)
     {
         var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-(days - 1)));
+        var startDateTimeOffset = new DateTimeOffset(startDate.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
 
         var dateSeries = Enumerable.Range(0, days).Select(i => startDate.AddDays(i)).ToList();
 
-        var revenueData = await context.OutputInfos
+        var rawData = await context.OutputInfos
             .Join(context.OutputOrders, oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
-            .Where(x => x.o.StatusId != OrderStatus.Cancelled && x.o.CreatedAt != null)
-            .GroupBy(x => DateOnly.FromDateTime(x.o.CreatedAt!.Value.UtcDateTime))
-            .Select(g => new { Day = g.Key, Revenue = g.Sum(x => x.oi.Price ?? 0 * (x.oi.Count ?? 0)) })
+            .Where(x => x.o.StatusId != OrderStatus.Cancelled && 
+                        x.o.CreatedAt != null &&
+                        x.o.CreatedAt >= startDateTimeOffset)
+            .Select(x => new 
+            { 
+                CreatedAt = x.o.CreatedAt!.Value, 
+                Price = x.oi.Price ?? 0, 
+                Count = x.oi.Count ?? 0 
+            })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
+
+        var revenueData = rawData
+            .GroupBy(x => DateOnly.FromDateTime(x.CreatedAt.DateTime))
+            .Select(g => new { Day = g.Key, Revenue = g.Sum(x => x.Price * x.Count) })
+            .ToList();
 
         return dateSeries.Select(
             day => new DailyRevenueResponse
@@ -93,22 +105,35 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
     {
         var currentMonth = new DateOnly(DateTimeOffset.UtcNow.Year, DateTimeOffset.UtcNow.Month, 1);
         var startMonth = currentMonth.AddMonths(-(months - 1));
+        var startDateTimeOffset = new DateTimeOffset(startMonth.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
 
         var monthSeries = Enumerable.Range(0, months).Select(i => startMonth.AddMonths(i)).ToList();
 
-        var revenueData = await context.OutputInfos
+        var rawData = await context.OutputInfos
             .Join(context.OutputOrders, oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
-            .Where(x => x.o.StatusId != OrderStatus.Cancelled && x.o.CreatedAt != null)
-            .GroupBy(x => new DateOnly(x.o.CreatedAt!.Value.Year, x.o.CreatedAt.Value.Month, 1))
+            .Where(x => x.o.StatusId != OrderStatus.Cancelled && 
+                        x.o.CreatedAt != null &&
+                        x.o.CreatedAt >= startDateTimeOffset)
+             .Select(x => new 
+            { 
+                CreatedAt = x.o.CreatedAt!.Value, 
+                Price = x.oi.Price ?? 0, 
+                CostPrice = x.oi.CostPrice ?? 0,
+                Count = x.oi.Count ?? 0 
+            })
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        var revenueData = rawData
+            .GroupBy(x => new DateOnly(x.CreatedAt.DateTime.Year, x.CreatedAt.DateTime.Month, 1))
             .Select(
                 g => new
                 {
                     Month = g.Key,
-                    Revenue = g.Sum(x => x.oi.Price ?? 0 * (x.oi.Count ?? 0)),
-                    Profit = g.Sum(x => (x.oi.Price ?? 0) - (x.oi.CostPrice ?? 0) * (x.oi.Count ?? 0))
+                    Revenue = g.Sum(x => x.Price * x.Count),
+                    Profit = g.Sum(x => (x.Price - x.CostPrice) * x.Count)
                 })
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
+            .ToList();
 
         return monthSeries.Select(
             month => new MonthlyRevenueProfitResponse
@@ -179,6 +204,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             .ConfigureAwait(false);
 
         var variants = await context.ProductVariants
+            .IgnoreQueryFilters()
             .Include(pv => pv.Product)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);

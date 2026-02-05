@@ -166,7 +166,10 @@ public class ApplicationDBContext(DbContextOptions<ApplicationDBContext> options
             switch(entry.State)
             {
                 case EntityState.Added:
-                    entry.Entity.CreatedAt = DateTimeOffset.UtcNow;
+                    if (entry.Entity.CreatedAt == null)
+                    {
+                        entry.Entity.CreatedAt = DateTimeOffset.UtcNow;
+                    }
                     break;
 
                 case EntityState.Modified:

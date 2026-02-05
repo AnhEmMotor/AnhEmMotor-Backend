@@ -457,7 +457,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>
         db.InputInfos.Add(new InputInfoEntity { InputId = inp.Id, ProductId = vid, Count = 35 });
         await db.SaveChangesAsync();
 
-        var response = await _client.GetAsync($"/api/v1/Statistics/product-stock-price?variantId={vid}");
+        var response = await _client.GetAsync($"/api/v1/Statistics/product-stock-price/{vid}");
         var content = await response.Content.ReadFromJsonAsync<ProductStockPriceResponse>();
 
         content!.UnitPrice.Should().Be(price);
@@ -478,7 +478,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>
         v!.DeletedAt = DateTime.UtcNow;
         await db.SaveChangesAsync();
 
-        var response = await _client.GetAsync($"/api/v1/Statistics/product-stock-price?variantId={vid}");
+        var response = await _client.GetAsync($"/api/v1/Statistics/product-stock-price/{vid}");
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
