@@ -55,7 +55,8 @@ public class IdentityService(UserManager<ApplicationUser> userManager) : IIdenti
             AuthMethods = [ "amr" ],
             Email = user.Email,
             FullName = user.FullName,
-            Status = user.Status
+            Status = user.Status,
+            SecurityStamp = user.SecurityStamp
         };
     }
 }

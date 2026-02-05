@@ -58,7 +58,7 @@ public class UpdateCurrentUserCommandHandler(
         {
             if (!errors.Any())
             {
-                return Error.Validation("UpdateFailed", "Failed to update user.");
+                return Error.Validation("Failed to update user.", "UpdateFailed");
             }
             var validationErrors = errors.Select(e => Error.Validation("UpdateError", e)).ToList();
             return Result<UserDTOForManagerResponse>.Failure(validationErrors);

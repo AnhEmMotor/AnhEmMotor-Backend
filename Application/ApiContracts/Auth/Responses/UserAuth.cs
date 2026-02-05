@@ -17,5 +17,7 @@ namespace Application.ApiContracts.Auth.Responses
         public string? Status { get; set; }
 
         public string[]? AuthMethods { get; set; }
+
+        public string? SecurityStamp { get; set; }
     }
 }

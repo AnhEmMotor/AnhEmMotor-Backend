@@ -91,7 +91,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var updatedUser = await db.Users.FindAsync(userId);
+            var updatedUser = await db.Users.FindAsync(Guid.Parse(userId));
             updatedUser!.DeletedAt.Should().BeNull();
         }
     }
@@ -143,9 +143,9 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
 
         var response = await _client.PostAsync($"/api/v1/User/{targetUser.Id}/restore", null);
 
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var content = await response.Content.ReadAsStringAsync();
-        content.Should().Contain("Cannot restore banned account");
+        content.Should().Contain($"Cannot restore user with status '{UserStatus.Banned}'. User status must be Active.");
     }
 
     [Fact(DisplayName = "USER_024 - Khôi phục tài khoản với UserId không tồn tại")]
@@ -236,7 +236,12 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var updateRequest = new UpdateUserCommand { PhoneNumber = "invalid-phone" };
+        var updateRequest = new UpdateUserCommand 
+        { 
+            FullName = "Test User",
+            Gender = GenderStatus.Male,
+            PhoneNumber = "invalid-phone" 
+        };
 
         var response = await _client.PutAsJsonAsync("/api/v1/User/me", updateRequest);
 
@@ -298,7 +303,9 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
 
         var response = await _client.PostAsJsonAsync("/api/v1/User/change-password", changePasswordRequest);
 
-        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var errorContent = await response.Content.ReadAsStringAsync();
+        errorContent.Should().Contain("Incorrect password.");
     }
 
     [Fact(DisplayName = "USER_031 - Xóa tài khoản - Integration Test")]

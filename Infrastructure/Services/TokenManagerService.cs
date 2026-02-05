@@ -54,7 +54,8 @@ public class TokenManagerService : ITokenManagerService
             new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
             new(JwtRegisteredClaimNames.Name, user.UserName ?? string.Empty),
             new(Domain.Constants.ClaimJWTPayload.FullName, user.FullName ?? string.Empty),
-            new(Domain.Constants.ClaimJWTPayload.Status, user.Status ?? string.Empty)
+            new(Domain.Constants.ClaimJWTPayload.Status, user.Status ?? string.Empty),
+            new("AspNet.Identity.SecurityStamp", user.SecurityStamp ?? string.Empty)
         };
 
         if(user.AuthMethods is { Length: > 0 })

@@ -42,7 +42,7 @@ public class DeleteCurrentUserAccountCommandHandler(
 
         if (!string.IsNullOrEmpty(user.Email) && protectedEmails.Contains(user.Email))
         {
-            return Error.Validation("Email", "Protected users cannot delete their account.");
+            return Error.Validation("Protected users cannot delete their account.", "Email");
         }
 
         cancellationToken.ThrowIfCancellationRequested();
@@ -53,7 +53,7 @@ public class DeleteCurrentUserAccountCommandHandler(
         {
             if (!errors.Any())
             {
-                return Error.Validation("DeleteFailed", "Failed to delete account.");
+                return Error.Validation("Failed to delete account.", "DeleteFailed");
             }
             var validationErrors = errors.Select(e => Error.Validation("DeleteError", e)).ToList();
             return Result<DeleteAccountByUserReponse>.Failure(validationErrors);

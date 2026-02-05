@@ -125,7 +125,7 @@ public class MediaFile
     public async Task DeleteFileAsync_ReturnsBadRequest_WhenValidationFails()
     {
         var storagePath = "";
-        var validationError = Error.Validation("StoragePath.Empty", "StoragePath is required");
+        var validationError = Error.Validation("StoragePath is required", "StoragePath.Empty");
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteFileCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Failure(validationError));

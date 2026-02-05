@@ -41,7 +41,7 @@ public class ChangePasswordCommandHandler(
         var isPasswordCorrect = await userReadRepository.CheckPasswordAsync(user, request.CurrentPassword!, cancellationToken).ConfigureAwait(false);
         if (!isPasswordCorrect)
         {
-            return Error.Validation("CurrentPassword", "Incorrect password.");
+            return Error.Validation("Incorrect password.", "CurrentPassword");
         }
 
         var (succeeded, errors) = await userUpdateRepository.ChangePasswordAsync(
@@ -55,7 +55,7 @@ public class ChangePasswordCommandHandler(
         {
             if (!errors.Any())
             {
-                return Error.Validation("ChangePasswordFailed", "Failed to change password.");
+                return Error.Validation("Failed to change password.", "ChangePasswordFailed");
             }
             var validationErrors = errors.Select(e => Error.Validation("ChangePasswordError", e)).ToList();
             return Result<ChangePasswordByUserResponse>.Failure(validationErrors);
