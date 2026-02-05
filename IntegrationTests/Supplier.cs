@@ -426,7 +426,10 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
             await db.Suppliers.AddRangeAsync([supplier1, supplier2]);
             await db.SaveChangesAsync();
 
-            var input = new Input { SupplierId = supplier2.Id, StatusId = Domain.Constants.Input.InputStatus.Working, CreatedBy = Guid.NewGuid() }; // Minimal Input
+            var user = await db.Users.FirstOrDefaultAsync(u => u.UserName == username);
+            var userId = user?.Id ?? Guid.NewGuid();
+
+            var input = new Input { SupplierId = supplier2.Id, StatusId = Domain.Constants.Input.InputStatus.Working, CreatedBy = userId }; // Minimal Input
             await db.InputReceipts.AddAsync(input);
             await db.SaveChangesAsync();
 
@@ -547,10 +550,8 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            if (!await db.SupplierStatuses.AnyAsync(s => s.Key == Domain.Constants.SupplierStatus.Active))
-                db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
-            if (!await db.InputStatuses.AnyAsync(s => s.Key == Domain.Constants.Input.InputStatus.Finish))
-                db.InputStatuses.Add(new InputStatus { Key = Domain.Constants.Input.InputStatus.Finish });
+            await db.Database.ExecuteSqlRawAsync("INSERT OR IGNORE INTO SupplierStatus (Key) VALUES ({0})", Domain.Constants.SupplierStatus.Active);
+            await db.Database.ExecuteSqlRawAsync("INSERT OR IGNORE INTO InputStatus (Key) VALUES ({0})", Domain.Constants.Input.InputStatus.Finish);
 
             var supplier = new SupplierEntity { Name = $"S_{uniqueId}", Phone = "099", Address = "A", StatusId = Domain.Constants.SupplierStatus.Active };
             
@@ -558,7 +559,9 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
             await db.SaveChangesAsync();
             supplierId = supplier.Id;
 
-            var userId = Guid.NewGuid();
+            var user = await db.Users.FirstOrDefaultAsync(u => u.UserName == username);
+            var userId = user?.Id ?? Guid.NewGuid();
+
             var inputs = new List<Input>
             {
                 new() { SupplierId = supplierId, StatusId = Domain.Constants.Input.InputStatus.Finish, CreatedBy = userId },
@@ -601,14 +604,12 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            if (!await db.SupplierStatuses.AnyAsync(s => s.Key == Domain.Constants.SupplierStatus.Active))
-                db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
-            if (!await db.InputStatuses.AnyAsync(s => s.Key == Domain.Constants.Input.InputStatus.Finish))
-                db.InputStatuses.Add(new InputStatus { Key = Domain.Constants.Input.InputStatus.Finish });
-            if (!await db.InputStatuses.AnyAsync(s => s.Key == Domain.Constants.Input.InputStatus.Working))
-                db.InputStatuses.Add(new InputStatus { Key = Domain.Constants.Input.InputStatus.Working });
-            if (!await db.InputStatuses.AnyAsync(s => s.Key == Domain.Constants.Input.InputStatus.Cancel))
-                db.InputStatuses.Add(new InputStatus { Key = Domain.Constants.Input.InputStatus.Cancel });
+            await db.Database.ExecuteSqlRawAsync("INSERT OR IGNORE INTO SupplierStatus (Key) VALUES ({0})", Domain.Constants.SupplierStatus.Active);
+            
+            foreach (var status in new[] { Domain.Constants.Input.InputStatus.Finish, Domain.Constants.Input.InputStatus.Working, Domain.Constants.Input.InputStatus.Cancel })
+            {
+                await db.Database.ExecuteSqlRawAsync("INSERT OR IGNORE INTO InputStatus (Key) VALUES ({0})", status);
+            }
 
             var supplier = new SupplierEntity { Name = $"S_{uniqueId}", Phone = "099", Address = "A", StatusId = Domain.Constants.SupplierStatus.Active };
             
@@ -616,7 +617,9 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
             await db.SaveChangesAsync();
             supplierId = supplier.Id;
 
-            var userId = Guid.NewGuid();
+            var user = await db.Users.FirstOrDefaultAsync(u => u.UserName == username);
+            var userId = user?.Id ?? Guid.NewGuid();
+
             var inputs = new List<Input>
             {
                 new() { SupplierId = supplierId, StatusId = Domain.Constants.Input.InputStatus.Finish, CreatedBy = userId },

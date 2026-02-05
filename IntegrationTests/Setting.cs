@@ -9,6 +9,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Xunit.Abstractions;
+using Microsoft.EntityFrameworkCore;
 using SettingEntity = Domain.Entities.Setting;
 
 namespace IntegrationTests;
@@ -42,18 +43,19 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-            db.Settings.RemoveRange(db.Settings);
-            await db.SaveChangesAsync(CancellationToken.None);
-
-            var settings = new List<SettingEntity>
-            {
-                new() { Key = "Deposit_ratio", Value = "50.5" },
-                new() { Key = "Inventory_alert_level", Value = "10" },
-                new() { Key = "Order_value_exceeds", Value = "50000000" },
-                new() { Key = "Z-bike_threshold_for_meeting", Value = "5" }
-            };
-            await db.Settings.AddRangeAsync(settings);
-            await db.SaveChangesAsync();
+            // Use AddOrUpdate logic to avoid UNIQUE constraint violations
+            await db.Database.ExecuteSqlRawAsync(
+                "INSERT INTO Setting (Key, Value) VALUES ({0}, {1}) ON CONFLICT(Key) DO UPDATE SET Value=excluded.Value",
+                "Deposit_ratio", "50.5");
+            await db.Database.ExecuteSqlRawAsync(
+                "INSERT INTO Setting (Key, Value) VALUES ({0}, {1}) ON CONFLICT(Key) DO UPDATE SET Value=excluded.Value",
+                "Inventory_alert_level", "10");
+            await db.Database.ExecuteSqlRawAsync(
+                "INSERT INTO Setting (Key, Value) VALUES ({0}, {1}) ON CONFLICT(Key) DO UPDATE SET Value=excluded.Value",
+                "Order_value_exceeds", "50000000");
+            await db.Database.ExecuteSqlRawAsync(
+                "INSERT INTO Setting (Key, Value) VALUES ({0}, {1}) ON CONFLICT(Key) DO UPDATE SET Value=excluded.Value",
+                "Z-bike_threshold_for_meeting", "5");
         }
 
         var response = await _client.GetAsync("/api/v1/Setting");
@@ -84,10 +86,9 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-            db.Settings.RemoveRange(db.Settings);
-            var settings = new List<SettingEntity> { new() { Key = "Deposit_ratio", Value = "50" } };
-            await db.Settings.AddRangeAsync(settings);
-            await db.SaveChangesAsync();
+            await db.Database.ExecuteSqlRawAsync(
+                "INSERT INTO Setting (Key, Value) VALUES ({0}, {1}) ON CONFLICT(Key) DO UPDATE SET Value=excluded.Value",
+                "Deposit_ratio", "50");
         }
 
         var response = await _client.GetAsync("/api/v1/Setting");
@@ -103,8 +104,10 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            db.Settings.RemoveRange(db.Settings);
-            await db.Settings.AddAsync(new() { Key = "Deposit_ratio", Value = "50" });
+            await db.Database.ExecuteSqlRawAsync(
+                "INSERT INTO Setting (Key, Value) VALUES ({0}, {1}) ON CONFLICT(Key) DO UPDATE SET Value=excluded.Value",
+                "Deposit_ratio", "50");
+            
             await db.SaveChangesAsync();
         }
 
@@ -151,16 +154,18 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-            db.Settings.RemoveRange(db.Settings);
-            var initialSettings = new List<SettingEntity>
-            {
-                new() { Key = "Deposit_ratio", Value = "30" },
-                new() { Key = "Inventory_alert_level", Value = "5" },
-                new() { Key = "Order_value_exceeds", Value = "30000000" },
-                new() { Key = "Z-bike_threshold_for_meeting", Value = "3" }
-            };
-            await db.Settings.AddRangeAsync(initialSettings);
-            await db.SaveChangesAsync();
+            await db.Database.ExecuteSqlRawAsync(
+                "INSERT INTO Setting (Key, Value) VALUES ({0}, {1}) ON CONFLICT(Key) DO UPDATE SET Value=excluded.Value",
+                "Deposit_ratio", "30");
+            await db.Database.ExecuteSqlRawAsync(
+                "INSERT INTO Setting (Key, Value) VALUES ({0}, {1}) ON CONFLICT(Key) DO UPDATE SET Value=excluded.Value",
+                "Inventory_alert_level", "5");
+            await db.Database.ExecuteSqlRawAsync(
+                "INSERT INTO Setting (Key, Value) VALUES ({0}, {1}) ON CONFLICT(Key) DO UPDATE SET Value=excluded.Value",
+                "Order_value_exceeds", "30000000");
+            await db.Database.ExecuteSqlRawAsync(
+                "INSERT INTO Setting (Key, Value) VALUES ({0}, {1}) ON CONFLICT(Key) DO UPDATE SET Value=excluded.Value",
+                "Z-bike_threshold_for_meeting", "3");
         }
 
         var request = new Dictionary<string, long?>
@@ -205,14 +210,12 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-            db.Settings.RemoveRange(db.Settings);
-            var initialSettings = new List<SettingEntity>
-            {
-                new() { Key = "Deposit_ratio", Value = "30" },
-                new() { Key = "Inventory_alert_level", Value = "5" }
-            };
-            await db.Settings.AddRangeAsync(initialSettings);
-            await db.SaveChangesAsync();
+            await db.Database.ExecuteSqlRawAsync(
+                "INSERT INTO Setting (Key, Value) VALUES ({0}, {1}) ON CONFLICT(Key) DO UPDATE SET Value=excluded.Value",
+                "Deposit_ratio", "30");
+            await db.Database.ExecuteSqlRawAsync(
+                "INSERT INTO Setting (Key, Value) VALUES ({0}, {1}) ON CONFLICT(Key) DO UPDATE SET Value=excluded.Value",
+                "Inventory_alert_level", "5");
         }
 
         var request = new Dictionary<string, long?> { { "Deposit_ratio", 25 } };
@@ -245,9 +248,9 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            db.Settings.RemoveRange(db.Settings);
-            await db.Settings.AddAsync(new() { Key = "Deposit_ratio", Value = "50" });
-            await db.SaveChangesAsync();
+            await db.Database.ExecuteSqlRawAsync(
+                "INSERT INTO Setting (Key, Value) VALUES ({0}, {1}) ON CONFLICT(Key) DO UPDATE SET Value=excluded.Value",
+                "Deposit_ratio", "50");
         }
 
         var request = new Dictionary<string, long?> { { "Deposit_ratio", 25 } };
@@ -272,9 +275,9 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            db.Settings.RemoveRange(db.Settings);
-            await db.Settings.AddAsync(new() { Key = "Deposit_ratio", Value = "50" });
-            await db.SaveChangesAsync();
+            await db.Database.ExecuteSqlRawAsync(
+                "INSERT INTO Setting (Key, Value) VALUES ({0}, {1}) ON CONFLICT(Key) DO UPDATE SET Value=excluded.Value",
+                "Deposit_ratio", "50");
         }
 
         var request = new Dictionary<string, long?> { { "Deposit_ratio", 25 } };
@@ -298,9 +301,9 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            db.Settings.RemoveRange(db.Settings);
-            await db.Settings.AddAsync(new() { Key = "Deposit_ratio", Value = "50" });
-            await db.SaveChangesAsync();
+            await db.Database.ExecuteSqlRawAsync(
+                "INSERT INTO Setting (Key, Value) VALUES ({0}, {1}) ON CONFLICT(Key) DO UPDATE SET Value=excluded.Value",
+                "Deposit_ratio", "50");
         }
 
         var request = new Dictionary<string, long?> { { "Deposit_ratio", 0 } };
@@ -334,9 +337,9 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            db.Settings.RemoveRange(db.Settings);
-            await db.Settings.AddAsync(new() { Key = "Deposit_ratio", Value = "50" });
-            await db.SaveChangesAsync();
+            await db.Database.ExecuteSqlRawAsync(
+                "INSERT INTO Setting (Key, Value) VALUES ({0}, {1}) ON CONFLICT(Key) DO UPDATE SET Value=excluded.Value",
+                "Deposit_ratio", "50");
         }
 
         var request = new Dictionary<string, long?> { { "Deposit_ratio", 100 } };
@@ -370,9 +373,9 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            db.Settings.RemoveRange(db.Settings);
-            await db.Settings.AddAsync(new() { Key = "Deposit_ratio", Value = "50" });
-            await db.SaveChangesAsync();
+            await db.Database.ExecuteSqlRawAsync(
+                "INSERT INTO Setting (Key, Value) VALUES ({0}, {1}) ON CONFLICT(Key) DO UPDATE SET Value=excluded.Value",
+                "Deposit_ratio", "50");
         }
 
         var request = new Dictionary<string, long?> { { "Deposit_ratio", 5055 } };
@@ -399,9 +402,9 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            db.Settings.RemoveRange(db.Settings);
-            await db.Settings.AddAsync(new() { Key = "Deposit_ratio", Value = "50" });
-            await db.SaveChangesAsync();
+            await db.Database.ExecuteSqlRawAsync(
+                "INSERT INTO Setting (Key, Value) VALUES ({0}, {1}) ON CONFLICT(Key) DO UPDATE SET Value=excluded.Value",
+                "Deposit_ratio", "50");
         }
 
         var request = new Dictionary<string, long?>();
