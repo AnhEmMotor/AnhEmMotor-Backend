@@ -20,7 +20,8 @@ public static class IntegrationTestAuthHelper
         string? email = null,
         bool isLocked = false,
         string? roleName = null,
-        DateTimeOffset? deletedAt = null)
+        DateTimeOffset? deletedAt = null,
+        string? phoneNumber = null)
     {
         using var scope = services.CreateScope();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
@@ -70,7 +71,8 @@ public static class IntegrationTestAuthHelper
             Email = userEmail,
             FullName = $"Test User {username}",
             Status = isLocked ? UserStatus.Banned : UserStatus.Active,
-            DeletedAt = deletedAt
+            DeletedAt = deletedAt,
+            PhoneNumber = phoneNumber // Added
         };
 
         var userResult = await userManager.CreateAsync(user, password);
@@ -110,5 +112,17 @@ public static class IntegrationTestAuthHelper
 
         return await loginResponse.Content.ReadFromJsonAsync<LoginResponse>()
             ?? throw new Exception("Failed to deserialize login response");
+    }
+
+    public static Task<ApplicationUser> CreateUserAsync(
+        IServiceProvider services,
+        string username,
+        string password,
+        string? email = null,
+        bool isLocked = false,
+        DateTimeOffset? deletedAt = null,
+        string? phoneNumber = null)
+    {
+        return CreateUserWithPermissionsAsync(services, username, password, [], email, isLocked, null, deletedAt, phoneNumber);
     }
 }
