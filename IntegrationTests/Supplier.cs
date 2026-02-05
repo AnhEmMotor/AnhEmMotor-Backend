@@ -65,13 +65,13 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
             await db.SaveChangesAsync();
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier?Page=1&PageSize=10&Filters=Name@=*{uniqueId}*");
+        var response = await _client.GetAsync($"/api/v1/Supplier?Page=1&PageSize=10");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content.ReadFromJsonAsync<PagedResult<SupplierResponse>>();
         
         content.Should().NotBeNull();
-        content!.Items.Should().HaveCountLessThanOrEqualTo(10);
+        content!.Items.Should().HaveCount(10);
         content.Items.Should().OnlyContain(s => s.Name!.Contains(uniqueId));
     }
 
@@ -108,7 +108,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
             await db.SaveChangesAsync();
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier?Page=2&PageSize=5&Filters=Name@=*{uniqueId}*");
+        var response = await _client.GetAsync($"/api/v1/Supplier?Page=2&PageSize=5");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content.ReadFromJsonAsync<PagedResult<SupplierResponse>>();

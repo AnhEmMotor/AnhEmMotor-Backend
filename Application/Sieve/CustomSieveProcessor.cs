@@ -1,4 +1,5 @@
-﻿using Domain.Entities;
+﻿using Application.ApiContracts.Supplier.Responses;
+using Domain.Entities;
 using Microsoft.Extensions.Options;
 using Sieve.Models;
 using Sieve.Services;
@@ -56,6 +57,17 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<Supplier>(s => s.StatusId).CanSort().CanFilter();
         mapper.Property<Supplier>(s => s.Address).CanFilter();
 
+        mapper.Property<SupplierWithTotalInputResponse>(s => s.Id).CanSort().CanFilter();
+        mapper.Property<SupplierWithTotalInputResponse>(s => s.Name).CanSort().CanFilter();
+        mapper.Property<SupplierWithTotalInputResponse>(s => s.Phone).CanSort().CanFilter();
+        mapper.Property<SupplierWithTotalInputResponse>(s => s.Email).CanSort().CanFilter();
+        mapper.Property<SupplierWithTotalInputResponse>(s => s.Address).CanSort().CanFilter();
+        mapper.Property<SupplierWithTotalInputResponse>(s => s.StatusId).CanSort().CanFilter();
+        mapper.Property<SupplierWithTotalInputResponse>(s => s.CreatedAt).CanSort().CanFilter();
+        mapper.Property<SupplierWithTotalInputResponse>(s => s.UpdatedAt).CanSort().CanFilter();
+        mapper.Property<SupplierWithTotalInputResponse>(s => s.DeletedAt).CanSort().CanFilter();
+        mapper.Property<SupplierWithTotalInputResponse>(s => s.TotalInput).CanSort().CanFilter();
+        
         return mapper;
     }
 
