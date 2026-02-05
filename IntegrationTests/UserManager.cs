@@ -206,7 +206,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
             await db.SaveChangesAsync();
         }
 
-        var request = new UpdateUserCommand { PhoneNumber = null };
+        var request = new UpdateUserCommand { PhoneNumber = null, FullName = "Updated Name" };
 
         var response = await _client.PutAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}", request);
 
@@ -227,7 +227,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var adminName = $"admin_{uniqueId}";
 
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, adminName, "Pass@123", [PermissionsList.Users.Edit]);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, adminName, "Pass@123", [PermissionsList.Users.Edit, PermissionsList.Users.ChangePassword]);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, adminName, "Pass@123");
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
@@ -279,7 +279,8 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
             await roleManager.CreateAsync(new ApplicationRole { Name = staffRoleName });
             await roleManager.CreateAsync(new ApplicationRole { Name = managerRoleName });
 
-            await userManager.AddToRoleAsync(targetUser, staffRoleName);
+            var userInScope = await userManager.FindByIdAsync(targetUser.Id.ToString());
+            await userManager.AddToRoleAsync(userInScope!, staffRoleName);
         }
 
         var request = new AssignRolesCommand { RoleNames = [ managerRoleName ] };
@@ -318,7 +319,8 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             var roleName = $"Role_{uniqueId}";
             await roleManager.CreateAsync(new ApplicationRole { Name = roleName });
-            await userManager.AddToRoleAsync(targetUser, roleName);
+            var userInScope = await userManager.FindByIdAsync(targetUser.Id.ToString());
+            await userManager.AddToRoleAsync(userInScope!, roleName);
         }
 
         var request = new AssignRolesCommand { RoleNames = [] };
