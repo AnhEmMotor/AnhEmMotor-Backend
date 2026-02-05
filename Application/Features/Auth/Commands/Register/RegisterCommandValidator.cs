@@ -4,7 +4,7 @@ using FluentValidation;
 
 namespace Application.Features.Auth.Commands.Register;
 
-public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
+public partial class RegisterCommandValidator : AbstractValidator<RegisterCommand>
 {
     public RegisterCommandValidator(IUserReadRepository userReadRepository)
     {
