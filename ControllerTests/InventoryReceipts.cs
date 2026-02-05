@@ -18,6 +18,7 @@ using Domain.Primitives;
 using FluentAssertions;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Sieve.Models;
@@ -296,7 +297,7 @@ public class InventoryReceipts
 
         var result = await _controller.CreateInputAsync(request, CancellationToken.None).ConfigureAwait(true);
 
-        result.Should().BeOfType<CreatedAtActionResult>();
+        result.Should().BeOfType<CreatedAtRouteResult>();
         _mediatorMock.Verify(m => m.Send(It.IsAny<CreateInputCommand>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 

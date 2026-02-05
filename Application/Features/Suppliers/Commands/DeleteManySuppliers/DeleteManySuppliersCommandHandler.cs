@@ -1,15 +1,17 @@
 ﻿using Application.Common.Models;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.Input;
 using Application.Interfaces.Repositories.Supplier;
-
 using Domain.Constants;
 using MediatR;
+
 
 namespace Application.Features.Suppliers.Commands.DeleteManySuppliers;
 
 public sealed class DeleteManySuppliersCommandHandler(
     ISupplierReadRepository readRepository,
     ISupplierDeleteRepository deleteRepository,
+    IInputReadRepository inputReadRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<DeleteManySuppliersCommand, Result>
 {
     public async Task<Result> Handle(DeleteManySuppliersCommand request, CancellationToken cancellationToken)
@@ -24,6 +26,14 @@ public sealed class DeleteManySuppliersCommandHandler(
         var allSupplierMap = allSuppliers.ToDictionary(s => s.Id);
         var activeSupplierSet = activeSuppliers.Select(s => s.Id).ToHashSet();
 
+        var relevantInputs = await inputReadRepository.GetBySupplierIdsAsync(uniqueIds, cancellationToken)
+            .ConfigureAwait(false);
+
+        var suppliersWithWorkingInputsSet = relevantInputs
+            .Where(x => x.StatusId == Domain.Constants.Input.InputStatus.Working && x.SupplierId.HasValue)
+            .Select(x => x.SupplierId!.Value)
+            .ToHashSet();
+
         foreach(var id in uniqueIds)
         {
             if(!allSupplierMap.ContainsKey(id))
@@ -32,6 +42,9 @@ public sealed class DeleteManySuppliersCommandHandler(
             } else if(!activeSupplierSet.Contains(id))
             {
                 errorDetails.Add(Error.BadRequest($"Supplier with Id {id} has already been deleted.", "Id"));
+            } else if (suppliersWithWorkingInputsSet.Contains(id))
+            {
+                 errorDetails.Add(Error.BadRequest($"Supplier with Id {id} cannot be deleted because it has working input receipts.", "Id"));
             }
         }
 

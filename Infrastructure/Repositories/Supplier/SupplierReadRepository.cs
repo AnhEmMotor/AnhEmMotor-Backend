@@ -40,6 +40,16 @@ public class SupplierReadRepository(ApplicationDBContext context) : ISupplierRea
         return query;
     }
 
+    public Task<SupplierWithTotalInputResponse?> GetByIdWithTotalInputAsync(
+        int id,
+        CancellationToken cancellationToken,
+        DataFetchMode mode = DataFetchMode.ActiveOnly)
+    {
+        return GetQueryableWithTotalInput(mode)
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
+            .ContinueWith(t => t.Result, cancellationToken);
+    }
+
     public Task<IEnumerable<SupplierEntity>> GetAllAsync(
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)

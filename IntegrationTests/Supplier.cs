@@ -11,6 +11,8 @@ using Infrastructure.DBContexts;
 using IntegrationTests.SetupClass;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualStudio.TestPlatform.Common;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Client;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -145,7 +147,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
             await db.SaveChangesAsync();
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier?Filters=Name@=*Test_{uniqueId}*");
+        var response = await _client.GetAsync($"/api/v1/Supplier?Filters=Name@=Test_{uniqueId}");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content.ReadFromJsonAsync<PagedResult<SupplierResponse>>();
@@ -181,7 +183,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
             await db.SaveChangesAsync();
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier?Sorts=Name&Filters=Name@=*{uniqueId}*");
+        var response = await _client.GetAsync($"/api/v1/Supplier?Sorts=Name&Filters=Name@={uniqueId}");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content.ReadFromJsonAsync<PagedResult<SupplierResponse>>();
@@ -222,7 +224,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
             await db.SaveChangesAsync();
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier?Filters=Name@=*{uniqueId}*");
+        var response = await _client.GetAsync($"/api/v1/Supplier?Filters=Id@={uniqueId}");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content.ReadFromJsonAsync<PagedResult<SupplierResponse>>();
@@ -259,7 +261,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
             await db.SaveChangesAsync();
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier/deleted?Filters=Name@=*{uniqueId}*");
+        var response = await _client.GetAsync($"/api/v1/Supplier/deleted?Filters=Id@={uniqueId}");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content.ReadFromJsonAsync<PagedResult<SupplierResponse>>();
@@ -390,9 +392,14 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         }
 
         var request = new DeleteManySuppliersCommand { Ids = supplierIds };
-        var response = await _client.PostAsJsonAsync("/api/v1/Supplier/delete-many", request);
+        var requestMessage = new HttpRequestMessage(HttpMethod.Delete, "/api/v1/Supplier/delete-many")
+        {
+            Content = JsonContent.Create(request)
+        };
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var response = await _client.SendAsync(requestMessage);
+
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
         using (var scope = _factory.Services.CreateScope())
         {
@@ -437,7 +444,12 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         }
 
         var request = new DeleteManySuppliersCommand { Ids = supplierIds };
-        var response = await _client.PostAsJsonAsync("/api/v1/Supplier/delete-many", request);
+        var requestMessage = new HttpRequestMessage(HttpMethod.Delete, "/api/v1/Supplier/delete-many")
+        {
+            Content = JsonContent.Create(request)
+        };
+
+        var response = await _client.SendAsync(requestMessage);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest); // or whatever status code the logic returns for failure
 

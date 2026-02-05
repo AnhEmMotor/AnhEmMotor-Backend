@@ -102,4 +102,17 @@ public class InputReadRepository(ApplicationDBContext context) : IInputReadRepos
             .Where(x => x.SupplierId == supplierId)
             .OrderByDescending(x => x.CreatedAt);
     }
+
+    public Task<IEnumerable<InputEntity>> GetBySupplierIdsAsync(
+        IEnumerable<int> supplierIds,
+        CancellationToken cancellationToken,
+        DataFetchMode mode = DataFetchMode.ActiveOnly)
+    {
+        var query = GetQueryable(mode);
+
+        return query
+            .Where(x => x.SupplierId != null && supplierIds.Contains(x.SupplierId.Value))
+            .ToListAsync(cancellationToken)
+            .ContinueWith<IEnumerable<InputEntity>>(t => t.Result, cancellationToken);
+    }
 }

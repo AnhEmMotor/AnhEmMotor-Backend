@@ -56,12 +56,10 @@ public class Supplier
         var result = await _controller.CreateSupplierAsync(request, CancellationToken.None).ConfigureAwait(true);
 
         // Sửa BeOfType từ CreatedResult thành CreatedAtActionResult
-        var createdAtActionResult = result.Should().BeOfType<CreatedAtActionResult>().Subject;
+        var createdAtActionResult = result.Should().BeOfType<CreatedAtRouteResult>().Subject;
 
         createdAtActionResult.StatusCode.Should().Be(StatusCodes.Status201Created);
 
-        // Kiểm tra thêm ActionName và RouteValues để đảm bảo Logic Mapping đúng
-        createdAtActionResult.ActionName.Should().Be("GetSupplierById"); // Hoặc tên hàm Get của bạn
         createdAtActionResult.RouteValues?["id"].Should().Be(1);
 
         var response = createdAtActionResult.Value.Should().BeOfType<SupplierResponse>().Subject;

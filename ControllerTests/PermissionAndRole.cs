@@ -275,8 +275,8 @@ public class PermissionAndRole
 
         var result = await _controller.CreateRoleAsync(request, CancellationToken.None).ConfigureAwait(true);
 
-        result.Should().BeOfType<CreatedAtActionResult>();
-        var okResult = result as CreatedAtActionResult;
+        result.Should().BeOfType<CreatedAtRouteResult>();
+        var okResult = result as CreatedAtRouteResult;
         var response = okResult!.Value as RoleCreateResponse;
         response.Should().NotBeNull();
         response!.RoleName.Should().Be("NewRole");

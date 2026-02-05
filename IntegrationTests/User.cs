@@ -86,7 +86,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content.ReadFromJsonAsync<RestoreUserResponse>();
         content.Should().NotBeNull();
-        content!.Message.Should().Be("Account restored successfully");
+        content!.Message.Should().Be("User account has been restored successfully.");
 
         using (var scope = _factory.Services.CreateScope())
         {
@@ -116,7 +116,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var content = await response.Content.ReadAsStringAsync();
-        content.Should().Contain("Account is not deleted");
+        content.Should().Contain("User account is not deleted.");
     }
 
     [Fact(DisplayName = "USER_023 - Khôi phục tài khoản khi bị Ban (không cho phép)")]

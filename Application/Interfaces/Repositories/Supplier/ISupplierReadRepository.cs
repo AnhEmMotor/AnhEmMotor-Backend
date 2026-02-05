@@ -11,6 +11,11 @@ namespace Application.Interfaces.Repositories.Supplier
         public IQueryable<SupplierWithTotalInputResponse> GetQueryableWithTotalInput(
             DataFetchMode mode = DataFetchMode.ActiveOnly);
 
+        public Task<SupplierWithTotalInputResponse?> GetByIdWithTotalInputAsync(
+            int id,
+            CancellationToken cancellationToken,
+            DataFetchMode mode = DataFetchMode.ActiveOnly);
+
         public Task<IEnumerable<SupplierEntity>> GetAllAsync(
             CancellationToken cancellationToken,
             DataFetchMode mode = DataFetchMode.ActiveOnly);
