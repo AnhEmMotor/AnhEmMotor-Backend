@@ -386,8 +386,16 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
             }
         }
 
-        var request = new CreateOutputByManagerCommand { BuyerId = user.Id };
-        var response = await _client.PostAsJsonAsync("/api/v1/SalesOrders/admin", request);
+        // Seed product variant
+        var variantId = await SeedProductVariantAsync(uniqueId);
+
+        // Create order with explicit JSON
+        var jsonContent = System.Text.Json.JsonSerializer.Serialize(new {
+            buyerId = user.Id,
+            products = new[] { new { productId = variantId, count = 1 } }
+        });
+        var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
+        var response = await _client.PostAsync("/api/v1/SalesOrders/by-manager", httpContent);
         response.StatusCode.Should().Be(HttpStatusCode.Created);
     }
 
@@ -425,7 +433,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content.ReadFromJsonAsync<PagedResult<OutputResponse>>();
         content.Should().NotBeNull();
-        content!.Items.Should().Contain(x => x.Notes!.Contains(uniqueId));
+        content!.Items.Should().Contain(x => x.Notes != null && x.Notes.Contains(uniqueId));
     }
 
     [Fact(DisplayName = "SO_068 - Tạo đơn hàng với nhiều sản phẩm")]
@@ -448,8 +456,8 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
             {
                 db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Pending });
             }
-            if (!await db.ProductStatuses.AnyAsync(x => x.Key == "ForSale"))
-                db.ProductStatuses.Add(new ProductStatus { Key = "ForSale" });
+            if (!await db.ProductStatuses.AnyAsync(x => x.Key == "for-sale"))
+                db.ProductStatuses.Add(new ProductStatus { Key = "for-sale" });
             
             await db.SaveChangesAsync();
 
@@ -459,7 +467,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
             db.ProductCategories.Add(category);
             await db.SaveChangesAsync();
 
-            var product = new ProductEntity { Name = $"Product_{uniqueId}", BrandId = brand.Id, CategoryId = category.Id, StatusId = "ForSale" };
+            var product = new ProductEntity { Name = $"Product_{uniqueId}", BrandId = brand.Id, CategoryId = category.Id, StatusId = "for-sale" };
             db.Products.Add(product);
             await db.SaveChangesAsync();
 
@@ -471,16 +479,16 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
             variantId2 = v2.Id;
         }
 
-        var request = new CreateOutputCommand 
-        { 
-            BuyerId = user.Id,
-            OutputInfos = [
-                new CreateOutputInfoRequest { ProductId = variantId1, Count = 1 },
-                new CreateOutputInfoRequest { ProductId = variantId2, Count = 2 }
-            ]
-        };
-
-        var response = await _client.PostAsJsonAsync("/api/v1/SalesOrders", request);
+        var jsonContent = System.Text.Json.JsonSerializer.Serialize(new {
+            buyerId = user.Id,
+            products = new[] 
+            { 
+                new { productId = variantId1, count = 1 },
+                new { productId = variantId2, count = 2 }
+            }
+        });
+        var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
+        var response = await _client.PostAsync("/api/v1/SalesOrders", httpContent);
         response.StatusCode.Should().Be(HttpStatusCode.Created);
     }
 
@@ -573,9 +581,17 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
             }
         }
 
-        var createResponse = await _client.PostAsJsonAsync(
-            "/api/v1/SalesOrders",
-            new CreateOutputCommand { BuyerId = user.Id, Notes = "DeleteMe" });
+        // Seed product variant
+        var variantId = await SeedProductVariantAsync(uniqueId);
+
+        var jsonContent = System.Text.Json.JsonSerializer.Serialize(new {
+            buyerId = user.Id,
+            notes = "DeleteMe",
+            products = new[] { new { productId = variantId, count = 1 } }
+        });
+        var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
+        var createResponse = await _client.PostAsync("/api/v1/SalesOrders", httpContent);
+        createResponse.StatusCode.Should().Be(HttpStatusCode.Created);
         
         var order = await createResponse.Content.ReadFromJsonAsync<OutputResponse>();
         var deleteResponse = await _client.DeleteAsync($"/api/v1/SalesOrders/{order!.Id}");
@@ -608,12 +624,20 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
             }
         }
 
-        var createResponse = await _client.PostAsJsonAsync("/api/v1/SalesOrders", new CreateOutputCommand { BuyerId = user.Id });
+        // Seed product variant
+        var variantId = await SeedProductVariantAsync(uniqueId);
+
+        var jsonContent = System.Text.Json.JsonSerializer.Serialize(new {
+            buyerId = user.Id,
+            products = new[] { new { productId = variantId, count = 1 } }
+        });
+        var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
+        var createResponse = await _client.PostAsync("/api/v1/SalesOrders", httpContent);
         var order = await createResponse.Content.ReadFromJsonAsync<OutputResponse>();
         
         await _client.DeleteAsync($"/api/v1/SalesOrders/{order!.Id}");
 
-        var restoreResponse = await _client.PatchAsync($"/api/v1/SalesOrders/{order.Id}/restore", null);
+        var restoreResponse = await _client.PostAsync($"/api/v1/SalesOrders/{order.Id}/restore", null);
         restoreResponse.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
@@ -656,7 +680,8 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content.ReadFromJsonAsync<PagedResult<OutputResponse>>();
         content!.Items.Should().Contain(x => x.Notes == $"Deleted_{uniqueId}");
-        content.Items.Should().NotContain(x => x.Notes == $"Active_{uniqueId}");
+        // Safe check for null Notes just in case
+        content.Items.Should().NotContain(x => x.Notes != null && x.Notes == $"Active_{uniqueId}");
     }
 
     [Fact(DisplayName = "SO_074 - UpdateOutput chỉ khi có quyền")]
@@ -672,7 +697,8 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var request = new UpdateOutputForManagerCommand();
-        var response = await _client.PatchAsJsonAsync("/api/v1/SalesOrders/1", request);
+        // Use PUT /for-manager (requires Edit permission)
+        var response = await _client.PutAsJsonAsync("/api/v1/SalesOrders/for-manager/1", request);
         response.StatusCode.Should().BeOneOf(HttpStatusCode.Forbidden, HttpStatusCode.Unauthorized);
     }
 
@@ -705,7 +731,16 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
             await db.SaveChangesAsync();
         }
 
-        var createResponse = await _client.PostAsJsonAsync("/api/v1/SalesOrders", new CreateOutputCommand { BuyerId = user.Id });
+        // Seed product variant
+        var variantId = await SeedProductVariantAsync(uniqueId);
+
+        var jsonContent = System.Text.Json.JsonSerializer.Serialize(new {
+            buyerId = user.Id,
+            products = new[] { new { productId = variantId, count = 1 } }
+        });
+        var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
+
+        var createResponse = await _client.PostAsync("/api/v1/SalesOrders", httpContent);
         var order = await createResponse.Content.ReadFromJsonAsync<OutputResponse>();
 
         var request = new UpdateOutputStatusCommand { StatusId = OrderStatus.Completed }; // Pending -> Completed
@@ -735,13 +770,29 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
             }
         }
 
-        var r1 = await _client.PostAsJsonAsync("/api/v1/SalesOrders", new CreateOutputCommand { BuyerId = user.Id });
+        // Seed product variant
+        var variantId = await SeedProductVariantAsync(uniqueId);
+
+        var jsonContent = System.Text.Json.JsonSerializer.Serialize(new {
+            buyerId = user.Id,
+            products = new[] { new { productId = variantId, count = 1 } }
+        });
+        var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
+        
+        var r1 = await _client.PostAsync("/api/v1/SalesOrders", httpContent);
         var o1 = await r1.Content.ReadFromJsonAsync<OutputResponse>();
-        var r2 = await _client.PostAsJsonAsync("/api/v1/SalesOrders", new CreateOutputCommand { BuyerId = user.Id });
+        
+        var httpContent2 = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json"); // Reuse json
+        var r2 = await _client.PostAsync("/api/v1/SalesOrders", httpContent2);
         var o2 = await r2.Content.ReadFromJsonAsync<OutputResponse>();
 
         var request = new DeleteManyOutputsCommand { Ids = [ o1!.Id!.Value, o2!.Id!.Value ] };
-        var response = await _client.PostAsJsonAsync("/api/v1/SalesOrders/delete-many", request);
+        var deleteJson = System.Text.Json.JsonSerializer.Serialize(request);
+        var deleteRequest = new HttpRequestMessage(HttpMethod.Delete, "/api/v1/SalesOrders")
+        {
+            Content = new StringContent(deleteJson, System.Text.Encoding.UTF8, "application/json")
+        };
+        var response = await _client.SendAsync(deleteRequest);
 
         response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NoContent);
     }
@@ -767,16 +818,26 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
             }
         }
 
-        var r1 = await _client.PostAsJsonAsync("/api/v1/SalesOrders", new CreateOutputCommand { BuyerId = user.Id });
+        // Seed product variant
+        var variantId = await SeedProductVariantAsync(uniqueId);
+
+        var jsonContent = System.Text.Json.JsonSerializer.Serialize(new {
+            buyerId = user.Id,
+            products = new[] { new { productId = variantId, count = 1 } }
+        });
+        
+        var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
+        var r1 = await _client.PostAsync("/api/v1/SalesOrders", httpContent);
         var o1 = await r1.Content.ReadFromJsonAsync<OutputResponse>();
         await _client.DeleteAsync($"/api/v1/SalesOrders/{o1!.Id}");
         
-        var r2 = await _client.PostAsJsonAsync("/api/v1/SalesOrders", new CreateOutputCommand { BuyerId = user.Id });
+        var httpContent2 = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
+        var r2 = await _client.PostAsync("/api/v1/SalesOrders", httpContent2);
         var o2 = await r2.Content.ReadFromJsonAsync<OutputResponse>();
         await _client.DeleteAsync($"/api/v1/SalesOrders/{o2!.Id}");
 
         var request = new RestoreManyOutputsCommand { Ids = [ o1.Id!.Value, o2.Id!.Value ] };
-        var response = await _client.PostAsJsonAsync("/api/v1/SalesOrders/restore-many", request);
+        var response = await _client.PostAsJsonAsync("/api/v1/SalesOrders/restore", request);
 
         response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NoContent);
     }
@@ -804,13 +865,27 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
             await db.SaveChangesAsync();
         }
 
-        var r1 = await _client.PostAsJsonAsync("/api/v1/SalesOrders", new CreateOutputCommand { BuyerId = user.Id });
+        // Seed product variant
+        var variantId = await SeedProductVariantAsync(uniqueId);
+        
+        // Seed inventory stock
+        await SeedInventoryAsync(variantId, 10, uniqueId);
+
+        var jsonContent = System.Text.Json.JsonSerializer.Serialize(new {
+            buyerId = user.Id,
+            products = new[] { new { productId = variantId, count = 1 } }
+        });
+        var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
+
+        var r1 = await _client.PostAsync("/api/v1/SalesOrders", httpContent);
         var o1 = await r1.Content.ReadFromJsonAsync<OutputResponse>();
-        var r2 = await _client.PostAsJsonAsync("/api/v1/SalesOrders", new CreateOutputCommand { BuyerId = user.Id });
+        
+        var httpContent2 = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
+        var r2 = await _client.PostAsync("/api/v1/SalesOrders", httpContent2);
         var o2 = await r2.Content.ReadFromJsonAsync<OutputResponse>();
 
         var request = new UpdateManyOutputStatusCommand { Ids = [ o1!.Id!.Value, o2!.Id!.Value ], StatusId = OrderStatus.ConfirmedCod };
-        var response = await _client.PostAsJsonAsync("/api/v1/SalesOrders/update-status-many", request);
+        var response = await _client.PatchAsJsonAsync("/api/v1/SalesOrders/status", request);
 
         response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NoContent);
     }
@@ -859,7 +934,18 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
         // SO_061 said "CreateOutput_WithAuthenticatedUser_SetsBuyerIdFromToken".
         // So if I create via API with this user, it should assign BuyerId = User.Id.
         
-        await _client.PostAsJsonAsync("/api/v1/SalesOrders", new CreateOutputCommand { Notes = $"Mine_{uniqueId}" });
+        // Seed product variant
+        var variantId = await SeedProductVariantAsync(uniqueId);
+        
+        var jsonContent = System.Text.Json.JsonSerializer.Serialize(new {
+            buyerId = user.Id,
+            notes = $"Mine_{uniqueId}",
+            products = new[] { new { productId = variantId, count = 1 } }
+        });
+        var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
+
+        var createResponse = await _client.PostAsync("/api/v1/SalesOrders", httpContent);
+        createResponse.StatusCode.Should().Be(HttpStatusCode.Created);
 
         var response = await _client.GetAsync("/api/v1/SalesOrders/my-purchases");
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -898,7 +984,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
             await db.SaveChangesAsync();
         }
 
-        var response = await _client.GetAsync($"/api/v1/SalesOrders/purchases/{buyerId}");
+        var response = await _client.GetAsync($"/api/v1/SalesOrders/get-purchases/{buyerId}");
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content.ReadFromJsonAsync<PagedResult<OutputResponse>>();
         content!.Items.Should().Contain(x => x.Notes == $"PurchasesOf_{uniqueId}");

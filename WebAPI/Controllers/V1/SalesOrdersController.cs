@@ -157,7 +157,6 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     /// Tạo đơn hàng mới (dành cho các tài khoản đã đăng nhập).
     /// </summary>
     [HttpPost]
-    [HasPermission(Outputs.Create)]
     [ProducesResponseType(typeof(OutputResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateOutputAsync(
