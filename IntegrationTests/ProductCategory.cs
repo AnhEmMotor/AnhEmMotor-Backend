@@ -113,7 +113,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             await db.ProductCategories.AddRangeAsync(
-                new ProductCategoryEntity { Name = $"Smartphone_{uniqueId}", Description = "Desc", DeletedAt = null },
+                new ProductCategoryEntity { Name = $"SmartPhone_{uniqueId}", Description = "Desc", DeletedAt = null },
                 new ProductCategoryEntity { Name = $"Phone Case_{uniqueId}", Description = "Desc", DeletedAt = null },
                 new ProductCategoryEntity { Name = $"Laptop_{uniqueId}", Description = "Desc", DeletedAt = null }
             );
@@ -139,7 +139,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
         
         // If the API filter works as AND, we get 2. If it works as OR or ignores, we check manually.
         // Assuming strict filter support:
-        items.Should().Contain(c => c.Name!.Contains("Smartphone"));
+        items.Should().Contain(c => c.Name!.Contains("SmartPhone"));
         items.Should().Contain(c => c.Name!.Contains("Phone Case"));
         items.Should().NotContain(c => c.Name!.Contains("Laptop"));
     }

@@ -14,12 +14,12 @@ public class ProductCategoryReadRepository(ApplicationDBContext context) : IProd
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         var query = context.GetQuery<CategoryEntity>(mode);
-        return await query.AnyAsync(c => c.Name!.Equals(name, StringComparison.CurrentCultureIgnoreCase), cancellationToken);
+        return await query.AnyAsync(c => c.Name!.ToLower() == name.ToLower(), cancellationToken);
     }
 
     public async Task<bool> ExistsByNameExceptIdAsync(string name, int id, CancellationToken cancellationToken, DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return await context.GetQuery<CategoryEntity>(mode).AnyAsync(x => x.Name!.Equals(name, StringComparison.CurrentCultureIgnoreCase) && x.Id != id, cancellationToken);
+        return await context.GetQuery<CategoryEntity>(mode).AnyAsync(x => x.Name!.ToLower() == name.ToLower() && x.Id != id, cancellationToken);
     }
 
     public async Task<IEnumerable<CategoryEntity>> GetAllAsync(

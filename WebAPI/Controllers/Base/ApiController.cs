@@ -34,7 +34,7 @@ public abstract class ApiController : ControllerBase
     {
         if (result.IsSuccess)
         {
-            return CreatedAtAction(actionName, routeValues, result.Value);
+            return CreatedAtRoute(actionName, routeValues, result.Value);
         }
         return MapErrorsToResponse(result);
     }
