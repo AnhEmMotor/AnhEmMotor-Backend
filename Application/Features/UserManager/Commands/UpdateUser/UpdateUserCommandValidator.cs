@@ -28,7 +28,7 @@ public partial class UpdateUserCommandValidator : AbstractValidator<UpdateUserCo
         // Allow user+tag@example.co.uk
         // Allow user.name@example.com
         var regex = RegexCheckEmail();
-        return regex.IsMatch(email);
+        return regex.IsMatch(email.Trim());
     }
 
     public static bool IsValidPhoneNumber(string? phoneNumber)
@@ -36,12 +36,12 @@ public partial class UpdateUserCommandValidator : AbstractValidator<UpdateUserCo
         if (string.IsNullOrWhiteSpace(phoneNumber)) return false;
         // Vietnamese phone number format: starts with 0 or 84 or +84, followed by 9 digits
         var regex = RegexCheckPhone();
-        return regex.IsMatch(phoneNumber);
+        return regex.IsMatch(phoneNumber.Trim());
     }
 
     public static bool IsValidGender(string? gender)
     {
-        return ValidGenders.Contains(gender);
+        return ValidGenders.Contains(gender?.Trim());
     }
 
     public static IReadOnlyList<string> ValidGenders =>

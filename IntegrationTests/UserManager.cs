@@ -175,11 +175,12 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         // Another user
         var duplicateAttemptUser = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"dup_{uniqueId}", "Pass@123");
 
-        var request = new UpdateUserCommand { PhoneNumber = phone };
+        var request = new UpdateUserCommand { PhoneNumber = phone, FullName = "Duplicate Attempt User" };
 
         var response = await _client.PutAsJsonAsync($"/api/v1/UserManager/{duplicateAttemptUser.Id}", request);
 
-        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        var content = await response.Content.ReadAsStringAsync();
+        response.StatusCode.Should().Be(HttpStatusCode.Conflict, content);
     }
 
     [Fact(DisplayName = "UMGR_024 - Cập nhật user với phone number = null khi đã có user khác cũng null")]
@@ -532,13 +533,13 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>
         result.Should().NotBeNull();
         result!.PageNumber.Should().Be(2);
         result.PageSize.Should().Be(10);
-        // Should have 1 item
-        // result.Items.Count().Should().Be(1); // Can't easily count object list without casting?
+        // Should have 2 items (11 created + 1 admin)
+        // result.Items.Count().Should().Be(2); // Can't easily count object list without casting?
         // PagedResult.Items is IEnumerable<T>.
         // Assuming implementation returns list.
         var itemsJson = System.Text.Json.JsonSerializer.Serialize(result.Items);
         var itemsList = System.Text.Json.JsonSerializer.Deserialize<List<object>>(itemsJson);
-        itemsList!.Count.Should().Be(1);
+        itemsList!.Count.Should().Be(2);
     }
 
     [Fact(DisplayName = "UMGR_033 - Cập nhật user không thay đổi password khi body không chứa password")]

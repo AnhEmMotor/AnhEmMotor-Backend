@@ -31,6 +31,10 @@ namespace Application.Interfaces.Repositories.User
             string username,
             CancellationToken cancellationToken = default);
 
+        public Task<ApplicationUser?> FindUserByPhoneNumberAsync(
+            string phoneNumber,
+            CancellationToken cancellationToken = default);
+
         public Task<bool> CheckPasswordAsync(
             ApplicationUser user,
             string password,

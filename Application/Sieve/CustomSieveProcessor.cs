@@ -67,6 +67,14 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<SupplierWithTotalInputResponse>(s => s.UpdatedAt).CanSort().CanFilter();
         mapper.Property<SupplierWithTotalInputResponse>(s => s.DeletedAt).CanSort().CanFilter();
         mapper.Property<SupplierWithTotalInputResponse>(s => s.TotalInput).CanSort().CanFilter();
+
+        mapper.Property<ApplicationUser>(p => p.Id).CanSort().CanFilter();
+        mapper.Property<ApplicationUser>(p => p.UserName).CanSort().CanFilter();
+        mapper.Property<ApplicationUser>(p => p.FullName).CanSort().CanFilter();
+        mapper.Property<ApplicationUser>(p => p.Email).CanSort().CanFilter();
+        mapper.Property<ApplicationUser>(p => p.PhoneNumber).CanSort().CanFilter();
+        mapper.Property<ApplicationUser>(p => p.Status).CanSort().CanFilter();
+        mapper.Property<ApplicationUser>(p => p.DeletedAt).CanSort().CanFilter();
         
         return mapper;
     }

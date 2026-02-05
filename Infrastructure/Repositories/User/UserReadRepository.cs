@@ -172,6 +172,16 @@ namespace Infrastructure.Repositories.User
             return result;
         }
 
+        public async Task<ApplicationUser?> FindUserByPhoneNumberAsync(
+            string phoneNumber,
+            CancellationToken cancellationToken = default)
+        {
+            var result = await userManager.Users
+                .FirstOrDefaultAsync(u => u.PhoneNumber == phoneNumber, cancellationToken)
+                .ConfigureAwait(false);
+            return result;
+        }
+
         public async Task<bool> CheckPasswordAsync(
             ApplicationUser user,
             string password,

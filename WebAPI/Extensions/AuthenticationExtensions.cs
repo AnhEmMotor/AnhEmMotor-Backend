@@ -76,7 +76,7 @@ public static class AuthenticationExtensions
                             }
 
                             var user = await userManager.FindByIdAsync(userId);
-                            if (user == null)
+                            if (user == null || user.DeletedAt is not null)
                             {
                                 context.Fail("Unauthorized");
                                 return;

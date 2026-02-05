@@ -341,9 +341,12 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var password = "ThisIsStrongPassword1@";
 
+        // 1. Create & Login (Get Token)
         var user = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, username, password);
-        
-        // Ban user
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        // 2. Ban user in DB
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
@@ -352,35 +355,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
             await db.SaveChangesAsync();
         }
 
-        // Try to login? Banned user usually can't login to get token to Self-Delete.
-        // If the test implies using a token obtained BEFORE ban?
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
-        // If login succeeds (maybe Login logic doesn't check Ban?), we use that token.
-        // If login fails, we can't test "Delete Account" endpoint which requires Auth.
-        // Assuming Logic: Login might fail if banned? 
-        // If existing token used?
-        // Let's assume we get a token first, THEN ban.
-        
-        // Re-do: 
-        // 1. Create & Login
-        // 2. Ban in DB
-        // 3. Try Delete
-        
-        // Reset/Create new
-        var uniqueId2 = Guid.NewGuid().ToString("N")[..8];
-        var username2 = $"user_{uniqueId2}";
-        var user2 = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, username2, password);
-        var loginResponse2 = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username2, password);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse2.AccessToken);
-        
-        using(var scope = _factory.Services.CreateScope())
-        {
-            var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var u = await db.Users.FindAsync(user2.Id);
-            u!.Status = UserStatus.Banned;
-            await db.SaveChangesAsync();
-        }
-
+        // 3. Try to Delete Account - Should return Forbidden (403)
         var response = await _client.PostAsync("/api/v1/User/delete-account", null);
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
@@ -431,7 +406,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>
         }
 
         var response = await _client.GetAsync("/api/v1/User/me");
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden); // Using Forbidden as per original test expectation
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
     [Fact(DisplayName = "USER_035 - Kiểm tra middleware chặn request khi tài khoản bị Ban")]
