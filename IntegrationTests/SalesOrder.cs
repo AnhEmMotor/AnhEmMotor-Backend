@@ -28,6 +28,8 @@ using OutputInfoEntity = Domain.Entities.OutputInfo;
 using OutputStatusEntity = Domain.Entities.OutputStatus;
 using ProductCategoryEntity = Domain.Entities.ProductCategory;
 using ProductEntity = Domain.Entities.Product;
+using InputEntity = Domain.Entities.Input;
+using InputStatusEntity = Domain.Entities.InputStatus;
 
 namespace IntegrationTests;
 
@@ -49,9 +51,9 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         
-        if (!await db.ProductStatuses.AnyAsync(x => x.Key == "ForSale"))
+        if (!await db.ProductStatuses.AnyAsync(x => x.Key == "for-sale"))
         {
-             db.ProductStatuses.Add(new ProductStatus { Key = "ForSale" });
+             db.ProductStatuses.Add(new ProductStatus { Key = "for-sale" });
              await db.SaveChangesAsync();
         }
 
@@ -61,7 +63,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
         db.ProductCategories.Add(category);
         await db.SaveChangesAsync();
 
-        var product = new ProductEntity { Name = $"Prod_{uniqueId}", BrandId = brand.Id, CategoryId = category.Id, StatusId = "ForSale" };
+        var product = new ProductEntity { Name = $"Prod_{uniqueId}", BrandId = brand.Id, CategoryId = category.Id, StatusId = "for-sale" };
         db.Products.Add(product);
         await db.SaveChangesAsync();
 
@@ -69,6 +71,41 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
         db.ProductVariants.Add(variant);
         await db.SaveChangesAsync();
         return variant.Id;
+    }
+
+    private async Task SeedInventoryAsync(int variantId, int quantity, string uniqueId)
+    {
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+
+        // Ensure input status exists
+        if (!await db.InputStatuses.AnyAsync(x => x.Key == "finished"))
+        {
+            db.InputStatuses.Add(new InputStatusEntity { Key = "finished" });
+            await db.SaveChangesAsync();
+        }
+
+        // Create Input (purchase order)
+        var input = new InputEntity
+        {
+            InputDate = DateTimeOffset.UtcNow,
+            Notes = $"Test inventory for {uniqueId}",
+            StatusId = "finished"
+        };
+        db.InputReceipts.Add(input);
+        await db.SaveChangesAsync();
+
+        // Create InputInfo (product line item with stock)
+        var inputInfo = new InputInfo
+        {
+            InputId = input.Id,
+            ProductId = variantId,
+            Count = quantity,
+            RemainingCount = quantity,
+            InputPrice = 50000
+        };
+        db.InputInfos.Add(inputInfo);
+        await db.SaveChangesAsync();
     }
 
 #pragma warning disable CRR0035
@@ -83,7 +120,6 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        // Seeding prerequisite statuses
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
@@ -94,9 +130,28 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
             }
         }
 
-        var request = new CreateOutputCommand { BuyerId = user.Id, Notes = "Test" };
+        // Seed product variant
+        var variantId = await SeedProductVariantAsync(uniqueId);
 
-        var response = await _client.PostAsJsonAsync("/api/v1/SalesOrders", request);
+        var request = new CreateOutputCommand 
+        { 
+            BuyerId = user.Id, 
+            Notes = "Test",
+            OutputInfos = [
+                new CreateOutputInfoRequest { ProductId = variantId, Count = 1 }
+            ]
+        };
+
+        // Use explicit JSON because PostAsJsonAsync doesn't respect [JsonPropertyName] correctly in this test context
+        var jsonContent = System.Text.Json.JsonSerializer.Serialize(new {
+            buyerId = user.Id,
+            notes = "Test",
+            products = new[] {
+                new { productId = variantId, count = 1 }
+            }
+        });
+        var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
+        var response = await _client.PostAsync("/api/v1/SalesOrders", httpContent);
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         var content = await response.Content.ReadFromJsonAsync<OutputResponse>();
@@ -131,9 +186,19 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
             }
         }
 
-        var request = new CreateOutputCommand { BuyerId = user.Id, Notes = "COD Order" };
+        // Seed product variant
+        var variantId = await SeedProductVariantAsync(uniqueId);
 
-        var response = await _client.PostAsJsonAsync("/api/v1/SalesOrders", request);
+        // Use explicit JSON with correct property names
+        var jsonContent = System.Text.Json.JsonSerializer.Serialize(new {
+            buyerId = user.Id,
+            notes = "COD Order",
+            products = new[] {
+                new { productId = variantId, count = 1 }
+            }
+        });
+        var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
+        var response = await _client.PostAsync("/api/v1/SalesOrders", httpContent);
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         var order = await response.Content.ReadFromJsonAsync<OutputResponse>();
@@ -165,8 +230,19 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
             await db.SaveChangesAsync();
         }
 
-        var createRequest = new CreateOutputCommand { BuyerId = user.Id };
-        var createResponse = await _client.PostAsJsonAsync("/api/v1/SalesOrders", createRequest);
+        // Seed product variant
+        var variantId = await SeedProductVariantAsync(uniqueId);
+        
+        // Seed inventory stock
+        await SeedInventoryAsync(variantId, 10, uniqueId);
+
+        // Create order with explicit JSON
+        var jsonContent = System.Text.Json.JsonSerializer.Serialize(new {
+            buyerId = user.Id,
+            products = new[] { new { productId = variantId, count = 1 } }
+        });
+        var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
+        var createResponse = await _client.PostAsync("/api/v1/SalesOrders", httpContent);
         var order = await createResponse.Content.ReadFromJsonAsync<OutputResponse>();
         int orderId = order!.Id!.Value;
 
@@ -203,20 +279,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            // Note: Constants for Deposit50/Confirmed50 might be named WaitingDeposit/DepositPaid/ConfirmedCod??
-            // Checking OrderStatus.cs: WaitingDeposit, DepositPaid.
-            // Original test used "deposit_50" and "confirmed_50".
-            // Since I only found OrderStatus.cs with "waiting_deposit", "deposit_paid".
-            // If the original test used "deposit_50", it means valid statuses in DB might be different or dynamic.
-            // HOWEVER, based on OrderStatus.cs I saw: WaitingDeposit, DepositPaid.
-            // I will use constants from OrderStatus.cs IF they map. If not, I stick to string literals from original test but ensure DB has them.
-            // Original: "deposit_50", "confirmed_50".
-            // OrderStatus.cs: WaitingDeposit="waiting_deposit", DepositPaid="deposit_paid".
-            // It's possible "deposit_50" is custom. I'll seed "deposit_50" and "confirmed_50" as strings to match original test expectations unless I am sure they are wrong.
-            // BUT, usually Constants drive logic.
-            // Let's trust Original Test literals for now, but seed them.
-            
-            var statuses = new[] { OrderStatus.Pending, "deposit_50", "confirmed_50", OrderStatus.Delivering, OrderStatus.Completed };
+            var statuses = new[] { OrderStatus.Pending, OrderStatus.WaitingDeposit, OrderStatus.DepositPaid, OrderStatus.Delivering, OrderStatus.Completed };
             foreach (var s in statuses)
             {
                 if (!await db.OutputStatuses.AnyAsync(x => x.Key == s))
@@ -225,14 +288,28 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
             await db.SaveChangesAsync();
         }
 
-        var createRequest = new CreateOutputCommand { BuyerId = user.Id };
-        var createResponse = await _client.PostAsJsonAsync("/api/v1/SalesOrders", createRequest);
+        // Seed product variant
+        var variantId = await SeedProductVariantAsync(uniqueId);
+        
+        // Seed inventory stock
+        await SeedInventoryAsync(variantId, 10, uniqueId);
+
+        // Create order with explicit JSON
+        var jsonContent = System.Text.Json.JsonSerializer.Serialize(new {
+            buyerId = user.Id,
+            products = new[] { new { productId = variantId, count = 1 } }
+        });
+        var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
+        var createResponse = await _client.PostAsync("/api/v1/SalesOrders", httpContent);
         var order = await createResponse.Content.ReadFromJsonAsync<OutputResponse>();
         int orderId = order!.Id!.Value;
 
-        await _client.PatchAsJsonAsync($"/api/v1/SalesOrders/{orderId}/status", new UpdateOutputStatusCommand { StatusId = "deposit_50" });
-        await _client.PatchAsJsonAsync($"/api/v1/SalesOrders/{orderId}/status", new UpdateOutputStatusCommand { StatusId = "confirmed_50" });
-        await _client.PatchAsJsonAsync($"/api/v1/SalesOrders/{orderId}/status", new UpdateOutputStatusCommand { StatusId = OrderStatus.Delivering });
+        var responseDep50 = await _client.PatchAsJsonAsync($"/api/v1/SalesOrders/{orderId}/status", new UpdateOutputStatusCommand { StatusId = OrderStatus.WaitingDeposit });
+        
+        var responseConf50 = await _client.PatchAsJsonAsync($"/api/v1/SalesOrders/{orderId}/status", new UpdateOutputStatusCommand { StatusId = OrderStatus.DepositPaid });
+
+        var responseDelivering = await _client.PatchAsJsonAsync($"/api/v1/SalesOrders/{orderId}/status", new UpdateOutputStatusCommand { StatusId = OrderStatus.Delivering });
+
         var finalResponse = await _client.PatchAsJsonAsync($"/api/v1/SalesOrders/{orderId}/status", new UpdateOutputStatusCommand { StatusId = OrderStatus.Completed });
 
         finalResponse.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -252,9 +329,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            // Original used "refund". OrderStatus has "refunded" and "refunding".
-            // I'll seed "refund" to match legacy test or ensure mapping.
-            var statuses = new[] { OrderStatus.Pending, OrderStatus.ConfirmedCod, "refund" };
+            var statuses = new[] { OrderStatus.Pending, OrderStatus.PaidProcessing, OrderStatus.Refunding, OrderStatus.Refunded };
             foreach (var s in statuses)
             {
                 if (!await db.OutputStatuses.AnyAsync(x => x.Key == s))
@@ -263,14 +338,28 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
             await db.SaveChangesAsync();
         }
 
-        var createRequest = new CreateOutputCommand { BuyerId = user.Id };
-        var createResponse = await _client.PostAsJsonAsync("/api/v1/SalesOrders", createRequest);
+        // Seed product variant
+        var variantId = await SeedProductVariantAsync(uniqueId);
+        
+        // Seed inventory stock
+        await SeedInventoryAsync(variantId, 10, uniqueId);
+
+        // Create order with explicit JSON
+        var jsonContent = System.Text.Json.JsonSerializer.Serialize(new {
+            buyerId = user.Id,
+            products = new[] { new { productId = variantId, count = 1 } }
+        });
+        var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
+        var createResponse = await _client.PostAsync("/api/v1/SalesOrders", httpContent);
         var order = await createResponse.Content.ReadFromJsonAsync<OutputResponse>();
         int orderId = order!.Id!.Value;
 
-        await _client.PatchAsJsonAsync($"/api/v1/SalesOrders/{orderId}/status", new UpdateOutputStatusCommand { StatusId = OrderStatus.ConfirmedCod });
-        var refundResponse = await _client.PatchAsJsonAsync($"/api/v1/SalesOrders/{orderId}/status", new UpdateOutputStatusCommand { StatusId = "refund" }); // Using "refund" as per original
-
+        // Pending -> PaidProcessing (instead of ConfirmedCod which prevents refund)
+        await _client.PatchAsJsonAsync($"/api/v1/SalesOrders/{orderId}/status", new UpdateOutputStatusCommand { StatusId = OrderStatus.PaidProcessing });
+        
+        // PaidProcessing -> Refunding
+        var refundResponse = await _client.PatchAsJsonAsync($"/api/v1/SalesOrders/{orderId}/status", new UpdateOutputStatusCommand { StatusId = OrderStatus.Refunding });
+        
         refundResponse.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 

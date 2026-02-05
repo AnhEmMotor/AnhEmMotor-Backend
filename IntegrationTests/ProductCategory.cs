@@ -426,7 +426,9 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var category = await db.ProductCategories.FindAsync(categoryId);
+            var category = await db.ProductCategories
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(c => c.Id == categoryId);
             category.Should().NotBeNull();
             category!.DeletedAt.Should().NotBeNull();
         }
@@ -458,7 +460,11 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
 
         var request = new DeleteManyProductCategoriesCommand { Ids = [.. categoryIds] };
 
-        var response = await _client.PostAsJsonAsync("/api/v1/ProductCategory/delete-many", request);
+        var httpRequest = new HttpRequestMessage(HttpMethod.Delete, "/api/v1/ProductCategory/delete-many")
+        {
+            Content = JsonContent.Create(request)
+        };
+        var response = await _client.SendAsync(httpRequest);
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
@@ -467,7 +473,10 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             foreach (var id in categoryIds)
             {
-                var category = await db.ProductCategories.FindAsync(id);
+                var category = await db.ProductCategories
+                    .IgnoreQueryFilters()
+                    .FirstOrDefaultAsync(c => c.Id == id);
+                category.Should().NotBeNull();
                 category!.DeletedAt.Should().NotBeNull();
             }
         }
@@ -499,9 +508,13 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
 
         var request = new DeleteManyProductCategoriesCommand { Ids = [validIds[0], 99999, validIds[1]] };
 
-        var response = await _client.PostAsJsonAsync("/api/v1/ProductCategory/delete-many", request);
+        var httpRequest = new HttpRequestMessage(HttpMethod.Delete, "/api/v1/ProductCategory/delete-many")
+        {
+            Content = JsonContent.Create(request)
+        };
+        var response = await _client.SendAsync(httpRequest);
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
 
         using (var scope = _factory.Services.CreateScope())
         {
@@ -543,7 +556,11 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
 
         var request = new DeleteManyProductCategoriesCommand { Ids = [.. categoryIds] };
 
-        var response = await _client.PostAsJsonAsync("/api/v1/ProductCategory/delete-many", request);
+        var httpRequest = new HttpRequestMessage(HttpMethod.Delete, "/api/v1/ProductCategory/delete-many")
+        {
+            Content = JsonContent.Create(request)
+        };
+        var response = await _client.SendAsync(httpRequest);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         
@@ -635,7 +652,9 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var category = await db.ProductCategories.FindAsync(categoryIds[0]);
+            var category = await db.ProductCategories
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(c => c.Id == categoryIds[0]);
             category.Should().NotBeNull();
             category!.DeletedAt.Should().NotBeNull();
         }
