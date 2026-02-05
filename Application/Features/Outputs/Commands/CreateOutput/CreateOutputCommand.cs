@@ -12,6 +12,12 @@ public sealed record CreateOutputCommand : IRequest<Result<OutputResponse?>>
 
     public string? Notes { get; init; }
 
+    public string? CustomerName { get; init; }
+
+    public string? CustomerAddress { get; init; }
+
+    public string? CustomerPhone { get; init; }
+
     [JsonPropertyName("products")]
     public List<CreateOutputInfoRequest> OutputInfos { get; init; } = [];
 }

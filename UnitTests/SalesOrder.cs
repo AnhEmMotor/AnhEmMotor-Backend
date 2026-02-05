@@ -1893,4 +1893,33 @@ public class SalesOrder
     }
 #pragma warning restore CRR0035
 #pragma warning restore IDE0079
+    [Fact(DisplayName = "SO_099 - CreateOutput validates CustomerPhone")]
+    public void CreateOutput_ValidateCustomerPhone_ShouldCheckFormat()
+    {
+        var validator = new CreateOutputCommandValidator();
+
+        // Valid cases
+        var validCommand1 = new CreateOutputCommand { CustomerPhone = "0912345678" };
+        var result1 = validator.TestValidate(validCommand1);
+        result1.ShouldNotHaveValidationErrorFor(x => x.CustomerPhone);
+
+        var validCommand2 = new CreateOutputCommand { CustomerPhone = "84912345678" };
+        var result2 = validator.TestValidate(validCommand2);
+        result2.ShouldNotHaveValidationErrorFor(x => x.CustomerPhone);
+
+        var validCommand3 = new CreateOutputCommand { CustomerPhone = "+84912345678" };
+        var result3 = validator.TestValidate(validCommand3);
+        result3.ShouldNotHaveValidationErrorFor(x => x.CustomerPhone);
+
+        // Invalid cases
+        var invalidCommand1 = new CreateOutputCommand { CustomerPhone = "091234" }; // Too short
+        var resultInv1 = validator.TestValidate(invalidCommand1);
+        resultInv1.ShouldHaveValidationErrorFor(x => x.CustomerPhone)
+                  .WithErrorMessage("Invalid phone number format.");
+
+        var invalidCommand2 = new CreateOutputCommand { CustomerPhone = "abcd123456" }; // Non-numeric
+        var resultInv2 = validator.TestValidate(invalidCommand2);
+        resultInv2.ShouldHaveValidationErrorFor(x => x.CustomerPhone)
+                  .WithErrorMessage("Invalid phone number format.");
+    }
 }

@@ -102,4 +102,34 @@ public class Auth
     }
 #pragma warning restore CRR0035
 #pragma warning restore IDE0079
+    [Fact(DisplayName = "AUTH_016 - Validate PhoneNumber format (Unit) - Format số điện thoại")]
+    public async Task AUTH_016_Register_ValidatePhoneNumber()
+    {
+        var userReadRepositoryMock = new Mock<IUserReadRepository>();
+        var validator = new RegisterCommandValidator(userReadRepositoryMock.Object);
+
+        // Valid cases
+        var validCommand1 = new RegisterCommand { PhoneNumber = "0912345678" };
+        var result1 = await validator.TestValidateAsync(validCommand1);
+        result1.ShouldNotHaveValidationErrorFor(x => x.PhoneNumber);
+
+        var validCommand2 = new RegisterCommand { PhoneNumber = "84912345678" };
+        var result2 = await validator.TestValidateAsync(validCommand2);
+        result2.ShouldNotHaveValidationErrorFor(x => x.PhoneNumber);
+
+        var validCommand3 = new RegisterCommand { PhoneNumber = "+84912345678" };
+        var result3 = await validator.TestValidateAsync(validCommand3);
+        result3.ShouldNotHaveValidationErrorFor(x => x.PhoneNumber);
+
+        // Invalid cases
+        var invalidCommand1 = new RegisterCommand { PhoneNumber = "091234" }; // Too short
+        var resultInv1 = await validator.TestValidateAsync(invalidCommand1);
+        resultInv1.ShouldHaveValidationErrorFor(x => x.PhoneNumber)
+                  .WithErrorMessage("Invalid phone number.");
+
+        var invalidCommand2 = new RegisterCommand { PhoneNumber = "abcd123456" }; // Non-numeric
+        var resultInv2 = await validator.TestValidateAsync(invalidCommand2);
+        resultInv2.ShouldHaveValidationErrorFor(x => x.PhoneNumber)
+                  .WithErrorMessage("Invalid phone number.");
+    }
 }

@@ -43,5 +43,20 @@ public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
             .Matches("[a-z]").WithMessage("Password must contain at least one lowercase letter.")
             .Matches("[0-9]").WithMessage("Password must contain at least one number.")
             .Matches("[^a-zA-Z0-9]").WithMessage("Password must contain at least one special character.");
+
+        RuleFor(x => x.PhoneNumber)
+            .Must(IsValidPhoneNumber).WithMessage("Invalid phone number.")
+            .When(x => !string.IsNullOrEmpty(x.PhoneNumber));
     }
+
+    private static bool IsValidPhoneNumber(string? phoneNumber)
+    {
+        if (string.IsNullOrWhiteSpace(phoneNumber)) return false;
+        // Vietnamese phone number format: starts with 0 or 84 or +84, followed by 9 digits
+        var regex = RegexCheckPhone();
+        return regex.IsMatch(phoneNumber.Trim());
+    }
+
+    [System.Text.RegularExpressions.GeneratedRegex(@"^(0|84|\+84)[0-9]{9}$")]
+    private static partial System.Text.RegularExpressions.Regex RegexCheckPhone();
 }
