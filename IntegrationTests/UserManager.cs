@@ -54,10 +54,10 @@ public class UserManager : IAsyncLifetime
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, adminName, "Pass@123", CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var userA = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"userA_{uniqueId}", "Pass@123", email: $"userA_{uniqueId}@test.com");
-        var userB = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"userB_{uniqueId}", "Pass@123", email: $"userB_{uniqueId}@test.com");
+        var userA = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"userA_{uniqueId}", "Pass@123", email: $"userA_{uniqueId}@test.com").ConfigureAwait(true);
+        var userB = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"userB_{uniqueId}", "Pass@123", email: $"userB_{uniqueId}@test.com").ConfigureAwait(true);
         // Create Banned User
-        var userC = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"userC_{uniqueId}", "Pass@123", email: $"userC_{uniqueId}@test.com", isLocked: true);
+        var userC = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"userC_{uniqueId}", "Pass@123", email: $"userC_{uniqueId}@test.com", isLocked: true).ConfigureAwait(true);
 
         // Filter: Status==Active, Sorts: -FullName. 
         // Note: FullName is "Test {username}". 
@@ -68,7 +68,7 @@ public class UserManager : IAsyncLifetime
         // Wait, Status==Active. UserC is Banned. So UserC should NOT be in result.
         
         var response = await _client.GetAsync(
-            $"/api/v1/UserManager?Filters=Status=={UserStatus.Active}&Sorts=-FullName&Page=1&PageSize=100");
+            $"/api/v1/UserManager?Filters=Status=={UserStatus.Active}&Sorts=-FullName&Page=1&PageSize=100").ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var result = await response.Content.ReadFromJsonAsync<PagedResult<object>>(CancellationToken.None).ConfigureAwait(true);
@@ -102,7 +102,7 @@ public class UserManager : IAsyncLifetime
             $"del_{uniqueId}",
             "Pass@123",
             email: $"del_{uniqueId}@test.com",
-            deletedAt: DateTimeOffset.UtcNow.AddDays(-1));
+            deletedAt: DateTimeOffset.UtcNow.AddDays(-1)).ConfigureAwait(true);
 
         var response = await _client.GetAsync($"/api/v1/UserManager/{softDeletedUser.Id}").ConfigureAwait(true);
 
@@ -120,17 +120,17 @@ public class UserManager : IAsyncLifetime
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, adminName, "Pass@123", CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var targetUser = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"target_{uniqueId}", "Pass@123");
+        var targetUser = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"target_{uniqueId}", "Pass@123", CancellationToken.None).ConfigureAwait(true);
 
         var request = new UpdateUserCommand { FullName = "  Test User  ", PhoneNumber = "  0912345678  " };
 
-        var response = await _client.PutAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}", request);
+        var response = await _client.PutAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}", request).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var updatedUser = await db.Users.FindAsync(targetUser.Id);
+        var updatedUser = await db.Users.FindAsync(targetUser.Id).ConfigureAwait(true);
         updatedUser!.FullName.Should().Be("Test User");
         updatedUser.PhoneNumber.Should().Be("0912345678");
     }
@@ -145,17 +145,17 @@ public class UserManager : IAsyncLifetime
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, adminName, "Pass@123", CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var targetUser = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"target_{uniqueId}", "Pass@123", email: $"test+tag_{uniqueId}@example.co.uk");
+        var targetUser = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"target_{uniqueId}", "Pass@123", email: $"test+tag_{uniqueId}@example.co.uk").ConfigureAwait(true);
 
         var request = new UpdateUserCommand { FullName = "Test User" };
 
-        var response = await _client.PutAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}", request);
+        var response = await _client.PutAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}", request).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var updatedUser = await db.Users.FindAsync(targetUser.Id);
+        var updatedUser = await db.Users.FindAsync(targetUser.Id).ConfigureAwait(true);
         updatedUser!.Email.Should().Be($"test+tag_{uniqueId}@example.co.uk");
     }
 
@@ -174,22 +174,22 @@ public class UserManager : IAsyncLifetime
         // Helper creates random phone "091234567{random}".
         // Need to set specific phone for targetUser
         
-        var targetUser = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"target_{uniqueId}", "Pass@123");
+        var targetUser = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"target_{uniqueId}", "Pass@123", CancellationToken.None).ConfigureAwait(true);
         // Update target to have specific phone
         using (var scope = _factory.Services.CreateScope()) 
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var u = await db.Users.FindAsync(targetUser.Id);
+            var u = await db.Users.FindAsync(targetUser.Id).ConfigureAwait(true);
             u!.PhoneNumber = phone;
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
         // Another user
-        var duplicateAttemptUser = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"dup_{uniqueId}", "Pass@123");
+        var duplicateAttemptUser = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"dup_{uniqueId}", "Pass@123", CancellationToken.None).ConfigureAwait(true);
 
         var request = new UpdateUserCommand { PhoneNumber = phone, FullName = "Duplicate Attempt User" };
 
-        var response = await _client.PutAsJsonAsync($"/api/v1/UserManager/{duplicateAttemptUser.Id}", request);
+        var response = await _client.PutAsJsonAsync($"/api/v1/UserManager/{duplicateAttemptUser.Id}", request).ConfigureAwait(true);
 
         var content = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.Conflict, content);
@@ -205,22 +205,22 @@ public class UserManager : IAsyncLifetime
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, adminName, "Pass@123", CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var targetUser = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"target_{uniqueId}", "Pass@123");
+        var targetUser = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"target_{uniqueId}", "Pass@123", CancellationToken.None).ConfigureAwait(true);
         // Note: Helper creates user with Phone.
         
-        await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"existing_{uniqueId}", "Pass@123");
+        await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"existing_{uniqueId}", "Pass@123", CancellationToken.None).ConfigureAwait(true);
         // Set existing user phone to null
         using (var scope = _factory.Services.CreateScope()) 
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var u = await db.Users.FirstOrDefaultAsync(u => u.UserName == $"existing_{uniqueId}");
+            var u = await db.Users.FirstOrDefaultAsync(u => string.Compare(u.UserName, $"existing_{uniqueId}") == 0, CancellationToken.None).ConfigureAwait(true);
             u!.PhoneNumber = null;
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
         var request = new UpdateUserCommand { PhoneNumber = null, FullName = "Updated Name" };
 
-        var response = await _client.PutAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}", request);
+        var response = await _client.PutAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}", request).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
@@ -228,7 +228,7 @@ public class UserManager : IAsyncLifetime
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var count = await db.Users.CountAsync(u => u.PhoneNumber == null);
+            var count = await db.Users.CountAsync(u => u.PhoneNumber == null, CancellationToken.None).ConfigureAwait(true);
             count.Should().BeGreaterThanOrEqualTo(2);
         }
     }
@@ -243,12 +243,12 @@ public class UserManager : IAsyncLifetime
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, adminName, "Pass@123", CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var targetUser = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"target_{uniqueId}", "Pass@123");
+        var targetUser = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"target_{uniqueId}", "Pass@123", CancellationToken.None).ConfigureAwait(true);
 
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var user = await db.Users.FindAsync(targetUser.Id);
+            var user = await db.Users.FindAsync(targetUser.Id).ConfigureAwait(true);
             user!.RefreshToken = "valid_refresh_token";
             user.RefreshTokenExpiryTime = DateTimeOffset.UtcNow.AddDays(7);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -263,7 +263,7 @@ public class UserManager : IAsyncLifetime
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var user = await db.Users.FindAsync(targetUser.Id);
+            var user = await db.Users.FindAsync(targetUser.Id).ConfigureAwait(true);
             (user!.RefreshToken == null || user.RefreshTokenExpiryTime < DateTimeOffset.UtcNow).Should().BeTrue();
         }
     }
@@ -278,7 +278,7 @@ public class UserManager : IAsyncLifetime
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, adminName, "Pass@123", CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var targetUser = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"target_{uniqueId}", "Pass@123");
+        var targetUser = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"target_{uniqueId}", "Pass@123", CancellationToken.None).ConfigureAwait(true);
 
         var staffRoleName = $"Staff_{uniqueId}";
         var managerRoleName = $"Manager_{uniqueId}";
@@ -288,11 +288,11 @@ public class UserManager : IAsyncLifetime
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
-            await roleManager.CreateAsync(new ApplicationRole { Name = staffRoleName });
-            await roleManager.CreateAsync(new ApplicationRole { Name = managerRoleName });
+            await roleManager.CreateAsync(new ApplicationRole { Name = staffRoleName }).ConfigureAwait(true);
+            await roleManager.CreateAsync(new ApplicationRole { Name = managerRoleName }).ConfigureAwait(true);
 
-            var userInScope = await userManager.FindByIdAsync(targetUser.Id.ToString());
-            await userManager.AddToRoleAsync(userInScope!, staffRoleName);
+            var userInScope = await userManager.FindByIdAsync(targetUser.Id.ToString()).ConfigureAwait(true);
+            await userManager.AddToRoleAsync(userInScope!, staffRoleName).ConfigureAwait(true);
         }
 
         var request = new AssignRolesCommand { RoleNames = [ managerRoleName ] };
@@ -305,8 +305,8 @@ public class UserManager : IAsyncLifetime
         {
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             // Re-fetch user to make sure we operate on fresh context
-            var u = await userManager.FindByIdAsync(targetUser.Id.ToString());
-            var roles = await userManager.GetRolesAsync(u!);
+            var u = await userManager.FindByIdAsync(targetUser.Id.ToString()).ConfigureAwait(true);
+            var roles = await userManager.GetRolesAsync(u!).ConfigureAwait(true);
             roles.Should().ContainSingle();
             roles.Should().Contain(managerRoleName);
             roles.Should().NotContain(staffRoleName);
@@ -323,16 +323,16 @@ public class UserManager : IAsyncLifetime
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, adminName, "Pass@123", CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var targetUser = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"target_{uniqueId}", "Pass@123");
+        var targetUser = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"target_{uniqueId}", "Pass@123", CancellationToken.None).ConfigureAwait(true);
 
         using(var scope = _factory.Services.CreateScope())
         {
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             var roleName = $"Role_{uniqueId}";
-            await roleManager.CreateAsync(new ApplicationRole { Name = roleName });
-            var userInScope = await userManager.FindByIdAsync(targetUser.Id.ToString());
-            await userManager.AddToRoleAsync(userInScope!, roleName);
+            await roleManager.CreateAsync(new ApplicationRole { Name = roleName }).ConfigureAwait(true);
+            var userInScope = await userManager.FindByIdAsync(targetUser.Id.ToString()).ConfigureAwait(true);
+            await userManager.AddToRoleAsync(userInScope!, roleName).ConfigureAwait(true);
         }
 
         var request = new AssignRolesCommand { RoleNames = [] };
@@ -344,8 +344,8 @@ public class UserManager : IAsyncLifetime
         using(var scope = _factory.Services.CreateScope())
         {
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-            var u = await userManager.FindByIdAsync(targetUser.Id.ToString());
-            var roles = await userManager.GetRolesAsync(u!);
+            var u = await userManager.FindByIdAsync(targetUser.Id.ToString()).ConfigureAwait(true);
+            var roles = await userManager.GetRolesAsync(u!).ConfigureAwait(true);
             roles.Should().BeEmpty();
         }
     }
@@ -365,13 +365,13 @@ public class UserManager : IAsyncLifetime
             $"target_{uniqueId}", 
             "Pass@123", 
             isLocked: true, 
-            deletedAt: DateTimeOffset.UtcNow.AddDays(-1));
+            deletedAt: DateTimeOffset.UtcNow.AddDays(-1)).ConfigureAwait(true);
 
         var request = new ChangeUserStatusCommand { Status = UserStatus.Active };
 
         var response = await _client.PatchAsJsonAsync(
             $"/api/v1/UserManager/{targetUser.Id}/status",
-            request);
+            request, CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -386,8 +386,8 @@ public class UserManager : IAsyncLifetime
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, adminName, "Pass@123", CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var user1 = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"u1_{uniqueId}", "Pass@123");
-        var user2 = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"u2_{uniqueId}", "Pass@123");
+        var user1 = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"u1_{uniqueId}", "Pass@123", CancellationToken.None).ConfigureAwait(true);
+        var user2 = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"u2_{uniqueId}", "Pass@123", CancellationToken.None).ConfigureAwait(true);
         var nonExistentId = Guid.NewGuid();
 
         var request = new ChangeMultipleUsersStatusCommand
@@ -396,14 +396,14 @@ public class UserManager : IAsyncLifetime
             Status = UserStatus.Banned
         };
 
-        var response = await _client.PatchAsJsonAsync("/api/v1/UserManager/status", request);
+        var response = await _client.PatchAsJsonAsync("/api/v1/UserManager/status", request, CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest); // Service usually returns bad request if ID not found
 
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var u1 = await db.Users.FindAsync(user1.Id);
-        var u2 = await db.Users.FindAsync(user2.Id);
+        var u1 = await db.Users.FindAsync(user1.Id).ConfigureAwait(true);
+        var u2 = await db.Users.FindAsync(user2.Id).ConfigureAwait(true);
         u1!.Status.Should().Be(UserStatus.Active);
         u2!.Status.Should().Be(UserStatus.Active);
     }
@@ -423,11 +423,11 @@ public class UserManager : IAsyncLifetime
         using (var scope = _factory.Services.CreateScope())
         {
              var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-             var u = await db.Users.FirstAsync(u => u.UserName == adminName);
+             var u = await db.Users.FirstAsync(u => string.Compare(u.UserName, adminName) == 0, CancellationToken.None).ConfigureAwait(true);
              adminId = u.Id;
         }
 
-        var targetUser = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"target_{uniqueId}", "Pass@123");
+        var targetUser = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"target_{uniqueId}", "Pass@123", CancellationToken.None).ConfigureAwait(true);
 
         var request = new ChangeMultipleUsersStatusCommand
         {
@@ -435,7 +435,7 @@ public class UserManager : IAsyncLifetime
             Status = UserStatus.Banned
         };
 
-        var response = await _client.PatchAsJsonAsync("/api/v1/UserManager/status", request);
+        var response = await _client.PatchAsJsonAsync("/api/v1/UserManager/status", request, CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -496,15 +496,15 @@ public class UserManager : IAsyncLifetime
 
         // Create Soft Deleted User
         var deletedPhone = "0999999999";
-        await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"del_{uniqueId}", "Pass@123", deletedAt: DateTimeOffset.UtcNow.AddDays(-1), phoneNumber: deletedPhone);
+        await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"del_{uniqueId}", "Pass@123", deletedAt: DateTimeOffset.UtcNow.AddDays(-1), phoneNumber: deletedPhone).ConfigureAwait(true);
 
         // Create Active User
-        var targetUser = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"target_{uniqueId}", "Pass@123");
+        var targetUser = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"target_{uniqueId}", "Pass@123", CancellationToken.None).ConfigureAwait(true);
 
         // Update Active user to use Deleted User's Phone
         var request = new UpdateUserCommand { PhoneNumber = deletedPhone, FullName = "Update Attempt" };
 
-        var response = await _client.PutAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}", request);
+        var response = await _client.PutAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}", request).ConfigureAwait(true);
 
         // Expect Conflict?
         // response.StatusCode.Should().Be(HttpStatusCode.Conflict); 
@@ -537,7 +537,7 @@ public class UserManager : IAsyncLifetime
         
         for (int i = 0; i < 11; i++)
         {
-            await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"u{i}_{uniqueId}", "Pass@123", email: $"u{i}_{uniqueId}@test.com");
+            await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"u{i}_{uniqueId}", "Pass@123", email: $"u{i}_{uniqueId}@test.com").ConfigureAwait(true);
         }
 
         var response = await _client.GetAsync($"/api/v1/UserManager?Filters=Email@=_{uniqueId}&Page=2&PageSize=10").ConfigureAwait(true);
@@ -566,11 +566,11 @@ public class UserManager : IAsyncLifetime
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, adminName, "Pass@123", CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var targetUser = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"target_{uniqueId}", "OldPass@123");
+        var targetUser = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"target_{uniqueId}", "OldPass@123", CancellationToken.None).ConfigureAwait(true);
 
         var request = new UpdateUserCommand { FullName = "New Name" };
 
-        var response = await _client.PutAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}", request);
+        var response = await _client.PutAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}", request).ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         _client.DefaultRequestHeaders.Authorization = null;
@@ -588,26 +588,26 @@ public class UserManager : IAsyncLifetime
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, adminName, "Pass@123", CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var targetUser = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"target_{uniqueId}", "Pass@123");
+        var targetUser = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"target_{uniqueId}", "Pass@123", CancellationToken.None).ConfigureAwait(true);
         var originalRefreshToken = "original_token";
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var user = await db.Users.FindAsync(targetUser.Id);
+            var user = await db.Users.FindAsync(targetUser.Id).ConfigureAwait(true);
             user!.RefreshToken = originalRefreshToken;
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
         var maliciousRequest = new { FullName = "New Name", RefreshToken = "hacker_token", Id = Guid.NewGuid() };
 
-        var response = await _client.PutAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}", maliciousRequest);
+        var response = await _client.PutAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}", maliciousRequest).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var user = await db.Users.FindAsync(targetUser.Id);
+            var user = await db.Users.FindAsync(targetUser.Id).ConfigureAwait(true);
             user!.FullName.Should().Be("New Name");
             user.RefreshToken.Should().Be(originalRefreshToken);
             user.Id.Should().Be(targetUser.Id);
@@ -624,7 +624,7 @@ public class UserManager : IAsyncLifetime
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, adminName, "Pass@123", CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var targetUser = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"target_{uniqueId}", "Pass@123");
+        var targetUser = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"target_{uniqueId}", "Pass@123", CancellationToken.None).ConfigureAwait(true);
 
         var request = new Application.Features.UserManager.Commands.ChangePasswordByManager.ChangePasswordByManagerCommand { NewPassword = "NewPass@123" };
 
@@ -646,12 +646,12 @@ public class UserManager : IAsyncLifetime
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, adminName, "Pass@123", CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var targetUser = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"target_{uniqueId}", "Pass@123");
+        var targetUser = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"target_{uniqueId}", "Pass@123", CancellationToken.None).ConfigureAwait(true);
         var roleName = $"Manager_{uniqueId}";
         using(var scope = _factory.Services.CreateScope())
         {
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
-            await roleManager.CreateAsync(new ApplicationRole { Name = roleName });
+            await roleManager.CreateAsync(new ApplicationRole { Name = roleName }).ConfigureAwait(true);
         }
 
         var request = new AssignRolesCommand { RoleNames = [ roleName ] };

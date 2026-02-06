@@ -39,15 +39,16 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
     private Respawner _respawner = default!;
     private DbConnection _connection = default!;
 
-    public async Task InitializeAsync(CancellationToken cancellationToken = default)
+#pragma warning disable IDE0079 
+#pragma warning disable CRR0039
+    public async Task InitializeAsync()
     {
-        await _mySqlContainer.StartAsync(cancellationToken).ConfigureAwait(false);
-
-        // Initialize connection and Respawner
+        await _mySqlContainer.StartAsync().ConfigureAwait(false);
         _connection = new MySqlConnection(_mySqlContainer.GetConnectionString());
-        // Initialized lazily to ensure DB schema exists
-        await _connection.OpenAsync(cancellationToken).ConfigureAwait(false);
+        await _connection.OpenAsync().ConfigureAwait(false);
     }
+#pragma warning restore CRR0039
+#pragma warning restore IDE0079 
 
     public async Task ResetDatabaseAsync(CancellationToken cancellationToken = default)
     {

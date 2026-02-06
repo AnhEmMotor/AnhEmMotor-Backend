@@ -20,6 +20,7 @@ using SupplierEntity = Domain.Entities.Supplier;
 
 namespace IntegrationTests;
 
+using System;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -39,7 +40,7 @@ public class Supplier : IAsyncLifetime
 
     public async Task DisposeAsync()
     {
-        await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(true);
+        await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(false);
     }
 
 #pragma warning disable IDE0079
@@ -71,9 +72,9 @@ public class Supplier : IAsyncLifetime
             await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
             
             // Ensure statuses exist
-            if (!await db.SupplierStatuses.AnyAsync(s => s.Key == Domain.Constants.SupplierStatus.Active))
+            if (!await db.SupplierStatuses.AnyAsync(s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0, CancellationToken.None).ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
-            if (!await db.SupplierStatuses.AnyAsync(s => s.Key == Domain.Constants.SupplierStatus.Inactive))
+            if (!await db.SupplierStatuses.AnyAsync(s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Inactive) == 0, CancellationToken.None).ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Inactive });
 
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -104,7 +105,7 @@ public class Supplier : IAsyncLifetime
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             
             // Ensure statuses
-            if (!await db.SupplierStatuses.AnyAsync(s => s.Key == Domain.Constants.SupplierStatus.Active))
+            if (!await db.SupplierStatuses.AnyAsync(s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0, CancellationToken.None).ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
             
             var suppliers = new List<SupplierEntity>();
@@ -146,7 +147,7 @@ public class Supplier : IAsyncLifetime
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             // Ensure statuses
-            if (!await db.SupplierStatuses.AnyAsync(s => s.Key == Domain.Constants.SupplierStatus.Active))
+            if (!await db.SupplierStatuses.AnyAsync(s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0, CancellationToken.None).ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
 
             var suppliers = new List<SupplierEntity>
@@ -182,7 +183,7 @@ public class Supplier : IAsyncLifetime
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            if (!await db.SupplierStatuses.AnyAsync(s => s.Key == Domain.Constants.SupplierStatus.Active))
+            if (!await db.SupplierStatuses.AnyAsync(s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0, CancellationToken.None).ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
 
             var suppliers = new List<SupplierEntity>
@@ -221,9 +222,9 @@ public class Supplier : IAsyncLifetime
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             
-            if (!await db.SupplierStatuses.AnyAsync(s => s.Key == Domain.Constants.SupplierStatus.Active))
+            if (!await db.SupplierStatuses.AnyAsync(s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0, CancellationToken.None).ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
-            if (!await db.SupplierStatuses.AnyAsync(s => s.Key == Domain.Constants.SupplierStatus.Inactive))
+            if (!await db.SupplierStatuses.AnyAsync(s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Inactive) == 0, CancellationToken.None).ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Inactive });
 
             var suppliers = new List<SupplierEntity>
@@ -243,9 +244,9 @@ public class Supplier : IAsyncLifetime
         
         content.Should().NotBeNull();
         // Since other tests might add active suppliers, we just ensure our deleted one isn't there and our active/inactive checks are present
-        content!.Items.Should().Contain(s => s.Name == $"Active_{uniqueId}");
-        content.Items.Should().Contain(s => s.Name == $"Inactive_{uniqueId}");
-        content.Items.Should().NotContain(s => s.Name == $"Deleted_{uniqueId}");
+        content!.Items.Should().Contain(s => string.Compare(s.Name, $"Active_{uniqueId}") == 0);
+        content.Items.Should().Contain(s => string.Compare(s.Name, $"Inactive_{uniqueId}") == 0);
+        content.Items.Should().NotContain(s => string.Compare(s.Name, $"Deleted_{uniqueId}") == 0);
     }
 
     [Fact(DisplayName = "SUP_036 - Lấy danh sách Supplier đã xóa với phân trang")]
@@ -261,7 +262,7 @@ public class Supplier : IAsyncLifetime
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            if (!await db.SupplierStatuses.AnyAsync(s => s.Key == Domain.Constants.SupplierStatus.Active))
+            if (!await db.SupplierStatuses.AnyAsync(s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0, CancellationToken.None).ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
 
             var suppliers = new List<SupplierEntity>
@@ -279,8 +280,8 @@ public class Supplier : IAsyncLifetime
         var content = await response.Content.ReadFromJsonAsync<PagedResult<SupplierResponse>>(CancellationToken.None).ConfigureAwait(true);
         
         content.Should().NotBeNull();
-        content!.Items.Should().Contain(s => s.Name == $"Deleted_{uniqueId}");
-        content.Items.Should().NotContain(s => s.Name == $"Active_{uniqueId}");
+        content!.Items.Should().Contain(s => string.Compare(s.Name, $"Deleted_{uniqueId}") == 0);
+        content.Items.Should().NotContain(s => string.Compare(s.Name, $"Active_{uniqueId}") == 0);
     }
 
     [Fact(DisplayName = "SUP_037 - Lấy chi tiết Supplier thành công với đầy đủ thông tin")]
@@ -297,7 +298,7 @@ public class Supplier : IAsyncLifetime
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            if (!await db.SupplierStatuses.AnyAsync(s => s.Key == Domain.Constants.SupplierStatus.Active))
+            if (!await db.SupplierStatuses.AnyAsync(s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0, CancellationToken.None).ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
 
             var supplier = new SupplierEntity
@@ -310,7 +311,7 @@ public class Supplier : IAsyncLifetime
                 StatusId = Domain.Constants.SupplierStatus.Active,
                 Notes = "Test notes"
             };
-            await db.Suppliers.AddAsync(supplier);
+            await db.Suppliers.AddAsync(supplier, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             supplierId = supplier.Id;
         }
@@ -340,7 +341,7 @@ public class Supplier : IAsyncLifetime
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            if (!await db.SupplierStatuses.AnyAsync(s => s.Key == Domain.Constants.SupplierStatus.Active))
+            if (!await db.SupplierStatuses.AnyAsync(s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0, CancellationToken.None).ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
 
             var supplier = new SupplierEntity
@@ -351,7 +352,7 @@ public class Supplier : IAsyncLifetime
                 StatusId = Domain.Constants.SupplierStatus.Active,
                 DeletedAt = DateTime.UtcNow
             };
-            await db.Suppliers.AddAsync(supplier);
+            await db.Suppliers.AddAsync(supplier, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             supplierId = supplier.Id;
         }
@@ -390,7 +391,7 @@ public class Supplier : IAsyncLifetime
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            if (!await db.SupplierStatuses.AnyAsync(s => s.Key == Domain.Constants.SupplierStatus.Active))
+            if (!await db.SupplierStatuses.AnyAsync(s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0, CancellationToken.None).ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
 
             var suppliers = new List<SupplierEntity>
@@ -435,9 +436,9 @@ public class Supplier : IAsyncLifetime
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            if (!await db.SupplierStatuses.AnyAsync(s => s.Key == Domain.Constants.SupplierStatus.Active))
+            if (!await db.SupplierStatuses.AnyAsync(s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0, CancellationToken.None).ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
-            if (!await db.InputStatuses.AnyAsync(s => s.Key == Domain.Constants.Input.InputStatus.Working))
+            if (!await db.InputStatuses.AnyAsync(s => string.Compare(s.Key, Domain.Constants.Input.InputStatus.Working) == 0, CancellationToken.None).ConfigureAwait(true))
                 db.InputStatuses.Add(new InputStatus { Key = Domain.Constants.Input.InputStatus.Working });
 
             var supplier1 = new SupplierEntity { Name = $"S1_{uniqueId}", Phone = "011", Address = "A", StatusId = Domain.Constants.SupplierStatus.Active };
@@ -445,11 +446,11 @@ public class Supplier : IAsyncLifetime
             await db.Suppliers.AddRangeAsync([supplier1, supplier2], CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-            var user = await db.Users.FirstOrDefaultAsync(u => u.UserName == username);
+            var user = await db.Users.FirstOrDefaultAsync(u => string.Compare(u.UserName, username) == 0, CancellationToken.None).ConfigureAwait(true);
             var userId = user?.Id ?? Guid.NewGuid();
 
             var input = new Input { SupplierId = supplier2.Id, StatusId = Domain.Constants.Input.InputStatus.Working, CreatedBy = userId }; // Minimal Input
-            await db.InputReceipts.AddAsync(input);
+            await db.InputReceipts.AddAsync(input, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
             supplierIds = [supplier1.Id, supplier2.Id];
@@ -492,7 +493,7 @@ public class Supplier : IAsyncLifetime
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            if (!await db.SupplierStatuses.AnyAsync(s => s.Key == Domain.Constants.SupplierStatus.Active))
+            if (!await db.SupplierStatuses.AnyAsync(s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0, CancellationToken.None).ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
 
             var suppliers = new List<SupplierEntity>
@@ -532,9 +533,9 @@ public class Supplier : IAsyncLifetime
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            if (!await db.SupplierStatuses.AnyAsync(s => s.Key == Domain.Constants.SupplierStatus.Active))
+            if (!await db.SupplierStatuses.AnyAsync(s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0, CancellationToken.None).ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
-            if (!await db.SupplierStatuses.AnyAsync(s => s.Key == Domain.Constants.SupplierStatus.Inactive))
+            if (!await db.SupplierStatuses.AnyAsync(s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Inactive) == 0, CancellationToken.None).ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Inactive });
 
             var suppliers = new List<SupplierEntity>
@@ -548,7 +549,7 @@ public class Supplier : IAsyncLifetime
         }
 
         var request = new UpdateManySupplierStatusCommand { Ids = supplierIds, StatusId = Domain.Constants.SupplierStatus.Inactive };
-        var response = await _client.PatchAsJsonAsync("/api/v1/Supplier/update-status-many", request);
+        var response = await _client.PatchAsJsonAsync("/api/v1/Supplier/update-status-many", request, CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
@@ -574,16 +575,16 @@ public class Supplier : IAsyncLifetime
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            await db.Database.ExecuteSqlRawAsync("INSERT IGNORE INTO SupplierStatus (`Key`) VALUES ({0})", Domain.Constants.SupplierStatus.Active);
-            await db.Database.ExecuteSqlRawAsync("INSERT IGNORE INTO InputStatus (`Key`) VALUES ({0})", Domain.Constants.Input.InputStatus.Finish);
+            await db.Database.ExecuteSqlRawAsync("INSERT IGNORE INTO SupplierStatus (`Key`) VALUES ({0})", Domain.Constants.SupplierStatus.Active).ConfigureAwait(true);
+            await db.Database.ExecuteSqlRawAsync("INSERT IGNORE INTO InputStatus (`Key`) VALUES ({0})", Domain.Constants.Input.InputStatus.Finish).ConfigureAwait(true);
 
             var supplier = new SupplierEntity { Name = $"S_{uniqueId}", Phone = "099", Address = "A", StatusId = Domain.Constants.SupplierStatus.Active };
             
-            await db.Suppliers.AddAsync(supplier);
+            await db.Suppliers.AddAsync(supplier, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             supplierId = supplier.Id;
 
-            var user = await db.Users.FirstOrDefaultAsync(u => u.UserName == username);
+            var user = await db.Users.FirstOrDefaultAsync(u => string.Compare(u.UserName, username) == 0, CancellationToken.None).ConfigureAwait(true);
             var userId = user?.Id ?? Guid.NewGuid();
 
             var inputs = new List<Input>
@@ -628,20 +629,20 @@ public class Supplier : IAsyncLifetime
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            await db.Database.ExecuteSqlRawAsync("INSERT IGNORE INTO SupplierStatus (`Key`) VALUES ({0})", Domain.Constants.SupplierStatus.Active);
+            await db.Database.ExecuteSqlRawAsync("INSERT IGNORE INTO SupplierStatus (`Key`) VALUES ({0})", Domain.Constants.SupplierStatus.Active).ConfigureAwait(true);
             
             foreach (var status in new[] { Domain.Constants.Input.InputStatus.Finish, Domain.Constants.Input.InputStatus.Working, Domain.Constants.Input.InputStatus.Cancel })
             {
-                await db.Database.ExecuteSqlRawAsync("INSERT IGNORE INTO InputStatus (`Key`) VALUES ({0})", status);
+                await db.Database.ExecuteSqlRawAsync("INSERT IGNORE INTO InputStatus (`Key`) VALUES ({0})", status).ConfigureAwait(true);
             }
 
             var supplier = new SupplierEntity { Name = $"S_{uniqueId}", Phone = "099", Address = "A", StatusId = Domain.Constants.SupplierStatus.Active };
             
-            await db.Suppliers.AddAsync(supplier);
+            await db.Suppliers.AddAsync(supplier, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             supplierId = supplier.Id;
 
-            var user = await db.Users.FirstOrDefaultAsync(u => u.UserName == username);
+            var user = await db.Users.FirstOrDefaultAsync(u => string.Compare(u.UserName, username) == 0, CancellationToken.None).ConfigureAwait(true);
             var userId = user?.Id ?? Guid.NewGuid();
 
             var inputs = new List<Input>

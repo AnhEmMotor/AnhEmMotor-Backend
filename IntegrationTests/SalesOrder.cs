@@ -708,7 +708,7 @@ public class SalesOrder : IAsyncLifetime
 
         var request = new UpdateOutputForManagerCommand();
         // Use PUT /for-manager (requires Edit permission)
-        var response = await _client.PutAsJsonAsync("/api/v1/SalesOrders/for-manager/1", request.Should).ConfigureAwait(true);
+        var response = await _client.PutAsJsonAsync("/api/v1/SalesOrders/for-manager/1", request).ConfigureAwait(true);
         response.StatusCode.Should().BeOneOf(HttpStatusCode.Forbidden, HttpStatusCode.Unauthorized);
     }
 

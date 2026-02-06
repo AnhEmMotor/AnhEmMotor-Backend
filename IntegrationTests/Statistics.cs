@@ -46,7 +46,7 @@ public class Statistics : IAsyncLifetime
 
     public async Task DisposeAsync()
     {
-        await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(true);
+        await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(false);
     }
 
     private static async Task WipeStatisticsDataAsync(ApplicationDBContext db, CancellationToken cancellationToken = default)
@@ -384,9 +384,9 @@ public class Statistics : IAsyncLifetime
         var response = await _client.GetAsync("/api/v1/Statistics/order-status-counts").ConfigureAwait(true);
         var content = await response.Content.ReadFromJsonAsync<List<OrderStatusCountResponse>>(CancellationToken.None).ConfigureAwait(true);
 
-        content?.First(x => string.Compare(x.StatusName, OrderStatus.Pending) == 0).OrderCount.Should().Be(3);
-        content?.First(x => string.Compare(x.StatusName, OrderStatus.Completed) == 0).OrderCount.Should().Be(10);
-        content?.First(x => string.Compare(x.StatusName, OrderStatus.Cancelled) == 0).OrderCount.Should().Be(1);
+        content?.First(x => string.Compare(x.StatusName, OrderStatus.Pending, StringComparison.Ordinal) == 0).OrderCount.Should().Be(3);
+        content?.First(x => string.Compare(x.StatusName, OrderStatus.Completed, StringComparison.Ordinal) == 0).OrderCount.Should().Be(10);
+        content?.First(x => string.Compare(x.StatusName, OrderStatus.Cancelled, StringComparison.Ordinal) == 0).OrderCount.Should().Be(1);
     }
 
     [Fact(DisplayName = "STAT_031 - Báo cáo sản phẩm (Multi Variants)")]
@@ -397,8 +397,8 @@ public class Statistics : IAsyncLifetime
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         await WipeStatisticsDataAsync(db, CancellationToken.None).ConfigureAwait(true);
         await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
-        var v1 = await SeedProductVariantAsync(db, uniqueId + "1", cancellationToken: CancellationToken.None).ConfigureAwait(true);
-        var v2 = await SeedProductVariantAsync(db, uniqueId + "2", cancellationToken: CancellationToken.None).ConfigureAwait(true);
+        var v1 = await SeedProductVariantAsync(db, $"{uniqueId}1", cancellationToken: CancellationToken.None).ConfigureAwait(true);
+        var v2 = await SeedProductVariantAsync(db, $"{uniqueId}2", cancellationToken: CancellationToken.None).ConfigureAwait(true);
 
         // Last Month Sales: V1=20, V2=15
         var lastMonth = DateTime.UtcNow.AddMonths(-1);
@@ -462,7 +462,7 @@ public class Statistics : IAsyncLifetime
         
         // Input: 35. Output: 0. Stock = 35.
         // Need to seed Input.
-        if (!await db.InputStatuses.AnyAsync(x => string.Compare(x.Key, Domain.Constants.Input.InputStatus.Finish) == 0).ConfigureAwait(true) {
+        if (!await db.InputStatuses.AnyAsync(x => string.Compare(x.Key, Domain.Constants.Input.InputStatus.Finish) == 0, CancellationToken.None).ConfigureAwait(true)) {
              db.InputStatuses.Add(new InputStatusEntity { Key = Domain.Constants.Input.InputStatus.Finish });
              await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
@@ -486,9 +486,9 @@ public class Statistics : IAsyncLifetime
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         await WipeStatisticsDataAsync(db, CancellationToken.None).ConfigureAwait(true);
         await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
-        var vid = await SeedProductVariantAsync(db, uniqueId).ConfigureAwait(true);
+        var vid = await SeedProductVariantAsync(db, uniqueId, cancellationToken: CancellationToken.None).ConfigureAwait(true);
         
-        var v = await db.ProductVariants.FindAsync(vid);
+        var v = await db.ProductVariants.FindAsync(vid).ConfigureAwait(true);
         v!.DeletedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
@@ -499,11 +499,11 @@ public class Statistics : IAsyncLifetime
     [Fact(DisplayName = "STAT_035 - Doanh thu nhiều OutputInfo")]
     public async Task GetDailyRevenue_MultipleItems()
     {
-        var uniqueId = await AuthenticateAsync();
+        var uniqueId = await AuthenticateAsync(CancellationToken.None).ConfigureAwait(true);
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        await WipeStatisticsDataAsync(db);
-        await SeedPrerequisitesAsync(db);
+        await WipeStatisticsDataAsync(db, CancellationToken.None).ConfigureAwait(true);
+        await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
         var vid = await SeedProductVariantAsync(db, uniqueId, cancellationToken: CancellationToken.None).ConfigureAwait(true);
 
         var o1 = new OutputEntity { StatusId = OrderStatus.Completed, CreatedAt = DateTime.UtcNow };
@@ -526,11 +526,11 @@ public class Statistics : IAsyncLifetime
     [Fact(DisplayName = "STAT_037 - Lợi nhuận âm")]
     public async Task GetMonthlyRevenue_NegativeProfit()
     {
-        var uniqueId = await AuthenticateAsync();
+        var uniqueId = await AuthenticateAsync(CancellationToken.None).ConfigureAwait(true);
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        await WipeStatisticsDataAsync(db);
-        await SeedPrerequisitesAsync(db);
+        await WipeStatisticsDataAsync(db, CancellationToken.None).ConfigureAwait(true);
+        await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
         var vid = await SeedProductVariantAsync(db, uniqueId, cancellationToken: CancellationToken.None).ConfigureAwait(true);
 
         // Rev 1M, Cost 1.5M -> Profit -0.5M
@@ -548,11 +548,11 @@ public class Statistics : IAsyncLifetime
     [Fact(DisplayName = "STAT_038 - Tháng không có đơn hàng (Revenue = 0)")]
     public async Task GetMonthlyRevenue_GapMonths()
     {
-        var uniqueId = await AuthenticateAsync();
+        var uniqueId = await AuthenticateAsync(CancellationToken.None).ConfigureAwait(true);
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        await WipeStatisticsDataAsync(db);
-        await SeedPrerequisitesAsync(db);
+        await WipeStatisticsDataAsync(db, CancellationToken.None).ConfigureAwait(true);
+        await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
         var vid = await SeedProductVariantAsync(db, uniqueId, cancellationToken: CancellationToken.None).ConfigureAwait(true);
         
         // Month -1 (Gap) -> implicitly 0
@@ -575,11 +575,11 @@ public class Statistics : IAsyncLifetime
     [Fact(DisplayName = "STAT_039 - Không có đơn nào")]
     public async Task GetOrderStatusCounts_EmptyDB()
     {
-        var uniqueId = await AuthenticateAsync();
+        await AuthenticateAsync(CancellationToken.None).ConfigureAwait(true);
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        await WipeStatisticsDataAsync(db);
-        await SeedPrerequisitesAsync(db);
+        await WipeStatisticsDataAsync(db, CancellationToken.None).ConfigureAwait(true);
+        await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
         // No orders seeded
 
         var response = await _client.GetAsync("/api/v1/Statistics/order-status-counts").ConfigureAwait(true);
@@ -592,11 +592,11 @@ public class Statistics : IAsyncLifetime
     [Fact(DisplayName = "STAT_040 - Báo cáo sản phẩm khi không bán")]
     public async Task GetProductReport_NoSales()
     {
-        var uniqueId = await AuthenticateAsync();
+        var uniqueId = await AuthenticateAsync(CancellationToken.None).ConfigureAwait(true);
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        await WipeStatisticsDataAsync(db);
-        await SeedPrerequisitesAsync(db);
+        await WipeStatisticsDataAsync(db, CancellationToken.None).ConfigureAwait(true);
+        await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
         var vid = await SeedProductVariantAsync(db, uniqueId, cancellationToken: CancellationToken.None).ConfigureAwait(true);
 
         var response = await _client.GetAsync("/api/v1/Statistics/product-report-last-month").ConfigureAwait(true);
