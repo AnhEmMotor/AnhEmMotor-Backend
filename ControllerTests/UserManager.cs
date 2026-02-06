@@ -34,6 +34,7 @@ public class UserManager
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
     }
 
+#pragma warning disable IDE0079 
 #pragma warning disable CRR0035
     [Fact(DisplayName = "UMGR_001 - Lấy danh sách người dùng thành công với phân trang mặc định")]
     public async Task GetAllUsers_WithDefaultPagination_ReturnsOkWithUsers()
@@ -424,4 +425,5 @@ public class UserManager
             Times.Once);
     }
 #pragma warning restore CRR0035
+#pragma warning restore IDE0079
 }

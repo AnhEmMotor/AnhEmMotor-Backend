@@ -30,7 +30,7 @@ public sealed class DeleteManySuppliersCommandHandler(
             .ConfigureAwait(false);
 
         var suppliersWithWorkingInputsSet = relevantInputs
-            .Where(x => x.StatusId == Domain.Constants.Input.InputStatus.Working && x.SupplierId.HasValue)
+            .Where(x => string.Compare(x.StatusId, Domain.Constants.Input.InputStatus.Working) == 0 && x.SupplierId.HasValue)
             .Select(x => x.SupplierId!.Value)
             .ToHashSet();
 

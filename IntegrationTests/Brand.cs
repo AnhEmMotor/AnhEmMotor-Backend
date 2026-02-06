@@ -37,7 +37,7 @@ public class Brand : IAsyncLifetime
     {
         await _factory.ResetDatabaseAsync();
     }
-
+#pragma warning disable IDE0079 
 #pragma warning disable CRR0035
     [Fact(DisplayName = "BRAND_001 - CreateBrand - Success")]
     public async Task BRAND_001_CreateBrand_Success()

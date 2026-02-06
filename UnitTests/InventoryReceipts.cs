@@ -177,7 +177,6 @@ public class InventoryReceipts
     public async Task UpdateInputHandler_InputNotFound_ThrowsException()
     {
         var mockReadRepo = new Mock<IInputReadRepository>();
-        var mockUpdateRepo = new Mock<IInputUpdateRepository>();
 
         mockReadRepo.Setup(x => x.GetByIdWithDetailsAsync(
                 It.IsAny<int>(),

@@ -42,6 +42,7 @@ public class Supplier : IAsyncLifetime
         await _factory.ResetDatabaseAsync();
     }
 
+#pragma warning disable IDE0079
 #pragma warning disable CRR0035
     [Fact(DisplayName = "SUP_031 - Lấy danh sách Supplier với phân trang mặc định")]
     public async Task GetSuppliers_DefaultPagination_ReturnsPagedResult()
@@ -399,7 +400,7 @@ public class Supplier : IAsyncLifetime
             };
             await db.Suppliers.AddRangeAsync(suppliers);
             await db.SaveChangesAsync();
-            supplierIds = suppliers.Select(s => s.Id).ToList();
+            supplierIds = [.. suppliers.Select(s => s.Id)];
         }
 
         var request = new DeleteManySuppliersCommand { Ids = supplierIds };
@@ -501,7 +502,7 @@ public class Supplier : IAsyncLifetime
             };
             await db.Suppliers.AddRangeAsync(suppliers);
             await db.SaveChangesAsync();
-            supplierIds = suppliers.Select(s => s.Id).ToList();
+            supplierIds = [.. suppliers.Select(s => s.Id)];
         }
 
         var request = new RestoreManySuppliersCommand { Ids = supplierIds };
@@ -543,7 +544,7 @@ public class Supplier : IAsyncLifetime
             };
             await db.Suppliers.AddRangeAsync(suppliers);
             await db.SaveChangesAsync();
-            supplierIds = suppliers.Select(s => s.Id).ToList();
+            supplierIds = [.. suppliers.Select(s => s.Id)];
         }
 
         var request = new UpdateManySupplierStatusCommand { Ids = supplierIds, StatusId = Domain.Constants.SupplierStatus.Inactive };

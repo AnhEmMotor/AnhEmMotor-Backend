@@ -26,6 +26,7 @@ public class Auth
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
     }
 
+#pragma warning disable IDE0079 
 #pragma warning disable CRR0035
     [Fact(DisplayName = "AUTH_REG_002 - Đăng ký thất bại (Validation) - TH1: Thiếu Password")]
     public async Task AUTH_REG_002_1_Register_MissingPassword()
@@ -122,4 +123,5 @@ public class Auth
         _mediatorMock.Verify(m => m.Send(It.IsAny<LogoutCommand>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 #pragma warning restore CRR0035
+#pragma warning restore IDE0079
 }

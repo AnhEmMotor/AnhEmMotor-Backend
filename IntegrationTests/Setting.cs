@@ -38,6 +38,7 @@ public class Setting : IAsyncLifetime
         await _factory.ResetDatabaseAsync();
     }
 
+#pragma warning disable IDE0079
 #pragma warning disable CRR0035
     [Fact(DisplayName = "SETTING_001 - GetAllSettings - Thành công (Happy Path)")]
     public async Task SETTING_001_GetAllSettings_Success()

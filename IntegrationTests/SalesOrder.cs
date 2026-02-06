@@ -117,6 +117,7 @@ public class SalesOrder : IAsyncLifetime
         await db.SaveChangesAsync();
     }
 
+#pragma warning disable IDE0079
 #pragma warning disable CRR0035
     [Fact(DisplayName = "SO_061 - Tạo đơn hàng với BuyerId tự động từ token JWT")]
     public async Task CreateOutput_WithAuthenticatedUser_SetsBuyerIdFromToken()
@@ -999,4 +1000,5 @@ public class SalesOrder : IAsyncLifetime
         content!.Items.Should().Contain(x => x.Notes == $"PurchasesOf_{uniqueId}");
     }
 #pragma warning restore CRR0035
+#pragma warning restore IDE0079
 }

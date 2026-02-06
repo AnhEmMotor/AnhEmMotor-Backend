@@ -21,8 +21,8 @@ public sealed class CreateBrandCommandHandler(
         if (cleanName == null)
             return Error.BadRequest("Name is empty/null, please check again");
 
-        var existingBrands = await brandReadRepository.GetByNameAsync(cleanName, cancellationToken);
-        if (existingBrands.Any())
+        var existingBrands = await brandReadRepository.GetByNameAsync(cleanName, cancellationToken).ConfigureAwait(false);
+        if (existingBrands.Count != 0)
         {
             // Trả về lỗi Domain/Business cụ thể, đừng throw exception vô tội vạ
             return Result<BrandResponse>.Failure("Brand name already exists.");

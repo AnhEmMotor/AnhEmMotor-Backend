@@ -38,9 +38,9 @@ public class BrandReadRepository(ApplicationDBContext context) : IBrandReadRepos
             .ContinueWith<IEnumerable<BrandEntity>>(t => t.Result, cancellationToken);
     }
 
-    public async Task<IEnumerable<BrandEntity>> GetByNameAsync(string name, CancellationToken cancellationToken, DataFetchMode dataFetchMode = DataFetchMode.ActiveOnly)
+    public Task<List<BrandEntity>> GetByNameAsync(string name, CancellationToken cancellationToken, DataFetchMode dataFetchMode = DataFetchMode.ActiveOnly)
     {
-        return await context.GetQuery<BrandEntity>(dataFetchMode)
+        return context.GetQuery<BrandEntity>(dataFetchMode)
             .Where(b => b.Name == name)
             .ToListAsync(cancellationToken);
     }

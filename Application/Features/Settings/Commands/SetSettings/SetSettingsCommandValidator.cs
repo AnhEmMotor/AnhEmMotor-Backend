@@ -25,7 +25,7 @@ public sealed class SetSettingsCommandValidator : AbstractValidator<SetSettingsC
                 {
                     if (string.IsNullOrWhiteSpace(value)) continue;
 
-                    if (key == SettingKeys.DepositRatio)
+                    if (string.Compare(key, SettingKeys.DepositRatio) == 0)
                     {
                         if (!decimal.TryParse(value, out var dValue))
                         {
@@ -47,12 +47,12 @@ public sealed class SetSettingsCommandValidator : AbstractValidator<SetSettingsC
                             }
                         }
                     }
-                    else if (key == SettingKeys.InventoryAlertLevel ||
-                             key == SettingKeys.OrderValueExceeds ||
-                             key == SettingKeys.ZBikeThresholdForMeeting)
+                    else if (string.Compare(key, SettingKeys.InventoryAlertLevel) == 0 ||
+                             string.Compare(key, SettingKeys.OrderValueExceeds) == 0 ||
+                             string.Compare(key, SettingKeys.ZBikeThresholdForMeeting) == 0)
                     {
                         // Check if it is a number at NOT an integer (i.e. has decimals)
-                        if (decimal.TryParse(value, out var dVal))
+                        if (decimal.TryParse(value, out var _))
                         {
                             // It is a valid number
                             // Check if it has decimal part. 

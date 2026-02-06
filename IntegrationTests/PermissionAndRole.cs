@@ -22,13 +22,11 @@ public class PermissionAndRole : IAsyncLifetime
 {
     private readonly IntegrationTestWebAppFactory _factory;
     private readonly HttpClient _client;
-    private readonly ITestOutputHelper _output;
 
-    public PermissionAndRole(IntegrationTestWebAppFactory factory, ITestOutputHelper output)
+    public PermissionAndRole(IntegrationTestWebAppFactory factory)
     {
         _factory = factory;
         _client = _factory.CreateClient();
-        _output = output;
     }
 
     public Task InitializeAsync() => Task.CompletedTask;
@@ -37,7 +35,8 @@ public class PermissionAndRole : IAsyncLifetime
     {
         await _factory.ResetDatabaseAsync();
     }
-
+#pragma warning disable IDE0079
+#pragma warning disable CRR0035
     [Fact(DisplayName = "PERM_INT_001 - API lấy tất cả permissions trả về đầy đủ thông tin")]
     public async Task GetAllPermissions_ReturnsFullPermissionList()
     {
@@ -263,16 +262,14 @@ public class PermissionAndRole : IAsyncLifetime
         content.Description.Should().Be("Integration Test Role");
         content.Permissions.Should().HaveCount(2);
 
-        using (var verifyScope = _factory.Services.CreateScope())
-        {
-            var verifyDb = verifyScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var roleInDb = await verifyDb.Roles
-                .FirstOrDefaultAsync(r => r.Name == newRoleName, CancellationToken.None)
-                .ConfigureAwait(true);
+        using var verifyScope = _factory.Services.CreateScope();
+        var verifyDb = verifyScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        var roleInDb = await verifyDb.Roles
+            .FirstOrDefaultAsync(r => r.Name == newRoleName, CancellationToken.None)
+            .ConfigureAwait(true);
 
-            roleInDb.Should().NotBeNull();
-            roleInDb!.Description.Should().Be("Integration Test Role");
-        }
+        roleInDb.Should().NotBeNull();
+        roleInDb!.Description.Should().Be("Integration Test Role");
     }
 
     [Fact(DisplayName = "PERM_INT_008 - API tạo role mới khi không có quyền")]
@@ -551,7 +548,7 @@ public class PermissionAndRole : IAsyncLifetime
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
     }
 
-    private async Task<Permission> EnsurePermissionExistsAsync(ApplicationDBContext db, string permName)
+    private static async Task<Permission> EnsurePermissionExistsAsync(ApplicationDBContext db, string permName)
     {
         var permission = await db.Permissions.FirstOrDefaultAsync(p => p.Name == permName);
         if (permission == null)

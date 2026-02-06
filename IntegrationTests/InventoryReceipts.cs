@@ -53,6 +53,7 @@ public class InventoryReceipts : IAsyncLifetime
         await _factory.ResetDatabaseAsync();
     }
 
+#pragma warning disable IDE0079 
 #pragma warning disable CRR0035
     [Fact(DisplayName = "INPUT_001 - Tạo phiếu nhập hàng thành công (Happy Path)")]
     public async Task CreateInput_Success_ReturnsOk()

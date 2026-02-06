@@ -8,43 +8,48 @@ namespace Infrastructure.Repositories.ProductCategory;
 
 public class ProductCategoryReadRepository(ApplicationDBContext context) : IProductCategoryReadRepository
 {
-    public async Task<bool> ExistsByNameAsync(
+    public Task<bool> ExistsByNameAsync(
         string name,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        var query = context.GetQuery<CategoryEntity>(mode);
-        return await query.AnyAsync(c => c.Name!.ToLower() == name.ToLower(), cancellationToken);
+        return context.GetQuery<CategoryEntity>(mode)
+            .AnyAsync(c => string.Compare(c.Name, name) == 0, cancellationToken);
     }
 
-    public async Task<bool> ExistsByNameExceptIdAsync(string name, int id, CancellationToken cancellationToken, DataFetchMode mode = DataFetchMode.ActiveOnly)
-    {
-        return await context.GetQuery<CategoryEntity>(mode).AnyAsync(x => x.Name!.ToLower() == name.ToLower() && x.Id != id, cancellationToken);
-    }
-
-    public async Task<IEnumerable<CategoryEntity>> GetAllAsync(
-        CancellationToken cancellationToken,
-        DataFetchMode mode = DataFetchMode.ActiveOnly)
-    {
-        return await context.GetQuery<CategoryEntity>(mode)
-            .ToListAsync(cancellationToken);
-    }
-
-    public async Task<CategoryEntity?> GetByIdAsync(
+    public Task<bool> ExistsByNameExceptIdAsync(
+        string name,
         int id,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return await context.GetQuery<CategoryEntity>(mode)
+        return context.GetQuery<CategoryEntity>(mode)
+            .AnyAsync(x => string.Compare(x.Name, name) == 0 && x.Id != id, cancellationToken);
+    }
+
+    public Task<List<CategoryEntity>> GetAllAsync(
+        CancellationToken cancellationToken,
+        DataFetchMode mode = DataFetchMode.ActiveOnly)
+    {
+        return context.GetQuery<CategoryEntity>(mode)
+            .ToListAsync(cancellationToken);
+    }
+
+    public Task<CategoryEntity?> GetByIdAsync(
+        int id,
+        CancellationToken cancellationToken,
+        DataFetchMode mode = DataFetchMode.ActiveOnly)
+    {
+        return context.GetQuery<CategoryEntity>(mode)
             .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
     }
 
-    public async Task<IEnumerable<CategoryEntity>> GetByIdAsync(
+    public Task<List<CategoryEntity>> GetByIdAsync(
         IEnumerable<int> ids,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return await context.GetQuery<CategoryEntity>(mode)
+        return context.GetQuery<CategoryEntity>(mode)
             .Where(c => ids.Contains(c.Id))
             .ToListAsync(cancellationToken);
     }

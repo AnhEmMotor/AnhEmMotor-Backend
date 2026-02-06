@@ -40,6 +40,7 @@ public class User : IAsyncLifetime
     {
         await _factory.ResetDatabaseAsync();
     }
+#pragma warning disable IDE0079
 #pragma warning disable CRR0035
     [Fact(DisplayName = "USER_021 - Khôi phục tài khoản thành công")]
     public async Task RestoreAccount_Success_DeletedAtSetToNull()
@@ -226,15 +227,13 @@ public class User : IAsyncLifetime
         var response = await _client.PutAsJsonAsync("/api/v1/User/me", updateRequest);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        
-        using (var scope = _factory.Services.CreateScope())
-        {
-            var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var user = await db.Users.FirstOrDefaultAsync(u => u.UserName == username);
-            user!.FullName.Should().Be("Updated Name");
-            user.Gender.Should().Be(GenderStatus.Female);
-            user.PhoneNumber.Should().Be("0999888777");
-        }
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        var user = await db.Users.FirstOrDefaultAsync(u => u.UserName == username);
+        user!.FullName.Should().Be("Updated Name");
+        user.Gender.Should().Be(GenderStatus.Female);
+        user.PhoneNumber.Should().Be("0999888777");
     }
 
     [Fact(DisplayName = "USER_028 - Cập nhật thông tin với validation error - số điện thoại không hợp lệ")]

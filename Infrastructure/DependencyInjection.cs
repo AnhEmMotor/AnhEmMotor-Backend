@@ -26,7 +26,7 @@ public static class DependencyInjection
     {
         var provider = configuration.GetValue("Provider", "SqlServer");
 
-        if (provider == "MySql")
+        if (string.Compare(provider, "MySql") == 0)
         {
             var connectionString = configuration.GetConnectionString("StringConnection") ?? "";
             services.AddDbContextPool<ApplicationDBContext, MySqlDbContext>(options =>

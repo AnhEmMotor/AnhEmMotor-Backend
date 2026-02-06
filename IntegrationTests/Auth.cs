@@ -39,6 +39,7 @@ public class Auth : IAsyncLifetime
         await _factory.ResetDatabaseAsync();
     }
 
+#pragma warning disable IDE0079 
 #pragma warning disable CRR0035
     [Fact(DisplayName = "AUTH_REG_001 - Register Success")]
     public async Task AUTH_REG_001_Register_Success()

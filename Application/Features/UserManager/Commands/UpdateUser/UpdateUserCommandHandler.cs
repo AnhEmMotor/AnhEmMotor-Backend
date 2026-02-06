@@ -43,7 +43,7 @@ public class UpdateUserCommandHandler(
         if(!string.IsNullOrWhiteSpace(request.PhoneNumber))
         {
             var phoneNumber = request.PhoneNumber.Trim();
-            if (phoneNumber != user.PhoneNumber)
+            if (string.Compare(phoneNumber, user.PhoneNumber) != 0)
             {
                 var existingUser = await userReadRepository.FindUserByPhoneNumberAsync(phoneNumber, cancellationToken).ConfigureAwait(false);
                 if (existingUser != null && existingUser.Id != user.Id)

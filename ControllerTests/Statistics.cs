@@ -28,6 +28,7 @@ public class Statistics
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
     }
 
+#pragma warning disable IDE0079 
 #pragma warning disable CRR0035
     [Fact(DisplayName = "STAT_001 - Lấy doanh thu theo ngày - Happy Path với 7 ngày")]
     public async Task GetDailyRevenue_ValidDays7_ReturnsRevenueData()
@@ -339,4 +340,5 @@ public class Statistics
         actualResponse.StockQuantity.Should().Be(0);
     }
 #pragma warning restore CRR0035
+#pragma warning restore IDE0079
 }

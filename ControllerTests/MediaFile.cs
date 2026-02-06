@@ -34,6 +34,7 @@ public class MediaFile
         };
     }
 
+#pragma warning disable IDE0079 
 #pragma warning disable CRR0035
     [Fact(DisplayName = "MF_006 - Tải lên ảnh thất bại khi chưa đăng nhập")]
     public void UploadImage_NotAuthenticated_Unauthorized()
@@ -102,7 +103,7 @@ public class MediaFile
     [Fact(DisplayName = "MF_CT_002: UploadImageAsync returns BadRequest when file is null")]
     public async Task UploadImageAsync_ReturnsBadRequest_WhenFileIsNull()
     {
-        var result = await _controller.UploadImageAsync(null!, CancellationToken.None);
+        var result = await _controller.UploadImageAsync(null!, CancellationToken.None).ConfigureAwait(true);
 
         var statusCodeResult = Assert.IsType<BadRequestResult>(result);
         Assert.Equal(StatusCodes.Status400BadRequest, statusCodeResult.StatusCode);
@@ -115,7 +116,7 @@ public class MediaFile
         _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteFileCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success());
 
-        var result = await _controller.DeleteFileAsync(storagePath, CancellationToken.None);
+        var result = await _controller.DeleteFileAsync(storagePath, CancellationToken.None).ConfigureAwait(true);
 
         var statusCodeResult = Assert.IsType<NoContentResult>(result);
         Assert.Equal(StatusCodes.Status204NoContent, statusCodeResult.StatusCode);
@@ -130,11 +131,12 @@ public class MediaFile
         _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteFileCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Failure(validationError));
 
-        var result = await _controller.DeleteFileAsync(storagePath, CancellationToken.None);
+        var result = await _controller.DeleteFileAsync(storagePath, CancellationToken.None).ConfigureAwait(true);
 
         // This expects your HandleResult to map Failure -> BadRequest
         var objectResult = Assert.IsType<BadRequestObjectResult>(result);
         Assert.Equal(StatusCodes.Status400BadRequest, objectResult.StatusCode);
     }
 #pragma warning restore CRR0035
+#pragma warning restore IDE0079
 }

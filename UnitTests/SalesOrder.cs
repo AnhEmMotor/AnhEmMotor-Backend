@@ -1499,7 +1499,7 @@ public class SalesOrder
         var result = _validator.Validate(command);
 
         result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(x => x.PropertyName == "OutputInfos");
+        result.Errors.Should().Contain(x => string.Compare(x.PropertyName, "OutputInfos") == 0);
     }
 
     [Fact(DisplayName = "SO_047 - UpdateOutputStatus validation StatusId not empty")]
@@ -1553,7 +1553,7 @@ public class SalesOrder
         var result = validator.Validate(command);
 
         result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(x => x.PropertyName == "Ids");
+        result.Errors.Should().Contain(x => string.Compare(x.PropertyName, "Ids") == 0);
     }
 
     [Fact(DisplayName = "SO_050 - DeleteManyOutputs fails when Ids is empty")]
@@ -1565,7 +1565,7 @@ public class SalesOrder
         var result = validator.Validate(command);
 
         result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(x => x.PropertyName == "Ids");
+        result.Errors.Should().Contain(x => string.Compare(x.PropertyName, "Ids") == 0);
     }
 
     [Fact(DisplayName = "SO_051 - RestoreManyOutputs fails when Ids is empty")]
@@ -1577,7 +1577,7 @@ public class SalesOrder
         var result = validator.Validate(command);
 
         result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(x => x.PropertyName == "Ids");
+        result.Errors.Should().Contain(x => string.Compare(x.PropertyName, "Ids") == 0);
     }
 
     [Fact(DisplayName = "SO_052 - GetOutputsByUserId với pagination")]
@@ -1687,7 +1687,6 @@ public class SalesOrder
     public async Task UpdateOutputStatus_PaidProcessingToRefunding_ShouldSucceed()
     {
         var outputId = 1;
-        var currentUserId = Guid.NewGuid();
         var handler = new UpdateOutputStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,

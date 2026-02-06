@@ -38,7 +38,7 @@ public class IdentityService(UserManager<ApplicationUser> userManager) : IIdenti
             return Error.Unauthorized("Wrong username/email or password.");
         }
 
-        if (user.Status == UserStatus.Banned)
+        if (string.Compare(user.Status, UserStatus.Banned) == 0)
         {
             return Error.Forbidden("User is banned.");
         }

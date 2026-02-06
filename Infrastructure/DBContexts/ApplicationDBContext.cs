@@ -3,6 +3,7 @@ using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Linq.Expressions;
 using InputStatus = Domain.Entities.InputStatus;
 using ProductStatus = Domain.Entities.ProductStatus;
@@ -96,7 +97,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .OnDelete(DeleteBehavior.Cascade);
 
         // Check if using a provider other than SQL Server (e.g., SQLite, MySQL) to remove SQL Server-specific configurations
-        var isNotSqlServer = Database.ProviderName != "Microsoft.EntityFrameworkCore.SqlServer";
+        var isNotSqlServer = string.Compare(Database.ProviderName, "Microsoft.EntityFrameworkCore.SqlServer") != 0;
 
         if(isNotSqlServer)
         {
@@ -106,26 +107,20 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
                 // Remove table filters that use SQL Server syntax
                 var tableName = entityType.GetTableName();
 
-                if(tableName == "Roles")
+                if(string.Compare(tableName, "Roles") == 0)
                 {
                     var index = entityType.GetIndexes()
-                        .FirstOrDefault(i => i.GetDatabaseName() == "RoleNameIndex");
+                        .FirstOrDefault(i => string.Compare(i.GetDatabaseName(), "RoleNameIndex") == 0);
 
-                    if(index is not null)
-                    {
-                        index.SetFilter(null);
-                    }
+                    index?.SetFilter(null);
                 }
 
-                if(tableName == "Users")
+                if(string.Compare(tableName, "Users") == 0)
                 {
                     var index = entityType.GetIndexes()
-                        .FirstOrDefault(i => i.GetDatabaseName() == "UserNameIndex");
+                        .FirstOrDefault(i => string.Compare(i.GetDatabaseName(), "UserNameIndex") == 0);
 
-                    if(index is not null)
-                    {
-                        index.SetFilter(null);
-                    }
+                    index?.SetFilter(null);
                 }
 
                 // Clear SQL Server-specific column types

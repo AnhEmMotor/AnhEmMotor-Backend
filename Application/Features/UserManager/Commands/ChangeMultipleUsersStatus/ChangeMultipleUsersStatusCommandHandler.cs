@@ -33,7 +33,7 @@ public class ChangeMultipleUsersStatusCommandHandler(
                 continue;
             }
 
-            if (!string.IsNullOrEmpty(request.CurrentUserId) && user.Id.ToString() == request.CurrentUserId)
+            if (!string.IsNullOrEmpty(request.CurrentUserId) && string.Compare(user.Id.ToString(), request.CurrentUserId) == 0)
             {
                  errorMessages.Add(Error.Validation($"Cannot change status of your own account.", "UserIds"));
                  continue;

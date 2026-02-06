@@ -27,6 +27,7 @@ public class Brand
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
     }
 
+#pragma warning disable IDE0079 
 #pragma warning disable CRR0035
     [Fact(DisplayName = "BRAND_005 - CreateBrand - Forbidden")]
     public async Task BRAND_005_CreateBrand_Forbidden()
@@ -178,4 +179,5 @@ public class Brand
             .ConfigureAwait(true);
     }
 #pragma warning restore CRR0035
+#pragma warning restore IDE0079
 }

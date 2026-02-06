@@ -35,6 +35,7 @@ public class Supplier
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
     }
 
+#pragma warning disable IDE0079 
 #pragma warning disable CRR0035
     [Fact(DisplayName = "SUP_046 - Tạo Supplier thành công qua API")]
     public async Task CreateSupplier_Success_ReturnsCreatedSupplier()
@@ -299,4 +300,5 @@ public class Supplier
             .ConfigureAwait(true);
     }
 #pragma warning restore CRR0035
+#pragma warning restore IDE0079
 }

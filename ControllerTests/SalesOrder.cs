@@ -42,6 +42,7 @@ public class SalesOrder
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
     }
 
+#pragma warning disable IDE0079 
 #pragma warning disable CRR0035
     [Fact(DisplayName = "SO_081 - GetMyPurchases - Lấy đơn hàng của chính mình")]
     public async Task GetMyPurchases_UserAuthenticated_ReturnsOrders()
@@ -318,4 +319,5 @@ public class SalesOrder
             .ConfigureAwait(true);
     }
 #pragma warning restore CRR0035
+#pragma warning restore IDE0079
 }

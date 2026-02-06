@@ -158,7 +158,7 @@ public class Supplier
                      .ReturnsAsync(true);
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -188,7 +188,7 @@ public class Supplier
         _readRepoMock.Setup(x => x.IsNameExistsAsync(It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
                      .ReturnsAsync(false);
 
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         result.IsFailure.Should().BeTrue();
         _insertRepoMock.Verify(x => x.Add(It.IsAny<SupplierEntity>()), Times.Never);
@@ -219,7 +219,7 @@ public class Supplier
         _readRepoMock.Setup(x => x.IsPhoneExistsAsync(It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
                      .ReturnsAsync(false);
 
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         result.IsFailure.Should().BeTrue();
         _insertRepoMock.Verify(x => x.Add(It.IsAny<SupplierEntity>()), Times.Never);

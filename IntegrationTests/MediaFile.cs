@@ -36,6 +36,7 @@ public class MediaFile : IAsyncLifetime
     {
         await _factory.ResetDatabaseAsync();
     }
+#pragma warning disable IDE0079 
 #pragma warning disable CRR0035
     [Fact(DisplayName = "MF_002 - Tải lên ảnh thành công với định dạng JPG hợp lệ")]
     public async Task UploadImage_ValidJpg_Success()

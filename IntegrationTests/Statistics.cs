@@ -49,7 +49,7 @@ public class Statistics : IAsyncLifetime
         await _factory.ResetDatabaseAsync();
     }
 
-    private async Task WipeStatisticsDataAsync(ApplicationDBContext db)
+    private static async Task WipeStatisticsDataAsync(ApplicationDBContext db)
     {
         // Clean up data that affects statistics
         db.OutputInfos.RemoveRange(db.OutputInfos);
@@ -69,7 +69,7 @@ public class Statistics : IAsyncLifetime
         return uniqueId;
     }
 
-    private async Task SeedPrerequisitesAsync(ApplicationDBContext db)
+    private static async Task SeedPrerequisitesAsync(ApplicationDBContext db)
     {
         if (!await db.OutputStatuses.AnyAsync(x => x.Key == OrderStatus.Pending)) db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Pending });
         if (!await db.OutputStatuses.AnyAsync(x => x.Key == OrderStatus.Completed)) db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Completed });
@@ -79,7 +79,7 @@ public class Statistics : IAsyncLifetime
         await db.SaveChangesAsync();
     }
 
-    private async Task<int> SeedProductVariantAsync(ApplicationDBContext db, string uniqueId, decimal price = 200000)
+    private static async Task<int> SeedProductVariantAsync(ApplicationDBContext db, string uniqueId, decimal price = 200000)
     {
         var brand = new BrandEntity { Name = $"Brand_{uniqueId}" };
         db.Brands.Add(brand);
@@ -97,6 +97,8 @@ public class Statistics : IAsyncLifetime
         return variant.Id;
     }
 
+#pragma warning disable IDE0079
+#pragma warning disable CRR0035
     [Fact(DisplayName = "STAT_021 - Lấy doanh thu 7 ngày gần nhất (Completed Only)")]
     public async Task GetDailyRevenue_Last7Days_ReturnsCorrectData()
     {
@@ -278,7 +280,6 @@ public class Statistics : IAsyncLifetime
     [Fact(DisplayName = "STAT_026 - Dashboard Pending Orders Count")]
     public async Task GetDashboardStats_PendingCount()
     {
-        var uniqueId = await AuthenticateAsync();
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         await WipeStatisticsDataAsync(db);
@@ -300,7 +301,6 @@ public class Statistics : IAsyncLifetime
     public async Task GetDashboardStats_NewUsers()
     {
         // Code hardcodes 0. Test expects 0.
-        var uniqueId = await AuthenticateAsync();
         var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats");
         var content = await response.Content.ReadFromJsonAsync<DashboardStatsResponse>();
         content!.NewCustomersCount.Should().Be(0);
@@ -440,7 +440,7 @@ public class Statistics : IAsyncLifetime
         // If Global Query Filter for 'IsDeleted'/`DeletedAt` is enabled (common in ABP/CleanArch), it won't show.
         // Spec says "Vẫn hiển thị".
         // Let's assert based on requirements. If it fails, we know Repo needs checking.
-        content!.Any((ProductReportResponse x) => x.VariantId == vid).Should().BeTrue();
+        content!.Any(x => x.VariantId == vid).Should().BeTrue();
     }
 
     [Fact(DisplayName = "STAT_033 - Tồn kho và giá thập phân")]
@@ -581,7 +581,7 @@ public class Statistics : IAsyncLifetime
         var content = await response.Content.ReadFromJsonAsync<List<OrderStatusCountResponse>>();
 
         content.Should().NotBeNull();
-        content!.All((OrderStatusCountResponse x) => x.OrderCount == 0).Should().BeTrue();
+        content!.All(x => x.OrderCount == 0).Should().BeTrue();
     }
 
     [Fact(DisplayName = "STAT_040 - Báo cáo sản phẩm khi không bán")]
@@ -597,7 +597,7 @@ public class Statistics : IAsyncLifetime
         var response = await _client.GetAsync("/api/v1/Statistics/product-report-last-month");
         var content = await response.Content.ReadFromJsonAsync<List<ProductReportResponse>>();
 
-        content!.First((ProductReportResponse x) => x.VariantId == vid).SoldLastMonth.Should().Be(0);
-        content!.First((ProductReportResponse x) => x.VariantId == vid).StockQuantity.Should().Be(0); // No input either
+        content!.First(x => x.VariantId == vid).SoldLastMonth.Should().Be(0);
+        content!.First(x => x.VariantId == vid).StockQuantity.Should().Be(0); // No input either
     }
 }

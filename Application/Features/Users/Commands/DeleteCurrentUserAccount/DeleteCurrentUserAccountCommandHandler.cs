@@ -32,7 +32,7 @@ public class DeleteCurrentUserAccountCommandHandler(
             return Error.Validation("DeletedAt", "This account has already been deleted.");
         }
 
-        if (user.Status == Domain.Constants.UserStatus.Banned)
+        if (string.Compare(user.Status, Domain.Constants.UserStatus.Banned) == 0)
         {
             return Error.Forbidden("User account is banned.");
         }

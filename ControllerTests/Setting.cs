@@ -27,6 +27,7 @@ public class Setting
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
     }
 
+#pragma warning disable IDE0079 
 #pragma warning disable CRR0035
 
     [Fact(DisplayName = "SETTING_030 - Controller GetAllSettings - Gọi đúng Query và trả về OkResult")]
@@ -151,4 +152,5 @@ public class Setting
         returnedDict["Inventory_alert_level"].Should().Be("2147483647");
     }
 #pragma warning restore CRR0035
+#pragma warning restore IDE0079
 }

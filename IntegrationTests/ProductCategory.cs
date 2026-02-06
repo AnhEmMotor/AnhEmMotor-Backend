@@ -42,6 +42,7 @@ public class ProductCategory : IAsyncLifetime
         await _factory.ResetDatabaseAsync();
     }
 
+#pragma warning disable IDE0079
 #pragma warning disable CRR0035
     [Fact(DisplayName = "PC_025 - Lấy danh sách danh mục sản phẩm thành công (cho mọi người dùng)")]
     public async Task GetProductCategories_WithPagination_ShouldReturnCorrectData()

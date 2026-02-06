@@ -24,19 +24,19 @@ public sealed class UpdateSupplierCommandHandler(
             return Error.NotFound($"Supplier with Id {request.Id} not found.");
         }
 
-        var isNameExists = await readRepository.IsNameExistsAsync(request.Name!, request.Id, cancellationToken);
+        var isNameExists = await readRepository.IsNameExistsAsync(request.Name!, request.Id, cancellationToken).ConfigureAwait(false);
         if (isNameExists)
         {
             return Error.Conflict("Supplier name already exists.");
         }
 
-        var isPhoneExists = await readRepository.IsPhoneExistsAsync(request.Phone!, request.Id, cancellationToken);
+        var isPhoneExists = await readRepository.IsPhoneExistsAsync(request.Phone!, request.Id, cancellationToken).ConfigureAwait(false);
         if (isPhoneExists)
         {
             return Error.Conflict("Supplier phone already exists.");
         }
 
-        var isTaxIdExists = await readRepository.IsTaxIdExistsAsync(request.TaxIdentificationNumber!, request.Id, cancellationToken);
+        var isTaxIdExists = await readRepository.IsTaxIdExistsAsync(request.TaxIdentificationNumber!, request.Id, cancellationToken).ConfigureAwait(false);
         if (isTaxIdExists)
         {
             return Error.Conflict("Supplier Tax ID already exists.");

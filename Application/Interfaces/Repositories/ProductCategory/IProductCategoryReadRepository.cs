@@ -18,7 +18,7 @@ public interface IProductCategoryReadRepository
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-    public Task<IEnumerable<CategoryEntity>> GetAllAsync(
+    public Task<List<CategoryEntity>> GetAllAsync(
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
 
@@ -27,7 +27,7 @@ public interface IProductCategoryReadRepository
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-    public Task<IEnumerable<CategoryEntity>> GetByIdAsync(
+    public Task<List<CategoryEntity>> GetByIdAsync(
         IEnumerable<int> ids,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);

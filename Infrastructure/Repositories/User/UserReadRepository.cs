@@ -177,7 +177,7 @@ namespace Infrastructure.Repositories.User
             CancellationToken cancellationToken = default)
         {
             var result = await userManager.Users
-                .FirstOrDefaultAsync(u => u.PhoneNumber == phoneNumber, cancellationToken)
+                .FirstOrDefaultAsync(u => string.Compare(u.PhoneNumber, phoneNumber) == 0, cancellationToken)
                 .ConfigureAwait(false);
             return result;
         }

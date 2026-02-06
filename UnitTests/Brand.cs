@@ -164,7 +164,7 @@ public class Brand
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>()))
             .Returns(Enumerable.Empty<BrandEntities>().AsQueryable());
 
-        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         _updateRepoMock.Verify(x => x.Update(It.IsAny<BrandEntities>()), Times.Once);
     }

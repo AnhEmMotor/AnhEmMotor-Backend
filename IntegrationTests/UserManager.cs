@@ -42,6 +42,7 @@ public class UserManager : IAsyncLifetime
         await _factory.ResetDatabaseAsync();
     }
 
+#pragma warning disable IDE0079
 #pragma warning disable CRR0035
     [Fact(DisplayName = "UMGR_019 - Query người dùng với filter và sorting phức tạp")]
     public async Task GetAllUsers_WithComplexFilterAndSorting_ReturnsCorrectResults()

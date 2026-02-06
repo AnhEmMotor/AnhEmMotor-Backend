@@ -11,6 +11,7 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using System;
 using System.Security.Claims;
 using WebAPI.Controllers.V1;
 
@@ -30,6 +31,7 @@ public class User
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
     }
 
+#pragma warning disable IDE0079 
 #pragma warning disable CRR0035
     [Fact(DisplayName = "USER_036 - Controller - GET /api/v1/User/me gọi đúng Query")]
     public async Task GetCurrentUser_CallsCorrectQuery_ReturnsOk()
@@ -165,9 +167,9 @@ public class User
         _mediatorMock.Verify(
             m => m.Send(
                 It.Is<Application.Features.Users.Commands.ChangePassword.ChangePasswordCommand>(c =>
-                    c.UserId == userId.ToString() &&
-                    c.NewPassword == "New" &&
-                    c.CurrentPassword == "Old"
+                    string.Compare(c.UserId, userId.ToString()) == 0 &&
+                    string.Compare(c.NewPassword, "New") == 0 &&
+                    string.Compare(c.CurrentPassword, "Old") == 0
                 ),
                 It.IsAny<CancellationToken>()),
             Times.Once);
@@ -326,4 +328,5 @@ public class User
         }
     }
 #pragma warning restore CRR0035
+#pragma warning restore IDE0079
 }

@@ -20,7 +20,7 @@ public sealed class DeleteSupplierCommandHandler(
             return Result.Failure(Error.NotFound($"Supplier with Id {request.Id} not found."));
         }
 
-        if (supplier.InputReceipts.Any(ir => ir.StatusId == InputStatus.Working))
+        if (supplier.InputReceipts.Any(ir => string.Compare(ir.StatusId, InputStatus.Working) == 0))
         {
             return Result.Failure(Error.Conflict("Cannot delete supplier with working input receipts."));
         }

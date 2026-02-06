@@ -75,7 +75,7 @@ public static class AuthenticationExtensions
                                 return;
                             }
 
-                            var user = await userManager.FindByIdAsync(userId);
+                            var user = await userManager.FindByIdAsync(userId).ConfigureAwait(true);
                             if (user == null || user.DeletedAt is not null)
                             {
                                 context.Fail("Unauthorized");
@@ -83,7 +83,7 @@ public static class AuthenticationExtensions
                             }
 
                             var tokenSecurityStamp = context.Principal?.FindFirstValue("AspNet.Identity.SecurityStamp");
-                            if (tokenSecurityStamp != user.SecurityStamp)
+                            if (string.Compare(tokenSecurityStamp, user.SecurityStamp) != 0)
                             {
                                 context.Fail("Unauthorized");
                             }

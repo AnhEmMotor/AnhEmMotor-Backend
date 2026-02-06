@@ -45,7 +45,7 @@ public class ChangePasswordByManagerCommandHandler(
         }
 
         // Invalidate refresh tokens upon password change
-        await userUpdateRepository.ClearRefreshTokenAsync(user.Id, cancellationToken);
+        await userUpdateRepository.ClearRefreshTokenAsync(user.Id, cancellationToken).ConfigureAwait(false);
 
         // Security Stamp is automatically updated by UserManager.ResetPasswordAsync/UpdateAsync usually,
         // but let's ensure token invalidation mechanisms rely on it or explicit revocation.

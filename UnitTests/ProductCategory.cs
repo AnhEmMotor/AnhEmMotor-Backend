@@ -159,8 +159,6 @@ public class ProductCategory
         var handler = new CreateProductCategoryCommandHandler(_insertRepoMock.Object, _readRepoMock.Object, _unitOfWorkMock.Object);
         var command = new CreateProductCategoryCommand { Name = "Gaming", Description = "Test" };
 
-        var existingCategories = new List<ProductCategoryEntity> { new() { Name = "Gaming", DeletedAt = null } }.AsQueryable(
-            );
         _readRepoMock.Setup(x => x.ExistsByNameAsync(
             It.Is<string>(s => s.Equals("gaming", StringComparison.OrdinalIgnoreCase)),
             It.IsAny<CancellationToken>(),
@@ -177,8 +175,6 @@ public class ProductCategory
         var handler = new CreateProductCategoryCommandHandler(_insertRepoMock.Object, _readRepoMock.Object, _unitOfWorkMock.Object);
         var command = new CreateProductCategoryCommand { Name = "gaming", Description = "Test" };
 
-        var existingCategories = new List<ProductCategoryEntity> { new() { Name = "Gaming", DeletedAt = null } }.AsQueryable(
-            );
         _readRepoMock.Setup(x => x.ExistsByNameAsync(
             It.Is<string>(s => s.Equals("gaming", StringComparison.OrdinalIgnoreCase)),
             It.IsAny<CancellationToken>(),
@@ -195,10 +191,6 @@ public class ProductCategory
         var handler = new CreateProductCategoryCommandHandler(_insertRepoMock.Object, _readRepoMock.Object, _unitOfWorkMock.Object);
         var command = new CreateProductCategoryCommand { Name = "Đã xóa", Description = "Test" };
 
-        var existingCategories = new List<ProductCategoryEntity>
-        {
-            new() { Name = "Đã xóa", DeletedAt = DateTime.UtcNow }
-        }.AsQueryable();
         _readRepoMock.Setup(x => x.ExistsByNameAsync(
             "Đã xóa",
             It.IsAny<CancellationToken>(),
