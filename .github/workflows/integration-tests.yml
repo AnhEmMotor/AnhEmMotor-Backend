@@ -1,4 +1,4 @@
-name: Run Integration Tests
+name: Run All Tests
 
 on:
   push:
@@ -33,13 +33,26 @@ jobs:
         dotnet-version: 10.0.x
         
     - name: Restore dependencies
-      run: dotnet restore IntegrationTests/IntegrationTests.csproj
+      run: dotnet restore
 
     - name: Build
-      run: dotnet build IntegrationTests/IntegrationTests.csproj --no-restore
+      run: dotnet build --no-restore
         
     - name: Run Integration Tests
-      run: dotnet test IntegrationTests/IntegrationTests.csproj --no-build --verbosity normal
+      run: dotnet test IntegrationTests/IntegrationTests.csproj --no-build --verbosity normal --logger "console;verbosity=normal"
       env:
-        # Override Connection String to point to the MySQL Service Container
         ConnectionStrings__StringConnection: "Server=127.0.0.1;Port=3306;Database=AnhEmMotor_Test;User=root;Password=root;"
+        Logging__LogLevel__Default: "Warning"
+        Logging__LogLevel__Microsoft.EntityFrameworkCore.Database.Command: "None"
+
+    - name: Run Controller Tests
+      run: dotnet test ControllerTests/ControllerTests.csproj --no-build --verbosity normal --logger "console;verbosity=normal"
+      env:
+        Logging__LogLevel__Default: "Warning"
+        Logging__LogLevel__Microsoft.EntityFrameworkCore.Database.Command: "None"
+
+    - name: Run Unit Tests
+      run: dotnet test UnitTests/UnitTests.csproj --no-build --verbosity normal --logger "console;verbosity=normal"
+      env:
+        Logging__LogLevel__Default: "Warning"
+        Logging__LogLevel__Microsoft.EntityFrameworkCore.Database.Command: "None"

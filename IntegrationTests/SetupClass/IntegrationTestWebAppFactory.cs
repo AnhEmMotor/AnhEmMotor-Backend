@@ -37,6 +37,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
 
     private Respawner _respawner = default!;
     private DbConnection _connection = default!;
+    private ApplicationDBContext _dbContext = default!;
 
 #pragma warning disable IDE0079 
 #pragma warning disable CRR0039
@@ -45,16 +46,18 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
         await _mySqlContainer.StartAsync().ConfigureAwait(false);
         _connection = new MySqlConnection(_mySqlContainer.GetConnectionString());
         await _connection.OpenAsync().ConfigureAwait(false);
-    }
 
-#pragma warning restore CRR0039
-#pragma warning restore IDE0079 
+        // Create a temporary DbContext to initialize the database schema
+        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDBContext>();
+        optionsBuilder.UseMySql(
+            _mySqlContainer.GetConnectionString(),
+            new MySqlServerVersion(new Version(8, 0, 0)));
 
-    public async Task ResetDatabaseAsync(CancellationToken cancellationToken = default)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
+        using var tempDbContext = new ApplicationDBContext(optionsBuilder.Options);
+        await tempDbContext.Database.EnsureCreatedAsync().ConfigureAwait(false);
 
-        _respawner ??= await Respawner.CreateAsync(
+        // Initialize Respawner after database schema is created
+        _respawner = await Respawner.CreateAsync(
             _connection,
             new RespawnerOptions
             {
@@ -63,9 +66,14 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                 TablesToIgnore = [ "__EFMigrationsHistory" ]
             })
             .ConfigureAwait(false);
+    }
 
+#pragma warning restore CRR0039
+#pragma warning restore IDE0079 
+
+    public async Task ResetDatabaseAsync(CancellationToken cancellationToken = default)
+    {
         cancellationToken.ThrowIfCancellationRequested();
-
         await _respawner.ResetAsync(_connection).ConfigureAwait(false);
     }
 
@@ -93,7 +101,11 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                             ["Jwt:AccessTokenExpiryInMinutes"] = "15",
                             ["Jwt:RefreshTokenExpiryInDays"] = "7",
                             ["ConnectionStrings:StringConnection"] = connString,
-                            ["ProtectedAuthorizationEntities:SuperRoles:0"] = "Administrator"
+                            ["ProtectedAuthorizationEntities:SuperRoles:0"] = "Administrator",
+                            ["Logging:LogLevel:Default"] = "Warning",
+                            ["Logging:LogLevel:Microsoft.EntityFrameworkCore.Database.Command"] = "None",
+                            ["Logging:LogLevel:Microsoft.EntityFrameworkCore"] = "Warning",
+                            ["Logging:LogLevel:Microsoft.AspNetCore"] = "Warning"
                         });
 
                 config.AddEnvironmentVariables();
@@ -166,11 +178,6 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                             .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Repository")))
                             .AsImplementedInterfaces()
                             .WithScopedLifetime());
-
-                var sp = services.BuildServiceProvider();
-                using var scope = sp.CreateScope();
-                var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-                db.Database.EnsureCreated();
             });
     }
 }
