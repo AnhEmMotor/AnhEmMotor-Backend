@@ -53,7 +53,7 @@ jobs:
       - name: Generate MySQL Migration Script
         run: |
           cd Infrastructure
-          dotnet ef migrations script --context MySqlDbContext --output ../mysql_schema.sql --idempotent
+          dotnet ef migrations script --context MySqlDbContext --output ../mysql_schema.sql
           cd ..
         continue-on-error: true
 
