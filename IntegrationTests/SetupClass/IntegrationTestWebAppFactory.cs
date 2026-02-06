@@ -39,34 +39,36 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
     private Respawner _respawner = default!;
     private DbConnection _connection = default!;
 
-    public async Task InitializeAsync()
+    public async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
-        await _mySqlContainer.StartAsync();
+        await _mySqlContainer.StartAsync(cancellationToken).ConfigureAwait(false);
 
         // Initialize connection and Respawner
         _connection = new MySqlConnection(_mySqlContainer.GetConnectionString());
         // Initialized lazily to ensure DB schema exists
-        await _connection.OpenAsync();
+        await _connection.OpenAsync(cancellationToken).ConfigureAwait(false);
     }
 
-    public async Task ResetDatabaseAsync()
+    public async Task ResetDatabaseAsync(CancellationToken cancellationToken = default)
     {
-        if (_respawner == null)
+        cancellationToken.ThrowIfCancellationRequested();
+
+        _respawner ??= await Respawner.CreateAsync(_connection, new RespawnerOptions
         {
-            _respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
-            {
-                DbAdapter = DbAdapter.MySql,
-                SchemasToInclude = ["AnhEmMotor_Test"],
-                TablesToIgnore = ["__EFMigrationsHistory"]
-            });
-        }
-        await _respawner.ResetAsync(_connection);
+            DbAdapter = DbAdapter.MySql,
+            SchemasToInclude = ["AnhEmMotor_Test"],
+            TablesToIgnore = ["__EFMigrationsHistory"]
+        }).ConfigureAwait(false);
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        await _respawner.ResetAsync(_connection).ConfigureAwait(false);
     }
 
     public new async Task DisposeAsync()
     {
-        await _connection.DisposeAsync();
-        await _mySqlContainer.StopAsync();
+        await _connection.DisposeAsync().ConfigureAwait(false);
+        await _mySqlContainer.StopAsync(CancellationToken.None).ConfigureAwait(false);
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)

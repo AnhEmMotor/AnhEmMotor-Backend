@@ -36,7 +36,7 @@ public class Auth : IAsyncLifetime
 
     public async Task DisposeAsync()
     {
-        await _factory.ResetDatabaseAsync();
+        await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(false);
     }
 
 #pragma warning disable IDE0079 
@@ -54,13 +54,13 @@ public class Auth : IAsyncLifetime
             Gender = "Male"
         };
 
-        var response = await _client.PostAsJsonAsync("/api/v1/Auth/register", request);
+        var response = await _client.PostAsJsonAsync("/api/v1/Auth/register", request).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
 
-        var jsonRaw = await response.Content.ReadAsStringAsync();
+        // var jsonRaw = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
 
-        var content = await response.Content.ReadFromJsonAsync<RegisterResponse>();
+        var content = await response.Content.ReadFromJsonAsync<RegisterResponse>(CancellationToken.None).ConfigureAwait(true);
 
         content.Should().NotBeNull();
         content!.UserId.Should().NotBeEmpty();
@@ -141,8 +141,9 @@ public class Auth : IAsyncLifetime
             "deleteduser",
             "Password123!",
             [], // No specific permissions needed for this test
+            CancellationToken.None,
             email: email,
-            deletedAt: DateTimeOffset.UtcNow);
+            deletedAt: DateTimeOffset.UtcNow).ConfigureAwait(true);
 
         var request = new RegisterCommand
         {
@@ -169,7 +170,8 @@ public class Auth : IAsyncLifetime
             "loginuser",
             password,
             [],
-            email: email);
+            CancellationToken.None,
+            email: email).ConfigureAwait(true);
 
         var request = new LoginCommand { UsernameOrEmail = email, Password = password };
 
@@ -197,8 +199,9 @@ public class Auth : IAsyncLifetime
             username,
             password,
             [],
+            CancellationToken.None,
             email: "banned@example.com",
-            isLocked: true);
+            isLocked: true).ConfigureAwait(true);
 
         var request = new LoginCommand { UsernameOrEmail = username, Password = password };
 
@@ -217,8 +220,9 @@ public class Auth : IAsyncLifetime
             username,
             password,
             [PermissionsList.Users.View],
+            CancellationToken.None,
             email: "manager@example.com",
-            roleName: "Manager");
+            roleName: "Manager").ConfigureAwait(true);
 
         var request = new LoginCommand { UsernameOrEmail = username, Password = password };
 
@@ -239,7 +243,8 @@ public class Auth : IAsyncLifetime
             username,
             password,
             [],
-            email: "refresh@example.com");
+            CancellationToken.None,
+            email: "refresh@example.com").ConfigureAwait(true);
 
         var loginRes = await _client.PostAsJsonAsync(
             "/api/v1/Auth/login",
@@ -280,7 +285,8 @@ public class Auth : IAsyncLifetime
             username,
             password,
             [],
-            email: "refresh_banned@example.com");
+            CancellationToken.None,
+            email: "refresh_banned@example.com").ConfigureAwait(true);
 
         var loginRes = await _client.PostAsJsonAsync(
             "/api/v1/Auth/login",

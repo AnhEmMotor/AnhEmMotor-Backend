@@ -4,6 +4,7 @@ using Application.ApiContracts.UserManager.Responses;
 using Application.Features.Auth.Commands.Login;
 using Application.Features.UserManager.Commands.UpdateUser;
 using Domain.Constants;
+using Domain.Constants.Permission;
 using Domain.Entities;
 using FluentAssertions;
 using Infrastructure.DBContexts;
@@ -38,7 +39,7 @@ public class User : IAsyncLifetime
 
     public async Task DisposeAsync()
     {
-        await _factory.ResetDatabaseAsync();
+        await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(true);
     }
 #pragma warning disable IDE0079
 #pragma warning disable CRR0035
@@ -79,10 +80,10 @@ public class User : IAsyncLifetime
         var adminUsername = $"admin_{adminUniqueId}";
         // Need to check what permissions restore requires. Assuming Users.Edit or special.
         // Let's give all permissions for simplicity in this context or check PermissionsList.
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, adminUsername, "AdminPass123!", [Domain.Constants.Permission.PermissionsList.Users.Edit, Domain.Constants.Permission.PermissionsList.Users.Delete]); 
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, adminUsername, "AdminPass123!", [PermissionsList.Users.Edit, PermissionsList.Users.Delete], CancellationToken.None).ConfigureAwait(true); 
         // Restore probably falls under Delete (Soft Delete toggle) or Edit.
         
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, adminUsername, "AdminPass123!");
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, adminUsername, "AdminPass123!", CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         // Get User ID
@@ -94,10 +95,10 @@ public class User : IAsyncLifetime
              userId = u!.Id.ToString();
         }
 
-        var response = await _client.PostAsync($"/api/v1/User/{userId}/restore", null);
+        var response = await _client.PostAsync($"/api/v1/User/{userId}/restore", null).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<RestoreUserResponse>();
+        var content = await response.Content.ReadFromJsonAsync<RestoreUserResponse>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Message.Should().Be("User account has been restored successfully.");
 
@@ -117,18 +118,18 @@ public class User : IAsyncLifetime
         var password = "ThisIsStrongPassword1@";
         
         // Admin to perform action
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [Domain.Constants.Permission.PermissionsList.Users.Edit]);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Users.Edit], CancellationToken.None).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         // Target User
         var targetId = Guid.NewGuid().ToString("N")[..8];
         var targetUser = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"target_{targetId}", "Pass123!");
 
-        var response = await _client.PostAsync($"/api/v1/User/{targetUser.Id}/restore", null);
+        var response = await _client.PostAsync($"/api/v1/User/{targetUser.Id}/restore", null).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var content = await response.Content.ReadAsStringAsync();
+        var content = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
         content.Should().Contain("User account is not deleted.");
     }
 
@@ -138,8 +139,8 @@ public class User : IAsyncLifetime
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueId}";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [Domain.Constants.Permission.PermissionsList.Users.Edit]);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Users.Edit], CancellationToken.None).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var targetId = Guid.NewGuid().ToString("N")[..8];
@@ -151,13 +152,13 @@ public class User : IAsyncLifetime
             var u = await db.Users.FindAsync(targetUser.Id);
             u!.Status = UserStatus.Banned;
             u.DeletedAt = DateTimeOffset.UtcNow.AddDays(-1);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.PostAsync($"/api/v1/User/{targetUser.Id}/restore", null);
+        var response = await _client.PostAsync($"/api/v1/User/{targetUser.Id}/restore", null).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var content = await response.Content.ReadAsStringAsync();
+        var content = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
         content.Should().Contain($"Cannot restore user with status '{UserStatus.Banned}'. User status must be Active.");
     }
 
@@ -167,12 +168,12 @@ public class User : IAsyncLifetime
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueId}";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [Domain.Constants.Permission.PermissionsList.Users.Edit]);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Users.Edit], CancellationToken.None).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var nonExistentUserId = Guid.NewGuid();
-        var response = await _client.PostAsync($"/api/v1/User/{nonExistentUserId}/restore", null);
+        var response = await _client.PostAsync($"/api/v1/User/{nonExistentUserId}/restore", null).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -186,13 +187,13 @@ public class User : IAsyncLifetime
         var password = "ThisIsStrongPassword1@";
 
         await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, username, password, email: email);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var response = await _client.GetAsync("/api/v1/User/me");
+        var response = await _client.GetAsync("/api/v1/User/me").ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<UserResponse>();
+        var content = await response.Content.ReadFromJsonAsync<UserResponse>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.UserName.Should().Be(username);
         content.Email.Should().Be(email);
@@ -202,7 +203,7 @@ public class User : IAsyncLifetime
     public async Task GetCurrentUser_NoJWT_ReturnsUnauthorized()
     {
         _client.DefaultRequestHeaders.Authorization = null;
-        var response = await _client.GetAsync("/api/v1/User/me");
+        var response = await _client.GetAsync("/api/v1/User/me").ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
@@ -214,7 +215,7 @@ public class User : IAsyncLifetime
         var password = "ThisIsStrongPassword1@";
 
         await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, username, password);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var updateRequest = new UpdateUserCommand
@@ -244,7 +245,7 @@ public class User : IAsyncLifetime
         var password = "ThisIsStrongPassword1@";
 
         await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, username, password);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var updateRequest = new UpdateUserCommand 
@@ -257,7 +258,7 @@ public class User : IAsyncLifetime
         var response = await _client.PutAsJsonAsync("/api/v1/User/me", updateRequest);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var content = await response.Content.ReadAsStringAsync();
+        var content = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
         content.Should().Contain("Invalid phone number format");
     }
 
@@ -270,7 +271,7 @@ public class User : IAsyncLifetime
         var newPassword = "NewPass456!";
 
         await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, username, oldPassword);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, oldPassword);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, oldPassword, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var changePasswordRequest = new Application.Features.UserManager.Commands.ChangePasswordByManager.ChangePasswordByManagerCommand
@@ -279,19 +280,19 @@ public class User : IAsyncLifetime
             NewPassword = newPassword
         };
 
-        var response = await _client.PostAsJsonAsync("/api/v1/User/change-password", changePasswordRequest);
+        var response = await _client.PostAsJsonAsync("/api/v1/User/change-password", changePasswordRequest).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         
         // Verify can login with new password
-        var newLoginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, newPassword);
+        var newLoginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, newPassword, CancellationToken.None).ConfigureAwait(true);
         newLoginResponse.AccessToken.Should().NotBeNullOrEmpty();
 
         // Verify old token is invalid (SecurityStamp check)
         // Note: In some implementations, old JWTs are still valid until expiry unless explicit check against DB SecurityStamp is done in middleware.
         // Identity checks SecurityStamp on every request if properly configured or on interval.
         // USER_033 tests this explicitly, so we assume it works.
-        var oldTokenResponse = await _client.GetAsync("/api/v1/User/me");
+        var oldTokenResponse = await _client.GetAsync("/api/v1/User/me").ConfigureAwait(true);
         oldTokenResponse.StatusCode.Should().Be(HttpStatusCode.Unauthorized); 
     }
 
@@ -303,7 +304,7 @@ public class User : IAsyncLifetime
         var oldPassword = "OldPass123!";
 
         await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, username, oldPassword);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, oldPassword);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, oldPassword, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var changePasswordRequest = new Application.Features.UserManager.Commands.ChangePasswordByManager.ChangePasswordByManagerCommand
@@ -312,10 +313,10 @@ public class User : IAsyncLifetime
             NewPassword = "NewPass456!"
         };
 
-        var response = await _client.PostAsJsonAsync("/api/v1/User/change-password", changePasswordRequest);
+        var response = await _client.PostAsJsonAsync("/api/v1/User/change-password", changePasswordRequest).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var errorContent = await response.Content.ReadAsStringAsync();
+        var errorContent = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
         errorContent.Should().Contain("Incorrect password.");
     }
 
@@ -327,10 +328,10 @@ public class User : IAsyncLifetime
         var password = "ThisIsStrongPassword1@";
 
         await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, username, password);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var response = await _client.PostAsync("/api/v1/User/delete-account", null);
+        var response = await _client.PostAsync("/api/v1/User/delete-account", null).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         
@@ -341,7 +342,7 @@ public class User : IAsyncLifetime
             user!.DeletedAt.Should().NotBeNull();
         }
 
-        var tokenTestResponse = await _client.GetAsync("/api/v1/User/me");
+        var tokenTestResponse = await _client.GetAsync("/api/v1/User/me").ConfigureAwait(true);
         tokenTestResponse.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
@@ -354,7 +355,7 @@ public class User : IAsyncLifetime
 
         // 1. Create & Login (Get Token)
         var user = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, username, password);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         // 2. Ban user in DB
@@ -363,11 +364,11 @@ public class User : IAsyncLifetime
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var u = await db.Users.FindAsync(user.Id);
             u!.Status = UserStatus.Banned;
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
         // 3. Try to Delete Account - Should return Forbidden (403)
-        var response = await _client.PostAsync("/api/v1/User/delete-account", null);
+        var response = await _client.PostAsync("/api/v1/User/delete-account", null).ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
@@ -380,7 +381,7 @@ public class User : IAsyncLifetime
         var newPassword = "NewPass456!";
 
         await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, username, password);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         // Change password
@@ -389,11 +390,11 @@ public class User : IAsyncLifetime
             CurrentPassword = password,
             NewPassword = newPassword
         };
-        var changeResponse = await _client.PostAsJsonAsync("/api/v1/User/change-password", changePasswordRequest);
+        var changeResponse = await _client.PostAsJsonAsync("/api/v1/User/change-password", changePasswordRequest).ConfigureAwait(true);
         changeResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
         // Use old token
-        var testResponse = await _client.GetAsync("/api/v1/User/me");
+        var testResponse = await _client.GetAsync("/api/v1/User/me").ConfigureAwait(true);
         testResponse.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
@@ -405,7 +406,7 @@ public class User : IAsyncLifetime
         var password = "Pass123!";
 
         var user = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, username, password);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         using(var scope = _factory.Services.CreateScope())
@@ -413,10 +414,10 @@ public class User : IAsyncLifetime
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var u = await db.Users.FindAsync(user.Id);
             u!.DeletedAt = DateTimeOffset.UtcNow;
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync("/api/v1/User/me");
+        var response = await _client.GetAsync("/api/v1/User/me").ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
@@ -428,7 +429,7 @@ public class User : IAsyncLifetime
         var password = "Pass123!";
 
         var user = await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, username, password);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         using(var scope = _factory.Services.CreateScope())
@@ -436,10 +437,10 @@ public class User : IAsyncLifetime
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var u = await db.Users.FindAsync(user.Id);
             u!.Status = UserStatus.Banned;
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync("/api/v1/User/me");
+        var response = await _client.GetAsync("/api/v1/User/me").ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 #pragma warning restore CRR0035

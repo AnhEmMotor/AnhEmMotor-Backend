@@ -39,7 +39,7 @@ public class Supplier : IAsyncLifetime
 
     public async Task DisposeAsync()
     {
-        await _factory.ResetDatabaseAsync();
+        await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(true);
     }
 
 #pragma warning disable IDE0079
@@ -50,8 +50,8 @@ public class Supplier : IAsyncLifetime
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueId}";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Suppliers.View]);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Suppliers.View], CancellationToken.None).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         using (var scope = _factory.Services.CreateScope())
@@ -68,7 +68,7 @@ public class Supplier : IAsyncLifetime
                     StatusId = i % 2 == 0 ? Domain.Constants.SupplierStatus.Active : Domain.Constants.SupplierStatus.Inactive
                 });
             }
-            await db.Suppliers.AddRangeAsync(suppliers);
+            await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
             
             // Ensure statuses exist
             if (!await db.SupplierStatuses.AnyAsync(s => s.Key == Domain.Constants.SupplierStatus.Active))
@@ -76,13 +76,13 @@ public class Supplier : IAsyncLifetime
             if (!await db.SupplierStatuses.AnyAsync(s => s.Key == Domain.Constants.SupplierStatus.Inactive))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Inactive });
 
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier?Page=1&PageSize=10");
+        var response = await _client.GetAsync($"/api/v1/Supplier?Page=1&PageSize=10").ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<SupplierResponse>>();
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<SupplierResponse>>(CancellationToken.None).ConfigureAwait(true);
         
         content.Should().NotBeNull();
         content!.Items.Should().HaveCount(10);
@@ -95,8 +95,8 @@ public class Supplier : IAsyncLifetime
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueId}";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Suppliers.View]);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Suppliers.View], CancellationToken.None).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         using (var scope = _factory.Services.CreateScope())
@@ -118,14 +118,14 @@ public class Supplier : IAsyncLifetime
                     StatusId = Domain.Constants.SupplierStatus.Active
                 });
             }
-            await db.Suppliers.AddRangeAsync(suppliers);
-            await db.SaveChangesAsync();
+            await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier?Page=2&PageSize=5");
+        var response = await _client.GetAsync($"/api/v1/Supplier?Page=2&PageSize=5").ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<SupplierResponse>>();
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<SupplierResponse>>(CancellationToken.None).ConfigureAwait(true);
         
         content.Should().NotBeNull();
         content!.Items.Should().HaveCount(5);
@@ -138,8 +138,8 @@ public class Supplier : IAsyncLifetime
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueId}";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Suppliers.View]);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Suppliers.View], CancellationToken.None).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         using (var scope = _factory.Services.CreateScope())
@@ -155,14 +155,14 @@ public class Supplier : IAsyncLifetime
                 new() { Name = $"Test_{uniqueId}_2", Phone = "0222222222", Address = "A", StatusId = Domain.Constants.SupplierStatus.Active },
                 new() { Name = $"Other_{uniqueId}", Phone = "0333333333", Address = "A", StatusId = Domain.Constants.SupplierStatus.Active }
             };
-            await db.Suppliers.AddRangeAsync(suppliers);
-            await db.SaveChangesAsync();
+            await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier?Filters=Name@=Test_{uniqueId}");
+        var response = await _client.GetAsync($"/api/v1/Supplier?Filters=Name@=Test_{uniqueId}").ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<SupplierResponse>>();
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<SupplierResponse>>(CancellationToken.None).ConfigureAwait(true);
         
         content.Should().NotBeNull();
         content!.Items.Should().HaveCount(2);
@@ -175,8 +175,8 @@ public class Supplier : IAsyncLifetime
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueId}";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Suppliers.View]);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Suppliers.View], CancellationToken.None).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         using (var scope = _factory.Services.CreateScope())
@@ -191,14 +191,14 @@ public class Supplier : IAsyncLifetime
                 new() { Name = $"Alpha_{uniqueId}", Phone = "0222222222", Address = "A", StatusId = Domain.Constants.SupplierStatus.Active },
                 new() { Name = $"Beta_{uniqueId}", Phone = "0333333333", Address = "A", StatusId = Domain.Constants.SupplierStatus.Active }
             };
-            await db.Suppliers.AddRangeAsync(suppliers);
-            await db.SaveChangesAsync();
+            await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier?Sorts=Name&Filters=Name@={uniqueId}");
+        var response = await _client.GetAsync($"/api/v1/Supplier?Sorts=Name&Filters=Name@={uniqueId}").ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<SupplierResponse>>();
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<SupplierResponse>>(CancellationToken.None).ConfigureAwait(true);
         
         content.Should().NotBeNull();
         content!.Items.Should().HaveCount(3);
@@ -213,8 +213,8 @@ public class Supplier : IAsyncLifetime
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueId}";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Suppliers.View]);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Suppliers.View], CancellationToken.None).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         using (var scope = _factory.Services.CreateScope())
@@ -232,14 +232,14 @@ public class Supplier : IAsyncLifetime
                 new() { Name = $"Inactive_{uniqueId}", Phone = "0222222222", Address = "A", StatusId = Domain.Constants.SupplierStatus.Inactive, DeletedAt = null },
                 new() { Name = $"Deleted_{uniqueId}", Phone = "0333333333", Address = "A", StatusId = Domain.Constants.SupplierStatus.Active, DeletedAt = DateTime.UtcNow }
             };
-            await db.Suppliers.AddRangeAsync(suppliers);
-            await db.SaveChangesAsync();
+            await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier?Filters=Id@={uniqueId}");
+        var response = await _client.GetAsync($"/api/v1/Supplier?Filters=Id@={uniqueId}").ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<SupplierResponse>>();
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<SupplierResponse>>(CancellationToken.None).ConfigureAwait(true);
         
         content.Should().NotBeNull();
         // Since other tests might add active suppliers, we just ensure our deleted one isn't there and our active/inactive checks are present
@@ -254,8 +254,8 @@ public class Supplier : IAsyncLifetime
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueId}";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Suppliers.View]);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Suppliers.View], CancellationToken.None).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         using (var scope = _factory.Services.CreateScope())
@@ -269,14 +269,14 @@ public class Supplier : IAsyncLifetime
                 new() { Name = $"Active_{uniqueId}", Phone = "0111111111", Address = "A", StatusId = Domain.Constants.SupplierStatus.Active, DeletedAt = null },
                 new() { Name = $"Deleted_{uniqueId}", Phone = "0222222222", Address = "A", StatusId = Domain.Constants.SupplierStatus.Active, DeletedAt = DateTime.UtcNow }
             };
-            await db.Suppliers.AddRangeAsync(suppliers);
-            await db.SaveChangesAsync();
+            await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier/deleted?Filters=Id@={uniqueId}");
+        var response = await _client.GetAsync($"/api/v1/Supplier/deleted?Filters=Id@={uniqueId}").ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<SupplierResponse>>();
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<SupplierResponse>>(CancellationToken.None).ConfigureAwait(true);
         
         content.Should().NotBeNull();
         content!.Items.Should().Contain(s => s.Name == $"Deleted_{uniqueId}");
@@ -289,8 +289,8 @@ public class Supplier : IAsyncLifetime
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueId}";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Suppliers.View]);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Suppliers.View], CancellationToken.None).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         int supplierId;
@@ -311,14 +311,14 @@ public class Supplier : IAsyncLifetime
                 Notes = "Test notes"
             };
             await db.Suppliers.AddAsync(supplier);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             supplierId = supplier.Id;
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}");
+        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}").ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<SupplierResponse>();
+        var content = await response.Content.ReadFromJsonAsync<SupplierResponse>(CancellationToken.None).ConfigureAwait(true);
         
         content.Should().NotBeNull();
         content!.Id.Should().Be(supplierId);
@@ -332,8 +332,8 @@ public class Supplier : IAsyncLifetime
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueId}";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Suppliers.View]);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Suppliers.View], CancellationToken.None).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         int supplierId;
@@ -352,11 +352,11 @@ public class Supplier : IAsyncLifetime
                 DeletedAt = DateTime.UtcNow
             };
             await db.Suppliers.AddAsync(supplier);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             supplierId = supplier.Id;
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}");
+        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}").ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -367,11 +367,11 @@ public class Supplier : IAsyncLifetime
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueId}";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Suppliers.View]);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Suppliers.View], CancellationToken.None).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var response = await _client.GetAsync("/api/v1/Supplier/999999");
+        var response = await _client.GetAsync("/api/v1/Supplier/999999").ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -382,8 +382,8 @@ public class Supplier : IAsyncLifetime
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueId}";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Suppliers.Delete]);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Suppliers.Delete], CancellationToken.None).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         List<int> supplierIds;
@@ -398,8 +398,8 @@ public class Supplier : IAsyncLifetime
                 new() { Name = $"S1_{uniqueId}", Phone = "0111111111", Address = "A", StatusId = Domain.Constants.SupplierStatus.Active },
                 new() { Name = $"S2_{uniqueId}", Phone = "0222222222", Address = "A", StatusId = Domain.Constants.SupplierStatus.Active }
             };
-            await db.Suppliers.AddRangeAsync(suppliers);
-            await db.SaveChangesAsync();
+            await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             supplierIds = [.. suppliers.Select(s => s.Id)];
         }
 
@@ -409,7 +409,7 @@ public class Supplier : IAsyncLifetime
             Content = JsonContent.Create(request)
         };
 
-        var response = await _client.SendAsync(requestMessage);
+        var response = await _client.SendAsync(requestMessage).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
@@ -427,8 +427,8 @@ public class Supplier : IAsyncLifetime
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueId}";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Suppliers.Delete]);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Suppliers.Delete], CancellationToken.None).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         List<int> supplierIds;
@@ -442,15 +442,15 @@ public class Supplier : IAsyncLifetime
 
             var supplier1 = new SupplierEntity { Name = $"S1_{uniqueId}", Phone = "011", Address = "A", StatusId = Domain.Constants.SupplierStatus.Active };
             var supplier2 = new SupplierEntity { Name = $"S2_{uniqueId}", Phone = "022", Address = "A", StatusId = Domain.Constants.SupplierStatus.Active };
-            await db.Suppliers.AddRangeAsync([supplier1, supplier2]);
-            await db.SaveChangesAsync();
+            await db.Suppliers.AddRangeAsync([supplier1, supplier2], CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
             var user = await db.Users.FirstOrDefaultAsync(u => u.UserName == username);
             var userId = user?.Id ?? Guid.NewGuid();
 
             var input = new Input { SupplierId = supplier2.Id, StatusId = Domain.Constants.Input.InputStatus.Working, CreatedBy = userId }; // Minimal Input
             await db.InputReceipts.AddAsync(input);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
             supplierIds = [supplier1.Id, supplier2.Id];
         }
@@ -461,7 +461,7 @@ public class Supplier : IAsyncLifetime
             Content = JsonContent.Create(request)
         };
 
-        var response = await _client.SendAsync(requestMessage);
+        var response = await _client.SendAsync(requestMessage).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest); // or whatever status code the logic returns for failure
 
@@ -479,13 +479,13 @@ public class Supplier : IAsyncLifetime
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueId}";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Suppliers.Delete]); // Usually Restore might share Delete permissions or have its own
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Suppliers.Delete], CancellationToken.None).ConfigureAwait(true); // Usually Restore might share Delete permissions or have its own
         // Assuming Restore behaves similarly permission-wise or check if specific perm needed. 
         // Based on other files, it likely uses RestoreManySuppliersValidator/Handler which might check Delete or Edit. 
         // Let's assume Delete perm works or check handler. Safest is ensuring Delete works or providing super access? 
         // Let's stick to Suppliers.Delete as per previous conversations/common sense for Restore.
         
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         List<int> supplierIds;
@@ -500,13 +500,13 @@ public class Supplier : IAsyncLifetime
                 new() { Name = $"S1_{uniqueId}", Phone = "011", Address = "A", StatusId = Domain.Constants.SupplierStatus.Active, DeletedAt = DateTime.UtcNow },
                 new() { Name = $"S2_{uniqueId}", Phone = "022", Address = "A", StatusId = Domain.Constants.SupplierStatus.Active, DeletedAt = DateTime.UtcNow }
             };
-            await db.Suppliers.AddRangeAsync(suppliers);
-            await db.SaveChangesAsync();
+            await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             supplierIds = [.. suppliers.Select(s => s.Id)];
         }
 
         var request = new RestoreManySuppliersCommand { Ids = supplierIds };
-        var response = await _client.PostAsJsonAsync("/api/v1/Supplier/restore-many", request);
+        var response = await _client.PostAsJsonAsync("/api/v1/Supplier/restore-many", request).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
@@ -524,8 +524,8 @@ public class Supplier : IAsyncLifetime
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueId}";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Suppliers.Edit]);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Suppliers.Edit], CancellationToken.None).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         List<int> supplierIds;
@@ -542,8 +542,8 @@ public class Supplier : IAsyncLifetime
                 new() { Name = $"S1_{uniqueId}", Phone = "011", Address = "A", StatusId = Domain.Constants.SupplierStatus.Active },
                 new() { Name = $"S2_{uniqueId}", Phone = "022", Address = "A", StatusId = Domain.Constants.SupplierStatus.Active }
             };
-            await db.Suppliers.AddRangeAsync(suppliers);
-            await db.SaveChangesAsync();
+            await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             supplierIds = [.. suppliers.Select(s => s.Id)];
         }
 
@@ -566,8 +566,8 @@ public class Supplier : IAsyncLifetime
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueId}";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Suppliers.View]);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Suppliers.View], CancellationToken.None).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         int supplierId;
@@ -580,7 +580,7 @@ public class Supplier : IAsyncLifetime
             var supplier = new SupplierEntity { Name = $"S_{uniqueId}", Phone = "099", Address = "A", StatusId = Domain.Constants.SupplierStatus.Active };
             
             await db.Suppliers.AddAsync(supplier);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             supplierId = supplier.Id;
 
             var user = await db.Users.FirstOrDefaultAsync(u => u.UserName == username);
@@ -592,8 +592,8 @@ public class Supplier : IAsyncLifetime
                 new() { SupplierId = supplierId, StatusId = Domain.Constants.Input.InputStatus.Finish, CreatedBy = userId },
                 new() { SupplierId = supplierId, StatusId = Domain.Constants.Input.InputStatus.Finish, CreatedBy = userId }
             };
-            await db.InputReceipts.AddRangeAsync(inputs);
-            await db.SaveChangesAsync();
+            await db.InputReceipts.AddRangeAsync(inputs, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
             var inputInfos = new List<InputInfo>
             {
@@ -601,14 +601,14 @@ public class Supplier : IAsyncLifetime
                 new() { InputId = inputs[1].Id, InputPrice = 2000m, Count = 20 },    // 40,000
                 new() { InputId = inputs[2].Id, InputPrice = 500m, Count = 30 }      // 15,000
             };
-            await db.InputInfos.AddRangeAsync(inputInfos);
-            await db.SaveChangesAsync();
+            await db.InputInfos.AddRangeAsync(inputInfos, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}");
+        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}").ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<SupplierResponse>();
+        var content = await response.Content.ReadFromJsonAsync<SupplierResponse>(CancellationToken.None).ConfigureAwait(true);
         
         content.Should().NotBeNull();
         content!.TotalInput.Should().Be(65000); // 10k + 40k + 15k
@@ -620,8 +620,8 @@ public class Supplier : IAsyncLifetime
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueId}";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Suppliers.View]);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Suppliers.View], CancellationToken.None).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         int supplierId;
@@ -638,7 +638,7 @@ public class Supplier : IAsyncLifetime
             var supplier = new SupplierEntity { Name = $"S_{uniqueId}", Phone = "099", Address = "A", StatusId = Domain.Constants.SupplierStatus.Active };
             
             await db.Suppliers.AddAsync(supplier);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             supplierId = supplier.Id;
 
             var user = await db.Users.FirstOrDefaultAsync(u => u.UserName == username);
@@ -650,8 +650,8 @@ public class Supplier : IAsyncLifetime
                 new() { SupplierId = supplierId, StatusId = Domain.Constants.Input.InputStatus.Working, CreatedBy = userId },
                 new() { SupplierId = supplierId, StatusId = Domain.Constants.Input.InputStatus.Cancel, CreatedBy = userId }
             };
-            await db.InputReceipts.AddRangeAsync(inputs);
-            await db.SaveChangesAsync();
+            await db.InputReceipts.AddRangeAsync(inputs, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
             var inputInfos = new List<InputInfo>
             {
@@ -659,14 +659,14 @@ public class Supplier : IAsyncLifetime
                 new() { InputId = inputs[1].Id, InputPrice = 200m, Count = 50 },   // Working: 10,000 (Ignored)
                 new() { InputId = inputs[2].Id, InputPrice = 300m, Count = 100 }   // Cancelled: 30,000 (Ignored)
             };
-            await db.InputInfos.AddRangeAsync(inputInfos);
-            await db.SaveChangesAsync();
+            await db.InputInfos.AddRangeAsync(inputInfos, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}");
+        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}").ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<SupplierResponse>();
+        var content = await response.Content.ReadFromJsonAsync<SupplierResponse>(CancellationToken.None).ConfigureAwait(true);
         
         content.Should().NotBeNull();
         content!.TotalInput.Should().Be(10000);

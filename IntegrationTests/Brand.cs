@@ -35,7 +35,7 @@ public class Brand : IAsyncLifetime
 
     public async Task DisposeAsync()
     {
-        await _factory.ResetDatabaseAsync();
+        await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(false);
     }
 #pragma warning disable IDE0079 
 #pragma warning disable CRR0035
@@ -46,31 +46,31 @@ public class Brand : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], CancellationToken.None, email).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
 
         var command = new CreateBrandCommand { Name = "Honda Integration", Description = "Integration Test" };
         var requestMessage = new HttpRequestMessage(HttpMethod.Post, "/api/v1/brand");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         requestMessage.Content = JsonContent.Create(command);
-        var response = await _client.SendAsync(requestMessage);
+        var response = await _client.SendAsync(requestMessage).ConfigureAwait(true);
 
         if (response.StatusCode == HttpStatusCode.Unauthorized)
         {
-            var errorContent = await response.Content.ReadAsStringAsync();
+            var errorContent = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
             throw new Exception($"API returned 401. Response Body: {errorContent}");
         }
 
         if (response.StatusCode == HttpStatusCode.InternalServerError)
         {
-            var errorContent = await response.Content.ReadAsStringAsync();
+            var errorContent = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
             throw new Exception($"API returned 500. Response Body: {errorContent}");
         }
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
 
         var responseData = await response.Content
-            .ReadFromJsonAsync<BrandResponse>(CancellationToken.None);
+            .ReadFromJsonAsync<BrandResponse>(CancellationToken.None).ConfigureAwait(true);
 
         responseData.Should().NotBeNull();
         responseData!.Name.Should().Be("Honda Integration");
@@ -140,8 +140,8 @@ public class Brand : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.View], email);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.View], CancellationToken.None, email).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
 
         int id;
         using(var scope = _factory.Services.CreateScope())
@@ -156,7 +156,7 @@ public class Brand : IAsyncLifetime
 
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/Brand/{id}");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-        var response = await _client.SendAsync(requestMessage);
+        var response = await _client.SendAsync(requestMessage).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -173,8 +173,8 @@ public class Brand : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Edit], email);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Edit], CancellationToken.None, email).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
 
         int id;
         using(var scope = _factory.Services.CreateScope())
@@ -191,7 +191,7 @@ public class Brand : IAsyncLifetime
         var requestMessage = new HttpRequestMessage(HttpMethod.Put, $"/api/v1/Brand/{id}");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         requestMessage.Content = JsonContent.Create(request);
-        var response = await _client.SendAsync(requestMessage);
+        var response = await _client.SendAsync(requestMessage).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
@@ -203,8 +203,8 @@ public class Brand : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Delete], email);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Delete], CancellationToken.None, email).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
 
         int id;
         using(var scope = _factory.Services.CreateScope())
@@ -219,7 +219,7 @@ public class Brand : IAsyncLifetime
 
         var requestMessage = new HttpRequestMessage(HttpMethod.Delete, $"/api/v1/Brand/{id}");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-        var response = await _client.SendAsync(requestMessage);
+        var response = await _client.SendAsync(requestMessage).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
@@ -231,8 +231,8 @@ public class Brand : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Delete], email);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Delete], CancellationToken.None, email).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
 
         int id;
         using(var scope = _factory.Services.CreateScope())
@@ -247,7 +247,7 @@ public class Brand : IAsyncLifetime
 
         var requestMessage = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/Brand/restore/{id}");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-        var response = await _client.SendAsync(requestMessage);
+        var response = await _client.SendAsync(requestMessage).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
@@ -259,8 +259,8 @@ public class Brand : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Delete], email);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Delete], CancellationToken.None, email).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
 
         var ids = new List<int>();
         using(var scope = _factory.Services.CreateScope())
@@ -280,7 +280,7 @@ public class Brand : IAsyncLifetime
         var requestMessage = new HttpRequestMessage(HttpMethod.Delete, "/api/v1/Brand/delete-many");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         requestMessage.Content = JsonContent.Create(request);
-        var response = await _client.SendAsync(requestMessage);
+        var response = await _client.SendAsync(requestMessage).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
@@ -292,8 +292,8 @@ public class Brand : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Delete], email);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Delete], CancellationToken.None, email).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
 
         var ids = new List<int>();
         using(var scope = _factory.Services.CreateScope())
@@ -313,7 +313,7 @@ public class Brand : IAsyncLifetime
         var requestMessage = new HttpRequestMessage(HttpMethod.Post, "/api/v1/Brand/restore-many");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         requestMessage.Content = JsonContent.Create(request);
-        var response = await _client.SendAsync(requestMessage);
+        var response = await _client.SendAsync(requestMessage).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
@@ -325,22 +325,22 @@ public class Brand : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Delete], email);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Delete], CancellationToken.None, email).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
 
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, "/api/v1/brand/deleted");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-        var response = await _client.SendAsync(requestMessage);
+        var response = await _client.SendAsync(requestMessage).ConfigureAwait(true);
 
         if (response.StatusCode == HttpStatusCode.Unauthorized)
         {
-            var errorContent = await response.Content.ReadAsStringAsync();
+            var errorContent = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
             throw new Exception($"API returned 401. Response Body: {errorContent}");
         }
 
         if (response.StatusCode == HttpStatusCode.InternalServerError)
         {
-            var errorContent = await response.Content.ReadAsStringAsync();
+            var errorContent = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
             throw new Exception($"API returned 500. Response Body: {errorContent}");
         }
 
@@ -354,15 +354,15 @@ public class Brand : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], email);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Create], CancellationToken.None, email).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
 
         var request = new CreateBrandCommand { Name = "Audit Brand", Description = "Audit" };
 
         var requestMessage = new HttpRequestMessage(HttpMethod.Post, "/api/v1/Brand");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         requestMessage.Content = JsonContent.Create(request);
-        var response = await _client.SendAsync(requestMessage);
+        await _client.SendAsync(requestMessage).ConfigureAwait(true);
 
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
@@ -378,8 +378,8 @@ public class Brand : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Edit], email);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Brands.Edit], CancellationToken.None, email).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
 
         int id;
         using(var scope = _factory.Services.CreateScope())
@@ -396,7 +396,7 @@ public class Brand : IAsyncLifetime
         var requestMessage = new HttpRequestMessage(HttpMethod.Put, $"/api/v1/Brand/{id}");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         requestMessage.Content = JsonContent.Create(request);
-        var response = await _client.SendAsync(requestMessage);
+        await _client.SendAsync(requestMessage).ConfigureAwait(true);
 
         using var verifyScope = _factory.Services.CreateScope();
         var verifyDb = verifyScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();

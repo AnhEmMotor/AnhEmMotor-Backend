@@ -39,7 +39,7 @@ public class ProductCategory : IAsyncLifetime
 
     public async Task DisposeAsync()
     {
-        await _factory.ResetDatabaseAsync();
+        await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(true);
     }
 
 #pragma warning disable IDE0079
@@ -51,8 +51,8 @@ public class ProductCategory : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.ProductCategories.View], email);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.ProductCategories.View], CancellationToken.None, email).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         using (var scope = _factory.Services.CreateScope())
@@ -63,14 +63,14 @@ public class ProductCategory : IAsyncLifetime
             {
                 categories.Add(new ProductCategoryEntity { Name = $"Category_{uniqueId}_{i}", Description = "Desc", DeletedAt = null });
             }
-            await db.ProductCategories.AddRangeAsync(categories);
-            await db.SaveChangesAsync();
+            await db.ProductCategories.AddRangeAsync(categories, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/ProductCategory?Page=1&PageSize=10&Filters=Name@={uniqueId}");
+        var response = await _client.GetAsync($"/api/v1/ProductCategory?Page=1&PageSize=10&Filters=Name@={uniqueId}").ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>();
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Items.Should().HaveCount(10);
         content.TotalCount.Should().Be(15);
@@ -84,8 +84,8 @@ public class ProductCategory : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.ProductCategories.View], email);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.ProductCategories.View], CancellationToken.None, email).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         using (var scope = _factory.Services.CreateScope())
@@ -96,14 +96,14 @@ public class ProductCategory : IAsyncLifetime
             {
                 categories.Add(new ProductCategoryEntity { Name = $"Category_{uniqueId}_{i}", Description = "Desc", DeletedAt = null });
             }
-            await db.ProductCategories.AddRangeAsync(categories);
-            await db.SaveChangesAsync();
+            await db.ProductCategories.AddRangeAsync(categories, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/ProductCategory?Page=2&PageSize=5&Filters=Name@={uniqueId}");
+        var response = await _client.GetAsync($"/api/v1/ProductCategory?Page=2&PageSize=5&Filters=Name@={uniqueId}").ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>();
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Items.Should().HaveCount(5);
         content.TotalCount.Should().Be(12);
@@ -117,8 +117,8 @@ public class ProductCategory : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.ProductCategories.View], email);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.ProductCategories.View], CancellationToken.None, email).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         using (var scope = _factory.Services.CreateScope())
@@ -128,18 +128,18 @@ public class ProductCategory : IAsyncLifetime
                 new ProductCategoryEntity { Name = $"SmartPhone_{uniqueId}", Description = "Desc", DeletedAt = null },
                 new ProductCategoryEntity { Name = $"Phone Case_{uniqueId}", Description = "Desc", DeletedAt = null },
                 new ProductCategoryEntity { Name = $"Laptop_{uniqueId}", Description = "Desc", DeletedAt = null }
-            );
-            await db.SaveChangesAsync();
+            ).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/ProductCategory?Filters=Name@=Phone,Name@={uniqueId}"); // Filter both strictly
+        var response = await _client.GetAsync($"/api/v1/ProductCategory?Filters=Name@=Phone,Name@={uniqueId}").ConfigureAwait(true); // Filter both strictly
 
         // Since Sieve might handle ',' as OR or AND depends on config, usually comma in Filters string separates different filters (AND). 
         // We want (Name contains 'Phone') AND (Name contains uniqueId). 
         // If Sieve default logic applies, separate params or comma. Let's try comma.
         
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>();
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         
         // "Smartphone_..." contains "Phone"
@@ -163,8 +163,8 @@ public class ProductCategory : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.ProductCategories.View], email);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.ProductCategories.View], CancellationToken.None, email).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         using (var scope = _factory.Services.CreateScope())
@@ -174,14 +174,14 @@ public class ProductCategory : IAsyncLifetime
                 new ProductCategoryEntity { Name = $"Zebra_{uniqueId}", Description = "Desc", DeletedAt = null },
                 new ProductCategoryEntity { Name = $"Apple_{uniqueId}", Description = "Desc", DeletedAt = null },
                 new ProductCategoryEntity { Name = $"Microsoft_{uniqueId}", Description = "Desc", DeletedAt = null }
-            );
-            await db.SaveChangesAsync();
+            ).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/ProductCategory?Sorts=Name&Filters=Name@={uniqueId}");
+        var response = await _client.GetAsync($"/api/v1/ProductCategory?Sorts=Name&Filters=Name@={uniqueId}").ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>();
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Items.Should().HaveCount(3);
         content.Items[0].Name.Should().StartWith("Apple");
@@ -196,14 +196,14 @@ public class ProductCategory : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.ProductCategories.View], email);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.ProductCategories.View], CancellationToken.None, email).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var response = await _client.GetAsync($"/api/v1/ProductCategory?Filters=Name@=NonExist{uniqueId}");
+        var response = await _client.GetAsync($"/api/v1/ProductCategory?Filters=Name@=NonExist{uniqueId}").ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>();
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Items.Should().BeEmpty();
         content.TotalCount.Should().Be(0);
@@ -216,8 +216,8 @@ public class ProductCategory : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.ProductCategories.View], email);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.ProductCategories.View], CancellationToken.None, email).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         using (var scope = _factory.Services.CreateScope())
@@ -228,17 +228,17 @@ public class ProductCategory : IAsyncLifetime
             {
                 categories.Add(new ProductCategoryEntity { Name = $"Manager_Cat_{uniqueId}_{i}", Description = "Desc", DeletedAt = null });
             }
-            await db.ProductCategories.AddRangeAsync(categories);
-            await db.SaveChangesAsync();
+            await db.ProductCategories.AddRangeAsync(categories, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
         // Assuming for-manager endpoint supports filtering or we just want to see if it works. 
         // If it doesn't support Filters, we just check status 200 and maybe non-empty if we just seeded.
         // But better try to filter if possible or just check functionality.
-        var response = await _client.GetAsync($"/api/v1/ProductCategory/for-manager?Page=1&PageSize=10&Filters=Name@={uniqueId}");
+        var response = await _client.GetAsync($"/api/v1/ProductCategory/for-manager?Page=1&PageSize=10&Filters=Name@={uniqueId}").ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>();
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         // Check if items > 0. Since we used a filter, if supported, we get 5. If not supported, we get all. 
         // We'll assert count >= 5.
@@ -253,8 +253,8 @@ public class ProductCategory : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.ProductCategories.View], email);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.ProductCategories.View], CancellationToken.None, email).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         using (var scope = _factory.Services.CreateScope())
@@ -268,14 +268,14 @@ public class ProductCategory : IAsyncLifetime
             // Add active ones to ensure we don't get them
             categories.Add(new ProductCategoryEntity { Name = $"Active_{uniqueId}", Description = "Desc", DeletedAt = null });
             
-            await db.ProductCategories.AddRangeAsync(categories);
-            await db.SaveChangesAsync();
+            await db.ProductCategories.AddRangeAsync(categories, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/ProductCategory/deleted?Page=1&PageSize=10&Filters=Name@={uniqueId}");
+        var response = await _client.GetAsync($"/api/v1/ProductCategory/deleted?Page=1&PageSize=10&Filters=Name@={uniqueId}").ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>();
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         // If Filters supported on deleted endpoint
         content!.Items.Should().HaveCount(5);
@@ -290,8 +290,8 @@ public class ProductCategory : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.ProductCategories.View], email);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.ProductCategories.View], CancellationToken.None, email).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         int categoryId;
@@ -299,15 +299,15 @@ public class ProductCategory : IAsyncLifetime
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var category = new ProductCategoryEntity { Name = $"Detail_{uniqueId}", Description = "Desc", DeletedAt = null };
-            await db.ProductCategories.AddAsync(category);
-            await db.SaveChangesAsync();
+            await db.ProductCategories.AddAsync(category, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             categoryId = category.Id;
         }
 
-        var response = await _client.GetAsync($"/api/v1/ProductCategory/{categoryId}");
+        var response = await _client.GetAsync($"/api/v1/ProductCategory/{categoryId}").ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<ProductCategoryResponse>();
+        var content = await response.Content.ReadFromJsonAsync<ProductCategoryResponse>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Id.Should().Be(categoryId);
         content.Name.Should().Be($"Detail_{uniqueId}");
@@ -320,11 +320,11 @@ public class ProductCategory : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.ProductCategories.View], email);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.ProductCategories.View], CancellationToken.None, email).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var response = await _client.GetAsync("/api/v1/ProductCategory/99999");
+        var response = await _client.GetAsync("/api/v1/ProductCategory/99999").ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -336,8 +336,8 @@ public class ProductCategory : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.ProductCategories.View], email);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.ProductCategories.View], CancellationToken.None, email).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         int categoryId;
@@ -345,12 +345,12 @@ public class ProductCategory : IAsyncLifetime
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var category = new ProductCategoryEntity { Name = $"Deleted_{uniqueId}", Description = "Desc", DeletedAt = DateTime.UtcNow };
-            await db.ProductCategories.AddAsync(category);
-            await db.SaveChangesAsync();
+            await db.ProductCategories.AddAsync(category, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             categoryId = category.Id;
         }
 
-        var response = await _client.GetAsync($"/api/v1/ProductCategory/{categoryId}");
+        var response = await _client.GetAsync($"/api/v1/ProductCategory/{categoryId}").ConfigureAwait(true);
 
         // Typically should return NotFound if deleted, unless viewed by admin with specific params? 
         // Standard API behavior for 'GetById' on logic deleted is usually NotFound.
@@ -364,16 +364,16 @@ public class ProductCategory : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.ProductCategories.Create], email);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.ProductCategories.Create], CancellationToken.None, email).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var request = new CreateProductCategoryCommand { Name = $"API_Test_{uniqueId}", Description = "Integration test" };
 
-        var response = await _client.PostAsJsonAsync("/api/v1/ProductCategory", request);
+        var response = await _client.PostAsJsonAsync("/api/v1/ProductCategory", request).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
-        var content = await response.Content.ReadFromJsonAsync<ProductCategoryResponse>();
+        var content = await response.Content.ReadFromJsonAsync<ProductCategoryResponse>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Name.Should().Be($"API_Test_{uniqueId}");
         content.Id.Should().BeGreaterThan(0);
@@ -386,8 +386,8 @@ public class ProductCategory : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.ProductCategories.Edit], email);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.ProductCategories.Edit], CancellationToken.None, email).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         int categoryId;
@@ -395,17 +395,17 @@ public class ProductCategory : IAsyncLifetime
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var category = new ProductCategoryEntity { Name = $"Original_{uniqueId}", Description = "Keep", DeletedAt = null };
-            await db.ProductCategories.AddAsync(category);
-            await db.SaveChangesAsync();
+            await db.ProductCategories.AddAsync(category, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             categoryId = category.Id;
         }
 
         var request = new UpdateProductCategoryCommand { Name = $"Updated_{uniqueId}" };
 
-        var response = await _client.PutAsJsonAsync($"/api/v1/ProductCategory/{categoryId}", request);
+        var response = await _client.PutAsJsonAsync($"/api/v1/ProductCategory/{categoryId}", request).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<ProductCategoryResponse>();
+        var content = await response.Content.ReadFromJsonAsync<ProductCategoryResponse>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Name.Should().Be($"Updated_{uniqueId}");
     }
@@ -417,8 +417,8 @@ public class ProductCategory : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.ProductCategories.Delete], email);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.ProductCategories.Delete], CancellationToken.None, email).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         int categoryId;
@@ -426,12 +426,12 @@ public class ProductCategory : IAsyncLifetime
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var category = new ProductCategoryEntity { Name = $"Delete_{uniqueId}", Description = "Desc", DeletedAt = null };
-            await db.ProductCategories.AddAsync(category);
-            await db.SaveChangesAsync();
+            await db.ProductCategories.AddAsync(category, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             categoryId = category.Id;
         }
 
-        var response = await _client.DeleteAsync($"/api/v1/ProductCategory/{categoryId}");
+        var response = await _client.DeleteAsync($"/api/v1/ProductCategory/{categoryId}").ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
@@ -440,7 +440,7 @@ public class ProductCategory : IAsyncLifetime
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var category = await db.ProductCategories
                 .IgnoreQueryFilters()
-                .FirstOrDefaultAsync(c => c.Id == categoryId);
+                .FirstOrDefaultAsync(c => c.Id == categoryId, CancellationToken.None).ConfigureAwait(true);
             category.Should().NotBeNull();
             category!.DeletedAt.Should().NotBeNull();
         }
@@ -453,8 +453,8 @@ public class ProductCategory : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.ProductCategories.Delete], email);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.ProductCategories.Delete], CancellationToken.None, email).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         int[] categoryIds = new int[3];
@@ -464,8 +464,8 @@ public class ProductCategory : IAsyncLifetime
             for (int i = 0; i < 3; i++)
             {
                 var category = new ProductCategoryEntity { Name = $"DelMany_{uniqueId}_{i}", Description = "Desc", DeletedAt = null };
-                await db.ProductCategories.AddAsync(category);
-                await db.SaveChangesAsync();
+                await db.ProductCategories.AddAsync(category, CancellationToken.None).ConfigureAwait(true);
+                await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
                 categoryIds[i] = category.Id;
             }
         }
@@ -476,7 +476,7 @@ public class ProductCategory : IAsyncLifetime
         {
             Content = JsonContent.Create(request)
         };
-        var response = await _client.SendAsync(httpRequest);
+        var response = await _client.SendAsync(httpRequest).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
@@ -487,7 +487,7 @@ public class ProductCategory : IAsyncLifetime
             {
                 var category = await db.ProductCategories
                     .IgnoreQueryFilters()
-                    .FirstOrDefaultAsync(c => c.Id == id);
+                    .FirstOrDefaultAsync(c => c.Id == id, CancellationToken.None).ConfigureAwait(true);
                 category.Should().NotBeNull();
                 category!.DeletedAt.Should().NotBeNull();
             }
@@ -501,8 +501,8 @@ public class ProductCategory : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.ProductCategories.Delete], email);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.ProductCategories.Delete], CancellationToken.None, email).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         int[] validIds = new int[2];
@@ -512,8 +512,8 @@ public class ProductCategory : IAsyncLifetime
             for (int i = 0; i < 2; i++)
             {
                 var category = new ProductCategoryEntity { Name = $"InvalidDel_{uniqueId}_{i}", Description = "Desc", DeletedAt = null };
-                await db.ProductCategories.AddAsync(category);
-                await db.SaveChangesAsync();
+                await db.ProductCategories.AddAsync(category, CancellationToken.None).ConfigureAwait(true);
+                await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
                 validIds[i] = category.Id;
             }
         }
@@ -524,7 +524,7 @@ public class ProductCategory : IAsyncLifetime
         {
             Content = JsonContent.Create(request)
         };
-        var response = await _client.SendAsync(httpRequest);
+        var response = await _client.SendAsync(httpRequest).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
 
@@ -533,7 +533,7 @@ public class ProductCategory : IAsyncLifetime
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             foreach (var id in validIds)
             {
-                var category = await db.ProductCategories.FindAsync(id);
+                var category = await db.ProductCategories.FindAsync(id).ConfigureAwait(true);
                 category!.DeletedAt.Should().BeNull();
             }
         }
@@ -546,8 +546,8 @@ public class ProductCategory : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.ProductCategories.Delete], email);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.ProductCategories.Delete], CancellationToken.None, email).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         int[] categoryIds = new int[2];
@@ -556,12 +556,12 @@ public class ProductCategory : IAsyncLifetime
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             
             var cat1 = new ProductCategoryEntity { Name = $"Active_{uniqueId}", Description = "Desc", DeletedAt = null };
-            await db.ProductCategories.AddAsync(cat1);
+            await db.ProductCategories.AddAsync(cat1, CancellationToken.None).ConfigureAwait(true);
             
             var cat2 = new ProductCategoryEntity { Name = $"AlreadyDel_{uniqueId}", Description = "Desc", DeletedAt = DateTime.UtcNow };
-            await db.ProductCategories.AddAsync(cat2);
+            await db.ProductCategories.AddAsync(cat2, CancellationToken.None).ConfigureAwait(true);
             
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             categoryIds[0] = cat1.Id;
             categoryIds[1] = cat2.Id;
         }
@@ -572,14 +572,14 @@ public class ProductCategory : IAsyncLifetime
         {
             Content = JsonContent.Create(request)
         };
-        var response = await _client.SendAsync(httpRequest);
+        var response = await _client.SendAsync(httpRequest).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var category = await db.ProductCategories.FindAsync(categoryIds[0]);
+            var category = await db.ProductCategories.FindAsync(categoryIds[0]).ConfigureAwait(true);
             category!.DeletedAt.Should().BeNull();
         }
     }
@@ -594,8 +594,8 @@ public class ProductCategory : IAsyncLifetime
         // To restore, we need logic. Assuming Delete permission OR a Restore permission. Usually 'Delete' or 'Edit' covers it.
         // Checking PermissionsList... there is only Delete. Restore might be covered by Edit or Delete.
         // Assuming Delete (soft delete management) or Edit. Let's try Delete first as it's the reverse.
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.ProductCategories.Delete], email);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.ProductCategories.Delete], CancellationToken.None, email).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         int[] categoryIds = new int[3];
@@ -605,15 +605,15 @@ public class ProductCategory : IAsyncLifetime
             for (int i = 0; i < 3; i++)
             {
                 var category = new ProductCategoryEntity { Name = $"Restore_{uniqueId}_{i}", Description = "Desc", DeletedAt = DateTime.UtcNow };
-                await db.ProductCategories.AddAsync(category);
-                await db.SaveChangesAsync();
+                await db.ProductCategories.AddAsync(category, CancellationToken.None).ConfigureAwait(true);
+                await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
                 categoryIds[i] = category.Id;
             }
         }
 
         var request = new RestoreManyProductCategoriesCommand { Ids = [.. categoryIds] };
 
-        var response = await _client.PostAsJsonAsync("/api/v1/ProductCategory/restore-many", request);
+        var response = await _client.PostAsJsonAsync("/api/v1/ProductCategory/restore-many", request).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         
@@ -622,7 +622,7 @@ public class ProductCategory : IAsyncLifetime
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             foreach (var id in categoryIds)
             {
-                var category = await db.ProductCategories.FindAsync(id);
+                var category = await db.ProductCategories.FindAsync(id).ConfigureAwait(true);
                 category!.DeletedAt.Should().BeNull();
             }
         }
@@ -635,8 +635,8 @@ public class ProductCategory : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.ProductCategories.Delete], email);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.ProductCategories.Delete], CancellationToken.None, email).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         int[] categoryIds = new int[2];
@@ -645,19 +645,19 @@ public class ProductCategory : IAsyncLifetime
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             
             var cat1 = new ProductCategoryEntity { Name = $"Deleted_{uniqueId}", Description = "Desc", DeletedAt = DateTime.UtcNow };
-            await db.ProductCategories.AddAsync(cat1);
+            await db.ProductCategories.AddAsync(cat1, CancellationToken.None).ConfigureAwait(true);
             
             var cat2 = new ProductCategoryEntity { Name = $"Active_{uniqueId}", Description = "Desc", DeletedAt = null };
-            await db.ProductCategories.AddAsync(cat2);
+            await db.ProductCategories.AddAsync(cat2, CancellationToken.None).ConfigureAwait(true);
             
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             categoryIds[0] = cat1.Id;
             categoryIds[1] = cat2.Id;
         }
 
         var request = new RestoreManyProductCategoriesCommand { Ids = [.. categoryIds] };
 
-        var response = await _client.PostAsJsonAsync("/api/v1/ProductCategory/restore-many", request);
+        var response = await _client.PostAsJsonAsync("/api/v1/ProductCategory/restore-many", request).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
@@ -666,7 +666,7 @@ public class ProductCategory : IAsyncLifetime
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var category = await db.ProductCategories
                 .IgnoreQueryFilters()
-                .FirstOrDefaultAsync(c => c.Id == categoryIds[0]);
+                .FirstOrDefaultAsync(c => c.Id == categoryIds[0], CancellationToken.None).ConfigureAwait(true);
             category.Should().NotBeNull();
             category!.DeletedAt.Should().NotBeNull();
         }
