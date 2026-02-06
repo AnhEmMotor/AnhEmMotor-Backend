@@ -6,14 +6,9 @@ public sealed class CreateInputCommandValidator : AbstractValidator<CreateInputC
 {
     public CreateInputCommandValidator()
     {
-        RuleFor(x => x.SupplierId)
-            .NotNull()
-            .GreaterThan(0) // Logic còn thiếu
-            .WithMessage("SupplierId must be greater than 0.");
+        RuleFor(x => x.SupplierId).NotNull().GreaterThan(0).WithMessage("SupplierId must be greater than 0.");
 
-        RuleFor(x => x.Notes)
-            .MaximumLength(1000)
-            .WithMessage("Notes cannot exceed 1000 characters.");
+        RuleFor(x => x.Notes).MaximumLength(1000).WithMessage("Notes cannot exceed 1000 characters.");
 
         RuleFor(x => x.Products).NotEmpty().WithMessage("Input must contain at least one product.");
 

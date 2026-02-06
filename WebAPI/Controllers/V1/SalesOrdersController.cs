@@ -150,7 +150,10 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     {
         var command = request.Adapt<CreateOutputByManagerCommand>();
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleCreated(result, RouteNames.SaleOrders.GetById, new { id = result.IsSuccess ? result.Value?.Id : 0 });
+        return HandleCreated(
+            result,
+            RouteNames.SaleOrders.GetById,
+            new { id = result.IsSuccess ? result.Value?.Id : 0 });
     }
 
     /// <summary>
@@ -165,7 +168,10 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     {
         var command = request.Adapt<CreateOutputCommand>();
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleCreated(result, RouteNames.SaleOrders.GetById, new { id = result.IsSuccess ? result.Value?.Id : 0 });
+        return HandleCreated(
+            result,
+            RouteNames.SaleOrders.GetById,
+            new { id = result.IsSuccess ? result.Value?.Id : 0 });
     }
 
     /// <summary>

@@ -64,7 +64,7 @@ public sealed class CreateOutputCommandHandler(
             output.StatusId = OrderStatus.Pending;
         }
 
-        output.BuyerId = request.BuyerId; 
+        output.BuyerId = request.BuyerId;
         output.CreatedBy = request.BuyerId;
 
         insertRepository.Add(output);

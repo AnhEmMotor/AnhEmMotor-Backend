@@ -10,7 +10,8 @@ public sealed class ProductCategoryMappingConfig : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {
-        config.NewConfig<CreateProductCategoryCommand, CategoryEntity>().Map(dest => dest.Description, src => string.IsNullOrWhiteSpace(src.Description) ? null : src.Description);
+        config.NewConfig<CreateProductCategoryCommand, CategoryEntity>()
+            .Map(dest => dest.Description, src => string.IsNullOrWhiteSpace(src.Description) ? null : src.Description);
 
         config.NewConfig<CategoryEntity, ProductCategoryResponse>();
 

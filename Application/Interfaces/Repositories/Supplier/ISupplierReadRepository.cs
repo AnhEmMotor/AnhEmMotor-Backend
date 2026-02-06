@@ -8,9 +8,9 @@ public interface ISupplierReadRepository
 {
     public IQueryable<SupplierEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-    public IQueryable<SupplierWithTotalInputResponse> GetQueryableWithTotalInput(DataFetchMode mode = DataFetchMode.ActiveOnly);
+    public IQueryable<SupplierWithTotalInputResponse> GetQueryableWithTotalInput(
+        DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-    // Đổi IEnumerable thành List
     public Task<List<SupplierEntity>> GetAllAsync(
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
@@ -20,7 +20,6 @@ public interface ISupplierReadRepository
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-    // Đổi IEnumerable thành List
     public Task<List<SupplierEntity>> GetByIdAsync(
         IEnumerable<int> ids,
         CancellationToken cancellationToken,
@@ -31,7 +30,18 @@ public interface ISupplierReadRepository
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-    public Task<bool> IsNameExistsAsync(string name, int? excludeId = null, CancellationToken cancellationToken = default);
-    public Task<bool> IsPhoneExistsAsync(string phone, int? excludeId = null, CancellationToken cancellationToken = default);
-    public Task<bool> IsTaxIdExistsAsync(string taxId, int? excludeId = null, CancellationToken cancellationToken = default);
+    public Task<bool> IsNameExistsAsync(
+        string name,
+        int? excludeId = null,
+        CancellationToken cancellationToken = default);
+
+    public Task<bool> IsPhoneExistsAsync(
+        string phone,
+        int? excludeId = null,
+        CancellationToken cancellationToken = default);
+
+    public Task<bool> IsTaxIdExistsAsync(
+        string taxId,
+        int? excludeId = null,
+        CancellationToken cancellationToken = default);
 }

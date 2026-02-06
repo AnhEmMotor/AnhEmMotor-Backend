@@ -35,7 +35,10 @@ public class Supplier
     [Fact(DisplayName = "SUP_001 - Tạo Supplier thành công với đầy đủ thông tin")]
     public async Task CreateSupplier_WithFullInformation_Success()
     {
-        var handler = new CreateSupplierCommandHandler(_readRepoMock.Object, _insertRepoMock.Object, _unitOfWorkMock.Object);
+        var handler = new CreateSupplierCommandHandler(
+            _readRepoMock.Object,
+            _insertRepoMock.Object,
+            _unitOfWorkMock.Object);
         var command = new CreateSupplierCommand
         {
             Name = "Supplier A",
@@ -61,7 +64,10 @@ public class Supplier
     [Fact(DisplayName = "SUP_002 - Tạo Supplier thành công với thông tin tối thiểu (chỉ Name, Phone, Address)")]
     public async Task CreateSupplier_WithMinimalInfo_Success()
     {
-        var handler = new CreateSupplierCommandHandler(_readRepoMock.Object, _insertRepoMock.Object, _unitOfWorkMock.Object);
+        var handler = new CreateSupplierCommandHandler(
+            _readRepoMock.Object,
+            _insertRepoMock.Object,
+            _unitOfWorkMock.Object);
         var command = new CreateSupplierCommand { Name = "Supplier B", Phone = "0987654321", Address = "456 Street" };
 
         var emptySuppliers = new List<SupplierEntity>().AsQueryable();
@@ -79,7 +85,10 @@ public class Supplier
     [Fact(DisplayName = "SUP_003 - Tạo Supplier thành công với Email thay vì Phone")]
     public async Task CreateSupplier_WithEmailInsteadOfPhone_Success()
     {
-        var handler = new CreateSupplierCommandHandler(_readRepoMock.Object, _insertRepoMock.Object, _unitOfWorkMock.Object);
+        var handler = new CreateSupplierCommandHandler(
+            _readRepoMock.Object,
+            _insertRepoMock.Object,
+            _unitOfWorkMock.Object);
         var command = new CreateSupplierCommand
         {
             Name = "Supplier C",
@@ -140,30 +149,20 @@ public class Supplier
     [Fact(DisplayName = "SUP_007 - Tạo Supplier thất bại khi Name đã tồn tại")]
     public async Task CreateSupplier_DuplicateName_ThrowsException()
     {
-        // Arrange
         var handler = new CreateSupplierCommandHandler(
             _readRepoMock.Object,
             _insertRepoMock.Object,
-             // Nhớ inject cái này vào constructor handler
             _unitOfWorkMock.Object);
 
-        var command = new CreateSupplierCommand
-        {
-            Name = "Supplier Existing",
-            // Các field khác không quan trọng trong ngữ cảnh test này
-        };
+        var command = new CreateSupplierCommand { Name = "Supplier Existing", };
 
-        // SETUP ĐƠN GIẢN: Hỏi có tồn tại không? Trả về CÓ (true).
         _readRepoMock.Setup(x => x.IsNameExistsAsync(command.Name, It.IsAny<int?>(), It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(true);
+            .ReturnsAsync(true);
 
-        // Act
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
-        // Assert
         result.IsFailure.Should().BeTrue();
 
-        // Verify: Đảm bảo Insert KHÔNG bao giờ được gọi
         _insertRepoMock.Verify(x => x.Add(It.IsAny<SupplierEntity>()), Times.Never);
     }
 
@@ -175,18 +174,14 @@ public class Supplier
             _insertRepoMock.Object,
             _unitOfWorkMock.Object);
 
-        var command = new CreateSupplierCommand
-        {
-            Name = "Supplier New",
-            Phone = "0123456789",
-            Address = "123 Street"
-        };
+        var command = new CreateSupplierCommand { Name = "Supplier New", Phone = "0123456789", Address = "123 Street" };
 
         _readRepoMock.Setup(x => x.IsPhoneExistsAsync(command.Phone, It.IsAny<int?>(), It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(true);
+            .ReturnsAsync(true);
 
-        _readRepoMock.Setup(x => x.IsNameExistsAsync(It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(false);
+        _readRepoMock.Setup(
+            x => x.IsNameExistsAsync(It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
@@ -210,14 +205,17 @@ public class Supplier
             TaxIdentificationNumber = "1234567890"
         };
 
-        _readRepoMock.Setup(x => x.IsTaxIdExistsAsync(command.TaxIdentificationNumber, It.IsAny<int?>(), It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(true);
+        _readRepoMock.Setup(
+            x => x.IsTaxIdExistsAsync(command.TaxIdentificationNumber, It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
 
-        _readRepoMock.Setup(x => x.IsNameExistsAsync(It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(false);
+        _readRepoMock.Setup(
+            x => x.IsNameExistsAsync(It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
 
-        _readRepoMock.Setup(x => x.IsPhoneExistsAsync(It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(false);
+        _readRepoMock.Setup(
+            x => x.IsPhoneExistsAsync(It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
@@ -372,8 +370,9 @@ public class Supplier
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingSupplier);
 
-        _readRepoMock.Setup(x => x.IsNameExistsAsync(It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
-             .ReturnsAsync(true);
+        _readRepoMock.Setup(
+            x => x.IsNameExistsAsync(It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();

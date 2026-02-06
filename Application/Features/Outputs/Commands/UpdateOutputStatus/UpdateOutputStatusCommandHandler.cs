@@ -24,17 +24,17 @@ public sealed class UpdateOutputStatusCommandHandler(
             DataFetchMode.ActiveOnly)
             .ConfigureAwait(false);
 
-        if (output is null)
+        if(output is null)
         {
             return Error.NotFound($"Không tìm thấy đơn hàng có ID {request.Id}.", "Id");
         }
 
-        if (!OrderStatus.IsValid(request.StatusId))
+        if(!OrderStatus.IsValid(request.StatusId))
         {
             return Error.BadRequest($"Trạng thái '{request.StatusId}' không hợp lệ.", "StatusId");
         }
 
-        if (!OrderStatusTransitions.IsTransitionAllowed(output.StatusId, request.StatusId))
+        if(!OrderStatusTransitions.IsTransitionAllowed(output.StatusId, request.StatusId))
         {
             var allowed = OrderStatusTransitions.GetAllowedTransitions(output.StatusId);
             return Error.BadRequest(
@@ -42,31 +42,30 @@ public sealed class UpdateOutputStatusCommandHandler(
                 "StatusId");
         }
 
-        switch (request.StatusId)
+        switch(request.StatusId)
         {
             case OrderStatus.Completed:
                 output.FinishedBy = request.CurrentUserId;
-                await updateRepository.ProcessCOGSForCompletedOrderAsync(output.Id, cancellationToken).ConfigureAwait(false);
+                await updateRepository.ProcessCOGSForCompletedOrderAsync(output.Id, cancellationToken)
+                    .ConfigureAwait(false);
                 break;
 
             case OrderStatus.Cancelled:
             case OrderStatus.Refunding:
             case OrderStatus.Refunded:
-                // No stock check required for reverse logistics
                 break;
 
             default:
-                // Forward logistics (Processing, Delivering, etc.) -> Must check stock availability
-                foreach (var outputInfo in output.OutputInfos)
+                foreach(var outputInfo in output.OutputInfos)
                 {
-                    if (outputInfo.ProductVarientId.HasValue && outputInfo.Count.HasValue)
+                    if(outputInfo.ProductVarientId.HasValue && outputInfo.Count.HasValue)
                     {
                         var stock = await readRepository.GetStockQuantityByVariantIdAsync(
                             outputInfo.ProductVarientId.Value,
                             cancellationToken)
                             .ConfigureAwait(false);
 
-                        if (stock < outputInfo.Count.Value)
+                        if(stock < outputInfo.Count.Value)
                         {
                             return Error.BadRequest(
                                 $"Sản phẩm ID {outputInfo.ProductVarientId} không đủ tồn kho. Hiện có: {stock}, cần: {outputInfo.Count.Value}",

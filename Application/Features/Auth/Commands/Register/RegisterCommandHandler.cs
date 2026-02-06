@@ -12,9 +12,7 @@ public class RegisterCommandHandler(
     IUserCreateRepository userCreateRepository,
     IProtectedEntityManagerService protectedEntityManagerService) : IRequestHandler<RegisterCommand, Result<RegisterResponse>>
 {
-    public async Task<Result<RegisterResponse>> Handle(
-    RegisterCommand request,
-    CancellationToken cancellationToken)
+    public async Task<Result<RegisterResponse>> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
         var user = new ApplicationUser
         {
@@ -31,22 +29,19 @@ public class RegisterCommandHandler(
         var (succeeded, errors) = await userCreateRepository.CreateUserAsync(user, request.Password!, cancellationToken)
             .ConfigureAwait(false);
 
-        if (!succeeded)
+        if(!succeeded)
         {
             var validationErrors = errors.Select(e => Error.Validation(e)).ToList();
             return Result<RegisterResponse>.Failure(validationErrors);
         }
 
         var defaultRoles = protectedEntityManagerService.GetDefaultRolesForNewUsers() ?? [];
-        if (defaultRoles.Count > 0)
+        if(defaultRoles.Count > 0)
         {
             var randomRole = defaultRoles[Random.Shared.Next(defaultRoles.Count)];
             await userCreateRepository.AddUserToRoleAsync(user, randomRole, cancellationToken).ConfigureAwait(false);
         }
 
-        return new RegisterResponse
-        {
-            UserId = user.Id
-        };
+        return new RegisterResponse { UserId = user.Id };
     }
 }

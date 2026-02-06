@@ -1,14 +1,14 @@
 ﻿using Application.ApiContracts.File.Responses;
+using Domain.Constants.Permission;
 using FluentAssertions;
 using Infrastructure.DBContexts;
+using IntegrationTests.SetupClass;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
-using System.Net.Http.Json;
-using Domain.Constants.Permission;
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using MediaFileEntity = Domain.Entities.MediaFile;
-using IntegrationTests.SetupClass;
 
 namespace IntegrationTests;
 
@@ -32,10 +32,7 @@ public class MediaFile : IAsyncLifetime
 
     public Task InitializeAsync() => Task.CompletedTask;
 
-    public async Task DisposeAsync()
-    {
-        await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(true);
-    }
+    public async Task DisposeAsync() { await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(true); }
 #pragma warning disable IDE0079 
 #pragma warning disable CRR0035
     [Fact(DisplayName = "MF_002 - Tải lên ảnh thành công với định dạng JPG hợp lệ")]
@@ -50,25 +47,26 @@ public class MediaFile : IAsyncLifetime
             _factory.Services,
             username,
             password,
-            [PermissionsList.Products.Create],
+            [ PermissionsList.Products.Create ],
             CancellationToken.None,
-            email).ConfigureAwait(true);
+            email)
+            .ConfigureAwait(true);
 
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
             _client,
             username,
-            password, CancellationToken.None).ConfigureAwait(true);
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
 
         _client.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var content = IntegrationTestFileHelper.CreateSingleImageForm();
 
-        var response = await _client.PostAsync(
-            "/api/v1/MediaFile/upload-image",
-            content).ConfigureAwait(true);
+        var response = await _client.PostAsync("/api/v1/MediaFile/upload-image", content).ConfigureAwait(true);
 
-        if (response.StatusCode != HttpStatusCode.Created)
+        if(response.StatusCode != HttpStatusCode.Created)
         {
             var errorContent = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
             throw new Exception($"API returned {response.StatusCode}. Response Body: {errorContent}");
@@ -93,16 +91,27 @@ public class MediaFile : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.Create], CancellationToken.None, email).ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Products.Create ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var validBytes = IntegrationTestFileHelper.GetValidJpgBytes();
         var content = IntegrationTestFileHelper.CreateManyImagesForm(
             ("files", "image1.jpg", "image/jpeg", validBytes),
             ("files", "image2.jpg", "image/jpeg", validBytes),
-            ("files", "image3.jpg", "image/jpeg", validBytes)
-        );
+            ("files", "image3.jpg", "image/jpeg", validBytes));
 
         var response = await _client.PostAsync("/api/v1/MediaFile/upload-images", content).ConfigureAwait(true);
 
@@ -123,8 +132,20 @@ public class MediaFile : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.Edit], CancellationToken.None, email).ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Products.Edit ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         using var scope = _factory.Services.CreateScope();
@@ -149,7 +170,10 @@ public class MediaFile : IAsyncLifetime
 
         using var verifyScope = _factory.Services.CreateScope();
         var verifyDb = verifyScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var deletedFile = await verifyDb.MediaFiles.IgnoreQueryFilters().FirstOrDefaultAsync(x => x.Id == mediaFile.Id, CancellationToken.None).ConfigureAwait(true);
+        var deletedFile = await verifyDb.MediaFiles
+            .IgnoreQueryFilters()
+            .FirstOrDefaultAsync(x => x.Id == mediaFile.Id, CancellationToken.None)
+            .ConfigureAwait(true);
         deletedFile.Should().NotBeNull();
         deletedFile!.DeletedAt.Should().NotBeNull();
     }
@@ -161,20 +185,33 @@ public class MediaFile : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.Edit, PermissionsList.Products.Create], CancellationToken.None, email).ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Products.Edit, PermissionsList.Products.Create ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var validBytes = IntegrationTestFileHelper.GetValidJpgBytes();
         var content = IntegrationTestFileHelper.CreateManyImagesForm(
             ("files", "delete1.jpg", "image/jpeg", validBytes),
             ("files", "delete2.jpg", "image/jpeg", validBytes),
-            ("files", "delete3.jpg", "image/jpeg", validBytes)
-        );
+            ("files", "delete3.jpg", "image/jpeg", validBytes));
 
         var uploadRes = await _client.PostAsync("/api/v1/MediaFile/upload-images", content).ConfigureAwait(true);
         uploadRes.EnsureSuccessStatusCode();
-        var uploadedFiles = await uploadRes.Content.ReadFromJsonAsync<List<MediaFileResponse>>(CancellationToken.None).ConfigureAwait(true);
+        var uploadedFiles = await uploadRes.Content
+            .ReadFromJsonAsync<List<MediaFileResponse>>(CancellationToken.None)
+            .ConfigureAwait(true);
 
         var requestBody = new { StoragePaths = uploadedFiles!.Select(f => f.StoragePath!).ToList() };
 
@@ -188,10 +225,13 @@ public class MediaFile : IAsyncLifetime
 
         using var verifyScope = _factory.Services.CreateScope();
         var verifyDb = verifyScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        
+
         foreach(var file in uploadedFiles!)
         {
-            var deletedFile = await verifyDb.MediaFiles.IgnoreQueryFilters().FirstOrDefaultAsync(f => f.Id == file.Id, CancellationToken.None).ConfigureAwait(true);
+            var deletedFile = await verifyDb.MediaFiles
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(f => f.Id == file.Id, CancellationToken.None)
+                .ConfigureAwait(true);
             deletedFile.Should().NotBeNull();
             deletedFile!.DeletedAt.Should().NotBeNull();
         }
@@ -204,8 +244,20 @@ public class MediaFile : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.Edit], CancellationToken.None, email).ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Products.Edit ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         using var scope = _factory.Services.CreateScope();
@@ -231,7 +283,9 @@ public class MediaFile : IAsyncLifetime
 
         using var verifyScope = _factory.Services.CreateScope();
         var verifyDb = verifyScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var restoredFile = await verifyDb.MediaFiles.FindAsync(mediaFile.Id, CancellationToken.None).ConfigureAwait(true);
+        var restoredFile = await verifyDb.MediaFiles
+            .FindAsync(mediaFile.Id, CancellationToken.None)
+            .ConfigureAwait(true);
         restoredFile.Should().NotBeNull();
         restoredFile!.DeletedAt.Should().BeNull();
     }
@@ -243,23 +297,34 @@ public class MediaFile : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.Edit, PermissionsList.Products.Create], CancellationToken.None, email).ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Products.Edit, PermissionsList.Products.Create ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        // 1. Upload files
         var validBytes = IntegrationTestFileHelper.GetValidJpgBytes();
         var content = IntegrationTestFileHelper.CreateManyImagesForm(
             ("files", "restore1.jpg", "image/jpeg", validBytes),
             ("files", "restore2.jpg", "image/jpeg", validBytes),
-            ("files", "restore3.jpg", "image/jpeg", validBytes)
-        );
+            ("files", "restore3.jpg", "image/jpeg", validBytes));
 
         var uploadRes = await _client.PostAsync("/api/v1/MediaFile/upload-images", content).ConfigureAwait(true);
         uploadRes.EnsureSuccessStatusCode();
-        var uploadedFiles = await uploadRes.Content.ReadFromJsonAsync<List<MediaFileResponse>>(CancellationToken.None).ConfigureAwait(true);
+        var uploadedFiles = await uploadRes.Content
+            .ReadFromJsonAsync<List<MediaFileResponse>>(CancellationToken.None)
+            .ConfigureAwait(true);
 
-        // 2. Delete files
         var requestBody = new { StoragePaths = uploadedFiles!.Select(f => f.StoragePath!).ToList() };
         var deleteMessage = new HttpRequestMessage(HttpMethod.Delete, "/api/v1/MediaFile/delete-many")
         {
@@ -268,8 +333,8 @@ public class MediaFile : IAsyncLifetime
         var deleteRes = await _client.SendAsync(deleteMessage).ConfigureAwait(true);
         deleteRes.EnsureSuccessStatusCode();
 
-        // 3. Restore files
-        var restoreRes = await _client.PostAsJsonAsync("/api/v1/MediaFile/restore-many", requestBody).ConfigureAwait(true);
+        var restoreRes = await _client.PostAsJsonAsync("/api/v1/MediaFile/restore-many", requestBody)
+            .ConfigureAwait(true);
 
         restoreRes.StatusCode.Should().Be(HttpStatusCode.OK);
 
@@ -291,14 +356,28 @@ public class MediaFile : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.Create, PermissionsList.Products.View], CancellationToken.None, email).ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Products.Create, PermissionsList.Products.View ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var content = IntegrationTestFileHelper.CreateSingleImageForm();
         var uploadRes = await _client.PostAsync("/api/v1/MediaFile/upload-image", content).ConfigureAwait(true);
         uploadRes.EnsureSuccessStatusCode();
-        var uploadedFile = await uploadRes.Content.ReadFromJsonAsync<MediaFileResponse>(CancellationToken.None).ConfigureAwait(true);
+        var uploadedFile = await uploadRes.Content
+            .ReadFromJsonAsync<MediaFileResponse>(CancellationToken.None)
+            .ConfigureAwait(true);
 
         var response = await _client.GetAsync(
             $"/api/v1/MediaFile/view-image/{uploadedFile!.StoragePath}",
@@ -316,14 +395,28 @@ public class MediaFile : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.Create, PermissionsList.Products.View], CancellationToken.None, email).ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Products.Create, PermissionsList.Products.View ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var content = IntegrationTestFileHelper.CreateSingleImageForm();
         var uploadRes = await _client.PostAsync("/api/v1/MediaFile/upload-image", content).ConfigureAwait(true);
         uploadRes.EnsureSuccessStatusCode();
-        var uploadedFile = await uploadRes.Content.ReadFromJsonAsync<MediaFileResponse>(CancellationToken.None).ConfigureAwait(true);
+        var uploadedFile = await uploadRes.Content
+            .ReadFromJsonAsync<MediaFileResponse>(CancellationToken.None)
+            .ConfigureAwait(true);
 
         var response = await _client.GetAsync(
             $"/api/v1/MediaFile/view-image/{uploadedFile!.StoragePath}?width=300",
@@ -341,8 +434,20 @@ public class MediaFile : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.Edit], CancellationToken.None, email).ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Products.Edit ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         using var scope = _factory.Services.CreateScope();
@@ -383,8 +488,20 @@ public class MediaFile : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.View], CancellationToken.None, email).ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Products.View ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         using var scope = _factory.Services.CreateScope();
@@ -418,8 +535,20 @@ public class MediaFile : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.View], CancellationToken.None, email).ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Products.View ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         using var scope = _factory.Services.CreateScope();
@@ -472,8 +601,20 @@ public class MediaFile : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.View], CancellationToken.None, email).ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Products.View ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         using var scope = _factory.Services.CreateScope();
@@ -538,8 +679,20 @@ public class MediaFile : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Products.View], CancellationToken.None, email).ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Products.View ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         using var scope = _factory.Services.CreateScope();

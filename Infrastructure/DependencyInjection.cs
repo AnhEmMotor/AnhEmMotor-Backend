@@ -13,7 +13,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using MySql.EntityFrameworkCore.Extensions;
 using System.Reflection;
 
 namespace Infrastructure;
@@ -26,16 +25,15 @@ public static class DependencyInjection
     {
         var provider = configuration.GetValue("Provider", "SqlServer");
 
-        if (string.Compare(provider, "MySql") == 0)
+        if(string.Compare(provider, "MySql") == 0)
         {
-            var connectionString = configuration.GetConnectionString("StringConnection") ?? "";
-            services.AddDbContextPool<ApplicationDBContext, MySqlDbContext>(options =>
-            {
-                options.UseMySQL(
-                    connectionString);
-            });
-        }
-        else
+            var connectionString = configuration.GetConnectionString("StringConnection") ?? string.Empty;
+            services.AddDbContextPool<ApplicationDBContext, MySqlDbContext>(
+                options =>
+                {
+                    options.UseMySQL(connectionString);
+                });
+        } else
         {
             services.AddDbContextPool<ApplicationDBContext>(
                 options =>

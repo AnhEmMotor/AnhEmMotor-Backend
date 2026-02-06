@@ -13,8 +13,8 @@ public sealed class GetProductStockAndPriceQueryHandler(IStatisticalReadReposito
     {
         var result = await repository.GetProductStockAndPriceAsync(request.VariantId, cancellationToken)
             .ConfigureAwait(false);
-        
-        if (result == null)
+
+        if(result == null)
         {
             return Result<ProductStockPriceResponse?>.Failure(Error.NotFound("Product variant not found"));
         }

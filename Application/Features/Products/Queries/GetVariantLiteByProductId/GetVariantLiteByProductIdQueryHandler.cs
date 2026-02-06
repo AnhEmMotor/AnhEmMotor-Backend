@@ -30,31 +30,32 @@ public sealed class GetVariantLiteByProductIdQueryHandler(
         var variants = await variantReadRepository.GetByProductIdAsync(request.ProductId, cancellationToken, mode)
             .ConfigureAwait(false);
 
-        var responses = variants.Select(v => 
-        {
-            var response = v.Adapt<ProductVariantLiteResponse>();
-            
-            // Manual population if Mapster config isn't picked up or to ensure consistency
-            if (string.IsNullOrWhiteSpace(response.VariantName) && v.VariantOptionValues.Count > 0)
+        var responses = variants.Select(
+            v =>
             {
-                var parts = v.VariantOptionValues
-                    .Where(vov => vov.OptionValue != null)
-                    .Select(vov => vov.OptionValue!.Name)
-                    .Where(n => !string.IsNullOrWhiteSpace(n))
-                    .ToList();
-                
-                if (parts.Count > 0)
+                var response = v.Adapt<ProductVariantLiteResponse>();
+
+                if(string.IsNullOrWhiteSpace(response.VariantName) && v.VariantOptionValues.Count > 0)
                 {
-                    response.VariantName = string.Join(" - ", parts);
-                    if (!string.IsNullOrWhiteSpace(response.ProductName))
+                    var parts = v.VariantOptionValues
+                        .Where(vov => vov.OptionValue != null)
+                        .Select(vov => vov.OptionValue!.Name)
+                        .Where(n => !string.IsNullOrWhiteSpace(n))
+                        .ToList();
+
+                    if(parts.Count > 0)
                     {
-                        response.DisplayName = $"{response.ProductName} ({response.VariantName})";
+                        response.VariantName = string.Join(" - ", parts);
+                        if(!string.IsNullOrWhiteSpace(response.ProductName))
+                        {
+                            response.DisplayName = $"{response.ProductName} ({response.VariantName})";
+                        }
                     }
                 }
-            }
-            
-            return response;
-        }).ToList();
+
+                return response;
+            })
+            .ToList();
 
         return responses;
     }

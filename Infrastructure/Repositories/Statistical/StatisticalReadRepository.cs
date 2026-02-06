@@ -19,15 +19,11 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
 
         var rawData = await context.OutputInfos
             .Join(context.OutputOrders, oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
-            .Where(x => x.o.StatusId != OrderStatus.Cancelled && 
-                        x.o.CreatedAt != null &&
-                        x.o.CreatedAt >= startDateTimeOffset)
-            .Select(x => new 
-            { 
-                CreatedAt = x.o.CreatedAt!.Value, 
-                Price = x.oi.Price ?? 0, 
-                Count = x.oi.Count ?? 0 
-            })
+            .Where(
+                x => x.o.StatusId != OrderStatus.Cancelled &&
+                    x.o.CreatedAt != null &&
+                    x.o.CreatedAt >= startDateTimeOffset)
+            .Select(x => new { CreatedAt = x.o.CreatedAt!.Value, Price = x.oi.Price ?? 0, Count = x.oi.Count ?? 0 })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
 
@@ -111,16 +107,18 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
 
         var rawData = await context.OutputInfos
             .Join(context.OutputOrders, oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
-            .Where(x => x.o.StatusId != OrderStatus.Cancelled && 
-                        x.o.CreatedAt != null &&
-                        x.o.CreatedAt >= startDateTimeOffset)
-             .Select(x => new 
-            { 
-                CreatedAt = x.o.CreatedAt!.Value, 
-                Price = x.oi.Price ?? 0, 
-                CostPrice = x.oi.CostPrice ?? 0,
-                Count = x.oi.Count ?? 0 
-            })
+            .Where(
+                x => x.o.StatusId != OrderStatus.Cancelled &&
+                    x.o.CreatedAt != null &&
+                    x.o.CreatedAt >= startDateTimeOffset)
+            .Select(
+                x => new
+                {
+                    CreatedAt = x.o.CreatedAt!.Value,
+                    Price = x.oi.Price ?? 0,
+                    CostPrice = x.oi.CostPrice ?? 0,
+                    Count = x.oi.Count ?? 0
+                })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
 

@@ -21,6 +21,9 @@ namespace Application.Interfaces.Repositories.Brand
             CancellationToken cancellationToken,
             DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-        public Task<List<BrandEntity>> GetByNameAsync(string name, CancellationToken cancellationToken, DataFetchMode dataFetchMode = DataFetchMode.ActiveOnly);
+        public Task<List<BrandEntity>> GetByNameAsync(
+            string name,
+            CancellationToken cancellationToken,
+            DataFetchMode dataFetchMode = DataFetchMode.ActiveOnly);
     }
 }

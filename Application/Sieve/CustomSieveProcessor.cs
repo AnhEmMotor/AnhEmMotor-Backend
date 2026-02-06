@@ -75,7 +75,7 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<ApplicationUser>(p => p.PhoneNumber).CanSort().CanFilter();
         mapper.Property<ApplicationUser>(p => p.Status).CanSort().CanFilter();
         mapper.Property<ApplicationUser>(p => p.DeletedAt).CanSort().CanFilter();
-        
+
         return mapper;
     }
 

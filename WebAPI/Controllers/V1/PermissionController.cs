@@ -9,6 +9,8 @@ using Application.Features.Permissions.Queries.GetMyPermissions;
 using Application.Features.Permissions.Queries.GetRolePermissions;
 using Application.Features.Permissions.Queries.GetUserPermissionsById;
 using Asp.Versioning;
+using Domain.Constants;
+using Domain.Constants.Permission;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -16,8 +18,6 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
 using WebAPI.Controllers.Base;
-using Domain.Constants.Permission;
-using Domain.Constants;
 
 namespace WebAPI.Controllers.V1;
 
@@ -143,7 +143,10 @@ public class PermissionController(IMediator mediator) : ApiController
             },
             cancellationToken)
             .ConfigureAwait(true);
-        return HandleCreated(result, RouteNames.Permission.GetRolePermissions, new { roleName = result.IsSuccess ? result.Value.RoleName : null });
+        return HandleCreated(
+            result,
+            RouteNames.Permission.GetRolePermissions,
+            new { roleName = result.IsSuccess ? result.Value.RoleName : null });
     }
 
     /// <summary>

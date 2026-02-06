@@ -27,7 +27,8 @@ public class Auth
             Gender = "Male"
         };
 
-        var result = await validator.TestValidateAsync(command, cancellationToken: CancellationToken.None).ConfigureAwait(true);
+        var result = await validator.TestValidateAsync(command, cancellationToken: CancellationToken.None)
+            .ConfigureAwait(true);
 
         result.ShouldHaveValidationErrorFor(x => x.Email);
     }
@@ -48,7 +49,8 @@ public class Auth
             Gender = "Male"
         };
 
-        var result = await validator.TestValidateAsync(command, cancellationToken: CancellationToken.None).ConfigureAwait(true);
+        var result = await validator.TestValidateAsync(command, cancellationToken: CancellationToken.None)
+            .ConfigureAwait(true);
 
         result.ShouldHaveValidationErrorFor(x => x.Password);
     }
@@ -69,7 +71,8 @@ public class Auth
             Gender = "Male"
         };
 
-        var result = await validator.TestValidateAsync(command, cancellationToken: CancellationToken.None).ConfigureAwait(true);
+        var result = await validator.TestValidateAsync(command, cancellationToken: CancellationToken.None)
+            .ConfigureAwait(true);
 
         result.ShouldHaveValidationErrorFor(x => x.Username);
     }
@@ -100,6 +103,7 @@ public class Auth
 
         await Assert.ThrowsAsync<Exception>(() => handler.Handle(command, CancellationToken.None)).ConfigureAwait(true);
     }
+
 #pragma warning restore CRR0035
 #pragma warning restore IDE0079
     [Fact(DisplayName = "AUTH_016 - Validate PhoneNumber format (Unit) - Format số điện thoại")]
@@ -108,28 +112,29 @@ public class Auth
         var userReadRepositoryMock = new Mock<IUserReadRepository>();
         var validator = new RegisterCommandValidator(userReadRepositoryMock.Object);
 
-        // Valid cases
         var validCommand1 = new RegisterCommand { PhoneNumber = "0912345678" };
-        var result1 = await validator.TestValidateAsync(validCommand1, cancellationToken: CancellationToken.None).ConfigureAwait(true);
+        var result1 = await validator.TestValidateAsync(validCommand1, cancellationToken: CancellationToken.None)
+            .ConfigureAwait(true);
         result1.ShouldNotHaveValidationErrorFor(x => x.PhoneNumber);
 
         var validCommand2 = new RegisterCommand { PhoneNumber = "84912345678" };
-        var result2 = await validator.TestValidateAsync(validCommand2, cancellationToken: CancellationToken.None).ConfigureAwait(true);
+        var result2 = await validator.TestValidateAsync(validCommand2, cancellationToken: CancellationToken.None)
+            .ConfigureAwait(true);
         result2.ShouldNotHaveValidationErrorFor(x => x.PhoneNumber);
 
         var validCommand3 = new RegisterCommand { PhoneNumber = "+84912345678" };
-        var result3 = await validator.TestValidateAsync(validCommand3, cancellationToken: CancellationToken.None).ConfigureAwait(true);
+        var result3 = await validator.TestValidateAsync(validCommand3, cancellationToken: CancellationToken.None)
+            .ConfigureAwait(true);
         result3.ShouldNotHaveValidationErrorFor(x => x.PhoneNumber);
 
-        // Invalid cases
-        var invalidCommand1 = new RegisterCommand { PhoneNumber = "091234" }; // Too short
-        var resultInv1 = await validator.TestValidateAsync(invalidCommand1, cancellationToken: CancellationToken.None).ConfigureAwait(true);
-        resultInv1.ShouldHaveValidationErrorFor(x => x.PhoneNumber)
-                  .WithErrorMessage("Invalid phone number.");
+        var invalidCommand1 = new RegisterCommand { PhoneNumber = "091234" };
+        var resultInv1 = await validator.TestValidateAsync(invalidCommand1, cancellationToken: CancellationToken.None)
+            .ConfigureAwait(true);
+        resultInv1.ShouldHaveValidationErrorFor(x => x.PhoneNumber).WithErrorMessage("Invalid phone number.");
 
-        var invalidCommand2 = new RegisterCommand { PhoneNumber = "abcd123456" }; // Non-numeric
-        var resultInv2 = await validator.TestValidateAsync(invalidCommand2, cancellationToken: CancellationToken.None).ConfigureAwait(true);
-        resultInv2.ShouldHaveValidationErrorFor(x => x.PhoneNumber)
-                  .WithErrorMessage("Invalid phone number.");
+        var invalidCommand2 = new RegisterCommand { PhoneNumber = "abcd123456" };
+        var resultInv2 = await validator.TestValidateAsync(invalidCommand2, cancellationToken: CancellationToken.None)
+            .ConfigureAwait(true);
+        resultInv2.ShouldHaveValidationErrorFor(x => x.PhoneNumber).WithErrorMessage("Invalid phone number.");
     }
 }

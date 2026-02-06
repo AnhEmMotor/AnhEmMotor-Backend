@@ -96,15 +96,12 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .HasForeignKey(rp => rp.PermissionId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // Check if using a provider other than SQL Server (e.g., SQLite, MySQL) to remove SQL Server-specific configurations
         var isNotSqlServer = string.Compare(Database.ProviderName, "Microsoft.EntityFrameworkCore.SqlServer") != 0;
 
         if(isNotSqlServer)
         {
-            // Remove SQL Server-specific annotations for SQLite compatibility
             foreach(var entityType in modelBuilder.Model.GetEntityTypes())
             {
-                // Remove table filters that use SQL Server syntax
                 var tableName = entityType.GetTableName();
 
                 if(string.Compare(tableName, "Roles") == 0)
@@ -123,24 +120,24 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
                     index?.SetFilter(null);
                 }
 
-                // Clear SQL Server-specific column types
                 foreach(var property in entityType.GetProperties())
                 {
                     var columnType = property.GetColumnType();
 
                     if(columnType is not null &&
-                       (columnType.Contains("nvarchar(MAX)", StringComparison.OrdinalIgnoreCase) ||
-                        columnType.Contains("uniqueidentifier", StringComparison.OrdinalIgnoreCase) ||
-                        columnType.Contains("datetimeoffset", StringComparison.OrdinalIgnoreCase) ||
-                        columnType.Contains("rowversion", StringComparison.OrdinalIgnoreCase) ||
-                        columnType.Contains("bit", StringComparison.OrdinalIgnoreCase)))
+                        (columnType.Contains("nvarchar(MAX)", StringComparison.OrdinalIgnoreCase) ||
+                            columnType.Contains("uniqueidentifier", StringComparison.OrdinalIgnoreCase) ||
+                            columnType.Contains("datetimeoffset", StringComparison.OrdinalIgnoreCase) ||
+                            columnType.Contains("rowversion", StringComparison.OrdinalIgnoreCase) ||
+                            columnType.Contains("bit", StringComparison.OrdinalIgnoreCase)))
                     {
                         property.SetColumnType(null);
                     }
 
-                    if (property.ClrType == typeof(DateTimeOffset) || property.ClrType == typeof(DateTimeOffset?))
+                    if(property.ClrType == typeof(DateTimeOffset) || property.ClrType == typeof(DateTimeOffset?))
                     {
-                        property.SetValueConverter(typeof(Microsoft.EntityFrameworkCore.Storage.ValueConversion.DateTimeOffsetToBinaryConverter));
+                        property.SetValueConverter(
+                            typeof(Microsoft.EntityFrameworkCore.Storage.ValueConversion.DateTimeOffsetToBinaryConverter));
                     }
                 }
             }
@@ -168,7 +165,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             switch(entry.State)
             {
                 case EntityState.Added:
-                    if (entry.Entity.CreatedAt == null)
+                    if(entry.Entity.CreatedAt == null)
                     {
                         entry.Entity.CreatedAt = DateTimeOffset.UtcNow;
                     }

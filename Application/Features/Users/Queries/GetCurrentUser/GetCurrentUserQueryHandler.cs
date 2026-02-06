@@ -9,23 +9,23 @@ public class GetCurrentUserQueryHandler(IUserReadRepository userReadRepository) 
 {
     public async Task<Result<UserResponse>> Handle(GetCurrentUserQuery request, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(request.UserId) || !Guid.TryParse(request.UserId, out var userId))
+        if(string.IsNullOrEmpty(request.UserId) || !Guid.TryParse(request.UserId, out var userId))
         {
             return Error.BadRequest("Invalid user ID.");
         }
 
         var user = await userReadRepository.FindUserByIdAsync(userId, cancellationToken).ConfigureAwait(false);
-        if (user is null)
+        if(user is null)
         {
             return Error.NotFound("User not found.");
         }
 
-        if (user.DeletedAt is not null)
+        if(user.DeletedAt is not null)
         {
             return Error.Forbidden("User account is deleted.");
         }
 
-        if (string.Compare(user.Status, Domain.Constants.UserStatus.Banned) == 0)
+        if(string.Compare(user.Status, Domain.Constants.UserStatus.Banned) == 0)
         {
             return Error.Forbidden("User account is banned.");
         }

@@ -2,10 +2,10 @@
 using Domain.Constants;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
-using ProductVariantEntity = Domain.Entities.ProductVariant;
-
 using Sieve.Models;
+
 using Sieve.Services;
+using ProductVariantEntity = Domain.Entities.ProductVariant;
 
 namespace Infrastructure.Repositories.ProductVariant
 {
@@ -117,10 +117,8 @@ namespace Infrastructure.Repositories.ProductVariant
                 .Include(v => v.OutputInfos.Where(oi => oi.DeletedAt == null && oi.OutputOrder!.DeletedAt == null))
                 .ThenInclude(oi => oi.OutputOrder);
 
-            if (string.IsNullOrWhiteSpace(sorts))
+            if(string.IsNullOrWhiteSpace(sorts))
             {
-                // Default sorting if none provided, though variants might not have CreatedAt directly on them or it's named differently
-                // Assuming ProductVariant has Id or we sort by Id like logic in CustomSieveProcessor implies
                 dbQuery = dbQuery.OrderByDescending(v => v.Id);
             }
 

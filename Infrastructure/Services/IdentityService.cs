@@ -1,8 +1,8 @@
 ﻿using Application.ApiContracts.Auth.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Services;
-using Domain.Entities;
 using Domain.Constants;
+using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 
 namespace Infrastructure.Services;
@@ -38,7 +38,7 @@ public class IdentityService(UserManager<ApplicationUser> userManager) : IIdenti
             return Error.Unauthorized("Wrong username/email or password.");
         }
 
-        if (string.Compare(user.Status, UserStatus.Banned) == 0)
+        if(string.Compare(user.Status, UserStatus.Banned) == 0)
         {
             return Error.Forbidden("User is banned.");
         }

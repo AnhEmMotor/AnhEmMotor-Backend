@@ -33,7 +33,7 @@ public sealed class UpdateOutputForManagerCommandHandler(
             return Error.NotFound($"Không tìm thấy đơn hàng có ID {request.Id}.", "Id");
         }
 
-        if (output.CreatedBy != request.CurrentUserId)
+        if(output.CreatedBy != request.CurrentUserId)
         {
             return Error.Forbidden("Bạn không có quyền chỉnh sửa đơn hàng này.", "Permission");
         }

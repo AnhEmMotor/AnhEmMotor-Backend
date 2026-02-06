@@ -12,14 +12,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MySqlConnector;
+using Respawn;
 using System.Data.Common;
 using Testcontainers.MySql;
-using Respawn;
-using Respawn.Graph;
-using MySqlConnector;
-using Microsoft.EntityFrameworkCore;
 
 namespace IntegrationTests.SetupClass;
 
@@ -47,6 +46,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
         _connection = new MySqlConnection(_mySqlContainer.GetConnectionString());
         await _connection.OpenAsync().ConfigureAwait(false);
     }
+
 #pragma warning restore CRR0039
 #pragma warning restore IDE0079 
 
@@ -54,12 +54,15 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        _respawner ??= await Respawner.CreateAsync(_connection, new RespawnerOptions
-        {
-            DbAdapter = DbAdapter.MySql,
-            SchemasToInclude = ["AnhEmMotor_Test"],
-            TablesToIgnore = ["__EFMigrationsHistory"]
-        }).ConfigureAwait(false);
+        _respawner ??= await Respawner.CreateAsync(
+            _connection,
+            new RespawnerOptions
+            {
+                DbAdapter = DbAdapter.MySql,
+                SchemasToInclude = [ "AnhEmMotor_Test" ],
+                TablesToIgnore = [ "__EFMigrationsHistory" ]
+            })
+            .ConfigureAwait(false);
 
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -76,94 +79,98 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
     {
         builder.UseEnvironment("Test");
 
-        builder.ConfigureAppConfiguration((context, config) =>
-        {
-            var connString = _mySqlContainer.GetConnectionString();
-
-            config.AddInMemoryCollection(new Dictionary<string, string?>
+        builder.ConfigureAppConfiguration(
+            (context, config) =>
             {
-                ["Jwt:Key"] = "ThisIsMySuperSecretAndLongEnoughKeyForJWTGenerationHehehe!@$#@#",
-                ["Jwt:Issuer"] = "https://test.api.anhemmotor.com",
-                ["Jwt:Audience"] = "https://test.anhemmotor.com",
-                ["Jwt:AccessTokenExpiryInMinutes"] = "15",
-                ["Jwt:RefreshTokenExpiryInDays"] = "7",
-                ["ConnectionStrings:StringConnection"] = connString,
-                ["ProtectedAuthorizationEntities:SuperRoles:0"] = "Administrator"
+                var connString = _mySqlContainer.GetConnectionString();
+
+                config.AddInMemoryCollection(
+                    new Dictionary<string, string?>
+                        {
+                            ["Jwt:Key"] = "ThisIsMySuperSecretAndLongEnoughKeyForJWTGenerationHehehe!@$#@#",
+                            ["Jwt:Issuer"] = "https://test.api.anhemmotor.com",
+                            ["Jwt:Audience"] = "https://test.anhemmotor.com",
+                            ["Jwt:AccessTokenExpiryInMinutes"] = "15",
+                            ["Jwt:RefreshTokenExpiryInDays"] = "7",
+                            ["ConnectionStrings:StringConnection"] = connString,
+                            ["ProtectedAuthorizationEntities:SuperRoles:0"] = "Administrator"
+                        });
+
+                config.AddEnvironmentVariables();
             });
-            
-            config.AddEnvironmentVariables();
-        });
 
-        builder.ConfigureServices(services =>
-        {
-            var dbConnectionDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbConnection));
-            if (dbConnectionDescriptor != null) services.Remove(dbConnectionDescriptor);
-
-            var dbContextDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<ApplicationDBContext>));
-            if (dbContextDescriptor != null) services.Remove(dbContextDescriptor);
-
-            services.AddDbContext<ApplicationDBContext>((container, options) =>
+        builder.ConfigureServices(
+            services =>
             {
-                var config = container.GetRequiredService<IConfiguration>();
-                var connectionString = config.GetConnectionString("StringConnection");
+                var dbConnectionDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbConnection));
+                if(dbConnectionDescriptor != null)
+                    services.Remove(dbConnectionDescriptor);
 
-                // QUAN TRỌNG:
-                // 1. Xóa bỏ ServerVersion.AutoDetect(connectionString) -> Đây là nguyên nhân gây lỗi.
-                // 2. Thay bằng new MySqlServerVersion(new Version(8, 0, 0)) -> Hardcode version MySQL (vì bạn đang chạy Docker image mysql:8.0).
+                var dbContextDescriptor = services.SingleOrDefault(
+                    d => d.ServiceType == typeof(DbContextOptions<ApplicationDBContext>));
+                if(dbContextDescriptor != null)
+                    services.Remove(dbContextDescriptor);
 
-                options.UseMySql(
-                    connectionString,
-                    new MySqlServerVersion(new Version(8, 0, 0)), // FIX: Khai báo thủ công
-                    mySqlOptions =>
+                services.AddDbContext<ApplicationDBContext>(
+                    (container, options) =>
                     {
-                        // Tùy chọn: Bật tính năng này nếu gặp lỗi schema
-                        mySqlOptions.EnableRetryOnFailure();
-                    }
-                );
-            });
+                        var config = container.GetRequiredService<IConfiguration>();
+                        var connectionString = config.GetConnectionString("StringConnection");
 
-            services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
-            {
-                options.Password.RequiredLength = 8;
-                options.Password.RequireNonAlphanumeric = true;
-                options.Password.RequireUppercase = true;
-                options.Password.RequireLowercase = true;
-                options.Password.RequireDigit = true;
-                options.User.RequireUniqueEmail = true;
-            })
-            .AddEntityFrameworkStores<ApplicationDBContext>()
-            .AddDefaultTokenProviders();
+                        options.UseMySql(
+                            connectionString,
+                            new MySqlServerVersion(new Version(8, 0, 0)),
+                            mySqlOptions =>
+                            {
+                                mySqlOptions.EnableRetryOnFailure();
+                            });
+                    });
 
-            services.Configure<Microsoft.AspNetCore.Authentication.AuthenticationOptions>(options =>
-            {
-                options.DefaultAuthenticateScheme = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme;
-            });
+                services.AddIdentity<ApplicationUser, ApplicationRole>(
+                    options =>
+                    {
+                        options.Password.RequiredLength = 8;
+                        options.Password.RequireNonAlphanumeric = true;
+                        options.Password.RequireUppercase = true;
+                        options.Password.RequireLowercase = true;
+                        options.Password.RequireDigit = true;
+                        options.User.RequireUniqueEmail = true;
+                    })
+                    .AddEntityFrameworkStores<ApplicationDBContext>()
+                    .AddDefaultTokenProviders();
 
-            services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
-            services.AddScoped<IAuthorizationHandler, PermissionHandler>();
-            services.AddScoped<IAuthorizationHandler, AllPermissionsHandler>();
-            services.AddScoped<IAuthorizationHandler, AnyPermissionsHandler>();
+                services.Configure<Microsoft.AspNetCore.Authentication.AuthenticationOptions>(
+                    options =>
+                    {
+                        options.DefaultAuthenticateScheme = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme;
+                        options.DefaultChallengeScheme = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme;
+                    });
 
-            services.AddScoped<ITokenManagerService, TokenManagerService>();
-            services.AddScoped<IHttpTokenAccessorService, HttpTokenAccessorService>();
-            services.AddScoped<IIdentityService, IdentityService>();
-            services.AddScoped<IProtectedEntityManagerService, ProtectedEntityManagerService>();
-            services.AddScoped<IProtectedProductCategoryService, ProtectedProductCategoryService>();
-            services.AddScoped<IFileStorageService, LocalFileStorageService>();
-            services.AddScoped<ISievePaginator, SievePaginator>();
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
+                services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+                services.AddScoped<IAuthorizationHandler, PermissionHandler>();
+                services.AddScoped<IAuthorizationHandler, AllPermissionsHandler>();
+                services.AddScoped<IAuthorizationHandler, AnyPermissionsHandler>();
 
-            services.Scan(scan => scan
+                services.AddScoped<ITokenManagerService, TokenManagerService>();
+                services.AddScoped<IHttpTokenAccessorService, HttpTokenAccessorService>();
+                services.AddScoped<IIdentityService, IdentityService>();
+                services.AddScoped<IProtectedEntityManagerService, ProtectedEntityManagerService>();
+                services.AddScoped<IProtectedProductCategoryService, ProtectedProductCategoryService>();
+                services.AddScoped<IFileStorageService, LocalFileStorageService>();
+                services.AddScoped<ISievePaginator, SievePaginator>();
+                services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+                services.Scan(
+                    scan => scan
                 .FromAssembliesOf(typeof(UnitOfWork))
-                .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Repository")))
-                .AsImplementedInterfaces()
-                .WithScopedLifetime());
-            
-            var sp = services.BuildServiceProvider();
-            using var scope = sp.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            db.Database.EnsureCreated();
-        });
+                            .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Repository")))
+                            .AsImplementedInterfaces()
+                            .WithScopedLifetime());
+
+                var sp = services.BuildServiceProvider();
+                using var scope = sp.CreateScope();
+                var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+                db.Database.EnsureCreated();
+            });
     }
 }

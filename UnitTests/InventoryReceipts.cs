@@ -178,10 +178,8 @@ public class InventoryReceipts
     {
         var mockReadRepo = new Mock<IInputReadRepository>();
 
-        mockReadRepo.Setup(x => x.GetByIdWithDetailsAsync(
-                It.IsAny<int>(),
-                It.IsAny<CancellationToken>(),
-                It.IsAny<DataFetchMode>()))
+        mockReadRepo.Setup(
+            x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync((Input?)null);
 
         var handler = new UpdateInputCommandHandler(
@@ -196,10 +194,8 @@ public class InventoryReceipts
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
-        // Assert chuẩn xác:
         result.IsFailure.Should().BeTrue();
 
-        // Code của Error.NotFound mặc định là "NotFound". Chấp nhận sự thật này.
         result.Error?.Code.Should().Be("NotFound");
     }
 

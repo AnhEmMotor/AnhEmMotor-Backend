@@ -1,10 +1,7 @@
 ﻿using Application.Features.UserManager.Commands.ChangePasswordByManager;
 using Application.Features.UserManager.Commands.UpdateUser;
-using Application.Interfaces.Repositories.User;
-using Application.Interfaces.Services;
 using Domain.Constants;
 using FluentAssertions;
-using Moq;
 
 namespace UnitTests;
 

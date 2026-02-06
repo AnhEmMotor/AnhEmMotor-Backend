@@ -34,7 +34,7 @@ public sealed class UpdateCurrentUserCommandValidator : AbstractValidator<Update
 
     private bool IsValidPhoneNumber(string? phoneNumber)
     {
-        if (string.IsNullOrWhiteSpace(phoneNumber))
+        if(string.IsNullOrWhiteSpace(phoneNumber))
         {
             return false;
         }
@@ -44,8 +44,7 @@ public sealed class UpdateCurrentUserCommandValidator : AbstractValidator<Update
             var phoneUtil = PhoneNumbers.PhoneNumberUtil.GetInstance();
             var numberProto = phoneUtil.Parse(phoneNumber, "VN");
             return phoneUtil.IsValidNumber(numberProto);
-        }
-        catch (PhoneNumbers.NumberParseException)
+        } catch(PhoneNumbers.NumberParseException)
         {
             return false;
         }

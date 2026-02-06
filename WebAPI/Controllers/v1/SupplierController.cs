@@ -14,7 +14,6 @@ using Application.Features.Suppliers.Queries.GetSuppliersList;
 using Application.Features.Suppliers.Queries.GetSuppliersListForInputManager;
 using Asp.Versioning;
 using Domain.Constants;
-using Domain.Entities;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using Mapster;

@@ -5,7 +5,7 @@ namespace Application.ApiContracts.Product.Requests;
 public class CreateProductVariantRequest
 {
     public decimal? Price { get; set; }
-    
+
     public string? UrlSlug { get; set; }
 
     public string? CoverImageUrl { get; set; }

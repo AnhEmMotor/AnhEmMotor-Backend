@@ -14,7 +14,6 @@ using Asp.Versioning;
 using Domain.Constants;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
-using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
@@ -90,7 +89,10 @@ public class MediaFileController(IMediator mediator) : ApiController
             return BadRequest();
         var command = new UploadImageCommand { FileContent = file.OpenReadStream(), FileName = file.FileName };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleCreated(result, RouteNames.MediaFile.GetById, new { id = result.IsSuccess ? result.Value.Id : null } );
+        return HandleCreated(
+            result,
+            RouteNames.MediaFile.GetById,
+            new { id = result.IsSuccess ? result.Value.Id : null });
     }
 
     /// <summary>

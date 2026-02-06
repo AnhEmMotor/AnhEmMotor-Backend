@@ -2,16 +2,16 @@
 using Application.Features.Auth.Commands.Login;
 using Application.Features.Auth.Commands.Register;
 using Domain.Constants;
+using Domain.Constants.Permission;
 using Domain.Entities;
 using FluentAssertions;
 using Infrastructure.DBContexts;
+using IntegrationTests.SetupClass;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Json;
-using Domain.Constants.Permission;
-using Microsoft.EntityFrameworkCore;
-using IntegrationTests.SetupClass;
 
 namespace IntegrationTests;
 
@@ -35,9 +35,7 @@ public class Auth : IAsyncLifetime
     public Task InitializeAsync() => Task.CompletedTask;
 
     public async Task DisposeAsync()
-    {
-        await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(false);
-    }
+    { await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(false); }
 
 #pragma warning disable IDE0079 
 #pragma warning disable CRR0035
@@ -58,9 +56,9 @@ public class Auth : IAsyncLifetime
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
 
-        // var jsonRaw = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
-
-        var content = await response.Content.ReadFromJsonAsync<RegisterResponse>(CancellationToken.None).ConfigureAwait(true);
+        var content = await response.Content
+            .ReadFromJsonAsync<RegisterResponse>(CancellationToken.None)
+            .ConfigureAwait(true);
 
         content.Should().NotBeNull();
         content!.UserId.Should().NotBeEmpty();
@@ -140,10 +138,11 @@ public class Auth : IAsyncLifetime
             _factory.Services,
             "deleteduser",
             "Password123!",
-            [], // No specific permissions needed for this test
+            [],
             CancellationToken.None,
             email: email,
-            deletedAt: DateTimeOffset.UtcNow).ConfigureAwait(true);
+            deletedAt: DateTimeOffset.UtcNow)
+            .ConfigureAwait(true);
 
         var request = new RegisterCommand
         {
@@ -171,7 +170,8 @@ public class Auth : IAsyncLifetime
             password,
             [],
             CancellationToken.None,
-            email: email).ConfigureAwait(true);
+            email: email)
+            .ConfigureAwait(true);
 
         var request = new LoginCommand { UsernameOrEmail = email, Password = password };
 
@@ -201,7 +201,8 @@ public class Auth : IAsyncLifetime
             [],
             CancellationToken.None,
             email: "banned@example.com",
-            isLocked: true).ConfigureAwait(true);
+            isLocked: true)
+            .ConfigureAwait(true);
 
         var request = new LoginCommand { UsernameOrEmail = username, Password = password };
 
@@ -219,10 +220,11 @@ public class Auth : IAsyncLifetime
             _factory.Services,
             username,
             password,
-            [PermissionsList.Users.View],
+            [ PermissionsList.Users.View ],
             CancellationToken.None,
             email: "manager@example.com",
-            roleName: "Manager").ConfigureAwait(true);
+            roleName: "Manager")
+            .ConfigureAwait(true);
 
         var request = new LoginCommand { UsernameOrEmail = username, Password = password };
 
@@ -244,7 +246,8 @@ public class Auth : IAsyncLifetime
             password,
             [],
             CancellationToken.None,
-            email: "refresh@example.com").ConfigureAwait(true);
+            email: "refresh@example.com")
+            .ConfigureAwait(true);
 
         var loginRes = await _client.PostAsJsonAsync(
             "/api/v1/Auth/login",
@@ -286,7 +289,8 @@ public class Auth : IAsyncLifetime
             password,
             [],
             CancellationToken.None,
-            email: "refresh_banned@example.com").ConfigureAwait(true);
+            email: "refresh_banned@example.com")
+            .ConfigureAwait(true);
 
         var loginRes = await _client.PostAsJsonAsync(
             "/api/v1/Auth/login",

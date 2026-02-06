@@ -61,11 +61,11 @@ public class Product
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _productVariantInsertRepository = new Mock<IProductVariantInsertRepository>();
     }
+
 #pragma warning disable IDE0079 
 #pragma warning disable CRR0035
 
     [Fact(DisplayName = "PRODUCT_001 - Tạo sản phẩm thành công với 1 biến thể không có optionValues")]
-// Remove unnecessary suppression
     public async Task CreateProduct_SingleVariantNoOptions_Success()
     {
         var command = new CreateProductCommand
@@ -934,21 +934,23 @@ public class Product
     [Fact(DisplayName = "PRODUCT_032 - Sửa giá nhiều sản phẩm cùng lúc thành công")]
     public async Task UpdateManyProductPrices_ValidData_Success()
     {
-        var command = new UpdateManyProductPricesCommand { Ids = [1, 2], Price = 25000000m };
+        var command = new UpdateManyProductPricesCommand { Ids = [ 1, 2 ], Price = 25000000m };
 
-        // SỬA TẠI ĐÂY: Mock đúng phương thức GetByIdWithVariantsAsync
-        _productReadRepoMock.Setup(x => x.GetByIdWithVariantsAsync(
-         It.IsAny<List<int>>(),
-         It.IsAny<CancellationToken>(),
-         It.IsAny<DataFetchMode>()))
-             .ReturnsAsync((List<int> ids, CancellationToken ct, DataFetchMode fetchMode) =>
-             {
-                 return [.. ids.Select(id => new Domain.Entities.Product
-                 {
-                     Id = id,
-                     ProductVariants = [new ProductVariant { Id = id * 10, Price = 0 }]
-                 })];
-             });
+        _productReadRepoMock.Setup(
+            x => x.GetByIdWithVariantsAsync(
+                It.IsAny<List<int>>(),
+                It.IsAny<CancellationToken>(),
+                It.IsAny<DataFetchMode>()))
+            .ReturnsAsync(
+                (List<int> ids, CancellationToken ct, DataFetchMode fetchMode) =>
+                {
+                    return[ .. ids.Select(
+                        id => new Domain.Entities.Product
+                            {
+                                Id = id,
+                                ProductVariants = [ new ProductVariant { Id = id * 10, Price = 0 } ]
+                            }) ];
+                });
 
         var handler = new UpdateManyProductPricesCommandHandler(
             _productReadRepoMock.Object,
@@ -1034,12 +1036,7 @@ public class Product
         var productId = 1;
         var command = new DeleteProductCommand { Id = productId };
 
-        var product = new Domain.Entities.Product
-        {
-            Id = productId,
-            StatusId = "for-sale",
-            ProductVariants = []
-        };
+        var product = new Domain.Entities.Product { Id = productId, StatusId = "for-sale", ProductVariants = [] };
 
         _productReadRepoMock.Setup(x => x.GetByIdWithDetailsAsync(productId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(product);
@@ -1097,7 +1094,8 @@ public class Product
     {
         var command = new DeleteManyProductsCommand { Ids = [ 1, 2, 3 ] };
 
-        _productReadRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+        _productReadRepoMock.Setup(
+            x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(
                 [ new() { Id = 1, StatusId = "for-sale", DeletedAt = null }, new()
                 {
@@ -1113,10 +1111,8 @@ public class Product
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
-        result.IsSuccess.Should().BeTrue(); // ĐÂY LÀ CHỖ CẦN SỬA
+        result.IsSuccess.Should().BeTrue();
 
-        // Xác minh rằng phương thức xóa đã được gọi với đúng số lượng
-        // Tùy vào Handler của bạn gọi Delete nhiều lần hay DeleteRange
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -1125,7 +1121,8 @@ public class Product
     {
         var command = new DeleteManyProductsCommand { Ids = [ 1, 2, 3 ] };
 
-        _productReadRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+        _productReadRepoMock.Setup(
+            x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(
                 [ new() { Id = 1, StatusId = "for-sale", DeletedAt = null }, new()
                 {
@@ -1149,7 +1146,8 @@ public class Product
     {
         var command = new DeleteManyProductsCommand { Ids = [ 1, 2, 3 ] };
 
-        _productReadRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+        _productReadRepoMock.Setup(
+            x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(
                 [ new() { Id = 1, StatusId = "for-sale", DeletedAt = null }, new()
                 {
@@ -1207,7 +1205,7 @@ public class Product
     [Fact(DisplayName = "PRODUCT_044 - Khôi phục nhiều sản phẩm thành công")]
     public async Task RestoreManyProducts_ValidData_Success()
     {
-        var command = new RestoreManyProductsCommand { Ids = [1, 2, 3] };
+        var command = new RestoreManyProductsCommand { Ids = [ 1, 2, 3 ] };
         var deletedTime = DateTime.UtcNow;
         var products = new List<Domain.Entities.Product>
         {
@@ -1216,10 +1214,8 @@ public class Product
             new() { Id = 3, Name = "P3", DeletedAt = deletedTime }
         };
 
-        _productReadRepoMock.Setup(x => x.GetByIdAsync(
-                It.IsAny<List<int>>(),
-                It.IsAny<CancellationToken>(),
-                It.IsAny<DataFetchMode>())) // Phải có tham số mode ở đây
+        _productReadRepoMock.Setup(
+            x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(products);
 
         var handler = new RestoreManyProductsCommandHandler(

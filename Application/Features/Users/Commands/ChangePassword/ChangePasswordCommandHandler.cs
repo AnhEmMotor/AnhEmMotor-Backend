@@ -2,10 +2,6 @@ using Application.ApiContracts.User.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.User;
 using MediatR;
-using Application;
-using Application.Features;
-using Application.Features.Users;
-using Application.Features.Users.Commands;
 
 namespace Application.Features.Users.Commands.ChangePassword;
 
@@ -17,29 +13,33 @@ public class ChangePasswordCommandHandler(
         ChangePasswordCommand request,
         CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(request.UserId) || !Guid.TryParse(request.UserId, out var userId))
+        if(string.IsNullOrEmpty(request.UserId) || !Guid.TryParse(request.UserId, out var userId))
         {
             return Error.BadRequest("Invalid user ID.");
         }
 
         var user = await userReadRepository.FindUserByIdAsync(userId, cancellationToken).ConfigureAwait(false);
-        if (user is null)
+        if(user is null)
         {
             return Error.NotFound("User not found.");
         }
 
-        if (user.DeletedAt is not null)
+        if(user.DeletedAt is not null)
         {
             return Error.Forbidden("User account is deleted.");
         }
 
-        if (string.Compare(user.Status, Domain.Constants.UserStatus.Banned) == 0)
+        if(string.Compare(user.Status, Domain.Constants.UserStatus.Banned) == 0)
         {
             return Error.Forbidden("User account is banned.");
         }
 
-        var isPasswordCorrect = await userReadRepository.CheckPasswordAsync(user, request.CurrentPassword!, cancellationToken).ConfigureAwait(false);
-        if (!isPasswordCorrect)
+        var isPasswordCorrect = await userReadRepository.CheckPasswordAsync(
+            user,
+            request.CurrentPassword!,
+            cancellationToken)
+            .ConfigureAwait(false);
+        if(!isPasswordCorrect)
         {
             return Error.Validation("Incorrect password.", "CurrentPassword");
         }
@@ -51,9 +51,9 @@ public class ChangePasswordCommandHandler(
             cancellationToken)
             .ConfigureAwait(false);
 
-        if (!succeeded)
+        if(!succeeded)
         {
-            if (!errors.Any())
+            if(!errors.Any())
             {
                 return Error.Validation("Failed to change password.", "ChangePasswordFailed");
             }

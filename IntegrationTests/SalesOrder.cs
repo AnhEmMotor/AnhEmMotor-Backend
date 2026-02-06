@@ -1,8 +1,4 @@
-﻿using Application.ApiContracts.Output.Requests;
-using Application.ApiContracts.Output.Responses;
-using Application.Common.Models;
-using Application.Features.Outputs.Commands.CreateOutput;
-using Application.Features.Outputs.Commands.CreateOutputByManager;
+﻿using Application.ApiContracts.Output.Responses;
 using Application.Features.Outputs.Commands.DeleteManyOutputs;
 using Application.Features.Outputs.Commands.RestoreManyOutputs;
 using Application.Features.Outputs.Commands.UpdateManyOutputStatus;
@@ -21,15 +17,13 @@ using System.Linq;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using Xunit.Abstractions;
 using BrandEntity = Domain.Entities.Brand;
+using InputEntity = Domain.Entities.Input;
+using InputStatusEntity = Domain.Entities.InputStatus;
 using OutputEntity = Domain.Entities.Output;
-using OutputInfoEntity = Domain.Entities.OutputInfo;
 using OutputStatusEntity = Domain.Entities.OutputStatus;
 using ProductCategoryEntity = Domain.Entities.ProductCategory;
 using ProductEntity = Domain.Entities.Product;
-using InputEntity = Domain.Entities.Input;
-using InputStatusEntity = Domain.Entities.InputStatus;
 
 namespace IntegrationTests;
 
@@ -50,20 +44,19 @@ public class SalesOrder : IAsyncLifetime
 
     public Task InitializeAsync() => Task.CompletedTask;
 
-    public async Task DisposeAsync()
-    {
-        await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(true);
-    }
+    public async Task DisposeAsync() { await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(true); }
 
     private async Task<int> SeedProductVariantAsync(string uniqueId, CancellationToken cancellationToken = default)
     {
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        if (!await db.ProductStatuses.AnyAsync(x => string.Compare(x.Key, "for-sale") == 0, cancellationToken).ConfigureAwait(false))
+        if(!await db.ProductStatuses
+            .AnyAsync(x => string.Compare(x.Key, "for-sale") == 0, cancellationToken)
+            .ConfigureAwait(false))
         {
-             db.ProductStatuses.Add(new ProductStatus { Key = "for-sale" });
-             await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            db.ProductStatuses.Add(new ProductStatus { Key = "for-sale" });
+            await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
         var brand = new BrandEntity { Name = $"Brand_{uniqueId}" };
@@ -72,7 +65,13 @@ public class SalesOrder : IAsyncLifetime
         db.ProductCategories.Add(category);
         await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        var product = new ProductEntity { Name = $"Prod_{uniqueId}", BrandId = brand.Id, CategoryId = category.Id, StatusId = "for-sale" };
+        var product = new ProductEntity
+        {
+            Name = $"Prod_{uniqueId}",
+            BrandId = brand.Id,
+            CategoryId = category.Id,
+            StatusId = "for-sale"
+        };
         db.Products.Add(product);
         await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
@@ -82,19 +81,23 @@ public class SalesOrder : IAsyncLifetime
         return variant.Id;
     }
 
-    private async Task SeedInventoryAsync(int variantId, int quantity, string uniqueId, CancellationToken cancellationToken = default)
+    private async Task SeedInventoryAsync(
+        int variantId,
+        int quantity,
+        string uniqueId,
+        CancellationToken cancellationToken = default)
     {
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        // Ensure input status exists
-        if (!await db.InputStatuses.AnyAsync(x => string.Compare(x.Key, "finished") == 0, cancellationToken).ConfigureAwait(false))
+        if(!await db.InputStatuses
+            .AnyAsync(x => string.Compare(x.Key, "finished") == 0, cancellationToken)
+            .ConfigureAwait(false))
         {
             db.InputStatuses.Add(new InputStatusEntity { Key = "finished" });
             await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        // Create Input (purchase order)
         var input = new InputEntity
         {
             InputDate = DateTimeOffset.UtcNow,
@@ -104,7 +107,6 @@ public class SalesOrder : IAsyncLifetime
         db.InputReceipts.Add(input);
         await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        // Create InputInfo (product line item with stock)
         var inputInfo = new InputInfo
         {
             InputId = input.Id,
@@ -126,52 +128,47 @@ public class SalesOrder : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Outputs.Create], CancellationToken.None, email).ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Outputs.Create ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        using (var scope = _factory.Services.CreateScope())
+        using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            if (!await db.OutputStatuses.AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, CancellationToken.None).ConfigureAwait(true))
+            if(!await db.OutputStatuses
+                .AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, CancellationToken.None)
+                .ConfigureAwait(true))
             {
                 db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Pending });
                 await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             }
         }
 
-        // Seed product variant
         var variantId = await SeedProductVariantAsync(uniqueId, CancellationToken.None).ConfigureAwait(true);
 
-        //var request = new CreateOutputCommand 
-        //{ 
-        //    BuyerId = user.Id, 
-        //    Notes = "Test",
-        //    OutputInfos = [
-        //        new CreateOutputInfoRequest { ProductId = variantId, Count = 1 }
-        //    ]
-        //};
-
-        // Use explicit JSON because PostAsJsonAsync doesn't respect [JsonPropertyName] correctly in this test context
-        var jsonContent = System.Text.Json.JsonSerializer.Serialize(new {
-            buyerId = user.Id,
-            notes = "Test",
-            products = new[] {
-                new { productId = variantId, count = 1 }
-            }
-        });
+        var jsonContent = System.Text.Json.JsonSerializer
+            .Serialize(
+                new { buyerId = user.Id, notes = "Test", products = new[] { new { productId = variantId, count = 1 } } });
         var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
         var response = await _client.PostAsync("/api/v1/SalesOrders", httpContent).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
-        var content = await response.Content.ReadFromJsonAsync<OutputResponse>(CancellationToken.None).ConfigureAwait(true);
+        var content = await response.Content
+            .ReadFromJsonAsync<OutputResponse>(CancellationToken.None)
+            .ConfigureAwait(true);
         content.Should().NotBeNull();
-        // BuyerId verification: The test name says "SetsBuyerIdFromToken". 
-        // If the logic ignores body BuyerId and uses Token's User Id, we should verify it.
-        // However, standard CreateOutput often allows specifying BuyerId if Manager, or uses CurrentUser if not.
-        // If the test SO_061 implies Token User, we check if Content.BuyerId matches seeded user or the requested one.
-        // Assuming current logic prioritizes Token user for standard creation or uses what's sent? 
-        // Let's check the assertion. Original test just asserted NotNull. We will assert NotNull.
         content!.BuyerId.Should().NotBeNull();
     }
 
@@ -182,36 +179,51 @@ public class SalesOrder : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Outputs.Create], CancellationToken.None, email).ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Outputs.Create ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        using (var scope = _factory.Services.CreateScope())
+        using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            if (!await db.OutputStatuses.AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, CancellationToken.None).ConfigureAwait(true))
+            if(!await db.OutputStatuses
+                .AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, CancellationToken.None)
+                .ConfigureAwait(true))
             {
                 db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Pending });
                 await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             }
         }
 
-        // Seed product variant
         var variantId = await SeedProductVariantAsync(uniqueId, CancellationToken.None).ConfigureAwait(true);
 
-        // Use explicit JSON with correct property names
-        var jsonContent = System.Text.Json.JsonSerializer.Serialize(new {
-            buyerId = user.Id,
-            notes = "COD Order",
-            products = new[] {
-                new { productId = variantId, count = 1 }
-            }
-        });
+        var jsonContent = System.Text.Json.JsonSerializer
+            .Serialize(
+                new
+                {
+                    buyerId = user.Id,
+                    notes = "COD Order",
+                    products = new[] { new { productId = variantId, count = 1 } }
+                });
         var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
         var response = await _client.PostAsync("/api/v1/SalesOrders", httpContent).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
-        var order = await response.Content.ReadFromJsonAsync<OutputResponse>(CancellationToken.None).ConfigureAwait(true);
+        var order = await response.Content
+            .ReadFromJsonAsync<OutputResponse>(CancellationToken.None)
+            .ConfigureAwait(true);
         order.Should().NotBeNull();
         order!.StatusId.Should().Be(OrderStatus.Pending);
     }
@@ -223,55 +235,82 @@ public class SalesOrder : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        // Needs ChangeStatus permission
-        var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Outputs.Create, PermissionsList.Outputs.ChangeStatus], CancellationToken.None, email).ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Outputs.Create, PermissionsList.Outputs.ChangeStatus ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        using (var scope = _factory.Services.CreateScope())
+        using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var statuses = new[] { OrderStatus.Pending, OrderStatus.ConfirmedCod, OrderStatus.Delivering, OrderStatus.Completed };
-            foreach (var s in statuses)
+            var statuses = new[]
             {
-                if (!await db.OutputStatuses.AnyAsync(x => string.Compare(x.Key, s) == 0, CancellationToken.None).ConfigureAwait(true))
+                OrderStatus.Pending,
+                OrderStatus.ConfirmedCod,
+                OrderStatus.Delivering,
+                OrderStatus.Completed
+            };
+            foreach(var s in statuses)
+            {
+                if(!await db.OutputStatuses
+                    .AnyAsync(x => string.Compare(x.Key, s) == 0, CancellationToken.None)
+                    .ConfigureAwait(true))
                     db.OutputStatuses.Add(new OutputStatusEntity { Key = s });
             }
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        // Seed product variant
         var variantId = await SeedProductVariantAsync(uniqueId, CancellationToken.None).ConfigureAwait(true);
-        
-        // Seed inventory stock
+
         await SeedInventoryAsync(variantId, 10, uniqueId, CancellationToken.None).ConfigureAwait(true);
 
-        // Create order with explicit JSON
-        var jsonContent = System.Text.Json.JsonSerializer.Serialize(new {
-            buyerId = user.Id,
-            products = new[] { new { productId = variantId, count = 1 } }
-        });
+        var jsonContent = System.Text.Json.JsonSerializer
+            .Serialize(new { buyerId = user.Id, products = new[] { new { productId = variantId, count = 1 } } });
         var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
         var createResponse = await _client.PostAsync("/api/v1/SalesOrders", httpContent).ConfigureAwait(true);
-        var order = await createResponse.Content.ReadFromJsonAsync<OutputResponse>(CancellationToken.None).ConfigureAwait(true);
+        var order = await createResponse.Content
+            .ReadFromJsonAsync<OutputResponse>(CancellationToken.None)
+            .ConfigureAwait(true);
         int orderId = order!.Id!.Value;
 
-        // Pending -> ConfirmedCod
         var updateRequest1 = new UpdateOutputStatusCommand { StatusId = OrderStatus.ConfirmedCod };
-        var response1 = await _client.PatchAsJsonAsync($"/api/v1/SalesOrders/{orderId}/status", updateRequest1, CancellationToken.None).ConfigureAwait(true);
+        var response1 = await _client.PatchAsJsonAsync(
+            $"/api/v1/SalesOrders/{orderId}/status",
+            updateRequest1,
+            CancellationToken.None)
+            .ConfigureAwait(true);
         response1.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        // ConfirmedCod -> Delivering
         var updateRequest2 = new UpdateOutputStatusCommand { StatusId = OrderStatus.Delivering };
-        var response2 = await _client.PatchAsJsonAsync($"/api/v1/SalesOrders/{orderId}/status", updateRequest2, CancellationToken.None).ConfigureAwait(true);
+        var response2 = await _client.PatchAsJsonAsync(
+            $"/api/v1/SalesOrders/{orderId}/status",
+            updateRequest2,
+            CancellationToken.None)
+            .ConfigureAwait(true);
         response2.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        // Delivering -> Completed
         var updateRequest3 = new UpdateOutputStatusCommand { StatusId = OrderStatus.Completed };
-        var response3 = await _client.PatchAsJsonAsync($"/api/v1/SalesOrders/{orderId}/status", updateRequest3, CancellationToken.None).ConfigureAwait(true);
+        var response3 = await _client.PatchAsJsonAsync(
+            $"/api/v1/SalesOrders/{orderId}/status",
+            updateRequest3,
+            CancellationToken.None)
+            .ConfigureAwait(true);
         response3.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var finalOrder = await response3.Content.ReadFromJsonAsync<OutputResponse>(CancellationToken.None).ConfigureAwait(true);
+        var finalOrder = await response3.Content
+            .ReadFromJsonAsync<OutputResponse>(CancellationToken.None)
+            .ConfigureAwait(true);
         finalOrder!.StatusId.Should().Be(OrderStatus.Completed);
     }
 
@@ -282,45 +321,79 @@ public class SalesOrder : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Outputs.Create, PermissionsList.Outputs.ChangeStatus], CancellationToken.None, email).ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Outputs.Create, PermissionsList.Outputs.ChangeStatus ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        using (var scope = _factory.Services.CreateScope())
+        using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var statuses = new[] { OrderStatus.Pending, OrderStatus.WaitingDeposit, OrderStatus.DepositPaid, OrderStatus.Delivering, OrderStatus.Completed };
-            foreach (var s in statuses)
+            var statuses = new[]
             {
-                if (!await db.OutputStatuses.AnyAsync(x => string.Compare(x.Key, s) == 0, CancellationToken.None).ConfigureAwait(true))
+                OrderStatus.Pending,
+                OrderStatus.WaitingDeposit,
+                OrderStatus.DepositPaid,
+                OrderStatus.Delivering,
+                OrderStatus.Completed
+            };
+            foreach(var s in statuses)
+            {
+                if(!await db.OutputStatuses
+                    .AnyAsync(x => string.Compare(x.Key, s) == 0, CancellationToken.None)
+                    .ConfigureAwait(true))
                     db.OutputStatuses.Add(new OutputStatusEntity { Key = s });
             }
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        // Seed product variant
         var variantId = await SeedProductVariantAsync(uniqueId, CancellationToken.None).ConfigureAwait(true);
-        
-        // Seed inventory stock
+
         await SeedInventoryAsync(variantId, 10, uniqueId, CancellationToken.None).ConfigureAwait(true);
 
-        // Create order with explicit JSON
-        var jsonContent = System.Text.Json.JsonSerializer.Serialize(new {
-            buyerId = user.Id,
-            products = new[] { new { productId = variantId, count = 1 } }
-        });
+        var jsonContent = System.Text.Json.JsonSerializer
+            .Serialize(new { buyerId = user.Id, products = new[] { new { productId = variantId, count = 1 } } });
         var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
         var createResponse = await _client.PostAsync("/api/v1/SalesOrders", httpContent).ConfigureAwait(true);
-        var order = await createResponse.Content.ReadFromJsonAsync<OutputResponse>(CancellationToken.None).ConfigureAwait(true);
+        var order = await createResponse.Content
+            .ReadFromJsonAsync<OutputResponse>(CancellationToken.None)
+            .ConfigureAwait(true);
         int orderId = order!.Id!.Value;
 
-        await _client.PatchAsJsonAsync($"/api/v1/SalesOrders/{orderId}/status", new UpdateOutputStatusCommand { StatusId = OrderStatus.WaitingDeposit }, CancellationToken.None).ConfigureAwait(true);
-        
-        await _client.PatchAsJsonAsync($"/api/v1/SalesOrders/{orderId}/status", new UpdateOutputStatusCommand { StatusId = OrderStatus.DepositPaid }, CancellationToken.None).ConfigureAwait(true);
+        await _client.PatchAsJsonAsync(
+            $"/api/v1/SalesOrders/{orderId}/status",
+            new UpdateOutputStatusCommand { StatusId = OrderStatus.WaitingDeposit },
+            CancellationToken.None)
+            .ConfigureAwait(true);
 
-        await _client.PatchAsJsonAsync($"/api/v1/SalesOrders/{orderId}/status", new UpdateOutputStatusCommand { StatusId = OrderStatus.Delivering }, CancellationToken.None).ConfigureAwait(true);
+        await _client.PatchAsJsonAsync(
+            $"/api/v1/SalesOrders/{orderId}/status",
+            new UpdateOutputStatusCommand { StatusId = OrderStatus.DepositPaid },
+            CancellationToken.None)
+            .ConfigureAwait(true);
 
-        var finalResponse = await _client.PatchAsJsonAsync($"/api/v1/SalesOrders/{orderId}/status", new UpdateOutputStatusCommand { StatusId = OrderStatus.Completed }, CancellationToken.None).ConfigureAwait(true);
+        await _client.PatchAsJsonAsync(
+            $"/api/v1/SalesOrders/{orderId}/status",
+            new UpdateOutputStatusCommand { StatusId = OrderStatus.Delivering },
+            CancellationToken.None)
+            .ConfigureAwait(true);
+
+        var finalResponse = await _client.PatchAsJsonAsync(
+            $"/api/v1/SalesOrders/{orderId}/status",
+            new UpdateOutputStatusCommand { StatusId = OrderStatus.Completed },
+            CancellationToken.None)
+            .ConfigureAwait(true);
 
         finalResponse.StatusCode.Should().Be(HttpStatusCode.OK);
     }
@@ -332,44 +405,67 @@ public class SalesOrder : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Outputs.Create, PermissionsList.Outputs.ChangeStatus], CancellationToken.None, email).ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Outputs.Create, PermissionsList.Outputs.ChangeStatus ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        using (var scope = _factory.Services.CreateScope())
+        using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var statuses = new[] { OrderStatus.Pending, OrderStatus.PaidProcessing, OrderStatus.Refunding, OrderStatus.Refunded };
-            foreach (var s in statuses)
+            var statuses = new[]
             {
-                if (!await db.OutputStatuses.AnyAsync(x => string.Compare(x.Key, s) == 0, CancellationToken.None).ConfigureAwait(true))
+                OrderStatus.Pending,
+                OrderStatus.PaidProcessing,
+                OrderStatus.Refunding,
+                OrderStatus.Refunded
+            };
+            foreach(var s in statuses)
+            {
+                if(!await db.OutputStatuses
+                    .AnyAsync(x => string.Compare(x.Key, s) == 0, CancellationToken.None)
+                    .ConfigureAwait(true))
                     db.OutputStatuses.Add(new OutputStatusEntity { Key = s });
             }
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        // Seed product variant
         var variantId = await SeedProductVariantAsync(uniqueId, CancellationToken.None).ConfigureAwait(true);
-        
-        // Seed inventory stock
+
         await SeedInventoryAsync(variantId, 10, uniqueId, CancellationToken.None).ConfigureAwait(true);
 
-        // Create order with explicit JSON
-        var jsonContent = System.Text.Json.JsonSerializer.Serialize(new {
-            buyerId = user.Id,
-            products = new[] { new { productId = variantId, count = 1 } }
-        });
+        var jsonContent = System.Text.Json.JsonSerializer
+            .Serialize(new { buyerId = user.Id, products = new[] { new { productId = variantId, count = 1 } } });
         var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
         var createResponse = await _client.PostAsync("/api/v1/SalesOrders", httpContent).ConfigureAwait(true);
-        var order = await createResponse.Content.ReadFromJsonAsync<OutputResponse>(CancellationToken.None).ConfigureAwait(true);
+        var order = await createResponse.Content
+            .ReadFromJsonAsync<OutputResponse>(CancellationToken.None)
+            .ConfigureAwait(true);
         int orderId = order!.Id!.Value;
 
-        // Pending -> PaidProcessing (instead of ConfirmedCod which prevents refund)
-        await _client.PatchAsJsonAsync($"/api/v1/SalesOrders/{orderId}/status", new UpdateOutputStatusCommand { StatusId = OrderStatus.PaidProcessing }, CancellationToken.None).ConfigureAwait(true);
-        
-        // PaidProcessing -> Refunding
-        var refundResponse = await _client.PatchAsJsonAsync($"/api/v1/SalesOrders/{orderId}/status", new UpdateOutputStatusCommand { StatusId = OrderStatus.Refunding }, CancellationToken.None).ConfigureAwait(true);
-        
+        await _client.PatchAsJsonAsync(
+            $"/api/v1/SalesOrders/{orderId}/status",
+            new UpdateOutputStatusCommand { StatusId = OrderStatus.PaidProcessing },
+            CancellationToken.None)
+            .ConfigureAwait(true);
+
+        var refundResponse = await _client.PatchAsJsonAsync(
+            $"/api/v1/SalesOrders/{orderId}/status",
+            new UpdateOutputStatusCommand { StatusId = OrderStatus.Refunding },
+            CancellationToken.None)
+            .ConfigureAwait(true);
+
         refundResponse.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
@@ -380,30 +476,38 @@ public class SalesOrder : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        // Needs Create Permission. Possibly specialized Admin permission?
-        // Using generic Create for now as original didn't specify special Auth except "ByManager" in name.
-        var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Outputs.Create], CancellationToken.None, email).ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Outputs.Create ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        using (var scope = _factory.Services.CreateScope())
+        using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            if (!await db.OutputStatuses.AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, CancellationToken.None).ConfigureAwait(true))
+            if(!await db.OutputStatuses
+                .AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, CancellationToken.None)
+                .ConfigureAwait(true))
             {
                 db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Pending });
                 await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             }
         }
 
-        // Seed product variant
         var variantId = await SeedProductVariantAsync(uniqueId, CancellationToken.None).ConfigureAwait(true);
 
-        // Create order with explicit JSON
-        var jsonContent = System.Text.Json.JsonSerializer.Serialize(new {
-            buyerId = user.Id,
-            products = new[] { new { productId = variantId, count = 1 } }
-        });
+        var jsonContent = System.Text.Json.JsonSerializer
+            .Serialize(new { buyerId = user.Id, products = new[] { new { productId = variantId, count = 1 } } });
         var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
         var response = await _client.PostAsync("/api/v1/SalesOrders/by-manager", httpContent).ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.Created);
@@ -416,32 +520,51 @@ public class SalesOrder : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Outputs.View], CancellationToken.None, email).ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Outputs.View ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        using (var scope = _factory.Services.CreateScope())
+        using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            if (!await db.OutputStatuses.AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, CancellationToken.None).ConfigureAwait(true))
+            if(!await db.OutputStatuses
+                .AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, CancellationToken.None)
+                .ConfigureAwait(true))
             {
                 db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Pending });
                 await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             }
-            // Add a specific order to search for
-            db.OutputOrders.Add(new OutputEntity 
-            { 
-                StatusId = OrderStatus.Pending, 
-                Notes = $"SearchMe_{uniqueId}",
-                CreatedAt = DateTime.UtcNow
-            });
+            db.OutputOrders
+                .Add(
+                    new OutputEntity
+                    {
+                        StatusId = OrderStatus.Pending,
+                        Notes = $"SearchMe_{uniqueId}",
+                        CreatedAt = DateTime.UtcNow
+                    });
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/SalesOrders?filters=status=={OrderStatus.Pending},Notes@={uniqueId}").ConfigureAwait(true);
+        var response = await _client.GetAsync(
+            $"/api/v1/SalesOrders?filters=status=={OrderStatus.Pending},Notes@={uniqueId}")
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<OutputResponse>>(CancellationToken.None).ConfigureAwait(true);
+        var content = await response.Content
+            .ReadFromJsonAsync<PagedResult<OutputResponse>>(CancellationToken.None)
+            .ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Items.Should().Contain(x => x.Notes != null && x.Notes.Contains(uniqueId));
     }
@@ -453,22 +576,37 @@ public class SalesOrder : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Outputs.Create], CancellationToken.None, email).ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Outputs.Create ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        // Required Data Creation: Brand, Category, Supplier, Product, Variant
         int variantId1, variantId2;
-        using (var scope = _factory.Services.CreateScope())
+        using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            if (!await db.OutputStatuses.AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, CancellationToken.None).ConfigureAwait(true))
+            if(!await db.OutputStatuses
+                .AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, CancellationToken.None)
+                .ConfigureAwait(true))
             {
                 db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Pending });
             }
-            if (!await db.ProductStatuses.AnyAsync(x => string.Compare(x.Key, "for-sale") == 0, CancellationToken.None).ConfigureAwait(true))
+            if(!await db.ProductStatuses
+                .AnyAsync(x => string.Compare(x.Key, "for-sale") == 0, CancellationToken.None)
+                .ConfigureAwait(true))
                 db.ProductStatuses.Add(new ProductStatus { Key = "for-sale" });
-            
+
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
             var brand = new BrandEntity { Name = $"Brand_{uniqueId}" };
@@ -477,7 +615,13 @@ public class SalesOrder : IAsyncLifetime
             db.ProductCategories.Add(category);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-            var product = new ProductEntity { Name = $"Product_{uniqueId}", BrandId = brand.Id, CategoryId = category.Id, StatusId = "for-sale" };
+            var product = new ProductEntity
+            {
+                Name = $"Product_{uniqueId}",
+                BrandId = brand.Id,
+                CategoryId = category.Id,
+                StatusId = "for-sale"
+            };
             db.Products.Add(product);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
@@ -489,14 +633,17 @@ public class SalesOrder : IAsyncLifetime
             variantId2 = v2.Id;
         }
 
-        var jsonContent = System.Text.Json.JsonSerializer.Serialize(new {
-            buyerId = user.Id,
-            products = new[] 
-            { 
-                new { productId = variantId1, count = 1 },
-                new { productId = variantId2, count = 2 }
-            }
-        });
+        var jsonContent = System.Text.Json.JsonSerializer
+            .Serialize(
+                new
+                {
+                    buyerId = user.Id,
+                    products = new[]
+                    {
+                        new { productId = variantId1, count = 1 },
+                        new { productId = variantId2, count = 2 }
+                    }
+                });
         var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
         var response = await _client.PostAsync("/api/v1/SalesOrders", httpContent).ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.Created);
@@ -509,32 +656,62 @@ public class SalesOrder : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Outputs.View], CancellationToken.None, email).ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Outputs.View ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        using (var scope = _factory.Services.CreateScope())
+        using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            if (!await db.OutputStatuses.AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, CancellationToken.None).ConfigureAwait(true))
+            if(!await db.OutputStatuses
+                .AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, CancellationToken.None)
+                .ConfigureAwait(true))
             {
                 db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Pending });
                 await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             }
-            db.OutputOrders.AddRange(
-                new OutputEntity { StatusId = OrderStatus.Pending, CreatedAt = DateTime.UtcNow.AddMinutes(-10), Notes = $"{uniqueId}_1" },
-                new OutputEntity { StatusId = OrderStatus.Pending, CreatedAt = DateTime.UtcNow.AddMinutes(-5), Notes = $"{uniqueId}_2" },
-                new OutputEntity { StatusId = OrderStatus.Pending, CreatedAt = DateTime.UtcNow, Notes = $"{uniqueId}_3" }
-            );
+            db.OutputOrders
+                .AddRange(
+                    new OutputEntity
+                    {
+                        StatusId = OrderStatus.Pending,
+                        CreatedAt = DateTime.UtcNow.AddMinutes(-10),
+                        Notes = $"{uniqueId}_1"
+                    },
+                    new OutputEntity
+                    {
+                        StatusId = OrderStatus.Pending,
+                        CreatedAt = DateTime.UtcNow.AddMinutes(-5),
+                        Notes = $"{uniqueId}_2"
+                    },
+                    new OutputEntity
+                    {
+                        StatusId = OrderStatus.Pending,
+                        CreatedAt = DateTime.UtcNow,
+                        Notes = $"{uniqueId}_3"
+                    });
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/SalesOrders?sorts=-createdAt&filters=Notes@={uniqueId}").ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/SalesOrders?sorts=-createdAt&filters=Notes@={uniqueId}")
+            .ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<OutputResponse>>(CancellationToken.None).ConfigureAwait(true);
+        var content = await response.Content
+            .ReadFromJsonAsync<PagedResult<OutputResponse>>(CancellationToken.None)
+            .ConfigureAwait(true);
         content.Should().NotBeNull();
-        // CreateAt is not in OutputResponse, verifying by Notes order
-        // content!.Items.Select((OutputResponse x) => x.Notes).Should().ContainInOrder($"{uniqueId}_3", $"{uniqueId}_2", $"{uniqueId}_1");
     }
 
     [Fact(DisplayName = "SO_070 - Phân trang với Page và PageSize")]
@@ -544,28 +721,45 @@ public class SalesOrder : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Outputs.View], CancellationToken.None, email).ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Outputs.View ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        using (var scope = _factory.Services.CreateScope())
+        using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            if (!await db.OutputStatuses.AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, CancellationToken.None).ConfigureAwait(true))
+            if(!await db.OutputStatuses
+                .AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, CancellationToken.None)
+                .ConfigureAwait(true))
             {
                 db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Pending });
                 await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             }
-            for (int i = 0; i < 15; i++)
+            for(int i = 0; i < 15; i++)
             {
                 db.OutputOrders.Add(new OutputEntity { StatusId = OrderStatus.Pending, Notes = $"{uniqueId}_{i}" });
             }
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/SalesOrders?page=1&pageSize=10&filters=Notes@={uniqueId}").ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/SalesOrders?page=1&pageSize=10&filters=Notes@={uniqueId}")
+            .ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<OutputResponse>>(CancellationToken.None).ConfigureAwait(true);
+        var content = await response.Content
+            .ReadFromJsonAsync<PagedResult<OutputResponse>>(CancellationToken.None)
+            .ConfigureAwait(true);
         content!.Items.Should().HaveCount(10);
     }
 
@@ -576,35 +770,53 @@ public class SalesOrder : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Outputs.Delete, PermissionsList.Outputs.Create], CancellationToken.None, email).ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Outputs.Delete, PermissionsList.Outputs.Create ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        // Ensure status exists
-        using (var scope = _factory.Services.CreateScope())
+        using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            if (!await db.OutputStatuses.AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, CancellationToken.None).ConfigureAwait(true))
+            if(!await db.OutputStatuses
+                .AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, CancellationToken.None)
+                .ConfigureAwait(true))
             {
                 db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Pending });
                 await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             }
         }
 
-        // Seed product variant
         var variantId = await SeedProductVariantAsync(uniqueId, CancellationToken.None).ConfigureAwait(true);
 
-        var jsonContent = System.Text.Json.JsonSerializer.Serialize(new {
-            buyerId = user.Id,
-            notes = "DeleteMe",
-            products = new[] { new { productId = variantId, count = 1 } }
-        });
+        var jsonContent = System.Text.Json.JsonSerializer
+            .Serialize(
+                new
+                {
+                    buyerId = user.Id,
+                    notes = "DeleteMe",
+                    products = new[] { new { productId = variantId, count = 1 } }
+                });
         var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
         var createResponse = await _client.PostAsync("/api/v1/SalesOrders", httpContent).ConfigureAwait(true);
         createResponse.StatusCode.Should().Be(HttpStatusCode.Created);
-        
-        var order = await createResponse.Content.ReadFromJsonAsync<OutputResponse>(CancellationToken.None).ConfigureAwait(true);
-        var deleteResponse = await _client.DeleteAsync($"/api/v1/SalesOrders/{order!.Id}", CancellationToken.None).ConfigureAwait(true);
+
+        var order = await createResponse.Content
+            .ReadFromJsonAsync<OutputResponse>(CancellationToken.None)
+            .ConfigureAwait(true);
+        var deleteResponse = await _client.DeleteAsync($"/api/v1/SalesOrders/{order!.Id}", CancellationToken.None)
+            .ConfigureAwait(true);
 
         deleteResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
@@ -616,38 +828,48 @@ public class SalesOrder : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        // Need Restore permissions? Usually mapping to RestoreMany? No, this is single Restore.
-        // Assuming Edit or specific permission. If none exist, maybe "Delete" covers restore or test exposes it.
-        // Checking PermissionsList... Files, Inputs, Outputs have C/R/U/D/ChangeStatus. No explicit Restore.
-        // Usually Restore uses Delete permission or Edit. Let's assume Delete.
-        var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Outputs.Delete, PermissionsList.Outputs.Create], CancellationToken.None, email).ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Outputs.Delete, PermissionsList.Outputs.Create ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        using (var scope = _factory.Services.CreateScope())
+        using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            if (!await db.OutputStatuses.AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, CancellationToken.None).ConfigureAwait(true))
+            if(!await db.OutputStatuses
+                .AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, CancellationToken.None)
+                .ConfigureAwait(true))
             {
                 db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Pending });
                 await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             }
         }
 
-        // Seed product variant
         var variantId = await SeedProductVariantAsync(uniqueId, CancellationToken.None).ConfigureAwait(true);
 
-        var jsonContent = System.Text.Json.JsonSerializer.Serialize(new {
-            buyerId = user.Id,
-            products = new[] { new { productId = variantId, count = 1 } }
-        });
+        var jsonContent = System.Text.Json.JsonSerializer
+            .Serialize(new { buyerId = user.Id, products = new[] { new { productId = variantId, count = 1 } } });
         var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
         var createResponse = await _client.PostAsync("/api/v1/SalesOrders", httpContent).ConfigureAwait(true);
-        var order = await createResponse.Content.ReadFromJsonAsync<OutputResponse>(CancellationToken.None).ConfigureAwait(true);
-        
+        var order = await createResponse.Content
+            .ReadFromJsonAsync<OutputResponse>(CancellationToken.None)
+            .ConfigureAwait(true);
+
         await _client.DeleteAsync($"/api/v1/SalesOrders/{order!.Id}", CancellationToken.None).ConfigureAwait(true);
 
-        var restoreResponse = await _client.PostAsync($"/api/v1/SalesOrders/{order.Id}/restore", null).ConfigureAwait(true);
+        var restoreResponse = await _client.PostAsync($"/api/v1/SalesOrders/{order.Id}/restore", null)
+            .ConfigureAwait(true);
         restoreResponse.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
@@ -658,39 +880,53 @@ public class SalesOrder : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Outputs.View], CancellationToken.None, email).ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Outputs.View ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        using (var scope = _factory.Services.CreateScope())
+        using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            if (!await db.OutputStatuses.AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, CancellationToken.None).ConfigureAwait(true))
+            if(!await db.OutputStatuses
+                .AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, CancellationToken.None)
+                .ConfigureAwait(true))
             {
                 db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Pending });
                 await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             }
-            // Add seeded deleted output
-            db.OutputOrders.Add(new OutputEntity 
-            { 
-                StatusId = OrderStatus.Pending, 
-                Notes = $"Deleted_{uniqueId}", 
-                DeletedAt = DateTime.UtcNow 
-            });
-             db.OutputOrders.Add(new OutputEntity 
-            { 
-                StatusId = OrderStatus.Pending, 
-                Notes = $"Active_{uniqueId}", 
-                DeletedAt = null 
-            });
+            db.OutputOrders
+                .Add(
+                    new OutputEntity
+                    {
+                        StatusId = OrderStatus.Pending,
+                        Notes = $"Deleted_{uniqueId}",
+                        DeletedAt = DateTime.UtcNow
+                    });
+            db.OutputOrders
+                .Add(
+                    new OutputEntity { StatusId = OrderStatus.Pending, Notes = $"Active_{uniqueId}", DeletedAt = null });
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/SalesOrders/deleted?filters=Notes@={uniqueId}").ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/SalesOrders/deleted?filters=Notes@={uniqueId}")
+            .ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<OutputResponse>>(CancellationToken.None).ConfigureAwait(true);
+        var content = await response.Content
+            .ReadFromJsonAsync<PagedResult<OutputResponse>>(CancellationToken.None)
+            .ConfigureAwait(true);
         content!.Items.Should().Contain(x => string.Compare(x.Notes, $"Deleted_{uniqueId}") == 0);
-        // Safe check for null Notes just in case
         content.Items.Should().NotContain(x => x.Notes != null && string.Compare(x.Notes, $"Active_{uniqueId}") == 0);
     }
 
@@ -701,13 +937,23 @@ public class SalesOrder : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        // Create user WITHOUT Edit permission
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Outputs.View], CancellationToken.None, email).ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Outputs.View ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var request = new UpdateOutputForManagerCommand();
-        // Use PUT /for-manager (requires Edit permission)
         var response = await _client.PutAsJsonAsync("/api/v1/SalesOrders/for-manager/1", request).ConfigureAwait(true);
         response.StatusCode.Should().BeOneOf(HttpStatusCode.Forbidden, HttpStatusCode.Unauthorized);
     }
@@ -719,42 +965,55 @@ public class SalesOrder : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Outputs.Create, PermissionsList.Outputs.ChangeStatus], CancellationToken.None, email).ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Outputs.Create, PermissionsList.Outputs.ChangeStatus ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        using (var scope = _factory.Services.CreateScope())
+        using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            if (!await db.OutputStatuses.AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, CancellationToken.None).ConfigureAwait(true))
+            if(!await db.OutputStatuses
+                .AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, CancellationToken.None)
+                .ConfigureAwait(true))
                 db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Pending });
-            
-            // Need a terminal status to test invalid transition from? Or just check logic.
-            // If Pending can go to Completed, test might fail.
-            // Assuming business logic prevents Pending -> Completed directly without intermediate steps (like Delivering).
-            // NOTE: Logic depends on Domain rules. If "AvailableTransitions" is enforced.
-            // Assuming Pending -> Completed is INVALID.
-            
-            if (!await db.OutputStatuses.AnyAsync(x => string.Compare(x.Key, OrderStatus.Completed) == 0, CancellationToken.None).ConfigureAwait(true))
+
+            if(!await db.OutputStatuses
+                .AnyAsync(x => string.Compare(x.Key, OrderStatus.Completed) == 0, CancellationToken.None)
+                .ConfigureAwait(true))
                 db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Completed });
-            
+
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        // Seed product variant
         var variantId = await SeedProductVariantAsync(uniqueId, CancellationToken.None).ConfigureAwait(true);
 
-        var jsonContent = System.Text.Json.JsonSerializer.Serialize(new {
-            buyerId = user.Id,
-            products = new[] { new { productId = variantId, count = 1 } }
-        });
+        var jsonContent = System.Text.Json.JsonSerializer
+            .Serialize(new { buyerId = user.Id, products = new[] { new { productId = variantId, count = 1 } } });
         var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
 
         var createResponse = await _client.PostAsync("/api/v1/SalesOrders", httpContent).ConfigureAwait(true);
-        var order = await createResponse.Content.ReadFromJsonAsync<OutputResponse>(CancellationToken.None).ConfigureAwait(true);
+        var order = await createResponse.Content
+            .ReadFromJsonAsync<OutputResponse>(CancellationToken.None)
+            .ConfigureAwait(true);
 
-        var request = new UpdateOutputStatusCommand { StatusId = OrderStatus.Completed }; // Pending -> Completed
-        var response = await _client.PatchAsJsonAsync($"/api/v1/SalesOrders/{order!.Id}/status", request, CancellationToken.None).ConfigureAwait(true);
+        var request = new UpdateOutputStatusCommand { StatusId = OrderStatus.Completed };
+        var response = await _client.PatchAsJsonAsync(
+            $"/api/v1/SalesOrders/{order!.Id}/status",
+            request,
+            CancellationToken.None)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -766,33 +1025,44 @@ public class SalesOrder : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Outputs.Delete, PermissionsList.Outputs.Create], CancellationToken.None, email).ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Outputs.Delete, PermissionsList.Outputs.Create ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        using (var scope = _factory.Services.CreateScope())
+        using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            if (!await db.OutputStatuses.AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, CancellationToken.None).ConfigureAwait(true))
+            if(!await db.OutputStatuses
+                .AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, CancellationToken.None)
+                .ConfigureAwait(true))
             {
                 db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Pending });
                 await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             }
         }
 
-        // Seed product variant
         var variantId = await SeedProductVariantAsync(uniqueId, CancellationToken.None).ConfigureAwait(true);
 
-        var jsonContent = System.Text.Json.JsonSerializer.Serialize(new {
-            buyerId = user.Id,
-            products = new[] { new { productId = variantId, count = 1 } }
-        });
+        var jsonContent = System.Text.Json.JsonSerializer
+            .Serialize(new { buyerId = user.Id, products = new[] { new { productId = variantId, count = 1 } } });
         var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
-        
+
         var r1 = await _client.PostAsync("/api/v1/SalesOrders", httpContent).ConfigureAwait(true);
         var o1 = await r1.Content.ReadFromJsonAsync<OutputResponse>(CancellationToken.None).ConfigureAwait(true);
-        
-        var httpContent2 = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json"); // Reuse json
+
+        var httpContent2 = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
         var r2 = await _client.PostAsync("/api/v1/SalesOrders", httpContent2).ConfigureAwait(true);
         var o2 = await r2.Content.ReadFromJsonAsync<OutputResponse>(CancellationToken.None).ConfigureAwait(true);
 
@@ -814,33 +1084,44 @@ public class SalesOrder : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Outputs.Delete, PermissionsList.Outputs.Create], CancellationToken.None, email).ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Outputs.Delete, PermissionsList.Outputs.Create ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        using (var scope = _factory.Services.CreateScope())
+        using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            if (!await db.OutputStatuses.AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, CancellationToken.None).ConfigureAwait(true))
+            if(!await db.OutputStatuses
+                .AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, CancellationToken.None)
+                .ConfigureAwait(true))
             {
                 db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Pending });
                 await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             }
         }
 
-        // Seed product variant
         var variantId = await SeedProductVariantAsync(uniqueId, CancellationToken.None).ConfigureAwait(true);
 
-        var jsonContent = System.Text.Json.JsonSerializer.Serialize(new {
-            buyerId = user.Id,
-            products = new[] { new { productId = variantId, count = 1 } }
-        });
-        
+        var jsonContent = System.Text.Json.JsonSerializer
+            .Serialize(new { buyerId = user.Id, products = new[] { new { productId = variantId, count = 1 } } });
+
         var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
         var r1 = await _client.PostAsync("/api/v1/SalesOrders", httpContent).ConfigureAwait(true);
         var o1 = await r1.Content.ReadFromJsonAsync<OutputResponse>(CancellationToken.None).ConfigureAwait(true);
         await _client.DeleteAsync($"/api/v1/SalesOrders/{o1!.Id}", CancellationToken.None).ConfigureAwait(true);
-        
+
         var httpContent2 = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
         var r2 = await _client.PostAsync("/api/v1/SalesOrders", httpContent2).ConfigureAwait(true);
         var o2 = await r2.Content.ReadFromJsonAsync<OutputResponse>(CancellationToken.None).ConfigureAwait(true);
@@ -859,43 +1140,58 @@ public class SalesOrder : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Outputs.Create, PermissionsList.Outputs.ChangeStatus], CancellationToken.None, email).ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Outputs.Create, PermissionsList.Outputs.ChangeStatus ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        using (var scope = _factory.Services.CreateScope())
+        using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var statuses = new[] { OrderStatus.Pending, OrderStatus.ConfirmedCod };
-            foreach (var s in statuses)
+            foreach(var s in statuses)
             {
-                if (!await db.OutputStatuses.AnyAsync(x => string.Compare(x.Key, s) == 0, CancellationToken.None).ConfigureAwait(true))
+                if(!await db.OutputStatuses
+                    .AnyAsync(x => string.Compare(x.Key, s) == 0, CancellationToken.None)
+                    .ConfigureAwait(true))
                     db.OutputStatuses.Add(new OutputStatusEntity { Key = s });
             }
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        // Seed product variant
         var variantId = await SeedProductVariantAsync(uniqueId, CancellationToken.None).ConfigureAwait(true);
-        
-        // Seed inventory stock
+
         await SeedInventoryAsync(variantId, 10, uniqueId, CancellationToken.None).ConfigureAwait(true);
 
-        var jsonContent = System.Text.Json.JsonSerializer.Serialize(new {
-            buyerId = user.Id,
-            products = new[] { new { productId = variantId, count = 1 } }
-        });
+        var jsonContent = System.Text.Json.JsonSerializer
+            .Serialize(new { buyerId = user.Id, products = new[] { new { productId = variantId, count = 1 } } });
         var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
 
         var r1 = await _client.PostAsync("/api/v1/SalesOrders", httpContent).ConfigureAwait(true);
         var o1 = await r1.Content.ReadFromJsonAsync<OutputResponse>(CancellationToken.None).ConfigureAwait(true);
-        
+
         var httpContent2 = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
         var r2 = await _client.PostAsync("/api/v1/SalesOrders", httpContent2).ConfigureAwait(true);
         var o2 = await r2.Content.ReadFromJsonAsync<OutputResponse>(CancellationToken.None).ConfigureAwait(true);
 
-        var request = new UpdateManyOutputStatusCommand { Ids = [ o1!.Id!.Value, o2!.Id!.Value ], StatusId = OrderStatus.ConfirmedCod };
-        var response = await _client.PatchAsJsonAsync("/api/v1/SalesOrders/status", request, CancellationToken.None).ConfigureAwait(true);
+        var request = new UpdateManyOutputStatusCommand
+        {
+            Ids = [ o1!.Id!.Value, o2!.Id!.Value ],
+            StatusId = OrderStatus.ConfirmedCod
+        };
+        var response = await _client.PatchAsJsonAsync("/api/v1/SalesOrders/status", request, CancellationToken.None)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NoContent);
     }
@@ -907,51 +1203,45 @@ public class SalesOrder : IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        // User requesting their own purchases usually doesn't need "Outputs.View" (Manager permission), 
-        // but needs to be authenticated.
-        var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [], CancellationToken.None, email).ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        using (var scope = _factory.Services.CreateScope())
+        using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            if (!await db.OutputStatuses.AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, CancellationToken.None).ConfigureAwait(true))
+            if(!await db.OutputStatuses
+                .AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, CancellationToken.None)
+                .ConfigureAwait(true))
             {
                 db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Pending });
                 await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             }
-            // Seed order for this user (BuyerId = user.Id)
-            // Note: OutputEntity structure for Buyer? usually mapped to User Id if GUID.
-            db.OutputOrders.Add(new OutputEntity 
-            { 
-                StatusId = OrderStatus.Pending, 
-                // Assuming BuyerId is relevant. 
-                // But wait, user.Id is the Identity User Id.
-                // CreateOutputCommand with BuyerId=Guid.NewGuid() was used.
-                // If GetMyPurchases filters by CurrentUser.Id, we must ensure the Order has that BuyerId.
-                // Or if there is a Customer/Buyer Entity mapping.
-                // Assuming direct mapping for now based on context.
-                // The issue: user.Id is Guid (string or guid?). IdentityUser is usually Guid string or Guid.
-                // IntegrationTestAuthHelper returns UserEntity?
-                // Domain.Entities.User Id type? Usually Guid or int/string.
-                // Let's check CreateUserWithPermissionsAsync return type. It returns User entity.
-            });
-            // Better to use API to create so logic is consistent.
+            db.OutputOrders.Add(new OutputEntity { StatusId = OrderStatus.Pending, });
         }
-        
-        // However, creating via API depends on logic:
-        // SO_061 said "CreateOutput_WithAuthenticatedUser_SetsBuyerIdFromToken".
-        // So if I create via API with this user, it should assign BuyerId = User.Id.
-        
-        // Seed product variant
+
         var variantId = await SeedProductVariantAsync(uniqueId, CancellationToken.None).ConfigureAwait(true);
-        
-        var jsonContent = System.Text.Json.JsonSerializer.Serialize(new {
-            buyerId = user.Id,
-            notes = $"Mine_{uniqueId}",
-            products = new[] { new { productId = variantId, count = 1 } }
-        });
+
+        var jsonContent = System.Text.Json.JsonSerializer
+            .Serialize(
+                new
+                {
+                    buyerId = user.Id,
+                    notes = $"Mine_{uniqueId}",
+                    products = new[] { new { productId = variantId, count = 1 } }
+                });
         var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
 
         var createResponse = await _client.PostAsync("/api/v1/SalesOrders", httpContent).ConfigureAwait(true);
@@ -959,7 +1249,9 @@ public class SalesOrder : IAsyncLifetime
 
         var response = await _client.GetAsync("/api/v1/SalesOrders/my-purchases").ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<OutputResponse>>(CancellationToken.None).ConfigureAwait(true);
+        var content = await response.Content
+            .ReadFromJsonAsync<PagedResult<OutputResponse>>(CancellationToken.None)
+            .ConfigureAwait(true);
         content!.Items.Should().Contain(x => string.Compare(x.Notes, $"Mine_{uniqueId}") == 0);
     }
 
@@ -970,33 +1262,58 @@ public class SalesOrder : IAsyncLifetime
         var managerName = $"manager_{uniqueId}";
         var managerEmail = $"manager_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, managerName, password, [PermissionsList.Outputs.View], CancellationToken.None, managerEmail).ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, managerName, password, CancellationToken.None).ConfigureAwait(true);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            managerName,
+            password,
+            [ PermissionsList.Outputs.View ],
+            CancellationToken.None,
+            managerEmail)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            managerName,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var buyer = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, $"buyer_{uniqueId}", password, [], CancellationToken.None, $"buyer_{uniqueId}@gmail.com").ConfigureAwait(true);
+        var buyer = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            $"buyer_{uniqueId}",
+            password,
+            [],
+            CancellationToken.None,
+            $"buyer_{uniqueId}@gmail.com")
+            .ConfigureAwait(true);
         var buyerId = buyer.Id;
 
-        using (var scope = _factory.Services.CreateScope())
+        using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            if (!await db.OutputStatuses.AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, CancellationToken.None).ConfigureAwait(true))
+            if(!await db.OutputStatuses
+                .AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, CancellationToken.None)
+                .ConfigureAwait(true))
             {
                 db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Pending });
                 await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             }
-            db.OutputOrders.Add(new OutputEntity 
-            { 
-                StatusId = OrderStatus.Pending, 
-                BuyerId = buyerId,
-                Notes = $"PurchasesOf_{uniqueId}"
-            });
+            db.OutputOrders
+                .Add(
+                    new OutputEntity
+                    {
+                        StatusId = OrderStatus.Pending,
+                        BuyerId = buyerId,
+                        Notes = $"PurchasesOf_{uniqueId}"
+                    });
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
         var response = await _client.GetAsync($"/api/v1/SalesOrders/get-purchases/{buyerId}").ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<OutputResponse>>(CancellationToken.None).ConfigureAwait(true);
+        var content = await response.Content
+            .ReadFromJsonAsync<PagedResult<OutputResponse>>(CancellationToken.None)
+            .ConfigureAwait(true);
         content!.Items.Should().Contain(x => string.Compare(x.Notes, $"PurchasesOf_{uniqueId}") == 0);
     }
 #pragma warning restore CRR0035

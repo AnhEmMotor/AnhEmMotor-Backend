@@ -1,7 +1,6 @@
 ﻿using Domain.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.DependencyInjection; // For GetRequiredService
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text;
@@ -64,30 +63,33 @@ public static class AuthenticationExtensions
 
                     options.Events = new JwtBearerEvents
                     {
-                        OnTokenValidated = async context =>
-                        {
-                            var userManager = context.HttpContext.RequestServices.GetRequiredService<UserManager<ApplicationUser>>();
-                            var userId = context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
-
-                            if (string.IsNullOrEmpty(userId))
+                        OnTokenValidated =
+                            async context =>
                             {
-                                context.Fail("Unauthorized");
-                                return;
-                            }
+                                var userManager = context.HttpContext.RequestServices
+                                    .GetRequiredService<UserManager<ApplicationUser>>();
+                                var userId = context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
 
-                            var user = await userManager.FindByIdAsync(userId).ConfigureAwait(true);
-                            if (user == null || user.DeletedAt is not null)
-                            {
-                                context.Fail("Unauthorized");
-                                return;
-                            }
+                                if(string.IsNullOrEmpty(userId))
+                                {
+                                    context.Fail("Unauthorized");
+                                    return;
+                                }
 
-                            var tokenSecurityStamp = context.Principal?.FindFirstValue("AspNet.Identity.SecurityStamp");
-                            if (string.Compare(tokenSecurityStamp, user.SecurityStamp) != 0)
-                            {
-                                context.Fail("Unauthorized");
+                                var user = await userManager.FindByIdAsync(userId).ConfigureAwait(true);
+                                if(user == null || user.DeletedAt is not null)
+                                {
+                                    context.Fail("Unauthorized");
+                                    return;
+                                }
+
+                                var tokenSecurityStamp = context.Principal?.FindFirstValue(
+                                    "AspNet.Identity.SecurityStamp");
+                                if(string.Compare(tokenSecurityStamp, user.SecurityStamp) != 0)
+                                {
+                                    context.Fail("Unauthorized");
+                                }
                             }
-                        }
                     };
                 });
 

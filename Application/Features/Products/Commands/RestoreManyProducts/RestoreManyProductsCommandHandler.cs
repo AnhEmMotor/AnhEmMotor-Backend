@@ -15,8 +15,8 @@ public sealed class RestoreManyProductsCommandHandler(
     IUnitOfWork unitOfWork) : IRequestHandler<RestoreManyProductsCommand, Result<List<ProductDetailForManagerResponse>?>>
 {
     public async Task<Result<List<ProductDetailForManagerResponse>?>> Handle(
-    RestoreManyProductsCommand command,
-    CancellationToken cancellationToken)
+        RestoreManyProductsCommand command,
+        CancellationToken cancellationToken)
     {
         var uniqueIds = command.Ids!.Distinct().ToList();
 
@@ -27,15 +27,15 @@ public sealed class RestoreManyProductsCommandHandler(
         var errorDetails = new List<Error>();
         var productsToRestore = new List<Domain.Entities.Product>();
 
-        foreach (var id in uniqueIds)
+        foreach(var id in uniqueIds)
         {
-            if (!allProductsMap.TryGetValue(id, out var product))
+            if(!allProductsMap.TryGetValue(id, out var product))
             {
                 errorDetails.Add(Error.NotFound($"Product not found, Product ID: {id}"));
                 continue;
             }
 
-            if (product.DeletedAt == null)
+            if(product.DeletedAt == null)
             {
                 errorDetails.Add(
                     Error.BadRequest($"Product is not deleted, Product ID: {id}, Product Name: {product.Name}"));
@@ -45,12 +45,12 @@ public sealed class RestoreManyProductsCommandHandler(
             productsToRestore.Add(product);
         }
 
-        if (errorDetails.Count > 0)
+        if(errorDetails.Count > 0)
         {
             return Result<List<ProductDetailForManagerResponse>?>.Failure(errorDetails);
         }
 
-        if (productsToRestore.Count > 0)
+        if(productsToRestore.Count > 0)
         {
             updateRepository.Restore(productsToRestore);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

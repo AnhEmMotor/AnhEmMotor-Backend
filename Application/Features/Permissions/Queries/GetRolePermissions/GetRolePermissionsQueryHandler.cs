@@ -9,21 +9,22 @@ namespace Application.Features.Permissions.Queries.GetRolePermissions;
 public class GetRolePermissionsQueryHandler(IRoleReadRepository rolePermissionRepository) : IRequestHandler<GetRolePermissionsQuery, Result<List<PermissionResponse>>>
 {
     public async Task<Result<List<PermissionResponse>>> Handle(
-    GetRolePermissionsQuery request,
-    CancellationToken cancellationToken)
+        GetRolePermissionsQuery request,
+        CancellationToken cancellationToken)
     {
-        var trimmedRoleName = request.RoleName?.Trim(); 
+        var trimmedRoleName = request.RoleName?.Trim();
 
         var role = await rolePermissionRepository.GetRoleByNameAsync(trimmedRoleName!, cancellationToken)
             .ConfigureAwait(false);
 
-        if (role is null)
+        if(role is null)
         {
             return Error.NotFound("Role not found.");
         }
 
         var permissions = await rolePermissionRepository.GetPermissionsNameByRoleIdAsync(role.Id, cancellationToken)
-            .ConfigureAwait(false) ?? [];
+                .ConfigureAwait(false) ??
+            [];
 
         var permissionsWithMetadata = permissions
             .Select(p => new { Name = p, Metadata = PermissionsList.GetMetadata(p) })

@@ -10,13 +10,11 @@ namespace Infrastructure.Repositories.Supplier;
 public class SupplierReadRepository(ApplicationDBContext context) : ISupplierReadRepository
 {
     public IQueryable<SupplierEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
-    {
-        return context.GetQuery<SupplierEntity>(mode);
-    }
+    { return context.GetQuery<SupplierEntity>(mode); }
 
-    public IQueryable<SupplierWithTotalInputResponse> GetQueryableWithTotalInput(DataFetchMode mode = DataFetchMode.ActiveOnly)
+    public IQueryable<SupplierWithTotalInputResponse> GetQueryableWithTotalInput(
+        DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        // Logic truy vấn giữ nguyên, nó chuẩn rồi.
         return context.GetQuery<SupplierEntity>(mode)
             .GroupJoin(
                 context.GetQuery<Domain.Entities.Input>(DataFetchMode.ActiveOnly)
@@ -24,75 +22,76 @@ public class SupplierReadRepository(ApplicationDBContext context) : ISupplierRea
                 supplier => supplier.Id,
                 input => input.SupplierId,
                 (supplier, inputs) => new { supplier, inputs })
-            .Select(x => new SupplierWithTotalInputResponse
-            {
-                Id = x.supplier.Id,
-                Name = x.supplier.Name!,
-                Phone = x.supplier.Phone,
-                Email = x.supplier.Email,
-                Address = x.supplier.Address,
-                StatusId = x.supplier.StatusId!,
-                CreatedAt = x.supplier.CreatedAt,
-                UpdatedAt = x.supplier.UpdatedAt,
-                DeletedAt = x.supplier.DeletedAt,
-                TotalInput = x.inputs.SelectMany(i => i.InputInfos).Sum(ii => (ii.Count ?? 0) * (ii.InputPrice ?? 0))
-            });
+            .Select(
+                x => new SupplierWithTotalInputResponse
+                {
+                    Id = x.supplier.Id,
+                    Name = x.supplier.Name!,
+                    Phone = x.supplier.Phone,
+                    Email = x.supplier.Email,
+                    Address = x.supplier.Address,
+                    StatusId = x.supplier.StatusId!,
+                    CreatedAt = x.supplier.CreatedAt,
+                    UpdatedAt = x.supplier.UpdatedAt,
+                    DeletedAt = x.supplier.DeletedAt,
+                    TotalInput =
+                        x.inputs.SelectMany(i => i.InputInfos).Sum(ii => (ii.Count ?? 0) * (ii.InputPrice ?? 0))
+                });
     }
 
     public Task<SupplierWithTotalInputResponse?> GetByIdWithTotalInputAsync(
         int id,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
-    {
-        // Trả về Task trực tiếp, không ContinueWith
-        return GetQueryableWithTotalInput(mode)
-            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-    }
+    { return GetQueryableWithTotalInput(mode).FirstOrDefaultAsync(x => x.Id == id, cancellationToken); }
 
     public Task<List<SupplierEntity>> GetAllAsync(
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
-    {
-        // Trả về Task trực tiếp
-        return context.GetQuery<SupplierEntity>(mode)
-            .ToListAsync(cancellationToken);
-    }
+    { return context.GetQuery<SupplierEntity>(mode).ToListAsync(cancellationToken); }
 
     public Task<SupplierEntity?> GetByIdAsync(
         int id,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
-    {
-        return context.GetQuery<SupplierEntity>(mode)
-            .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
-    }
+    { return context.GetQuery<SupplierEntity>(mode).FirstOrDefaultAsync(s => s.Id == id, cancellationToken); }
 
     public Task<List<SupplierEntity>> GetByIdAsync(
         IEnumerable<int> ids,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
-    {
-        return context.GetQuery<SupplierEntity>(mode)
-            .Where(s => ids.Contains(s.Id))
-            .ToListAsync(cancellationToken);
-    }
+    { return context.GetQuery<SupplierEntity>(mode).Where(s => ids.Contains(s.Id)).ToListAsync(cancellationToken); }
 
-    public Task<bool> IsNameExistsAsync(string name, int? excludeId = null, CancellationToken cancellationToken = default)
-    {
-        // Không async/await
-        return GetQueryable(DataFetchMode.All)
-            .AnyAsync(x => string.Compare(x.Name, name) == 0 && (!excludeId.HasValue || x.Id != excludeId), cancellationToken);
-    }
-
-    public Task<bool> IsPhoneExistsAsync(string phone, int? excludeId = null, CancellationToken cancellationToken = default)
+    public Task<bool> IsNameExistsAsync(
+        string name,
+        int? excludeId = null,
+        CancellationToken cancellationToken = default)
     {
         return GetQueryable(DataFetchMode.All)
-            .AnyAsync(x => string.Compare(x.Phone, phone) == 0 && (!excludeId.HasValue || x.Id != excludeId), cancellationToken);
+            .AnyAsync(
+                x => string.Compare(x.Name, name) == 0 && (!excludeId.HasValue || x.Id != excludeId),
+                cancellationToken);
     }
 
-    public Task<bool> IsTaxIdExistsAsync(string taxId, int? excludeId = null, CancellationToken cancellationToken = default)
+    public Task<bool> IsPhoneExistsAsync(
+        string phone,
+        int? excludeId = null,
+        CancellationToken cancellationToken = default)
     {
         return GetQueryable(DataFetchMode.All)
-            .AnyAsync(x => string.Compare(x.TaxIdentificationNumber, taxId) == 0 && (!excludeId.HasValue || x.Id != excludeId), cancellationToken);
+            .AnyAsync(
+                x => string.Compare(x.Phone, phone) == 0 && (!excludeId.HasValue || x.Id != excludeId),
+                cancellationToken);
+    }
+
+    public Task<bool> IsTaxIdExistsAsync(
+        string taxId,
+        int? excludeId = null,
+        CancellationToken cancellationToken = default)
+    {
+        return GetQueryable(DataFetchMode.All)
+            .AnyAsync(
+                x => string.Compare(x.TaxIdentificationNumber, taxId) == 0 && (!excludeId.HasValue || x.Id != excludeId),
+                cancellationToken);
     }
 }

@@ -13,7 +13,6 @@ using Application.Features.Outputs.Commands.UpdateOutputStatus;
 using Application.Features.Outputs.Queries.GetDeletedOutputsList;
 using Application.Features.Outputs.Queries.GetOutputById;
 using Application.Features.Outputs.Queries.GetOutputsByUserId;
-using Application.Features.Outputs.Queries.GetOutputsByUserIdByManager;
 using Application.Features.Outputs.Queries.GetOutputsList;
 
 using Domain.Primitives;
@@ -49,15 +48,10 @@ public class SalesOrder
     {
         var buyerId = Guid.NewGuid();
 
-        // Tạo các Claims giả
-        var claims = new List<Claim>
-        {
-            new(ClaimTypes.NameIdentifier, buyerId.ToString())
-        };
+        var claims = new List<Claim> { new(ClaimTypes.NameIdentifier, buyerId.ToString()) };
         var identity = new ClaimsIdentity(claims, "TestAuthType");
         var claimsPrincipal = new ClaimsPrincipal(identity);
 
-        // Gán ClaimsPrincipal vào ControllerContext
         _controller.ControllerContext = new ControllerContext
         {
             HttpContext = new DefaultHttpContext { User = claimsPrincipal }
@@ -83,7 +77,6 @@ public class SalesOrder
         var buyerId = Guid.NewGuid();
         var sieveModel = new SieveModel();
 
-        // Sửa class Query ở đây cho khớp với Controller
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputsByUserIdQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PagedResult<OutputResponse>>.Success(new PagedResult<OutputResponse>([], 0, 1, 10)));
 

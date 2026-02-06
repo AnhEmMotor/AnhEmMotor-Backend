@@ -56,7 +56,6 @@ public class Supplier
 
         var result = await _controller.CreateSupplierAsync(request, CancellationToken.None).ConfigureAwait(true);
 
-        // Sửa BeOfType từ CreatedResult thành CreatedAtActionResult
         var createdAtActionResult = result.Should().BeOfType<CreatedAtRouteResult>().Subject;
 
         createdAtActionResult.StatusCode.Should().Be(StatusCodes.Status201Created);
@@ -123,18 +122,16 @@ public class Supplier
     {
         var sieveModel = new SieveModel();
 
-        // 1. Sửa kiểu dữ liệu ở đây thành SupplierForInputManagerResponse
         var items = new List<SupplierForInputManagerResponse>
-    {
-        new() { Id = 1, Name = "Supplier 1" },
-        new() { Id = 2, Name = "Supplier 2" }
-    };
+        {
+            new() { Id = 1, Name = "Supplier 1" },
+            new() { Id = 2, Name = "Supplier 2" }
+        };
 
-        // 2. Đảm bảo PagedResult cũng đi theo kiểu dữ liệu mới
         var expectedResponse = new PagedResult<SupplierForInputManagerResponse>(items, 10, 1, 10);
 
-        // 3. Mock Setup bây giờ sẽ khớp kiểu hoàn toàn
-        _mediatorMock.Setup(m => m.Send(It.IsAny<GetSuppliersListForInputManagerQuery>(), It.IsAny<CancellationToken>()))
+        _mediatorMock.Setup(
+            m => m.Send(It.IsAny<GetSuppliersListForInputManagerQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PagedResult<SupplierForInputManagerResponse>>.Success(expectedResponse));
 
         var result = await _controller.GetSuppliersForInputAsync(sieveModel, CancellationToken.None)
@@ -142,7 +139,6 @@ public class Supplier
 
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
 
-        // 4. Ép kiểu trả về đúng để Assert
         var response = okResult.Value.Should().BeOfType<PagedResult<SupplierForInputManagerResponse>>().Subject;
 
         response.Items.Should().HaveCount(2);

@@ -1,7 +1,6 @@
 ﻿using Application.Interfaces.Repositories.ProductVariant;
-using ProductVariantEntity = Domain.Entities.ProductVariant;
 using Infrastructure.DBContexts;
-using System.Collections.Generic;
+using ProductVariantEntity = Domain.Entities.ProductVariant;
 
 namespace Infrastructure.Repositories.ProductVariant
 {

@@ -80,8 +80,8 @@ public class Setting
     public async Task SETTING_032_Controller_SetSettings_ValidationFail_ReturnsBadRequest()
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<SetSettingsCommand>(), It.IsAny<CancellationToken>()))
-    .ReturnsAsync(
-        Result<Dictionary<string, string?>?>.Failure(Error.Validation("Validation failed", "Settings")));
+            .ReturnsAsync(
+                Result<Dictionary<string, string?>?>.Failure(Error.Validation("Validation failed", "Settings")));
 
         var request = new Dictionary<string, string?> { { "Deposit_ratio", "0" } };
 
@@ -90,8 +90,7 @@ public class Setting
         var badRequestResult = result.Should().BeOfType<BadRequestObjectResult>().Subject;
         var returnedError = badRequestResult.Value.Should().BeOfType<ErrorResponse>().Subject;
 
-        returnedError.Errors.Should().ContainSingle()
-            .Which.Message.Should().Be("Validation failed");
+        returnedError.Errors.Should().ContainSingle().Which.Message.Should().Be("Validation failed");
     }
 
     [Fact(DisplayName = "SETTING_033 - Controller GetAllSettings - Có attribute Authorize phù hợp")]

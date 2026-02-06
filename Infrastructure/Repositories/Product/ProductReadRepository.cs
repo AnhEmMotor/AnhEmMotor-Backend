@@ -121,7 +121,7 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
         CancellationToken cancellationToken)
     {
         var query = context.DeletedOnly<ProductEntity>();
-        
+
         var normalizedPage = Math.Max(page, 1);
         var normalizedPageSize = Math.Max(pageSize, 1);
 
@@ -152,7 +152,7 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             .ThenInclude(v => v.OutputInfos)
             .ThenInclude(oi => oi.OutputOrder);
 
-        if (string.IsNullOrWhiteSpace(sorts))
+        if(string.IsNullOrWhiteSpace(sorts))
         {
             dbQuery = dbQuery.OrderByDescending(p => p.DeletedAt);
         }
@@ -226,7 +226,7 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             .ThenInclude(vov => vov.OptionValue)
             .ThenInclude(ov => ov!.Option);
 
-        if (string.IsNullOrWhiteSpace(sorts))
+        if(string.IsNullOrWhiteSpace(sorts))
         {
             dbQuery = dbQuery.OrderByDescending(p => p.CreatedAt);
         }

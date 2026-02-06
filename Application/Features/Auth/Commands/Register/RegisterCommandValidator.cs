@@ -14,7 +14,8 @@ public partial class RegisterCommandValidator : AbstractValidator<RegisterComman
 
         RuleFor(x => x.Username)
             .NotEmpty()
-            .Matches("^[a-zA-Z0-9]+$").WithMessage("Username must contain only letters and numbers.")
+            .Matches("^[a-zA-Z0-9]+$")
+            .WithMessage("Username must contain only letters and numbers.")
             .MustAsync(
                 async (username, cancellation) =>
                 {
@@ -38,21 +39,27 @@ public partial class RegisterCommandValidator : AbstractValidator<RegisterComman
 
         RuleFor(x => x.Password)
             .NotEmpty()
-            .MinimumLength(8).WithMessage("Password must be at least 8 characters.")
-            .Matches("[A-Z]").WithMessage("Password must contain at least one uppercase letter.")
-            .Matches("[a-z]").WithMessage("Password must contain at least one lowercase letter.")
-            .Matches("[0-9]").WithMessage("Password must contain at least one number.")
-            .Matches("[^a-zA-Z0-9]").WithMessage("Password must contain at least one special character.");
+            .MinimumLength(8)
+            .WithMessage("Password must be at least 8 characters.")
+            .Matches("[A-Z]")
+            .WithMessage("Password must contain at least one uppercase letter.")
+            .Matches("[a-z]")
+            .WithMessage("Password must contain at least one lowercase letter.")
+            .Matches("[0-9]")
+            .WithMessage("Password must contain at least one number.")
+            .Matches("[^a-zA-Z0-9]")
+            .WithMessage("Password must contain at least one special character.");
 
         RuleFor(x => x.PhoneNumber)
-            .Must(IsValidPhoneNumber).WithMessage("Invalid phone number.")
+            .Must(IsValidPhoneNumber)
+            .WithMessage("Invalid phone number.")
             .When(x => !string.IsNullOrEmpty(x.PhoneNumber));
     }
 
     private static bool IsValidPhoneNumber(string? phoneNumber)
     {
-        if (string.IsNullOrWhiteSpace(phoneNumber)) return false;
-        // Vietnamese phone number format: starts with 0 or 84 or +84, followed by 9 digits
+        if(string.IsNullOrWhiteSpace(phoneNumber))
+            return false;
         var regex = RegexCheckPhone();
         return regex.IsMatch(phoneNumber.Trim());
     }

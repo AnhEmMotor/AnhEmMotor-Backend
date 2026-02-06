@@ -15,8 +15,8 @@ public sealed class RestoreManyBrandsCommandHandler(
     IUnitOfWork unitOfWork) : IRequestHandler<RestoreManyBrandsCommand, Result<List<BrandResponse>?>>
 {
     public async Task<Result<List<BrandResponse>?>> Handle(
-    RestoreManyBrandsCommand request,
-    CancellationToken cancellationToken)
+        RestoreManyBrandsCommand request,
+        CancellationToken cancellationToken)
     {
         var uniqueIds = request.Ids.Distinct().ToList();
 
@@ -27,15 +27,15 @@ public sealed class RestoreManyBrandsCommandHandler(
         var brandsToRestore = new List<Brand>();
         var errors = new List<Error>();
 
-        foreach (var id in uniqueIds)
+        foreach(var id in uniqueIds)
         {
-            if (!existingBrandsMap.TryGetValue(id, out var brand))
+            if(!existingBrandsMap.TryGetValue(id, out var brand))
             {
                 errors.Add(Error.NotFound($"Brand with Id {id} not found.", "Id"));
                 continue;
             }
 
-            if (brand.DeletedAt == null)
+            if(brand.DeletedAt == null)
             {
                 errors.Add(Error.BadRequest($"Brand with Id {id} is not deleted.", "Id"));
                 continue;
@@ -44,12 +44,12 @@ public sealed class RestoreManyBrandsCommandHandler(
             brandsToRestore.Add(brand);
         }
 
-        if (errors.Count > 0)
+        if(errors.Count > 0)
         {
             return Result<List<BrandResponse>?>.Failure(errors);
         }
 
-        if (brandsToRestore.Count > 0)
+        if(brandsToRestore.Count > 0)
         {
             updateRepository.Restore(brandsToRestore);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

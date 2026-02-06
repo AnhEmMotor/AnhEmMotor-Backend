@@ -446,7 +446,6 @@ public class MediaFile
         var insertRepositoryMock = new Mock<IMediaFileInsertRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
 
-        // SỬA Ở ĐÂY: Dùng FileUpload thay vì SavedFile
         fileStorageServiceMock
             .Setup(x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<FileUpload>.Failure("Invalid file signature"));
@@ -462,7 +461,9 @@ public class MediaFile
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         result.IsFailure.Should().BeTrue();
-        fileStorageServiceMock.Verify(x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()), Times.Once);
+        fileStorageServiceMock.Verify(
+            x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()),
+            Times.Once);
         insertRepositoryMock.Verify(x => x.Add(It.IsAny<MediaFileEntity>()), Times.Never);
     }
 
@@ -488,7 +489,9 @@ public class MediaFile
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         result.IsFailure.Should().BeTrue();
-        fileStorageServiceMock.Verify(x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()), Times.Once);
+        fileStorageServiceMock.Verify(
+            x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()),
+            Times.Once);
         insertRepositoryMock.Verify(x => x.Add(It.IsAny<MediaFileEntity>()), Times.Never);
     }
 
@@ -671,14 +674,12 @@ public class MediaFile
             insertRepositoryMock.Object,
             unitOfWorkMock.Object);
 
-        // Stream có dữ liệu để vượt qua check null stream
         var stream = new MemoryStream(new byte[10]);
         var command = new UploadImageCommand { FileContent = stream, FileName = string.Empty };
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         result.IsFailure.Should().BeTrue();
-        // Đảm bảo thông báo lỗi khớp với code trong Handler
         result.Error?.Message.Should().Contain("Filename");
     }
 #pragma warning restore CRR0035

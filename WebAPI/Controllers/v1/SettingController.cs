@@ -40,7 +40,6 @@ public class SettingController(IMediator mediator) : ApiController
         var command = new SetSettingsCommand() { Settings = request };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleCreated(result, RouteNames.Settings.GetAllSettings);
-
     }
 
     /// <summary>

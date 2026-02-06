@@ -30,32 +30,20 @@ public class ProductCategoryReadRepository(ApplicationDBContext context) : IProd
     public Task<List<CategoryEntity>> GetAllAsync(
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
-    {
-        return context.GetQuery<CategoryEntity>(mode)
-            .ToListAsync(cancellationToken);
-    }
+    { return context.GetQuery<CategoryEntity>(mode).ToListAsync(cancellationToken); }
 
     public Task<CategoryEntity?> GetByIdAsync(
         int id,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
-    {
-        return context.GetQuery<CategoryEntity>(mode)
-            .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
-    }
+    { return context.GetQuery<CategoryEntity>(mode).FirstOrDefaultAsync(c => c.Id == id, cancellationToken); }
 
     public Task<List<CategoryEntity>> GetByIdAsync(
         IEnumerable<int> ids,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
-    {
-        return context.GetQuery<CategoryEntity>(mode)
-            .Where(c => ids.Contains(c.Id))
-            .ToListAsync(cancellationToken);
-    }
+    { return context.GetQuery<CategoryEntity>(mode).Where(c => ids.Contains(c.Id)).ToListAsync(cancellationToken); }
 
     public IQueryable<CategoryEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
-    {
-        return context.GetQuery<CategoryEntity>(mode);
-    }
+    { return context.GetQuery<CategoryEntity>(mode); }
 }

@@ -1,10 +1,6 @@
 using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Models;
 using MediatR;
-using Application;
-using Application.Features;
-using Application.Features.UserManager;
-using Application.Features.UserManager.Commands;
 
 namespace Application.Features.UserManager.Commands.ChangePasswordByManager;
 

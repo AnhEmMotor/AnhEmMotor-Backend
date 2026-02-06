@@ -18,7 +18,6 @@ using Domain.Primitives;
 using FluentAssertions;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Sieve.Models;
@@ -49,7 +48,7 @@ public class InventoryReceipts
         {
             Notes = "Test",
             SupplierId = 1,
-            Products = [new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }]
+            Products = [ new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 } ]
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateInputCommand>(), It.IsAny<CancellationToken>()))
@@ -287,7 +286,7 @@ public class InventoryReceipts
         {
             Notes = "Test",
             SupplierId = 1,
-            Products = [new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }]
+            Products = [ new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 } ]
         };
 
         var expectedResponse = new InputResponse { Id = 1, StatusId = "working" };

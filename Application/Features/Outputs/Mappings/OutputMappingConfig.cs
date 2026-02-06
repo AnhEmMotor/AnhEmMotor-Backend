@@ -14,7 +14,9 @@ public sealed class OutputMappingConfig : IRegister
                 dest => dest.Total,
                 src => src.OutputInfos != null ? src.OutputInfos.Sum(oi => (oi.Count ?? 0) * (oi.Price ?? 0)) : 0)
             .Map(dest => dest.BuyerName, src => src.Buyer != null ? src.Buyer.FullName : null)
-            .Map(dest => dest.CompletedByUserName, src => src.FinishedByUser != null ? src.FinishedByUser.FullName : null)
+            .Map(
+                dest => dest.CompletedByUserName,
+                src => src.FinishedByUser != null ? src.FinishedByUser.FullName : null)
             .Map(dest => dest.CreatedByUserId, src => src.CreatedBy)
             .Map(dest => dest.Products, src => src.OutputInfos);
 

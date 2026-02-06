@@ -16,7 +16,8 @@ namespace Application.Features.Outputs.Commands.CreateOutput
             RuleForEach(x => x.OutputInfos).SetValidator(new CreateOutputProductCommandValidator());
 
             RuleFor(x => x.CustomerPhone)
-                .Must(IsValidPhoneNumber).WithMessage("Invalid phone number format.")
+                .Must(IsValidPhoneNumber)
+                .WithMessage("Invalid phone number format.")
                 .When(x => !string.IsNullOrEmpty(x.CustomerPhone));
         }
 
@@ -42,8 +43,8 @@ namespace Application.Features.Outputs.Commands.CreateOutput
 
         private static bool IsValidPhoneNumber(string? phoneNumber)
         {
-            if (string.IsNullOrWhiteSpace(phoneNumber)) return false;
-            // Vietnamese phone number format: starts with 0 or 84 or +84, followed by 9 digits
+            if(string.IsNullOrWhiteSpace(phoneNumber))
+                return false;
             var regex = RegexCheckPhone();
             return regex.IsMatch(phoneNumber.Trim());
         }

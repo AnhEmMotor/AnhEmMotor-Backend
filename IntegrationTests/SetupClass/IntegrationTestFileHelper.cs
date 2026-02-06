@@ -1,17 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net.Http.Headers;
-using System.Text;
 
-namespace IntegrationTests
+namespace IntegrationTests.SetupClass
 {
     public class IntegrationTestFileHelper
     {
-        private static readonly Lazy<byte[]> ValidJpgBytes = new(() =>
-        {
-            var path = Path.Combine(AppContext.BaseDirectory, "TestData", "valid-image.jpg");
-            return File.ReadAllBytes(path);
-        });
+        private static readonly Lazy<byte[]> ValidJpgBytes = new(
+            () =>
+            {
+                var path = Path.Combine(AppContext.BaseDirectory, "TestData", "valid-image.jpg");
+                return File.ReadAllBytes(path);
+            });
 
         public static byte[] GetValidJpgBytes() => ValidJpgBytes.Value;
 
@@ -30,10 +29,11 @@ namespace IntegrationTests
             return content;
         }
 
-        public static MultipartFormDataContent CreateManyImagesForm(params (string Field, string FileName, string ContentType, byte[] Bytes)[] files)
+        public static MultipartFormDataContent CreateManyImagesForm(
+            params (string Field, string FileName, string ContentType, byte[] Bytes)[] files)
         {
             var content = new MultipartFormDataContent();
-            foreach (var f in files)
+            foreach(var f in files)
             {
                 var fileContent = new ByteArrayContent(f.Bytes);
                 fileContent.Headers.ContentType = new MediaTypeHeaderValue(f.ContentType);

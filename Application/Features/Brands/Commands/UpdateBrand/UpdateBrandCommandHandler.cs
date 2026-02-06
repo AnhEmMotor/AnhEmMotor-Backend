@@ -4,7 +4,6 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
 using Mapster;
 using MediatR;
-using BrandEntity = Domain.Entities.Brand;
 
 namespace Application.Features.Brands.Commands.UpdateBrand;
 
@@ -25,15 +24,16 @@ public sealed class UpdateBrandCommandHandler(
         string? cleanName = request.Name?.Trim();
         string? cleanDescription = request.Description?.Trim();
 
-        var duplicateCandidates = await readRepository.GetByNameAsync(cleanName!, cancellationToken).ConfigureAwait(false);
+        var duplicateCandidates = await readRepository.GetByNameAsync(cleanName!, cancellationToken)
+            .ConfigureAwait(false);
 
-        if (duplicateCandidates.Any(x => x.Id != request.Id))
+        if(duplicateCandidates.Any(x => x.Id != request.Id))
         {
             return Error.Validation("Brand name already exists.", "Name");
         }
 
         request.Adapt(brand);
-        brand.Name = cleanName; 
+        brand.Name = cleanName;
         brand.Description = cleanDescription;
 
         updateRepository.Update(brand);

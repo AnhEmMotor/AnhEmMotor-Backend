@@ -34,7 +34,10 @@ public class ProductCategory
     [Fact(DisplayName = "PC_001 - Tạo danh mục sản phẩm thành công (Happy Path)")]
     public async Task CreateProductCategory_WithValidData_ShouldSucceed()
     {
-        var handler = new CreateProductCategoryCommandHandler(_insertRepoMock.Object, _readRepoMock.Object, _unitOfWorkMock.Object);
+        var handler = new CreateProductCategoryCommandHandler(
+            _insertRepoMock.Object,
+            _readRepoMock.Object,
+            _unitOfWorkMock.Object);
         var command = new CreateProductCategoryCommand { Name = "Điện thoại", Description = "Các sản phẩm điện thoại" };
 
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>()))
@@ -56,7 +59,10 @@ public class ProductCategory
     [Fact(DisplayName = "PC_002 - Tạo danh mục sản phẩm chỉ với Name (Description null)")]
     public async Task CreateProductCategory_WithNameOnly_ShouldSucceed()
     {
-        var handler = new CreateProductCategoryCommandHandler(_insertRepoMock.Object, _readRepoMock.Object, _unitOfWorkMock.Object);
+        var handler = new CreateProductCategoryCommandHandler(
+            _insertRepoMock.Object,
+            _readRepoMock.Object,
+            _unitOfWorkMock.Object);
         var command = new CreateProductCategoryCommand { Name = "Laptop", Description = null };
 
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>()))
@@ -73,7 +79,10 @@ public class ProductCategory
     [Fact(DisplayName = "PC_003 - Tạo danh mục sản phẩm chỉ với Name (Description empty string)")]
     public async Task CreateProductCategory_WithEmptyDescription_ShouldConvertToNull()
     {
-        var handler = new CreateProductCategoryCommandHandler(_insertRepoMock.Object, _readRepoMock.Object, _unitOfWorkMock.Object);
+        var handler = new CreateProductCategoryCommandHandler(
+            _insertRepoMock.Object,
+            _readRepoMock.Object,
+            _unitOfWorkMock.Object);
         var command = new CreateProductCategoryCommand { Name = "Tablet", Description = string.Empty };
 
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>()))
@@ -89,7 +98,10 @@ public class ProductCategory
     [Fact(DisplayName = "PC_004 - Tạo danh mục sản phẩm với Name có khoảng trắng đầu/cuối")]
     public async Task CreateProductCategory_WithNameWhitespace_ShouldTrim()
     {
-        var handler = new CreateProductCategoryCommandHandler(_insertRepoMock.Object, _readRepoMock.Object, _unitOfWorkMock.Object);
+        var handler = new CreateProductCategoryCommandHandler(
+            _insertRepoMock.Object,
+            _readRepoMock.Object,
+            _unitOfWorkMock.Object);
         var command = new CreateProductCategoryCommand { Name = "  Phụ kiện  ", Description = "Test" };
 
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>()))
@@ -104,7 +116,10 @@ public class ProductCategory
     [Fact(DisplayName = "PC_005 - Tạo danh mục sản phẩm với Description có khoảng trắng đầu/cuối")]
     public async Task CreateProductCategory_WithDescriptionWhitespace_ShouldTrim()
     {
-        var handler = new CreateProductCategoryCommandHandler(_insertRepoMock.Object, _readRepoMock.Object, _unitOfWorkMock.Object);
+        var handler = new CreateProductCategoryCommandHandler(
+            _insertRepoMock.Object,
+            _readRepoMock.Object,
+            _unitOfWorkMock.Object);
         var command = new CreateProductCategoryCommand { Name = "Máy tính", Description = "  Mô tả test  " };
 
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>()))
@@ -119,7 +134,10 @@ public class ProductCategory
     [Fact(DisplayName = "PC_006 - Tạo danh mục sản phẩm với Name chứa ký tự đặc biệt")]
     public async Task CreateProductCategory_WithSpecialCharacters_ShouldSucceed()
     {
-        var handler = new CreateProductCategoryCommandHandler(_insertRepoMock.Object, _readRepoMock.Object, _unitOfWorkMock.Object);
+        var handler = new CreateProductCategoryCommandHandler(
+            _insertRepoMock.Object,
+            _readRepoMock.Object,
+            _unitOfWorkMock.Object);
         var command = new CreateProductCategoryCommand { Name = "Đồ điện tử & Công nghệ <Tag>", Description = "Test" };
 
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>()))
@@ -156,14 +174,18 @@ public class ProductCategory
     [Fact(DisplayName = "PC_009 - Tạo danh mục sản phẩm với Name trùng (case-sensitive)")]
     public async Task CreateProductCategory_WithDuplicateName_ShouldThrowException()
     {
-        var handler = new CreateProductCategoryCommandHandler(_insertRepoMock.Object, _readRepoMock.Object, _unitOfWorkMock.Object);
+        var handler = new CreateProductCategoryCommandHandler(
+            _insertRepoMock.Object,
+            _readRepoMock.Object,
+            _unitOfWorkMock.Object);
         var command = new CreateProductCategoryCommand { Name = "Gaming", Description = "Test" };
 
-        _readRepoMock.Setup(x => x.ExistsByNameAsync(
-            It.Is<string>(s => s.Equals("gaming", StringComparison.OrdinalIgnoreCase)),
-            It.IsAny<CancellationToken>(),
-            Domain.Constants.DataFetchMode.All))
-        .ReturnsAsync(true);
+        _readRepoMock.Setup(
+            x => x.ExistsByNameAsync(
+                It.Is<string>(s => s.Equals("gaming", StringComparison.OrdinalIgnoreCase)),
+                It.IsAny<CancellationToken>(),
+                Domain.Constants.DataFetchMode.All))
+            .ReturnsAsync(true);
 
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         resultObj.IsFailure.Should().BeTrue();
@@ -172,14 +194,18 @@ public class ProductCategory
     [Fact(DisplayName = "PC_010 - Tạo danh mục sản phẩm với Name trùng (case-insensitive)")]
     public async Task CreateProductCategory_WithDuplicateNameCaseInsensitive_ShouldThrowException()
     {
-        var handler = new CreateProductCategoryCommandHandler(_insertRepoMock.Object, _readRepoMock.Object, _unitOfWorkMock.Object);
+        var handler = new CreateProductCategoryCommandHandler(
+            _insertRepoMock.Object,
+            _readRepoMock.Object,
+            _unitOfWorkMock.Object);
         var command = new CreateProductCategoryCommand { Name = "gaming", Description = "Test" };
 
-        _readRepoMock.Setup(x => x.ExistsByNameAsync(
-            It.Is<string>(s => s.Equals("gaming", StringComparison.OrdinalIgnoreCase)),
-            It.IsAny<CancellationToken>(),
-            Domain.Constants.DataFetchMode.All))
-        .ReturnsAsync(true);
+        _readRepoMock.Setup(
+            x => x.ExistsByNameAsync(
+                It.Is<string>(s => s.Equals("gaming", StringComparison.OrdinalIgnoreCase)),
+                It.IsAny<CancellationToken>(),
+                Domain.Constants.DataFetchMode.All))
+            .ReturnsAsync(true);
 
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         resultObj.IsFailure.Should().BeTrue();
@@ -188,14 +214,15 @@ public class ProductCategory
     [Fact(DisplayName = "PC_011 - Tạo danh mục sản phẩm với Name trùng bản ghi đã xóa")]
     public async Task CreateProductCategory_WithNameOfDeletedCategory_ShouldThrowException()
     {
-        var handler = new CreateProductCategoryCommandHandler(_insertRepoMock.Object, _readRepoMock.Object, _unitOfWorkMock.Object);
+        var handler = new CreateProductCategoryCommandHandler(
+            _insertRepoMock.Object,
+            _readRepoMock.Object,
+            _unitOfWorkMock.Object);
         var command = new CreateProductCategoryCommand { Name = "Đã xóa", Description = "Test" };
 
-        _readRepoMock.Setup(x => x.ExistsByNameAsync(
-            "Đã xóa",
-            It.IsAny<CancellationToken>(),
-            Domain.Constants.DataFetchMode.All))
-        .ReturnsAsync(true);
+        _readRepoMock.Setup(
+            x => x.ExistsByNameAsync("Đã xóa", It.IsAny<CancellationToken>(), Domain.Constants.DataFetchMode.All))
+            .ReturnsAsync(true);
 
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         resultObj.IsFailure.Should().BeTrue();
@@ -204,7 +231,10 @@ public class ProductCategory
     [Fact(DisplayName = "PC_012 - Tạo danh mục sản phẩm với dữ liệu rác trong request")]
     public async Task CreateProductCategory_WithExtraFields_ShouldIgnoreExtraData()
     {
-        var handler = new CreateProductCategoryCommandHandler(_insertRepoMock.Object, _readRepoMock.Object, _unitOfWorkMock.Object);
+        var handler = new CreateProductCategoryCommandHandler(
+            _insertRepoMock.Object,
+            _readRepoMock.Object,
+            _unitOfWorkMock.Object);
         var command = new CreateProductCategoryCommand { Name = "Valid", Description = "Valid" };
 
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>()))
@@ -321,11 +351,12 @@ public class ProductCategory
             x => x.GetByIdAsync(5, It.IsAny<CancellationToken>(), It.IsAny<Domain.Constants.DataFetchMode>()))
             .ReturnsAsync(new ProductCategoryEntity { Id = 5, Name = "Original", DeletedAt = null });
 
-        _readRepoMock.Setup(x => x.ExistsByNameExceptIdAsync(
-            "Existing",
-            5,
-            It.IsAny<CancellationToken>(),
-            Domain.Constants.DataFetchMode.All))
+        _readRepoMock.Setup(
+            x => x.ExistsByNameExceptIdAsync(
+                "Existing",
+                5,
+                It.IsAny<CancellationToken>(),
+                Domain.Constants.DataFetchMode.All))
             .ReturnsAsync(true);
 
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);

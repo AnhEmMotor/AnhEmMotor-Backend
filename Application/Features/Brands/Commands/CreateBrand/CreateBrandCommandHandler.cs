@@ -18,24 +18,20 @@ public sealed class CreateBrandCommandHandler(
         var cleanName = request.Name?.Trim();
         var cleanDescription = request.Description?.Trim();
 
-        if (cleanName == null)
+        if(cleanName == null)
             return Error.BadRequest("Name is empty/null, please check again");
 
-        var existingBrands = await brandReadRepository.GetByNameAsync(cleanName, cancellationToken).ConfigureAwait(false);
-        if (existingBrands.Count != 0)
+        var existingBrands = await brandReadRepository.GetByNameAsync(cleanName, cancellationToken)
+            .ConfigureAwait(false);
+        if(existingBrands.Count != 0)
         {
-            // Trả về lỗi Domain/Business cụ thể, đừng throw exception vô tội vạ
             return Result<BrandResponse>.Failure("Brand name already exists.");
         }
 
-        // 3. Mapping & Entity Creation
-        // Đừng dùng Adapt tự động hoàn toàn nếu bạn muốn kiểm soát dữ liệu.
-        // Hoặc map xong thì phải ghi đè lại bằng dữ liệu sạch.
         var brand = request.Adapt<BrandEntity>();
-        brand.Name = cleanName; // Gán cứng lại bằng tên sạch
+        brand.Name = cleanName;
         brand.Description = cleanDescription;
 
-        // 4. Persistence
         repository.Add(brand);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 

@@ -43,10 +43,11 @@ public class UpdateUserCommandHandler(
         if(!string.IsNullOrWhiteSpace(request.PhoneNumber))
         {
             var phoneNumber = request.PhoneNumber.Trim();
-            if (string.Compare(phoneNumber, user.PhoneNumber) != 0)
+            if(string.Compare(phoneNumber, user.PhoneNumber) != 0)
             {
-                var existingUser = await userReadRepository.FindUserByPhoneNumberAsync(phoneNumber, cancellationToken).ConfigureAwait(false);
-                if (existingUser != null && existingUser.Id != user.Id)
+                var existingUser = await userReadRepository.FindUserByPhoneNumberAsync(phoneNumber, cancellationToken)
+                    .ConfigureAwait(false);
+                if(existingUser != null && existingUser.Id != user.Id)
                 {
                     return Error.Conflict($"Phone number '{phoneNumber}' is already taken.", "PhoneNumber");
                 }
@@ -59,10 +60,14 @@ public class UpdateUserCommandHandler(
         if(!succeeded)
         {
             var errorList = errors.ToList();
-            if (errorList.Any(e => e.Contains("taken", StringComparison.OrdinalIgnoreCase) || e.Contains("duplicate", StringComparison.OrdinalIgnoreCase)))
+            if(errorList.Any(
+                e => e.Contains("taken", StringComparison.OrdinalIgnoreCase) ||
+                    e.Contains("duplicate", StringComparison.OrdinalIgnoreCase)))
             {
                 var conflictErrors = errorList
-                    .Where(e => e.Contains("taken", StringComparison.OrdinalIgnoreCase) || e.Contains("duplicate", StringComparison.OrdinalIgnoreCase))
+                    .Where(
+                        e => e.Contains("taken", StringComparison.OrdinalIgnoreCase) ||
+                            e.Contains("duplicate", StringComparison.OrdinalIgnoreCase))
                     .Select(e => Error.Conflict(e))
                     .ToList();
                 return Result<UserDTOForManagerResponse>.Failure(conflictErrors);

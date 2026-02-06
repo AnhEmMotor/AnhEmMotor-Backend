@@ -21,9 +21,9 @@ public abstract class ApiController : ControllerBase
             return NoContent();
         return MapErrorsToResponse(result);
     }
-    
+
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="result"></param>
@@ -32,7 +32,7 @@ public abstract class ApiController : ControllerBase
     /// <returns></returns>
     protected IActionResult HandleCreated<T>(Result<T> result, string actionName, object? routeValues = null)
     {
-        if (result.IsSuccess)
+        if(result.IsSuccess)
         {
             return CreatedAtRoute(actionName, routeValues, result.Value);
         }
@@ -40,14 +40,14 @@ public abstract class ApiController : ControllerBase
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="result"></param>
     /// <returns></returns>
     protected IActionResult HandleCreated<T>(Result<T> result)
     {
-        if (result.IsSuccess)
+        if(result.IsSuccess)
         {
             return StatusCode(StatusCodes.Status201Created, result.Value);
         }

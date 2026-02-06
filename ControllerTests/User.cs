@@ -74,10 +74,7 @@ public class User
         var userId = Guid.NewGuid();
         var request = new UpdateCurrentUserCommand { FullName = "Test", Gender = GenderStatus.Male };
 
-        var claims = new List<Claim>
-    {
-        new(ClaimTypes.NameIdentifier, userId.ToString())
-    };
+        var claims = new List<Claim> { new(ClaimTypes.NameIdentifier, userId.ToString()) };
         var identity = new ClaimsIdentity(claims, "TestAuthType");
         var claimsPrincipal = new ClaimsPrincipal(identity);
 
@@ -144,7 +141,11 @@ public class User
     public async Task ChangePassword_CallsCorrectCommand_ReturnsOk()
     {
         var userId = Guid.NewGuid();
-        var request = new Application.Features.Users.Commands.ChangePassword.ChangePasswordCommand { CurrentPassword = "Old", NewPassword = "New" };
+        var request = new Application.Features.Users.Commands.ChangePassword.ChangePasswordCommand
+        {
+            CurrentPassword = "Old",
+            NewPassword = "New"
+        };
         var expectedResponse = new ChangePasswordByUserResponse { Message = "Password changed successfully" };
 
         var claims = new List<Claim> { new(ClaimTypes.NameIdentifier, userId.ToString()) };
@@ -154,7 +155,10 @@ public class User
             HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(identity) }
         };
 
-        _mediatorMock.Setup(m => m.Send(It.IsAny<Application.Features.Users.Commands.ChangePassword.ChangePasswordCommand>(), It.IsAny<CancellationToken>()))
+        _mediatorMock.Setup(
+            m => m.Send(
+                It.IsAny<Application.Features.Users.Commands.ChangePassword.ChangePasswordCommand>(),
+                It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<ChangePasswordByUserResponse>.Success(expectedResponse));
 
         var result = await _controller.ChangePasswordCurrentUserAsync(request, CancellationToken.None)
@@ -166,11 +170,10 @@ public class User
 
         _mediatorMock.Verify(
             m => m.Send(
-                It.Is<Application.Features.Users.Commands.ChangePassword.ChangePasswordCommand>(c =>
-                    string.Compare(c.UserId, userId.ToString()) == 0 &&
-                    string.Compare(c.NewPassword, "New") == 0 &&
-                    string.Compare(c.CurrentPassword, "Old") == 0
-                ),
+                It.Is<Application.Features.Users.Commands.ChangePassword.ChangePasswordCommand>(
+                    c => string.Compare(c.UserId, userId.ToString()) == 0 &&
+                        string.Compare(c.NewPassword, "New") == 0 &&
+                        string.Compare(c.CurrentPassword, "Old") == 0),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -178,9 +181,16 @@ public class User
     [Fact(DisplayName = "USER_042 - Controller - POST /api/v1/User/change-password với body thiếu trường")]
     public async Task ChangePassword_MissingField_ThrowsValidationException()
     {
-        var request = new Application.Features.Users.Commands.ChangePassword.ChangePasswordCommand { CurrentPassword = "Old", NewPassword = string.Empty };
+        var request = new Application.Features.Users.Commands.ChangePassword.ChangePasswordCommand
+        {
+            CurrentPassword = "Old",
+            NewPassword = string.Empty
+        };
 
-        _mediatorMock.Setup(m => m.Send(It.IsAny<Application.Features.Users.Commands.ChangePassword.ChangePasswordCommand>(), It.IsAny<CancellationToken>()))
+        _mediatorMock.Setup(
+            m => m.Send(
+                It.IsAny<Application.Features.Users.Commands.ChangePassword.ChangePasswordCommand>(),
+                It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<ChangePasswordByUserResponse>.Failure(Error.BadRequest("NewPassword is required")));
 
         var result = await _controller.ChangePasswordCurrentUserAsync(request, CancellationToken.None)
@@ -192,9 +202,16 @@ public class User
     [Fact(DisplayName = "USER_043 - Controller - POST /api/v1/User/change-password xử lý UnauthorizedException")]
     public async Task ChangePassword_UnauthorizedException_ThrowsUnauthorizedException()
     {
-        var request = new Application.Features.Users.Commands.ChangePassword.ChangePasswordCommand { CurrentPassword = "Wrong", NewPassword = "New" };
+        var request = new Application.Features.Users.Commands.ChangePassword.ChangePasswordCommand
+        {
+            CurrentPassword = "Wrong",
+            NewPassword = "New"
+        };
 
-        _mediatorMock.Setup(m => m.Send(It.IsAny<Application.Features.Users.Commands.ChangePassword.ChangePasswordCommand>(), It.IsAny<CancellationToken>()))
+        _mediatorMock.Setup(
+            m => m.Send(
+                It.IsAny<Application.Features.Users.Commands.ChangePassword.ChangePasswordCommand>(),
+                It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException("Current password is incorrect"));
 
         await   Assert.ThrowsAsync<UnauthorizedAccessException>(
@@ -306,23 +323,25 @@ public class User
 
         var hasControllerLevelAuthorize = controllerAttributes.Length > 0;
 
-        if (!hasControllerLevelAuthorize)
+        if(!hasControllerLevelAuthorize)
         {
-            foreach (var method in methods)
+            foreach(var method in methods)
             {
-                // Bỏ qua các hàm có AllowAnonymous
                 var allowAnonymous = method.GetCustomAttributes(
-                    typeof(Microsoft.AspNetCore.Authorization.AllowAnonymousAttribute), true);
+                    typeof(Microsoft.AspNetCore.Authorization.AllowAnonymousAttribute),
+                    true);
 
-                if (allowAnonymous.Length > 0) continue;
+                if(allowAnonymous.Length > 0)
+                    continue;
 
                 var methodAttributes = method.GetCustomAttributes(
-                    typeof(Microsoft.AspNetCore.Authorization.AuthorizeAttribute), true);
+                    typeof(Microsoft.AspNetCore.Authorization.AuthorizeAttribute),
+                    true);
 
-                methodAttributes.Should().NotBeEmpty($"Method {method.Name} should be secured or explicitly AllowAnonymous");
+                methodAttributes.Should()
+                    .NotBeEmpty($"Method {method.Name} should be secured or explicitly AllowAnonymous");
             }
-        }
-        else
+        } else
         {
             hasControllerLevelAuthorize.Should().BeTrue();
         }

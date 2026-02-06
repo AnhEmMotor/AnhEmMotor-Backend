@@ -30,7 +30,9 @@ public sealed class DeleteManySuppliersCommandHandler(
             .ConfigureAwait(false);
 
         var suppliersWithWorkingInputsSet = relevantInputs
-            .Where(x => string.Compare(x.StatusId, Domain.Constants.Input.InputStatus.Working) == 0 && x.SupplierId.HasValue)
+            .Where(
+                x => string.Compare(x.StatusId, Domain.Constants.Input.InputStatus.Working) == 0 &&
+                    x.SupplierId.HasValue)
             .Select(x => x.SupplierId!.Value)
             .ToHashSet();
 
@@ -42,9 +44,12 @@ public sealed class DeleteManySuppliersCommandHandler(
             } else if(!activeSupplierSet.Contains(id))
             {
                 errorDetails.Add(Error.BadRequest($"Supplier with Id {id} has already been deleted.", "Id"));
-            } else if (suppliersWithWorkingInputsSet.Contains(id))
+            } else if(suppliersWithWorkingInputsSet.Contains(id))
             {
-                 errorDetails.Add(Error.BadRequest($"Supplier with Id {id} cannot be deleted because it has working input receipts.", "Id"));
+                errorDetails.Add(
+                    Error.BadRequest(
+                        $"Supplier with Id {id} cannot be deleted because it has working input receipts.",
+                        "Id"));
             }
         }
 

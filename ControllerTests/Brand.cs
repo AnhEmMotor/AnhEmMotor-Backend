@@ -81,7 +81,7 @@ public class Brand
 
         var attribute = method.GetCustomAttribute<AuthorizeAttribute>();
 
-        if (attribute == null)
+        if(attribute == null)
         {
             var allAttributes = method.GetCustomAttributes(true);
             var attrNames = string.Join(", ", allAttributes.Select(a => a.GetType().FullName));
