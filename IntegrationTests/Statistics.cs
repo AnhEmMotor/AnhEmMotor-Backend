@@ -280,6 +280,7 @@ public class Statistics : IAsyncLifetime
     [Fact(DisplayName = "STAT_026 - Dashboard Pending Orders Count")]
     public async Task GetDashboardStats_PendingCount()
     {
+        await AuthenticateAsync();
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         await WipeStatisticsDataAsync(db);
@@ -300,6 +301,7 @@ public class Statistics : IAsyncLifetime
     [Fact(DisplayName = "STAT_027 - User mới đăng ký (Expect 0 due to hardcoded)")]
     public async Task GetDashboardStats_NewUsers()
     {
+        await AuthenticateAsync();
         // Code hardcodes 0. Test expects 0.
         var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats");
         var content = await response.Content.ReadFromJsonAsync<DashboardStatsResponse>();

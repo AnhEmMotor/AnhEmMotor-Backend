@@ -141,6 +141,12 @@ public class Brand
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>()))
             .Returns(Enumerable.Empty<BrandEntities>().AsQueryable());
 
+        _readRepoMock.Setup(x => x.GetByNameAsync(
+                It.IsAny<string>(), 
+                It.IsAny<CancellationToken>(), 
+                It.IsAny<DataFetchMode>()))
+            .ReturnsAsync(new List<BrandEntities>());
+
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         result.Should().NotBeNull();
@@ -163,6 +169,12 @@ public class Brand
             .ReturnsAsync(new BrandEntities { Id = 1, Name = "Honda" });
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>()))
             .Returns(Enumerable.Empty<BrandEntities>().AsQueryable());
+
+        _readRepoMock.Setup(x => x.GetByNameAsync(
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>(),
+                It.IsAny<DataFetchMode>()))
+            .ReturnsAsync(new List<BrandEntities>());
 
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
@@ -275,6 +287,12 @@ public class Brand
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>()))
             .Returns(Enumerable.Empty<BrandEntities>().AsQueryable());
 
+        _readRepoMock.Setup(x => x.GetByNameAsync(
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>(),
+                It.IsAny<DataFetchMode>()))
+            .ReturnsAsync(new List<BrandEntities>());
+
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         result.Value.Name.Should().Be("Honda");
@@ -298,6 +316,12 @@ public class Brand
             .ReturnsAsync(new BrandEntities { Id = 1, Name = "Honda" });
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>()))
             .Returns(Enumerable.Empty<BrandEntities>().AsQueryable());
+
+        _readRepoMock.Setup(x => x.GetByNameAsync(
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>(),
+                It.IsAny<DataFetchMode>()))
+            .ReturnsAsync(new List<BrandEntities>());
 
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
