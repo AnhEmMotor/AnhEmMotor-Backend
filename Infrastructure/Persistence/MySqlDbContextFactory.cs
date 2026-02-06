@@ -35,7 +35,7 @@ namespace Infrastructure.Persistence
             }
 
             var builder = new DbContextOptionsBuilder<MySqlDbContext>();
-            builder.UseMySQL(connectionString);
+            builder.UseMySQL(connectionString, b => b.MigrationsAssembly("Infrastructure"));
 
             return new MySqlDbContext(builder.Options);
         }

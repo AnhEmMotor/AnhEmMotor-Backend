@@ -45,11 +45,28 @@ jobs:
       - name: Build
         run: dotnet build --configuration Release --no-restore
 
+      - name: Install EF Core Tools
+        run: dotnet tool install --global dotnet-ef
+
+      - name: Generate MySQL Migration Script
+        run: |
+          cd Infrastructure
+          dotnet ef migrations script --context MySqlDbContext --output ../mysql_schema.sql --idempotent
+          cd ..
+        continue-on-error: true
+
       - name: Publish
         run: dotnet publish --configuration Release --no-build --output ./publish
 
       - name: Move AppSettings to Publish Folder
         run: cp appsettings.Production.json ./publish/
+
+      - name: Move Migration Script to Publish Folder (if exists)
+        run: |
+          if [ -f mysql_schema.sql ]; then
+            cp mysql_schema.sql ./publish/
+          fi
+        continue-on-error: true
 
       - name: Clean Remote Directory
         uses: appleboy/ssh-action@master
@@ -80,6 +97,16 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
+            # Run database migration if script exists
+            if [ -f /home/anhemmot/projects/anhemmotor-backend/mysql_schema.sql ]; then
+              echo "Running database migration..."
+              mysql -u ${{ secrets.DB_USER }} -p${{ secrets.DB_PASSWORD }} ${{ secrets.DB_NAME }} < /home/anhemmot/projects/anhemmotor-backend/mysql_schema.sql
+              echo "Migration completed successfully"
+            else
+              echo "No migration script found, skipping..."
+            fi
+            
+            # Restart application
             sed -i 's/\r$//' /home/anhemmot/scripts/restart_app.sh
             chmod +x /home/anhemmot/scripts/restart_app.sh
             bash /home/anhemmot/scripts/restart_app.sh

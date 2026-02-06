@@ -1,3 +1,24 @@
+# AnhEmMotor Backend API
+
+> **🚨 CẢNH BÁO QUAN TRỌNG CHO NGƯỜI MỚI:**
+>
+> **Khi thay đổi cấu trúc database (thêm bảng, sửa cột, etc.), BẮT BUỘC phải tạo migration theo cách thức dưới đây!**
+>
+> ```powershell
+> # Chạy lệnh này mỗi khi thay đổi Entity/DbContext:
+> .\add-migration.ps1 "TenMigration"
+> .\update-database.ps1
+> ```
+>
+> **Nếu quên tạo MySQL migration:**
+> - ✅ Code mới được deploy lên VPS
+> - ❌ Database KHÔNG được update
+> - 💥 **Application sẽ CRASH khi chạy!**
+>
+> ➡️ Chi tiết xem [Section 4.5: Tạo và Quản Lý Migrations](#45-tạo-và-quản-lý-database-migrations)
+
+---
+
 # 1. Yêu cầu hệ thống
 
 Máy tính lập trình nên dùng hệ điều hành Windows để có trải nghiệm lập trình tốt nhất.
@@ -53,9 +74,44 @@ Dự án sử dụng file `appsettings.json` để cấu hình. File mẫu là `
 
 Mở file `WebAPI/appsettings.json` và điền các thông tin sau:
 
-## 1. Connection String (BẮT BUỘC)
+## 1. Chọn Database Provider (BẮT BUỘC)
 
-Thay thế connection string để kết nối với SQL Server:
+**Dự án hỗ trợ cả SQL Server và MySQL.** Chọn provider phù hợp với môi trường:
+
+### SQL Server (Dành cho Development trên Windows)
+
+Trong file `appsettings.json`, cấu hình:
+
+```json
+{
+  "Provider": "SqlServer",
+  "ConnectionStrings": {
+    "StringConnection": "Server=localhost;Database=AnhEmMotorDB;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true"
+  }
+}
+```
+
+### MySQL (Dành cho Production hoặc Testing)
+
+Trong file `appsettings.json`, cấu hình:
+
+```json
+{
+  "Provider": "MySql",
+  "ConnectionStrings": {
+    "StringConnection": "Server=localhost;Database=anhemmotor;User=root;Password=your_password;"
+  }
+}
+```
+
+> **⚠️ LƯU Ý QUAN TRỌNG:**
+> - **Local Development:** Khuyến nghị dùng **SQL Server** (nhanh, quen thuộc trên Windows)
+> - **Production/VPS:** Sử dụng **MySQL** (VPS thường dùng MySQL)
+> - **Testing:** Tự động dùng MySQL qua Docker (không cần cấu hình)
+
+---
+
+## 2. Connection String Chi Tiết
 
 ```json
 "ConnectionStrings": {
@@ -166,6 +222,126 @@ Cấu hình seeding dữ liệu ban đầu:
    Chạy ứng dụng lần đầu tiên, database và dữ liệu mẫu sẽ được tạo tự động
 
    **Quan trọng:** Sau khi chạy lần đầu, tắt `RunDataSeedingOnStartup`:
+
+---
+
+# 4.5. Tạo và Quản Lý Database Migrations
+
+> **🚨 QUAN TRỌNG CHO NGƯỜI MỚI:**
+> 
+> Khi bạn thay đổi cấu trúc database (thêm bảng, sửa cột, etc.), **BẮT BUỘC phải tạo migration**!
+> Nếu không, dự án sẽ bị lỗi khi deploy lên VPS!
+
+## Tạo Migration (Recommended Way)
+
+### Tự động tạo cả SQL Server và MySQL migrations
+
+Sử dụng script wrapper để tự động tạo migrations cho CẢ 2 providers:
+
+```powershell
+# Từ thư mục gốc của dự án
+.\add-migration.ps1 "TenMigration"
+```
+
+**Ví dụ:**
+```powershell
+.\add-migration.ps1 "AddProductColorColumn"
+```
+
+Script sẽ tự động:
+- Tạo SQL Server migration (cho local development)
+- Tạo MySQL migration (cho production deployment)
+- Báo lỗi rõ ràng nếu có vấn đề
+
+### Update Local Database
+
+Sau khi tạo migration, update database local:
+
+```powershell
+.\update-database.ps1
+```
+
+Hoặc thủ công:
+
+```powershell
+dotnet ef database update --project Infrastructure --startup-project WebAPI
+```
+
+---
+
+## Tạo Migration Thủ Công (Advanced)
+
+### Tạo SQL Server Migration
+
+```powershell
+dotnet ef migrations add TenMigration --project Infrastructure --startup-project WebAPI
+```
+
+### Tạo MySQL Migration
+
+```powershell
+dotnet ef migrations add TenMigration --context MySqlDbContext --output-dir MySqlMigrations --project Infrastructure --startup-project WebAPI
+```
+
+> **⚠️ NGUY HIỂM:**
+> 
+> Nếu chỉ tạo SQL Server migration mà **quên tạo MySQL migration**, khi deploy lên VPS:
+> - ✅ Code mới được deploy
+> - ❌ Database KHÔNG được update
+> - 💥 **Application sẽ CRASH** (mismatch giữa code và DB schema)
+> 
+> **Khuyến nghị:** Luôn dùng `add-migration.ps1` để tránh quên!
+
+---
+
+## Deploy Lên Production
+
+Khi đã tạo migrations và commit code:
+
+```bash
+git add .
+git commit -m "feat: add new feature with database changes"
+git push origin master
+```
+
+**GitHub Actions sẽ tự động:**
+1. Build project
+2. Generate MySQL migration script
+3. Deploy lên VPS
+4. Chạy migrations tự động
+5. Restart application
+
+✨ **Không cần làm gì thêm!**
+
+---
+
+# 4.6. Các Lệnh Migration Hữu Ích
+
+### Xem danh sách migrations
+
+```powershell
+# SQL Server migrations
+dotnet ef migrations list --project Infrastructure --startup-project WebAPI
+
+# MySQL migrations
+dotnet ef migrations list --context MySqlDbContext --project Infrastructure --startup-project WebAPI
+```
+
+### Xóa migration cuối cùng (nếu chưa apply)
+
+```powershell
+# SQL Server
+dotnet ef migrations remove --project Infrastructure --startup-project WebAPI
+
+# MySQL
+dotnet ef migrations remove --context MySqlDbContext --project Infrastructure --startup-project WebAPI
+```
+
+### Rollback database về migration trước
+
+```powershell
+dotnet ef database update TenMigrationTruocDo --project Infrastructure --startup-project WebAPI
+```
 
    ```json
    "RunDataSeedingOnStartup": false
