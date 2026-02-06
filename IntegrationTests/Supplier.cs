@@ -562,8 +562,8 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            await db.Database.ExecuteSqlRawAsync("INSERT OR IGNORE INTO SupplierStatus (Key) VALUES ({0})", Domain.Constants.SupplierStatus.Active);
-            await db.Database.ExecuteSqlRawAsync("INSERT OR IGNORE INTO InputStatus (Key) VALUES ({0})", Domain.Constants.Input.InputStatus.Finish);
+            await db.Database.ExecuteSqlRawAsync("INSERT IGNORE INTO SupplierStatus (`Key`) VALUES ({0})", Domain.Constants.SupplierStatus.Active);
+            await db.Database.ExecuteSqlRawAsync("INSERT IGNORE INTO InputStatus (`Key`) VALUES ({0})", Domain.Constants.Input.InputStatus.Finish);
 
             var supplier = new SupplierEntity { Name = $"S_{uniqueId}", Phone = "099", Address = "A", StatusId = Domain.Constants.SupplierStatus.Active };
             
@@ -616,11 +616,11 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            await db.Database.ExecuteSqlRawAsync("INSERT OR IGNORE INTO SupplierStatus (Key) VALUES ({0})", Domain.Constants.SupplierStatus.Active);
+            await db.Database.ExecuteSqlRawAsync("INSERT IGNORE INTO SupplierStatus (`Key`) VALUES ({0})", Domain.Constants.SupplierStatus.Active);
             
             foreach (var status in new[] { Domain.Constants.Input.InputStatus.Finish, Domain.Constants.Input.InputStatus.Working, Domain.Constants.Input.InputStatus.Cancel })
             {
-                await db.Database.ExecuteSqlRawAsync("INSERT OR IGNORE INTO InputStatus (Key) VALUES ({0})", status);
+                await db.Database.ExecuteSqlRawAsync("INSERT IGNORE INTO InputStatus (`Key`) VALUES ({0})", status);
             }
 
             var supplier = new SupplierEntity { Name = $"S_{uniqueId}", Phone = "099", Address = "A", StatusId = Domain.Constants.SupplierStatus.Active };
