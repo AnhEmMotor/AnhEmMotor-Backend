@@ -36,8 +36,9 @@ jobs:
           Jwt.Key: ${{ secrets.JWT_KEY }}
           Jwt.Issuer: ${{ secrets.JWT_ISSUER }}
           Jwt.Audience: ${{ secrets.JWT_AUDIENCE }}
-          ProtectedAuthorizationEntities.SuperRoles.0: ${{ secrets.SUPER_ROLES }}
-          ProtectedAuthorizationEntities.ProtectedUsers.0: ${{ secrets.PROTECTED_USERS }}
+          ProtectedAuthorizationEntities.SuperRoles: ${{ secrets.SUPER_ROLES }}
+          ProtectedAuthorizationEntities.ProtectedUsers: ${{ secrets.PROTECTED_USERS }}
+          ProtectedAuthorizationEntities.DefaultRolesForNewUsers: ${{ secrets.DEFAULT_ROLES }}
 
       - name: Restore dependencies
         run: dotnet restore
