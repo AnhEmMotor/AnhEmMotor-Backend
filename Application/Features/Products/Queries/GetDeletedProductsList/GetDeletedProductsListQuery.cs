@@ -18,6 +18,8 @@ public sealed record GetDeletedProductsListQuery : IRequest<Result<PagedResult<P
 
     public string? Sorts { get; init; }
 
+    public string? Filters { get; init; }
+
     public static GetDeletedProductsListQuery FromRequest(SieveModel request)
     {
         var search = ExtractFilterValue(request.Filters, "search");
@@ -33,7 +35,8 @@ public sealed record GetDeletedProductsListQuery : IRequest<Result<PagedResult<P
             PageSize = request.PageSize ?? 10,
             Search = search,
             StatusIds = statusIds,
-            Sorts = request.Sorts
+            Sorts = request.Sorts,
+            Filters = request.Filters
         };
     }
 

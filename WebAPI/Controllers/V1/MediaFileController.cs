@@ -11,9 +11,9 @@ using Application.Features.Files.Queries.GetFileById;
 using Application.Features.Files.Queries.GetFilesList;
 using Application.Features.Files.Queries.ViewImage;
 using Asp.Versioning;
+using Domain.Constants;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
-using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
@@ -35,7 +35,8 @@ public class MediaFileController(IMediator mediator) : ApiController
     /// <summary>
     /// Lấy danh sách tệp media (có phân trang, lọc, sắp xếp).
     /// </summary>
-    [NonAction]
+    [HttpGet]
+    [HasPermission(Products.View)]
     [ProducesResponseType(typeof(PagedResult<MediaFileResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetFilesAsync(
         [FromQuery] SieveModel sieveModel,
@@ -49,7 +50,8 @@ public class MediaFileController(IMediator mediator) : ApiController
     /// <summary>
     /// Lấy danh sách tệp media đã bị xoá (có phân trang, lọc, sắp xếp).
     /// </summary>
-    [NonAction]
+    [HttpGet("deleted")]
+    [HasPermission(Products.View)]
     [ProducesResponseType(typeof(PagedResult<MediaFileResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetDeletedFilesAsync(
         [FromQuery] SieveModel sieveModel,
@@ -63,7 +65,8 @@ public class MediaFileController(IMediator mediator) : ApiController
     /// <summary>
     /// Lấy thông tin của tệp media được chọn.
     /// </summary>
-    [NonAction]
+    [HttpGet("{id:int}", Name = RouteNames.MediaFile.GetById)]
+    [RequiresAnyPermissions(Products.Edit, Products.Create)]
     [ProducesResponseType(typeof(MediaFileResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetFileByIdAsync(int id, CancellationToken cancellationToken)
@@ -86,7 +89,10 @@ public class MediaFileController(IMediator mediator) : ApiController
             return BadRequest();
         var command = new UploadImageCommand { FileContent = file.OpenReadStream(), FileName = file.FileName };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
+        return HandleCreated(
+            result,
+            RouteNames.MediaFile.GetById,
+            new { id = result.IsSuccess ? result.Value.Id : null });
     }
 
     /// <summary>
@@ -111,7 +117,7 @@ public class MediaFileController(IMediator mediator) : ApiController
         var command = new UploadManyImageCommand { Files = fileDtos };
 
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
+        return HandleCreated(result);
     }
 
     /// <summary>
@@ -136,11 +142,10 @@ public class MediaFileController(IMediator mediator) : ApiController
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteFilesAsync(
-        [FromBody] List<string> request,
+        [FromBody] DeleteManyFilesCommand request,
         CancellationToken cancellationToken)
     {
-        var command = request.Adapt<DeleteManyFilesCommand>();
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(request, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -166,11 +171,10 @@ public class MediaFileController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(List<MediaFileResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RestoreFilesAsync(
-        [FromBody] List<string> request,
+        [FromBody] RestoreManyFilesCommand request,
         CancellationToken cancellationToken)
     {
-        var command = request.Adapt<RestoreManyFilesCommand>();
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(request, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 

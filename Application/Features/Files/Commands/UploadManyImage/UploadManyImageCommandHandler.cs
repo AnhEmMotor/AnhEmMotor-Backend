@@ -1,4 +1,4 @@
-using Application.ApiContracts.File.Responses;
+﻿using Application.ApiContracts.File.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.LocalFile;
@@ -23,6 +23,23 @@ public sealed class UploadManyImageCommandHandler(
         if(request.Files == null || request.Files.Count == 0)
         {
             return Result<List<MediaFileResponse>>.Failure("No files to upload");
+        }
+
+        var allowedExtensions = new HashSet<string> { ".jpg", ".jpeg", ".png", ".webp" };
+
+        foreach(var fileDto in request.Files)
+        {
+            if(fileDto.FileContent.Length > MaxFileSize)
+            {
+                return Result<List<MediaFileResponse>>.Failure($"File {fileDto.FileName} exceeds 10MB limit");
+            }
+
+            var ext = Path.GetExtension(fileDto.FileName).ToLowerInvariant();
+            if(string.IsNullOrEmpty(ext) || !allowedExtensions.Contains(ext))
+            {
+                return Result<List<MediaFileResponse>>.Failure(
+                    $"File format '{ext}' is not supported in file {fileDto.FileName}");
+            }
         }
 
         var mediaFiles = new List<MediaFileEntity>();

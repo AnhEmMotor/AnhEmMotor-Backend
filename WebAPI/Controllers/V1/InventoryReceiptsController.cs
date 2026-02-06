@@ -14,6 +14,7 @@ using Application.Features.Inputs.Queries.GetInputById;
 using Application.Features.Inputs.Queries.GetInputsBySupplierId;
 using Application.Features.Inputs.Queries.GetInputsList;
 using Asp.Versioning;
+using Domain.Constants;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using Mapster;
@@ -69,7 +70,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// <summary>
     /// Lấy thông tin chi tiết của phiếu nhập.
     /// </summary>
-    [HttpGet("{id:int}")]
+    [HttpGet("{id:int}", Name = RouteNames.InventoryReceipts.GetById)]
     [HasPermission(Inputs.View)]
     [ProducesResponseType(typeof(InputResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -109,7 +110,10 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     {
         var command = request.Adapt<CreateInputCommand>();
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
+        return HandleCreated(
+            result,
+            RouteNames.InventoryReceipts.GetById,
+            new { id = result.IsSuccess ? result.Value?.Id : null });
     }
 
     /// <summary>
@@ -124,7 +128,10 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     {
         var command = new CloneInputCommand() { Id = id };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
+        return HandleCreated(
+            result,
+            RouteNames.InventoryReceipts.GetById,
+            new { id = result.IsSuccess ? result.Value?.Id : null });
     }
 
     /// <summary>

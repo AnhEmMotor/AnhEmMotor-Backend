@@ -47,6 +47,7 @@ msbuild.wrn
 appsettings.json
 appsettings.*.json
 !appsettings.*template*.json
+!appsettings.*test*.json
 
 # Ignore client-side libraries managed by LibMan
 **/bin/
@@ -205,3 +206,5 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+TestResults

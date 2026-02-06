@@ -1,9 +1,7 @@
-﻿using Application.ApiContracts.User.Responses;
-using Application.ApiContracts.UserManager.Responses;
+﻿using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Models;
 using Application.Features.UserManager.Commands.AssignRoles;
 using Application.Features.UserManager.Commands.ChangeMultipleUsersStatus;
-using Application.Features.UserManager.Commands.ChangePassword;
 using Application.Features.UserManager.Commands.ChangeUserStatus;
 using Application.Features.UserManager.Commands.UpdateUser;
 using Application.Features.UserManager.Queries.GetUserById;
@@ -16,6 +14,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Security.Claims;
 using WebAPI.Controllers.Base;
 using static Domain.Constants.Permission.PermissionsList;
 
@@ -118,7 +117,7 @@ public class UserManagerController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> ChangePasswordAsync(
         Guid userId,
-        [FromBody] ChangePasswordCommand model,
+        [FromBody] Application.Features.UserManager.Commands.ChangePasswordByManager.ChangePasswordByManagerCommand model,
         CancellationToken cancellationToken)
     {
         var modelToSend = model with { UserId = userId };
@@ -178,7 +177,12 @@ public class UserManagerController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var result = await mediator.Send(
-            new ChangeMultipleUsersStatusCommand() { Status = model.Status, UserIds = model.UserIds },
+            new ChangeMultipleUsersStatusCommand()
+            {
+                Status = model.Status,
+                UserIds = model.UserIds,
+                CurrentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+            },
             cancellationToken)
             .ConfigureAwait(true);
         return HandleResult(result);

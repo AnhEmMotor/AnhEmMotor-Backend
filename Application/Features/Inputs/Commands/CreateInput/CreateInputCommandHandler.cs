@@ -61,6 +61,12 @@ public sealed class CreateInputCommandHandler(
         }
 
         var input = request.Adapt<InputEntity>();
+
+        if(!string.IsNullOrEmpty(input.Notes))
+        {
+            input.Notes = System.Text.RegularExpressions.Regex.Replace(input.Notes, "<.*?>", string.Empty);
+        }
+
         input.StatusId = Domain.Constants.Input.InputStatus.Working;
         input.InputInfos = [ .. request.Products
             .Select(

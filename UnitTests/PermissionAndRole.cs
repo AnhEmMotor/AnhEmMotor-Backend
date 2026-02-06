@@ -2,6 +2,7 @@
 using Application.Features.Permissions.Commands.CreateRole;
 using Application.Features.Permissions.Commands.DeleteMultipleRoles;
 using Application.Features.Permissions.Commands.DeleteRole;
+using Application.Features.Permissions.Commands.UpdateRole;
 using Application.Features.Permissions.Queries.GetAllPermissions;
 using Application.Features.Permissions.Queries.GetMyPermissions;
 using Application.Features.Permissions.Queries.GetRolePermissions;
@@ -14,6 +15,7 @@ using Application.Interfaces.Services;
 using Domain.Constants.Permission;
 using Domain.Entities;
 using FluentAssertions;
+using FluentValidation.TestHelper;
 using Microsoft.AspNetCore.Identity;
 using Moq;
 using PermissionEntity = Domain.Entities.Permission;
@@ -22,6 +24,7 @@ namespace UnitTests;
 
 public class PermissionAndRole
 {
+#pragma warning disable IDE0079 
 #pragma warning disable CRR0035
     [Fact(DisplayName = "PERM_001 - Lấy tất cả permissions thành công")]
     public async Task GetAllPermissions_NoParams_ReturnsGroupedPermissions()
@@ -92,6 +95,10 @@ public class PermissionAndRole
 
         roleReadRepoMock.Setup(
             x => x.GetRolesByNameAsync(It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+
+        roleReadRepoMock.Setup(
+            x => x.GetPermissionsNameByRoleIdAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
 
         var handler = new GetMyPermissionsQueryHandler(roleReadRepoMock.Object, userReadRepoMock.Object);
@@ -250,12 +257,12 @@ public class PermissionAndRole
         roleReadRepoMock.Setup(x => x.IsRoleExistAsync("NewRole", CancellationToken.None)).ReturnsAsync(false);
 
         var createdRole = new ApplicationRole { Id = Guid.NewGuid(), Name = "NewRole", Description = "Test role" };
-        roleInsertRepoMock.Setup(x => x.CreateAsync(It.IsAny<ApplicationRole>(), CancellationToken.None))
+        roleInsertRepoMock.Setup(x => x.CreateAsync(It.IsAny<ApplicationRole>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(IdentityResult.Success)
-            .Callback<ApplicationRole>(
-                r =>
+            .Callback<ApplicationRole, CancellationToken>(
+                (role, token) =>
                 {
-                    r.Id = createdRole.Id;
+                    role.Id = createdRole.Id;
                 });
 
         var handler = new CreateRoleCommandHandler(
@@ -308,135 +315,49 @@ public class PermissionAndRole
         result.IsFailure.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "PERM_011 - Tạo role mới với tên rỗng hoặc null - Trường hợp 1: RoleName rỗng")]
-    public async Task CreateRole_EmptyRoleName_ThrowsValidationException()
+    [Fact(DisplayName = "PERM_011 - Trường hợp 1: RoleName rỗng")]
+    public void RoleName_Empty_ShouldHaveError()
     {
-        var roleReadRepoMock = new Mock<IRoleReadRepository>();
-        var roleInsertRepoMock = new Mock<IRoleInsertRepository>();
-        var permissionRepoMock = new Mock<IPermissionReadRepository>();
-        var roleUpdateRepoMock = new Mock<IRoleUpdateRepository>();
-        var unitOfWorkMock = new Mock<IUnitOfWork>();
-
-        var handler = new CreateRoleCommandHandler(
-            roleReadRepoMock.Object,
-            roleInsertRepoMock.Object,
-            permissionRepoMock.Object,
-            roleUpdateRepoMock.Object,
-            unitOfWorkMock.Object);
-        var command = new CreateRoleCommand
-        {
-            RoleName = string.Empty,
-            Description = "Test",
-            Permissions = [ PermissionsList.Brands.View ]
-        };
-
-        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-        result.IsFailure.Should().BeTrue();
+        CreateRoleCommandValidator validator = new();
+        var command = new CreateRoleCommand { RoleName = string.Empty };
+        var result = validator.TestValidate(command);
+        result.ShouldHaveValidationErrorFor(x => x.RoleName);
     }
 
-    [Fact(DisplayName = "PERM_011 - Tạo role mới với tên rỗng hoặc null - Trường hợp 2: RoleName null")]
-    public async Task CreateRole_NullRoleName_ThrowsValidationException()
+    [Fact(DisplayName = "PERM_011 - Trường hợp 2: RoleName null")]
+    public void RoleName_Null_ShouldHaveError()
     {
-        var roleReadRepoMock = new Mock<IRoleReadRepository>();
-        var roleInsertRepoMock = new Mock<IRoleInsertRepository>();
-        var permissionRepoMock = new Mock<IPermissionReadRepository>();
-        var roleUpdateRepoMock = new Mock<IRoleUpdateRepository>();
-        var unitOfWorkMock = new Mock<IUnitOfWork>();
-
-        var handler = new CreateRoleCommandHandler(
-            roleReadRepoMock.Object,
-            roleInsertRepoMock.Object,
-            permissionRepoMock.Object,
-            roleUpdateRepoMock.Object,
-            unitOfWorkMock.Object);
-        var command = new CreateRoleCommand
-        {
-            RoleName = null!,
-            Description = "Test",
-            Permissions = [ PermissionsList.Brands.View ]
-        };
-
-        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-        result.IsFailure.Should().BeTrue();
+        CreateRoleCommandValidator validator = new();
+        var command = new CreateRoleCommand { RoleName = null! };
+        var result = validator.TestValidate(command);
+        result.ShouldHaveValidationErrorFor(x => x.RoleName);
     }
 
-    [Fact(DisplayName = "PERM_012 - Tạo role mới với danh sách permissions rỗng")]
-    public async Task CreateRole_EmptyPermissions_ThrowsValidationException()
+    [Fact(DisplayName = "PERM_012 - Danh sách permissions rỗng")]
+    public void Permissions_Empty_ShouldHaveError()
     {
-        var roleReadRepoMock = new Mock<IRoleReadRepository>();
-        var roleInsertRepoMock = new Mock<IRoleInsertRepository>();
-        var permissionRepoMock = new Mock<IPermissionReadRepository>();
-        var roleUpdateRepoMock = new Mock<IRoleUpdateRepository>();
-        var unitOfWorkMock = new Mock<IUnitOfWork>();
-
-        var handler = new CreateRoleCommandHandler(
-            roleReadRepoMock.Object,
-            roleInsertRepoMock.Object,
-            permissionRepoMock.Object,
-            roleUpdateRepoMock.Object,
-            unitOfWorkMock.Object);
-        var command = new CreateRoleCommand { RoleName = "EmptyPermRole", Description = "Test", Permissions = [] };
-
-        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-        result.IsFailure.Should().BeTrue();
+        CreateRoleCommandValidator validator = new();
+        var command = new CreateRoleCommand { RoleName = "ValidRole", Permissions = [] };
+        var result = validator.TestValidate(command);
+        result.ShouldHaveValidationErrorFor(x => x.Permissions);
     }
 
-    [Fact(DisplayName = "PERM_013 - Tạo role mới với permissions không tồn tại")]
-    public async Task CreateRole_InvalidPermissions_ThrowsValidationException()
+    [Fact(DisplayName = "PERM_013 - Permissions không tồn tại trong hệ thống")]
+    public void Permissions_Invalid_ShouldHaveError()
     {
-        var roleReadRepoMock = new Mock<IRoleReadRepository>();
-        var roleInsertRepoMock = new Mock<IRoleInsertRepository>();
-        var permissionRepoMock = new Mock<IPermissionReadRepository>();
-        var roleUpdateRepoMock = new Mock<IRoleUpdateRepository>();
-        var unitOfWorkMock = new Mock<IUnitOfWork>();
-
-        roleReadRepoMock.Setup(x => x.IsRoleExistAsync("InvalidPermRole", CancellationToken.None)).ReturnsAsync(false);
-
-        permissionRepoMock.Setup(
-            x => x.GetPermissionsByNamesAsync(It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync([]);
-
-        var handler = new CreateRoleCommandHandler(
-            roleReadRepoMock.Object,
-            roleInsertRepoMock.Object,
-            permissionRepoMock.Object,
-            roleUpdateRepoMock.Object,
-            unitOfWorkMock.Object);
-        var command = new CreateRoleCommand
-        {
-            RoleName = "InvalidPermRole",
-            Description = "Test",
-            Permissions = [ "Permissions.Invalid.Permission", "Permissions.NotExist.Test" ]
-        };
-
-        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-        result.IsFailure.Should().BeTrue();
+        CreateRoleCommandValidator validator = new();
+        var command = new CreateRoleCommand { RoleName = "ValidRole", Permissions = [ "Invalid.Permission.Name" ] };
+        var result = validator.TestValidate(command);
+        result.ShouldHaveValidationErrorFor(x => x.Permissions);
     }
 
-    [Fact(DisplayName = "PERM_014 - Tạo role mới với tên chứa ký tự đặc biệt")]
-    public async Task CreateRole_RoleNameWithSpecialCharacters_ThrowsValidationException()
+    [Fact(DisplayName = "PERM_014 - Tên chứa ký tự đặc biệt")]
+    public void RoleName_SpecialChars_ShouldHaveError()
     {
-        var roleReadRepoMock = new Mock<IRoleReadRepository>();
-        var roleInsertRepoMock = new Mock<IRoleInsertRepository>();
-        var permissionRepoMock = new Mock<IPermissionReadRepository>();
-        var roleUpdateRepoMock = new Mock<IRoleUpdateRepository>();
-        var unitOfWorkMock = new Mock<IUnitOfWork>();
-
-        var handler = new CreateRoleCommandHandler(
-            roleReadRepoMock.Object,
-            roleInsertRepoMock.Object,
-            permissionRepoMock.Object,
-            roleUpdateRepoMock.Object,
-            unitOfWorkMock.Object);
-        var command = new CreateRoleCommand
-        {
-            RoleName = "Role@#$%",
-            Description = "Test",
-            Permissions = [ PermissionsList.Brands.View ]
-        };
-
-        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-        result.IsFailure.Should().BeTrue();
+        CreateRoleCommandValidator validator = new();
+        var command = new CreateRoleCommand { RoleName = "Role@#$%", Permissions = [ "Some.Valid.Perm" ] };
+        var result = validator.TestValidate(command);
+        result.ShouldHaveValidationErrorFor(x => x.RoleName);
     }
 
     [Fact(DisplayName = "PERM_015 - Cập nhật description của role thành công")]
@@ -451,12 +372,12 @@ public class PermissionAndRole
         var role = new ApplicationRole { Id = roleId, Name = "Manager", Description = "Old description" };
         roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("Manager", CancellationToken.None)).ReturnsAsync(role);
 
-        var handler = new Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommandHandler(
+        var handler = new UpdateRoleCommandHandler(
             roleReadRepoMock.Object,
             roleUpdateRepoMock.Object,
             permissionRepoMock.Object,
             unitOfWorkMock.Object);
-        var command = new Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommand()
+        var command = new UpdateRoleCommand()
         {
             RoleName = "Manager",
             Description = "Updated description",
@@ -473,45 +394,64 @@ public class PermissionAndRole
     {
         var roleId = Guid.NewGuid();
         var roleReadRepoMock = new Mock<IRoleReadRepository>();
-        var permissionRepoMock = new Mock<IPermissionReadRepository>();
         var roleUpdateRepoMock = new Mock<IRoleUpdateRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
+        var permissionReadRepoMock = new Mock<IPermissionReadRepository>();
 
         var role = new ApplicationRole { Id = roleId, Name = "Manager", Description = "Test" };
         roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("Manager", CancellationToken.None)).ReturnsAsync(role);
 
         var oldPermissions = new List<RolePermission>
         {
-            new() { RoleId = roleId, PermissionId = 1 },
-            new() { RoleId = roleId, PermissionId = 2 }
+            new()
+            {
+                RoleId = roleId,
+                PermissionId = 1,
+                Permission = new PermissionEntity { Id = 1, Name = "Old.Perm.1" }
+            },
+            new()
+            {
+                RoleId = roleId,
+                PermissionId = 2,
+                Permission = new PermissionEntity { Id = 2, Name = "Old.Perm.2" }
+            }
         };
+
+        roleReadRepoMock.Setup(x => x.GetRolesPermissionByRoleIdAsync(roleId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(oldPermissions);
 
         var newPermissions = new List<PermissionEntity>
         {
             new() { Id = 3, Name = PermissionsList.Products.View },
             new() { Id = 4, Name = PermissionsList.Products.Create }
         };
-
-        roleReadRepoMock.Setup(x => x.GetRolesPermissionByRoleIdAsync(roleId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(oldPermissions);
-
-        permissionRepoMock.Setup(
+        permissionReadRepoMock.Setup(
             x => x.GetPermissionsByNamesAsync(It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(newPermissions);
 
-        var handler = new Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommandHandler(
+        permissionReadRepoMock.Setup(
+            x => x.GetRolePermissionsByPermissionIdsAsync(It.IsAny<IEnumerable<int>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(
+                [ new() { PermissionId = 1, Permission = new PermissionEntity { Name = "Old.Perm.1" } }, new()
+                {
+                    PermissionId = 1
+                }, new() { PermissionId = 2, Permission = new PermissionEntity { Name = "Old.Perm.2" } }, new()
+                {
+                    PermissionId = 2
+                } ]);
+
+        var handler = new UpdateRoleCommandHandler(
             roleReadRepoMock.Object,
             roleUpdateRepoMock.Object,
-            permissionRepoMock.Object,
+            permissionReadRepoMock.Object,
             unitOfWorkMock.Object);
 
-        var command = new Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommand()
+        var command = new UpdateRoleCommand()
         {
             RoleName = "Manager",
             Description = null,
             Permissions = [ PermissionsList.Products.View, PermissionsList.Products.Create ]
         };
-
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
@@ -534,17 +474,12 @@ public class PermissionAndRole
         var role = new ApplicationRole { Id = roleId, Name = "Manager", Description = "Original description" };
         roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("Manager", CancellationToken.None)).ReturnsAsync(role);
 
-        var handler = new Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommandHandler(
+        var handler = new UpdateRoleCommandHandler(
             roleReadRepoMock.Object,
             roleUpdateRepoMock.Object,
             permissionRepoMock.Object,
             unitOfWorkMock.Object);
-        var command = new Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommand()
-        {
-            RoleName = "Manager",
-            Description = null,
-            Permissions = []
-        };
+        var command = new UpdateRoleCommand() { RoleName = "Manager", Description = null, Permissions = [] };
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
@@ -568,16 +503,12 @@ public class PermissionAndRole
         roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("NonExistentRole", CancellationToken.None))
             .ReturnsAsync((ApplicationRole?)null);
 
-        var handler = new Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommandHandler(
+        var handler = new UpdateRoleCommandHandler(
             roleReadRepoMock.Object,
             roleUpdateRepoMock.Object,
             permissionRepoMock.Object,
             unitOfWorkMock.Object);
-        var command = new Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommand()
-        {
-            RoleName = "NonExistentRole",
-            Description = "Test"
-        };
+        var command = new UpdateRoleCommand() { RoleName = "NonExistentRole", Description = "Test" };
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
@@ -648,4 +579,5 @@ public class PermissionAndRole
             Times.Exactly(3));
     }
 #pragma warning restore CRR0035
+#pragma warning restore IDE0079
 }

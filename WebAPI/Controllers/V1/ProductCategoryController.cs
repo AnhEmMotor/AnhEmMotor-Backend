@@ -10,6 +10,7 @@ using Application.Features.ProductCategories.Queries.GetDeletedProductCategories
 using Application.Features.ProductCategories.Queries.GetProductCategoriesList;
 using Application.Features.ProductCategories.Queries.GetProductCategoryById;
 using Asp.Versioning;
+using Domain.Constants;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using Mapster;
@@ -78,7 +79,7 @@ public class ProductCategoryController(IMediator mediator) : ApiController
     /// <summary>
     /// Lấy thông tin danh mục sản phẩm theo Id.
     /// </summary>
-    [HttpGet("{id:int}")]
+    [HttpGet("{id:int}", Name = RouteNames.ProductCategory.GetById)]
     [HasPermission(ProductCategories.View)]
     [ProducesResponseType(typeof(ProductCategoryResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -101,7 +102,10 @@ public class ProductCategoryController(IMediator mediator) : ApiController
     {
         var command = request.Adapt<CreateProductCategoryCommand>();
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
+        return HandleCreated(
+            result,
+            RouteNames.ProductCategory.GetById,
+            new { id = result.IsSuccess ? result.Value.Id : null });
     }
 
     /// <summary>

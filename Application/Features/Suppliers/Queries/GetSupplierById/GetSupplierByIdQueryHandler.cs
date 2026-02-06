@@ -13,7 +13,7 @@ public sealed class GetSupplierByIdQueryHandler(ISupplierReadRepository reposito
         GetSupplierByIdQuery request,
         CancellationToken cancellationToken)
     {
-        var supplier = await repository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
+        var supplier = await repository.GetByIdWithTotalInputAsync(request.Id, cancellationToken).ConfigureAwait(false);
 
         if(supplier == null)
         {

@@ -1,73 +1,143 @@
-﻿using FluentAssertions;
+﻿using Application.Common.Models;
+using Domain.Constants.Permission;
+using FluentAssertions;
 using Infrastructure.DBContexts;
+using IntegrationTests.SetupClass;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using SettingEntity = Domain.Entities.Setting;
+using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
-public class Setting : IClassFixture<IntegrationTestWebAppFactory>
+using System.Threading.Tasks;
+using Xunit;
+
+[Collection("Shared Integration Collection")]
+public class Setting : IAsyncLifetime
 {
     private readonly IntegrationTestWebAppFactory _factory;
     private readonly HttpClient _client;
+    private readonly ITestOutputHelper _output;
 
-    public Setting(IntegrationTestWebAppFactory factory)
+    public Setting(IntegrationTestWebAppFactory factory, ITestOutputHelper output)
     {
         _factory = factory;
         _client = _factory.CreateClient();
+        _output = output;
     }
 
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync() { await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(true); }
+
+#pragma warning disable IDE0079
 #pragma warning disable CRR0035
     [Fact(DisplayName = "SETTING_001 - GetAllSettings - Thành công (Happy Path)")]
     public async Task SETTING_001_GetAllSettings_Success()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Settings.View ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-            db.Settings.RemoveRange(db.Settings);
-            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
-            var settings = new List<SettingEntity>
-            {
-                new() { Key = "Deposit_ratio", Value = "50.5" },
-                new() { Key = "Inventory_alert_level", Value = "10" },
-                new() { Key = "Order_value_exceeds", Value = "50000000" },
-                new() { Key = "Z-bike_threshold_for_meeting", Value = "5" }
-            };
-            await db.Settings.AddRangeAsync(settings, CancellationToken.None).ConfigureAwait(true);
-            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+            await db.Database
+                .ExecuteSqlRawAsync(
+                    "INSERT INTO Setting (`Key`, `Value`) VALUES ({0}, {1}) ON DUPLICATE KEY UPDATE `Value`=VALUES(`Value`), `DeletedAt`=NULL",
+                    "Deposit_ratio",
+                    "50.5")
+                .ConfigureAwait(true);
+            await db.Database
+                .ExecuteSqlRawAsync(
+                    "INSERT INTO Setting (`Key`, `Value`) VALUES ({0}, {1}) ON DUPLICATE KEY UPDATE `Value`=VALUES(`Value`), `DeletedAt`=NULL",
+                    "Inventory_alert_level",
+                    "10")
+                .ConfigureAwait(true);
+            await db.Database
+                .ExecuteSqlRawAsync(
+                    "INSERT INTO Setting (`Key`, `Value`) VALUES ({0}, {1}) ON DUPLICATE KEY UPDATE `Value`=VALUES(`Value`), `DeletedAt`=NULL",
+                    "Order_value_exceeds",
+                    "50000000")
+                .ConfigureAwait(true);
+            await db.Database
+                .ExecuteSqlRawAsync(
+                    "INSERT INTO Setting (`Key`, `Value`) VALUES ({0}, {1}) ON DUPLICATE KEY UPDATE `Value`=VALUES(`Value`), `DeletedAt`=NULL",
+                    "Z-bike_threshold_for_meeting",
+                    "5")
+                .ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync("/api/v1/Setting", CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/Setting").ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
-            .ReadFromJsonAsync<Dictionary<string, decimal?>>(CancellationToken.None)
+            .ReadFromJsonAsync<Dictionary<string, string?>>(CancellationToken.None)
             .ConfigureAwait(true);
         content.Should().NotBeNull();
         content.Should().HaveCount(4);
-        content!["Deposit_ratio"].Should().Be(50.5m);
-        content["Inventory_alert_level"].Should().Be(10m);
-        content["Order_value_exceeds"].Should().Be(50000000m);
-        content["Z-bike_threshold_for_meeting"].Should().Be(5m);
+        content!["Deposit_ratio"].Should().Be("50.5");
+        content["Inventory_alert_level"].Should().Be("10");
+        content["Order_value_exceeds"].Should().Be("50000000");
+        content["Z-bike_threshold_for_meeting"].Should().Be("5");
     }
 
     [Fact(DisplayName = "SETTING_002 - GetAllSettings - Không có quyền xem")]
     public async Task SETTING_002_GetAllSettings_Forbidden()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-            db.Settings.RemoveRange(db.Settings);
-            var settings = new List<SettingEntity> { new() { Key = "Deposit_ratio", Value = "50" } };
-            await db.Settings.AddRangeAsync(settings, CancellationToken.None).ConfigureAwait(true);
-            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+            await db.Database
+                .ExecuteSqlRawAsync(
+                    "INSERT INTO Setting (`Key`, `Value`) VALUES ({0}, {1}) ON DUPLICATE KEY UPDATE `Value`=VALUES(`Value`), `DeletedAt`=NULL",
+                    "Deposit_ratio",
+                    "50")
+                .ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync("/api/v1/Setting", CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/Setting").ConfigureAwait(true);
 
         response.StatusCode.Should().BeOneOf(HttpStatusCode.Unauthorized, HttpStatusCode.Forbidden);
     }
@@ -75,17 +145,22 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "SETTING_003 - GetAllSettings - Chưa đăng nhập")]
     public async Task SETTING_003_GetAllSettings_Unauthorized()
     {
+        _client.DefaultRequestHeaders.Authorization = null;
+
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            db.Settings.RemoveRange(db.Settings);
-            await db.Settings
-                .AddAsync(new() { Key = "Deposit_ratio", Value = "50" }, CancellationToken.None)
+            await db.Database
+                .ExecuteSqlRawAsync(
+                    "INSERT INTO Setting (`Key`, `Value`) VALUES ({0}, {1}) ON DUPLICATE KEY UPDATE `Value`=VALUES(`Value`), `DeletedAt`=NULL",
+                    "Deposit_ratio",
+                    "50")
                 .ConfigureAwait(true);
+
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync("/api/v1/Setting", CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/Setting").ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
@@ -93,6 +168,26 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "SETTING_004 - GetAllSettings - Database rỗng")]
     public async Task SETTING_004_GetAllSettings_EmptyDatabase_ReturnsEmptyDictionary()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Settings.View ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
@@ -100,53 +195,82 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync("/api/v1/Setting", CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/Setting").ConfigureAwait(true);
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
-            .ReadFromJsonAsync<Dictionary<string, decimal?>>(CancellationToken.None)
-            .ConfigureAwait(true);
-        content.Should().NotBeNull();
-        content.Should().BeEmpty();
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact(DisplayName = "SETTING_005 - SetSettings - Thành công với tất cả keys hợp lệ")]
     public async Task SETTING_005_SetSettings_AllValidKeys_Success()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Settings.Edit ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-            db.Settings.RemoveRange(db.Settings);
-            var initialSettings = new List<SettingEntity>
-            {
-                new() { Key = "Deposit_ratio", Value = "30" },
-                new() { Key = "Inventory_alert_level", Value = "5" },
-                new() { Key = "Order_value_exceeds", Value = "30000000" },
-                new() { Key = "Z-bike_threshold_for_meeting", Value = "3" }
-            };
-            await db.Settings.AddRangeAsync(initialSettings, CancellationToken.None).ConfigureAwait(true);
-            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+            await db.Database
+                .ExecuteSqlRawAsync(
+                    "INSERT INTO Setting (`Key`, `Value`) VALUES ({0}, {1}) ON DUPLICATE KEY UPDATE `Value`=VALUES(`Value`), `DeletedAt`=NULL",
+                    "Deposit_ratio",
+                    "30")
+                .ConfigureAwait(true);
+            await db.Database
+                .ExecuteSqlRawAsync(
+                    "INSERT INTO Setting (`Key`, `Value`) VALUES ({0}, {1}) ON DUPLICATE KEY UPDATE `Value`=VALUES(`Value`), `DeletedAt`=NULL",
+                    "Inventory_alert_level",
+                    "5")
+                .ConfigureAwait(true);
+            await db.Database
+                .ExecuteSqlRawAsync(
+                    "INSERT INTO Setting (`Key`, `Value`) VALUES ({0}, {1}) ON DUPLICATE KEY UPDATE `Value`=VALUES(`Value`), `DeletedAt`=NULL",
+                    "Order_value_exceeds",
+                    "30000000")
+                .ConfigureAwait(true);
+            await db.Database
+                .ExecuteSqlRawAsync(
+                    "INSERT INTO Setting (`Key`, `Value`) VALUES ({0}, {1}) ON DUPLICATE KEY UPDATE `Value`=VALUES(`Value`), `DeletedAt`=NULL",
+                    "Z-bike_threshold_for_meeting",
+                    "3")
+                .ConfigureAwait(true);
         }
 
-        var request = new Dictionary<string, long?>
+        var request = new Dictionary<string, string?>
         {
-            { "Deposit_ratio", 50 },
-            { "Inventory_alert_level", 10 },
-            { "Order_value_exceeds", 50000000 },
-            { "Z-bike_threshold_for_meeting", 5 }
+            { "Deposit_ratio", "50" },
+            { "Inventory_alert_level", "10" },
+            { "Order_value_exceeds", "50000000" },
+            { "Z-bike_threshold_for_meeting", "5" }
         };
 
         var response = await _client.PutAsJsonAsync("/api/v1/Setting", request).ConfigureAwait(true);
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
         var content = await response.Content
-            .ReadFromJsonAsync<Dictionary<string, long?>>(CancellationToken.None)
+            .ReadFromJsonAsync<Dictionary<string, string?>>(CancellationToken.None)
             .ConfigureAwait(true);
         content.Should().NotBeNull();
         content.Should().HaveCount(4);
-        content!["Deposit_ratio"].Should().Be(50);
-        content["Inventory_alert_level"].Should().Be(10);
+        content!["Deposit_ratio"].Should().Be("50");
+        content["Inventory_alert_level"].Should().Be("10");
 
         using(var scope = _factory.Services.CreateScope())
         {
@@ -161,25 +285,49 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "SETTING_006 - SetSettings - Cập nhật chỉ 1 key")]
     public async Task SETTING_006_SetSettings_UpdateSingleKey_Success()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Settings.Edit ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-            db.Settings.RemoveRange(db.Settings);
-            var initialSettings = new List<SettingEntity>
-            {
-                new() { Key = "Deposit_ratio", Value = "30" },
-                new() { Key = "Inventory_alert_level", Value = "5" }
-            };
-            await db.Settings.AddRangeAsync(initialSettings, CancellationToken.None).ConfigureAwait(true);
-            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+            await db.Database
+                .ExecuteSqlRawAsync(
+                    "INSERT INTO Setting (`Key`, `Value`) VALUES ({0}, {1}) ON DUPLICATE KEY UPDATE `Value`=VALUES(`Value`), `DeletedAt`=NULL",
+                    "Deposit_ratio",
+                    "30")
+                .ConfigureAwait(true);
+            await db.Database
+                .ExecuteSqlRawAsync(
+                    "INSERT INTO Setting (`Key`, `Value`) VALUES ({0}, {1}) ON DUPLICATE KEY UPDATE `Value`=VALUES(`Value`), `DeletedAt`=NULL",
+                    "Inventory_alert_level",
+                    "5")
+                .ConfigureAwait(true);
         }
 
-        var request = new Dictionary<string, long?> { { "Deposit_ratio", 25 } };
+        var request = new Dictionary<string, string?> { { "Deposit_ratio", "25" } };
 
         var response = await _client.PutAsJsonAsync("/api/v1/Setting", request).ConfigureAwait(true);
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
 
         using(var scope = _factory.Services.CreateScope())
         {
@@ -193,17 +341,38 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "SETTING_007 - SetSettings - Không có quyền chỉnh sửa")]
     public async Task SETTING_007_SetSettings_Forbidden()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Settings.View ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            db.Settings.RemoveRange(db.Settings);
-            await db.Settings
-                .AddAsync(new() { Key = "Deposit_ratio", Value = "50" }, CancellationToken.None)
+            await db.Database
+                .ExecuteSqlRawAsync(
+                    "INSERT INTO Setting (`Key`, `Value`) VALUES ({0}, {1}) ON DUPLICATE KEY UPDATE `Value`=VALUES(`Value`), `DeletedAt`=NULL",
+                    "Deposit_ratio",
+                    "50")
                 .ConfigureAwait(true);
-            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var request = new Dictionary<string, long?> { { "Deposit_ratio", 25 } };
+        var request = new Dictionary<string, string?> { { "Deposit_ratio", "25" } };
 
         var response = await _client.PutAsJsonAsync("/api/v1/Setting", request).ConfigureAwait(true);
 
@@ -220,17 +389,20 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "SETTING_008 - SetSettings - Chưa đăng nhập")]
     public async Task SETTING_008_SetSettings_Unauthorized()
     {
+        _client.DefaultRequestHeaders.Authorization = null;
+
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            db.Settings.RemoveRange(db.Settings);
-            await db.Settings
-                .AddAsync(new() { Key = "Deposit_ratio", Value = "50" }, CancellationToken.None)
+            await db.Database
+                .ExecuteSqlRawAsync(
+                    "INSERT INTO Setting (`Key`, `Value`) VALUES ({0}, {1}) ON DUPLICATE KEY UPDATE `Value`=VALUES(`Value`), `DeletedAt`=NULL",
+                    "Deposit_ratio",
+                    "50")
                 .ConfigureAwait(true);
-            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var request = new Dictionary<string, long?> { { "Deposit_ratio", 25 } };
+        var request = new Dictionary<string, string?> { { "Deposit_ratio", "25" } };
 
         var response = await _client.PutAsJsonAsync("/api/v1/Setting", request).ConfigureAwait(true);
 
@@ -240,28 +412,47 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "SETTING_009 - SetSettings - Deposit_ratio dưới ngưỡng tối thiểu")]
     public async Task SETTING_009_SetSettings_DepositRatioBelowMinimum_BadRequest()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Settings.Edit ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            db.Settings.RemoveRange(db.Settings);
-            await db.Settings
-                .AddAsync(new() { Key = "Deposit_ratio", Value = "50" }, CancellationToken.None)
+            await db.Database
+                .ExecuteSqlRawAsync(
+                    "INSERT INTO Setting (`Key`, `Value`) VALUES ({0}, {1}) ON DUPLICATE KEY UPDATE `Value`=VALUES(`Value`), `DeletedAt`=NULL",
+                    "Deposit_ratio",
+                    "50")
                 .ConfigureAwait(true);
-            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var request = new Dictionary<string, long?> { { "Deposit_ratio", 0 } };
+        var request = new Dictionary<string, string?> { { "Deposit_ratio", "0" } };
 
         var response = await _client.PutAsJsonAsync("/api/v1/Setting", request).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var content = await response.Content
-            .ReadFromJsonAsync<Application.Common.Models.ErrorResponse>(CancellationToken.None)
+            .ReadFromJsonAsync<ErrorResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         content.Should().NotBeNull();
-        content!.Errors
-            .Should()
-            .Contain(e => string.Compare(e.Field, "Deposit_ratio") == 0 && e.Message.Contains("between 1.0 and 99.0"));
+        content!.Errors.Should().Contain(e => e.Message.Contains("between 1.0 and 99.0"));
 
         using(var scope = _factory.Services.CreateScope())
         {
@@ -274,28 +465,47 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "SETTING_010 - SetSettings - Deposit_ratio trên ngưỡng tối đa")]
     public async Task SETTING_010_SetSettings_DepositRatioAboveMaximum_BadRequest()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Settings.Edit ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            db.Settings.RemoveRange(db.Settings);
-            await db.Settings
-                .AddAsync(new() { Key = "Deposit_ratio", Value = "50" }, CancellationToken.None)
+            await db.Database
+                .ExecuteSqlRawAsync(
+                    "INSERT INTO Setting (`Key`, `Value`) VALUES ({0}, {1}) ON DUPLICATE KEY UPDATE `Value`=VALUES(`Value`), `DeletedAt`=NULL",
+                    "Deposit_ratio",
+                    "50")
                 .ConfigureAwait(true);
-            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var request = new Dictionary<string, long?> { { "Deposit_ratio", 100 } };
+        var request = new Dictionary<string, string?> { { "Deposit_ratio", "100" } };
 
         var response = await _client.PutAsJsonAsync("/api/v1/Setting", request).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var content = await response.Content
-            .ReadFromJsonAsync<Application.Common.Models.ErrorResponse>(CancellationToken.None)
+            .ReadFromJsonAsync<ErrorResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         content.Should().NotBeNull();
-        content!.Errors
-            .Should()
-            .Contain(e => string.Compare(e.Field, "Deposit_ratio") == 0 && e.Message.Contains("between 1.0 and 99.0"));
+        content!.Errors.Should().Contain(e => e.Message.Contains("between 1.0 and 99.0"));
 
         using(var scope = _factory.Services.CreateScope())
         {
@@ -308,23 +518,44 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "SETTING_011 - SetSettings - Deposit_ratio với nhiều hơn 1 chữ số thập phân")]
     public async Task SETTING_011_SetSettings_DepositRatioMultipleDecimals_BadRequest()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Settings.Edit ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            db.Settings.RemoveRange(db.Settings);
-            await db.Settings
-                .AddAsync(new() { Key = "Deposit_ratio", Value = "50" }, CancellationToken.None)
+            await db.Database
+                .ExecuteSqlRawAsync(
+                    "INSERT INTO Setting (`Key`, `Value`) VALUES ({0}, {1}) ON DUPLICATE KEY UPDATE `Value`=VALUES(`Value`), `DeletedAt`=NULL",
+                    "Deposit_ratio",
+                    "50")
                 .ConfigureAwait(true);
-            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var request = new Dictionary<string, long?> { { "Deposit_ratio", 5055 } };
+        var request = new Dictionary<string, string?> { { "Deposit_ratio", "50.55" } };
 
         var response = await _client.PutAsJsonAsync("/api/v1/Setting", request).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var content = await response.Content
-            .ReadFromJsonAsync<Application.Common.Models.ErrorResponse>(CancellationToken.None)
+            .ReadFromJsonAsync<ErrorResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Errors.Should().Contain(e => e.Message.Contains("decimal place"));
@@ -333,26 +564,48 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "SETTING_012 - SetSettings - Request body rỗng")]
     public async Task SETTING_012_SetSettings_EmptyRequest_BadRequest()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Settings.Edit ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            db.Settings.RemoveRange(db.Settings);
-            await db.Settings
-                .AddAsync(new() { Key = "Deposit_ratio", Value = "50" }, CancellationToken.None)
+            await db.Database
+                .ExecuteSqlRawAsync(
+                    "INSERT INTO Setting (`Key`, `Value`) VALUES ({0}, {1}) ON DUPLICATE KEY UPDATE `Value`=VALUES(`Value`), `DeletedAt`=NULL",
+                    "Deposit_ratio",
+                    "50")
                 .ConfigureAwait(true);
-            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var request = new Dictionary<string, long?>();
+        var request = new Dictionary<string, string?>();
 
         var response = await _client.PutAsJsonAsync("/api/v1/Setting", request).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var content = await response.Content
-            .ReadFromJsonAsync<Application.Common.Models.ErrorResponse>(CancellationToken.None)
+            .ReadFromJsonAsync<ErrorResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Errors.Should().Contain(e => e.Message.Contains("cannot be empty"));
     }
 #pragma warning restore CRR0035
+#pragma warning restore IDE0079
 }

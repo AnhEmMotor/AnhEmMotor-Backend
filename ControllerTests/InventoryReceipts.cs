@@ -39,7 +39,7 @@ public class InventoryReceipts
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
     }
 
-#pragma warning disable IDE0079 // Remove unnecessary suppression
+#pragma warning disable IDE0079 
 #pragma warning disable CRR0035
     [Fact(DisplayName = "INPUT_003 - Tạo phiếu nhập thiếu quyền Create")]
     public async Task CreateInput_MissingPermission_ReturnsForbidden()
@@ -296,7 +296,7 @@ public class InventoryReceipts
 
         var result = await _controller.CreateInputAsync(request, CancellationToken.None).ConfigureAwait(true);
 
-        result.Should().BeOfType<OkObjectResult>();
+        result.Should().BeOfType<CreatedAtRouteResult>();
         _mediatorMock.Verify(m => m.Send(It.IsAny<CreateInputCommand>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -337,5 +337,5 @@ public class InventoryReceipts
             Times.Once);
     }
 #pragma warning restore CRR0035
+#pragma warning restore IDE0079
 }
-#pragma warning restore IDE0079 // Remove unnecessary suppression

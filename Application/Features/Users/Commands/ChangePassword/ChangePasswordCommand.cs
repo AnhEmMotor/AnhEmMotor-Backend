@@ -2,9 +2,9 @@ using Application.ApiContracts.User.Responses;
 using Application.Common.Models;
 using MediatR;
 
-namespace Application.Features.Users.Commands.ChangePasswordCurrentUser;
+namespace Application.Features.Users.Commands.ChangePassword;
 
-public record ChangePasswordCurrentUserCommand : IRequest<Result<ChangePasswordUserByUserResponse>>
+public record ChangePasswordCommand : IRequest<Result<ChangePasswordByUserResponse>>
 {
     public string? UserId { get; init; }
 

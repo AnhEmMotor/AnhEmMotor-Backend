@@ -19,6 +19,7 @@ using Application.Features.Products.Queries.GetProductById;
 using Application.Features.Products.Queries.GetProductsList;
 using Application.Features.Products.Queries.GetVariantLiteByProductId;
 using Asp.Versioning;
+using Domain.Constants;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using Mapster;
@@ -153,7 +154,7 @@ public class ProductController(ISender sender) : ApiController
     /// <summary>
     /// Lấy thông tin chi tiết sản phẩm theo Id (dành cho toàn bộ người dùng khách)
     /// </summary>
-    [HttpGet("{id:int}")]
+    [HttpGet("{id:int}", Name = RouteNames.Product.GetVarientById)]
     [ProducesResponseType(typeof(ProductDetailForManagerResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetVarientByIdAsync(int id, CancellationToken cancellationToken = default)
@@ -223,7 +224,10 @@ public class ProductController(ISender sender) : ApiController
     {
         var command = request.Adapt<CreateProductCommand>();
         var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
+        return HandleCreated(
+            result,
+            RouteNames.Product.GetVarientById,
+            new { id = result.IsSuccess ? result.Value?.Id : 0 });
     }
 
     /// <summary>

@@ -9,13 +9,16 @@ namespace Application.Features.Users.Commands.DeleteCurrentUserAccount;
 public class DeleteCurrentUserAccountCommandHandler(
     IUserReadRepository userReadRepository,
     IUserDeleteRepository userDeleteRepository,
-    IProtectedEntityManagerService protectedEntityManagerService) : IRequestHandler<DeleteCurrentUserAccountCommand, Result<DeleteUserByUserReponse>>
+    IProtectedEntityManagerService protectedEntityManagerService) : IRequestHandler<DeleteCurrentUserAccountCommand, Result<DeleteAccountByUserReponse>>
 {
-    public async Task<Result<DeleteUserByUserReponse>> Handle(
+    public async Task<Result<DeleteAccountByUserReponse>> Handle(
         DeleteCurrentUserAccountCommand request,
         CancellationToken cancellationToken)
     {
-        var userId = Guid.Parse(request.UserId!);
+        if(string.IsNullOrEmpty(request.UserId) || !Guid.TryParse(request.UserId, out var userId))
+        {
+            return Error.BadRequest("Invalid user ID.");
+        }
 
         var user = await userReadRepository.FindUserByIdAsync(userId, cancellationToken).ConfigureAwait(false);
         if(user is null)
@@ -26,7 +29,12 @@ public class DeleteCurrentUserAccountCommandHandler(
 
         if(user.DeletedAt is not null)
         {
-            return Error.Validation("This account has already been deleted.", "DeletedAt");
+            return Error.Validation("DeletedAt", "This account has already been deleted.");
+        }
+
+        if(string.Compare(user.Status, Domain.Constants.UserStatus.Banned) == 0)
+        {
+            return Error.Forbidden("User account is banned.");
         }
 
         var protectedUsers = protectedEntityManagerService.GetProtectedUsers() ?? [];
@@ -43,10 +51,14 @@ public class DeleteCurrentUserAccountCommandHandler(
             .ConfigureAwait(false);
         if(!succeeded)
         {
-            var validationErrors = errors.Select(e => Error.Validation(e)).ToList();
-            return Result<DeleteUserByUserReponse>.Failure(validationErrors);
+            if(!errors.Any())
+            {
+                return Error.Validation("Failed to delete account.", "DeleteFailed");
+            }
+            var validationErrors = errors.Select(e => Error.Validation("DeleteError", e)).ToList();
+            return Result<DeleteAccountByUserReponse>.Failure(validationErrors);
         }
 
-        return new DeleteUserByUserReponse() { Message = "Your account has been deleted successfully.", };
+        return new DeleteAccountByUserReponse() { Message = "Your account has been deleted successfully.", };
     }
 }

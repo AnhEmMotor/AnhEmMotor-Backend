@@ -1,4 +1,5 @@
-﻿using Domain.Entities;
+﻿using Application.ApiContracts.Supplier.Responses;
+using Domain.Entities;
 using Microsoft.Extensions.Options;
 using Sieve.Models;
 using Sieve.Services;
@@ -27,7 +28,11 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<Brand>(p => p.Id).CanSort();
         mapper.Property<Input>(p => p.Id).CanSort();
         mapper.Property<Output>(p => p.Id).CanSort();
-        mapper.Property<Product>(p => p.Id).CanSort();
+        mapper.Property<Product>(p => p.Id).CanSort().CanFilter();
+        mapper.Property<Product>(p => p.Name).CanSort().CanFilter();
+        mapper.Property<Product>(p => p.BrandId).CanFilter();
+        mapper.Property<Product>(p => p.CategoryId).CanFilter();
+        mapper.Property<Product>(p => p.StatusId).CanFilter();
         mapper.Property<ProductVariant>(p => p.Id).CanSort();
         mapper.Property<Supplier>(p => p.Id).CanSort();
 
@@ -42,6 +47,7 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<Output>(o => o.StatusId).CanSort().CanFilter();
         mapper.Property<Output>(o => o.Notes).CanFilter();
 
+        mapper.Property<ProductCategory>(c => c.Id).CanSort();
         mapper.Property<ProductCategory>(c => c.Name).CanSort().CanFilter();
         mapper.Property<ProductCategory>(c => c.Description).CanFilter();
 
@@ -50,6 +56,25 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<Supplier>(s => s.Email).CanFilter();
         mapper.Property<Supplier>(s => s.StatusId).CanSort().CanFilter();
         mapper.Property<Supplier>(s => s.Address).CanFilter();
+
+        mapper.Property<SupplierWithTotalInputResponse>(s => s.Id).CanSort().CanFilter();
+        mapper.Property<SupplierWithTotalInputResponse>(s => s.Name).CanSort().CanFilter();
+        mapper.Property<SupplierWithTotalInputResponse>(s => s.Phone).CanSort().CanFilter();
+        mapper.Property<SupplierWithTotalInputResponse>(s => s.Email).CanSort().CanFilter();
+        mapper.Property<SupplierWithTotalInputResponse>(s => s.Address).CanSort().CanFilter();
+        mapper.Property<SupplierWithTotalInputResponse>(s => s.StatusId).CanSort().CanFilter();
+        mapper.Property<SupplierWithTotalInputResponse>(s => s.CreatedAt).CanSort().CanFilter();
+        mapper.Property<SupplierWithTotalInputResponse>(s => s.UpdatedAt).CanSort().CanFilter();
+        mapper.Property<SupplierWithTotalInputResponse>(s => s.DeletedAt).CanSort().CanFilter();
+        mapper.Property<SupplierWithTotalInputResponse>(s => s.TotalInput).CanSort().CanFilter();
+
+        mapper.Property<ApplicationUser>(p => p.Id).CanSort().CanFilter();
+        mapper.Property<ApplicationUser>(p => p.UserName).CanSort().CanFilter();
+        mapper.Property<ApplicationUser>(p => p.FullName).CanSort().CanFilter();
+        mapper.Property<ApplicationUser>(p => p.Email).CanSort().CanFilter();
+        mapper.Property<ApplicationUser>(p => p.PhoneNumber).CanSort().CanFilter();
+        mapper.Property<ApplicationUser>(p => p.Status).CanSort().CanFilter();
+        mapper.Property<ApplicationUser>(p => p.DeletedAt).CanSort().CanFilter();
 
         return mapper;
     }

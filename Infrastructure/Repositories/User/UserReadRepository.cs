@@ -1,5 +1,4 @@
 ﻿using Application.ApiContracts.Auth.Responses;
-using Application.ApiContracts.User.Responses;
 using Application.ApiContracts.UserManager.Responses;
 using Application.Interfaces.Repositories.User;
 using Domain.Constants;
@@ -169,6 +168,16 @@ namespace Infrastructure.Repositories.User
             cancellationToken.ThrowIfCancellationRequested();
             var result = await userManager.FindByNameAsync(username)
                 .ContinueWith(t => t.Result, cancellationToken)
+                .ConfigureAwait(false);
+            return result;
+        }
+
+        public async Task<ApplicationUser?> FindUserByPhoneNumberAsync(
+            string phoneNumber,
+            CancellationToken cancellationToken = default)
+        {
+            var result = await userManager.Users
+                .FirstOrDefaultAsync(u => string.Compare(u.PhoneNumber, phoneNumber) == 0, cancellationToken)
                 .ConfigureAwait(false);
             return result;
         }

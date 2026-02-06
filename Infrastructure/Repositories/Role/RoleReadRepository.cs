@@ -84,5 +84,10 @@ namespace Infrastructure.Repositories.Role
                 .ConfigureAwait(false);
             return result;
         }
+
+        public Task<bool> HasAnyPermissionAsync(
+            IEnumerable<Guid> roleIds,
+            CancellationToken cancellationToken = default)
+        { return context.RolePermissions.Where(rp => roleIds.Contains(rp.RoleId)).AnyAsync(cancellationToken); }
     }
 }

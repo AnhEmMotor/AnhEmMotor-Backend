@@ -18,6 +18,7 @@ using Application.Interfaces.Repositories.OptionValue;
 using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.ProductCategory;
 using Application.Interfaces.Repositories.ProductVariant;
+using Domain.Constants;
 using Domain.Entities;
 using FluentAssertions;
 using Moq;
@@ -40,6 +41,7 @@ public class Product
     private readonly Mock<IOptionValueInsertRepository> _optionValueInsertRepoMock;
     private readonly Mock<IOptionValueReadRepository> _optionValueReadRepoMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
+    private readonly Mock<IProductVariantInsertRepository> _productVariantInsertRepository;
 
     public Product()
     {
@@ -57,7 +59,10 @@ public class Product
         _optionValueInsertRepoMock = new Mock<IOptionValueInsertRepository>();
         _optionValueReadRepoMock = new Mock<IOptionValueReadRepository>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
+        _productVariantInsertRepository = new Mock<IProductVariantInsertRepository>();
     }
+
+#pragma warning disable IDE0079 
 #pragma warning disable CRR0035
 
     [Fact(DisplayName = "PRODUCT_001 - Tạo sản phẩm thành công với 1 biến thể không có optionValues")]
@@ -92,6 +97,7 @@ public class Product
             _optionValueReadRepoMock.Object,
             _optionReadRepoMock.Object,
             _productInsertRepoMock.Object,
+            _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
             _unitOfWorkMock.Object);
 
@@ -136,6 +142,7 @@ public class Product
             _optionValueReadRepoMock.Object,
             _optionReadRepoMock.Object,
             _productInsertRepoMock.Object,
+            _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
             _unitOfWorkMock.Object);
 
@@ -165,6 +172,7 @@ public class Product
             _optionValueReadRepoMock.Object,
             _optionReadRepoMock.Object,
             _productInsertRepoMock.Object,
+            _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
             _unitOfWorkMock.Object);
 
@@ -196,6 +204,7 @@ public class Product
             _optionValueReadRepoMock.Object,
             _optionReadRepoMock.Object,
             _productInsertRepoMock.Object,
+            _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
             _unitOfWorkMock.Object);
 
@@ -225,6 +234,7 @@ public class Product
             _optionValueReadRepoMock.Object,
             _optionReadRepoMock.Object,
             _productInsertRepoMock.Object,
+            _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
             _unitOfWorkMock.Object);
 
@@ -256,6 +266,7 @@ public class Product
             _optionValueReadRepoMock.Object,
             _optionReadRepoMock.Object,
             _productInsertRepoMock.Object,
+            _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
             _unitOfWorkMock.Object);
 
@@ -289,6 +300,7 @@ public class Product
             _optionValueReadRepoMock.Object,
             _optionReadRepoMock.Object,
             _productInsertRepoMock.Object,
+            _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
             _unitOfWorkMock.Object);
 
@@ -322,6 +334,7 @@ public class Product
             _optionValueReadRepoMock.Object,
             _optionReadRepoMock.Object,
             _productInsertRepoMock.Object,
+            _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
             _unitOfWorkMock.Object);
 
@@ -373,6 +386,7 @@ public class Product
             _optionValueReadRepoMock.Object,
             _optionReadRepoMock.Object,
             _productInsertRepoMock.Object,
+            _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
             _unitOfWorkMock.Object);
 
@@ -520,6 +534,7 @@ public class Product
             _optionValueReadRepoMock.Object,
             _optionReadRepoMock.Object,
             _productInsertRepoMock.Object,
+            _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
             _unitOfWorkMock.Object);
 
@@ -610,6 +625,7 @@ public class Product
             _optionValueReadRepoMock.Object,
             _optionReadRepoMock.Object,
             _productInsertRepoMock.Object,
+            _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
             _unitOfWorkMock.Object);
 
@@ -920,16 +936,21 @@ public class Product
     {
         var command = new UpdateManyProductPricesCommand { Ids = [ 1, 2 ], Price = 25000000m };
 
-        _productReadRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((int id, CancellationToken ct) => new Domain.Entities.Product { Id = id, DeletedAt = null });
-        _variantReadRepoMock.Setup(x => x.GetByProductIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+        _productReadRepoMock.Setup(
+            x => x.GetByIdWithVariantsAsync(
+                It.IsAny<List<int>>(),
+                It.IsAny<CancellationToken>(),
+                It.IsAny<DataFetchMode>()))
             .ReturnsAsync(
-                (int productId, CancellationToken ct) => [ new()
+                (List<int> ids, CancellationToken ct, DataFetchMode fetchMode) =>
                 {
-                    Id = productId * 10,
-                    ProductId = productId,
-                    DeletedAt = null
-                } ]);
+                    return[ .. ids.Select(
+                        id => new Domain.Entities.Product
+                            {
+                                Id = id,
+                                ProductVariants = [ new ProductVariant { Id = id * 10, Price = 0 } ]
+                            }) ];
+                });
 
         var handler = new UpdateManyProductPricesCommandHandler(
             _productReadRepoMock.Object,
@@ -938,7 +959,9 @@ public class Product
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
-        result.Should().NotBeNull();
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().HaveCount(2);
+        _productUpdateRepoMock.Verify(x => x.Update(It.IsAny<Domain.Entities.Product>()), Times.Exactly(2));
     }
 
     [Fact(DisplayName = "PRODUCT_033 - Sửa trạng thái một sản phẩm thành công")]
@@ -1010,10 +1033,13 @@ public class Product
     [Fact(DisplayName = "PRODUCT_036 - Xóa một sản phẩm thành công")]
     public async Task DeleteProduct_ValidData_Success()
     {
-        var command = new DeleteProductCommand { Id = 1 };
+        var productId = 1;
+        var command = new DeleteProductCommand { Id = productId };
 
-        _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Domain.Entities.Product { Id = 1, StatusId = "for-sale", DeletedAt = null });
+        var product = new Domain.Entities.Product { Id = productId, StatusId = "for-sale", ProductVariants = [] };
+
+        _productReadRepoMock.Setup(x => x.GetByIdWithDetailsAsync(productId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(product);
 
         var handler = new DeleteProductCommandHandler(
             _productReadRepoMock.Object,
@@ -1022,7 +1048,9 @@ public class Product
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
-        result.Should().BeNull();
+        result.IsSuccess.Should().BeTrue();
+        _productDeleteRepoMock.Verify(x => x.Delete(product), Times.Once);
+        _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact(DisplayName = "PRODUCT_037 - Xóa sản phẩm thất bại khi sản phẩm không tồn tại")]
@@ -1066,7 +1094,8 @@ public class Product
     {
         var command = new DeleteManyProductsCommand { Ids = [ 1, 2, 3 ] };
 
-        _productReadRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>()))
+        _productReadRepoMock.Setup(
+            x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(
                 [ new() { Id = 1, StatusId = "for-sale", DeletedAt = null }, new()
                 {
@@ -1082,7 +1111,9 @@ public class Product
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
-        result.Should().BeNull();
+        result.IsSuccess.Should().BeTrue();
+
+        _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact(DisplayName = "PRODUCT_040 - Xóa nhiều sản phẩm thất bại khi 1 trong số đó không tồn tại")]
@@ -1090,7 +1121,8 @@ public class Product
     {
         var command = new DeleteManyProductsCommand { Ids = [ 1, 2, 3 ] };
 
-        _productReadRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>()))
+        _productReadRepoMock.Setup(
+            x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(
                 [ new() { Id = 1, StatusId = "for-sale", DeletedAt = null }, new()
                 {
@@ -1114,7 +1146,8 @@ public class Product
     {
         var command = new DeleteManyProductsCommand { Ids = [ 1, 2, 3 ] };
 
-        _productReadRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>()))
+        _productReadRepoMock.Setup(
+            x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(
                 [ new() { Id = 1, StatusId = "for-sale", DeletedAt = null }, new()
                 {
@@ -1173,15 +1206,17 @@ public class Product
     public async Task RestoreManyProducts_ValidData_Success()
     {
         var command = new RestoreManyProductsCommand { Ids = [ 1, 2, 3 ] };
+        var deletedTime = DateTime.UtcNow;
+        var products = new List<Domain.Entities.Product>
+        {
+            new() { Id = 1, Name = "P1", DeletedAt = deletedTime },
+            new() { Id = 2, Name = "P2", DeletedAt = deletedTime },
+            new() { Id = 3, Name = "P3", DeletedAt = deletedTime }
+        };
 
-        _productReadRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(
-                [ new() { Id = 1, StatusId = "for-sale", DeletedAt = DateTime.UtcNow }, new()
-                {
-                    Id = 2,
-                    StatusId = "for-sale",
-                    DeletedAt = DateTime.UtcNow
-                }, new() { Id = 3, StatusId = "for-sale", DeletedAt = DateTime.UtcNow } ]);
+        _productReadRepoMock.Setup(
+            x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync(products);
 
         var handler = new RestoreManyProductsCommandHandler(
             _productReadRepoMock.Object,
@@ -1190,7 +1225,9 @@ public class Product
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
-        result.Should().NotBeNull();
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().HaveCount(3);
+        _productUpdateRepoMock.Verify(x => x.Restore(It.IsAny<List<Domain.Entities.Product>>()), Times.Once);
     }
 
     [Fact(DisplayName = "PRODUCT_045 - Khôi phục nhiều sản phẩm thất bại khi 1 trong số đó chưa bị xóa")]
@@ -1262,4 +1299,5 @@ public class Product
         result.Should().NotBeNull();
     }
 #pragma warning restore CRR0035
+#pragma warning restore IDE0079
 }

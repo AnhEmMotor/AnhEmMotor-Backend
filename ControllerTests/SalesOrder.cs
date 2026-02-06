@@ -13,7 +13,6 @@ using Application.Features.Outputs.Commands.UpdateOutputStatus;
 using Application.Features.Outputs.Queries.GetDeletedOutputsList;
 using Application.Features.Outputs.Queries.GetOutputById;
 using Application.Features.Outputs.Queries.GetOutputsByUserId;
-using Application.Features.Outputs.Queries.GetOutputsByUserIdByManager;
 using Application.Features.Outputs.Queries.GetOutputsList;
 
 using Domain.Primitives;
@@ -23,6 +22,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Sieve.Models;
+using System.Security.Claims;
 using WebAPI.Controllers.V1;
 
 namespace ControllerTests;
@@ -41,11 +41,21 @@ public class SalesOrder
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
     }
 
+#pragma warning disable IDE0079 
 #pragma warning disable CRR0035
     [Fact(DisplayName = "SO_081 - GetMyPurchases - Lấy đơn hàng của chính mình")]
     public async Task GetMyPurchases_UserAuthenticated_ReturnsOrders()
     {
         var buyerId = Guid.NewGuid();
+
+        var claims = new List<Claim> { new(ClaimTypes.NameIdentifier, buyerId.ToString()) };
+        var identity = new ClaimsIdentity(claims, "TestAuthType");
+        var claimsPrincipal = new ClaimsPrincipal(identity);
+
+        _controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = claimsPrincipal }
+        };
         var sieveModel = new SieveModel();
         var expectedOrder = new OutputResponse { Id = 1, BuyerId = buyerId };
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputsByUserIdQuery>(), It.IsAny<CancellationToken>()))
@@ -66,7 +76,8 @@ public class SalesOrder
     {
         var buyerId = Guid.NewGuid();
         var sieveModel = new SieveModel();
-        _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputsByUserIdByManagerQuery>(), It.IsAny<CancellationToken>()))
+
+        _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputsByUserIdQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PagedResult<OutputResponse>>.Success(new PagedResult<OutputResponse>([], 0, 1, 10)));
 
         var result = await _controller.GetPurchasesByIDAsync(sieveModel, buyerId, CancellationToken.None)
@@ -74,7 +85,7 @@ public class SalesOrder
 
         result.Should().NotBeNull();
         _mediatorMock.Verify(
-            m => m.Send(It.IsAny<GetOutputsByUserIdByManagerQuery>(), It.IsAny<CancellationToken>()),
+            m => m.Send(It.IsAny<GetOutputsByUserIdQuery>(), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -301,4 +312,5 @@ public class SalesOrder
             .ConfigureAwait(true);
     }
 #pragma warning restore CRR0035
+#pragma warning restore IDE0079
 }

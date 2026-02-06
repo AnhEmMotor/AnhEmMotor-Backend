@@ -2,6 +2,7 @@ using Application.Interfaces.Repositories.Product;
 using Infrastructure.DBContexts;
 using ProductEntity = Domain.Entities.Product;
 
+
 namespace Infrastructure.Repositories.Product;
 
 public class ProductInsertRepository(ApplicationDBContext context) : IProductInsertRepository

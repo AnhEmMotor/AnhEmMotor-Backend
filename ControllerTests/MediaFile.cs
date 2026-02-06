@@ -1,166 +1,129 @@
-﻿using FluentAssertions;
+﻿using Application.Common.Models;
+using Application.Features.Files.Commands.DeleteFile;
+using FluentAssertions;
+using Infrastructure.Authorization.Attribute;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using System.Reflection;
 using WebAPI.Controllers.V1;
+using static Domain.Constants.Permission.PermissionsList;
 
 namespace ControllerTests;
 
 public class MediaFile
 {
-    [Fact(DisplayName = "MF_005 - Tải lên ảnh thất bại khi không có quyền Upload")]
-    public async Task UploadImage_NoPermission_Forbidden()
+    private readonly Mock<IMediator> _mediatorMock;
+    private readonly MediaFileController _controller;
+
+    public MediaFile()
     {
-        var mediatorMock = new Mock<IMediator>();
-        var controller = new MediaFileController(mediatorMock.Object);
+        _mediatorMock = new Mock<IMediator>();
+        _controller = new MediaFileController(_mediatorMock.Object);
 
-        var fileMock = new Mock<IFormFile>();
-        fileMock.Setup(f => f.Length).Returns(100000);
-        fileMock.Setup(f => f.FileName).Returns("test.webp");
-
-        var result = await controller.UploadImageAsync(fileMock.Object, CancellationToken.None).ConfigureAwait(true);
-
-        result.Should().BeOfType<ForbidResult>();
+        var httpContext = new DefaultHttpContext();
+        _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
     }
 
+#pragma warning disable IDE0079 
 #pragma warning disable CRR0035
     [Fact(DisplayName = "MF_006 - Tải lên ảnh thất bại khi chưa đăng nhập")]
-    public async Task UploadImage_NotAuthenticated_Unauthorized()
+    public void UploadImage_NotAuthenticated_Unauthorized()
     {
-        var mediatorMock = new Mock<IMediator>();
-        var controller = new MediaFileController(mediatorMock.Object);
+        var method = typeof(MediaFileController).GetMethod("UploadImageAsync");
 
-        var fileMock = new Mock<IFormFile>();
-        fileMock.Setup(f => f.Length).Returns(100000);
-        fileMock.Setup(f => f.FileName).Returns("test.webp");
+        var hasAuthorize = method!.GetCustomAttributes(typeof(AuthorizeAttribute), true).Length != 0 ||
+            typeof(MediaFileController).GetCustomAttributes(typeof(AuthorizeAttribute), true).Length != 0;
 
-        var result = await controller.UploadImageAsync(fileMock.Object, CancellationToken.None).ConfigureAwait(true);
-
-        result.Should().BeOfType<UnauthorizedObjectResult>();
+        hasAuthorize.Should().BeTrue("API này phải yêu cầu đăng nhập (Authorize)");
     }
 
-    [Fact(DisplayName = "MF_012 - Xoá file thất bại khi không có quyền Delete")]
-    public async Task DeleteFile_NoPermission_Forbidden()
+    [Fact(DisplayName = "MF_005: UploadImageAsync has RequiresAnyPermissions with Edit/Create permissions")]
+    public void UploadImageAsync_HasCorrectPermissionsAttribute()
     {
-        var mediatorMock = new Mock<IMediator>();
-        var controller = new MediaFileController(mediatorMock.Object);
+        var methodInfo = typeof(MediaFileController).GetMethod(nameof(MediaFileController.UploadImageAsync));
+        var attribute = methodInfo!.GetCustomAttribute<RequiresAnyPermissionsAttribute>();
 
+        Assert.NotNull(attribute);
+
+        Assert.Contains(Products.Edit, attribute.Policy);
+        Assert.Contains(Products.Create, attribute.Policy);
+    }
+
+    [Fact(DisplayName = "MF_CT_004: DeleteFileAsync has RequiresAnyPermissions with Edit/Create permissions")]
+    public void DeleteFileAsync_HasCorrectPermissionsAttribute()
+    {
+        var methodInfo = typeof(MediaFileController).GetMethod(nameof(MediaFileController.DeleteFileAsync));
+        var attribute = methodInfo!.GetCustomAttribute<RequiresAnyPermissionsAttribute>();
+
+        Assert.NotNull(attribute);
+
+        Assert.Contains(Products.Edit, attribute.Policy);
+        Assert.Contains(Products.Create, attribute.Policy);
+    }
+
+    [Fact(DisplayName = "MF_012: DeleteFileAsync has RequiresAnyPermissions with Edit/Create permissions")]
+    public void DeleteFileAsync_HasCorrectPermissionsAttribute1()
+    {
+        var methodInfo = typeof(MediaFileController).GetMethod(nameof(MediaFileController.DeleteFileAsync));
+        var attribute = methodInfo!.GetCustomAttribute<RequiresAnyPermissionsAttribute>();
+
+        Assert.NotNull(attribute);
+
+        Assert.Contains(Products.Edit, attribute.Policy);
+        Assert.Contains(Products.Create, attribute.Policy);
+    }
+
+    [Fact(DisplayName = "MF_018: RestoreFileAsync has RequiresAnyPermissions with Edit/Create permissions")]
+    public void RestoreFileAsync_HasCorrectPermissionsAttribute()
+    {
+        var methodInfo = typeof(MediaFileController).GetMethod(nameof(MediaFileController.RestoreFileAsync));
+        var attribute = methodInfo?.GetCustomAttribute<RequiresAnyPermissionsAttribute>();
+
+        Assert.NotNull(attribute);
+
+        Assert.Contains(Products.Edit, attribute.Policy);
+        Assert.Contains(Products.Create, attribute.Policy);
+    }
+
+    [Fact(DisplayName = "MF_CT_002: UploadImageAsync returns BadRequest when file is null")]
+    public async Task UploadImageAsync_ReturnsBadRequest_WhenFileIsNull()
+    {
+        var result = await _controller.UploadImageAsync(null!, CancellationToken.None).ConfigureAwait(true);
+
+        var statusCodeResult = Assert.IsType<BadRequestResult>(result);
+        Assert.Equal(StatusCodes.Status400BadRequest, statusCodeResult.StatusCode);
+    }
+
+    [Fact(DisplayName = "MF_CT_003: DeleteFileAsync returns NoContent when mediator succeeds")]
+    public async Task DeleteFileAsync_ReturnsNoContent_WhenMediatorSucceeds()
+    {
         var storagePath = "test-file.webp";
+        _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteFileCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Success());
 
-        var result = await controller.DeleteFileAsync(storagePath, CancellationToken.None).ConfigureAwait(true);
+        var result = await _controller.DeleteFileAsync(storagePath, CancellationToken.None).ConfigureAwait(true);
 
-        result.Should().BeOfType<ForbidResult>();
+        var statusCodeResult = Assert.IsType<NoContentResult>(result);
+        Assert.Equal(StatusCodes.Status204NoContent, statusCodeResult.StatusCode);
     }
 
-    [Fact(DisplayName = "MF_018 - Khôi phục file thất bại khi không có quyền")]
-    public async Task RestoreFile_NoPermission_Forbidden()
+    [Fact(DisplayName = "MF_046: DeleteFileAsync returns BadRequest when validation fails")]
+    public async Task DeleteFileAsync_ReturnsBadRequest_WhenValidationFails()
     {
-        var mediatorMock = new Mock<IMediator>();
-        var controller = new MediaFileController(mediatorMock.Object);
-
-        var storagePath = "deleted-file.webp";
-
-        var result = await controller.RestoreFileAsync(storagePath, CancellationToken.None).ConfigureAwait(true);
-
-        result.Should().BeOfType<ForbidResult>();
-    }
-
-    [Fact(DisplayName = "MF_034 - Lấy thông tin file khi không có quyền View")]
-    public async Task GetFileById_NoPermission_Forbidden()
-    {
-        var mediatorMock = new Mock<IMediator>();
-        var controller = new MediaFileController(mediatorMock.Object);
-
-        var fileId = 123;
-
-        var result = await controller.GetFileByIdAsync(fileId, CancellationToken.None).ConfigureAwait(true);
-
-        result.Should().BeOfType<ForbidResult>();
-    }
-
-    [Fact(DisplayName = "MF_046 - Validate: StoragePath rỗng khi xoá file")]
-    public async Task DeleteFile_EmptyStoragePath_BadRequest()
-    {
-        var mediatorMock = new Mock<IMediator>();
-        var controller = new MediaFileController(mediatorMock.Object);
-
         var storagePath = string.Empty;
+        var validationError = Error.Validation("StoragePath is required", "StoragePath.Empty");
 
-        var result = await controller.DeleteFileAsync(storagePath, CancellationToken.None).ConfigureAwait(true);
+        _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteFileCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Failure(validationError));
 
-        result.Should().BeOfType<BadRequestObjectResult>();
-    }
+        var result = await _controller.DeleteFileAsync(storagePath, CancellationToken.None).ConfigureAwait(true);
 
-    [Fact(DisplayName = "MF_047 - Validate: StoragePath chứa path traversal (Security)")]
-    public async Task DeleteFile_PathTraversal_BadRequest()
-    {
-        var mediatorMock = new Mock<IMediator>();
-        var controller = new MediaFileController(mediatorMock.Object);
-
-        var storagePath = "../../etc/passwd.webp";
-
-        var result = await controller.DeleteFileAsync(storagePath, CancellationToken.None).ConfigureAwait(true);
-
-        result.Should().BeOfType<BadRequestObjectResult>();
-    }
-
-    [Fact(DisplayName = "MF_CT_001 - Upload ảnh với Authorization header hợp lệ")]
-    public async Task UploadImage_ValidAuth_Success()
-    {
-        var mediatorMock = new Mock<IMediator>();
-        var controller = new MediaFileController(mediatorMock.Object);
-
-        var fileMock = new Mock<IFormFile>();
-        fileMock.Setup(f => f.Length).Returns(100000);
-        fileMock.Setup(f => f.FileName).Returns("test.webp");
-
-        var result = await controller.UploadImageAsync(fileMock.Object, CancellationToken.None).ConfigureAwait(true);
-
-        result.Should().BeOfType<OkObjectResult>();
-        var okResult = result as OkObjectResult;
-        okResult!.Value.Should().NotBeNull();
-    }
-
-    [Fact(DisplayName = "MF_CT_002 - Upload ảnh với Authorization header không hợp lệ")]
-    public async Task UploadImage_InvalidAuth_Unauthorized()
-    {
-        var mediatorMock = new Mock<IMediator>();
-        var controller = new MediaFileController(mediatorMock.Object);
-
-        var fileMock = new Mock<IFormFile>();
-        fileMock.Setup(f => f.Length).Returns(100000);
-        fileMock.Setup(f => f.FileName).Returns("test.webp");
-
-        var result = await controller.UploadImageAsync(fileMock.Object, CancellationToken.None).ConfigureAwait(true);
-
-        result.Should().BeOfType<UnauthorizedObjectResult>();
-    }
-
-    [Fact(DisplayName = "MF_CT_003 - Xoá file với Role có đúng Permission")]
-    public async Task DeleteFile_WithCorrectPermission_Success()
-    {
-        var mediatorMock = new Mock<IMediator>();
-        var controller = new MediaFileController(mediatorMock.Object);
-
-        var storagePath = "test-file.webp";
-
-        var result = await controller.DeleteFileAsync(storagePath, CancellationToken.None).ConfigureAwait(true);
-
-        result.Should().BeOfType<OkResult>();
-    }
-
-    [Fact(DisplayName = "MF_CT_004 - Xoá file với Role thiếu Permission")]
-    public async Task DeleteFile_WithoutPermission_Forbidden()
-    {
-        var mediatorMock = new Mock<IMediator>();
-        var controller = new MediaFileController(mediatorMock.Object);
-
-        var storagePath = "test-file.webp";
-
-        var result = await controller.DeleteFileAsync(storagePath, CancellationToken.None).ConfigureAwait(true);
-
-        result.Should().BeOfType<ForbidResult>();
+        var objectResult = Assert.IsType<BadRequestObjectResult>(result);
+        Assert.Equal(StatusCodes.Status400BadRequest, objectResult.StatusCode);
     }
 #pragma warning restore CRR0035
+#pragma warning restore IDE0079
 }

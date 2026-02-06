@@ -35,6 +35,7 @@ public class ProductCategory
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
     }
 
+#pragma warning disable IDE0079 
 #pragma warning disable CRR0035
     [Fact(DisplayName = "PC_043 - Kiểm tra phân quyền - Tạo danh mục sản phẩm không có quyền")]
     public async Task CreateProductCategory_WithoutPermission_ShouldThrowUnauthorized()
@@ -253,4 +254,5 @@ public class ProductCategory
             Times.Exactly(2));
     }
 #pragma warning restore CRR0035
+#pragma warning restore IDE0079
 }

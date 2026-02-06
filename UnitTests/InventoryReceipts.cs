@@ -5,6 +5,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Supplier;
+using Domain.Constants;
 using Domain.Entities;
 using FluentAssertions;
 using FluentValidation.TestHelper;
@@ -14,6 +15,7 @@ namespace UnitTests;
 
 public class InventoryReceipts
 {
+#pragma warning disable IDE0079 
 #pragma warning disable CRR0035
     [Fact(DisplayName = "INPUT_007 - Tạo phiếu nhập với Quantity là số âm")]
     public void CreateInputProductValidator_NegativeQuantity_ReturnsValidationError()
@@ -52,7 +54,7 @@ public class InventoryReceipts
     public void CreateInputProductValidator_ExcessiveDecimalPlaces_ReturnsValidationError()
     {
         var validator = new CreateInputInfoCommandValidator();
-        var command = new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000123456 };
+        var command = new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 10000012.3456m };
 
         var result = validator.TestValidate(command);
 
@@ -175,23 +177,26 @@ public class InventoryReceipts
     public async Task UpdateInputHandler_InputNotFound_ThrowsException()
     {
         var mockReadRepo = new Mock<IInputReadRepository>();
-        var mockUpdateRepo = new Mock<IInputUpdateRepository>();
 
-        mockReadRepo.Setup(x => x.GetByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+        mockReadRepo.Setup(
+            x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync((Input?)null);
 
         var handler = new UpdateInputCommandHandler(
             mockReadRepo.Object,
-            mockUpdateRepo.Object,
+            Mock.Of<IInputUpdateRepository>(),
             Mock.Of<IInputDeleteRepository>(),
             Mock.Of<ISupplierReadRepository>(),
             Mock.Of<IProductVariantReadRepository>(),
             Mock.Of<IUnitOfWork>());
+
         var command = new UpdateInputCommand { Id = 9999, Notes = "Updated", SupplierId = 2, Products = [] };
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-        result.Value.Should().BeNull();
+
         result.IsFailure.Should().BeTrue();
+
+        result.Error?.Code.Should().Be("NotFound");
     }
 
     [Fact(DisplayName = "INPUT_055 - Handler xử lý UpdateInputStatus kiểm tra transition hợp lệ")]
@@ -302,4 +307,5 @@ public class InventoryReceipts
         result.ShouldHaveValidationErrorFor(x => x.Products);
     }
 #pragma warning restore CRR0035
+#pragma warning restore IDE0079
 }

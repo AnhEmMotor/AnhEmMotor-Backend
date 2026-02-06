@@ -3,6 +3,7 @@ using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Linq.Expressions;
 using InputStatus = Domain.Entities.InputStatus;
 using ProductStatus = Domain.Entities.ProductStatus;
@@ -10,9 +11,16 @@ using SupplierStatus = Domain.Entities.SupplierStatus;
 
 namespace Infrastructure.DBContexts;
 
-public class ApplicationDBContext(DbContextOptions<ApplicationDBContext> options) : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>(
-    options)
+public class ApplicationDBContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
 {
+    public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options) : base(options)
+    {
+    }
+
+    protected ApplicationDBContext(DbContextOptions options) : base(options)
+    {
+    }
+
     public new DbSet<IdentityUserRole<Guid>> UserRoles => Set<IdentityUserRole<Guid>>();
 
     public virtual DbSet<Brand> Brands { get; set; }
@@ -88,6 +96,53 @@ public class ApplicationDBContext(DbContextOptions<ApplicationDBContext> options
             .HasForeignKey(rp => rp.PermissionId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        var isNotSqlServer = string.Compare(Database.ProviderName, "Microsoft.EntityFrameworkCore.SqlServer") != 0;
+
+        if(isNotSqlServer)
+        {
+            foreach(var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                var tableName = entityType.GetTableName();
+
+                if(string.Compare(tableName, "Roles") == 0)
+                {
+                    var index = entityType.GetIndexes()
+                        .FirstOrDefault(i => string.Compare(i.GetDatabaseName(), "RoleNameIndex") == 0);
+
+                    index?.SetFilter(null);
+                }
+
+                if(string.Compare(tableName, "Users") == 0)
+                {
+                    var index = entityType.GetIndexes()
+                        .FirstOrDefault(i => string.Compare(i.GetDatabaseName(), "UserNameIndex") == 0);
+
+                    index?.SetFilter(null);
+                }
+
+                foreach(var property in entityType.GetProperties())
+                {
+                    var columnType = property.GetColumnType();
+
+                    if(columnType is not null &&
+                        (columnType.Contains("nvarchar(MAX)", StringComparison.OrdinalIgnoreCase) ||
+                            columnType.Contains("uniqueidentifier", StringComparison.OrdinalIgnoreCase) ||
+                            columnType.Contains("datetimeoffset", StringComparison.OrdinalIgnoreCase) ||
+                            columnType.Contains("rowversion", StringComparison.OrdinalIgnoreCase) ||
+                            columnType.Contains("bit", StringComparison.OrdinalIgnoreCase)))
+                    {
+                        property.SetColumnType(null);
+                    }
+
+                    if(property.ClrType == typeof(DateTimeOffset) || property.ClrType == typeof(DateTimeOffset?))
+                    {
+                        property.SetValueConverter(
+                            typeof(Microsoft.EntityFrameworkCore.Storage.ValueConversion.DateTimeOffsetToBinaryConverter));
+                    }
+                }
+            }
+        }
+
         foreach(var entityType in modelBuilder.Model.GetEntityTypes())
         {
             if(typeof(BaseEntity).IsAssignableFrom(entityType.ClrType))
@@ -110,7 +165,10 @@ public class ApplicationDBContext(DbContextOptions<ApplicationDBContext> options
             switch(entry.State)
             {
                 case EntityState.Added:
-                    entry.Entity.CreatedAt = DateTimeOffset.UtcNow;
+                    if(entry.Entity.CreatedAt == null)
+                    {
+                        entry.Entity.CreatedAt = DateTimeOffset.UtcNow;
+                    }
                     break;
 
                 case EntityState.Modified:

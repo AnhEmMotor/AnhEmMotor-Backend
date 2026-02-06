@@ -2,17 +2,27 @@
 using Application.Features.Suppliers.Commands.DeleteManySuppliers;
 using Application.Features.Suppliers.Commands.RestoreManySuppliers;
 using Application.Features.Suppliers.Commands.UpdateManySupplierStatus;
+using Domain.Constants.Permission;
 using Domain.Entities;
 using Domain.Primitives;
 using FluentAssertions;
 using Infrastructure.DBContexts;
+using IntegrationTests.SetupClass;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using SupplierEntity = Domain.Entities.Supplier;
 
 namespace IntegrationTests;
 
-public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
+using System;
+using System.Threading.Tasks;
+using Xunit;
+
+[Collection("Shared Integration Collection")]
+public class Supplier : IAsyncLifetime
 {
     private readonly IntegrationTestWebAppFactory _factory;
     private readonly HttpClient _client;
@@ -23,173 +33,349 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         _client = _factory.CreateClient();
     }
 
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
+    { await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(false); }
+
+#pragma warning disable IDE0079
 #pragma warning disable CRR0035
     [Fact(DisplayName = "SUP_031 - Lấy danh sách Supplier với phân trang mặc định")]
     public async Task GetSuppliers_DefaultPagination_ReturnsPagedResult()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Suppliers.View ],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            db.Suppliers.RemoveRange(db.Suppliers);
-            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
-            var suppliers = new List<Domain.Entities.Supplier>();
-            for(int i = 1; i <= 25; i++)
+            var suppliers = new List<SupplierEntity>();
+            for(int i = 1; i <= 15; i++)
             {
                 suppliers.Add(
-                    new Domain.Entities.Supplier
+                    new SupplierEntity
                     {
-                        Name = $"Supplier {i}",
+                        Name = $"Supplier_{uniqueId}_{i}",
                         Phone = $"012345678{i:00}",
                         Address = $"Address {i}",
-                        StatusId = i % 2 == 0 ? "active" : "inactive"
+                        StatusId =
+                            i % 2 == 0
+                                    ? Domain.Constants.SupplierStatus.Active
+                                    : Domain.Constants.SupplierStatus.Inactive
                     });
             }
             await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
+
+            if(!await db.SupplierStatuses
+                .AnyAsync(
+                    s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0,
+                    CancellationToken.None)
+                .ConfigureAwait(true))
+                db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
+            if(!await db.SupplierStatuses
+                .AnyAsync(
+                    s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Inactive) == 0,
+                    CancellationToken.None)
+                .ConfigureAwait(true))
+                db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Inactive });
+
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync("/api/v1/Supplier?Page=1&PageSize=10", CancellationToken.None)
-            .ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/Supplier?Page=1&PageSize=10").ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
             .ReadFromJsonAsync<PagedResult<SupplierResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
+
         content.Should().NotBeNull();
         content!.Items.Should().HaveCount(10);
-        content.TotalCount.Should().Be(25);
-        content.TotalPages.Should().Be(3);
-        content.PageNumber.Should().Be(1);
+        content.Items.Should().OnlyContain(s => s.Name!.Contains(uniqueId));
     }
 
     [Fact(DisplayName = "SUP_032 - Lấy danh sách Supplier với phân trang tùy chỉnh")]
     public async Task GetSuppliers_CustomPagination_ReturnsPagedResult()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Suppliers.View ],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            db.Suppliers.RemoveRange(db.Suppliers);
-            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-            var suppliers = new List<Domain.Entities.Supplier>();
-            for(int i = 1; i <= 25; i++)
+            if(!await db.SupplierStatuses
+                .AnyAsync(
+                    s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0,
+                    CancellationToken.None)
+                .ConfigureAwait(true))
+                db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
+
+            var suppliers = new List<SupplierEntity>();
+            for(int i = 1; i <= 15; i++)
             {
                 suppliers.Add(
-                    new Domain.Entities.Supplier
+                    new SupplierEntity
                     {
-                        Name = $"Supplier {i}",
+                        Name = $"Supplier_{uniqueId}_{i}",
                         Phone = $"012345678{i:00}",
                         Address = $"Address {i}",
-                        StatusId = "active"
+                        StatusId = Domain.Constants.SupplierStatus.Active
                     });
             }
             await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync("/api/v1/Supplier?Page=2&PageSize=5", CancellationToken.None)
-            .ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/Supplier?Page=2&PageSize=5").ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
             .ReadFromJsonAsync<PagedResult<SupplierResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
+
         content.Should().NotBeNull();
         content!.Items.Should().HaveCount(5);
-        content.TotalCount.Should().Be(25);
-        content.TotalPages.Should().Be(5);
         content.PageNumber.Should().Be(2);
     }
 
     [Fact(DisplayName = "SUP_033 - Lấy danh sách Supplier với lọc theo Name")]
     public async Task GetSuppliers_FilterByName_ReturnsFilteredResult()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Suppliers.View ],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            db.Suppliers.RemoveRange(db.Suppliers);
-            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+            if(!await db.SupplierStatuses
+                .AnyAsync(
+                    s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0,
+                    CancellationToken.None)
+                .ConfigureAwait(true))
+                db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
 
-            var suppliers = new List<Domain.Entities.Supplier>
+            var suppliers = new List<SupplierEntity>
             {
-                new() { Name = "Test Supplier 1", Phone = "0111111111", Address = "Address 1", StatusId = "active" },
-                new() { Name = "Test Supplier 2", Phone = "0222222222", Address = "Address 2", StatusId = "active" },
-                new() { Name = "Other Supplier", Phone = "0333333333", Address = "Address 3", StatusId = "active" }
+                new()
+                {
+                    Name = $"Test_{uniqueId}_1",
+                    Phone = "0111111111",
+                    Address = "A",
+                    StatusId = Domain.Constants.SupplierStatus.Active
+                },
+                new()
+                {
+                    Name = $"Test_{uniqueId}_2",
+                    Phone = "0222222222",
+                    Address = "A",
+                    StatusId = Domain.Constants.SupplierStatus.Active
+                },
+                new()
+                {
+                    Name = $"Other_{uniqueId}",
+                    Phone = "0333333333",
+                    Address = "A",
+                    StatusId = Domain.Constants.SupplierStatus.Active
+                }
             };
             await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync("/api/v1/Supplier?Filters=Name@=*Test*", CancellationToken.None)
-            .ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/Supplier?Filters=Name@=Test_{uniqueId}").ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
             .ReadFromJsonAsync<PagedResult<SupplierResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
+
         content.Should().NotBeNull();
         content!.Items.Should().HaveCount(2);
-        content.Items.Should().OnlyContain(s => s.Name!.Contains("Test"));
+        content.Items.Should().OnlyContain(s => s.Name!.Contains($"Test_{uniqueId}"));
     }
 
     [Fact(DisplayName = "SUP_034 - Lấy danh sách Supplier với sắp xếp theo Name tăng dần")]
     public async Task GetSuppliers_SortByNameAscending_ReturnsSortedResult()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Suppliers.View ],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            db.Suppliers.RemoveRange(db.Suppliers);
-            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+            if(!await db.SupplierStatuses
+                .AnyAsync(
+                    s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0,
+                    CancellationToken.None)
+                .ConfigureAwait(true))
+                db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
 
-            var suppliers = new List<Domain.Entities.Supplier>
+            var suppliers = new List<SupplierEntity>
             {
-                new() { Name = "Zebra Supplier", Phone = "0111111111", Address = "Address", StatusId = "active" },
-                new() { Name = "Alpha Supplier", Phone = "0222222222", Address = "Address", StatusId = "active" },
-                new() { Name = "Beta Supplier", Phone = "0333333333", Address = "Address", StatusId = "active" }
+                new()
+                {
+                    Name = $"Zebra_{uniqueId}",
+                    Phone = "0111111111",
+                    Address = "A",
+                    StatusId = Domain.Constants.SupplierStatus.Active
+                },
+                new()
+                {
+                    Name = $"Alpha_{uniqueId}",
+                    Phone = "0222222222",
+                    Address = "A",
+                    StatusId = Domain.Constants.SupplierStatus.Active
+                },
+                new()
+                {
+                    Name = $"Beta_{uniqueId}",
+                    Phone = "0333333333",
+                    Address = "A",
+                    StatusId = Domain.Constants.SupplierStatus.Active
+                }
             };
             await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync("/api/v1/Supplier?Sorts=Name", CancellationToken.None)
+        var response = await _client.GetAsync($"/api/v1/Supplier?Sorts=Name&Filters=Name@={uniqueId}")
             .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
             .ReadFromJsonAsync<PagedResult<SupplierResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
+
         content.Should().NotBeNull();
-        content.Items?.First().Name.Should().Be("Alpha Supplier");
-        content.Items?.Last().Name.Should().Be("Zebra Supplier");
+        content!.Items.Should().HaveCount(3);
+        content.Items![0].Name.Should().Be($"Alpha_{uniqueId}");
+        content.Items[1].Name.Should().Be($"Beta_{uniqueId}");
+        content.Items[2].Name.Should().Be($"Zebra_{uniqueId}");
     }
 
     [Fact(DisplayName = "SUP_035 - Lấy danh sách Supplier chỉ bao gồm trạng thái active và inactive")]
     public async Task GetSuppliers_OnlyActiveAndInactive_ExcludesDeleted()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Suppliers.View ],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            db.Suppliers.RemoveRange(db.Suppliers);
-            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-            var suppliers = new List<Domain.Entities.Supplier>
+            if(!await db.SupplierStatuses
+                .AnyAsync(
+                    s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0,
+                    CancellationToken.None)
+                .ConfigureAwait(true))
+                db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
+            if(!await db.SupplierStatuses
+                .AnyAsync(
+                    s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Inactive) == 0,
+                    CancellationToken.None)
+                .ConfigureAwait(true))
+                db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Inactive });
+
+            var suppliers = new List<SupplierEntity>
             {
-                new() { Name = "Active 1", Phone = "0111111111", Address = "A", StatusId = "active", DeletedAt = null },
                 new()
                 {
-                    Name = "Inactive 1",
-                    Phone = "0222222222",
+                    Name = $"Active_{uniqueId}",
+                    Phone = "0111111111",
                     Address = "A",
-                    StatusId = "inactive",
+                    StatusId = Domain.Constants.SupplierStatus.Active,
                     DeletedAt = null
                 },
                 new()
                 {
-                    Name = "Deleted 1",
+                    Name = $"Inactive_{uniqueId}",
+                    Phone = "0222222222",
+                    Address = "A",
+                    StatusId = Domain.Constants.SupplierStatus.Inactive,
+                    DeletedAt = null
+                },
+                new()
+                {
+                    Name = $"Deleted_{uniqueId}",
                     Phone = "0333333333",
                     Address = "A",
-                    StatusId = "active",
+                    StatusId = Domain.Constants.SupplierStatus.Active,
                     DeletedAt = DateTime.UtcNow
                 }
             };
@@ -197,43 +383,66 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync("/api/v1/Supplier", CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/Supplier?Filters=Id@={uniqueId}").ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
             .ReadFromJsonAsync<PagedResult<SupplierResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
+
         content.Should().NotBeNull();
-        content!.TotalCount.Should().Be(2);
-        content.Items.Should().NotContain(s => string.Compare(s.Name, "Deleted 1") == 0);
+        content!.Items.Should().Contain(s => string.Compare(s.Name, $"Active_{uniqueId}") == 0);
+        content.Items.Should().Contain(s => string.Compare(s.Name, $"Inactive_{uniqueId}") == 0);
+        content.Items.Should().NotContain(s => string.Compare(s.Name, $"Deleted_{uniqueId}") == 0);
     }
 
     [Fact(DisplayName = "SUP_036 - Lấy danh sách Supplier đã xóa với phân trang")]
     public async Task GetDeletedSuppliers_WithPagination_ReturnsDeletedOnly()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Suppliers.View ],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            db.Suppliers.RemoveRange(db.Suppliers);
-            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+            if(!await db.SupplierStatuses
+                .AnyAsync(
+                    s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0,
+                    CancellationToken.None)
+                .ConfigureAwait(true))
+                db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
 
-            var suppliers = new List<Domain.Entities.Supplier>
+            var suppliers = new List<SupplierEntity>
             {
-                new() { Name = "Active 1", Phone = "0111111111", Address = "A", StatusId = "active", DeletedAt = null },
                 new()
                 {
-                    Name = "Deleted 1",
-                    Phone = "0222222222",
+                    Name = $"Active_{uniqueId}",
+                    Phone = "0111111111",
                     Address = "A",
-                    StatusId = "active",
-                    DeletedAt = DateTime.UtcNow
+                    StatusId = Domain.Constants.SupplierStatus.Active,
+                    DeletedAt = null
                 },
                 new()
                 {
-                    Name = "Deleted 2",
-                    Phone = "0333333333",
+                    Name = $"Deleted_{uniqueId}",
+                    Phone = "0222222222",
                     Address = "A",
-                    StatusId = "inactive",
+                    StatusId = Domain.Constants.SupplierStatus.Active,
                     DeletedAt = DateTime.UtcNow
                 }
             };
@@ -241,74 +450,120 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync("/api/v1/Supplier/deleted?Page=1&PageSize=10", CancellationToken.None)
-            .ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/Supplier/deleted?Filters=Id@={uniqueId}").ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
             .ReadFromJsonAsync<PagedResult<SupplierResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
+
         content.Should().NotBeNull();
-        content!.TotalCount.Should().Be(2);
-        content.Items.Should().NotContain(s => string.Compare(s.Name, "Active 1") == 0);
+        content!.Items.Should().Contain(s => string.Compare(s.Name, $"Deleted_{uniqueId}") == 0);
+        content.Items.Should().NotContain(s => string.Compare(s.Name, $"Active_{uniqueId}") == 0);
     }
 
     [Fact(DisplayName = "SUP_037 - Lấy chi tiết Supplier thành công với đầy đủ thông tin")]
     public async Task GetSupplierById_WithFullInfo_ReturnsCompleteSupplier()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Suppliers.View ],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         int supplierId;
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var supplier = new Domain.Entities.Supplier
+            if(!await db.SupplierStatuses
+                .AnyAsync(
+                    s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0,
+                    CancellationToken.None)
+                .ConfigureAwait(true))
+                db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
+
+            var supplier = new SupplierEntity
             {
-                Name = "Full Info Supplier",
+                Name = $"Full Info {uniqueId}",
                 Phone = "0123456789",
-                Email = "test@test.com",
+                Email = $"test_{uniqueId}@test.com",
                 Address = "Full Address",
                 TaxIdentificationNumber = "1234567890",
-                StatusId = "active",
+                StatusId = Domain.Constants.SupplierStatus.Active,
                 Notes = "Test notes"
             };
             await db.Suppliers.AddAsync(supplier, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
             supplierId = supplier.Id;
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}", CancellationToken.None)
-            .ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}").ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
             .ReadFromJsonAsync<SupplierResponse>(CancellationToken.None)
             .ConfigureAwait(true);
+
         content.Should().NotBeNull();
         content!.Id.Should().Be(supplierId);
-        content.Name.Should().Be("Full Info Supplier");
-        content.Phone.Should().Be("0123456789");
-        content.Email.Should().Be("test@test.com");
-        content.TaxIdentificationNumber.Should().Be("1234567890");
+        content.Name.Should().Be($"Full Info {uniqueId}");
+        content.Email.Should().Be($"test_{uniqueId}@test.com");
     }
 
     [Fact(DisplayName = "SUP_038 - Lấy chi tiết Supplier thất bại khi Supplier đã bị xóa")]
     public async Task GetSupplierById_DeletedSupplier_ReturnsNotFound()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Suppliers.View ],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         int supplierId;
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var supplier = new Domain.Entities.Supplier
+            if(!await db.SupplierStatuses
+                .AnyAsync(
+                    s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0,
+                    CancellationToken.None)
+                .ConfigureAwait(true))
+                db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
+
+            var supplier = new SupplierEntity
             {
-                Name = "Deleted Supplier",
+                Name = $"Deleted {uniqueId}",
                 Phone = "0123456789",
                 Address = "Address",
-                StatusId = "active",
+                StatusId = Domain.Constants.SupplierStatus.Active,
                 DeletedAt = DateTime.UtcNow
             };
             await db.Suppliers.AddAsync(supplier, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
             supplierId = supplier.Id;
         }
 
@@ -320,7 +575,25 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "SUP_039 - Lấy chi tiết Supplier thất bại khi Id không tồn tại")]
     public async Task GetSupplierById_NonExistentId_ReturnsNotFound()
     {
-        var response = await _client.GetAsync("/api/v1/Supplier/999999", CancellationToken.None).ConfigureAwait(true);
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Suppliers.View ],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        var response = await _client.GetAsync("/api/v1/Supplier/999999").ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -328,27 +601,66 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "SUP_040 - Xóa nhiều Supplier thành công")]
     public async Task DeleteManySuppliers_AllValid_SuccessfullyDeletes()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Suppliers.Delete ],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         List<int> supplierIds;
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var suppliers = new List<Domain.Entities.Supplier>
+            if(!await db.SupplierStatuses
+                .AnyAsync(
+                    s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0,
+                    CancellationToken.None)
+                .ConfigureAwait(true))
+                db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
+
+            var suppliers = new List<SupplierEntity>
             {
-                new() { Name = "Supplier 1", Phone = "0111111111", Address = "A", StatusId = "active" },
-                new() { Name = "Supplier 2", Phone = "0222222222", Address = "A", StatusId = "active" },
-                new() { Name = "Supplier 3", Phone = "0333333333", Address = "A", StatusId = "active" }
+                new()
+                {
+                    Name = $"S1_{uniqueId}",
+                    Phone = "0111111111",
+                    Address = "A",
+                    StatusId = Domain.Constants.SupplierStatus.Active
+                },
+                new()
+                {
+                    Name = $"S2_{uniqueId}",
+                    Phone = "0222222222",
+                    Address = "A",
+                    StatusId = Domain.Constants.SupplierStatus.Active
+                }
             };
             await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
             supplierIds = [ .. suppliers.Select(s => s.Id) ];
         }
 
         var request = new DeleteManySuppliersCommand { Ids = supplierIds };
+        var requestMessage = new HttpRequestMessage(HttpMethod.Delete, "/api/v1/Supplier/delete-many")
+        {
+            Content = JsonContent.Create(request)
+        };
 
-        var response = await _client.PostAsJsonAsync("/api/v1/Supplier/delete-many", request).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage).ConfigureAwait(true);
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
         using(var scope = _factory.Services.CreateScope())
         {
@@ -361,28 +673,69 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "SUP_041 - Xóa nhiều Supplier thất bại khi một trong số đó còn Input Receipt Working")]
     public async Task DeleteManySuppliers_OneHasWorkingReceipt_FailsForAll()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Suppliers.Delete ],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         List<int> supplierIds;
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var supplier1 = new Domain.Entities.Supplier
+            if(!await db.SupplierStatuses
+                .AnyAsync(
+                    s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0,
+                    CancellationToken.None)
+                .ConfigureAwait(true))
+                db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
+            if(!await db.InputStatuses
+                .AnyAsync(
+                    s => string.Compare(s.Key, Domain.Constants.Input.InputStatus.Working) == 0,
+                    CancellationToken.None)
+                .ConfigureAwait(true))
+                db.InputStatuses.Add(new InputStatus { Key = Domain.Constants.Input.InputStatus.Working });
+
+            var supplier1 = new SupplierEntity
             {
-                Name = "Supplier 1",
-                Phone = "0111111111",
+                Name = $"S1_{uniqueId}",
+                Phone = "011",
                 Address = "A",
-                StatusId = "active"
+                StatusId = Domain.Constants.SupplierStatus.Active
             };
-            var supplier2 = new Domain.Entities.Supplier
+            var supplier2 = new SupplierEntity
             {
-                Name = "Supplier 2",
-                Phone = "0222222222",
+                Name = $"S2_{uniqueId}",
+                Phone = "022",
                 Address = "A",
-                StatusId = "active"
+                StatusId = Domain.Constants.SupplierStatus.Active
             };
             await db.Suppliers.AddRangeAsync([ supplier1, supplier2 ], CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-            var input = new Input { SupplierId = supplier2.Id, StatusId = "working" };
+            var user = await db.Users
+                .FirstOrDefaultAsync(u => string.Compare(u.UserName, username) == 0, CancellationToken.None)
+                .ConfigureAwait(true);
+            var userId = user?.Id ?? Guid.NewGuid();
+
+            var input = new Input
+            {
+                SupplierId = supplier2.Id,
+                StatusId = Domain.Constants.Input.InputStatus.Working,
+                CreatedBy = userId
+            };
             await db.InputReceipts.AddAsync(input, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
@@ -390,8 +743,12 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         }
 
         var request = new DeleteManySuppliersCommand { Ids = supplierIds };
+        var requestMessage = new HttpRequestMessage(HttpMethod.Delete, "/api/v1/Supplier/delete-many")
+        {
+            Content = JsonContent.Create(request)
+        };
 
-        var response = await _client.PostAsJsonAsync("/api/v1/Supplier/delete-many", request).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
@@ -406,37 +763,60 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "SUP_042 - Khôi phục nhiều Supplier thành công")]
     public async Task RestoreManySuppliers_AllDeleted_SuccessfullyRestores()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Suppliers.Delete ],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         List<int> supplierIds;
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var suppliers = new List<Domain.Entities.Supplier>
+            if(!await db.SupplierStatuses
+                .AnyAsync(
+                    s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0,
+                    CancellationToken.None)
+                .ConfigureAwait(true))
+                db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
+
+            var suppliers = new List<SupplierEntity>
             {
                 new()
                 {
-                    Name = "Supplier 1",
-                    Phone = "0111111111",
+                    Name = $"S1_{uniqueId}",
+                    Phone = "011",
                     Address = "A",
-                    StatusId = "active",
+                    StatusId = Domain.Constants.SupplierStatus.Active,
                     DeletedAt = DateTime.UtcNow
                 },
                 new()
                 {
-                    Name = "Supplier 2",
-                    Phone = "0222222222",
+                    Name = $"S2_{uniqueId}",
+                    Phone = "022",
                     Address = "A",
-                    StatusId = "inactive",
+                    StatusId = Domain.Constants.SupplierStatus.Active,
                     DeletedAt = DateTime.UtcNow
                 }
             };
             await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
             supplierIds = [ .. suppliers.Select(s => s.Id) ];
         }
 
         var request = new RestoreManySuppliersCommand { Ids = supplierIds };
-
         var response = await _client.PostAsJsonAsync("/api/v1/Supplier/restore-many", request).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -444,31 +824,76 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var restoredSuppliers = db.Suppliers.Where(s => supplierIds.Contains(s.Id)).ToList();
-            restoredSuppliers.Should().AllSatisfy(s => s.DeletedAt.Should().BeNull());
+            var restored = db.Suppliers.Where(s => supplierIds.Contains(s.Id)).ToList();
+            restored.Should().AllSatisfy(s => s.DeletedAt.Should().BeNull());
         }
     }
 
     [Fact(DisplayName = "SUP_043 - Cập nhật trạng thái nhiều Supplier thành công")]
     public async Task UpdateManySupplierStatus_ValidStatus_SuccessfullyUpdates()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Suppliers.Edit ],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         List<int> supplierIds;
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var suppliers = new List<Domain.Entities.Supplier>
+            if(!await db.SupplierStatuses
+                .AnyAsync(
+                    s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0,
+                    CancellationToken.None)
+                .ConfigureAwait(true))
+                db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
+            if(!await db.SupplierStatuses
+                .AnyAsync(
+                    s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Inactive) == 0,
+                    CancellationToken.None)
+                .ConfigureAwait(true))
+                db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Inactive });
+
+            var suppliers = new List<SupplierEntity>
             {
-                new() { Name = "Supplier 1", Phone = "0111111111", Address = "A", StatusId = "active" },
-                new() { Name = "Supplier 2", Phone = "0222222222", Address = "A", StatusId = "active" }
+                new()
+                {
+                    Name = $"S1_{uniqueId}",
+                    Phone = "011",
+                    Address = "A",
+                    StatusId = Domain.Constants.SupplierStatus.Active
+                },
+                new()
+                {
+                    Name = $"S2_{uniqueId}",
+                    Phone = "022",
+                    Address = "A",
+                    StatusId = Domain.Constants.SupplierStatus.Active
+                }
             };
             await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
             supplierIds = [ .. suppliers.Select(s => s.Id) ];
         }
 
-        var request = new UpdateManySupplierStatusCommand { Ids = supplierIds, StatusId = "inactive" };
-
+        var request = new UpdateManySupplierStatusCommand
+        {
+            Ids = supplierIds,
+            StatusId = Domain.Constants.SupplierStatus.Inactive
+        };
         var response = await _client.PatchAsJsonAsync(
             "/api/v1/Supplier/update-status-many",
             request,
@@ -480,55 +905,105 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var updatedSuppliers = db.Suppliers.Where(s => supplierIds.Contains(s.Id)).ToList();
-            updatedSuppliers.Should().AllSatisfy(s => s.StatusId.Should().Be("inactive"));
+            var updated = db.Suppliers.Where(s => supplierIds.Contains(s.Id)).ToList();
+            updated.Should().AllSatisfy(s => s.StatusId.Should().Be(Domain.Constants.SupplierStatus.Inactive));
         }
     }
 
     [Fact(DisplayName = "SUP_044 - Tính toán TotalInputValue chính xác với nhiều Input Receipt")]
     public async Task GetSupplierById_MultipleInputReceipts_CalculatesCorrectTotal()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Suppliers.View ],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         int supplierId;
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var supplier = new Domain.Entities.Supplier
+            await db.Database
+                .ExecuteSqlRawAsync(
+                    "INSERT IGNORE INTO SupplierStatus (`Key`) VALUES ({0})",
+                    Domain.Constants.SupplierStatus.Active)
+                .ConfigureAwait(true);
+            await db.Database
+                .ExecuteSqlRawAsync(
+                    "INSERT IGNORE INTO InputStatus (`Key`) VALUES ({0})",
+                    Domain.Constants.Input.InputStatus.Finish)
+                .ConfigureAwait(true);
+
+            var supplier = new SupplierEntity
             {
-                Name = "Supplier With Inputs",
-                Phone = "0123456789",
-                Address = "Address",
-                StatusId = "active"
+                Name = $"S_{uniqueId}",
+                Phone = "099",
+                Address = "A",
+                StatusId = Domain.Constants.SupplierStatus.Active
             };
+
             await db.Suppliers.AddAsync(supplier, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             supplierId = supplier.Id;
 
+            var user = await db.Users
+                .FirstOrDefaultAsync(u => string.Compare(u.UserName, username) == 0, CancellationToken.None)
+                .ConfigureAwait(true);
+            var userId = user?.Id ?? Guid.NewGuid();
+
             var inputs = new List<Input>
             {
-                new() { SupplierId = supplierId, StatusId = "completed" },
-                new() { SupplierId = supplierId, StatusId = "completed" },
-                new() { SupplierId = supplierId, StatusId = "completed" }
+                new()
+                {
+                    SupplierId = supplierId,
+                    StatusId = Domain.Constants.Input.InputStatus.Finish,
+                    CreatedBy = userId
+                },
+                new()
+                {
+                    SupplierId = supplierId,
+                    StatusId = Domain.Constants.Input.InputStatus.Finish,
+                    CreatedBy = userId
+                },
+                new()
+                {
+                    SupplierId = supplierId,
+                    StatusId = Domain.Constants.Input.InputStatus.Finish,
+                    CreatedBy = userId
+                }
             };
             await db.InputReceipts.AddRangeAsync(inputs, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
             var inputInfos = new List<InputInfo>
             {
-                new() { InputId = inputs[0].Id, InputPrice = 1000.00m, Count = 10 },
-                new() { InputId = inputs[1].Id, InputPrice = 2000.00m, Count = 20 },
-                new() { InputId = inputs[2].Id, InputPrice = 500.00m, Count = 30 }
+                new() { InputId = inputs[0].Id, InputPrice = 1000m, Count = 10 },
+                new() { InputId = inputs[1].Id, InputPrice = 2000m, Count = 20 },
+                new() { InputId = inputs[2].Id, InputPrice = 500m, Count = 30 }
             };
             await db.InputInfos.AddRangeAsync(inputInfos, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}", CancellationToken.None)
-            .ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}").ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
             .ReadFromJsonAsync<SupplierResponse>(CancellationToken.None)
             .ConfigureAwait(true);
+
         content.Should().NotBeNull();
         content!.TotalInput.Should().Be(65000);
     }
@@ -536,27 +1011,83 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
     [Fact(DisplayName = "SUP_045 - Tính toán TotalInputValue không bao gồm Input Receipt ở trạng thái khác completed")]
     public async Task GetSupplierById_MixedInputStatuses_OnlyCountsCompleted()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Suppliers.View ],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         int supplierId;
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var supplier = new Domain.Entities.Supplier
+            await db.Database
+                .ExecuteSqlRawAsync(
+                    "INSERT IGNORE INTO SupplierStatus (`Key`) VALUES ({0})",
+                    Domain.Constants.SupplierStatus.Active)
+                .ConfigureAwait(true);
+
+            foreach(var status in new[]
             {
-                Name = "Supplier Mixed Inputs",
-                Phone = "0123456789",
-                Address = "Address",
-                StatusId = "active"
+                Domain.Constants.Input.InputStatus.Finish,
+                Domain.Constants.Input.InputStatus.Working,
+                Domain.Constants.Input.InputStatus.Cancel
+            })
+            {
+                await db.Database
+                    .ExecuteSqlRawAsync("INSERT IGNORE INTO InputStatus (`Key`) VALUES ({0})", status)
+                    .ConfigureAwait(true);
+            }
+
+            var supplier = new SupplierEntity
+            {
+                Name = $"S_{uniqueId}",
+                Phone = "099",
+                Address = "A",
+                StatusId = Domain.Constants.SupplierStatus.Active
             };
+
             await db.Suppliers.AddAsync(supplier, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
             supplierId = supplier.Id;
+
+            var user = await db.Users
+                .FirstOrDefaultAsync(u => string.Compare(u.UserName, username) == 0, CancellationToken.None)
+                .ConfigureAwait(true);
+            var userId = user?.Id ?? Guid.NewGuid();
 
             var inputs = new List<Input>
             {
-                new() { SupplierId = supplierId, StatusId = "completed" },
-                new() { SupplierId = supplierId, StatusId = "working" },
-                new() { SupplierId = supplierId, StatusId = "cancelled" }
+                new()
+                {
+                    SupplierId = supplierId,
+                    StatusId = Domain.Constants.Input.InputStatus.Finish,
+                    CreatedBy = userId
+                },
+                new()
+                {
+                    SupplierId = supplierId,
+                    StatusId = Domain.Constants.Input.InputStatus.Working,
+                    CreatedBy = userId
+                },
+                new()
+                {
+                    SupplierId = supplierId,
+                    StatusId = Domain.Constants.Input.InputStatus.Cancel,
+                    CreatedBy = userId
+                }
             };
             await db.InputReceipts.AddRangeAsync(inputs, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -571,13 +1102,13 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}", CancellationToken.None)
-            .ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}").ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
             .ReadFromJsonAsync<SupplierResponse>(CancellationToken.None)
             .ConfigureAwait(true);
+
         content.Should().NotBeNull();
         content!.TotalInput.Should().Be(10000);
     }

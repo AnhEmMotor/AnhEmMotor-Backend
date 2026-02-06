@@ -30,6 +30,8 @@ namespace Application.Interfaces.Repositories.ProductVariant
         public Task<(List<ProductVariantEntity> Items, int TotalCount)> GetPagedVariantsAsync(
             int page,
             int pageSize,
+            string? filters,
+            string? sorts,
             CancellationToken cancellationToken,
             DataFetchMode mode = DataFetchMode.ActiveOnly);
     }

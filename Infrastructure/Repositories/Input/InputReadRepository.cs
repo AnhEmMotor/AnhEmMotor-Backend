@@ -25,6 +25,7 @@ public class InputReadRepository(ApplicationDBContext context) : IInputReadRepos
             .ThenInclude(x => x.ProductVariant)
             .ThenInclude(x => x!.Product)
             .Include(x => x.Supplier)
+            .Include(x => x.CreatedByUser)
             .Include(x => x.InputStatus);
     }
 
@@ -100,5 +101,18 @@ public class InputReadRepository(ApplicationDBContext context) : IInputReadRepos
             .ThenInclude(x => x!.Product)
             .Where(x => x.SupplierId == supplierId)
             .OrderByDescending(x => x.CreatedAt);
+    }
+
+    public Task<IEnumerable<InputEntity>> GetBySupplierIdsAsync(
+        IEnumerable<int> supplierIds,
+        CancellationToken cancellationToken,
+        DataFetchMode mode = DataFetchMode.ActiveOnly)
+    {
+        var query = GetQueryable(mode);
+
+        return query
+            .Where(x => x.SupplierId != null && supplierIds.Contains(x.SupplierId.Value))
+            .ToListAsync(cancellationToken)
+            .ContinueWith<IEnumerable<InputEntity>>(t => t.Result, cancellationToken);
     }
 }

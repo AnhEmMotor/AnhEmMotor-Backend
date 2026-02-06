@@ -38,6 +38,7 @@ public class Product
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
     }
 
+#pragma warning disable IDE0079 
 #pragma warning disable CRR0035
     [Fact(DisplayName = "PRODUCT_081 - API tạo sản phẩm trả về 403 khi user không có quyền")]
     public async Task CreateProduct_UserNoPermission_ReturnsForbidden()
@@ -283,4 +284,5 @@ public class Product
         _senderMock.Verify(m => m.Send(It.IsAny<GetProductsListQuery>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 #pragma warning restore CRR0035
+#pragma warning restore IDE0079
 }

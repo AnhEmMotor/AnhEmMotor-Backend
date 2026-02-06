@@ -27,6 +27,8 @@ public sealed class DeleteOutputCommandHandler(
                 Error.BadRequest($"Không thể xóa đơn hàng có trạng thái '{output.StatusId}'.", "StatusId"));
         }
 
+        output.DeletedAt = DateTimeOffset.UtcNow;
+
         deleteRepository.Delete(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 

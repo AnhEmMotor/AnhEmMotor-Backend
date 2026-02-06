@@ -30,4 +30,9 @@ public interface IInputReadRepository
         int supplierId,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
+
+    public Task<IEnumerable<InputEntity>> GetBySupplierIdsAsync(
+        IEnumerable<int> supplierIds,
+        CancellationToken cancellationToken,
+        DataFetchMode mode = DataFetchMode.ActiveOnly);
 }

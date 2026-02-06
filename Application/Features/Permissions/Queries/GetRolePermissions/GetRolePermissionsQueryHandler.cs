@@ -1,4 +1,4 @@
-using Application.ApiContracts.Permission.Responses;
+﻿using Application.ApiContracts.Permission.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.Role;
 using Domain.Constants.Permission;
@@ -12,15 +12,19 @@ public class GetRolePermissionsQueryHandler(IRoleReadRepository rolePermissionRe
         GetRolePermissionsQuery request,
         CancellationToken cancellationToken)
     {
-        var role = await rolePermissionRepository.GetRoleByNameAsync(request.RoleName!, cancellationToken)
+        var trimmedRoleName = request.RoleName?.Trim();
+
+        var role = await rolePermissionRepository.GetRoleByNameAsync(trimmedRoleName!, cancellationToken)
             .ConfigureAwait(false);
+
         if(role is null)
         {
             return Error.NotFound("Role not found.");
         }
 
         var permissions = await rolePermissionRepository.GetPermissionsNameByRoleIdAsync(role.Id, cancellationToken)
-            .ConfigureAwait(false);
+                .ConfigureAwait(false) ??
+            [];
 
         var permissionsWithMetadata = permissions
             .Select(p => new { Name = p, Metadata = PermissionsList.GetMetadata(p) })

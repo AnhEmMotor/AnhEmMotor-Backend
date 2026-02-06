@@ -1,4 +1,4 @@
-using Application.Common.Models;
+﻿using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductCategory;
 using Application.Interfaces.Services;
@@ -17,7 +17,7 @@ public sealed class DeleteProductCategoryCommandHandler(
     {
         var category = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
 
-        if(category is null)
+        if(category is null || category.DeletedAt is not null)
         {
             return Result.Failure(Error.NotFound($"Product category with Id {request.Id} not found."));
         }

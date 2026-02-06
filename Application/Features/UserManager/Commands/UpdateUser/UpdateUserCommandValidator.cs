@@ -1,22 +1,53 @@
 using Domain.Constants;
 using FluentValidation;
+using System.Text.RegularExpressions;
 
 namespace Application.Features.UserManager.Commands.UpdateUser;
 
-public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
+public partial class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
 {
-    public UpdateUserCommandValidator() { throw new NotImplementedException(); }
-
-    public static bool IsValidEmail(string email) { throw new NotImplementedException(); }
-
-    public static bool IsValidPhoneNumber(string phoneNumber) { throw new NotImplementedException(); }
-
-    public static bool IsValidGender(string gender) { throw new NotImplementedException(); }
-
-    public static IReadOnlyList<string> ValidGenders => new[]
+    public UpdateUserCommandValidator()
     {
-        GenderStatus.Male,
-        GenderStatus.Female,
-        GenderStatus.Other
-    };
+        RuleFor(x => x.FullName)
+            .NotEmpty()
+            .WithMessage("Full Name is required.")
+            .MaximumLength(255)
+            .WithMessage("Full Name must not exceed 255 characters.");
+
+        RuleFor(x => x.PhoneNumber)
+            .Must(IsValidPhoneNumber)
+            .WithMessage("Invalid phone number.")
+            .When(x => !string.IsNullOrEmpty(x.PhoneNumber));
+
+        RuleFor(x => x.Gender)
+            .Must(IsValidGender)
+            .WithMessage("Invalid gender.")
+            .When(x => !string.IsNullOrEmpty(x.Gender));
+    }
+
+    public static bool IsValidEmail(string? email)
+    {
+        if(string.IsNullOrWhiteSpace(email))
+            return false;
+        var regex = RegexCheckEmail();
+        return regex.IsMatch(email.Trim());
+    }
+
+    public static bool IsValidPhoneNumber(string? phoneNumber)
+    {
+        if(string.IsNullOrWhiteSpace(phoneNumber))
+            return false;
+        var regex = RegexCheckPhone();
+        return regex.IsMatch(phoneNumber.Trim());
+    }
+
+    public static bool IsValidGender(string? gender) { return ValidGenders.Contains(gender?.Trim()); }
+
+    public static IReadOnlyList<string> ValidGenders => [ GenderStatus.Male, GenderStatus.Female, GenderStatus.Other ];
+
+    [GeneratedRegex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$")]
+    private static partial Regex RegexCheckEmail();
+
+    [GeneratedRegex(@"^(0|84|\+84)[0-9]{9}$")]
+    private static partial Regex RegexCheckPhone();
 }

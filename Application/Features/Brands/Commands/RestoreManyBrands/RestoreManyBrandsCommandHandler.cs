@@ -46,11 +46,7 @@ public sealed class RestoreManyBrandsCommandHandler(
 
         if(errors.Count > 0)
         {
-            if(typeof(Result<List<BrandResponse>?>).GetMethod("Failure", [ typeof(List<Error>) ]) != null)
-            {
-                return (Result<List<BrandResponse>?>)(object)Result.Failure(errors);
-            }
-            return (Result<List<BrandResponse>?>)(object)Result.Failure(errors[0]);
+            return Result<List<BrandResponse>?>.Failure(errors);
         }
 
         if(brandsToRestore.Count > 0)

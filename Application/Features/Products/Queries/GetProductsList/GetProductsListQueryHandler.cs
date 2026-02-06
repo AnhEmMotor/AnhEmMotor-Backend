@@ -24,6 +24,8 @@ public sealed class GetProductsListQueryHandler(IProductReadRepository readRepos
             normalizedStatusIds,
             request.Page,
             request.PageSize,
+            request.Filters,
+            request.Sorts,
             cancellationToken)
             .ConfigureAwait(false);
 

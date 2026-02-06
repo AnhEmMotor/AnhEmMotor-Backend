@@ -8,35 +8,41 @@ namespace Infrastructure.Repositories.ProductCategory;
 
 public class ProductCategoryReadRepository(ApplicationDBContext context) : IProductCategoryReadRepository
 {
-    public Task<IEnumerable<CategoryEntity>> GetAllAsync(
+    public Task<bool> ExistsByNameAsync(
+        string name,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         return context.GetQuery<CategoryEntity>(mode)
-            .ToListAsync(cancellationToken)
-            .ContinueWith<IEnumerable<CategoryEntity>>(t => t.Result, cancellationToken);
+            .AnyAsync(c => string.Compare(c.Name, name) == 0, cancellationToken);
     }
 
-    public Task<CategoryEntity?> GetByIdAsync(
+    public Task<bool> ExistsByNameExceptIdAsync(
+        string name,
         int id,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         return context.GetQuery<CategoryEntity>(mode)
-            .FirstOrDefaultAsync(c => c.Id == id, cancellationToken)
-            .ContinueWith(t => t.Result, cancellationToken);
+            .AnyAsync(x => string.Compare(x.Name, name) == 0 && x.Id != id, cancellationToken);
     }
 
-    public Task<IEnumerable<CategoryEntity>> GetByIdAsync(
+    public Task<List<CategoryEntity>> GetAllAsync(
+        CancellationToken cancellationToken,
+        DataFetchMode mode = DataFetchMode.ActiveOnly)
+    { return context.GetQuery<CategoryEntity>(mode).ToListAsync(cancellationToken); }
+
+    public Task<CategoryEntity?> GetByIdAsync(
+        int id,
+        CancellationToken cancellationToken,
+        DataFetchMode mode = DataFetchMode.ActiveOnly)
+    { return context.GetQuery<CategoryEntity>(mode).FirstOrDefaultAsync(c => c.Id == id, cancellationToken); }
+
+    public Task<List<CategoryEntity>> GetByIdAsync(
         IEnumerable<int> ids,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
-    {
-        return context.GetQuery<CategoryEntity>(mode)
-            .Where(c => ids.Contains(c.Id))
-            .ToListAsync(cancellationToken)
-            .ContinueWith<IEnumerable<CategoryEntity>>(t => t.Result, cancellationToken);
-    }
+    { return context.GetQuery<CategoryEntity>(mode).Where(c => ids.Contains(c.Id)).ToListAsync(cancellationToken); }
 
     public IQueryable<CategoryEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
     { return context.GetQuery<CategoryEntity>(mode); }

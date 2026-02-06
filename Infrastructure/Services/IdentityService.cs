@@ -1,6 +1,7 @@
 ﻿using Application.ApiContracts.Auth.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Services;
+using Domain.Constants;
 using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 
@@ -37,6 +38,11 @@ public class IdentityService(UserManager<ApplicationUser> userManager) : IIdenti
             return Error.Unauthorized("Wrong username/email or password.");
         }
 
+        if(string.Compare(user.Status, UserStatus.Banned) == 0)
+        {
+            return Error.Forbidden("User is banned.");
+        }
+
         cancellationToken.ThrowIfCancellationRequested();
 
         var roles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
@@ -49,7 +55,8 @@ public class IdentityService(UserManager<ApplicationUser> userManager) : IIdenti
             AuthMethods = [ "amr" ],
             Email = user.Email,
             FullName = user.FullName,
-            Status = user.Status
+            Status = user.Status,
+            SecurityStamp = user.SecurityStamp
         };
     }
 }

@@ -1,9 +1,8 @@
-﻿using Application.ApiContracts.User.Responses;
-using Application.ApiContracts.UserManager.Responses;
+﻿using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Models;
 using Application.Features.UserManager.Commands.AssignRoles;
 using Application.Features.UserManager.Commands.ChangeMultipleUsersStatus;
-using Application.Features.UserManager.Commands.ChangePassword;
+using Application.Features.UserManager.Commands.ChangePasswordByManager;
 using Application.Features.UserManager.Commands.ChangeUserStatus;
 using Application.Features.UserManager.Commands.UpdateUser;
 using Application.Features.UserManager.Queries.GetUserById;
@@ -35,6 +34,7 @@ public class UserManager
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
     }
 
+#pragma warning disable IDE0079 
 #pragma warning disable CRR0035
     [Fact(DisplayName = "UMGR_001 - Lấy danh sách người dùng thành công với phân trang mặc định")]
     public async Task GetAllUsers_WithDefaultPagination_ReturnsOkWithUsers()
@@ -114,7 +114,8 @@ public class UserManager
 
         var result = await _controller.GetAllUsersAsync(sieveModel, CancellationToken.None).ConfigureAwait(true);
 
-        result.Should().BeOfType<ForbidResult>();
+        var objectResult = result.Should().BeOfType<ObjectResult>().Subject;
+        objectResult.StatusCode.Should().Be(StatusCodes.Status403Forbidden);
 
         _mediatorMock.Verify(m => m.Send(It.IsAny<GetUsersListQuery>(), It.IsAny<CancellationToken>()), Times.Once());
     }
@@ -165,7 +166,8 @@ public class UserManager
         var result = await _controller.GetAllUsersForOutputAsync(sieveModel, CancellationToken.None)
             .ConfigureAwait(true);
 
-        result.Should().BeOfType<ForbidResult>();
+        var objectResult = result.Should().BeOfType<ObjectResult>().Subject;
+        objectResult.StatusCode.Should().Be(StatusCodes.Status403Forbidden);
 
         _mediatorMock.Verify(
             m => m.Send(It.IsAny<GetUsersListForOutputQuery>(), It.IsAny<CancellationToken>()),
@@ -270,11 +272,11 @@ public class UserManager
     public async Task ChangePassword_WithValidPassword_ReturnsOk()
     {
         var userId = Guid.NewGuid();
-        var request = new ChangePasswordCommand { NewPassword = "NewPass@123" };
+        var request = new ChangePasswordByManagerCommand { NewPassword = "NewPass@123" };
 
         var expectedResponse = new ChangePasswordByManagerResponse { Message = "Đổi mật khẩu thành công" };
 
-        _mediatorMock.Setup(m => m.Send(It.IsAny<ChangePasswordCommand>(), It.IsAny<CancellationToken>()))
+        _mediatorMock.Setup(m => m.Send(It.IsAny<ChangePasswordByManagerCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
 
         var result = await _controller.ChangePasswordAsync(userId, request, CancellationToken.None).ConfigureAwait(true);
@@ -284,7 +286,7 @@ public class UserManager
         response.Message.Should().Be("Đổi mật khẩu thành công");
 
         _mediatorMock.Verify(
-            m => m.Send(It.Is<ChangePasswordCommand>(c => c.UserId == userId), It.IsAny<CancellationToken>()),
+            m => m.Send(It.Is<ChangePasswordByManagerCommand>(c => c.UserId == userId), It.IsAny<CancellationToken>()),
             Times.Once());
     }
 
@@ -292,9 +294,9 @@ public class UserManager
     public async Task ChangePassword_WithWeakPassword_ReturnsBadRequest()
     {
         var userId = Guid.NewGuid();
-        var request = new ChangePasswordCommand { NewPassword = "123" };
+        var request = new ChangePasswordByManagerCommand { NewPassword = "123" };
 
-        _mediatorMock.Setup(m => m.Send(It.IsAny<ChangePasswordCommand>(), It.IsAny<CancellationToken>()))
+        _mediatorMock.Setup(m => m.Send(It.IsAny<ChangePasswordByManagerCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<ChangePasswordByManagerResponse>.Failure(Error.BadRequest("Mật khẩu không đủ mạnh")));
 
         var result = await _controller.ChangePasswordAsync(userId, request, CancellationToken.None).ConfigureAwait(true);
@@ -302,7 +304,7 @@ public class UserManager
         result.Should().BeOfType<BadRequestObjectResult>();
 
         _mediatorMock.Verify(
-            m => m.Send(It.IsAny<ChangePasswordCommand>(), It.IsAny<CancellationToken>()),
+            m => m.Send(It.IsAny<ChangePasswordByManagerCommand>(), It.IsAny<CancellationToken>()),
             Times.Once());
     }
 
@@ -423,4 +425,5 @@ public class UserManager
             Times.Once);
     }
 #pragma warning restore CRR0035
+#pragma warning restore IDE0079
 }

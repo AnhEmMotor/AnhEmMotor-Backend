@@ -30,7 +30,32 @@ public sealed class GetVariantLiteByProductIdQueryHandler(
         var variants = await variantReadRepository.GetByProductIdAsync(request.ProductId, cancellationToken, mode)
             .ConfigureAwait(false);
 
-        var responses = variants.Select(v => v.Adapt<ProductVariantLiteResponse>()).ToList();
+        var responses = variants.Select(
+            v =>
+            {
+                var response = v.Adapt<ProductVariantLiteResponse>();
+
+                if(string.IsNullOrWhiteSpace(response.VariantName) && v.VariantOptionValues.Count > 0)
+                {
+                    var parts = v.VariantOptionValues
+                        .Where(vov => vov.OptionValue != null)
+                        .Select(vov => vov.OptionValue!.Name)
+                        .Where(n => !string.IsNullOrWhiteSpace(n))
+                        .ToList();
+
+                    if(parts.Count > 0)
+                    {
+                        response.VariantName = string.Join(" - ", parts);
+                        if(!string.IsNullOrWhiteSpace(response.ProductName))
+                        {
+                            response.DisplayName = $"{response.ProductName} ({response.VariantName})";
+                        }
+                    }
+                }
+
+                return response;
+            })
+            .ToList();
 
         return responses;
     }

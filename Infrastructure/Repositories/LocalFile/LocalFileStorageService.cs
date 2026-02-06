@@ -8,10 +8,27 @@ using SixLabors.ImageSharp.Processing;
 
 namespace Infrastructure.Repositories.LocalFile;
 
-public class LocalFileStorageService(IWebHostEnvironment environment, IHttpContextAccessor httpContextAccessor) : IFileStorageService
+public class LocalFileStorageService : IFileStorageService
 {
     private const int DefaultMaxWidth = 1200;
-    private readonly string _uploadFolder = Path.Combine(environment.WebRootPath, "uploads");
+    private readonly string _uploadFolder;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+
+    public LocalFileStorageService(IWebHostEnvironment environment, IHttpContextAccessor httpContextAccessor)
+    {
+        _httpContextAccessor = httpContextAccessor;
+        
+        // Handle null WebRootPath in test environment
+        if (string.IsNullOrEmpty(environment.WebRootPath))
+        {
+            // Use temp directory for test/CI environment
+            _uploadFolder = Path.Combine(Path.GetTempPath(), "AnhEmMotor_Test_Uploads");
+        }
+        else
+        {
+            _uploadFolder = Path.Combine(environment.WebRootPath, "uploads");
+        }
+    }
 
     private readonly List<string> _allowedMimeTypes = [ "image/jpeg", "image/png", "image/gif", "image/webp" ];
 
@@ -91,7 +108,7 @@ public class LocalFileStorageService(IWebHostEnvironment environment, IHttpConte
 
     public string GetPublicUrl(string storagePath)
     {
-        var request = httpContextAccessor.HttpContext?.Request;
+        var request = _httpContextAccessor.HttpContext?.Request;
         if(request == null)
             return $"/api/v1/mediafile/view-image/{storagePath}";
         return $"{request.Scheme}://{request.Host.Value}/api/v1/mediafile/view-image/{storagePath}";

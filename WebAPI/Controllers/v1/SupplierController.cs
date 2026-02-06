@@ -11,7 +11,9 @@ using Application.Features.Suppliers.Commands.UpdateSupplierStatus;
 using Application.Features.Suppliers.Queries.GetDeletedSuppliersList;
 using Application.Features.Suppliers.Queries.GetSupplierById;
 using Application.Features.Suppliers.Queries.GetSuppliersList;
+using Application.Features.Suppliers.Queries.GetSuppliersListForInputManager;
 using Asp.Versioning;
+using Domain.Constants;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using Mapster;
@@ -75,7 +77,7 @@ public class SupplierController(IMediator mediator) : ApiController
     /// <param name="id">Mã nhà cung cấp cần lấy thông tin.</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    [HttpGet("{id:int}")]
+    [HttpGet("{id:int}", Name = RouteNames.Supplier.GetById)]
     [HasPermission(Suppliers.View)]
     [ProducesResponseType(typeof(SupplierResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -101,21 +103,27 @@ public class SupplierController(IMediator mediator) : ApiController
     {
         var command = request.Adapt<CreateSupplierCommand>();
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
+        return HandleCreated(result, RouteNames.Supplier.GetById, new { id = result.IsSuccess ? result.Value?.Id : 0 });
     }
 
     /// <summary>
-    /// Lấy danh sách nhà cung cấp (có phân trang, lọc, sắp xếp - chỉ được vào khi người dùng có quyền thêm và xoá phiếu
+    /// Lấy danh sách nhà cung cấp (có phân trang, lọc, sắp xếp - chỉ được vào khi người dùng có quyền thêm và sửa phiếu
     /// bán hàng).
     /// </summary>
     /// <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpGet("for-input")]
+    [RequiresAnyPermissions(Inputs.Create, Inputs.Edit)]
+    [ProducesResponseType(typeof(PagedResult<SupplierResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetSuppliersForInputAsync(
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
-    { throw new NotImplementedException(); }
+    {
+        var query = new GetSuppliersListForInputManagerQuery() { SieveModel = sieveModel };
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
 
     /// <summary>
     /// Cập nhật thông tin nhà cung cấp.

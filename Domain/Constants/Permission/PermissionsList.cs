@@ -79,7 +79,6 @@ public static class PermissionsList
         public const string Create = "Permissions.Roles.Create";
         public const string Edit = "Permissions.Roles.Edit";
         public const string Delete = "Permissions.Roles.Delete";
-        public const string AssignPermissions = "Permissions.Roles.AssignPermissions";
     }
 
     public static class Users
@@ -153,7 +152,6 @@ public static class PermissionsList
         { Roles.Create, new PermissionMetadata("Create Role", "Tạo vai trò mới") },
         { Roles.Edit, new PermissionMetadata("Edit Role", "Chỉnh sửa vai trò") },
         { Roles.Delete, new PermissionMetadata("Delete Role", "Xóa vai trò") },
-        { Roles.AssignPermissions, new PermissionMetadata("Assign Permissions", "Gán quyền cho vai trò") },
 
         { Users.View, new PermissionMetadata("View Users", "Xem danh sách người dùng") },
         { Users.Create, new PermissionMetadata("Create User", "Tạo người dùng mới") },

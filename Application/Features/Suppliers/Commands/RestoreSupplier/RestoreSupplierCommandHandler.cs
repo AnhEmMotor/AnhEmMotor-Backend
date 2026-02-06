@@ -18,12 +18,17 @@ public sealed class RestoreSupplierCommandHandler(
         RestoreSupplierCommand request,
         CancellationToken cancellationToken)
     {
-        var supplier = await readRepository.GetByIdAsync(request.Id, cancellationToken, DataFetchMode.DeletedOnly)
+        var supplier = await readRepository.GetByIdAsync(request.Id, cancellationToken, DataFetchMode.All)
             .ConfigureAwait(false);
 
         if(supplier == null)
         {
-            return Error.NotFound($"Deleted supplier with Id {request.Id} not found.");
+            return Error.NotFound($"Supplier with Id {request.Id} not found.");
+        }
+
+        if(supplier.DeletedAt == null)
+        {
+            return Error.Conflict($"Supplier with Id {request.Id} is not deleted.");
         }
 
         updateRepository.Restore(supplier);

@@ -9,4 +9,6 @@ public record ChangeMultipleUsersStatusCommand : IRequest<Result<ChangeStatusMul
     public List<Guid>? UserIds { get; init; }
 
     public string? Status { get; init; }
+
+    public string? CurrentUserId { get; init; }
 }

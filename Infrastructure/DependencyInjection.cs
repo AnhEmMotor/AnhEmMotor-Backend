@@ -23,13 +23,26 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddDbContextPool<ApplicationDBContext>(
-            options =>
-            {
-                options.UseSqlServer(
-                    configuration.GetConnectionString("StringConnection"),
-                    b => b.MigrationsAssembly(typeof(ApplicationDBContext).Assembly.FullName).CommandTimeout(30));
-            });
+        var provider = configuration.GetValue("Provider", "SqlServer");
+
+        if(string.Compare(provider, "MySql") == 0)
+        {
+            var connectionString = configuration.GetConnectionString("StringConnection") ?? string.Empty;
+            services.AddDbContextPool<ApplicationDBContext, MySqlDbContext>(
+                options =>
+                {
+                    options.UseMySQL(connectionString);
+                });
+        } else
+        {
+            services.AddDbContextPool<ApplicationDBContext>(
+                options =>
+                {
+                    options.UseSqlServer(
+                        configuration.GetConnectionString("StringConnection"),
+                        b => b.MigrationsAssembly(typeof(ApplicationDBContext).Assembly.FullName).CommandTimeout(30));
+                });
+        }
 
         services.AddIdentity<ApplicationUser, ApplicationRole>(
             options =>

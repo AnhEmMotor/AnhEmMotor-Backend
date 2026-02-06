@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Domain.Entities;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
 using System.Text;
 
 namespace WebAPI.Extensions;
@@ -30,8 +33,6 @@ public static class AuthenticationExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        var jwtKey = configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key missing");
-
         services.AddAuthentication(
             options =>
             {
@@ -42,6 +43,8 @@ public static class AuthenticationExtensions
             .AddJwtBearer(
                 options =>
                 {
+                    var jwtKey = configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key missing");
+
                     options.SaveToken = true;
                     options.RequireHttpsMetadata = false;
                     options.TokenValidationParameters = new TokenValidationParameters
@@ -56,6 +59,37 @@ public static class AuthenticationExtensions
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
                         RoleClaimType = "role",
                         NameClaimType = System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Name
+                    };
+
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnTokenValidated =
+                            async context =>
+                            {
+                                var userManager = context.HttpContext.RequestServices
+                                    .GetRequiredService<UserManager<ApplicationUser>>();
+                                var userId = context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                                if(string.IsNullOrEmpty(userId))
+                                {
+                                    context.Fail("Unauthorized");
+                                    return;
+                                }
+
+                                var user = await userManager.FindByIdAsync(userId).ConfigureAwait(true);
+                                if(user == null || user.DeletedAt is not null)
+                                {
+                                    context.Fail("Unauthorized");
+                                    return;
+                                }
+
+                                var tokenSecurityStamp = context.Principal?.FindFirstValue(
+                                    "AspNet.Identity.SecurityStamp");
+                                if(string.Compare(tokenSecurityStamp, user.SecurityStamp) != 0)
+                                {
+                                    context.Fail("Unauthorized");
+                                }
+                            }
                     };
                 });
 

@@ -2,11 +2,14 @@
 using Domain.Constants;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
+using Sieve.Models;
+
+using Sieve.Services;
 using ProductVariantEntity = Domain.Entities.ProductVariant;
 
 namespace Infrastructure.Repositories.ProductVariant
 {
-    public class ProductVariantReadRepository(ApplicationDBContext context) : IProductVariantReadRepository
+    public class ProductVariantReadRepository(ApplicationDBContext context, ISieveProcessor sieveProcessor) : IProductVariantReadRepository
     {
         public IQueryable<ProductVariantEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
         { return context.GetQuery<ProductVariantEntity>(mode); }
@@ -39,7 +42,7 @@ namespace Infrastructure.Repositories.ProductVariant
             DataFetchMode mode = DataFetchMode.ActiveOnly)
         {
             return context.GetQuery<ProductVariantEntity>(mode)
-                .Where(v => v.ProductId == productId)
+                .Where(v => v.ProductId == productId && (mode != DataFetchMode.ActiveOnly || v.DeletedAt == null))
                 .Include(v => v.Product)
                 .Include(v => v.ProductCollectionPhotos)
                 .Include(v => v.InputInfos)
@@ -66,6 +69,8 @@ namespace Infrastructure.Repositories.ProductVariant
         public async Task<(List<ProductVariantEntity> Items, int TotalCount)> GetPagedVariantsAsync(
             int page,
             int pageSize,
+            string? filters,
+            string? sorts,
             CancellationToken cancellationToken,
             DataFetchMode mode = DataFetchMode.ActiveOnly)
         {
@@ -79,9 +84,22 @@ namespace Infrastructure.Repositories.ProductVariant
                 query = query.Where(v => v.Product != null && v.Product.DeletedAt == null);
             }
 
+            var normalizedPage = Math.Max(page, 1);
+            var normalizedPageSize = Math.Max(pageSize, 1);
+
+            var sieveModel = new SieveModel
+            {
+                Filters = filters,
+                Sorts = sorts,
+                Page = normalizedPage,
+                PageSize = normalizedPageSize
+            };
+
+            query = sieveProcessor.Apply(sieveModel, query, applyPagination: false);
+
             var totalCount = await query.CountAsync(cancellationToken).ConfigureAwait(false);
 
-            var items = await query
+            IQueryable<ProductVariantEntity> dbQuery = query
                 .Include(v => v.Product)
                 .ThenInclude(p => p!.ProductCategory)
                 .Include(v => v.Product)
@@ -97,10 +115,16 @@ namespace Infrastructure.Repositories.ProductVariant
                 .ThenInclude(ii => ii.InputReceipt)
 
                 .Include(v => v.OutputInfos.Where(oi => oi.DeletedAt == null && oi.OutputOrder!.DeletedAt == null))
-                .ThenInclude(oi => oi.OutputOrder)
+                .ThenInclude(oi => oi.OutputOrder);
 
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
+            if(string.IsNullOrWhiteSpace(sorts))
+            {
+                dbQuery = dbQuery.OrderByDescending(v => v.Id);
+            }
+
+            var items = await dbQuery
+                .Skip((normalizedPage - 1) * normalizedPageSize)
+                .Take(normalizedPageSize)
                 .AsSplitQuery()
                 .ToListAsync(cancellationToken)
                 .ConfigureAwait(false);

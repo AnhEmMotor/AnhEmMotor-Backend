@@ -47,7 +47,7 @@ public sealed class UpdateInputStatusCommandHandler(
             StringComparison.OrdinalIgnoreCase))
         {
             input.InputDate = DateTimeOffset.UtcNow;
-            input.CreatedBy = request.CurrentUserId;
+            input.ConfirmedBy = request.CurrentUserId;
         }
 
         updateRepository.Update(input);

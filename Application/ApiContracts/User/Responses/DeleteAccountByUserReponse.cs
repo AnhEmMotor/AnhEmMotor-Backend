@@ -2,7 +2,7 @@
 
 namespace Application.ApiContracts.User.Responses
 {
-    public class DeleteUserByUserReponse
+    public class DeleteAccountByUserReponse
     {
         public string? Message { get; set; }
     }

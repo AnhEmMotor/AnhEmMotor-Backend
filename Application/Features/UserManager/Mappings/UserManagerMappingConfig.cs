@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.User.Responses;
+﻿using Application.ApiContracts.UserManager.Responses;
 using Domain.Entities;
 using Mapster;
 

@@ -1,5 +1,6 @@
 ﻿using Application.Common.Models;
 using Application.Features.Auth.Commands.Login;
+using Application.Features.Auth.Commands.LoginForManager;
 using Application.Features.Auth.Commands.Logout;
 using Application.Features.Auth.Commands.Register;
 using FluentAssertions;
@@ -25,6 +26,7 @@ public class Auth
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
     }
 
+#pragma warning disable IDE0079 
 #pragma warning disable CRR0035
     [Fact(DisplayName = "AUTH_REG_002 - Đăng ký thất bại (Validation) - TH1: Thiếu Password")]
     public async Task AUTH_REG_002_1_Register_MissingPassword()
@@ -99,9 +101,9 @@ public class Auth
     [Fact(DisplayName = "AUTH_MGR_002 - Manager Login Fail (Quyền)")]
     public async Task AUTH_MGR_002_Login_Manager_Fail_Forbidden()
     {
-        var request = new LoginCommand { UsernameOrEmail = "staff", Password = "123" };
+        var request = new LoginForManagerCommand { UsernameOrEmail = "staff", Password = "123" };
 
-        _mediatorMock.Setup(m => m.Send(It.IsAny<LoginCommand>(), It.IsAny<CancellationToken>()))
+        _mediatorMock.Setup(m => m.Send(It.IsAny<LoginForManagerCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException("Forbidden"));
 
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
@@ -121,4 +123,5 @@ public class Auth
         _mediatorMock.Verify(m => m.Send(It.IsAny<LogoutCommand>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 #pragma warning restore CRR0035
+#pragma warning restore IDE0079
 }

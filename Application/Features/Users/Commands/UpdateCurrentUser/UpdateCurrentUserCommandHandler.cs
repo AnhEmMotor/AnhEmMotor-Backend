@@ -1,4 +1,4 @@
-using Application.ApiContracts.User.Responses;
+using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.User;
 using MediatR;
@@ -13,7 +13,10 @@ public class UpdateCurrentUserCommandHandler(
         UpdateCurrentUserCommand request,
         CancellationToken cancellationToken)
     {
-        var userId = Guid.Parse(request.UserId!);
+        if(string.IsNullOrEmpty(request.UserId) || !Guid.TryParse(request.UserId, out var userId))
+        {
+            return Error.BadRequest("Invalid user ID.");
+        }
 
         var user = await userReadRepository.FindUserByIdAsync(userId, cancellationToken).ConfigureAwait(false);
         if(user is null)
@@ -21,12 +24,22 @@ public class UpdateCurrentUserCommandHandler(
             return Error.NotFound("User not found.");
         }
 
+        if(user.DeletedAt is not null)
+        {
+            return Error.Forbidden("User account is deleted.");
+        }
+
+        if(string.Compare(user.Status, Domain.Constants.UserStatus.Banned) == 0)
+        {
+            return Error.Forbidden("User account is banned.");
+        }
+
         cancellationToken.ThrowIfCancellationRequested();
 
 
         if(!string.IsNullOrWhiteSpace(request.FullName))
         {
-            user.FullName = request.FullName;
+            user.FullName = request.FullName.Trim();
         }
 
         if(!string.IsNullOrWhiteSpace(request.Gender))
@@ -36,14 +49,18 @@ public class UpdateCurrentUserCommandHandler(
 
         if(!string.IsNullOrWhiteSpace(request.PhoneNumber))
         {
-            user.PhoneNumber = request.PhoneNumber;
+            user.PhoneNumber = request.PhoneNumber.Trim();
         }
 
         var (succeeded, errors) = await userUpdateRepository.UpdateUserAsync(user, cancellationToken)
             .ConfigureAwait(false);
         if(!succeeded)
         {
-            var validationErrors = errors.Select(e => Error.Validation(e)).ToList();
+            if(!errors.Any())
+            {
+                return Error.Validation("Failed to update user.", "UpdateFailed");
+            }
+            var validationErrors = errors.Select(e => Error.Validation("UpdateError", e)).ToList();
             return Result<UserDTOForManagerResponse>.Failure(validationErrors);
         }
 

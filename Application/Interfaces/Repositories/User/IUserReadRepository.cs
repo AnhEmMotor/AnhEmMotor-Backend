@@ -1,5 +1,4 @@
 ﻿using Application.ApiContracts.Auth.Responses;
-using Application.ApiContracts.User.Responses;
 using Application.ApiContracts.UserManager.Responses;
 using Domain.Entities;
 using Domain.Primitives;
@@ -30,6 +29,10 @@ namespace Application.Interfaces.Repositories.User
 
         public Task<ApplicationUser?> FindUserByUsernameAsync(
             string username,
+            CancellationToken cancellationToken = default);
+
+        public Task<ApplicationUser?> FindUserByPhoneNumberAsync(
+            string phoneNumber,
             CancellationToken cancellationToken = default);
 
         public Task<bool> CheckPasswordAsync(

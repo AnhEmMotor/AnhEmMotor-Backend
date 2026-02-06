@@ -26,7 +26,8 @@ public class GetMyPermissionsQueryHandler(
 
         var roleIds = roleEntities.Select(r => r.Id).ToList();
         var userPermissionNames = await roleReadRepository.GetPermissionsNameByRoleIdAsync(roleIds, cancellationToken)
-            .ConfigureAwait(false);
+                .ConfigureAwait(false) ??
+            new List<string>();
 
         var userPermissions = userPermissionNames
             .Select(p => new { Name = p, Metadata = Domain.Constants.Permission.PermissionsList.GetMetadata(p) })

@@ -10,6 +10,7 @@ using Application.Features.Brands.Queries.GetBrandById;
 using Application.Features.Brands.Queries.GetBrandsList;
 using Application.Features.Brands.Queries.GetDeletedBrandsList;
 using Asp.Versioning;
+using Domain.Constants;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using Mapster;
@@ -64,7 +65,7 @@ public class BrandController(IMediator mediator) : ApiController
     /// Lấy danh sách thương hiệu đã bị xoá (có phân trang, lọc, sắp xếp).
     /// </summary>
     [HttpGet("deleted")]
-    [HasPermission(Brands.View)]
+    [HasPermission(Brands.Delete)]
     [ProducesResponseType(typeof(PagedResult<BrandResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetDeletedBrandsAsync(
         [FromQuery] SieveModel sieveModel,
@@ -78,7 +79,7 @@ public class BrandController(IMediator mediator) : ApiController
     /// <summary>
     /// Lấy thông tin của thương hiệu được chọn.
     /// </summary>
-    [HttpGet("{id:int}")]
+    [HttpGet("{id:int}", Name = RouteNames.Brands.GetById)]
     [HasPermission(Brands.View)]
     [ProducesResponseType(typeof(BrandResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -101,7 +102,7 @@ public class BrandController(IMediator mediator) : ApiController
     {
         var command = request.Adapt<CreateBrandCommand>();
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
+        return HandleCreated(result, RouteNames.Brands.GetById, new { id = result.IsSuccess ? result.Value.Id : 0 });
     }
 
     /// <summary>

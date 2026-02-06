@@ -16,6 +16,24 @@
              <param name="result"></param>
              <returns></returns>
         </member>
+        <member name="M:WebAPI.Controllers.Base.ApiController.HandleCreated``1(Application.Common.Models.Result{``0},System.String,System.Object)">
+             <summary>
+            
+             </summary>
+             <typeparam name="T"></typeparam>
+             <param name="result"></param>
+             <param name="actionName"></param>
+             <param name="routeValues"></param>
+             <returns></returns>
+        </member>
+        <member name="M:WebAPI.Controllers.Base.ApiController.HandleCreated``1(Application.Common.Models.Result{``0})">
+             <summary>
+            
+             </summary>
+             <typeparam name="T"></typeparam>
+             <param name="result"></param>
+             <returns></returns>
+        </member>
         <member name="M:WebAPI.Controllers.Base.ApiController.HandleResult``1(Application.Common.Models.Result{``0})">
              <summary>
             
@@ -64,7 +82,7 @@
             Đăng nhập bằng Facebook (placeholder - cần cấu hình Facebook OAuth)
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.AuthController.LoginForManagerAsync(Application.Features.Auth.Commands.Login.LoginCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.AuthController.LoginForManagerAsync(Application.Features.Auth.Commands.LoginForManager.LoginForManagerCommand,System.Threading.CancellationToken)">
             <summary>
             Đăng nhập bằng Username/Email và Password - Dành cho quản lý
             </summary>
@@ -244,7 +262,7 @@
             Xoá tệp media theo tên file.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.MediaFileController.DeleteFilesAsync(System.Collections.Generic.List{System.String},System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.MediaFileController.DeleteFilesAsync(Application.Features.Files.Commands.DeleteManyFiles.DeleteManyFilesCommand,System.Threading.CancellationToken)">
             <summary>
             Xoá nhiều tệp media cùng lúc.
             </summary>
@@ -254,7 +272,7 @@
             Khôi phục lại tệp media đã xoá theo tên file.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.MediaFileController.RestoreFilesAsync(System.Collections.Generic.List{System.String},System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.MediaFileController.RestoreFilesAsync(Application.Features.Files.Commands.RestoreManyFiles.RestoreManyFilesCommand,System.Threading.CancellationToken)">
             <summary>
             Khôi phục nhiều tệp media đã xoá cùng lúc.
             </summary>
@@ -710,7 +728,7 @@
         </member>
         <member name="M:WebAPI.Controllers.V1.SupplierController.GetSuppliersForInputAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
-            Lấy danh sách nhà cung cấp (có phân trang, lọc, sắp xếp - chỉ được vào khi người dùng có quyền thêm và xoá phiếu
+            Lấy danh sách nhà cung cấp (có phân trang, lọc, sắp xếp - chỉ được vào khi người dùng có quyền thêm và sửa phiếu
             bán hàng).
             </summary>
             <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
@@ -790,12 +808,12 @@
             Lấy thông tin người dùng hiện tại từ JWT
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.UserController.UpdateCurrentUserAsync(Application.Features.UserManager.Commands.UpdateUser.UpdateUserCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.UserController.UpdateCurrentUserAsync(Application.Features.Users.Commands.UpdateCurrentUser.UpdateCurrentUserCommand,System.Threading.CancellationToken)">
             <summary>
             Đổi thông tin người dùng hiện tại từ JWT
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.UserController.ChangePasswordCurrentUserAsync(Application.Features.UserManager.Commands.ChangePassword.ChangePasswordCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.UserController.ChangePasswordCurrentUserAsync(Application.Features.Users.Commands.ChangePassword.ChangePasswordCommand,System.Threading.CancellationToken)">
             <summary>
             Đổi mật khẩu người dùng hiện tại từ JWT
             </summary>
@@ -862,7 +880,7 @@
             Cập nhật thông tin người dùng
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.UserManagerController.ChangePasswordAsync(System.Guid,Application.Features.UserManager.Commands.ChangePassword.ChangePasswordCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.UserManagerController.ChangePasswordAsync(System.Guid,Application.Features.UserManager.Commands.ChangePasswordByManager.ChangePasswordByManagerCommand,System.Threading.CancellationToken)">
             <summary>
             Đổi mật khẩu người dùng theo ID (đang đăng nhập)
             </summary>

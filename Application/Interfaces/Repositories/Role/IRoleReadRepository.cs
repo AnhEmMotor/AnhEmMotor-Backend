@@ -29,5 +29,9 @@ namespace Application.Interfaces.Repositories.Role
         public Task<ApplicationRole?> GetRoleByNameAsync(string roleName, CancellationToken cancellationToken);
 
         public Task<IList<ApplicationUser>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken);
+
+        public Task<bool> HasAnyPermissionAsync(
+            IEnumerable<Guid> roleIds,
+            CancellationToken cancellationToken = default);
     }
 }

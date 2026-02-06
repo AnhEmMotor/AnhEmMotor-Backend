@@ -11,7 +11,10 @@ namespace Application.Features.Inputs.Commands.CreateInput
 
             RuleFor(x => x.Count).NotNull().GreaterThan((short)0);
 
-            RuleFor(x => x.InputPrice).NotNull().GreaterThanOrEqualTo(0);
+            RuleFor(x => x.InputPrice)
+                .NotNull()
+                .GreaterThanOrEqualTo(0)
+                .Must(price => !price.HasValue || (price.Value * 100) % 1 == 0);
         }
     }
 }

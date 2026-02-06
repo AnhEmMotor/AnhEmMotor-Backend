@@ -18,6 +18,8 @@ namespace Application.Features.Products.Queries.GetActiveVariantLiteListForOutpu
 
         public string? Sorts { get; init; }
 
+        public string? Filters { get; init; }
+
         public static GetActiveVariantLiteListForOutputQuery FromRequest(SieveModel request)
         {
             var search = ExtractFilterValue(request.Filters, "search");
@@ -33,7 +35,8 @@ namespace Application.Features.Products.Queries.GetActiveVariantLiteListForOutpu
                 PageSize = request.PageSize ?? 10,
                 Search = search,
                 StatusIds = statusIds,
-                Sorts = request.Sorts
+                Sorts = request.Sorts,
+                Filters = request.Filters
             };
         }
 

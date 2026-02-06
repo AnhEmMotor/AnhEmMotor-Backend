@@ -14,6 +14,7 @@ using Application.Features.Outputs.Queries.GetDeletedOutputsList;
 using Application.Features.Outputs.Queries.GetOutputById;
 using Application.Features.Outputs.Queries.GetOutputsList;
 using Asp.Versioning;
+using Domain.Constants;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using Mapster;
@@ -125,7 +126,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     /// <summary>
     /// Lấy thông tin chi tiết của đơn hàng.
     /// </summary>
-    [HttpGet("{id:int}")]
+    [HttpGet("{id:int}", Name = RouteNames.SaleOrders.GetById)]
     [HasPermission(Outputs.View)]
     [ProducesResponseType(typeof(OutputResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -149,14 +150,16 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     {
         var command = request.Adapt<CreateOutputByManagerCommand>();
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
+        return HandleCreated(
+            result,
+            RouteNames.SaleOrders.GetById,
+            new { id = result.IsSuccess ? result.Value?.Id : 0 });
     }
 
     /// <summary>
     /// Tạo đơn hàng mới (dành cho các tài khoản đã đăng nhập).
     /// </summary>
     [HttpPost]
-    [HasPermission(Outputs.Create)]
     [ProducesResponseType(typeof(OutputResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateOutputAsync(
@@ -165,7 +168,10 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     {
         var command = request.Adapt<CreateOutputCommand>();
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
+        return HandleCreated(
+            result,
+            RouteNames.SaleOrders.GetById,
+            new { id = result.IsSuccess ? result.Value?.Id : 0 });
     }
 
     /// <summary>

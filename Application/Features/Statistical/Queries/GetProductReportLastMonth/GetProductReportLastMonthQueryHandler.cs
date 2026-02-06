@@ -12,6 +12,6 @@ public sealed class GetProductReportLastMonthQueryHandler(IStatisticalReadReposi
         CancellationToken cancellationToken)
     {
         var result = await repository.GetProductReportLastMonthAsync(cancellationToken).ConfigureAwait(false);
-        return Result<IEnumerable<ProductReportResponse>>.Success(result);
+        return Result<IEnumerable<ProductReportResponse>>.Success(result.OrderByDescending(x => x.SoldLastMonth));
     }
 }

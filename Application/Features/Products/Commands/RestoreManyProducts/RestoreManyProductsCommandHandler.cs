@@ -20,43 +20,43 @@ public sealed class RestoreManyProductsCommandHandler(
     {
         var uniqueIds = command.Ids!.Distinct().ToList();
 
-        var deletedProducts = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.DeletedOnly)
-            .ConfigureAwait(false);
         var allProducts = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.All)
             .ConfigureAwait(false);
 
         var allProductsMap = allProducts.ToDictionary(p => p.Id);
-        var deletedProductsSet = deletedProducts.Select(p => p.Id).ToHashSet();
-
         var errorDetails = new List<Error>();
+        var productsToRestore = new List<Domain.Entities.Product>();
 
         foreach(var id in uniqueIds)
         {
-            if(!allProductsMap.ContainsKey(id))
+            if(!allProductsMap.TryGetValue(id, out var product))
             {
                 errorDetails.Add(Error.NotFound($"Product not found, Product ID: {id}"));
+                continue;
             }
 
-            if(!deletedProductsSet.Contains(id))
+            if(product.DeletedAt == null)
             {
-                var productName = allProductsMap[id].Name;
                 errorDetails.Add(
-                    Error.BadRequest($"Product is not deleted, Product ID: {id}, Product Name: {productName}"));
+                    Error.BadRequest($"Product is not deleted, Product ID: {id}, Product Name: {product.Name}"));
+                continue;
             }
+
+            productsToRestore.Add(product);
         }
 
         if(errorDetails.Count > 0)
         {
-            return errorDetails;
+            return Result<List<ProductDetailForManagerResponse>?>.Failure(errorDetails);
         }
 
-        if(deletedProducts.ToList().Count > 0)
+        if(productsToRestore.Count > 0)
         {
-            updateRepository.Restore(deletedProducts);
+            updateRepository.Restore(productsToRestore);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        var responses = deletedProducts.Select(p => p.Adapt<ProductDetailForManagerResponse>()).ToList();
-        return responses;
+        var responses = productsToRestore.Select(p => p.Adapt<ProductDetailForManagerResponse>()).ToList();
+        return Result<List<ProductDetailForManagerResponse>?>.Success(responses);
     }
 }

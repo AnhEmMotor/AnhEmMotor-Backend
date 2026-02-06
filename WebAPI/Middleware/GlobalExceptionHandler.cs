@@ -43,7 +43,7 @@ public partial class GlobalExceptionHandler(IWebHostEnvironment environment, ILo
     {
         LogUnhandledException(exception, httpContext.TraceIdentifier);
 
-        var errorResponse = environment.IsDevelopment()
+        var errorResponse = environment.IsDevelopment() || environment.IsEnvironment("Test")
             ? ErrorResponse.CreateDevelopmentError(exception)
             : ErrorResponse.CreateProductionError("An unexpected system error occurred. Please contact support.");
 

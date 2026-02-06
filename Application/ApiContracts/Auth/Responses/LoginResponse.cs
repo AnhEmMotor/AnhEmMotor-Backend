@@ -1,4 +1,6 @@
 
+using System.Text.Json.Serialization;
+
 namespace Application.ApiContracts.Auth.Responses;
 
 public class LoginResponse
@@ -7,6 +9,6 @@ public class LoginResponse
 
     public DateTimeOffset ExpiresAt { get; set; }
 
-    [System.Text.Json.Serialization.JsonIgnore]
+    [JsonIgnore]
     public string? RefreshToken { get; set; }
 }

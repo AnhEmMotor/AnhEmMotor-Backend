@@ -2,7 +2,7 @@
 
 namespace Application.ApiContracts.User.Responses
 {
-    public class ChangePasswordUserByUserResponse
+    public class ChangePasswordByUserResponse
     {
         public string? Message { get; set; }
     }

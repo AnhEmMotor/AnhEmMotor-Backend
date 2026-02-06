@@ -4,7 +4,7 @@ using FluentValidation;
 
 namespace Application.Features.Auth.Commands.Register;
 
-public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
+public partial class RegisterCommandValidator : AbstractValidator<RegisterCommand>
 {
     public RegisterCommandValidator(IUserReadRepository userReadRepository)
     {
@@ -13,6 +13,9 @@ public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
             .WithMessage("Gender not vaild. Please check again.");
 
         RuleFor(x => x.Username)
+            .NotEmpty()
+            .Matches("^[a-zA-Z0-9]+$")
+            .WithMessage("Username must contain only letters and numbers.")
             .MustAsync(
                 async (username, cancellation) =>
                 {
@@ -33,5 +36,34 @@ public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
                     return existingUser is null;
                 })
             .WithMessage("Email already exists.");
+
+        RuleFor(x => x.Password)
+            .NotEmpty()
+            .MinimumLength(8)
+            .WithMessage("Password must be at least 8 characters.")
+            .Matches("[A-Z]")
+            .WithMessage("Password must contain at least one uppercase letter.")
+            .Matches("[a-z]")
+            .WithMessage("Password must contain at least one lowercase letter.")
+            .Matches("[0-9]")
+            .WithMessage("Password must contain at least one number.")
+            .Matches("[^a-zA-Z0-9]")
+            .WithMessage("Password must contain at least one special character.");
+
+        RuleFor(x => x.PhoneNumber)
+            .Must(IsValidPhoneNumber)
+            .WithMessage("Invalid phone number.")
+            .When(x => !string.IsNullOrEmpty(x.PhoneNumber));
     }
+
+    private static bool IsValidPhoneNumber(string? phoneNumber)
+    {
+        if(string.IsNullOrWhiteSpace(phoneNumber))
+            return false;
+        var regex = RegexCheckPhone();
+        return regex.IsMatch(phoneNumber.Trim());
+    }
+
+    [System.Text.RegularExpressions.GeneratedRegex(@"^(0|84|\+84)[0-9]{9}$")]
+    private static partial System.Text.RegularExpressions.Regex RegexCheckPhone();
 }

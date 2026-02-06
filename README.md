@@ -1,3 +1,25 @@
+# AnhEmMotor Backend API
+
+> **🚨 CẢNH BÁO QUAN TRỌNG CHO NGƯỜI MỚI:**
+>
+> **Dự án này sẽ cần chạy SQL Server trên máy local và MySQL trên VPS.**
+> **Khi thay đổi cấu trúc database (thêm bảng, sửa cột, etc.), BẮT BUỘC phải tạo migration theo cách thức dưới đây!**
+>
+> ```powershell
+> # Chạy lệnh này mỗi khi thay đổi Entity/DbContext:
+> .\add-migration.ps1 "TenMigration"
+> ```
+>
+> **Nếu quên tạo MySQL migration:**
+>
+> - ✅ Code mới được deploy lên VPS
+> - ❌ Database KHÔNG được update
+> - 💥 **Application sẽ CRASH khi chạy!**
+>
+> ➡️ Chi tiết xem [Section 4.5: Tạo và Quản Lý Migrations](#45-tạo-và-quản-lý-database-migrations)
+
+---
+
 # 1. Yêu cầu hệ thống
 
 Máy tính lập trình nên dùng hệ điều hành Windows để có trải nghiệm lập trình tốt nhất.
@@ -7,8 +29,8 @@ Trước khi bắt đầu, đảm bảo máy tính của bạn đã cài đặt 
 - **.NET 10 SDK** - [Tải tại đây](https://dotnet.microsoft.com/download/dotnet/10.0)
 - **SQL Server** - [Tải tại đây](https://www.microsoft.com/sql-server/sql-server-downloads) và **SQL Server Management Studio (SSMS)** - [Tải tại đây](https://learn.microsoft.com/sql/ssms/download-sql-server-management-studio-ssms)
 - **Git** - [Tải tại đây](https://git-scm.com/downloads)
-- **Visual Studio 2022 hoặc 2026** - [Tải tại đây](https://visualstudio.microsoft.com/downloads/)
-- **NodeJS** - [Tải tại đây](https://nodejs.org/en/download)
+- **Visual Studio 2026** - [Tải tại đây](https://visualstudio.microsoft.com/downloads/)
+- **Docker** - [Tải tại đây](https://www.docker.com/products/docker-desktop)
 
 # 2. Thiết lập dự án
 
@@ -24,7 +46,7 @@ cd AnhEmMotor-Backend
 Mở terminal tại thư mục gốc của dự án và chạy lệnh:
 
 ```powershell
-dotnet restore && npm i
+dotnet restore
 ```
 
 ## 2. Tạo file cấu hình
@@ -52,9 +74,45 @@ Dự án sử dụng file `appsettings.json` để cấu hình. File mẫu là `
 
 Mở file `WebAPI/appsettings.json` và điền các thông tin sau:
 
-## 1. Connection String (BẮT BUỘC)
+## 1. Chọn Database Provider (BẮT BUỘC)
 
-Thay thế connection string để kết nối với SQL Server:
+**Dự án hỗ trợ cả SQL Server và MySQL.** Chọn provider phù hợp với môi trường:
+
+### SQL Server (Dành cho Development trên Windows)
+
+Trong file `appsettings.json`, cấu hình:
+
+```json
+{
+	"Provider": "SqlServer",
+	"ConnectionStrings": {
+		"StringConnection": "Server=localhost;Database=AnhEmMotorDB;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true"
+	}
+}
+```
+
+### MySQL (Dành cho Production hoặc Testing)
+
+Trong file `appsettings.json`, cấu hình:
+
+```json
+{
+	"Provider": "MySql",
+	"ConnectionStrings": {
+		"StringConnection": "Server=localhost;Database=anhemmotor;User=root;Password=your_password;"
+	}
+}
+```
+
+> **⚠️ LƯU Ý QUAN TRỌNG:**
+>
+> - **Local Development:** Dùng **SQL Server**
+> - **Production/VPS:** sử dụng **MySQL**
+> - **Testing:** Tự động dùng MySQL qua Docker (không cần cấu hình, nhưng cần phải cài đặt Docker)
+
+---
+
+## 2. Connection String Chi Tiết
 
 ```json
 "ConnectionStrings": {
@@ -112,11 +170,38 @@ Cấu hình roles và users mặc định:
 
 ```json
 "ProtectedAuthorizationEntities": {
-  "SuperRoles": ["Admin"],
-  "ProtectedUsers": ["admin@anhem.com:Admin@123456"],
-  "DefaultRolesForNewUsers": ["User"]
+  "SuperRoles": ["Admin", "SuperAdmin"],
+  "ProtectedUsers": [
+    "admin@anhem.com:Admin@123456",
+    "superadmin@anhem.com:SuperAdmin@123456"
+  ],
+  "DefaultRolesForNewUsers": ["User", "Customer"]
 }
 ```
+
+**Giải thích:**
+
+- **SuperRoles**: Roles có full quyền, không thể xóa
+  - Có thể có nhiều roles: `["Admin", "SuperAdmin", "Manager"]`
+  - Mỗi super role sẽ tự động có tất cả permissions
+- **ProtectedUsers**: Users không thể xóa, được tạo tự động khi app khởi động
+  - Format: `"email:password"` hoặc chỉ `"email"` (password mặc định: `DefaultProtectedUser@123456`)
+  - Ví dụ nhiều users:
+    ```json
+    [
+    	"admin@anhem.com:Admin@123456",
+    	"manager@anhem.com",
+    	"support@anhem.com:Support@2024"
+    ]
+    ```
+- **DefaultRolesForNewUsers**: Roles được gán tự động cho user mới đăng ký
+  - Có thể có nhiều default roles: `["User", "Customer", "Member"]`
+
+---
+
+## 6. Seeding Options (Tùy chọn)
+
+````
 
 ## 5. Seeding Options (Tùy chọn)
 
@@ -126,9 +211,9 @@ Cấu hình seeding dữ liệu ban đầu:
 "SeedingOptions": {
   "RunDataSeedingOnStartup": true,
 }
-```
+````
 
-## 6. Một số cài đặt bổ sung
+## 7. Một số cài đặt bổ sung
 
 ### Cấu hình các danh mục sản phẩm không xoá
 
@@ -166,9 +251,105 @@ Cấu hình seeding dữ liệu ban đầu:
 
    **Quan trọng:** Sau khi chạy lần đầu, tắt `RunDataSeedingOnStartup`:
 
-   ```json
-   "RunDataSeedingOnStartup": false
-   ```
+---
+
+# 4.5. Tạo và Quản Lý Database Migrations
+
+> **🚨 QUAN TRỌNG CHO NGƯỜI MỚI:**
+>
+> Khi bạn thay đổi cấu trúc database (thêm bảng, sửa cột, etc.), **BẮT BUỘC phải tạo migration**!
+> Nếu không, dự án sẽ bị lỗi khi deploy lên VPS!
+
+## Tạo Migration (Recommended Way)
+
+### Tự động tạo cả SQL Server và MySQL migrations
+
+Sử dụng script wrapper để tự động tạo migrations cho CẢ 2 providers:
+
+```powershell
+# Từ thư mục gốc của dự án
+.\add-migration.ps1 "TenMigration"
+```
+
+**Ví dụ:**
+
+```powershell
+.\add-migration.ps1 "AddProductColorColumn"
+```
+
+Script sẽ tự động:
+
+- Tạo SQL Server migration (cho local development)
+- Tạo MySQL migration (cho production deployment)
+- Báo lỗi rõ ràng nếu có vấn đề
+
+### Update Local Database
+
+Sau khi tạo migration, update database local:
+
+```powershell
+dotnet ef database update --context ApplicationDBContext --project Infrastructure --startup-project WebAPI
+```
+
+---
+
+## Tạo Migration Thủ Công (Advanced)
+
+### Tạo SQL Server Migration
+
+```powershell
+dotnet ef migrations add TenMigration --project Infrastructure --startup-project WebAPI
+```
+
+### Tạo MySQL Migration
+
+```powershell
+dotnet ef migrations add TenMigration --context MySqlDbContext --output-dir MySqlMigrations --project Infrastructure --startup-project WebAPI
+```
+
+> **⚠️ NGUY HIỂM:**
+>
+> Nếu chỉ tạo SQL Server migration mà **quên tạo MySQL migration**, khi deploy lên VPS:
+>
+> - ✅ Code mới được deploy
+> - ❌ Database KHÔNG được update
+> - 💥 **Application sẽ CRASH** (mismatch giữa code và DB schema)
+>
+> **Khuyến nghị:** Luôn dùng `add-migration.ps1` để tránh quên!
+
+---
+
+# 4.6. Các Lệnh Migration Hữu Ích
+
+### Xem danh sách migrations
+
+```powershell
+# SQL Server migrations
+dotnet ef migrations list --project Infrastructure --startup-project WebAPI
+
+# MySQL migrations
+dotnet ef migrations list --context MySqlDbContext --project Infrastructure --startup-project WebAPI
+```
+
+### Xóa migration cuối cùng (nếu chưa apply)
+
+```powershell
+# SQL Server
+dotnet ef migrations remove --project Infrastructure --startup-project WebAPI
+
+# MySQL
+dotnet ef migrations remove --context MySqlDbContext --project Infrastructure --startup-project WebAPI
+```
+
+### Rollback database về migration trước
+
+```powershell
+dotnet ef database update TenMigrationTruocDo --project Infrastructure --startup-project WebAPI
+```
+
+```json
+"RunDataSeedingOnStartup": false
+```
 
 # 5. Chạy ứng dụng
 
@@ -204,7 +385,108 @@ Sau khi chạy ứng dụng, truy cập Swagger UI để xem tài liệu API:
 https://localhost:7001/swagger
 ```
 
-# 7. Troubleshooting
+# 7. Cấu hình Môi trường Test (Yêu cầu)
+
+Dự án sử dụng **Testcontainers** để tự động tạo môi trường MySQL cô lập khi chạy Test.
+
+**Yêu cầu duy nhất:**
+
+- Máy tính phải cài đặt và đang chạy **Docker Desktop** (hoặc Docker Engine).
+
+**Cách chạy Test:**
+
+1.  Bật Docker.
+2.  Chạy lệnh: `dotnet test`
+3.  Hệ thống sẽ tự động:
+    - Tải Docker Image `mysql:8.0`.
+    - Khởi tạo Container.
+    - Chạy Migrations.
+    - Thực thi Test.
+    - Tự động dọn dẹp sau khi xong.
+
+# 8. GitHub Secrets Configuration (Cho Production Deploy)
+
+Cần setup các secrets sau trong GitHub repository:
+
+**Vào:** `Settings` → `Secrets and variables` → `Actions` → `New repository secret`
+
+### Required Secrets
+
+| Secret Name       | Mô Tả                               | Ví Dụ                                                          |
+| ----------------- | ----------------------------------- | -------------------------------------------------------------- |
+| `ALLOWED_HOSTS`   | Domains được phép                   | `api.yourdomain.com;yourdomain.com` hoặc `*`                   |
+| `DB_CONNECTION`   | MySQL connection string             | `Server=localhost;Database=anhemmotor;User=root;Password=xxx;` |
+| `DB_USER`         | MySQL username (để chạy migrations) | `root` hoặc `anhemmotor_user`                                  |
+| `DB_PASSWORD`     | MySQL password                      | `YourPassword123`                                              |
+| `DB_NAME`         | Database name                       | `anhemmotor`                                                   |
+| `JWT_KEY`         | JWT secret key (>= 32 chars)        | `Your-Super-Secret-JWT-Key-32-Chars`                           |
+| `JWT_ISSUER`      | API URL                             | `https://api.yourdomain.com`                                   |
+| `JWT_AUDIENCE`    | Client URL                          | `https://yourdomain.com`                                       |
+| `HOST`            | VPS IP hoặc domain, hoặc dấu \*     | `*`                                                            |
+| `USERNAME`        | SSH username                        | `root` hoặc `youruser`                                         |
+| `SSH_PRIVATE_KEY` | Private SSH key                     | Nội dung file `~/.ssh/id_rsa`                                  |
+| `RUN_DATA_SEEDING` | Chạy data seeding khi deploy (true/false) | `false` (production) hoặc `true` (lần đầu setup) |
+
+### Array Secrets (SuperRoles, ProtectedUsers, DefaultRoles)
+
+**Quan trọng:** GitHub Secrets hỗ trợ JSON array format!
+
+#### SUPER_ROLES
+
+**Single value:**
+
+```
+["Admin"]
+```
+
+**Multiple values:**
+
+```json
+["Admin", "SuperAdmin", "Manager"]
+```
+
+#### PROTECTED_USERS
+
+**Single user:**
+
+```json
+["admin@anhem.com:Admin@123456"]
+```
+
+**Multiple users:**
+
+```json
+["admin@anhem.com:Admin@123456","manager@anhem.com","support@anhem.com:Support@2024"]
+```
+
+#### DEFAULT_ROLES
+
+**Single role:**
+
+```json
+["User"]
+```
+
+**Multiple roles:**
+
+````json
+["User","Customer"]
+````
+
+> **Lưu ý:** Không có space (khoảng cách) sau dấu phẩy trong JSON array! Ví dụ viết như 2 ví dụ sau là sai:
+```json
+["admin@anhem.com:Admin@123456" , "manager@anhem.com"]
+["admin@anhem.com:Admin@123456", "manager@anhem.com"]
+````
+
+---
+
+# 9. Troubleshooting
+
+## Lỗi: "Docker is not running"
+
+**Giải pháp:**
+Hãy chắc chắn bạn đã bật Docker Desktop trước khi chạy Test.
 
 ## Lỗi: "Unable to connect to SQL Server"
 

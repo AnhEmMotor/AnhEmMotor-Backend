@@ -1,4 +1,4 @@
-using Application.ApiContracts.Permission.Responses;
+﻿using Application.ApiContracts.Permission.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Permission;
@@ -25,6 +25,7 @@ public class UpdateRoleCommandHandler(
         {
             return Error.NotFound("Role not found.");
         }
+
         var isRoleUpdated = false;
 
         if(request.Description is not null && string.Compare(role.Description, request.Description) != 0)
@@ -33,7 +34,16 @@ public class UpdateRoleCommandHandler(
             isRoleUpdated = true;
         }
 
-        if(request.Permissions!.Count == 0)
+        if(request.Permissions == null)
+        {
+            if(isRoleUpdated)
+            {
+                await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+            return new PermissionRoleUpdateResponse();
+        }
+
+        if(request.Permissions.Count == 0)
         {
             if(isRoleUpdated)
             {

@@ -2,6 +2,7 @@
 using Application.Common.Models;
 using Application.Features.Auth.Commands.GoogleLogin;
 using Application.Features.Auth.Commands.Login;
+using Application.Features.Auth.Commands.LoginForManager;
 using Application.Features.Auth.Commands.Logout;
 using Application.Features.Auth.Commands.RefreshToken;
 using Application.Features.Auth.Commands.Register;
@@ -31,7 +32,7 @@ public class AuthController(IMediator mediator) : ApiController
     [HttpPost("register")]
     [AnonymousOnly]
     [SwaggerOperation(Summary = "Đăng ký tài khoản mới", Description = "Tạo 1 tài khoản mới (với email và password)")]
-    [ProducesResponseType(typeof(RegistrationSuccessResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(RegisterResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RegisterAsync(
         [FromBody] RegisterCommand command,
@@ -39,7 +40,7 @@ public class AuthController(IMediator mediator) : ApiController
     {
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
 
-        return HandleResult(result);
+        return HandleCreated(result);
     }
 
     /// <summary>
@@ -79,7 +80,7 @@ public class AuthController(IMediator mediator) : ApiController
     /// Đăng xuất
     /// </summary>
     [HttpPost("logout")]
-    [ProducesResponseType(typeof(LogoutSuccessResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(LogoutResponse), StatusCodes.Status200OK)]
     [Authorize]
     public async Task<IActionResult> LogoutAsync(CancellationToken cancellationToken)
     {
@@ -90,7 +91,7 @@ public class AuthController(IMediator mediator) : ApiController
             return HandleResult(result);
 
         Response.Cookies.Delete("refreshToken");
-        return Ok(new LogoutSuccessResponse());
+        return Ok(new LogoutResponse());
     }
 
     /// <summary>
@@ -124,8 +125,19 @@ public class AuthController(IMediator mediator) : ApiController
     /// Đăng nhập bằng Username/Email và Password - Dành cho quản lý
     /// </summary>
     [HttpPost("login/for-manager")]
+    [AnonymousOnly]
+    [SwaggerOperation(
+        Summary = "Đăng nhập cho quản lý",
+        Description = "Đăng nhập với Username/Email và Password. Chỉ cho phép người dùng có ít nhất một quyền trong hệ thống.")]
+    [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> LoginForManagerAsync(
-        [FromBody] LoginCommand command,
+        [FromBody] LoginForManagerCommand command,
         CancellationToken cancellationToken)
-    { throw new NotImplementedException(); }
+    {
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+
+        return HandleResult(result);
+    }
 }

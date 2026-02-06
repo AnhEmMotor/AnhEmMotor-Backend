@@ -3,26 +3,16 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories.User;
 using MediatR;
 
-namespace Application.Features.UserManager.Commands.ChangePassword;
+namespace Application.Features.UserManager.Commands.ChangePasswordByManager;
 
-public class ChangePasswordCommandHandler(
+public class ChangePasswordByManagerCommandHandler(
     IUserReadRepository userReadRepository,
-    IUserUpdateRepository userUpdateRepository) : IRequestHandler<ChangePasswordCommand, Result<ChangePasswordByManagerResponse>>
+    IUserUpdateRepository userUpdateRepository) : IRequestHandler<ChangePasswordByManagerCommand, Result<ChangePasswordByManagerResponse>>
 {
     public async Task<Result<ChangePasswordByManagerResponse>> Handle(
-        ChangePasswordCommand request,
+        ChangePasswordByManagerCommand request,
         CancellationToken cancellationToken)
     {
-        if(string.IsNullOrEmpty(request.CurrentUserId) || !Guid.TryParse(request.CurrentUserId, out var currentUserGuid))
-        {
-            return Error.Unauthorized("Invalid user token.");
-        }
-
-        if(currentUserGuid != request.UserId!.Value)
-        {
-            return Error.Forbidden("Invalid user token.");
-        }
-
         var user = await userReadRepository.FindUserByIdAsync(request.UserId!.Value, cancellationToken)
             .ConfigureAwait(false);
         if(user is null)
@@ -30,16 +20,10 @@ public class ChangePasswordCommandHandler(
             return Error.NotFound("User not found.");
         }
 
-        if(string.Compare(request.CurrentPassword, request.NewPassword) == 0)
-        {
-            return Error.Validation("New password must be different from current password.", "NewPassword");
-        }
-
         cancellationToken.ThrowIfCancellationRequested();
 
-        var (succeeded, errors) = await userUpdateRepository.ChangePasswordAsync(
+        var (succeeded, errors) = await userUpdateRepository.ResetPasswordAsync(
             user,
-            request.CurrentPassword!,
             request.NewPassword!,
             cancellationToken)
             .ConfigureAwait(false);
@@ -49,6 +33,8 @@ public class ChangePasswordCommandHandler(
             var validationErrors = errors.Select(e => Error.Validation(e)).ToList();
             return Result<ChangePasswordByManagerResponse>.Failure(validationErrors);
         }
+
+        await userUpdateRepository.ClearRefreshTokenAsync(user.Id, cancellationToken).ConfigureAwait(false);
 
         return new ChangePasswordByManagerResponse() { Message = "Password changed successfully." };
     }

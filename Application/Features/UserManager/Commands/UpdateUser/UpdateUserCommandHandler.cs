@@ -1,4 +1,4 @@
-using Application.ApiContracts.User.Responses;
+using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.User;
 using Domain.Constants;
@@ -23,32 +23,57 @@ public class UpdateUserCommandHandler(
 
         if(!string.IsNullOrWhiteSpace(request.FullName))
         {
-            user.FullName = request.FullName;
+            user.FullName = request.FullName.Trim();
         }
 
         if(!string.IsNullOrWhiteSpace(request.Gender))
         {
-            if(!GenderStatus.IsValid(request.Gender))
+            var gender = request.Gender.Trim();
+            if(!GenderStatus.IsValid(gender))
             {
                 return Error.Validation(
                     $"Invalid gender value. Allowed values: {string.Join(", ", GenderStatus.All)}",
                     "Gender");
             }
-            user.Gender = request.Gender;
+            user.Gender = gender;
         }
 
         cancellationToken.ThrowIfCancellationRequested();
 
         if(!string.IsNullOrWhiteSpace(request.PhoneNumber))
         {
-            user.PhoneNumber = request.PhoneNumber;
+            var phoneNumber = request.PhoneNumber.Trim();
+            if(string.Compare(phoneNumber, user.PhoneNumber) != 0)
+            {
+                var existingUser = await userReadRepository.FindUserByPhoneNumberAsync(phoneNumber, cancellationToken)
+                    .ConfigureAwait(false);
+                if(existingUser != null && existingUser.Id != user.Id)
+                {
+                    return Error.Conflict($"Phone number '{phoneNumber}' is already taken.", "PhoneNumber");
+                }
+                user.PhoneNumber = phoneNumber;
+            }
         }
 
         var (succeeded, errors) = await userUpdateRepository.UpdateUserAsync(user, cancellationToken)
             .ConfigureAwait(false);
         if(!succeeded)
         {
-            var validationErrors = errors.Select(e => Error.Validation(e)).ToList();
+            var errorList = errors.ToList();
+            if(errorList.Any(
+                e => e.Contains("taken", StringComparison.OrdinalIgnoreCase) ||
+                    e.Contains("duplicate", StringComparison.OrdinalIgnoreCase)))
+            {
+                var conflictErrors = errorList
+                    .Where(
+                        e => e.Contains("taken", StringComparison.OrdinalIgnoreCase) ||
+                            e.Contains("duplicate", StringComparison.OrdinalIgnoreCase))
+                    .Select(e => Error.Conflict(e))
+                    .ToList();
+                return Result<UserDTOForManagerResponse>.Failure(conflictErrors);
+            }
+
+            var validationErrors = errorList.Select(e => Error.Validation(e)).ToList();
             return Result<UserDTOForManagerResponse>.Failure(validationErrors);
         }
 

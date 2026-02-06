@@ -18,6 +18,8 @@ public sealed record GetProductsListForManagerQuery : IRequest<Result<PagedResul
 
     public string? Sorts { get; init; }
 
+    public string? Filters { get; init; }
+
     public static GetProductsListForManagerQuery FromRequest(SieveModel request)
     {
         var search = ExtractFilterValue(request.Filters, "search");
@@ -33,7 +35,8 @@ public sealed record GetProductsListForManagerQuery : IRequest<Result<PagedResul
             PageSize = request.PageSize ?? 10,
             Search = search,
             StatusIds = statusIds,
-            Sorts = request.Sorts
+            Sorts = request.Sorts,
+            Filters = request.Filters
         };
     }
 

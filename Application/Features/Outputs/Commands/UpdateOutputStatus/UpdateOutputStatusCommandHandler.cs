@@ -2,7 +2,6 @@ using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
-
 using Domain.Constants;
 using Domain.Constants.Order;
 using Mapster;
@@ -43,33 +42,43 @@ public sealed class UpdateOutputStatusCommandHandler(
                 "StatusId");
         }
 
-        if(string.Compare(request.StatusId, OrderStatus.Completed) == 0)
+        switch(request.StatusId)
         {
-            output.CreatedBy = request.CurrentUserId;
-        } else
-        {
-            foreach(var outputInfo in output.OutputInfos)
-            {
-                if(outputInfo.ProductVarientId.HasValue && outputInfo.Count.HasValue)
-                {
-                    var stock = await readRepository.GetStockQuantityByVariantIdAsync(
-                        outputInfo.ProductVarientId.Value,
-                        cancellationToken)
-                        .ConfigureAwait(false);
+            case OrderStatus.Completed:
+                output.FinishedBy = request.CurrentUserId;
+                await updateRepository.ProcessCOGSForCompletedOrderAsync(output.Id, cancellationToken)
+                    .ConfigureAwait(false);
+                break;
 
-                    if(stock < outputInfo.Count.Value)
+            case OrderStatus.Cancelled:
+            case OrderStatus.Refunding:
+            case OrderStatus.Refunded:
+                break;
+
+            default:
+                foreach(var outputInfo in output.OutputInfos)
+                {
+                    if(outputInfo.ProductVarientId.HasValue && outputInfo.Count.HasValue)
                     {
-                        return Error.BadRequest(
-                            $"Sản phẩm ID {outputInfo.ProductVarientId} không đủ tồn kho. Hiện có: {stock}, cần: {outputInfo.Count.Value}",
-                            "Products");
+                        var stock = await readRepository.GetStockQuantityByVariantIdAsync(
+                            outputInfo.ProductVarientId.Value,
+                            cancellationToken)
+                            .ConfigureAwait(false);
+
+                        if(stock < outputInfo.Count.Value)
+                        {
+                            return Error.BadRequest(
+                                $"Sản phẩm ID {outputInfo.ProductVarientId} không đủ tồn kho. Hiện có: {stock}, cần: {outputInfo.Count.Value}",
+                                "Products");
+                        }
                     }
                 }
-            }
-
-            await updateRepository.ProcessCOGSForCompletedOrderAsync(output.Id, cancellationToken).ConfigureAwait(false);
+                break;
         }
 
         output.StatusId = request.StatusId;
+        output.LastStatusChangedAt = DateTimeOffset.UtcNow;
+
         updateRepository.Update(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 

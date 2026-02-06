@@ -33,6 +33,7 @@ public class PermissionAndRole
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
     }
 
+#pragma warning disable IDE0079 
 #pragma warning disable CRR0035
     [Fact(DisplayName = "PERM_CTRL_001 - Controller gọi GetAllPermissions thành công")]
     public async Task GetAllPermissions_MediatorReturnsData_ReturnsOkWithData()
@@ -275,8 +276,8 @@ public class PermissionAndRole
 
         var result = await _controller.CreateRoleAsync(request, CancellationToken.None).ConfigureAwait(true);
 
-        result.Should().BeOfType<OkObjectResult>();
-        var okResult = result as OkObjectResult;
+        result.Should().BeOfType<CreatedAtRouteResult>();
+        var okResult = result as CreatedAtRouteResult;
         var response = okResult!.Value as RoleCreateResponse;
         response.Should().NotBeNull();
         response!.RoleName.Should().Be("NewRole");
@@ -405,4 +406,5 @@ public class PermissionAndRole
         _controller.ControllerContext.HttpContext.User = claimsPrincipal;
     }
 #pragma warning restore CRR0035
+#pragma warning restore IDE0079
 }

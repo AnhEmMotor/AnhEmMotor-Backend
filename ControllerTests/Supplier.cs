@@ -9,7 +9,7 @@ using Application.Features.Suppliers.Commands.UpdateSupplier;
 using Application.Features.Suppliers.Queries.GetDeletedSuppliersList;
 using Application.Features.Suppliers.Queries.GetSupplierById;
 using Application.Features.Suppliers.Queries.GetSuppliersList;
-
+using Application.Features.Suppliers.Queries.GetSuppliersListForInputManager;
 using Domain.Primitives;
 using FluentAssertions;
 using MediatR;
@@ -35,6 +35,7 @@ public class Supplier
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
     }
 
+#pragma warning disable IDE0079 
 #pragma warning disable CRR0035
     [Fact(DisplayName = "SUP_046 - Tạo Supplier thành công qua API")]
     public async Task CreateSupplier_Success_ReturnsCreatedSupplier()
@@ -55,9 +56,13 @@ public class Supplier
 
         var result = await _controller.CreateSupplierAsync(request, CancellationToken.None).ConfigureAwait(true);
 
-        var createdResult = result.Should().BeOfType<CreatedResult>().Subject;
-        createdResult.StatusCode.Should().Be(StatusCodes.Status201Created);
-        var response = createdResult.Value.Should().BeOfType<SupplierResponse>().Subject;
+        var createdAtActionResult = result.Should().BeOfType<CreatedAtRouteResult>().Subject;
+
+        createdAtActionResult.StatusCode.Should().Be(StatusCodes.Status201Created);
+
+        createdAtActionResult.RouteValues?["id"].Should().Be(1);
+
+        var response = createdAtActionResult.Value.Should().BeOfType<SupplierResponse>().Subject;
         response.Id.Should().Be(1);
         response.Name.Should().Be("API Supplier");
         response.StatusId.Should().Be("active");
@@ -116,24 +121,27 @@ public class Supplier
     public async Task GetSuppliersForInput_ReturnsOnlyActiveSuppliers()
     {
         var sieveModel = new SieveModel();
-        var items = new List<SupplierResponse>
-        {
-            new() { Id = 1, Name = "Supplier 1", StatusId = "active" },
-            new() { Id = 2, Name = "Supplier 2", StatusId = "active" }
-        };
-        var expectedResponse = new PagedResult<SupplierResponse>(items, 10, 1, 10);
 
-        _mediatorMock.Setup(m => m.Send(It.IsAny<GetSuppliersListQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<PagedResult<SupplierResponse>>.Success(expectedResponse));
+        var items = new List<SupplierForInputManagerResponse>
+        {
+            new() { Id = 1, Name = "Supplier 1" },
+            new() { Id = 2, Name = "Supplier 2" }
+        };
+
+        var expectedResponse = new PagedResult<SupplierForInputManagerResponse>(items, 10, 1, 10);
+
+        _mediatorMock.Setup(
+            m => m.Send(It.IsAny<GetSuppliersListForInputManagerQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<PagedResult<SupplierForInputManagerResponse>>.Success(expectedResponse));
 
         var result = await _controller.GetSuppliersForInputAsync(sieveModel, CancellationToken.None)
             .ConfigureAwait(true);
 
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
-        var response = okResult.Value.Should().BeOfType<PagedResult<SupplierResponse>>().Subject;
+
+        var response = okResult.Value.Should().BeOfType<PagedResult<SupplierForInputManagerResponse>>().Subject;
+
         response.Items.Should().HaveCount(2);
-        response.Items.Should().OnlyContain(s => string.Compare(s.StatusId, "active") == 0);
-        response.Items.First().TotalInput.Should().BeNull();
     }
 
     [Fact(
@@ -288,4 +296,5 @@ public class Supplier
             .ConfigureAwait(true);
     }
 #pragma warning restore CRR0035
+#pragma warning restore IDE0079
 }

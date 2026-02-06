@@ -16,27 +16,25 @@ public sealed class DeleteManyProductsCommandHandler(
     {
         var uniqueIds = command.Ids!.Distinct().ToList();
 
-        var activeProducts = await readRepository.GetByIdAsync(uniqueIds, cancellationToken).ConfigureAwait(false);
-        var allProducts = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.ActiveOnly)
+        var allProducts = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.All)
             .ConfigureAwait(false);
 
         var allProductsMap = allProducts.ToDictionary(p => p.Id!);
-        var activeProductsSet = activeProducts.Select(p => p.Id!).ToHashSet();
-
         var errorDetails = new List<Error>();
 
         foreach(var id in uniqueIds)
         {
-            if(!allProductsMap.ContainsKey(id))
+            if(!allProductsMap.TryGetValue(id, out var product))
             {
                 errorDetails.Add(Error.NotFound($"Product not found, Product ID: {id}"));
+                continue;
             }
 
-            if(!activeProductsSet.Contains(id))
+            if(product.DeletedAt != null)
             {
-                var productName = allProductsMap[id].Name;
                 errorDetails.Add(
-                    Error.BadRequest($"Product has already been deleted, Product ID: {id}, Product Name: {productName}"));
+                    Error.BadRequest(
+                        $"Product has already been deleted, Product ID: {id}, Product Name: {product.Name}"));
             }
         }
 
@@ -45,9 +43,11 @@ public sealed class DeleteManyProductsCommandHandler(
             return Result.Failure(errorDetails);
         }
 
-        if(activeProducts.ToList().Count > 0)
+        var productsToDelete = allProductsMap.Values.Where(p => p.DeletedAt == null).ToList();
+
+        if(productsToDelete.Count > 0)
         {
-            deleteRepository.Delete(activeProducts);
+            deleteRepository.Delete(productsToDelete);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
