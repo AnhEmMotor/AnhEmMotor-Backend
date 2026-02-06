@@ -2,14 +2,14 @@ name: Run All Tests
 
 on:
   push:
-    branches: [ "master", "main" ]
+    branches: ["master", "main"]
   pull_request:
-    branches: [ "master", "main" ]
+    branches: ["master", "main"]
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     services:
       mysql:
         image: mysql:8.0
@@ -25,41 +25,41 @@ jobs:
           --health-retries=3
 
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 10.0.x
-        
-    - name: Restore dependencies
-      run: dotnet restore
+      - uses: actions/checkout@v4
 
-    - name: Build
-      run: dotnet build --no-restore
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
 
-    - name: Debug - Check Environment
-      run: |
-        echo "GITHUB_ACTIONS=$GITHUB_ACTIONS"
-        echo "CI=$CI"
-        echo "MySQL Host: 127.0.0.1:3306"
-        mysql -h 127.0.0.1 -P 3306 -u root -proot -e "SHOW DATABASES;"
-        
-    - name: Run Integration Tests
-      run: dotnet test IntegrationTests/IntegrationTests.csproj --no-build --verbosity normal --logger "console;verbosity=normal"
-      env:
-        ConnectionStrings__StringConnection: "Server=127.0.0.1;Port=3306;Database=AnhEmMotor_Test;User=root;Password=root;"
-        Logging__LogLevel__Default: "Warning"
-        Logging__LogLevel__Microsoft.EntityFrameworkCore.Database.Command: "None"
+      - name: Restore dependencies
+        run: dotnet restore
 
-    - name: Run Controller Tests
-      run: dotnet test ControllerTests/ControllerTests.csproj --no-build --verbosity normal --logger "console;verbosity=normal"
-      env:
-        Logging__LogLevel__Default: "Warning"
-        Logging__LogLevel__Microsoft.EntityFrameworkCore.Database.Command: "None"
+      - name: Build
+        run: dotnet build --no-restore
 
-    - name: Run Unit Tests
-      run: dotnet test UnitTests/UnitTests.csproj --no-build --verbosity normal --logger "console;verbosity=normal"
-      env:
-        Logging__LogLevel__Default: "Warning"
-        Logging__LogLevel__Microsoft.EntityFrameworkCore.Database.Command: "None"
+      - name: Debug - Check Environment
+        run: |
+          echo "GITHUB_ACTIONS=$GITHUB_ACTIONS"
+          echo "CI=$CI"
+          echo "MySQL Host: 127.0.0.1:3306"
+          mysql -h 127.0.0.1 -P 3306 -u root -proot -e "SHOW DATABASES;"
+
+      - name: Run Integration Tests
+        run: dotnet test IntegrationTests/IntegrationTests.csproj --no-build --verbosity minimal --logger "console;verbosity=minimal"
+        env:
+          ConnectionStrings__StringConnection: "Server=127.0.0.1;Port=3306;Database=AnhEmMotor_Test;User=root;Password=root;"
+          Logging__LogLevel__Default: "Warning"
+          Logging__LogLevel__Microsoft.EntityFrameworkCore.Database.Command: "None"
+
+      - name: Run Controller Tests
+        run: dotnet test ControllerTests/ControllerTests.csproj --no-build --verbosity minimal --logger "console;verbosity=minimal"
+        env:
+          Logging__LogLevel__Default: "Warning"
+          Logging__LogLevel__Microsoft.EntityFrameworkCore.Database.Command: "None"
+
+      - name: Run Unit Tests
+        run: dotnet test UnitTests/UnitTests.csproj --no-build --verbosity minimal --logger "console;verbosity=minimal"
+        env:
+          Logging__LogLevel__Default: "Warning"
+          Logging__LogLevel__Microsoft.EntityFrameworkCore.Database.Command: "None"

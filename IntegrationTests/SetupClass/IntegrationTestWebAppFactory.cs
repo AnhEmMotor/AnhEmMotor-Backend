@@ -30,32 +30,22 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
 
     public IntegrationTestWebAppFactory()
     {
-        // Detect if running in GitHub Actions or other CI environment
         _isRunningInCI = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GITHUB_ACTIONS")) ||
                          !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("CI"));
 
-        Console.WriteLine($"[IntegrationTestWebAppFactory] Running in CI: {_isRunningInCI}");
-        Console.WriteLine($"[IntegrationTestWebAppFactory] GITHUB_ACTIONS env: {Environment.GetEnvironmentVariable("GITHUB_ACTIONS")}");
-        Console.WriteLine($"[IntegrationTestWebAppFactory] CI env: {Environment.GetEnvironmentVariable("CI")}");
-
         if (_isRunningInCI)
         {
-            // Use MySQL service container in CI
             _ciConnectionString = Environment.GetEnvironmentVariable("ConnectionStrings__StringConnection")
                 ?? "Server=127.0.0.1;Port=3306;Database=AnhEmMotor_Test;User=root;Password=root;";
-            
-            Console.WriteLine($"[IntegrationTestWebAppFactory] Using CI connection: {_ciConnectionString}");
         }
         else
         {
-            // Use Testcontainers locally
             _mySqlContainer = new MySqlBuilder("mysql:8.0")
                 .WithDatabase("AnhEmMotor_Test")
                 .WithUsername("root")
                 .WithPassword("root")
                 .Build();
             
-            Console.WriteLine("[IntegrationTestWebAppFactory] Using Testcontainers for local development");
         }
     }
 
@@ -70,12 +60,10 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
 
         if (_isRunningInCI)
         {
-            // Use CI MySQL service container
             connectionString = _ciConnectionString!;
         }
         else
         {
-            // Start Testcontainers for local development
             await _mySqlContainer!.StartAsync().ConfigureAwait(false);
             connectionString = _mySqlContainer.GetConnectionString();
         }
@@ -83,7 +71,6 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
         _connection = new MySqlConnection(connectionString);
         await _connection.OpenAsync().ConfigureAwait(false);
 
-        // Create a temporary DbContext to initialize the database schema
         var optionsBuilder = new DbContextOptionsBuilder<ApplicationDBContext>();
         optionsBuilder.UseMySql(
             connectionString,
@@ -92,7 +79,6 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
         using var tempDbContext = new ApplicationDBContext(optionsBuilder.Options);
         await tempDbContext.Database.EnsureCreatedAsync().ConfigureAwait(false);
 
-        // Initialize Respawner after database schema is created
         _respawner = await Respawner.CreateAsync(
             _connection,
             new RespawnerOptions
