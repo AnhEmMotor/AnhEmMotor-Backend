@@ -10,9 +10,16 @@ using SupplierStatus = Domain.Entities.SupplierStatus;
 
 namespace Infrastructure.DBContexts;
 
-public class ApplicationDBContext(DbContextOptions<ApplicationDBContext> options) : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>(
-    options)
+public class ApplicationDBContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
 {
+    public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options) : base(options)
+    {
+    }
+
+    protected ApplicationDBContext(DbContextOptions options) : base(options)
+    {
+    }
+
     public new DbSet<IdentityUserRole<Guid>> UserRoles => Set<IdentityUserRole<Guid>>();
 
     public virtual DbSet<Brand> Brands { get; set; }
