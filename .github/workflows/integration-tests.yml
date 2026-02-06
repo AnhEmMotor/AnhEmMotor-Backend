@@ -37,6 +37,13 @@ jobs:
 
     - name: Build
       run: dotnet build --no-restore
+
+    - name: Debug - Check Environment
+      run: |
+        echo "GITHUB_ACTIONS=$GITHUB_ACTIONS"
+        echo "CI=$CI"
+        echo "MySQL Host: 127.0.0.1:3306"
+        mysql -h 127.0.0.1 -P 3306 -u root -proot -e "SHOW DATABASES;"
         
     - name: Run Integration Tests
       run: dotnet test IntegrationTests/IntegrationTests.csproj --no-build --verbosity normal --logger "console;verbosity=normal"

@@ -34,11 +34,17 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
         _isRunningInCI = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GITHUB_ACTIONS")) ||
                          !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("CI"));
 
+        Console.WriteLine($"[IntegrationTestWebAppFactory] Running in CI: {_isRunningInCI}");
+        Console.WriteLine($"[IntegrationTestWebAppFactory] GITHUB_ACTIONS env: {Environment.GetEnvironmentVariable("GITHUB_ACTIONS")}");
+        Console.WriteLine($"[IntegrationTestWebAppFactory] CI env: {Environment.GetEnvironmentVariable("CI")}");
+
         if (_isRunningInCI)
         {
             // Use MySQL service container in CI
             _ciConnectionString = Environment.GetEnvironmentVariable("ConnectionStrings__StringConnection")
                 ?? "Server=127.0.0.1;Port=3306;Database=AnhEmMotor_Test;User=root;Password=root;";
+            
+            Console.WriteLine($"[IntegrationTestWebAppFactory] Using CI connection: {_ciConnectionString}");
         }
         else
         {
@@ -48,6 +54,8 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                 .WithUsername("root")
                 .WithPassword("root")
                 .Build();
+            
+            Console.WriteLine("[IntegrationTestWebAppFactory] Using Testcontainers for local development");
         }
     }
 
@@ -140,7 +148,8 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                             ["Logging:LogLevel:Default"] = "Warning",
                             ["Logging:LogLevel:Microsoft.EntityFrameworkCore.Database.Command"] = "None",
                             ["Logging:LogLevel:Microsoft.EntityFrameworkCore"] = "Warning",
-                            ["Logging:LogLevel:Microsoft.AspNetCore"] = "Warning"
+                            ["Logging:LogLevel:Microsoft.AspNetCore"] = "Warning",
+                            ["Logging:LogLevel:LuckyPennySoftware.MediatR.License"] = "None"
                         });
 
                 config.AddEnvironmentVariables();
