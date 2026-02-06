@@ -1,13 +1,13 @@
 # AnhEmMotor Backend API
 
 > **🚨 CẢNH BÁO QUAN TRỌNG CHO NGƯỜI MỚI:**
->
+> 
+> **Dự án này sẽ cần chạy SQL Server trên máy local và MySQL trên VPS.**
 > **Khi thay đổi cấu trúc database (thêm bảng, sửa cột, etc.), BẮT BUỘC phải tạo migration theo cách thức dưới đây!**
 >
 > ```powershell
 > # Chạy lệnh này mỗi khi thay đổi Entity/DbContext:
 > .\add-migration.ps1 "TenMigration"
-> .\update-database.ps1
 > ```
 >
 > **Nếu quên tạo MySQL migration:**
@@ -258,13 +258,7 @@ Script sẽ tự động:
 Sau khi tạo migration, update database local:
 
 ```powershell
-.\update-database.ps1
-```
-
-Hoặc thủ công:
-
-```powershell
-dotnet ef database update --project Infrastructure --startup-project WebAPI
+dotnet ef database update --context ApplicationDBContext --project Infrastructure --startup-project WebAPI
 ```
 
 ---
@@ -291,27 +285,6 @@ dotnet ef migrations add TenMigration --context MySqlDbContext --output-dir MySq
 > - 💥 **Application sẽ CRASH** (mismatch giữa code và DB schema)
 > 
 > **Khuyến nghị:** Luôn dùng `add-migration.ps1` để tránh quên!
-
----
-
-## Deploy Lên Production
-
-Khi đã tạo migrations và commit code:
-
-```bash
-git add .
-git commit -m "feat: add new feature with database changes"
-git push origin master
-```
-
-**GitHub Actions sẽ tự động:**
-1. Build project
-2. Generate MySQL migration script
-3. Deploy lên VPS
-4. Chạy migrations tự động
-5. Restart application
-
-✨ **Không cần làm gì thêm!**
 
 ---
 
