@@ -470,7 +470,7 @@ Cần setup các secrets sau trong GitHub repository:
 
 ````json
 ["User","Customer"]
-
+````
 
 > **Lưu ý:** Không có space (khoảng cách) sau dấu phẩy trong JSON array! Ví dụ viết như 2 ví dụ sau là sai:
 ```json
