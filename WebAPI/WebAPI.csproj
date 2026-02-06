@@ -72,12 +72,12 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.15.0" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.15.0" />
     <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.15.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="10.1.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="10.1.2" />
   </ItemGroup>
 
   <ItemGroup>

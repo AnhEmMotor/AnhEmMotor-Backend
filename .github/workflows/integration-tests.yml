@@ -1,0 +1,45 @@
+name: Run Integration Tests
+
+on:
+  push:
+    branches: [ "master", "main" ]
+  pull_request:
+    branches: [ "master", "main" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: AnhEmMotor_Test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+        
+    - name: Restore dependencies
+      run: dotnet restore IntegrationTests/IntegrationTests.csproj
+
+    - name: Build
+      run: dotnet build IntegrationTests/IntegrationTests.csproj --no-restore
+        
+    - name: Run Integration Tests
+      run: dotnet test IntegrationTests/IntegrationTests.csproj --no-build --verbosity normal
+      env:
+        # Override Connection String to point to the MySQL Service Container
+        ConnectionStrings__StringConnection: "Server=127.0.0.1;Port=3306;Database=AnhEmMotor_Test;User=root;Password=root;"

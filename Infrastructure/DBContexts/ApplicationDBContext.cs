@@ -88,10 +88,10 @@ public class ApplicationDBContext(DbContextOptions<ApplicationDBContext> options
             .HasForeignKey(rp => rp.PermissionId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // Check if using SQLite and remove SQL Server-specific configurations
-        var isSqlite = Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite";
+        // Check if using a provider other than SQL Server (e.g., SQLite, MySQL) to remove SQL Server-specific configurations
+        var isNotSqlServer = Database.ProviderName != "Microsoft.EntityFrameworkCore.SqlServer";
 
-        if(isSqlite)
+        if(isNotSqlServer)
         {
             // Remove SQL Server-specific annotations for SQLite compatibility
             foreach(var entityType in modelBuilder.Model.GetEntityTypes())
