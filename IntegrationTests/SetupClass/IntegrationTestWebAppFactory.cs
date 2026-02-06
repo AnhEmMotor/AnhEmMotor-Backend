@@ -24,33 +24,61 @@ namespace IntegrationTests.SetupClass;
 
 public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
-    private readonly MySqlContainer _mySqlContainer;
+    private readonly MySqlContainer? _mySqlContainer;
+    private readonly bool _isRunningInCI;
+    private readonly string? _ciConnectionString;
 
     public IntegrationTestWebAppFactory()
     {
-        _mySqlContainer = new MySqlBuilder("mysql:8.0")
-            .WithDatabase("AnhEmMotor_Test")
-            .WithUsername("root")
-            .WithPassword("root")
-            .Build();
+        // Detect if running in GitHub Actions or other CI environment
+        _isRunningInCI = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GITHUB_ACTIONS")) ||
+                         !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("CI"));
+
+        if (_isRunningInCI)
+        {
+            // Use MySQL service container in CI
+            _ciConnectionString = Environment.GetEnvironmentVariable("ConnectionStrings__StringConnection")
+                ?? "Server=127.0.0.1;Port=3306;Database=AnhEmMotor_Test;User=root;Password=root;";
+        }
+        else
+        {
+            // Use Testcontainers locally
+            _mySqlContainer = new MySqlBuilder("mysql:8.0")
+                .WithDatabase("AnhEmMotor_Test")
+                .WithUsername("root")
+                .WithPassword("root")
+                .Build();
+        }
     }
 
     private Respawner _respawner = default!;
     private DbConnection _connection = default!;
-    private ApplicationDBContext _dbContext = default!;
 
 #pragma warning disable IDE0079 
 #pragma warning disable CRR0039
     public async Task InitializeAsync()
     {
-        await _mySqlContainer.StartAsync().ConfigureAwait(false);
-        _connection = new MySqlConnection(_mySqlContainer.GetConnectionString());
+        string connectionString;
+
+        if (_isRunningInCI)
+        {
+            // Use CI MySQL service container
+            connectionString = _ciConnectionString!;
+        }
+        else
+        {
+            // Start Testcontainers for local development
+            await _mySqlContainer!.StartAsync().ConfigureAwait(false);
+            connectionString = _mySqlContainer.GetConnectionString();
+        }
+
+        _connection = new MySqlConnection(connectionString);
         await _connection.OpenAsync().ConfigureAwait(false);
 
         // Create a temporary DbContext to initialize the database schema
         var optionsBuilder = new DbContextOptionsBuilder<ApplicationDBContext>();
         optionsBuilder.UseMySql(
-            _mySqlContainer.GetConnectionString(),
+            connectionString,
             new MySqlServerVersion(new Version(8, 0, 0)));
 
         using var tempDbContext = new ApplicationDBContext(optionsBuilder.Options);
@@ -80,7 +108,12 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
     public new async Task DisposeAsync()
     {
         await _connection.DisposeAsync().ConfigureAwait(false);
-        await _mySqlContainer.StopAsync(CancellationToken.None).ConfigureAwait(false);
+        
+        // Only stop Testcontainers if running locally
+        if (!_isRunningInCI && _mySqlContainer is not null)
+        {
+            await _mySqlContainer.StopAsync(CancellationToken.None).ConfigureAwait(false);
+        }
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -90,7 +123,9 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
         builder.ConfigureAppConfiguration(
             (context, config) =>
             {
-                var connString = _mySqlContainer.GetConnectionString();
+                var connString = _isRunningInCI 
+                    ? _ciConnectionString! 
+                    : _mySqlContainer!.GetConnectionString();
 
                 config.AddInMemoryCollection(
                     new Dictionary<string, string?>
