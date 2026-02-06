@@ -425,6 +425,7 @@ Cần setup các secrets sau trong GitHub repository:
 | `HOST`            | VPS IP hoặc domain, hoặc dấu \*     | `*`                                                            |
 | `USERNAME`        | SSH username                        | `root` hoặc `youruser`                                         |
 | `SSH_PRIVATE_KEY` | Private SSH key                     | Nội dung file `~/.ssh/id_rsa`                                  |
+| `RUN_DATA_SEEDING` | Chạy data seeding khi deploy (true/false) | `false` (production) hoặc `true` (lần đầu setup) |
 
 ### Array Secrets (SuperRoles, ProtectedUsers, DefaultRoles)
 

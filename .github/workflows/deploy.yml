@@ -39,6 +39,7 @@ jobs:
           ProtectedAuthorizationEntities.SuperRoles: ${{ secrets.SUPER_ROLES }}
           ProtectedAuthorizationEntities.ProtectedUsers: ${{ secrets.PROTECTED_USERS }}
           ProtectedAuthorizationEntities.DefaultRolesForNewUsers: ${{ secrets.DEFAULT_ROLES }}
+          SeedingOptions.RunDataSeedingOnStartup: ${{ secrets.RUN_DATA_SEEDING }}
 
       - name: Restore dependencies
         run: dotnet restore
