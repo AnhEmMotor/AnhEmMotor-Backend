@@ -31,17 +31,26 @@ using IntegrationTests.SetupClass;
 
 namespace IntegrationTests;
 
-public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
+using System.Threading.Tasks;
+using Xunit;
+
+[Collection("Shared Integration Collection")]
+public class InventoryReceipts : IAsyncLifetime
 {
     private readonly IntegrationTestWebAppFactory _factory;
     private readonly HttpClient _client;
-    private readonly ITestOutputHelper _output;
 
-    public InventoryReceipts(IntegrationTestWebAppFactory factory, ITestOutputHelper output)
+    public InventoryReceipts(IntegrationTestWebAppFactory factory)
     {
         _factory = factory;
         _client = _factory.CreateClient();
-        _output = output;
+    }
+
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
+    {
+        await _factory.ResetDatabaseAsync();
     }
 
 #pragma warning disable CRR0035
@@ -1661,7 +1670,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
             .ReadFromJsonAsync<InputResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         clonedInput!.Products.Should().HaveCount(1);
-        clonedInput.Products[0].ProductId.Should().Be(product1.Id);
+        clonedInput.Products[0].ProductId.Should().Be(variant1.Id);
     }
 
     [Fact(DisplayName = "INPUT_046 - Lấy danh sách phiếu nhập theo SupplierId")]
@@ -1805,11 +1814,46 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+
+        // Ensure Statuses
+        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        if (!await db.ProductStatuses.AnyAsync(x => x.Key == productStatusId))
+            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
+
+        var supplierStatusId = Domain.Constants.SupplierStatus.Active;
+        if (!await db.SupplierStatuses.AnyAsync(x => x.Key == supplierStatusId))
+            db.SupplierStatuses.Add(new SupplierStatus { Key = supplierStatusId });
+
+        var inputStatusId = Domain.Constants.Input.InputStatus.Working;
+        if (!await db.InputStatuses.AnyAsync(x => x.Key == inputStatusId))
+            db.InputStatuses.Add(new InputStatus { Key = inputStatusId });
+
+        await db.SaveChangesAsync();
+
+        // Create Prerequisite Entities
+        var brand = new BrandEntity { Name = $"Brand_{uniqueId}" };
+        db.Brands.Add(brand);
+        var category = new ProductCategoryEntity { Name = $"Category_{uniqueId}" };
+        db.ProductCategories.Add(category);
+        var supplier = new SupplierEntity { Name = $"Supplier_{uniqueId}", StatusId = supplierStatusId, Email = $"sup_{uniqueId}@ex.com", Phone = "0123456789" };
+        db.Suppliers.Add(supplier);
+        await db.SaveChangesAsync();
+
+        var product = new ProductEntity { Name = $"P_{uniqueId}", BrandId = brand.Id, CategoryId = category.Id, StatusId = productStatusId };
+        db.Products.Add(product);
+        await db.SaveChangesAsync();
+
+        var variant = new ProductVariant { ProductId = product.Id, Price = 100000, UrlSlug = $"s-{uniqueId}" };
+        db.ProductVariants.Add(variant);
+        await db.SaveChangesAsync();
+
         var request = new CreateInputCommand
         {
             Notes = "Free products",
-            SupplierId = 1,
-            Products = [ new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 0 } ]
+            SupplierId = supplier.Id,
+            Products = [ new CreateInputInfoRequest { ProductId = variant.Id, Count = 10, InputPrice = 0 } ]
         };
 
         var response = await _client.PostAsJsonAsync("/api/v1/InventoryReceipts", request).ConfigureAwait(true);
@@ -1914,11 +1958,33 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Inputs.View], email);
+        var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, username, password, [PermissionsList.Inputs.View], email);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var response = await _client.GetAsync("/api/v1/InventoryReceipts?filters=StatusId==working,SupplierId==1")
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+
+        // Ensure Statuses
+        var inputStatusId = Domain.Constants.Input.InputStatus.Working;
+        if (!await db.InputStatuses.AnyAsync(x => x.Key == inputStatusId))
+            db.InputStatuses.Add(new InputStatus { Key = inputStatusId });
+        
+        var supplierStatusId = Domain.Constants.SupplierStatus.Active;
+        if (!await db.SupplierStatuses.AnyAsync(x => x.Key == supplierStatusId))
+            db.SupplierStatuses.Add(new SupplierStatus { Key = supplierStatusId });
+
+        await db.SaveChangesAsync();
+
+        var supplier = new SupplierEntity { Name = $"Sup_{uniqueId}", StatusId = supplierStatusId, Email = $"sup_{uniqueId}@ex.com", Phone = "0123456789" };
+        db.Suppliers.Add(supplier);
+        await db.SaveChangesAsync();
+
+        var input = new InputEntity { InputDate = DateTimeOffset.UtcNow, StatusId = inputStatusId, SupplierId = supplier.Id, CreatedBy = user.Id };
+        db.InputReceipts.Add(input);
+        await db.SaveChangesAsync();
+
+        var response = await _client.GetAsync($"/api/v1/InventoryReceipts?filters=StatusId==working,SupplierId=={supplier.Id}")
             .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -1929,7 +1995,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>
         content!.Items
             .Should()
             .OnlyContain(
-                i => string.Compare(i.StatusId, Domain.Constants.Input.InputStatus.Working) == 0 && i.SupplierId == 1);
+                i => string.Compare(i.StatusId, Domain.Constants.Input.InputStatus.Working) == 0 && i.SupplierId == supplier.Id);
     }
 #pragma warning restore CRR0035
 }

@@ -16,6 +16,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Data.Common;
 using Testcontainers.MySql;
+using Respawn;
+using Respawn.Graph;
+using MySqlConnector;
 using Microsoft.EntityFrameworkCore;
 
 namespace IntegrationTests.SetupClass;
@@ -33,13 +36,36 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
             .Build();
     }
 
+    private Respawner _respawner = default!;
+    private DbConnection _connection = default!;
+
     public async Task InitializeAsync()
     {
         await _mySqlContainer.StartAsync();
+
+        // Initialize connection and Respawner
+        _connection = new MySqlConnection(_mySqlContainer.GetConnectionString());
+        // Initialized lazily to ensure DB schema exists
+        await _connection.OpenAsync();
+    }
+
+    public async Task ResetDatabaseAsync()
+    {
+        if (_respawner == null)
+        {
+            _respawner = await Respawner.CreateAsync(_connection, new RespawnerOptions
+            {
+                DbAdapter = DbAdapter.MySql,
+                SchemasToInclude = ["AnhEmMotor_Test"],
+                TablesToIgnore = ["__EFMigrationsHistory"]
+            });
+        }
+        await _respawner.ResetAsync(_connection);
     }
 
     public new async Task DisposeAsync()
     {
+        await _connection.DisposeAsync();
         await _mySqlContainer.StopAsync();
     }
 

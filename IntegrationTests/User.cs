@@ -14,20 +14,32 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Threading.Tasks;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
-public class User : IClassFixture<IntegrationTestWebAppFactory>
+[Collection("Shared Integration Collection")]
+public class User : IAsyncLifetime
 {
     private readonly IntegrationTestWebAppFactory _factory;
     private readonly HttpClient _client;
+    private readonly ITestOutputHelper _output;
 
-    public User(IntegrationTestWebAppFactory factory)
+    public User(IntegrationTestWebAppFactory factory, ITestOutputHelper output)
     {
         _factory = factory;
         _client = _factory.CreateClient();
+        _output = output;
     }
 
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
+    {
+        await _factory.ResetDatabaseAsync();
+    }
 #pragma warning disable CRR0035
     [Fact(DisplayName = "USER_021 - Khôi phục tài khoản thành công")]
     public async Task RestoreAccount_Success_DeletedAtSetToNull()

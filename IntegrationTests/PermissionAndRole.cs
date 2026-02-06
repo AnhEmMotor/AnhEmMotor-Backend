@@ -11,18 +11,31 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using Xunit;
+using Xunit.Abstractions;
+using System.Threading.Tasks;
 
 namespace IntegrationTests;
 
-public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
+[Collection("Shared Integration Collection")]
+public class PermissionAndRole : IAsyncLifetime
 {
     private readonly IntegrationTestWebAppFactory _factory;
     private readonly HttpClient _client;
+    private readonly ITestOutputHelper _output;
 
-    public PermissionAndRole(IntegrationTestWebAppFactory factory)
+    public PermissionAndRole(IntegrationTestWebAppFactory factory, ITestOutputHelper output)
     {
         _factory = factory;
         _client = _factory.CreateClient();
+        _output = output;
+    }
+
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
+    {
+        await _factory.ResetDatabaseAsync();
     }
 
     [Fact(DisplayName = "PERM_INT_001 - API lấy tất cả permissions trả về đầy đủ thông tin")]
@@ -338,6 +351,12 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
             await EnsurePermissionExistsAsync(db, PermissionsList.Products.Edit);
         }
 
+        // Create a dummy role to hold the permissions we are about to remove from the main test role
+        // This prevents the "Cannot remove last role assignment" validation error
+        await CreateRoleWithPermissionsInternalAsync(
+            $"DummyHolder_{uniqueId}", 
+            [PermissionsList.Brands.View, PermissionsList.Brands.Create]);
+
         var request = new Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommand
         {
             Permissions = [PermissionsList.Products.View, PermissionsList.Products.Create, PermissionsList.Products.Edit]
@@ -346,6 +365,11 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>
         var response = await _client.PutAsJsonAsync($"/api/v1/Permission/roles/{roleName}", request)
             .ConfigureAwait(true);
 
+        if (response.StatusCode != HttpStatusCode.OK)
+        {
+             var error = await response.Content.ReadAsStringAsync();
+             throw new Exception($"API Failed with {response.StatusCode}: {error}");
+        }
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         using (var verifyScope = _factory.Services.CreateScope())

@@ -20,7 +20,11 @@ using Domain.Primitives;
 
 namespace IntegrationTests;
 
-public class Product : IClassFixture<IntegrationTestWebAppFactory>
+using System.Threading.Tasks;
+using Xunit;
+
+[Collection("Shared Integration Collection")]
+public class Product : IAsyncLifetime
 {
     private readonly IntegrationTestWebAppFactory _factory;
     private readonly HttpClient _client;
@@ -31,6 +35,13 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>
         _factory = factory;
         _client = _factory.CreateClient();
         _output = output;
+    }
+
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
+    {
+        await _factory.ResetDatabaseAsync();
     }
 
 #pragma warning disable CRR0035

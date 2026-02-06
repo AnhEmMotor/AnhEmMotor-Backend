@@ -12,17 +12,30 @@ using IntegrationTests.SetupClass;
 
 namespace IntegrationTests;
 
-public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>
+using System.Threading.Tasks;
+using Xunit;
+using Xunit.Abstractions;
+
+[Collection("Shared Integration Collection")]
+public class MediaFile : IAsyncLifetime
 {
     private readonly IntegrationTestWebAppFactory _factory;
     private readonly HttpClient _client;
+    private readonly ITestOutputHelper _output;
 
-    public MediaFile(IntegrationTestWebAppFactory factory)
+    public MediaFile(IntegrationTestWebAppFactory factory, ITestOutputHelper output)
     {
         _factory = factory;
         _client = _factory.CreateClient();
+        _output = output;
     }
 
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
+    {
+        await _factory.ResetDatabaseAsync();
+    }
 #pragma warning disable CRR0035
     [Fact(DisplayName = "MF_002 - Tải lên ảnh thành công với định dạng JPG hợp lệ")]
     public async Task UploadImage_ValidJpg_Success()

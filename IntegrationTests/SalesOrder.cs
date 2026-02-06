@@ -33,17 +33,26 @@ using InputStatusEntity = Domain.Entities.InputStatus;
 
 namespace IntegrationTests;
 
-public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>
+using System.Threading.Tasks;
+using Xunit;
+
+[Collection("Shared Integration Collection")]
+public class SalesOrder : IAsyncLifetime
 {
     private readonly IntegrationTestWebAppFactory _factory;
     private readonly HttpClient _client;
-    private readonly ITestOutputHelper _output;
 
-    public SalesOrder(IntegrationTestWebAppFactory factory, ITestOutputHelper output)
+    public SalesOrder(IntegrationTestWebAppFactory factory)
     {
         _factory = factory;
         _client = _factory.CreateClient();
-        _output = output;
+    }
+
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
+    {
+        await _factory.ResetDatabaseAsync();
     }
 
     private async Task<int> SeedProductVariantAsync(string uniqueId)

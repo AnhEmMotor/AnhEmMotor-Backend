@@ -20,7 +20,11 @@ using SupplierEntity = Domain.Entities.Supplier;
 
 namespace IntegrationTests;
 
-public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
+using System.Threading.Tasks;
+using Xunit;
+
+[Collection("Shared Integration Collection")]
+public class Supplier : IAsyncLifetime
 {
     private readonly IntegrationTestWebAppFactory _factory;
     private readonly HttpClient _client;
@@ -29,6 +33,13 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>
     {
         _factory = factory;
         _client = _factory.CreateClient();
+    }
+
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
+    {
+        await _factory.ResetDatabaseAsync();
     }
 
 #pragma warning disable CRR0035

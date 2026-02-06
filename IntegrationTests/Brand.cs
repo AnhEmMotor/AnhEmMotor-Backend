@@ -16,7 +16,11 @@ using BrandEntities = Domain.Entities.Brand;
 
 namespace IntegrationTests;
 
-public class Brand : IClassFixture<IntegrationTestWebAppFactory>
+using System.Threading.Tasks;
+using Xunit;
+
+[Collection("Shared Integration Collection")]
+public class Brand : IAsyncLifetime
 {
     private readonly IntegrationTestWebAppFactory _factory;
     private readonly HttpClient _client;
@@ -25,6 +29,13 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>
     {
         _factory = factory;
         _client = _factory.CreateClient();
+    }
+
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
+    {
+        await _factory.ResetDatabaseAsync();
     }
 
 #pragma warning disable CRR0035

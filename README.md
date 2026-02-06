@@ -44,10 +44,9 @@ Dự án sử dụng file `appsettings.json` để cấu hình. File mẫu là `
    Copy-Item appsettings.Template.json appsettings.json
    ```
 
-4. Tạo file cấu hình cho Integration Tests (Nếu muốn chạy Test MySQL với tài khoản riêng):
+3. Tạo file `appsettings.Development.json` (nếu cần):
    ```powershell
-   cd ../IntegrationTests
-   Copy-Item appsettings.Test.local.template.json appsettings.Test.local.json
+   Copy-Item appsettings.Template.Development.json appsettings.Development.json
    ```
 
 # 3. Cấu hình ứng dụng
@@ -223,7 +222,6 @@ Dự án sử dụng **Testcontainers** để tự động tạo môi trường 
     *   Thực thi Test.
     *   Tự động dọn dẹp sau khi xong.
 
-*Không cần cài MySQL Server hay cấu hình Connection String thủ công nữa.*
 
 # 8. Troubleshooting
 
@@ -241,25 +239,6 @@ Hãy chắc chắn bạn đã bật Docker Desktop trước khi chạy Test.
 3. Thử connection string khác:
    - Với SQL Express: `Server=.\\SQLEXPRESS;...`
    - Với LocalDB: `Server=(localdb)\\MSSQLLocalDB;...`
-   
-## Lỗi: "MySQL: Access denied for user 'root'@'localhost'"
-
-**Nguyên nhân:**
-1.  Sai mật khẩu.
-2.  MySQL mặc định phân biệt `localhost` và `127.0.0.1`.
-3.  Visual Studio không hỗ trợ lấy chuỗi kết nối MySQL tự động như SQL Server (trừ khi cài thêm Extension).
-
-**Cách khắc phục:**
-1.  **Dùng MySQL Workbench để kiểm tra:**
-    *   Mở Workbench -> Nhìn vào phần "MySQL Connections" ở trang chủ.
-    *   Bấm chuột phải vào kết nối Local -> Chọn **Edit Connection**.
-    *   Bấm **Test Connection**.
-    *   Nếu thành công -> Thông tin User/Host/Port ở đó là đúng.
-    *   Nếu thất bại -> Bạn cần nhớ lại mật khẩu hoặc reset pass.
-
-2.  **Thử đổi Server:**
-    *   Nếu `Server=localhost` không được, hãy thử đổi thành `Server=127.0.0.1`.
-    *   Ví dụ: `"Server=127.0.0.1;Database=AnhEmMotor_Test;User=root;Password=YOUR_REAL_PASSWORD;"`
 
 ## Lỗi: "The certificate chain was issued by an authority that is not trusted"
 

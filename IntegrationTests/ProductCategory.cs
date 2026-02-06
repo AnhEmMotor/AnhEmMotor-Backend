@@ -18,7 +18,11 @@ using ProductCategoryEntity = Domain.Entities.ProductCategory;
 
 namespace IntegrationTests;
 
-public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
+using System.Threading.Tasks;
+using Xunit;
+
+[Collection("Shared Integration Collection")]
+public class ProductCategory : IAsyncLifetime
 {
     private readonly IntegrationTestWebAppFactory _factory;
     private readonly HttpClient _client;
@@ -29,6 +33,13 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
         _factory = factory;
         _client = _factory.CreateClient();
         _output = output;
+    }
+
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
+    {
+        await _factory.ResetDatabaseAsync();
     }
 
 #pragma warning disable CRR0035
@@ -135,7 +146,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
         // "Laptop_..." does NOT
         // Ensure we strictly filter by uniqueId too to avoid noise
         
-        var items = content!.Items.Where(x => x.Name!.Contains(uniqueId)).ToList();
+        var items = content.Items?.Where(x => x.Name!.Contains(uniqueId)).ToList();
         
         // If the API filter works as AND, we get 2. If it works as OR or ignores, we check manually.
         // Assuming strict filter support:
@@ -230,7 +241,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>
         content.Should().NotBeNull();
         // Check if items > 0. Since we used a filter, if supported, we get 5. If not supported, we get all. 
         // We'll assert count >= 5.
-        content!.Items.Count.Should().BeGreaterThanOrEqualTo(5);
+        content.Items?.Count.Should().BeGreaterThanOrEqualTo(5);
         content.Items.Should().Contain(c => c.Name!.Contains($"Manager_Cat_{uniqueId}"));
     }
 

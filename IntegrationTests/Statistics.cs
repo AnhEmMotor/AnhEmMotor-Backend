@@ -13,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using Xunit;
 using Xunit.Abstractions;
 using BrandEntity = Domain.Entities.Brand;
 using InputEntity = Domain.Entities.Input;
@@ -27,7 +28,8 @@ using ProductEntity = Domain.Entities.Product;
 
 namespace IntegrationTests;
 
-public class Statistics : IClassFixture<IntegrationTestWebAppFactory>
+[Collection("Shared Integration Collection")]
+public class Statistics : IAsyncLifetime
 {
     private readonly IntegrationTestWebAppFactory _factory;
     private readonly HttpClient _client;
@@ -38,6 +40,13 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>
         _factory = factory;
         _client = _factory.CreateClient();
         _output = output;
+    }
+
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
+    {
+        await _factory.ResetDatabaseAsync();
     }
 
     private async Task WipeStatisticsDataAsync(ApplicationDBContext db)
@@ -370,9 +379,9 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>
         var response = await _client.GetAsync("/api/v1/Statistics/order-status-counts");
         var content = await response.Content.ReadFromJsonAsync<List<OrderStatusCountResponse>>();
 
-        content!.First(x => x.StatusName == OrderStatus.Pending).OrderCount.Should().Be(3);
-        content.First(x => x.StatusName == OrderStatus.Completed).OrderCount.Should().Be(10);
-        content.First(x => x.StatusName == OrderStatus.Cancelled).OrderCount.Should().Be(1);
+        content?.First(x => x.StatusName == OrderStatus.Pending).OrderCount.Should().Be(3);
+        content?.First(x => x.StatusName == OrderStatus.Completed).OrderCount.Should().Be(10);
+        content?.First(x => x.StatusName == OrderStatus.Cancelled).OrderCount.Should().Be(1);
     }
 
     [Fact(DisplayName = "STAT_031 - Báo cáo sản phẩm (Multi Variants)")]
@@ -398,8 +407,8 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>
         var response = await _client.GetAsync("/api/v1/Statistics/product-report-last-month");
         var content = await response.Content.ReadFromJsonAsync<List<ProductReportResponse>>();
 
-        content!.First((ProductReportResponse x) => x.VariantId == v1).SoldLastMonth.Should().Be(20);
-        content.First((ProductReportResponse x) => x.VariantId == v2).SoldLastMonth.Should().Be(15);
+        content?.First(x => x.VariantId == v1).SoldLastMonth.Should().Be(20);
+        content?.First(x => x.VariantId == v2).SoldLastMonth.Should().Be(15);
     }
 
     [Fact(DisplayName = "STAT_032 - Báo cáo gồm sản phẩm đã xóa (Soft Delete)")]

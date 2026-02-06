@@ -15,11 +15,14 @@ using IntegrationTests.SetupClass;
 
 namespace IntegrationTests;
 
-public class Auth : IClassFixture<IntegrationTestWebAppFactory>
+using System.Threading.Tasks;
+using Xunit;
+
+[Collection("Shared Integration Collection")]
+public class Auth : IAsyncLifetime
 {
     private readonly IntegrationTestWebAppFactory _factory;
     private readonly HttpClient _client;
-
     private readonly Xunit.Abstractions.ITestOutputHelper _output;
 
     public Auth(IntegrationTestWebAppFactory factory, Xunit.Abstractions.ITestOutputHelper output)
@@ -27,6 +30,13 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         _factory = factory;
         _client = _factory.CreateClient();
         _output = output;
+    }
+
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
+    {
+        await _factory.ResetDatabaseAsync();
     }
 
 #pragma warning disable CRR0035
@@ -48,7 +58,6 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>
         response.StatusCode.Should().Be(HttpStatusCode.Created);
 
         var jsonRaw = await response.Content.ReadAsStringAsync();
-        _output.WriteLine($"Raw JSON: {jsonRaw}");
 
         var content = await response.Content.ReadFromJsonAsync<RegisterResponse>();
 
