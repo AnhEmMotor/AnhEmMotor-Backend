@@ -416,9 +416,6 @@ Cần setup các secrets sau trong GitHub repository:
 | ----------------- | ----------------------------------- | -------------------------------------------------------------- |
 | `ALLOWED_HOSTS`   | Domains được phép                   | `api.yourdomain.com;yourdomain.com` hoặc `*`                   |
 | `DB_CONNECTION`   | MySQL connection string             | `Server=localhost;Database=anhemmotor;User=root;Password=xxx;` |
-| `DB_USER`         | MySQL username (để chạy migrations) | `root` hoặc `anhemmotor_user`                                  |
-| `DB_PASSWORD`     | MySQL password                      | `YourPassword123`                                              |
-| `DB_NAME`         | Database name                       | `anhemmotor`                                                   |
 | `JWT_KEY`         | JWT secret key (>= 32 chars)        | `Your-Super-Secret-JWT-Key-32-Chars`                           |
 | `JWT_ISSUER`      | API URL                             | `https://api.yourdomain.com`                                   |
 | `JWT_AUDIENCE`    | Client URL                          | `https://yourdomain.com`                                       |
