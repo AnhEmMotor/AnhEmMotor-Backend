@@ -51,9 +51,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
         await _connection.OpenAsync().ConfigureAwait(false);
 
         var optionsBuilder = new DbContextOptionsBuilder<ApplicationDBContext>();
-        optionsBuilder.UseMySql(
-            connectionString,
-            new MySqlServerVersion(new Version(8, 0, 0)));
+        optionsBuilder.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 0)));
 
         using var tempDbContext = new ApplicationDBContext(optionsBuilder.Options);
         await tempDbContext.Database.EnsureCreatedAsync().ConfigureAwait(false);
@@ -81,8 +79,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
     public new async Task DisposeAsync()
     {
         await _connection.DisposeAsync().ConfigureAwait(false);
-        
-        // Only stop Testcontainers if running locally
+
         await _mySqlContainer.StopAsync(CancellationToken.None).ConfigureAwait(false);
     }
 

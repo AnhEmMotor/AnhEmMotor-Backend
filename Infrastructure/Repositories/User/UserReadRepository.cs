@@ -1,6 +1,7 @@
 ﻿using Application.ApiContracts.Auth.Responses;
 using Application.ApiContracts.UserManager.Responses;
 using Application.Interfaces.Repositories.User;
+using Application.Sieve;
 using Domain.Constants;
 using Domain.Entities;
 using Domain.Primitives;
@@ -8,7 +9,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
 using Sieve.Services;
-using Application.Sieve;
 using System;
 
 namespace Infrastructure.Repositories.User

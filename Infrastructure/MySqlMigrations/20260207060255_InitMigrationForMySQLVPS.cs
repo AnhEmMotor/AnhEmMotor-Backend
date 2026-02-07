@@ -1,19 +1,18 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Metadata;
+﻿using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 #nullable disable
 
 namespace Infrastructure.MySqlMigrations
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public partial class InitMigrationForMySQLVPS : Migration
     {
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterDatabase()
-                .Annotation("MySql:CharSet", "utf8mb4");
+            migrationBuilder.AlterDatabase().Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
                 name: "Brand",
@@ -134,7 +133,10 @@ namespace Infrastructure.MySqlMigrations
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_unicode_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Description = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_unicode_ci")
+                    Description = table.Column<string>(
+                        type: "longtext",
+                        nullable: true,
+                        collation: "utf8mb4_unicode_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     CreatedAt = table.Column<long>(type: "bigint", nullable: true),
                     UpdatedAt = table.Column<long>(type: "bigint", nullable: true),
@@ -528,7 +530,10 @@ namespace Infrastructure.MySqlMigrations
                 {
                     UserId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     RoleId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    ApplicationUserId = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci")
+                    ApplicationUserId = table.Column<Guid>(
+                        type: "char(36)",
+                        nullable: true,
+                        collation: "ascii_general_ci")
                 },
                 constraints: table =>
                 {
@@ -803,95 +808,47 @@ namespace Infrastructure.MySqlMigrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Input_ConfirmedBy",
-                table: "Input",
-                column: "ConfirmedBy");
+            migrationBuilder.CreateIndex(name: "IX_Input_ConfirmedBy", table: "Input", column: "ConfirmedBy");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Input_CreatedBy",
-                table: "Input",
-                column: "CreatedBy");
+            migrationBuilder.CreateIndex(name: "IX_Input_CreatedBy", table: "Input", column: "CreatedBy");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Input_SourceOrderId",
-                table: "Input",
-                column: "SourceOrderId");
+            migrationBuilder.CreateIndex(name: "IX_Input_SourceOrderId", table: "Input", column: "SourceOrderId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Input_StatusId",
-                table: "Input",
-                column: "StatusId");
+            migrationBuilder.CreateIndex(name: "IX_Input_StatusId", table: "Input", column: "StatusId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Input_SupplierId",
-                table: "Input",
-                column: "SupplierId");
+            migrationBuilder.CreateIndex(name: "IX_Input_SupplierId", table: "Input", column: "SupplierId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_InputInfo_InputId",
-                table: "InputInfo",
-                column: "InputId");
+            migrationBuilder.CreateIndex(name: "IX_InputInfo_InputId", table: "InputInfo", column: "InputId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_InputInfo_ParentOutputInfoId",
                 table: "InputInfo",
                 column: "ParentOutputInfoId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_InputInfo_ProductId",
-                table: "InputInfo",
-                column: "ProductId");
+            migrationBuilder.CreateIndex(name: "IX_InputInfo_ProductId", table: "InputInfo", column: "ProductId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_OptionValue_OptionId",
-                table: "OptionValue",
-                column: "OptionId");
+            migrationBuilder.CreateIndex(name: "IX_OptionValue_OptionId", table: "OptionValue", column: "OptionId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Output_BuyerId",
-                table: "Output",
-                column: "BuyerId");
+            migrationBuilder.CreateIndex(name: "IX_Output_BuyerId", table: "Output", column: "BuyerId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Output_CreatedBy",
-                table: "Output",
-                column: "CreatedBy");
+            migrationBuilder.CreateIndex(name: "IX_Output_CreatedBy", table: "Output", column: "CreatedBy");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Output_FinishedBy",
-                table: "Output",
-                column: "FinishedBy");
+            migrationBuilder.CreateIndex(name: "IX_Output_FinishedBy", table: "Output", column: "FinishedBy");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Output_StatusId",
-                table: "Output",
-                column: "StatusId");
+            migrationBuilder.CreateIndex(name: "IX_Output_StatusId", table: "Output", column: "StatusId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_OutputInfo_OutputId",
-                table: "OutputInfo",
-                column: "OutputId");
+            migrationBuilder.CreateIndex(name: "IX_OutputInfo_OutputId", table: "OutputInfo", column: "OutputId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_OutputInfo_ProductVarientId",
                 table: "OutputInfo",
                 column: "ProductVarientId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Product_BrandId",
-                table: "Product",
-                column: "BrandId");
+            migrationBuilder.CreateIndex(name: "IX_Product_BrandId", table: "Product", column: "BrandId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Product_CategoryId",
-                table: "Product",
-                column: "CategoryId");
+            migrationBuilder.CreateIndex(name: "IX_Product_CategoryId", table: "Product", column: "CategoryId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Product_StatusId",
-                table: "Product",
-                column: "StatusId");
+            migrationBuilder.CreateIndex(name: "IX_Product_StatusId", table: "Product", column: "StatusId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProductCollectionPhoto_ProductVariantId",
@@ -903,56 +860,34 @@ namespace Infrastructure.MySqlMigrations
                 table: "ProductVariant",
                 column: "ProductId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_RoleClaims_RoleId",
-                table: "RoleClaims",
-                column: "RoleId");
+            migrationBuilder.CreateIndex(name: "IX_RoleClaims_RoleId", table: "RoleClaims", column: "RoleId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_RolePermissions_PermissionId",
                 table: "RolePermissions",
                 column: "PermissionId");
 
-            migrationBuilder.CreateIndex(
-                name: "RoleNameIndex",
-                table: "Roles",
-                column: "NormalizedName",
-                unique: true);
+            migrationBuilder.CreateIndex(name: "RoleNameIndex", table: "Roles", column: "NormalizedName", unique: true);
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Supplier_StatusId",
-                table: "Supplier",
-                column: "StatusId");
+            migrationBuilder.CreateIndex(name: "IX_Supplier_StatusId", table: "Supplier", column: "StatusId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SupplierContact_SupplierId",
                 table: "SupplierContact",
                 column: "SupplierId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_UserClaims_UserId",
-                table: "UserClaims",
-                column: "UserId");
+            migrationBuilder.CreateIndex(name: "IX_UserClaims_UserId", table: "UserClaims", column: "UserId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_UserLogins_UserId",
-                table: "UserLogins",
-                column: "UserId");
+            migrationBuilder.CreateIndex(name: "IX_UserLogins_UserId", table: "UserLogins", column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserRoles_ApplicationUserId",
                 table: "UserRoles",
                 column: "ApplicationUserId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_UserRoles_RoleId",
-                table: "UserRoles",
-                column: "RoleId");
+            migrationBuilder.CreateIndex(name: "IX_UserRoles_RoleId", table: "UserRoles", column: "RoleId");
 
-            migrationBuilder.CreateIndex(
-                name: "EmailIndex",
-                table: "Users",
-                column: "NormalizedEmail");
+            migrationBuilder.CreateIndex(name: "EmailIndex", table: "Users", column: "NormalizedEmail");
 
             migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
@@ -971,95 +906,66 @@ namespace Infrastructure.MySqlMigrations
                 column: "VariantId");
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "InputInfo");
+            migrationBuilder.DropTable(name: "InputInfo");
 
-            migrationBuilder.DropTable(
-                name: "MediaFiles");
+            migrationBuilder.DropTable(name: "MediaFiles");
 
-            migrationBuilder.DropTable(
-                name: "ProductCollectionPhoto");
+            migrationBuilder.DropTable(name: "ProductCollectionPhoto");
 
-            migrationBuilder.DropTable(
-                name: "RoleClaims");
+            migrationBuilder.DropTable(name: "RoleClaims");
 
-            migrationBuilder.DropTable(
-                name: "RolePermissions");
+            migrationBuilder.DropTable(name: "RolePermissions");
 
-            migrationBuilder.DropTable(
-                name: "Setting");
+            migrationBuilder.DropTable(name: "Setting");
 
-            migrationBuilder.DropTable(
-                name: "SupplierContact");
+            migrationBuilder.DropTable(name: "SupplierContact");
 
-            migrationBuilder.DropTable(
-                name: "UserClaims");
+            migrationBuilder.DropTable(name: "UserClaims");
 
-            migrationBuilder.DropTable(
-                name: "UserLogins");
+            migrationBuilder.DropTable(name: "UserLogins");
 
-            migrationBuilder.DropTable(
-                name: "UserRoles");
+            migrationBuilder.DropTable(name: "UserRoles");
 
-            migrationBuilder.DropTable(
-                name: "UserTokens");
+            migrationBuilder.DropTable(name: "UserTokens");
 
-            migrationBuilder.DropTable(
-                name: "VariantOptionValue");
+            migrationBuilder.DropTable(name: "VariantOptionValue");
 
-            migrationBuilder.DropTable(
-                name: "Input");
+            migrationBuilder.DropTable(name: "Input");
 
-            migrationBuilder.DropTable(
-                name: "OutputInfo");
+            migrationBuilder.DropTable(name: "OutputInfo");
 
-            migrationBuilder.DropTable(
-                name: "Permissions");
+            migrationBuilder.DropTable(name: "Permissions");
 
-            migrationBuilder.DropTable(
-                name: "Roles");
+            migrationBuilder.DropTable(name: "Roles");
 
-            migrationBuilder.DropTable(
-                name: "OptionValue");
+            migrationBuilder.DropTable(name: "OptionValue");
 
-            migrationBuilder.DropTable(
-                name: "InputStatus");
+            migrationBuilder.DropTable(name: "InputStatus");
 
-            migrationBuilder.DropTable(
-                name: "Supplier");
+            migrationBuilder.DropTable(name: "Supplier");
 
-            migrationBuilder.DropTable(
-                name: "Output");
+            migrationBuilder.DropTable(name: "Output");
 
-            migrationBuilder.DropTable(
-                name: "ProductVariant");
+            migrationBuilder.DropTable(name: "ProductVariant");
 
-            migrationBuilder.DropTable(
-                name: "Option");
+            migrationBuilder.DropTable(name: "Option");
 
-            migrationBuilder.DropTable(
-                name: "SupplierStatus");
+            migrationBuilder.DropTable(name: "SupplierStatus");
 
-            migrationBuilder.DropTable(
-                name: "OutputStatus");
+            migrationBuilder.DropTable(name: "OutputStatus");
 
-            migrationBuilder.DropTable(
-                name: "Users");
+            migrationBuilder.DropTable(name: "Users");
 
-            migrationBuilder.DropTable(
-                name: "Product");
+            migrationBuilder.DropTable(name: "Product");
 
-            migrationBuilder.DropTable(
-                name: "Brand");
+            migrationBuilder.DropTable(name: "Brand");
 
-            migrationBuilder.DropTable(
-                name: "ProductCategory");
+            migrationBuilder.DropTable(name: "ProductCategory");
 
-            migrationBuilder.DropTable(
-                name: "ProductStatus");
+            migrationBuilder.DropTable(name: "ProductStatus");
         }
     }
 }

@@ -25,7 +25,7 @@ public static class DependencyInjection
     {
         var provider = configuration.GetValue("Provider", "SqlServer");
 
-        if (string.Compare(provider, "MySql") == 0)
+        if(string.Compare(provider, "MySql") == 0)
         {
             var connectionString = configuration.GetConnectionString("StringConnection") ?? string.Empty;
             var serverVersion = new MariaDbServerVersion(new Version(10, 6, 23));
@@ -35,8 +35,7 @@ public static class DependencyInjection
                 {
                     options.UseMySql(connectionString, serverVersion);
                 });
-        }
-        else
+        } else
         {
             services.AddDbContextPool<ApplicationDBContext>(
                 options =>

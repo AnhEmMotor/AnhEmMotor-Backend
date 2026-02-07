@@ -142,7 +142,6 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
                             typeof(Microsoft.EntityFrameworkCore.Storage.ValueConversion.DateTimeOffsetToBinaryConverter));
                     }
                 }
-
             }
         }
 

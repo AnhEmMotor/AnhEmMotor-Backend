@@ -19,7 +19,6 @@ public static class ProductCategorySeeder
             return;
         }
 
-        // Fetch all existing category names into memory first to avoid complex LINQ translation issues with "Contains"
         var allExistingCategoryNames = await context.ProductCategories
             .Where(c => c.Name != null)
             .Select(c => c.Name!)

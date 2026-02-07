@@ -17,14 +17,11 @@ public class LocalFileStorageService : IFileStorageService
     public LocalFileStorageService(IWebHostEnvironment environment, IHttpContextAccessor httpContextAccessor)
     {
         _httpContextAccessor = httpContextAccessor;
-        
-        // Handle null WebRootPath in test environment
-        if (string.IsNullOrEmpty(environment.WebRootPath))
+
+        if(string.IsNullOrEmpty(environment.WebRootPath))
         {
-            // Use temp directory for test/CI environment
             _uploadFolder = Path.Combine(Path.GetTempPath(), "AnhEmMotor_Test_Uploads");
-        }
-        else
+        } else
         {
             _uploadFolder = Path.Combine(environment.WebRootPath, "uploads");
         }
