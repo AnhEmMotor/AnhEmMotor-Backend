@@ -19,18 +19,17 @@ public static class ProductCategorySeeder
             return;
         }
 
-        var existingCategories = await context.ProductCategories
-            .Where(pc => pc.Name != null && protectedCategories.Contains(pc.Name))
+        // Fetch all existing category names into memory first to avoid complex LINQ translation issues with "Contains"
+        var allExistingCategoryNames = await context.ProductCategories
+            .Where(c => c.Name != null)
+            .Select(c => c.Name!)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
 
-        var existingCategoryNames = existingCategories
-            .Where(c => c.Name is not null)
-            .Select(c => c.Name!)
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var existingCategorySet = new HashSet<string>(allExistingCategoryNames, StringComparer.OrdinalIgnoreCase);
 
         var categoriesToAdd = protectedCategories
-            .Where(name => !string.IsNullOrWhiteSpace(name) && !existingCategoryNames.Contains(name))
+            .Where(name => !string.IsNullOrWhiteSpace(name) && !existingCategorySet.Contains(name))
             .Select(name => new ProductCategory { Name = name, })
             .ToList();
 

@@ -99,23 +99,19 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            # Run database migration if script exists
             if [ -f /home/anhemmot/projects/anhemmotor-backend/mysql_schema.sql ]; then
               echo "Running database migration..."
-              
-              # Extract DB credentials from connection string
               DB_CONNECTION='${{ secrets.DB_CONNECTION }}'
-              DB_USER=$(echo $DB_CONNECTION | sed -n 's/.*User=\([^;]*\).*/\1/p')
-              DB_PASSWORD=$(echo $DB_CONNECTION | sed -n 's/.*Password=\([^;]*\).*/\1/p')
-              DB_NAME=$(echo $DB_CONNECTION | sed -n 's/.*Database=\([^;]*\).*/\1/p')
-              
+              DB_USER=$(echo $DB_CONNECTION | sed -n 's/.*[Uu][Ss][Ee][Rr]=\([^;]*\).*/\1/p')
+              DB_PASSWORD=$(echo $DB_CONNECTION | sed -n 's/.*[Pp][Aa][Ss][Ss][Ww][Oo][Rr][Dd]=\([^;]*\).*/\1/p')
+              DB_NAME=$(echo $DB_CONNECTION | sed -n 's/.*[Dd][Aa][Tt][Aa][Bb][Aa][Ss][Ee]=\([^;]*\).*/\1/p')
               mysql -u $DB_USER -p$DB_PASSWORD $DB_NAME < /home/anhemmot/projects/anhemmotor-backend/mysql_schema.sql
               echo "Migration completed successfully"
+              rm /home/anhemmot/projects/anhemmotor-backend/mysql_schema.sql
+              echo "Removed migration script"
             else
               echo "No migration script found, skipping..."
             fi
-            
-            # Restart application
             sed -i 's/\r$//' /home/anhemmot/scripts/restart_app.sh
             chmod +x /home/anhemmot/scripts/restart_app.sh
             bash /home/anhemmot/scripts/restart_app.sh
