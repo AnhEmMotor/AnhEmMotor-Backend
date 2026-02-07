@@ -24,29 +24,15 @@ namespace IntegrationTests.SetupClass;
 
 public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
-    private readonly MySqlContainer? _mySqlContainer;
-    private readonly bool _isRunningInCI;
-    private readonly string? _ciConnectionString;
+    private readonly MySqlContainer _mySqlContainer;
 
     public IntegrationTestWebAppFactory()
     {
-        _isRunningInCI = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GITHUB_ACTIONS")) ||
-                         !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("CI"));
-
-        if (_isRunningInCI)
-        {
-            _ciConnectionString = Environment.GetEnvironmentVariable("ConnectionStrings__StringConnection")
-                ?? "Server=127.0.0.1;Port=3306;Database=AnhEmMotor_Test;User=root;Password=root;";
-        }
-        else
-        {
-            _mySqlContainer = new MySqlBuilder("mysql:8.0")
-                .WithDatabase("AnhEmMotor_Test")
-                .WithUsername("root")
-                .WithPassword("root")
-                .Build();
-            
-        }
+        _mySqlContainer = new MySqlBuilder("mysql:8.0")
+            .WithDatabase("AnhEmMotor_Test")
+            .WithUsername("root")
+            .WithPassword("root")
+            .Build();
     }
 
     private Respawner _respawner = default!;
@@ -58,15 +44,8 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
     {
         string connectionString;
 
-        if (_isRunningInCI)
-        {
-            connectionString = _ciConnectionString!;
-        }
-        else
-        {
-            await _mySqlContainer!.StartAsync().ConfigureAwait(false);
-            connectionString = _mySqlContainer.GetConnectionString();
-        }
+        await _mySqlContainer.StartAsync().ConfigureAwait(false);
+        connectionString = _mySqlContainer.GetConnectionString();
 
         _connection = new MySqlConnection(connectionString);
         await _connection.OpenAsync().ConfigureAwait(false);
@@ -104,10 +83,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
         await _connection.DisposeAsync().ConfigureAwait(false);
         
         // Only stop Testcontainers if running locally
-        if (!_isRunningInCI && _mySqlContainer is not null)
-        {
-            await _mySqlContainer.StopAsync(CancellationToken.None).ConfigureAwait(false);
-        }
+        await _mySqlContainer.StopAsync(CancellationToken.None).ConfigureAwait(false);
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -117,9 +93,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
         builder.ConfigureAppConfiguration(
             (context, config) =>
             {
-                var connString = _isRunningInCI 
-                    ? _ciConnectionString! 
-                    : _mySqlContainer!.GetConnectionString();
+                var connString = _mySqlContainer.GetConnectionString();
 
                 config.AddInMemoryCollection(
                     new Dictionary<string, string?>
