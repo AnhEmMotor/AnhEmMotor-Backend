@@ -734,6 +734,8 @@ namespace Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ProductCategory");
+
+                    b.HasAnnotation("Relational:Collation", "utf8mb4_unicode_ci");
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductCollectionPhoto", b =>

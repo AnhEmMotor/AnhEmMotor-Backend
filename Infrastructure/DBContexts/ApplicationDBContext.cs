@@ -82,6 +82,8 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
         modelBuilder.Entity<Permission>().ToTable("Permissions");
         modelBuilder.Entity<RolePermission>().ToTable("RolePermissions");
 
+        modelBuilder.Entity<ProductCategory>().HasAnnotation("Relational:Collation", "utf8mb4_unicode_ci");
+
         modelBuilder.Entity<RolePermission>().HasKey(rp => new { rp.RoleId, rp.PermissionId });
 
         modelBuilder.Entity<RolePermission>()
@@ -140,6 +142,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
                             typeof(Microsoft.EntityFrameworkCore.Storage.ValueConversion.DateTimeOffsetToBinaryConverter));
                     }
                 }
+
             }
         }
 
