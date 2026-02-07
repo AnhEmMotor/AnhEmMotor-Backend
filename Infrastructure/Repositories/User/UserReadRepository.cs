@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
 using Sieve.Services;
+using Application.Sieve;
 using System;
 
 namespace Infrastructure.Repositories.User
@@ -19,6 +20,7 @@ namespace Infrastructure.Repositories.User
             CancellationToken cancellationToken)
         {
             var query = userManager.Users.AsNoTracking();
+            SieveHelper.ApplyDefaultSorting(sieveModel);
 
             var countQuery = sieveProcessor.Apply(sieveModel, query, applyPagination: false);
             var totalCount = await countQuery.CountAsync(cancellationToken).ConfigureAwait(false);
@@ -61,6 +63,7 @@ namespace Infrastructure.Repositories.User
             CancellationToken cancellationToken)
         {
             var query = userManager.Users.AsNoTracking();
+            SieveHelper.ApplyDefaultSorting(sieveModel);
 
             var countQuery = sieveProcessor.Apply(sieveModel, query, applyPagination: false);
             var totalCount = await countQuery.CountAsync(cancellationToken).ConfigureAwait(false);
