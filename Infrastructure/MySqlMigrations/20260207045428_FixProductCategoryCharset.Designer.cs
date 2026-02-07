@@ -711,7 +711,7 @@ namespace Infrastructure.MySqlMigrations
 
                     b.ToTable("ProductCategory");
 
-                    MySQLEntityTypeBuilderExtensions.UseCollation(b, "utf8mb4_unicode_ci");
+                    b.HasAnnotation("Relational:Collation", "utf8mb4_unicode_ci");
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductCollectionPhoto", b =>
