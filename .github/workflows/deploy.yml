@@ -50,10 +50,10 @@ jobs:
       - name: Install EF Core Tools
         run: dotnet tool install --global dotnet-ef
 
-      - name: Generate MySQL Migration Script
+      - name: Generate MySQL Migration Bundle
         run: |
           cd Infrastructure
-          dotnet ef migrations script --idempotent --context MySqlDbContext --output ../mysql_schema.sql
+          dotnet ef migrations bundle --self-contained -r linux-x64 --context MySqlDbContext --output ../mysql_bundle
           cd ..
         continue-on-error: true
 
@@ -63,10 +63,10 @@ jobs:
       - name: Move AppSettings to Publish Folder
         run: cp appsettings.Production.json ./publish/
 
-      - name: Move Migration Script to Publish Folder (if exists)
+      - name: Move Migration Bundle to Publish Folder
         run: |
-          if [ -f mysql_schema.sql ]; then
-            cp mysql_schema.sql ./publish/
+          if [ -f mysql_bundle ]; then
+            mv mysql_bundle ./publish/
           fi
         continue-on-error: true
 
@@ -99,18 +99,18 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            if [ -f /home/anhemmot/projects/anhemmotor-backend/mysql_schema.sql ]; then
+            # Run database migration using bundle
+            if [ -f /home/anhemmot/projects/anhemmotor-backend/mysql_bundle ]; then
               echo "Running database migration..."
-              DB_CONNECTION='${{ secrets.DB_CONNECTION }}'
-              DB_USER=$(echo $DB_CONNECTION | sed -n 's/.*[Uu][Ss][Ee][Rr]=\([^;]*\).*/\1/p')
-              DB_PASSWORD=$(echo $DB_CONNECTION | sed -n 's/.*[Pp][Aa][Ss][Ss][Ww][Oo][Rr][Dd]=\([^;]*\).*/\1/p')
-              DB_NAME=$(echo $DB_CONNECTION | sed -n 's/.*[Dd][Aa][Tt][Aa][Bb][Aa][Ss][Ee]=\([^;]*\).*/\1/p')
-              mysql -u $DB_USER -p$DB_PASSWORD $DB_NAME < /home/anhemmot/projects/anhemmotor-backend/mysql_schema.sql
+              chmod +x /home/anhemmot/projects/anhemmotor-backend/mysql_bundle
+              /home/anhemmot/projects/anhemmotor-backend/mysql_bundle --connection "${{ secrets.DB_CONNECTION }}"
               echo "Migration completed successfully"
-              rm /home/anhemmot/projects/anhemmotor-backend/mysql_schema.sql
-              echo "Removed migration script"
+
+              # Cleanup bundle
+              rm /home/anhemmot/projects/anhemmotor-backend/mysql_bundle
+              echo "Removed migration bundle"
             else
-              echo "No migration script found, skipping..."
+              echo "No migration bundle found, skipping..."
             fi
             sed -i 's/\r$//' /home/anhemmot/scripts/restart_app.sh
             chmod +x /home/anhemmot/scripts/restart_app.sh
