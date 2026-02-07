@@ -3,6 +3,7 @@ using System;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -18,6 +19,8 @@ namespace Infrastructure.MySqlMigrations
             modelBuilder
                 .HasAnnotation("ProductVersion", "10.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
+
+            MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
             modelBuilder.Entity("Domain.Entities.ApplicationRole", b =>
                 {
@@ -142,6 +145,8 @@ namespace Infrastructure.MySqlMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<long?>("CreatedAt")
                         .HasColumnType("bigint");
 
@@ -156,10 +161,10 @@ namespace Infrastructure.MySqlMigrations
                         .HasColumnType("nvarchar(100)")
                         .HasColumnName("Name");
 
-                    b.Property<byte[]>("RowVersion")
+                    b.Property<DateTime?>("RowVersion")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("longblob")
+                        .HasColumnType("timestamp(6)")
                         .HasColumnName("RowVersion");
 
                     b.Property<long?>("UpdatedAt")
@@ -176,6 +181,8 @@ namespace Infrastructure.MySqlMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasColumnName("Id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<Guid?>("ConfirmedBy")
                         .HasColumnType("char(36)")
@@ -235,6 +242,8 @@ namespace Infrastructure.MySqlMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasColumnName("Id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("Count")
                         .HasColumnType("int")
@@ -306,6 +315,8 @@ namespace Infrastructure.MySqlMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<string>("ContentType")
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
@@ -351,6 +362,8 @@ namespace Infrastructure.MySqlMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<long?>("CreatedAt")
                         .HasColumnType("bigint");
 
@@ -375,6 +388,8 @@ namespace Infrastructure.MySqlMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasColumnName("Id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<long?>("CreatedAt")
                         .HasColumnType("bigint");
@@ -406,6 +421,8 @@ namespace Infrastructure.MySqlMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<Guid?>("BuyerId")
                         .HasColumnType("char(36)")
@@ -472,6 +489,8 @@ namespace Infrastructure.MySqlMigrations
                         .HasColumnType("int")
                         .HasColumnName("id");
 
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<decimal?>("CostPrice")
                         .HasColumnType("decimal(18, 2)")
                         .HasColumnName("CostPrice");
@@ -536,6 +555,8 @@ namespace Infrastructure.MySqlMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -551,6 +572,8 @@ namespace Infrastructure.MySqlMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasColumnName("Id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("BoreStroke")
                         .HasColumnType("nvarchar(30)")
@@ -687,6 +710,8 @@ namespace Infrastructure.MySqlMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<long?>("CreatedAt")
                         .HasColumnType("bigint");
 
@@ -708,7 +733,7 @@ namespace Infrastructure.MySqlMigrations
 
                     b.ToTable("ProductCategory");
 
-                    b.HasAnnotation("Relational:Collation", "utf8mb4_unicode_ci");
+                    MySqlEntityTypeBuilderExtensions.UseCollation(b, "utf8mb4_unicode_ci");
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductCollectionPhoto", b =>
@@ -717,6 +742,8 @@ namespace Infrastructure.MySqlMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasColumnName("Id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<long?>("CreatedAt")
                         .HasColumnType("bigint");
@@ -768,6 +795,8 @@ namespace Infrastructure.MySqlMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasColumnName("Id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("CoverImageUrl")
                         .HasColumnType("nvarchar(100)")
@@ -847,6 +876,8 @@ namespace Infrastructure.MySqlMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<string>("Address")
                         .HasColumnType("nvarchar(255)")
                         .HasColumnName("Address");
@@ -897,6 +928,8 @@ namespace Infrastructure.MySqlMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasColumnName("Id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("CitizenID")
                         .HasColumnType("varchar(20)")
@@ -961,6 +994,8 @@ namespace Infrastructure.MySqlMigrations
                         .HasColumnType("int")
                         .HasColumnName("Id");
 
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<long?>("CreatedAt")
                         .HasColumnType("bigint");
 
@@ -993,6 +1028,8 @@ namespace Infrastructure.MySqlMigrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<string>("ClaimType")
                         .HasColumnType("longtext");
 
@@ -1014,6 +1051,8 @@ namespace Infrastructure.MySqlMigrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
                         .HasColumnType("longtext");
