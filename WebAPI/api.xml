@@ -1038,6 +1038,18 @@
             <param name="serviceVersion">The version of the service to be used for OpenTelemetry resource identification.</param>
             <returns>The same service collection instance with OpenTelemetry tracing and metrics configured.</returns>
         </member>
+        <member name="T:WebAPI.Extensions.RateLimitingExtensions">
+             <summary>
+            
+             </summary>
+        </member>
+        <member name="M:WebAPI.Extensions.RateLimitingExtensions.AddRateLimitingServices(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+             <summary>
+            
+             </summary>
+             <param name="services"></param>
+             <returns></returns>
+        </member>
         <member name="T:WebAPI.Extensions.SwaggerExtensions">
             <summary>
             Provides extension methods for configuring custom Swagger/OpenAPI services in an ASP.NET Core application.

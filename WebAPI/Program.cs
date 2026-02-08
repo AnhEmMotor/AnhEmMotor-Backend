@@ -17,11 +17,37 @@ if(!environment.IsEnvironment("Test"))
 
 builder.Services
     .AddCustomMvc()
+    .AddCors(
+        options =>
+        {
+            options.AddPolicy(
+                "CorsPolicy",
+                builder =>
+                {
+                    var allowedOrigins = configuration["Cors:AllowedOrigins"]?.Split(
+                        ';',
+                        StringSplitOptions.RemoveEmptyEntries);
+                    if(allowedOrigins != null && allowedOrigins.Length > 0)
+                    {
+                        if(allowedOrigins.Contains("*"))
+                        {
+                            builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                        } else
+                        {
+                            builder.WithOrigins(allowedOrigins).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+                        }
+                    }
+                });
+        })
     .AddJwtAuthentication(configuration)
     .AddAuthorization()
     .AddCustomSwagger(environment)
     .AddCustomOpenTelemetry(configuration, "AnhEmMotor API", "1.0.0");
 
+if(!builder.Environment.IsEnvironment("Test"))
+{
+    builder.Services.AddRateLimitingServices();
+}
 builder.Services.Configure<SieveOptions>(configuration.GetSection("Sieve"));
 builder.Services.AddHttpContextAccessor();
 builder.Services.ConfigureOptions<ConfigureSwaggerOptions>();
@@ -49,6 +75,14 @@ if(app.Environment.IsDevelopment())
 }
 
 app.UseRouting();
+
+app.UseCors("CorsPolicy");
+
+if(!app.Environment.IsEnvironment("Test"))
+{
+    app.UseForwardedHeaders();
+    app.UseRateLimiter();
+}
 
 app.UseAuthentication();
 app.UseAuthorization();

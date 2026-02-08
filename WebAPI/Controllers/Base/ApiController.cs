@@ -1,12 +1,15 @@
 ﻿using Application.Common.Models;
 using Microsoft.AspNetCore.Mvc;
 
+using Microsoft.AspNetCore.RateLimiting;
+
 namespace WebAPI.Controllers.Base;
 
 /// <summary>
 ///
 /// </summary>
 [ApiController]
+[EnableRateLimiting("auth_api")]
 [Route("api/[controller]")]
 public abstract class ApiController : ControllerBase
 {
