@@ -11,6 +11,7 @@ using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
 using WebAPI.Controllers.Base;
@@ -31,6 +32,7 @@ public class AuthController(IMediator mediator) : ApiController
     /// </summary>
     [HttpPost("register")]
     [AnonymousOnly]
+    [EnableRateLimiting("public_api")]
     [SwaggerOperation(Summary = "Đăng ký tài khoản mới", Description = "Tạo 1 tài khoản mới (với email và password)")]
     [ProducesResponseType(typeof(RegisterResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
@@ -48,6 +50,7 @@ public class AuthController(IMediator mediator) : ApiController
     /// </summary>
     [HttpPost("login")]
     [AnonymousOnly]
+    [EnableRateLimiting("public_api")]
     [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> LoginAsync([FromBody] LoginCommand command, CancellationToken cancellationToken)
@@ -62,6 +65,7 @@ public class AuthController(IMediator mediator) : ApiController
     /// </summary>
     [HttpPost("refresh-token")]
     [AllowAnonymous]
+    [EnableRateLimiting("public_api")]
     [ProducesResponseType(typeof(GetAccessTokenFromRefreshTokenResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
@@ -99,6 +103,7 @@ public class AuthController(IMediator mediator) : ApiController
     /// </summary>
     [HttpPost("google")]
     [AnonymousOnly]
+    [EnableRateLimiting("public_api")]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status501NotImplemented)]
     public async Task<IActionResult> GoogleLoginAsync(
         [FromBody] GoogleLoginCommand command,
@@ -113,6 +118,7 @@ public class AuthController(IMediator mediator) : ApiController
     /// </summary>
     [HttpPost("facebook")]
     [AnonymousOnly]
+    [EnableRateLimiting("public_api")]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status501NotImplemented)]
     public IActionResult FacebookLoginAsync()
     {
@@ -126,6 +132,7 @@ public class AuthController(IMediator mediator) : ApiController
     /// </summary>
     [HttpPost("login/for-manager")]
     [AnonymousOnly]
+    [EnableRateLimiting("public_api")]
     [SwaggerOperation(
         Summary = "Đăng nhập cho quản lý",
         Description = "Đăng nhập với Username/Email và Password. Chỉ cho phép người dùng có ít nhất một quyền trong hệ thống.")]
