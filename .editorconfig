@@ -3,3 +3,6 @@
 [*.cs]
 dotnet_style_require_accessibility_modifiers = always:warning
 dotnet_diagnostic.IDE0001.severity = error
+
+[**/*ModelSnapshot.cs]
+dotnet_diagnostic.IDE0040.severity = none
