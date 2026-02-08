@@ -16,9 +16,9 @@
 > - ❌ Database KHÔNG được update
 > - 💥 **Application sẽ CRASH khi chạy!**
 >
-> ➡️ Chi tiết xem [Section 4.5: Tạo và Quản Lý Migrations](#45-tạo-và-quản-lý-database-migrations)
+> ➡️ Chi tiết xem [Section 3. Tạo và Quản Lý Database Migrations](#3-tạo-và-quản-lý-database-migrations)
 
----
+
 
 # 1. Yêu cầu hệ thống
 
@@ -70,39 +70,35 @@ Dự án sử dụng file `appsettings.json` để cấu hình. File mẫu là `
    Copy-Item appsettings.Template.Development.json appsettings.Development.json
    ```
 
-# 3. Cấu hình ứng dụng
+## 3. Cấu hình ứng dụng
 
 Mở file `WebAPI/appsettings.json` và điền các thông tin sau:
 
-## 1. Chọn Database Provider (BẮT BUỘC)
+### 1. Chọn Database Provider (BẮT BUỘC)
 
 **Dự án hỗ trợ cả SQL Server và MySQL.** Chọn provider phù hợp với môi trường:
 
-### SQL Server (Dành cho Development trên Windows)
+- SQL Server (Dành cho Development trên Windows):
 
-Trong file `appsettings.json`, cấu hình:
+  ```json
+  {
+    "Provider": "SqlServer",
+    "ConnectionStrings": {
+      "StringConnection": "Server=localhost;Database=AnhEmMotorDB;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true"
+    }
+  }
+  ```
 
-```json
-{
-	"Provider": "SqlServer",
-	"ConnectionStrings": {
-		"StringConnection": "Server=localhost;Database=AnhEmMotorDB;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true"
-	}
-}
-```
+- MySQL (Dành cho Production hoặc Testing):
 
-### MySQL (Dành cho Production hoặc Testing)
-
-Trong file `appsettings.json`, cấu hình:
-
-```json
-{
-	"Provider": "MySql",
-	"ConnectionStrings": {
-		"StringConnection": "Server=localhost;Database=anhemmotor;User=root;Password=your_password;"
-	}
-}
-```
+  ```json
+  {
+    "Provider": "MySql",
+    "ConnectionStrings": {
+      "StringConnection": "Server=localhost;Database=anhemmotor;User=root;Password=your_password;"
+    }
+  }
+  ```
 
 > **⚠️ LƯU Ý QUAN TRỌNG:**
 >
@@ -110,9 +106,8 @@ Trong file `appsettings.json`, cấu hình:
 > - **Production/VPS:** sử dụng **MySQL**
 > - **Testing:** Tự động dùng MySQL qua Docker (không cần cấu hình, nhưng cần phải cài đặt Docker)
 
----
 
-## 2. Connection String Chi Tiết
+### 2. Connection String Chi Tiết
 
 ```json
 "ConnectionStrings": {
@@ -130,7 +125,7 @@ Nếu bạn chưa có Database, vui lòng tạo 1 Database, sau đó tìm chuỗ
 - Sau khi điền xong, ô "Select or enter a database name:" sáng lên, hãy chọn Database cần kết nối (Ở đây chính là Database mới tạo ở phía trên).
 - Sau đó nhấn Advanced. Một chuỗi sẽ hiện ra trong cửa sổ mới, đó chính là chuỗi kết nối Database bạn cần dùng. Copy và dán vào chổ đó.
 
-## 2. JWT Configuration (BẮT BUỘC)
+### 3. JWT Configuration (BẮT BUỘC)
 
 Cấu hình JWT để xác thực người dùng:
 
@@ -150,7 +145,7 @@ Cấu hình JWT để xác thực người dùng:
 - `Issuer`: URL của API (thường là `https://localhost:7001`)
 - `Audience`: URL của client (frontend). Với dự án chạy trên máy cá nhân, dù có tận 2 dự án với 2 đầu API khác nhau, nhưng điều này cũng không quan trọng.
 
-## 3. Allowed Hosts
+### 4. Allowed Hosts
 
 Danh sách các hosts được phép truy cập:
 
@@ -161,10 +156,26 @@ Danh sách các hosts được phép truy cập:
 Hoặc cho phép tất cả:
 
 ```json
+```json
 "AllowedHosts": "*"
 ```
 
-## 4. Protected Authorization Entities
+### 5. CORS Configuration
+Cấu hình CORS để cho phép các domain khác gọi API:
+
+```json
+"Cors": {
+  "AllowedOrigins": "https://frontend.com;http://localhost:3000"
+}
+```
+Hoặc cho phép tất cả (chỉ dùng cho dev):
+```json
+"Cors": {
+  "AllowedOrigins": "*"
+}
+```
+
+### 6. Protected Authorization Entities
 
 Cấu hình roles và users mặc định:
 
@@ -197,13 +208,7 @@ Cấu hình roles và users mặc định:
 - **DefaultRolesForNewUsers**: Roles được gán tự động cho user mới đăng ký
   - Có thể có nhiều default roles: `["User", "Customer", "Member"]`
 
----
-
-## 6. Seeding Options (Tùy chọn)
-
-````
-
-## 5. Seeding Options (Tùy chọn)
+### 7. Seeding Options (Tùy chọn)
 
 Cấu hình seeding dữ liệu ban đầu:
 
@@ -213,23 +218,23 @@ Cấu hình seeding dữ liệu ban đầu:
 }
 ````
 
-## 7. Một số cài đặt bổ sung
+### 8. Một số cài đặt bổ sung
 
-### Cấu hình các danh mục sản phẩm không xoá
+- Cấu hình các danh mục sản phẩm không xoá
 
-```json
-"ProtectedProductCategory": [ "Xe máy", "Phụ kiện", "Phụ tùng" ],
-```
+  ```json
+  "ProtectedProductCategory": [ "Xe máy", "Phụ kiện", "Phụ tùng" ],
+  ```
 
-### Cấu hình địa chỉ OpenTelemetry URL để gửi dữ liệu giám sát dự án khi chạy
+- Cấu hình địa chỉ OpenTelemetry URL để gửi dữ liệu giám sát dự án khi chạy
 
-```json
-"OpenTelemetry": {
-	"OtlpEndpoint": "http://localhost:4317"
-},
-```
+  ```json
+  "OpenTelemetry": {
+    "OtlpEndpoint": "http://localhost:4317"
+  },
+  ```
 
-# 4. Tạo Database
+## 4. Tạo Database
 
 1. Mở terminal tại thư mục gốc của dự án
 2. Chạy lệnh tạo database:
@@ -251,9 +256,13 @@ Cấu hình seeding dữ liệu ban đầu:
 
    **Quan trọng:** Sau khi chạy lần đầu, tắt `RunDataSeedingOnStartup`:
 
----
+    ```json
+    "RunDataSeedingOnStartup": false
+    ```
 
-# 4.5. Tạo và Quản Lý Database Migrations
+
+
+# 3. Tạo và Quản Lý Database Migrations
 
 > **🚨 QUAN TRỌNG CHO NGƯỜI MỚI:**
 >
@@ -291,8 +300,6 @@ Sau khi tạo migration, update database local:
 dotnet ef database update --context ApplicationDBContext --project Infrastructure --startup-project WebAPI
 ```
 
----
-
 ## Tạo Migration Thủ Công (Advanced)
 
 ### Tạo SQL Server Migration
@@ -317,9 +324,9 @@ dotnet ef migrations add TenMigration --context MySqlDbContext --output-dir MySq
 >
 > **Khuyến nghị:** Luôn dùng `add-migration.ps1` để tránh quên!
 
----
 
-# 4.6. Các Lệnh Migration Hữu Ích
+
+## Các Lệnh Migration Hữu Ích
 
 ### Xem danh sách migrations
 
@@ -341,23 +348,19 @@ dotnet ef migrations remove --project Infrastructure --startup-project WebAPI
 dotnet ef migrations remove --context MySqlDbContext --project Infrastructure --startup-project WebAPI
 ```
 
-### Rollback database về migration trước
-
-```powershell
-dotnet ef database update TenMigrationTruocDo --project Infrastructure --startup-project WebAPI
-```
-
-```json
-"RunDataSeedingOnStartup": false
-```
-
-# 5. Chạy ứng dụng
+# 4. Chạy ứng dụng
 
 ## Cách 1: Sử dụng Visual Studio
 
 1. Mở file `AnhEmMotor-Backend.sln` bằng Visual Studio 2022
 2. Chọn project `WebAPI` làm Startup Project (chuột phải > Set as Startup Project).
 3. Nhấn `F5` hoặc click nút **Run**. Chú ý ở chổ mũi tên xanh phải đang chọn "https"
+
+Sau khi chạy ứng dụng, truy cập Swagger UI để xem tài liệu API:
+
+```
+https://localhost:7001/swagger
+```
 
 ## Cách 2: Sử dụng Command Line
 
@@ -377,21 +380,17 @@ dotnet ef database update TenMigrationTruocDo --project Infrastructure --startup
    - **HTTPS:** `https://localhost:7001`
    - **HTTP:** `http://localhost:5000`
 
-# 6. Truy cập Swagger UI
-
 Sau khi chạy ứng dụng, truy cập Swagger UI để xem tài liệu API:
 
 ```
 https://localhost:7001/swagger
 ```
 
-# 7. Cấu hình Môi trường Test (Yêu cầu)
+# 5. Cấu hình Môi trường Test (Yêu cầu)
 
 Dự án sử dụng **Testcontainers** để tự động tạo môi trường MySQL cô lập khi chạy Test.
 
-**Yêu cầu duy nhất:**
-
-- Máy tính phải cài đặt và đang chạy **Docker Desktop** (hoặc Docker Engine).
+**Yêu cầu duy nhất:** Máy tính phải cài đặt và đang chạy **Docker Desktop** (hoặc Docker Engine).
 
 **Cách chạy Test:**
 
@@ -404,7 +403,7 @@ Dự án sử dụng **Testcontainers** để tự động tạo môi trường 
     - Thực thi Test.
     - Tự động dọn dẹp sau khi xong.
 
-# 8. GitHub Secrets Configuration (Cho Production Deploy)
+# 6. GitHub Secrets Configuration (Cho Production Deploy)
 
 Cần setup các secrets sau trong GitHub repository:
 
@@ -415,6 +414,7 @@ Cần setup các secrets sau trong GitHub repository:
 | Secret Name       | Mô Tả                               | Ví Dụ                                                          |
 | ----------------- | ----------------------------------- | -------------------------------------------------------------- |
 | `ALLOWED_HOSTS`   | Domains được phép                   | `api.yourdomain.com;yourdomain.com` hoặc `*`                   |
+| `CORS_ALLOWED_ORIGINS` | CORS Allowed Origins           | `https://yourdomain.com;http://localhost:3000` hoặc `*`        |
 | `DB_CONNECTION`   | MySQL connection string             | `Server=localhost;Database=anhemmotor;User=root;Password=xxx;` |
 | `JWT_KEY`         | JWT secret key (>= 32 chars)        | `Your-Super-Secret-JWT-Key-32-Chars`                           |
 | `JWT_ISSUER`      | API URL                             | `https://api.yourdomain.com`                                   |
@@ -476,9 +476,7 @@ Cần setup các secrets sau trong GitHub repository:
 ["admin@anhem.com:Admin@123456", "manager@anhem.com"]
 ````
 
----
-
-# 9. Troubleshooting
+# 7. Troubleshooting
 
 ## Lỗi: "Docker is not running"
 
@@ -520,7 +518,10 @@ Thêm `TrustServerCertificate=True` vào connection string:
 ## Port đã được sử dụng
 
 **Giải pháp:**
-Thay đổi port trong file `WebAPI/Properties/launchSettings.json`:
+
+Khởi động lại máy tính.
+
+Nếu không được, thay đổi port trong file `WebAPI/Properties/launchSettings.json` (Nhưng vì file này có thể push lên github nên nhớ trở về cổng cũ):
 
 ```json
 "applicationUrl": "https://localhost:7002;http://localhost:5001"

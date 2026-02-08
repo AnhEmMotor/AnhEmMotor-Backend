@@ -17,6 +17,29 @@ if(!environment.IsEnvironment("Test"))
 
 builder.Services
     .AddCustomMvc()
+    .AddCors(options =>
+    {
+        options.AddPolicy("CorsPolicy", builder =>
+        {
+            var allowedOrigins = configuration["Cors:AllowedOrigins"]?.Split(';', StringSplitOptions.RemoveEmptyEntries);
+            if (allowedOrigins != null && allowedOrigins.Length > 0)
+            {
+                if (allowedOrigins.Contains("*"))
+                {
+                   builder.AllowAnyOrigin()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader();
+                }
+                else
+                {
+                   builder.WithOrigins(allowedOrigins)
+                          .AllowAnyMethod()
+                          .AllowAnyHeader()
+                          .AllowCredentials();
+                }
+            }
+        });
+    })
     .AddJwtAuthentication(configuration)
     .AddAuthorization()
     .AddCustomSwagger(environment)
@@ -49,6 +72,8 @@ if(app.Environment.IsDevelopment())
 }
 
 app.UseRouting();
+
+app.UseCors("CorsPolicy"); 
 
 app.UseAuthentication();
 app.UseAuthorization();
