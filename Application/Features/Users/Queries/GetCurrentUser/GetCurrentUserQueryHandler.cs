@@ -1,11 +1,16 @@
+using Application.ApiContracts.Permission.Responses;
 using Application.ApiContracts.User.Responses;
+using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Models;
+using Application.Interfaces.Repositories.Role;
 using Application.Interfaces.Repositories.User;
 using MediatR;
 
 namespace Application.Features.Users.Queries.GetCurrentUser;
 
-public class GetCurrentUserQueryHandler(IUserReadRepository userReadRepository) : IRequestHandler<GetCurrentUserQuery, Result<UserResponse>>
+public class GetCurrentUserQueryHandler(
+    IUserReadRepository userReadRepository,
+    IRoleReadRepository roleReadRepository) : IRequestHandler<GetCurrentUserQuery, Result<UserResponse>>
 {
     public async Task<Result<UserResponse>> Handle(GetCurrentUserQuery request, CancellationToken cancellationToken)
     {
@@ -27,7 +32,31 @@ public class GetCurrentUserQueryHandler(IUserReadRepository userReadRepository) 
 
         if(string.Compare(user.Status, Domain.Constants.UserStatus.Banned) == 0)
         {
-            return Error.Forbidden("User account is banned.");
+        return Error.Forbidden("User account is banned.");
+        }
+
+        var userRoles = await userReadRepository.GetRolesOfUserAsync(user, cancellationToken).ConfigureAwait(false);
+        var roleEntities = await roleReadRepository.GetRolesByNameAsync(userRoles, cancellationToken)
+            .ConfigureAwait(false);
+
+        var roleIds = roleEntities.Select(r => r.Id).ToList();
+        var userPermissionNames = await roleReadRepository.GetPermissionsNameByRoleIdAsync(roleIds, cancellationToken)
+                .ConfigureAwait(false) ??
+            new List<string>();
+
+        List<PermissionResponse>? userPermissions = null;
+        if(userPermissionNames.Count > 0)
+        {
+            userPermissions = userPermissionNames
+                .Select(p => new { Name = p, Metadata = Domain.Constants.Permission.PermissionsList.GetMetadata(p) })
+                .Select(
+                    p => new PermissionResponse()
+                    {
+                        ID = p.Name,
+                        DisplayName = p.Metadata?.DisplayName ?? p.Name,
+                        Description = p.Metadata?.Description
+                    })
+                .ToList();
         }
 
         return new UserResponse()
@@ -38,6 +67,7 @@ public class GetCurrentUserQueryHandler(IUserReadRepository userReadRepository) 
             FullName = user.FullName,
             Gender = user.Gender,
             PhoneNumber = user.PhoneNumber,
+            Permissions = userPermissions
         };
     }
 }

@@ -14,6 +14,9 @@ using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
 using WebAPI.Controllers.Base;
 
+using Application.Interfaces.Services;
+using System.Text.Json;
+
 namespace WebAPI.Controllers.V1;
 
 /// <summary>
@@ -23,10 +26,15 @@ namespace WebAPI.Controllers.V1;
 [SwaggerTag("Quản lý người dùng (Bất cứ người dùng nào đã đăng nhập đều có quyền vào đây)")]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
-public class UserController(IMediator mediator) : ApiController
+public class UserController(IMediator mediator, IUserStreamService userStreamService) : ApiController
 {
+    private readonly JsonSerializerOptions _jsonSerializerOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = false
+    };
     /// <summary>
-    /// Lấy thông tin người dùng hiện tại từ JWT
+    /// Lấy thông tin người dùng hiện tại từ JWT (Hỗ trợ SSE nếu Accept: text/event-stream)
     /// </summary>
     [HttpGet("me")]
     [Authorize]
@@ -35,11 +43,64 @@ public class UserController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetCurrentUserAsync(CancellationToken cancellationToken)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if(string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out var userId))
+        {
+            return Unauthorized(Error.Validation("Invalid User ID", "UserId"));
+        }
+
+        bool isSse = Request.Headers.Accept.ToString().Contains("text/event-stream");
+
+        if(isSse)
+        {
+            Response.Headers.Append("Content-Type", "text/event-stream");
+            Response.Headers.Append("Cache-Control", "no-cache");
+            Response.Headers.Append("Connection", "keep-alive");
+            Response.Headers.Append("X-Accel-Buffering", "no");
+
+            try
+            {
+                // Send initial data
+                await SendUserData(userIdString, cancellationToken).ConfigureAwait(false);
+
+                while(!cancellationToken.IsCancellationRequested)
+                {
+                    // Wait for update signal
+                    await userStreamService.WaitForUpdateAsync(userId, cancellationToken);
+                    
+                    // Fetch and send updated data
+                    await SendUserData(userIdString, cancellationToken).ConfigureAwait(false);
+                }
+            }
+            catch(OperationCanceledException)
+            {
+                // Client disconnected
+            }
+            return new EmptyResult();
+        }
+        else
+        {
+            // Normal request
+             var result = await mediator.Send(new GetCurrentUserQuery() { UserId = userIdString }, cancellationToken)
+            .ConfigureAwait(false);
+            
+            return HandleResult(result);
+        }
+    }
+
+    private async Task SendUserData(string userId, CancellationToken cancellationToken)
+    {
         var result = await mediator.Send(new GetCurrentUserQuery() { UserId = userId }, cancellationToken)
             .ConfigureAwait(false);
-        return HandleResult(result);
+
+        if(result.IsSuccess)
+        {
+            var json = JsonSerializer.Serialize(result.Value, _jsonSerializerOptions);
+            await Response.WriteAsync($"data: {json}\n\n", cancellationToken);
+            await Response.Body.FlushAsync(cancellationToken);
+        }
     }
+
 
     /// <summary>
     /// Đổi thông tin người dùng hiện tại từ JWT

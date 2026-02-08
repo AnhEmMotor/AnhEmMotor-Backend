@@ -1,4 +1,6 @@
-﻿namespace Application.ApiContracts.User.Responses;
+﻿using Application.ApiContracts.Permission.Responses;
+
+namespace Application.ApiContracts.User.Responses;
 
 public class UserResponse
 {
@@ -13,4 +15,6 @@ public class UserResponse
     public string? Gender { get; set; } = string.Empty;
 
     public string? PhoneNumber { get; set; } = string.Empty;
+
+    public List<PermissionResponse>? Permissions { get; set; }
 }

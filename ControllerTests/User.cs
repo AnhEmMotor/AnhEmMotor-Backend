@@ -15,17 +15,21 @@ using System;
 using System.Security.Claims;
 using WebAPI.Controllers.V1;
 
+using Application.Interfaces.Services;
+
 namespace ControllerTests;
 
 public class User
 {
     private readonly Mock<IMediator> _mediatorMock;
+    private readonly Mock<IUserStreamService> _userStreamServiceMock;
     private readonly UserController _controller;
 
     public User()
     {
         _mediatorMock = new Mock<IMediator>();
-        _controller = new UserController(_mediatorMock.Object);
+        _userStreamServiceMock = new Mock<IUserStreamService>();
+        _controller = new UserController(_mediatorMock.Object, _userStreamServiceMock.Object);
 
         var httpContext = new DefaultHttpContext();
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };

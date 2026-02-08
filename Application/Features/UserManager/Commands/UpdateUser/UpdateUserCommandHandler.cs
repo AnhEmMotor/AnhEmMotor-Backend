@@ -1,6 +1,7 @@
 using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.User;
+using Application.Interfaces.Services;
 using Domain.Constants;
 using MediatR;
 
@@ -8,7 +9,8 @@ namespace Application.Features.UserManager.Commands.UpdateUser;
 
 public class UpdateUserCommandHandler(
     IUserReadRepository userReadRepository,
-    IUserUpdateRepository userUpdateRepository) : IRequestHandler<UpdateUserCommand, Result<UserDTOForManagerResponse>>
+    IUserUpdateRepository userUpdateRepository,
+    IUserStreamService userStreamService) : IRequestHandler<UpdateUserCommand, Result<UserDTOForManagerResponse>>
 {
     public async Task<Result<UserDTOForManagerResponse>> Handle(
         UpdateUserCommand request,
@@ -76,6 +78,9 @@ public class UpdateUserCommandHandler(
             var validationErrors = errorList.Select(e => Error.Validation(e)).ToList();
             return Result<UserDTOForManagerResponse>.Failure(validationErrors);
         }
+
+        // Notify user about update
+        userStreamService.NotifyUserUpdate(user.Id);
 
         var roles = await userReadRepository.GetUserRolesAsync(user, cancellationToken).ConfigureAwait(false);
 

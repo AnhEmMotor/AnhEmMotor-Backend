@@ -1,13 +1,15 @@
 using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.User;
+using Application.Interfaces.Services;
 using MediatR;
 
 namespace Application.Features.Users.Commands.UpdateCurrentUser;
 
 public class UpdateCurrentUserCommandHandler(
     IUserReadRepository userReadRepository,
-    IUserUpdateRepository userUpdateRepository) : IRequestHandler<UpdateCurrentUserCommand, Result<UserDTOForManagerResponse>>
+    IUserUpdateRepository userUpdateRepository,
+    IUserStreamService userStreamService) : IRequestHandler<UpdateCurrentUserCommand, Result<UserDTOForManagerResponse>>
 {
     public async Task<Result<UserDTOForManagerResponse>> Handle(
         UpdateCurrentUserCommand request,
@@ -63,6 +65,9 @@ public class UpdateCurrentUserCommandHandler(
             var validationErrors = errors.Select(e => Error.Validation("UpdateError", e)).ToList();
             return Result<UserDTOForManagerResponse>.Failure(validationErrors);
         }
+
+        // Notify user about update
+        userStreamService.NotifyUserUpdate(user.Id);
 
         var roles = await userReadRepository.GetUserRolesAsync(user, cancellationToken).ConfigureAwait(false);
 

@@ -10,7 +10,8 @@ namespace Application.Features.UserManager.Commands.ChangeUserStatus;
 public class ChangeUserStatusCommandHandler(
     IUserReadRepository userReadRepository,
     IUserUpdateRepository userUpdateRepository,
-    IProtectedEntityManagerService protectedEntityManagerService) : IRequestHandler<ChangeUserStatusCommand, Result<ChangeStatusUserByManagerResponse>>
+    IProtectedEntityManagerService protectedEntityManagerService,
+    IUserStreamService userStreamService) : IRequestHandler<ChangeUserStatusCommand, Result<ChangeStatusUserByManagerResponse>>
 {
     public async Task<Result<ChangeStatusUserByManagerResponse>> Handle(
         ChangeUserStatusCommand request,
@@ -69,6 +70,9 @@ public class ChangeUserStatusCommandHandler(
             var validationErrors = errors.Select(e => Error.Validation(e)).ToList();
             return Result<ChangeStatusUserByManagerResponse>.Failure(validationErrors);
         }
+
+        // Notify user about status change (they might be logged out or just updated status in profile)
+        userStreamService.NotifyUserUpdate(user.Id);
 
         return new ChangeStatusUserByManagerResponse()
         {
