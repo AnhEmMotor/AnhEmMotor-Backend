@@ -30,10 +30,11 @@ public class GetCurrentUserQueryHandler(
             return Error.Forbidden("User account is deleted.");
         }
 
-        if(string.Compare(user.Status, Domain.Constants.UserStatus.Banned) == 0)
-        {
-        return Error.Forbidden("User account is banned.");
-        }
+        // Allow banned users to retrieve their profile so frontend can show "Banned" status
+        // if(string.Compare(user.Status, Domain.Constants.UserStatus.Banned) == 0)
+        // {
+        //    return Error.Forbidden("User account is banned.");
+        // }
 
         var userRoles = await userReadRepository.GetRolesOfUserAsync(user, cancellationToken).ConfigureAwait(false);
         var roleEntities = await roleReadRepository.GetRolesByNameAsync(userRoles, cancellationToken)
@@ -67,6 +68,7 @@ public class GetCurrentUserQueryHandler(
             FullName = user.FullName,
             Gender = user.Gender,
             PhoneNumber = user.PhoneNumber,
+            Status = user.Status,
             Permissions = userPermissions
         };
     }

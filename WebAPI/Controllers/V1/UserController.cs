@@ -99,6 +99,13 @@ public class UserController(IMediator mediator, IUserStreamService userStreamSer
             await Response.WriteAsync($"data: {json}\n\n", cancellationToken);
             await Response.Body.FlushAsync(cancellationToken);
         }
+        else
+        {
+            // Send error event if query fails (e.g. user deleted)
+            var errorJson = JsonSerializer.Serialize(result.Error, _jsonSerializerOptions);
+            await Response.WriteAsync($"event: error\ndata: {errorJson}\n\n", cancellationToken);
+            await Response.Body.FlushAsync(cancellationToken);
+        }
     }
 
 
