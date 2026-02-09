@@ -1,6 +1,5 @@
 using Application.ApiContracts.Permission.Responses;
 using Application.ApiContracts.User.Responses;
-using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.Role;
 using Application.Interfaces.Repositories.User;
@@ -8,9 +7,7 @@ using MediatR;
 
 namespace Application.Features.Users.Queries.GetCurrentUser;
 
-public class GetCurrentUserQueryHandler(
-    IUserReadRepository userReadRepository,
-    IRoleReadRepository roleReadRepository) : IRequestHandler<GetCurrentUserQuery, Result<UserResponse>>
+public class GetCurrentUserQueryHandler(IUserReadRepository userReadRepository, IRoleReadRepository roleReadRepository) : IRequestHandler<GetCurrentUserQuery, Result<UserResponse>>
 {
     public async Task<Result<UserResponse>> Handle(GetCurrentUserQuery request, CancellationToken cancellationToken)
     {
@@ -29,12 +26,6 @@ public class GetCurrentUserQueryHandler(
         {
             return Error.Forbidden("User account is deleted.");
         }
-
-        // Allow banned users to retrieve their profile so frontend can show "Banned" status
-        // if(string.Compare(user.Status, Domain.Constants.UserStatus.Banned) == 0)
-        // {
-        //    return Error.Forbidden("User account is banned.");
-        // }
 
         var userRoles = await userReadRepository.GetRolesOfUserAsync(user, cancellationToken).ConfigureAwait(false);
         var roleEntities = await roleReadRepository.GetRolesByNameAsync(userRoles, cancellationToken)

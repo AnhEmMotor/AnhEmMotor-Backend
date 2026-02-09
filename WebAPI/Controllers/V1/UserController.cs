@@ -2,20 +2,18 @@
 using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Models;
 using Application.Features.Users.Commands.DeleteCurrentUserAccount;
-
 using Application.Features.Users.Commands.RestoreUserAccount;
 using Application.Features.Users.Commands.UpdateCurrentUser;
 using Application.Features.Users.Queries.GetCurrentUser;
+using Application.Interfaces.Services;
 using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
-using WebAPI.Controllers.Base;
-
-using Application.Interfaces.Services;
 using System.Text.Json;
+using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1;
 
@@ -60,42 +58,30 @@ public class UserController(IMediator mediator, IUserStreamService userStreamSer
 
             try
             {
-                // Send initial data (using existing mediator scope)
-                await SendUserData(mediator, userIdString, cancellationToken).ConfigureAwait(false);
+                await SendUserDataAsync(mediator, userIdString, cancellationToken).ConfigureAwait(false);
 
                 while(!cancellationToken.IsCancellationRequested)
                 {
-                    // Wait for update signal
-                    await userStreamService.WaitForUpdateAsync(userId, cancellationToken);
-                    
-                    // Create a NEW scope for each update check to ensure we get a fresh DbContext instance.
-                    // This is crucial for long-running connections to see changes made by other transactions 
-                    // (bypassing potential Repeatable Read isolation issues in the initial scope).
-                    using (var scope = serviceProvider.CreateScope())
-                    {
-                        var scopedMediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-                        // Fetch and send updated data using the scoped mediator
-                        await SendUserData(scopedMediator, userIdString, cancellationToken).ConfigureAwait(false);
-                    }
+                    await userStreamService.WaitForUpdateAsync(userId, cancellationToken).ConfigureAwait(true);
+
+                    using var scope = serviceProvider.CreateScope();
+                    var scopedMediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+                    await SendUserDataAsync(scopedMediator, userIdString, cancellationToken).ConfigureAwait(false);
                 }
-            }
-            catch(OperationCanceledException)
+            } catch(OperationCanceledException)
             {
-                // Client disconnected
             }
             return new EmptyResult();
-        }
-        else
+        } else
         {
-            // Normal request
-             var result = await mediator.Send(new GetCurrentUserQuery() { UserId = userIdString }, cancellationToken)
-            .ConfigureAwait(false);
-            
+            var result = await mediator.Send(new GetCurrentUserQuery() { UserId = userIdString }, cancellationToken)
+                .ConfigureAwait(false);
+
             return HandleResult(result);
         }
     }
 
-    private async Task SendUserData(IMediator mediatorToUse, string userId, CancellationToken cancellationToken)
+    private async Task SendUserDataAsync(IMediator mediatorToUse, string userId, CancellationToken cancellationToken)
     {
         var result = await mediatorToUse.Send(new GetCurrentUserQuery() { UserId = userId }, cancellationToken)
             .ConfigureAwait(false);
@@ -103,15 +89,13 @@ public class UserController(IMediator mediator, IUserStreamService userStreamSer
         if(result.IsSuccess)
         {
             var json = JsonSerializer.Serialize(result.Value, _jsonSerializerOptions);
-            await Response.WriteAsync($"data: {json}\n\n", cancellationToken);
-            await Response.Body.FlushAsync(cancellationToken);
-        }
-        else
+            await Response.WriteAsync($"data: {json}\n\n", cancellationToken).ConfigureAwait(true);
+            await Response.Body.FlushAsync(cancellationToken).ConfigureAwait(true);
+        } else
         {
-            // Send error event if query fails (e.g. user deleted)
             var errorJson = JsonSerializer.Serialize(result.Error, _jsonSerializerOptions);
-            await Response.WriteAsync($"event: error\ndata: {errorJson}\n\n", cancellationToken);
-            await Response.Body.FlushAsync(cancellationToken);
+            await Response.WriteAsync($"event: error\ndata: {errorJson}\n\n", cancellationToken).ConfigureAwait(true);
+            await Response.Body.FlushAsync(cancellationToken).ConfigureAwait(true);
         }
     }
 

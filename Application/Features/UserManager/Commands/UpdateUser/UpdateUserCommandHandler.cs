@@ -79,7 +79,6 @@ public class UpdateUserCommandHandler(
             return Result<UserDTOForManagerResponse>.Failure(validationErrors);
         }
 
-        // Notify user about update
         userStreamService.NotifyUserUpdate(user.Id);
 
         var roles = await userReadRepository.GetUserRolesAsync(user, cancellationToken).ConfigureAwait(false);

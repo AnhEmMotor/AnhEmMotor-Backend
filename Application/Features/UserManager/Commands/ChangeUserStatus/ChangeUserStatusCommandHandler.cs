@@ -71,7 +71,6 @@ public class ChangeUserStatusCommandHandler(
             return Result<ChangeStatusUserByManagerResponse>.Failure(validationErrors);
         }
 
-        // Notify user about status change (they might be logged out or just updated status in profile)
         userStreamService.NotifyUserUpdate(user.Id);
 
         return new ChangeStatusUserByManagerResponse()

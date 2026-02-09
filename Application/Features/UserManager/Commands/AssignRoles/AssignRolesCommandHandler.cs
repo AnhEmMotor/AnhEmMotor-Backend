@@ -96,7 +96,6 @@ public sealed class AssignRolesCommandHandler(
 
         if(hasChanged)
         {
-            // Notify user about role/permission updates
             userStreamService.NotifyUserUpdate(user.Id);
         }
 

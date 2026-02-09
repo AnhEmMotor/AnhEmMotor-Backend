@@ -5,6 +5,7 @@ using Application.Features.Users.Commands.DeleteCurrentUserAccount;
 using Application.Features.Users.Commands.RestoreUserAccount;
 using Application.Features.Users.Commands.UpdateCurrentUser;
 using Application.Features.Users.Queries.GetCurrentUser;
+using Application.Interfaces.Services;
 using Domain.Constants;
 using FluentAssertions;
 using MediatR;
@@ -13,9 +14,8 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System;
 using System.Security.Claims;
-using WebAPI.Controllers.V1;
 
-using Application.Interfaces.Services;
+using WebAPI.Controllers.V1;
 
 namespace ControllerTests;
 
@@ -32,8 +32,8 @@ public class User
         _userStreamServiceMock = new Mock<IUserStreamService>();
         _serviceProviderMock = new Mock<IServiceProvider>();
         _controller = new UserController(
-            _mediatorMock.Object, 
-            _userStreamServiceMock.Object, 
+            _mediatorMock.Object,
+            _userStreamServiceMock.Object,
             _serviceProviderMock.Object);
 
         var httpContext = new DefaultHttpContext();
@@ -55,8 +55,7 @@ public class User
             PhoneNumber = "0123456789"
         };
 
-        
-        var claims = new List<Claim> { new(ClaimTypes.NameIdentifier, expectedResponse.Id.ToString()) };
+        var claims = new List<Claim> { new(ClaimTypes.NameIdentifier, expectedResponse.Id.ToString() ?? string.Empty) };
         var identity = new ClaimsIdentity(claims, "TestAuthType");
         var claimsPrincipal = new ClaimsPrincipal(identity);
 
