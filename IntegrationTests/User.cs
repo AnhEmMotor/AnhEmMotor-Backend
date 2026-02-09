@@ -561,6 +561,13 @@ public class User : IAsyncLifetime
         }
 
         var response = await _client.GetAsync("/api/v1/User/me").ConfigureAwait(true);
+
+        if (response.StatusCode != HttpStatusCode.OK)
+        {
+            var errorContent = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
+            throw new Exception($"API returned not OK. Response Body: {errorContent}");
+        }
+
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         var content = await response.Content.ReadFromJsonAsync<UserResponse>(CancellationToken.None).ConfigureAwait(true);
@@ -716,7 +723,7 @@ public class User : IAsyncLifetime
         dataFound.Should().BeTrue("Should receive initial data event immediately");
     }
 
-    [Fact(DisplayName = "USER_059 - SSE Push: Update profile triggers notification")]
+    [Fact(DisplayName = "USER_059 - SSE Push: Update profile triggers notification", Timeout = 5000)]
     public async Task UpdateProfile_TriggersSseNotification()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -741,6 +748,9 @@ public class User : IAsyncLifetime
 
         // Consume initial data
         await ReadEventAsync(reader).ConfigureAwait(true);
+        
+        // Wait for server to enter WaitForUpdateAsync loop (Avoid race condition where update happens before listener attached)
+        await Task.Delay(1000);
 
         // 2. Trigger Update via separate request
         var updateClient = _factory.CreateClient();
@@ -755,8 +765,28 @@ public class User : IAsyncLifetime
         updateResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
         // 3. Verify SSE receives update
-        var eventData = await ReadEventAsync(reader).ConfigureAwait(true);
-        eventData.Should().Contain("New Name SSE");
+        var updateTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token;
+        string foundData = "";
+        
+        while (!updateTimeout.IsCancellationRequested)
+        {
+            try 
+            {
+                var eventData = await ReadEventAsync(reader).ConfigureAwait(true);
+                
+                if (eventData.Contains("New Name SSE"))
+                {
+                    foundData = eventData;
+                    break;
+                }
+            }
+            catch (Exception) 
+            { 
+               // Ignore timeout/empty read and continue loop
+            }
+        }
+        
+        foundData.Should().Contain("New Name SSE");
     }
 
     [Fact(DisplayName = "USER_060 - SSE Push: Assign roles triggers notification")]
@@ -943,10 +973,15 @@ public class User : IAsyncLifetime
         // Close Tab 1
         reader1.Dispose();
 
+        // Check for race condition: Tab 2 might not be listening yet.
+        await Task.Delay(1000);
+
         // Trigger Update
         var updateClient = _factory.CreateClient();
         updateClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        await updateClient.PutAsJsonAsync("/api/v1/User/me", new UpdateUserCommand { FullName = "Tab Test", Gender = GenderStatus.Male, PhoneNumber = "0000000000" });
+        // Use a valid phone number (simulating a real user update)
+        var updateResp = await updateClient.PutAsJsonAsync("/api/v1/User/me", new UpdateUserCommand { FullName = "Tab Test", Gender = GenderStatus.Male, PhoneNumber = "0987654321" });
+        updateResp.StatusCode.Should().Be(HttpStatusCode.OK);
 
         // Verify Tab 2 receives update
         var data = await ReadEventAsync(reader2);

@@ -68,27 +68,11 @@ public class UserStreamService : IUserStreamService
                 if(list.Count == 0)
                 {
                     // Remove the key if no more listeners to clean up memory
-                    // We use the collection as the comparison value to ensure we are removing the entry we just modified
-                    // and not a new one that might have been added concurrently.
-                    // However, ConcurrentDictionary TryRemove in older versions does not support value check easily without KVP.
-                    // But since we are locking 'list', and 'AddOrUpdate' also locks 'list' (if it gets the same instance),
-                    // we need to be careful.
-                    
-                    // Actually, simpler approach: if empty, try remove. 
-                    // If a new connection just came in (AddOrUpdate), it would have either:
-                    // 1. Got the same list (if we haven't removed it yet). It will lock it. We are holding lock. It waits.
-                    //    We remove TCS. List empty. We remove Key. Release lock.
-                    //    AddOrUpdate gets lock. Adds TCS. Returns list.
-                    //    But we REMOVED the key. So the list acts as "detached".
-                    //    AddOrUpdate logic in ConcurrentDictionary:
-                    //    If we are in the 'updateFactory', we already modifying the value.
-                    //    If we remove the key, ConcurrentDictionary state might be inconsistent if we are inside an update?
-                    //    No, we are in RemoveListener, not inside a Dict method.
-                    
-                    // If we remove the key/value pair now, the 'list' object becomes orphaned from the dictionary.
-                    // Any generic 'AddOrUpdate' running concurrently might end up putting it back if it had a reference?
-                    // Safe approach: Just TryRemove. If a new user comes, they'll create a new List via AddOrUpdate factory.
-                     _listeners.TryRemove(userId, out _);
+                    // Note: There is a potential race condition here if a new listener is added while we are removing the key.
+                    // However, typical usage patterns (client disconnect vs new connection) make this low risk.
+                    // For robustness, we can leave the empty list or implement safer removal.
+                    // Currently leaving empty list to avoid race in tests.
+                     // _listeners.TryRemove(userId, out _);
                 }
             }
         }

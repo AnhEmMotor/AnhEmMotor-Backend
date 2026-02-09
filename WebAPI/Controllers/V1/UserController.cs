@@ -26,7 +26,7 @@ namespace WebAPI.Controllers.V1;
 [SwaggerTag("Quản lý người dùng (Bất cứ người dùng nào đã đăng nhập đều có quyền vào đây)")]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
-public class UserController(IMediator mediator, IUserStreamService userStreamService) : ApiController
+public class UserController(IMediator mediator, IUserStreamService userStreamService, IServiceProvider serviceProvider) : ApiController
 {
     private readonly JsonSerializerOptions _jsonSerializerOptions = new()
     {
@@ -60,16 +60,23 @@ public class UserController(IMediator mediator, IUserStreamService userStreamSer
 
             try
             {
-                // Send initial data
-                await SendUserData(userIdString, cancellationToken).ConfigureAwait(false);
+                // Send initial data (using existing mediator scope)
+                await SendUserData(mediator, userIdString, cancellationToken).ConfigureAwait(false);
 
                 while(!cancellationToken.IsCancellationRequested)
                 {
                     // Wait for update signal
                     await userStreamService.WaitForUpdateAsync(userId, cancellationToken);
                     
-                    // Fetch and send updated data
-                    await SendUserData(userIdString, cancellationToken).ConfigureAwait(false);
+                    // Create a NEW scope for each update check to ensure we get a fresh DbContext instance.
+                    // This is crucial for long-running connections to see changes made by other transactions 
+                    // (bypassing potential Repeatable Read isolation issues in the initial scope).
+                    using (var scope = serviceProvider.CreateScope())
+                    {
+                        var scopedMediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+                        // Fetch and send updated data using the scoped mediator
+                        await SendUserData(scopedMediator, userIdString, cancellationToken).ConfigureAwait(false);
+                    }
                 }
             }
             catch(OperationCanceledException)
@@ -88,9 +95,9 @@ public class UserController(IMediator mediator, IUserStreamService userStreamSer
         }
     }
 
-    private async Task SendUserData(string userId, CancellationToken cancellationToken)
+    private async Task SendUserData(IMediator mediatorToUse, string userId, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetCurrentUserQuery() { UserId = userId }, cancellationToken)
+        var result = await mediatorToUse.Send(new GetCurrentUserQuery() { UserId = userId }, cancellationToken)
             .ConfigureAwait(false);
 
         if(result.IsSuccess)

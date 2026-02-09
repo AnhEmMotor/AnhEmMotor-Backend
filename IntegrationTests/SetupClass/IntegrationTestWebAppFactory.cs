@@ -164,6 +164,9 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                 services.AddScoped<IAuthorizationHandler, AllPermissionsHandler>();
                 services.AddScoped<IAuthorizationHandler, AnyPermissionsHandler>();
 
+                services.AddSingleton<IUserStreamService, UserStreamService>();
+
+
                 services.AddScoped<ITokenManagerService, TokenManagerService>();
                 services.AddScoped<IHttpTokenAccessorService, HttpTokenAccessorService>();
                 services.AddScoped<IIdentityService, IdentityService>();

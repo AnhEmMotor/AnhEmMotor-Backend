@@ -23,13 +23,18 @@ public class User
 {
     private readonly Mock<IMediator> _mediatorMock;
     private readonly Mock<IUserStreamService> _userStreamServiceMock;
+    private readonly Mock<IServiceProvider> _serviceProviderMock;
     private readonly UserController _controller;
 
     public User()
     {
         _mediatorMock = new Mock<IMediator>();
         _userStreamServiceMock = new Mock<IUserStreamService>();
-        _controller = new UserController(_mediatorMock.Object, _userStreamServiceMock.Object);
+        _serviceProviderMock = new Mock<IServiceProvider>();
+        _controller = new UserController(
+            _mediatorMock.Object, 
+            _userStreamServiceMock.Object, 
+            _serviceProviderMock.Object);
 
         var httpContext = new DefaultHttpContext();
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
@@ -50,8 +55,18 @@ public class User
             PhoneNumber = "0123456789"
         };
 
+        
+        var claims = new List<Claim> { new(ClaimTypes.NameIdentifier, expectedResponse.Id.ToString()) };
+        var identity = new ClaimsIdentity(claims, "TestAuthType");
+        var claimsPrincipal = new ClaimsPrincipal(identity);
+
+        _controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = claimsPrincipal }
+        };
+
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetCurrentUserQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(expectedResponse);
+            .ReturnsAsync(Result<UserResponse>.Success(expectedResponse));
 
         var result = await _controller.GetCurrentUserAsync(CancellationToken.None).ConfigureAwait(true);
 
@@ -64,6 +79,16 @@ public class User
     [Fact(DisplayName = "USER_037 - Controller - GET /api/v1/User/me xử lý exception")]
     public async Task GetCurrentUser_HandlesException_ThrowsUnauthorizedException()
     {
+        var userId = Guid.NewGuid();
+        var claims = new List<Claim> { new(ClaimTypes.NameIdentifier, userId.ToString()) };
+        var identity = new ClaimsIdentity(claims, "TestAuthType");
+        var claimsPrincipal = new ClaimsPrincipal(identity);
+
+        _controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = claimsPrincipal }
+        };
+
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetCurrentUserQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException("Invalid JWT"));
 

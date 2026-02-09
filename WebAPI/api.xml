@@ -798,7 +798,7 @@
             Quản lý người dùng (Bất cứ người dùng nào đã đăng nhập đều có quyền vào đây)
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.UserController.#ctor(MediatR.IMediator,Application.Interfaces.Services.IUserStreamService)">
+        <member name="M:WebAPI.Controllers.V1.UserController.#ctor(MediatR.IMediator,Application.Interfaces.Services.IUserStreamService,System.IServiceProvider)">
             <summary>
             Quản lý người dùng (Bất cứ người dùng nào đã đăng nhập đều có quyền vào đây)
             </summary>
