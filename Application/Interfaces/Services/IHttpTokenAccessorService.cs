@@ -6,6 +6,8 @@
 
         public void SetRefreshTokenToCookie(string token, DateTimeOffset expiresAt);
 
+        public void DeleteRefreshTokenFromCookie();
+
         public string? GetAuthorizationValueFromHeader();
     }
 }
