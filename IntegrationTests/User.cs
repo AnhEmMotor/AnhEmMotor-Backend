@@ -756,8 +756,6 @@ public class User : IAsyncLifetime
 
         await ReadEventAsync(reader).ConfigureAwait(true);
 
-        await Task.Delay(1000).ConfigureAwait(true);
-
         var updateClient = _factory.CreateClient();
         updateClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
             "Bearer",
@@ -991,8 +989,6 @@ public class User : IAsyncLifetime
 
         reader1.Dispose();
 
-        await Task.Delay(1000).ConfigureAwait(true);
-
         var updateClient = _factory.CreateClient();
         updateClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         var updateResp = await updateClient.PutAsJsonAsync(
@@ -1194,8 +1190,6 @@ public class User : IAsyncLifetime
         var resp = await _client.SendAsync(req, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(true);
         resp.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        await Task.Delay(1000).ConfigureAwait(true);
-
         resp.Dispose();
     }
 
@@ -1203,6 +1197,13 @@ public class User : IAsyncLifetime
     public async Task UpdateUserA_DoesNotNotifyUserB()
     {
         var usernameA = $"userA_{Guid.NewGuid().ToString("N")[..8]}";
+        
+        await IntegrationTestAuthHelper.CreateUserAsync(
+            _factory.Services,
+            usernameA,
+            "Pass123!",
+            CancellationToken.None)
+            .ConfigureAwait(true);
         var tokenA = (await IntegrationTestAuthHelper.AuthenticateAsync(
             _client,
             usernameA,
