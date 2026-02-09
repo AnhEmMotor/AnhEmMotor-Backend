@@ -798,14 +798,14 @@
             Quản lý người dùng (Bất cứ người dùng nào đã đăng nhập đều có quyền vào đây)
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.UserController.#ctor(MediatR.IMediator)">
+        <member name="M:WebAPI.Controllers.V1.UserController.#ctor(MediatR.IMediator,Application.Interfaces.Services.IUserStreamService,System.IServiceProvider)">
             <summary>
             Quản lý người dùng (Bất cứ người dùng nào đã đăng nhập đều có quyền vào đây)
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.UserController.GetCurrentUserAsync(System.Threading.CancellationToken)">
             <summary>
-            Lấy thông tin người dùng hiện tại từ JWT
+            Lấy thông tin người dùng hiện tại từ JWT (Hỗ trợ SSE nếu Accept: text/event-stream)
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.UserController.UpdateCurrentUserAsync(Application.Features.Users.Commands.UpdateCurrentUser.UpdateCurrentUserCommand,System.Threading.CancellationToken)">

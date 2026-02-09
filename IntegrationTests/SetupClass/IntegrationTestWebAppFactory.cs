@@ -29,6 +29,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
     public IntegrationTestWebAppFactory()
     {
         _mySqlContainer = new MySqlBuilder("mysql:8.0")
+            .WithLogger(Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance)
             .WithDatabase("AnhEmMotor_Test")
             .WithUsername("root")
             .WithPassword("root")
@@ -163,6 +164,9 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                 services.AddScoped<IAuthorizationHandler, PermissionHandler>();
                 services.AddScoped<IAuthorizationHandler, AllPermissionsHandler>();
                 services.AddScoped<IAuthorizationHandler, AnyPermissionsHandler>();
+
+                services.AddSingleton<IUserStreamService, UserStreamService>();
+
 
                 services.AddScoped<ITokenManagerService, TokenManagerService>();
                 services.AddScoped<IHttpTokenAccessorService, HttpTokenAccessorService>();

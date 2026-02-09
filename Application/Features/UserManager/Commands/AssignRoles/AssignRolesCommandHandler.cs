@@ -12,7 +12,8 @@ public sealed class AssignRolesCommandHandler(
     IRoleReadRepository roleReadRepository,
     IUserUpdateRepository userUpdateRepository,
     IUserCreateRepository userCreateRepository,
-    IProtectedEntityManagerService protectedEntityManagerService) : IRequestHandler<AssignRolesCommand, Result<AssignRoleResponse>>
+    IProtectedEntityManagerService protectedEntityManagerService,
+    IUserStreamService userStreamService) : IRequestHandler<AssignRolesCommand, Result<AssignRoleResponse>>
 {
     public async Task<Result<AssignRoleResponse>> Handle(
         AssignRolesCommand request,
@@ -61,6 +62,8 @@ public sealed class AssignRolesCommandHandler(
             }
         }
 
+        bool hasChanged = false;
+
         if(rolesToRemove.Count > 0)
         {
             var (removeSucceeded, removeErrors) = await userUpdateRepository.RemoveUserFromRolesAsync(
@@ -73,6 +76,7 @@ public sealed class AssignRolesCommandHandler(
             {
                 return Result<AssignRoleResponse>.Failure([ .. removeErrors.Select(e => Error.Failure(e)) ]);
             }
+            hasChanged = true;
         }
 
         if(rolesToAdd.Count > 0)
@@ -87,6 +91,12 @@ public sealed class AssignRolesCommandHandler(
             {
                 return Result<AssignRoleResponse>.Failure([ .. addErrors.Select(e => Error.Failure(e)) ]);
             }
+            hasChanged = true;
+        }
+
+        if(hasChanged)
+        {
+            userStreamService.NotifyUserUpdate(user.Id);
         }
 
         var finalRoles = await userReadRepository.GetUserRolesAsync(user, cancellationToken).ConfigureAwait(false);
