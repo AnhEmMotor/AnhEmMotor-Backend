@@ -16,7 +16,7 @@ namespace Infrastructure.Services
                 HttpOnly = true,
                 Expires = expiresAt,
                 Secure = true,
-                SameSite = SameSiteMode.Strict,
+                SameSite = SameSiteMode.None,
                 Path = "/api/v1/auth/refresh-token"
             };
 

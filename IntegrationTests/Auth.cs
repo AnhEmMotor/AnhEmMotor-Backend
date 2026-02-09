@@ -186,7 +186,7 @@ public class Auth : IAsyncLifetime
 
         refreshTokenCookie.Should().Contain("httponly", "Vì Refresh Token không được phép để Javascript truy cập");
         refreshTokenCookie.Should().Contain("secure", "Vì Refresh Token chỉ được gửi qua HTTPS");
-        refreshTokenCookie.Should().Contain("samesite=strict", "Hoặc Lax tùy vào cấu hình Cross-domain của bạn");
+        refreshTokenCookie.Should().Contain("samesite=none", "Using SameSite=None for cross-origin support");
     }
 
     [Fact(DisplayName = "AUTH_LOG_003 - Đăng nhập User bị cấm")]
