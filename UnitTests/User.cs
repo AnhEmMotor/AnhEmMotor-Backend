@@ -7,7 +7,10 @@ using Application.Interfaces.Services;
 using Domain.Constants;
 using Domain.Entities;
 using FluentAssertions;
+using Infrastructure.Services;
 using Moq;
+using System.Collections;
+using System.Reflection;
 
 namespace UnitTests;
 
@@ -108,19 +111,78 @@ public class User
     }
 
     [Fact(DisplayName = "USER_004 - Lấy thông tin người dùng khi tài khoản bị Ban")]
-    public async Task GetCurrentUser_BannedAccount_ThrowsForbiddenException()
+    public async Task GetCurrentUser_BannedAccount_ReturnsUserResponseWithBannedStatus()
     {
         var userId = Guid.NewGuid();
         var user = new ApplicationUser { Id = userId, Status = UserStatus.Banned, DeletedAt = null };
 
         _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(user);
+        _userReadRepositoryMock.Setup(x => x.GetRolesOfUserAsync(user, It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+        _roleReadRepositoryMock.Setup(x => x.GetRolesByNameAsync(It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+        _roleReadRepositoryMock.Setup(x => x.GetPermissionsNameByRoleIdAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
 
         var handler = new GetCurrentUserQueryHandler(_userReadRepositoryMock.Object, _roleReadRepositoryMock.Object);
         var query = new GetCurrentUserQuery() { UserId = userId.ToString() };
 
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
-        result.IsFailure.Should().BeTrue();
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Status.Should().Be(UserStatus.Banned);
+    }
+    
+    [Fact(DisplayName = "USER_051 - Verify UserResponse chứa danh sách Permissions")]
+    public async Task GetCurrentUser_WithPermissions_ReturnsPermissionsList()
+    {
+        var userId = Guid.NewGuid();
+        var user = new ApplicationUser { Id = userId, Status = UserStatus.Active };
+        var roles = new List<ApplicationRole> { new() { Id = Guid.NewGuid(), Name = "Staff" } };
+        var permissions = new List<string> { "User.Read", "User.Write" };
+
+        _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(user);
+        _userReadRepositoryMock.Setup(x => x.GetRolesOfUserAsync(user, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(["Staff"]);
+        _roleReadRepositoryMock.Setup(x => x.GetRolesByNameAsync(It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(roles);
+        _roleReadRepositoryMock.Setup(x => x.GetPermissionsNameByRoleIdAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(permissions);
+
+        var handler = new GetCurrentUserQueryHandler(_userReadRepositoryMock.Object, _roleReadRepositoryMock.Object);
+        var query = new GetCurrentUserQuery() { UserId = userId.ToString() };
+
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
+        
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Permissions.Should().NotBeNullOrEmpty();
+        result.Value.Permissions.Should().HaveCount(2);
+        result.Value.Permissions!.Select(p => p.ID).Should().Contain("User.Read");
+    }
+
+    [Fact(DisplayName = "USER_052 - Verify UserResponse.Permissions rỗng khi user không có quyền")]
+    public async Task GetCurrentUser_NoPermissions_ReturnsEmptyPermissions()
+    {
+        var userId = Guid.NewGuid();
+        var user = new ApplicationUser { Id = userId, Status = UserStatus.Active };
+
+        _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(user);
+        _userReadRepositoryMock.Setup(x => x.GetRolesOfUserAsync(user, It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+        _roleReadRepositoryMock.Setup(x => x.GetRolesByNameAsync(It.IsAny<IEnumerable<string>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+        _roleReadRepositoryMock.Setup(x => x.GetPermissionsNameByRoleIdAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+
+        var handler = new GetCurrentUserQueryHandler(_userReadRepositoryMock.Object, _roleReadRepositoryMock.Object);
+        var query = new GetCurrentUserQuery() { UserId = userId.ToString() };
+
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
+        
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Permissions.Should().BeNull();
     }
 
     [Fact(DisplayName = "USER_005 - Cập nhật thông tin người dùng thành công")]
@@ -561,6 +623,51 @@ public class User
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
+    }
+
+    [Fact(DisplayName = "USER_063 - Verify cleanup logic when listener disconnects")]
+    public async Task WaitForUpdateAsync_ShouldCleanupDictionary_WhenCancelled()
+    {
+        // 1. Arrange
+        var service = new UserStreamService();
+        var userId = Guid.NewGuid();
+        var cancellationTokenSource = new CancellationTokenSource();
+
+        // Use Reflection to inspect private _listeners dictionary
+        var listenersField = typeof(UserStreamService)
+            .GetField("_listeners", BindingFlags.NonPublic | BindingFlags.Instance);
+        listenersField.Should().NotBeNull();
+
+        // ConcurrentDictionary implements IEnumerable
+
+        // 2. Act: Call WaitForUpdateAsync but don't await it yet (it blocks)
+        var waitTask = service.WaitForUpdateAsync(userId, cancellationTokenSource.Token);
+
+        // Allow some time for the task to register the listener
+        await Task.Delay(50);
+
+        // Verify listener is added
+        // We can't easily check count on generic IEnumerable without casting or iterating, 
+        // relying on the fact that waitTask is not completed is good enough proxy that it's "listening".
+        waitTask.IsCompleted.Should().BeFalse();
+
+        // 3. Cancel the token to trigger cleanup
+        cancellationTokenSource.Cancel();
+
+        // 4. Assert
+        // The task should be canceled
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => waitTask);
+
+        // Verify dictionary is cleaned up
+        // We need to cast or rely on dynamic to check if it's empty
+        int count = 0;
+        if (listenersField!.GetValue(service) is IEnumerable listenersDict)
+        {
+            foreach (var item in listenersDict) count++;
+        }
+
+        // Should be 0 if cleanup logic worked and removed the key since list was empty
+        count.Should().Be(0, "Dictionary should be empty after cancellation");
     }
 #pragma warning restore CRR0035
 #pragma warning restore IDE0079

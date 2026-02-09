@@ -2,6 +2,6 @@ namespace Application.Interfaces.Services;
 
 public interface IUserStreamService
 {
-    Task WaitForUpdateAsync(Guid userId, CancellationToken cancellationToken);
-    void NotifyUserUpdate(Guid userId);
+    public Task WaitForUpdateAsync(Guid userId, CancellationToken cancellationToken);
+    public void NotifyUserUpdate(Guid userId);
 }
