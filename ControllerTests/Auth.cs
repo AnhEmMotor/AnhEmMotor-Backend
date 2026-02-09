@@ -3,6 +3,7 @@ using Application.Features.Auth.Commands.Login;
 using Application.Features.Auth.Commands.LoginForManager;
 using Application.Features.Auth.Commands.Logout;
 using Application.Features.Auth.Commands.Register;
+using Application.Interfaces.Services;
 using FluentAssertions;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -15,12 +16,14 @@ namespace ControllerTests;
 public class Auth
 {
     private readonly Mock<IMediator> _mediatorMock;
+    private readonly Mock<IHttpTokenAccessorService> _httpTokenAccessorServiceMock;
     private readonly AuthController _controller;
 
     public Auth()
     {
         _mediatorMock = new Mock<IMediator>();
-        _controller = new AuthController(_mediatorMock.Object);
+        _httpTokenAccessorServiceMock = new Mock<IHttpTokenAccessorService>();
+        _controller = new AuthController(_mediatorMock.Object, _httpTokenAccessorServiceMock.Object);
 
         var httpContext = new DefaultHttpContext();
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
