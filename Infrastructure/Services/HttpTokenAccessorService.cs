@@ -23,6 +23,19 @@ namespace Infrastructure.Services
             httpContextAccessor.HttpContext?.Response.Cookies.Append("refreshToken", token, cookieOptions);
         }
 
+        public void DeleteRefreshTokenFromCookie()
+        {
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Path = "/api/v1/auth/refresh-token"
+            };
+
+            httpContextAccessor.HttpContext?.Response.Cookies.Delete("refreshToken", cookieOptions);
+        }
+
         public string? GetAuthorizationValueFromHeader()
         { return httpContextAccessor.HttpContext?.Request.Headers.Authorization; }
     }

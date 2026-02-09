@@ -6,6 +6,7 @@ using Application.Features.Auth.Commands.LoginForManager;
 using Application.Features.Auth.Commands.Logout;
 using Application.Features.Auth.Commands.RefreshToken;
 using Application.Features.Auth.Commands.Register;
+using Application.Interfaces.Services;
 using Asp.Versioning;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
@@ -25,7 +26,7 @@ namespace WebAPI.Controllers.V1;
 [SwaggerTag("Controller xử lý xác thực và đăng nhập")]
 [Route("api/v{version:apiVersion}/[controller]")]
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
-public class AuthController(IMediator mediator) : ApiController
+public class AuthController(IMediator mediator, IHttpTokenAccessorService httpTokenAccessorService) : ApiController
 {
     /// <summary>
     /// Đăng ký tài khoản mới
@@ -70,7 +71,7 @@ public class AuthController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> RefreshTokenAsync(CancellationToken cancellationToken)
     {
-        var refreshToken = Request.Cookies["refreshToken"];
+        var refreshToken = httpTokenAccessorService.GetRefreshTokenFromCookie();
         var accessToken = Request.Headers.Authorization.ToString().Replace("Bearer ", string.Empty);
         var result = await mediator.Send(
             new RefreshTokenCommand() { RefreshToken = refreshToken, AccessToken = accessToken },
@@ -93,7 +94,7 @@ public class AuthController(IMediator mediator) : ApiController
         if(result.IsFailure)
             return HandleResult(result);
 
-        Response.Cookies.Delete("refreshToken");
+        httpTokenAccessorService.DeleteRefreshTokenFromCookie();
         return Ok(new LogoutResponse());
     }
 

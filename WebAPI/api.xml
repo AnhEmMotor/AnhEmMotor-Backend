@@ -47,7 +47,7 @@
             Controller xử lý xác thực và đăng nhập
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.AuthController.#ctor(MediatR.IMediator)">
+        <member name="M:WebAPI.Controllers.V1.AuthController.#ctor(MediatR.IMediator,Application.Interfaces.Services.IHttpTokenAccessorService)">
             <summary>
             Controller xử lý xác thực và đăng nhập
             </summary>
