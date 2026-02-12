@@ -31,13 +31,7 @@ public class GetUserPermissionsByIdQueryHandler(
 
         var userPermissions = userPermissionNames
             .Select(p => new { Name = p, Metadata = Domain.Constants.Permission.PermissionsList.GetMetadata(p) })
-            .Select(
-                p => new PermissionResponse()
-                {
-                    ID = p.Name,
-                    DisplayName = p.Metadata?.DisplayName ?? p.Name,
-                    Description = p.Metadata?.Description
-                })
+            .Select(p => p.Name)
             .ToList();
 
         return new PermissionAndRoleOfUserResponse()

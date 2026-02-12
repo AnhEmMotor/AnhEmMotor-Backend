@@ -17,5 +17,10 @@ public sealed class CreateSupplierCommandValidator : AbstractValidator<CreateSup
         RuleFor(x => x)
             .Must(x => !string.IsNullOrWhiteSpace(x.Phone) || !string.IsNullOrWhiteSpace(x.Email))
             .WithMessage("Phone or Email is required");
+
+        RuleFor(x => x.TaxIdentificationNumber)
+            .Matches(@"^[0-9]*$")
+            .MaximumLength(20)
+            .When(x => !string.IsNullOrWhiteSpace(x.TaxIdentificationNumber));
     }
 }

@@ -1197,7 +1197,7 @@ public class User : IAsyncLifetime
     public async Task UpdateUserA_DoesNotNotifyUserB()
     {
         var usernameA = $"userA_{Guid.NewGuid().ToString("N")[..8]}";
-        
+
         await IntegrationTestAuthHelper.CreateUserAsync(
             _factory.Services,
             usernameA,

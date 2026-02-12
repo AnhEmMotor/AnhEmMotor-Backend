@@ -34,6 +34,8 @@ public class SupplierReadRepository(ApplicationDBContext context) : ISupplierRea
                     CreatedAt = x.supplier.CreatedAt,
                     UpdatedAt = x.supplier.UpdatedAt,
                     DeletedAt = x.supplier.DeletedAt,
+                    Notes = x.supplier.Notes,
+                    TaxIdentificationNumber = x.supplier.TaxIdentificationNumber,
                     TotalInput =
                         x.inputs.SelectMany(i => i.InputInfos).Sum(ii => (ii.Count ?? 0) * (ii.InputPrice ?? 0))
                 });
@@ -92,6 +94,17 @@ public class SupplierReadRepository(ApplicationDBContext context) : ISupplierRea
         return GetQueryable(DataFetchMode.All)
             .AnyAsync(
                 x => string.Compare(x.TaxIdentificationNumber, taxId) == 0 && (!excludeId.HasValue || x.Id != excludeId),
+                cancellationToken);
+    }
+
+    public Task<bool> IsEmailExistsAsync(
+        string email,
+        int? excludeId = null,
+        CancellationToken cancellationToken = default)
+    {
+        return GetQueryable(DataFetchMode.All)
+            .AnyAsync(
+                x => string.Compare(x.Email, email) == 0 && (!excludeId.HasValue || x.Id != excludeId),
                 cancellationToken);
     }
 }

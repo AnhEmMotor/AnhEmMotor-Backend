@@ -12,6 +12,6 @@ namespace Application.ApiContracts.Permission.Responses
 
         public IList<string>? Roles { get; set; }
 
-        public List<PermissionResponse>? Permissions { get; set; }
+        public IList<string>? Permissions { get; set; }
     }
 }

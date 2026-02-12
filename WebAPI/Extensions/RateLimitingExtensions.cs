@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
 
 namespace WebAPI.Extensions;
@@ -33,23 +32,35 @@ public static class RateLimitingExtensions
                     await context.HttpContext.Response.WriteAsync("Busy", token).ConfigureAwait(true);
                 };
 
-                options.AddFixedWindowLimiter(
+                options.AddPolicy(
                     policyName: "public_api",
-                    options =>
+                    partitioner: httpContext =>
                     {
-                        options.PermitLimit = 10;
-                        options.Window = TimeSpan.FromSeconds(10);
-                        options.QueueLimit = 0;
-                        options.AutoReplenishment = true;
+                        var remoteIp = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+                        return RateLimitPartition.GetFixedWindowLimiter(
+                            partitionKey: remoteIp,
+                            factory: _ => new FixedWindowRateLimiterOptions
+                                    {
+                                        PermitLimit = 5,
+                                        Window = TimeSpan.FromSeconds(1),
+                                        QueueLimit = 0,
+                                        AutoReplenishment = true
+                                    });
                     });
 
-                options.AddFixedWindowLimiter(
+                options.AddPolicy(
                     policyName: "auth_api",
-                    options =>
+                    partitioner: httpContext =>
                     {
-                        options.PermitLimit = 60;
-                        options.Window = TimeSpan.FromMinutes(1);
-                        options.QueueLimit = 0;
+                        var remoteIp = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+                        return RateLimitPartition.GetFixedWindowLimiter(
+                            partitionKey: remoteIp,
+                            factory: _ => new FixedWindowRateLimiterOptions
+                                    {
+                                        PermitLimit = 50,
+                                        Window = TimeSpan.FromSeconds(1),
+                                        QueueLimit = 0
+                                    });
                     });
 
                 options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(
@@ -61,8 +72,8 @@ public static class RateLimitingExtensions
                             partitionKey: remoteIp,
                             factory: _ => new FixedWindowRateLimiterOptions
                                     {
-                                        PermitLimit = 30,
-                                        Window = TimeSpan.FromMinutes(1),
+                                        PermitLimit = 200,
+                                        Window = TimeSpan.FromSeconds(1),
                                         QueueLimit = 0
                                     });
                     });

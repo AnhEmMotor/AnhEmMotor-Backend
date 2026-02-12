@@ -223,6 +223,215 @@ public class Supplier
         _insertRepoMock.Verify(x => x.Add(It.IsAny<SupplierEntity>()), Times.Never);
     }
 
+    [Fact(DisplayName = "SUP_VAL_001 - Thêm nhà cung cấp mới với Mã số thuế hợp lệ")]
+    public async Task CreateSupplier_ValidTaxId_Success()
+    {
+        var handler = new CreateSupplierCommandHandler(
+            _readRepoMock.Object,
+            _insertRepoMock.Object,
+            _unitOfWorkMock.Object);
+        var command = new CreateSupplierCommand
+        {
+            Name = "Supplier Tax Valid",
+            Phone = "0123456789",
+            TaxIdentificationNumber = "0123456789"
+        };
+
+        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>()))
+            .Returns(new List<SupplierEntity>().AsQueryable());
+        _insertRepoMock.Setup(x => x.Add(It.IsAny<SupplierEntity>()));
+        _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+    }
+
+    [Fact(DisplayName = "SUP_VAL_002 - Thêm nhà cung cấp mới với Mã số thuế không hợp lệ (có chữ cái)")]
+    public void CreateSupplier_InvalidTaxId_FailsValidation()
+    {
+        var validator = new CreateSupplierCommandValidator();
+        var command = new CreateSupplierCommand
+        {
+            Name = "Supplier Tax Invalid",
+            Phone = "0123456789",
+            TaxIdentificationNumber = "TAX123"
+        };
+
+        var result = validator.TestValidate(command);
+        result.ShouldHaveValidationErrorFor(x => x.TaxIdentificationNumber);
+    }
+
+    [Fact(DisplayName = "SUP_VAL_003 - Cập nhật nhà cung cấp với Số điện thoại hợp lệ")]
+    public async Task UpdateSupplier_ValidPhone_Success()
+    {
+        var handler = new UpdateSupplierCommandHandler(
+            _readRepoMock.Object,
+            _updateRepoMock.Object,
+            _unitOfWorkMock.Object);
+
+        var existingSupplier = new SupplierEntity
+        {
+            Id = 1,
+            Name = "Original",
+            Phone = "0123456789",
+            StatusId = "active"
+        };
+        _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync(existingSupplier);
+
+        var command = new UpdateSupplierCommand { Id = 1, Phone = "0987654321" };
+
+        _readRepoMock.Setup(x => x.IsPhoneExistsAsync("0987654321", 1, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        result.Value!.Phone.Should().Be("0987654321");
+    }
+
+    [Fact(DisplayName = "SUP_VAL_004 - Cập nhật nhà cung cấp với Số điện thoại không hợp lệ (có chữ cái)")]
+    public void UpdateSupplier_InvalidPhone_FailsValidation()
+    {
+        var validator = new UpdateSupplierCommandValidator();
+        var command = new UpdateSupplierCommand { Id = 1, Phone = "PHONE123" };
+
+        var result = validator.TestValidate(command);
+        result.ShouldHaveValidationErrorFor(x => x.Phone);
+    }
+
+    [Fact(DisplayName = "SUP_VAL_005 - Cập nhật nhà cung cấp với Email hợp lệ")]
+    public async Task UpdateSupplier_ValidEmail_Success()
+    {
+        var handler = new UpdateSupplierCommandHandler(
+            _readRepoMock.Object,
+            _updateRepoMock.Object,
+            _unitOfWorkMock.Object);
+
+        var existingSupplier = new SupplierEntity
+        {
+            Id = 1,
+            Name = "Original",
+            Email = "old@test.com",
+            StatusId = "active"
+        };
+        _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync(existingSupplier);
+
+        var command = new UpdateSupplierCommand { Id = 1, Email = "update@test.com" };
+
+        _readRepoMock.Setup(x => x.IsEmailExistsAsync("update@test.com", 1, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
+
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        result.Value!.Email.Should().Be("update@test.com");
+    }
+
+    [Fact(DisplayName = "SUP_VAL_006 - Cập nhật Supplier thất bại với Email không hợp lệ")]
+    public void UpdateSupplier_InvalidEmail_FailsValidation()
+    {
+        var validator = new UpdateSupplierCommandValidator();
+        var command = new UpdateSupplierCommand { Id = 1, Email = "invalid-email" };
+
+        var result = validator.TestValidate(command);
+        result.ShouldHaveValidationErrorFor(x => x.Email);
+    }
+
+    [Fact(DisplayName = "SUP_VAL_007 - Cập nhật Supplier thất bại khi Email đã tồn tại")]
+    public async Task UpdateSupplier_DuplicateEmail_ThrowsException()
+    {
+        var handler = new UpdateSupplierCommandHandler(
+            _readRepoMock.Object,
+            _updateRepoMock.Object,
+            _unitOfWorkMock.Object);
+        var command = new UpdateSupplierCommand { Id = 1, Email = "existing@test.com" };
+
+        var existingSupplier = new SupplierEntity
+        {
+            Id = 1,
+            Name = "Original",
+            Email = "old@test.com",
+            StatusId = "active"
+        };
+
+        _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync(existingSupplier);
+
+        _readRepoMock.Setup(x => x.IsEmailExistsAsync("existing@test.com", 1, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsFailure.Should().BeTrue();
+        result.Error?.Code.Should().Be("Conflict");
+    }
+
+    [Fact(DisplayName = "SUP_VAL_008 - Cập nhật Supplier thất bại khi Phone đã tồn tại")]
+    public async Task UpdateSupplier_DuplicatePhone_ThrowsException()
+    {
+        var handler = new UpdateSupplierCommandHandler(
+            _readRepoMock.Object,
+            _updateRepoMock.Object,
+            _unitOfWorkMock.Object);
+        var command = new UpdateSupplierCommand { Id = 1, Phone = "0912345678" };
+
+        var existingSupplier = new SupplierEntity
+        {
+            Id = 1,
+            Name = "Original",
+            Phone = "0900000000",
+            StatusId = "active"
+        };
+
+        _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync(existingSupplier);
+
+        _readRepoMock.Setup(x => x.IsPhoneExistsAsync("0912345678", 1, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsFailure.Should().BeTrue();
+        result.Error?.Code.Should().Be("Conflict");
+    }
+
+    [Fact(DisplayName = "SUP_VAL_009 - Cập nhật Supplier thất bại khi Mã số thuế đã tồn tại")]
+    public async Task UpdateSupplier_DuplicateTaxId_ThrowsException()
+    {
+        var handler = new UpdateSupplierCommandHandler(
+            _readRepoMock.Object,
+            _updateRepoMock.Object,
+            _unitOfWorkMock.Object);
+        var command = new UpdateSupplierCommand { Id = 1, TaxIdentificationNumber = "0123456789" };
+
+        var existingSupplier = new SupplierEntity
+        {
+            Id = 1,
+            Name = "Original",
+            TaxIdentificationNumber = "0000000000",
+            StatusId = "active"
+        };
+
+        _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync(existingSupplier);
+
+        _readRepoMock.Setup(x => x.IsTaxIdExistsAsync("0123456789", 1, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsFailure.Should().BeTrue();
+        result.Error?.Code.Should().Be("Conflict");
+    }
+
+    [Fact(DisplayName = "SUP_VAL_010 - Cập nhật Supplier thất bại với Mã số thuế không hợp lệ (chứa chữ cái)")]
+    public void UpdateSupplier_InvalidTaxId_FailsValidation()
+    {
+        var validator = new UpdateSupplierCommandValidator();
+        var command = new UpdateSupplierCommand { Id = 1, TaxIdentificationNumber = "TAX123" };
+
+        var result = validator.TestValidate(command);
+        result.ShouldHaveValidationErrorFor(x => x.TaxIdentificationNumber);
+    }
+
+
     [Fact(DisplayName = "SUP_011 - Tạo Supplier với Email không hợp lệ")]
     public void CreateSupplier_InvalidEmail_FailsValidation()
     {

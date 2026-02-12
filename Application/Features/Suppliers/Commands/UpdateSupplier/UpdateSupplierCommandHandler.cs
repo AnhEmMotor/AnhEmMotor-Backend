@@ -24,28 +24,47 @@ public sealed class UpdateSupplierCommandHandler(
             return Error.NotFound($"Supplier with Id {request.Id} not found.");
         }
 
-        var isNameExists = await readRepository.IsNameExistsAsync(request.Name!, request.Id, cancellationToken)
-            .ConfigureAwait(false);
-        if(isNameExists)
+        if(!string.IsNullOrWhiteSpace(request.Name))
         {
-            return Error.Conflict("Supplier name already exists.");
+            var isNameExists = await readRepository.IsNameExistsAsync(request.Name, request.Id, cancellationToken)
+                .ConfigureAwait(false);
+            if(isNameExists)
+            {
+                return Error.Conflict("Supplier name already exists.");
+            }
         }
 
-        var isPhoneExists = await readRepository.IsPhoneExistsAsync(request.Phone!, request.Id, cancellationToken)
-            .ConfigureAwait(false);
-        if(isPhoneExists)
+        if(!string.IsNullOrWhiteSpace(request.Phone))
         {
-            return Error.Conflict("Supplier phone already exists.");
+            var isPhoneExists = await readRepository.IsPhoneExistsAsync(request.Phone, request.Id, cancellationToken)
+                .ConfigureAwait(false);
+            if(isPhoneExists)
+            {
+                return Error.Conflict("Supplier phone already exists.");
+            }
         }
 
-        var isTaxIdExists = await readRepository.IsTaxIdExistsAsync(
-            request.TaxIdentificationNumber!,
-            request.Id,
-            cancellationToken)
-            .ConfigureAwait(false);
-        if(isTaxIdExists)
+        if(!string.IsNullOrWhiteSpace(request.Email))
         {
-            return Error.Conflict("Supplier Tax ID already exists.");
+            var isEmailExists = await readRepository.IsEmailExistsAsync(request.Email, request.Id, cancellationToken)
+                .ConfigureAwait(false);
+            if(isEmailExists)
+            {
+                return Error.Conflict("Supplier email already exists.");
+            }
+        }
+
+        if(!string.IsNullOrWhiteSpace(request.TaxIdentificationNumber))
+        {
+            var isTaxIdExists = await readRepository.IsTaxIdExistsAsync(
+                request.TaxIdentificationNumber,
+                request.Id,
+                cancellationToken)
+                .ConfigureAwait(false);
+            if(isTaxIdExists)
+            {
+                return Error.Conflict("Supplier Tax ID already exists.");
+            }
         }
 
         var config = new TypeAdapterConfig();

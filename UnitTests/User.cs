@@ -1,10 +1,14 @@
-﻿using Application.Features.Users.Commands.DeleteCurrentUserAccount;
+﻿using Application.ApiContracts.Permission.Responses;
+using Application.Features.Permissions.Queries.GetMyPermissions;
+using Application.Features.Permissions.Queries.GetUserPermissionsById;
+using Application.Features.Users.Commands.DeleteCurrentUserAccount;
 using Application.Features.Users.Commands.UpdateCurrentUser;
 using Application.Features.Users.Queries.GetCurrentUser;
 using Application.Interfaces.Repositories.Role;
 using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Services;
 using Domain.Constants;
+using Domain.Constants.Permission;
 using Domain.Entities;
 using FluentAssertions;
 using Moq;
@@ -625,6 +629,73 @@ public class User
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
+    }
+
+    [Fact(DisplayName = "USR_PERM_001 - Lấy quyền của người dùng theo ID trả về danh sách chuỗi ID")]
+    public async Task GetUserPermissionsById_ReturnsListOfStringIds()
+    {
+        var handler = new GetUserPermissionsByIdQueryHandler(_userReadRepositoryMock.Object, _roleReadRepositoryMock.Object);
+
+        var userId = Guid.NewGuid();
+        var user = new ApplicationUser { Id = userId, UserName = "testuser", Email = "test@test.com" };
+        var roles = new List<string> { "Manager" };
+        var roleEntities = new List<ApplicationRole> { new() { Id = Guid.NewGuid(), Name = "Manager" } };
+        var permissionNames = new List<string> { PermissionsList.Brands.View, PermissionsList.Products.View };
+
+        _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>())).ReturnsAsync(user);
+        _userReadRepositoryMock.Setup(x => x.GetRolesOfUserAsync(user, It.IsAny<CancellationToken>())).ReturnsAsync(roles);
+        _roleReadRepositoryMock.Setup(x => x.GetRolesByNameAsync(roles, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(roleEntities);
+        _roleReadRepositoryMock.Setup(
+            x => x.GetPermissionsNameByRoleIdAsync(It.IsAny<List<Guid>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(permissionNames);
+
+        var query = new GetUserPermissionsByIdQuery { UserId = userId };
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
+
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Permissions.Should().BeAssignableTo<IList<string>>();
+        result.Value.Permissions.Should().Contain(PermissionsList.Brands.View);
+        result.Value.Permissions.Should().Contain(PermissionsList.Products.View);
+        result.Value.Permissions.Should().NotContainNulls();
+    }
+
+    [Fact(DisplayName = "USR_PERM_002 - Lấy quyền của người dùng hiện tại (GetMyPermissions) trả về danh sách chuỗi ID")]
+    public async Task GetMyPermissions_ReturnsListOfStringIds()
+    {
+        var handler = new GetMyPermissionsQueryHandler(_roleReadRepositoryMock.Object, _userReadRepositoryMock.Object);
+
+        var userId = Guid.NewGuid();
+        var user = new ApplicationUser { Id = userId, UserName = "testuser", Email = "test@test.com" };
+        var roles = new List<string> { "Manager" };
+        var roleEntities = new List<ApplicationRole> { new() { Id = Guid.NewGuid(), Name = "Manager" } };
+        var permissionNames = new List<string> { PermissionsList.Suppliers.View, PermissionsList.Files.Upload };
+
+        _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>())).ReturnsAsync(user);
+        _userReadRepositoryMock.Setup(x => x.GetRolesOfUserAsync(user, It.IsAny<CancellationToken>())).ReturnsAsync(roles);
+        _roleReadRepositoryMock.Setup(x => x.GetRolesByNameAsync(roles, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(roleEntities);
+        _roleReadRepositoryMock.Setup(
+            x => x.GetPermissionsNameByRoleIdAsync(It.IsAny<List<Guid>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(permissionNames);
+
+        var query = new GetMyPermissionsQuery { UserId = userId.ToString() };
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
+
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Permissions.Should().BeAssignableTo<IList<string>>();
+        result.Value.Permissions.Should().Contain(PermissionsList.Suppliers.View);
+        result.Value.Permissions.Should().Contain(PermissionsList.Files.Upload);
+    }
+
+    [Fact(DisplayName = "USR_PERM_003 - Kiểm tra định dạng response getUserPermissionsById (Contract)")]
+    public void PermissionAndRoleOfUserResponse_PermissionsField_IsListOfStrings()
+    {
+        var propertyInfo = typeof(PermissionAndRoleOfUserResponse).GetProperty(
+            nameof(PermissionAndRoleOfUserResponse.Permissions));
+
+        propertyInfo.Should().NotBeNull();
+        typeof(IList<string>).IsAssignableFrom(propertyInfo!.PropertyType).Should().BeTrue();
     }
 #pragma warning restore CRR0035
 #pragma warning restore IDE0079

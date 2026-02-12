@@ -107,10 +107,7 @@ public class PermissionAndRole
             Email = "test@test.com",
             Roles = [ "Manager" ],
             Permissions =
-                [ new() { ID = PermissionsList.Brands.View }, new() { ID = PermissionsList.Brands.Create }, new()
-                {
-                    ID = PermissionsList.Products.View
-                }, new() { ID = PermissionsList.Products.Create } ]
+                [ PermissionsList.Brands.View, PermissionsList.Brands.Create, PermissionsList.Products.View, PermissionsList.Products.Create ]
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetMyPermissionsQuery>(), It.IsAny<CancellationToken>()))
@@ -148,10 +145,7 @@ public class PermissionAndRole
             Email = "target@test.com",
             Roles = [ "Staff" ],
             Permissions =
-                [ new() { ID = PermissionsList.Products.View }, new() { ID = PermissionsList.Brands.View }, new()
-                {
-                    ID = PermissionsList.Files.View
-                }, new() { ID = PermissionsList.Files.Upload }, new() { ID = PermissionsList.Suppliers.View } ]
+                [ PermissionsList.Products.View, PermissionsList.Brands.View, PermissionsList.Files.View, PermissionsList.Files.Upload, PermissionsList.Suppliers.View ]
         };
 
         _mediatorMock.Setup(
