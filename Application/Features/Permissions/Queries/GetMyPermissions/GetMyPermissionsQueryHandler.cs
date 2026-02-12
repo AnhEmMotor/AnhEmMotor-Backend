@@ -29,16 +29,7 @@ public class GetMyPermissionsQueryHandler(
                 .ConfigureAwait(false) ??
             new List<string>();
 
-        var userPermissions = userPermissionNames
-            .Select(p => new { Name = p, Metadata = Domain.Constants.Permission.PermissionsList.GetMetadata(p) })
-            .Select(
-                p => new PermissionResponse()
-                {
-                    ID = p.Name,
-                    DisplayName = p.Metadata?.DisplayName ?? p.Name,
-                    Description = p.Metadata?.Description
-                })
-            .ToList();
+        var userPermissions = userPermissionNames.ToList();
 
         return new PermissionAndRoleOfUserResponse()
         {

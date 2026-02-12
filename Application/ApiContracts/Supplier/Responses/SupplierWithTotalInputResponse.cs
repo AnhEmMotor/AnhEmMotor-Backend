@@ -21,5 +21,9 @@ namespace Application.ApiContracts.Supplier.Responses
         public DateTimeOffset? DeletedAt { get; set; }
 
         public decimal TotalInput { get; set; }
+
+        public string? Notes { get; set; }
+
+        public string? TaxIdentificationNumber { get; set; }
     }
 }

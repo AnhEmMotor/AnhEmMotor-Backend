@@ -44,4 +44,9 @@ public interface ISupplierReadRepository
         string taxId,
         int? excludeId = null,
         CancellationToken cancellationToken = default);
+
+    public Task<bool> IsEmailExistsAsync(
+        string email,
+        int? excludeId = null,
+        CancellationToken cancellationToken = default);
 }
