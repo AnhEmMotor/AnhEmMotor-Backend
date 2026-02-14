@@ -130,11 +130,11 @@ public class Auth
         var invalidCommand1 = new RegisterCommand { PhoneNumber = "091234" };
         var resultInv1 = await validator.TestValidateAsync(invalidCommand1, cancellationToken: CancellationToken.None)
             .ConfigureAwait(true);
-        resultInv1.ShouldHaveValidationErrorFor(x => x.PhoneNumber).WithErrorMessage("Invalid phone number.");
+        resultInv1.ShouldHaveValidationErrorFor(x => x.PhoneNumber).WithErrorMessage("Invalid phone number format.");
 
         var invalidCommand2 = new RegisterCommand { PhoneNumber = "abcd123456" };
         var resultInv2 = await validator.TestValidateAsync(invalidCommand2, cancellationToken: CancellationToken.None)
             .ConfigureAwait(true);
-        resultInv2.ShouldHaveValidationErrorFor(x => x.PhoneNumber).WithErrorMessage("Invalid phone number.");
+        resultInv2.ShouldHaveValidationErrorFor(x => x.PhoneNumber).WithErrorMessage("Invalid phone number format.");
     }
 }

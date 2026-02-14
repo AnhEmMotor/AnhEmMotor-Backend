@@ -1,3 +1,4 @@
+using Application.Common.Validators;
 using Application.Interfaces.Repositories.User;
 using Domain.Constants;
 using FluentValidation;
@@ -50,20 +51,6 @@ public partial class RegisterCommandValidator : AbstractValidator<RegisterComman
             .Matches("[^a-zA-Z0-9]")
             .WithMessage("Password must contain at least one special character.");
 
-        RuleFor(x => x.PhoneNumber)
-            .Must(IsValidPhoneNumber)
-            .WithMessage("Invalid phone number.")
-            .When(x => !string.IsNullOrEmpty(x.PhoneNumber));
+        RuleFor(x => x.PhoneNumber).NotEmpty().MustBeValidPhoneNumber().When(x => !string.IsNullOrEmpty(x.PhoneNumber));
     }
-
-    private static bool IsValidPhoneNumber(string? phoneNumber)
-    {
-        if(string.IsNullOrWhiteSpace(phoneNumber))
-            return false;
-        var regex = RegexCheckPhone();
-        return regex.IsMatch(phoneNumber.Trim());
-    }
-
-    [System.Text.RegularExpressions.GeneratedRegex(@"^(0|84|\+84)[0-9]{9}$")]
-    private static partial System.Text.RegularExpressions.Regex RegexCheckPhone();
 }
