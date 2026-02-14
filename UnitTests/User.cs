@@ -634,7 +634,9 @@ public class User
     [Fact(DisplayName = "USR_PERM_001 - Lấy quyền của người dùng theo ID trả về danh sách chuỗi ID")]
     public async Task GetUserPermissionsById_ReturnsListOfStringIds()
     {
-        var handler = new GetUserPermissionsByIdQueryHandler(_userReadRepositoryMock.Object, _roleReadRepositoryMock.Object);
+        var handler = new GetUserPermissionsByIdQueryHandler(
+            _userReadRepositoryMock.Object,
+            _roleReadRepositoryMock.Object);
 
         var userId = Guid.NewGuid();
         var user = new ApplicationUser { Id = userId, UserName = "testuser", Email = "test@test.com" };
@@ -642,8 +644,10 @@ public class User
         var roleEntities = new List<ApplicationRole> { new() { Id = Guid.NewGuid(), Name = "Manager" } };
         var permissionNames = new List<string> { PermissionsList.Brands.View, PermissionsList.Products.View };
 
-        _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>())).ReturnsAsync(user);
-        _userReadRepositoryMock.Setup(x => x.GetRolesOfUserAsync(user, It.IsAny<CancellationToken>())).ReturnsAsync(roles);
+        _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(user);
+        _userReadRepositoryMock.Setup(x => x.GetRolesOfUserAsync(user, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(roles);
         _roleReadRepositoryMock.Setup(x => x.GetRolesByNameAsync(roles, It.IsAny<CancellationToken>()))
             .ReturnsAsync(roleEntities);
         _roleReadRepositoryMock.Setup(
@@ -671,8 +675,10 @@ public class User
         var roleEntities = new List<ApplicationRole> { new() { Id = Guid.NewGuid(), Name = "Manager" } };
         var permissionNames = new List<string> { PermissionsList.Suppliers.View, PermissionsList.Files.Upload };
 
-        _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>())).ReturnsAsync(user);
-        _userReadRepositoryMock.Setup(x => x.GetRolesOfUserAsync(user, It.IsAny<CancellationToken>())).ReturnsAsync(roles);
+        _userReadRepositoryMock.Setup(x => x.FindUserByIdAsync(userId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(user);
+        _userReadRepositoryMock.Setup(x => x.GetRolesOfUserAsync(user, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(roles);
         _roleReadRepositoryMock.Setup(x => x.GetRolesByNameAsync(roles, It.IsAny<CancellationToken>()))
             .ReturnsAsync(roleEntities);
         _roleReadRepositoryMock.Setup(

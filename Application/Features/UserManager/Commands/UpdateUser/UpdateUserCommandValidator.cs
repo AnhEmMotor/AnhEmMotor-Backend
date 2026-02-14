@@ -1,3 +1,4 @@
+using Application.Common.Validators;
 using Domain.Constants;
 using FluentValidation;
 using System.Text.RegularExpressions;
@@ -14,10 +15,7 @@ public partial class UpdateUserCommandValidator : AbstractValidator<UpdateUserCo
             .MaximumLength(255)
             .WithMessage("Full Name must not exceed 255 characters.");
 
-        RuleFor(x => x.PhoneNumber)
-            .Must(IsValidPhoneNumber)
-            .WithMessage("Invalid phone number.")
-            .When(x => !string.IsNullOrEmpty(x.PhoneNumber));
+        RuleFor(x => x.PhoneNumber).MustBeValidPhoneNumber().When(x => !string.IsNullOrEmpty(x.PhoneNumber));
 
         RuleFor(x => x.Gender)
             .Must(IsValidGender)
@@ -33,21 +31,10 @@ public partial class UpdateUserCommandValidator : AbstractValidator<UpdateUserCo
         return regex.IsMatch(email.Trim());
     }
 
-    public static bool IsValidPhoneNumber(string? phoneNumber)
-    {
-        if(string.IsNullOrWhiteSpace(phoneNumber))
-            return false;
-        var regex = RegexCheckPhone();
-        return regex.IsMatch(phoneNumber.Trim());
-    }
-
     public static bool IsValidGender(string? gender) { return ValidGenders.Contains(gender?.Trim()); }
 
     public static IReadOnlyList<string> ValidGenders => [ GenderStatus.Male, GenderStatus.Female, GenderStatus.Other ];
 
     [GeneratedRegex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$")]
     private static partial Regex RegexCheckEmail();
-
-    [GeneratedRegex(@"^(0|84|\+84)[0-9]{9}$")]
-    private static partial Regex RegexCheckPhone();
 }

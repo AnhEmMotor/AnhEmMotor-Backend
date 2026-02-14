@@ -2,6 +2,7 @@
 using Application.Features.UserManager.Commands.UpdateUser;
 using Domain.Constants;
 using FluentAssertions;
+using FluentValidation.TestHelper;
 
 namespace UnitTests;
 
@@ -62,15 +63,22 @@ public class UserManager
     [Fact(DisplayName = "UMGR_041 - Validate PhoneNumber format Việt Nam")]
     public void ValidatePhoneNumber_VariousFormats_ReturnsCorrectValidation()
     {
-        UpdateUserCommandValidator.IsValidPhoneNumber("0912345678").Should().BeTrue();
+        var validator = new UpdateUserCommandValidator();
 
-        UpdateUserCommandValidator.IsValidPhoneNumber("84912345678").Should().BeTrue();
+        var validCommand1 = new UpdateUserCommand { PhoneNumber = "0912345678" };
+        validator.TestValidate(validCommand1).ShouldNotHaveValidationErrorFor(x => x.PhoneNumber);
 
-        UpdateUserCommandValidator.IsValidPhoneNumber("+84912345678").Should().BeTrue();
+        var validCommand2 = new UpdateUserCommand { PhoneNumber = "84912345678" };
+        validator.TestValidate(validCommand2).ShouldNotHaveValidationErrorFor(x => x.PhoneNumber);
 
-        UpdateUserCommandValidator.IsValidPhoneNumber("091234").Should().BeFalse();
+        var validCommand3 = new UpdateUserCommand { PhoneNumber = "+84912345678" };
+        validator.TestValidate(validCommand3).ShouldNotHaveValidationErrorFor(x => x.PhoneNumber);
 
-        UpdateUserCommandValidator.IsValidPhoneNumber("abcd123456").Should().BeFalse();
+        var invalidCommand1 = new UpdateUserCommand { PhoneNumber = "091234" };
+        validator.TestValidate(invalidCommand1).ShouldHaveValidationErrorFor(x => x.PhoneNumber);
+
+        var invalidCommand2 = new UpdateUserCommand { PhoneNumber = "abcd123456" };
+        validator.TestValidate(invalidCommand2).ShouldHaveValidationErrorFor(x => x.PhoneNumber);
     }
 
     [Fact(DisplayName = "UMGR_042 - Validate Gender chỉ chấp nhận các giá trị hợp lệ")]

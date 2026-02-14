@@ -1,3 +1,4 @@
+using Application.Common.Validators;
 using Domain.Constants;
 using FluentValidation;
 
@@ -25,28 +26,6 @@ public sealed class UpdateCurrentUserCommandValidator : AbstractValidator<Update
             .MaximumLength(100)
             .WithMessage("Full Name cannot exceed 100 characters.");
 
-        RuleFor(x => x.PhoneNumber)
-            .NotEmpty()
-            .WithMessage("Phone Number is required.")
-            .Must(IsValidPhoneNumber)
-            .WithMessage("Invalid phone number format");
-    }
-
-    private bool IsValidPhoneNumber(string? phoneNumber)
-    {
-        if(string.IsNullOrWhiteSpace(phoneNumber))
-        {
-            return false;
-        }
-
-        try
-        {
-            var phoneUtil = PhoneNumbers.PhoneNumberUtil.GetInstance();
-            var numberProto = phoneUtil.Parse(phoneNumber, "VN");
-            return phoneUtil.IsValidNumber(numberProto);
-        } catch(PhoneNumbers.NumberParseException)
-        {
-            return false;
-        }
+        RuleFor(x => x.PhoneNumber).NotEmpty().WithMessage("Phone Number is required.").MustBeValidPhoneNumber();
     }
 }

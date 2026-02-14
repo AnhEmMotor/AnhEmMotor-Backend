@@ -1,4 +1,5 @@
 using Application.ApiContracts.Output.Requests;
+using Application.Common.Validators;
 using FluentValidation;
 
 namespace Application.Features.Outputs.Commands.CreateOutput
@@ -16,7 +17,7 @@ namespace Application.Features.Outputs.Commands.CreateOutput
             RuleForEach(x => x.OutputInfos).SetValidator(new CreateOutputProductCommandValidator());
 
             RuleFor(x => x.CustomerPhone)
-                .Must(IsValidPhoneNumber)
+                .MustBeValidPhoneNumber()
                 .WithMessage("Invalid phone number format.")
                 .When(x => !string.IsNullOrEmpty(x.CustomerPhone));
         }
@@ -40,16 +41,5 @@ namespace Application.Features.Outputs.Commands.CreateOutput
             }
             return true;
         }
-
-        private static bool IsValidPhoneNumber(string? phoneNumber)
-        {
-            if(string.IsNullOrWhiteSpace(phoneNumber))
-                return false;
-            var regex = RegexCheckPhone();
-            return regex.IsMatch(phoneNumber.Trim());
-        }
-
-        [System.Text.RegularExpressions.GeneratedRegex(@"^(0|84|\+84)[0-9]{9}$")]
-        private static partial System.Text.RegularExpressions.Regex RegexCheckPhone();
     }
 }

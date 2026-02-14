@@ -47,7 +47,7 @@ public class Auth : IAsyncLifetime
             Password = "Password123!",
             FullName = "Test User 001",
             Username = "testuser001",
-            PhoneNumber = "0123456789",
+            PhoneNumber = "0987311641",
             Gender = "Male"
         };
 

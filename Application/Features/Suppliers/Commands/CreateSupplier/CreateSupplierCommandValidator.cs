@@ -1,3 +1,4 @@
+using Application.Common.Validators;
 using FluentValidation;
 
 namespace Application.Features.Suppliers.Commands.CreateSupplier;
@@ -10,7 +11,7 @@ public sealed class CreateSupplierCommandValidator : AbstractValidator<CreateSup
 
         RuleFor(x => x.Address).NotEmpty().MaximumLength(300);
 
-        RuleFor(x => x.Phone).MaximumLength(20).Matches(@"^[0-9]*$").When(x => !string.IsNullOrWhiteSpace(x.Phone));
+        RuleFor(x => x.Phone).MustBeValidPhoneNumber().When(x => !string.IsNullOrWhiteSpace(x.Phone));
 
         RuleFor(x => x.Email).EmailAddress().MaximumLength(100).When(x => !string.IsNullOrWhiteSpace(x.Email));
 

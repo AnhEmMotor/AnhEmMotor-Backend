@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using Application.Common.Validators;
+using FluentValidation;
 
 namespace Application.Features.Suppliers.Commands.UpdateSupplier;
 
@@ -8,7 +9,7 @@ public sealed class UpdateSupplierCommandValidator : AbstractValidator<UpdateSup
     {
         RuleFor(x => x.Id).NotEmpty().GreaterThan(0);
 
-        RuleFor(x => x.Phone).Matches(@"^[0-9]*$").MaximumLength(20).When(x => !string.IsNullOrWhiteSpace(x.Phone));
+        RuleFor(x => x.Phone).MustBeValidPhoneNumber().When(x => !string.IsNullOrWhiteSpace(x.Phone));
 
         RuleFor(x => x.Email).EmailAddress().MaximumLength(100).When(x => !string.IsNullOrWhiteSpace(x.Email));
 
