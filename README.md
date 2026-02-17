@@ -1,5 +1,10 @@
 # AnhEmMotor Backend API
 
+**Copyright (C) 2026 Tran Thanh Binh, Nguyen Huynh Kim Ngan, Nguyen Trinh Anh Khoi, Trinh Minh Uyen.**
+
+This project is licensed under the **GNU Affero General Public License v3.0 (AGPLv3)**.
+See the [LICENSE](LICENSE) file for details.
+
 > **🚨 CẢNH BÁO QUAN TRỌNG CHO NGƯỜI MỚI:**
 >
 > **Dự án này sẽ cần chạy SQL Server trên máy local và MySQL trên VPS.**
