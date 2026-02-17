@@ -2,7 +2,7 @@
 
 **Copyright (C) 2026 Tran Thanh Binh, Nguyen Huynh Kim Ngan, Nguyen Trinh Anh Khoi, Trinh Minh Uyen.**
 
-This project is licensed under the **GNU Affero General Public License v3.0 (AGPLv3)**.
+This project is licensed under the **Apache License 2.0**.
 See the [LICENSE](LICENSE) file for details.
 
 > **🚨 CẢNH BÁO QUAN TRỌNG CHO NGƯỜI MỚI:**
