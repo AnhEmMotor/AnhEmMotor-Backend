@@ -1,18 +1,20 @@
-using Microsoft.AspNetCore.HttpOverrides;
+using System.Net;
 using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace WebAPI.Extensions;
 
 /// <summary>
-///
+/// Provides extension methods for configuring rate limiting services.
 /// </summary>
 public static class RateLimitingExtensions
 {
     /// <summary>
-    ///
+    /// Adds rate limiting services to the specified <see cref="IServiceCollection"/>.
+    /// Loopback (localhost) requests are excluded from rate limiting.
     /// </summary>
-    /// <param name="services"></param>
-    /// <returns></returns>
+    /// <param name="services">The service collection to add rate limiting to.</param>
+    /// <returns>The same <see cref="IServiceCollection"/> for chaining.</returns>
     public static IServiceCollection AddRateLimitingServices(this IServiceCollection services)
     {
         services.Configure<ForwardedHeadersOptions>(
@@ -36,7 +38,13 @@ public static class RateLimitingExtensions
                     policyName: "public_api",
                     partitioner: httpContext =>
                     {
+                        if (IsLoopback(httpContext))
+                        {
+                            return RateLimitPartition.GetNoLimiter(string.Empty);
+                        }
+
                         var remoteIp = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
                         return RateLimitPartition.GetFixedWindowLimiter(
                             partitionKey: remoteIp,
                             factory: _ => new FixedWindowRateLimiterOptions
@@ -52,7 +60,13 @@ public static class RateLimitingExtensions
                     policyName: "auth_api",
                     partitioner: httpContext =>
                     {
+                        if (IsLoopback(httpContext))
+                        {
+                            return RateLimitPartition.GetNoLimiter(string.Empty);
+                        }
+
                         var remoteIp = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
                         return RateLimitPartition.GetFixedWindowLimiter(
                             partitionKey: remoteIp,
                             factory: _ => new FixedWindowRateLimiterOptions
@@ -66,6 +80,11 @@ public static class RateLimitingExtensions
                 options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(
                     httpContext =>
                     {
+                        if (IsLoopback(httpContext))
+                        {
+                            return RateLimitPartition.GetNoLimiter(string.Empty);
+                        }
+
                         var remoteIp = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
 
                         return RateLimitPartition.GetFixedWindowLimiter(
@@ -80,5 +99,12 @@ public static class RateLimitingExtensions
             });
 
         return services;
+    }
+
+    private static bool IsLoopback(HttpContext httpContext)
+    {
+        var remoteIp = httpContext.Connection.RemoteIpAddress;
+
+        return remoteIp is not null && IPAddress.IsLoopback(remoteIp);
     }
 }
