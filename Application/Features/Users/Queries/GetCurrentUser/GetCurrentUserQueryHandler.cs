@@ -1,4 +1,3 @@
-using Application.ApiContracts.Permission.Responses;
 using Application.ApiContracts.User.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.Role;
@@ -36,20 +35,9 @@ public class GetCurrentUserQueryHandler(IUserReadRepository userReadRepository, 
                 .ConfigureAwait(false) ??
             new List<string>();
 
-        List<PermissionResponse>? userPermissions = null;
-        if(userPermissionNames.Count > 0)
-        {
-            userPermissions = userPermissionNames
-                .Select(p => new { Name = p, Metadata = Domain.Constants.Permission.PermissionsList.GetMetadata(p) })
-                .Select(
-                    p => new PermissionResponse()
-                    {
-                        ID = p.Name,
-                        DisplayName = p.Metadata?.DisplayName ?? p.Name,
-                        Description = p.Metadata?.Description
-                    })
-                .ToList();
-        }
+        List<string>? userPermissions = userPermissionNames.Count > 0
+            ? userPermissionNames
+            : null;
 
         return new UserResponse()
         {
@@ -64,3 +52,4 @@ public class GetCurrentUserQueryHandler(IUserReadRepository userReadRepository, 
         };
     }
 }
+

@@ -607,8 +607,7 @@ public class User : IAsyncLifetime
             .ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Permissions.Should().NotBeNullOrEmpty();
-        content.Permissions!.Should().Contain(p => string.Compare(p.ID, PermissionsList.Users.View) == 0);
-        content.Permissions!.First().DisplayName.Should().NotBeNullOrEmpty();
+        content.Permissions!.Should().Contain(PermissionsList.Users.View);
     }
 
     [Fact(DisplayName = "USER_054 - Verify Status field cho Active user")]

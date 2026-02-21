@@ -163,7 +163,7 @@ public class User
         result.IsSuccess.Should().BeTrue();
         result.Value.Permissions.Should().NotBeNullOrEmpty();
         result.Value.Permissions.Should().HaveCount(2);
-        result.Value.Permissions!.Select(p => p.ID).Should().Contain("User.Read");
+        result.Value.Permissions!.Should().Contain("User.Read");
     }
 
     [Fact(DisplayName = "USER_052 - Verify UserResponse.Permissions rỗng khi user không có quyền")]

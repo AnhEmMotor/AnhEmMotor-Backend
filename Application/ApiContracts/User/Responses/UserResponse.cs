@@ -1,6 +1,4 @@
-﻿using Application.ApiContracts.Permission.Responses;
-
-namespace Application.ApiContracts.User.Responses;
+﻿namespace Application.ApiContracts.User.Responses;
 
 public class UserResponse
 {
@@ -18,5 +16,6 @@ public class UserResponse
 
     public string? Status { get; set; } = string.Empty;
 
-    public List<PermissionResponse>? Permissions { get; set; }
+    public List<string>? Permissions { get; set; }
 }
+
