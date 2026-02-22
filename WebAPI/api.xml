@@ -162,6 +162,11 @@
             Lấy danh sách phiếu nhập (có phân trang, lọc, sắp xếp).
             </summary>
         </member>
+        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.GetInputStatusesAsync(System.Threading.CancellationToken)">
+            <summary>
+            Lấy danh sách trạng thái phiếu nhập.
+            </summary>
+        </member>
         <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.GetDeletedInputsAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách phiếu nhập đã bị xóa (có phân trang, lọc, sắp xếp).
@@ -569,6 +574,11 @@
         <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetDeletedOutputsAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách đơn hàng đã bị xóa (có phân trang, lọc, sắp xếp).
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetOutputStatusesAsync(System.Threading.CancellationToken)">
+            <summary>
+            Lấy danh sách trạng thái đơn hàng.
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetOutputByIdAsync(System.Int32,System.Threading.CancellationToken)">

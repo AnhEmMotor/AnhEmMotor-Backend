@@ -2932,5 +2932,54 @@ public class InventoryReceipts : IAsyncLifetime
                 i => string.Compare(i.StatusId, Domain.Constants.Input.InputStatus.Working) == 0 &&
                     i.SupplierId == supplier.Id);
     }
+
+    [Fact(DisplayName = "INPUT_070 - Lấy danh sách trạng thái phiếu nhập thành công (Happy Path)")]
+    public async Task GetInputStatuses_WithViewPermission_ReturnsAllStatusesWithVietnameseLabels()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Inputs.View ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        var response = await _client.GetAsync("/api/v1/InventoryReceipts/status").ConfigureAwait(true);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response.Content
+            .ReadFromJsonAsync<Dictionary<string, string>>(CancellationToken.None)
+            .ConfigureAwait(true);
+        content.Should().NotBeNull();
+        content!.Should().HaveCount(3);
+        content.Should().ContainKey(Domain.Constants.Input.InputStatus.Working)
+            .WhoseValue.Should().Be("Phiếu tạm");
+        content.Should().ContainKey(Domain.Constants.Input.InputStatus.Finish)
+            .WhoseValue.Should().Be("Hoàn thành");
+        content.Should().ContainKey(Domain.Constants.Input.InputStatus.Cancel)
+            .WhoseValue.Should().Be("Đã huỷ");
+    }
+
+    [Fact(DisplayName = "INPUT_071 - Lấy danh sách trạng thái phiếu nhập khi chưa đăng nhập trả 401")]
+    public async Task GetInputStatuses_WithoutToken_ReturnsUnauthorized()
+    {
+        _client.DefaultRequestHeaders.Authorization = null;
+
+        var response = await _client.GetAsync("/api/v1/InventoryReceipts/status").ConfigureAwait(true);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
 #pragma warning restore CRR0035
 }

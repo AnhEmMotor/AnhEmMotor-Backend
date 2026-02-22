@@ -13,6 +13,7 @@ using Application.Features.Outputs.Commands.UpdateOutputStatus;
 using Application.Features.Outputs.Queries.GetDeletedOutputsList;
 using Application.Features.Outputs.Queries.GetOutputById;
 using Application.Features.Outputs.Queries.GetOutputsList;
+using Application.Features.Outputs.Queries.GetOutputStatusList;
 using Asp.Versioning;
 using Domain.Constants;
 using Domain.Primitives;
@@ -119,6 +120,19 @@ public class SalesOrdersController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var query = new GetDeletedOutputsListQuery() { SieveModel = sieveModel };
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy danh sách trạng thái đơn hàng.
+    /// </summary>
+    [HttpGet("status")]
+    [RequiresAnyPermissions(Outputs.View, Outputs.Create, Outputs.Edit)]
+    [ProducesResponseType(typeof(Dictionary<string, string>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetOutputStatusesAsync(CancellationToken cancellationToken)
+    {
+        var query = new GetOutputStatusListQuery();
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }

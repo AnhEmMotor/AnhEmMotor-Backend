@@ -13,6 +13,7 @@ using Application.Features.Inputs.Queries.GetDeletedInputsList;
 using Application.Features.Inputs.Queries.GetInputById;
 using Application.Features.Inputs.Queries.GetInputsBySupplierId;
 using Application.Features.Inputs.Queries.GetInputsList;
+using Application.Features.Inputs.Queries.GetInputStatusList;
 using Asp.Versioning;
 using Domain.Constants;
 using Domain.Primitives;
@@ -48,6 +49,19 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var query = new GetInputsListQuery() { SieveModel = sieveModel };
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy danh sách trạng thái phiếu nhập.
+    /// </summary>
+    [HttpGet("status")]
+    [RequiresAnyPermissions(Inputs.View, Inputs.Create, Inputs.Edit)]
+    [ProducesResponseType(typeof(Dictionary<string, string>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetInputStatusesAsync(CancellationToken cancellationToken)
+    {
+        var query = new GetInputStatusListQuery();
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }

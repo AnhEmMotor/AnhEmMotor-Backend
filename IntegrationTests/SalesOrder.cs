@@ -1316,6 +1316,52 @@ public class SalesOrder : IAsyncLifetime
             .ConfigureAwait(true);
         content!.Items.Should().Contain(x => string.Compare(x.Notes, $"PurchasesOf_{uniqueId}") == 0);
     }
+
+    [Fact(DisplayName = "SO_100 - Lấy danh sách trạng thái đơn hàng thành công (Happy Path)")]
+    public async Task GetOutputStatuses_WithViewPermission_ReturnsAllStatusesWithVietnameseLabels()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Outputs.View ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        var response = await _client.GetAsync("/api/v1/SalesOrders/status").ConfigureAwait(true);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response.Content
+            .ReadFromJsonAsync<Dictionary<string, string>>(CancellationToken.None)
+            .ConfigureAwait(true);
+        content.Should().NotBeNull();
+        content!.Should().HaveCount(11);
+        content.Should().ContainKey(OrderStatus.Pending).WhoseValue.Should().Be("Chờ xác nhận");
+        content.Should().ContainKey(OrderStatus.ConfirmedCod).WhoseValue.Should().Be("Xác nhận COD");
+        content.Should().ContainKey(OrderStatus.Completed).WhoseValue.Should().Be("Đã hoàn thành");
+    }
+
+    [Fact(DisplayName = "SO_101 - Lấy danh sách trạng thái đơn hàng khi chưa đăng nhập trả 401")]
+    public async Task GetOutputStatuses_WithoutToken_ReturnsUnauthorized()
+    {
+        _client.DefaultRequestHeaders.Authorization = null;
+
+        var response = await _client.GetAsync("/api/v1/SalesOrders/status").ConfigureAwait(true);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
 #pragma warning restore CRR0035
 #pragma warning restore IDE0079
 }
