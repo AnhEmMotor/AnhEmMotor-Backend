@@ -109,6 +109,18 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .HasForeignKey(o => o.Name)
             .OnDelete(DeleteBehavior.Restrict);
 
+        modelBuilder.Entity<ProductCollectionPhoto>()
+            .HasOne(p => p.ProductVariant)
+            .WithMany(v => v.ProductCollectionPhotos)
+            .HasForeignKey(p => p.ProductVariantId)
+            .IsRequired(false);
+
+        modelBuilder.Entity<VariantOptionValue>()
+            .HasOne(v => v.ProductVariant)
+            .WithMany(pv => pv.VariantOptionValues)
+            .HasForeignKey(v => v.VariantId)
+            .IsRequired(false);
+
         var isNotSqlServer = string.Compare(Database.ProviderName, "Microsoft.EntityFrameworkCore.SqlServer") != 0;
 
         if(isNotSqlServer)
