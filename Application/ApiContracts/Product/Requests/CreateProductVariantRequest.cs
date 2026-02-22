@@ -4,6 +4,7 @@ namespace Application.ApiContracts.Product.Requests;
 
 public class CreateProductVariantRequest
 {
+    [JsonConverter(typeof(Application.Common.Converters.NullableDecimalConverter))]
     public decimal? Price { get; set; }
 
     public string? UrlSlug { get; set; }

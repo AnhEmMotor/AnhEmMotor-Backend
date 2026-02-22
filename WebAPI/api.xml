@@ -948,29 +948,6 @@
             <param name="value">The string value to write. If null or empty, no value is written.</param>
             <param name="options">Options to control JSON serialization behavior. This parameter can be used to customize serialization features.</param>
         </member>
-        <member name="T:WebAPI.Converters.NullableDecimalConverter">
-            <summary>
-            Provides a custom JSON converter for nullable decimals that handles empty strings by returning null.
-            </summary>
-        </member>
-        <member name="M:WebAPI.Converters.NullableDecimalConverter.Read(System.Text.Json.Utf8JsonReader@,System.Type,System.Text.Json.JsonSerializerOptions)">
-            <summary>
-            
-            </summary>
-            <param name="reader"></param>
-            <param name="typeToConvert"></param>
-            <param name="options"></param>
-            <returns></returns>
-            <exception cref="T:System.Text.Json.JsonException"></exception>
-        </member>
-        <member name="M:WebAPI.Converters.NullableDecimalConverter.Write(System.Text.Json.Utf8JsonWriter,System.Nullable{System.Decimal},System.Text.Json.JsonSerializerOptions)">
-            <summary>
-            
-            </summary>
-            <param name="writer"></param>
-            <param name="value"></param>
-            <param name="options"></param>
-        </member>
         <member name="T:WebAPI.Extensions.AuthenticationExtensions">
             <summary>
             Provides extension methods for configuring JWT bearer authentication in an ASP.NET Core application.

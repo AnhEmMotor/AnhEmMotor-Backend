@@ -1529,5 +1529,196 @@ public class Product : IAsyncLifetime
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
+    [Fact(DisplayName = "PRODUCT_104 - Tạo sản phẩm với UrlSlug dài hơn 50 ký tự (lưu DB thành công)")]
+    public async Task CreateProduct_LongUrlSlug_SavedSuccessfully()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services, username, password, [PermissionsList.Products.Create], CancellationToken.None, $"u_{uniqueId}@x.com")
+            .ConfigureAwait(true);
+        var loginResp = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResp.AccessToken);
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+
+        var cat = new ProductCategoryEntity { Name = $"C_{uniqueId}" };
+        var brand = new BrandEntity { Name = $"B_{uniqueId}" };
+        db.ProductCategories.Add(cat);
+        db.Brands.Add(brand);
+        if (!await db.ProductStatuses.AnyAsync(x => x.Key == Domain.Constants.ProductStatus.ForSale, CancellationToken.None))
+            db.ProductStatuses.Add(new ProductStatus { Key = Domain.Constants.ProductStatus.ForSale });
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        string longSlug = new('a', 200); // 200 characters
+
+        var command = new CreateProductCommand
+        {
+            Name = "Long Slug Product",
+            CategoryId = cat.Id,
+            BrandId = brand.Id,
+            Variants =
+            [
+                new CreateProductVariantRequest
+                {
+                    UrlSlug = longSlug,
+                    Price = 1000,
+                    OptionValueIds = []
+                }
+            ]
+        };
+
+        var response = await _client.PostAsJsonAsync("/api/v1/product", command).ConfigureAwait(true);
+        response.StatusCode.Should().BeOneOf(HttpStatusCode.Created, HttpStatusCode.OK);
+
+        var createdProduct = await db.ProductVariants.FirstOrDefaultAsync(v => v.UrlSlug == longSlug).ConfigureAwait(true);
+        createdProduct.Should().NotBeNull();
+        createdProduct!.UrlSlug?.Length.Should().Be(200);
+    }
+
+    [Fact(DisplayName = "PRODUCT_105 - Cập nhật sản phẩm với thuộc tính null (chuỗi trống) parse thành decimal an toàn")]
+    public async Task UpdateProduct_EmptyDecimalStrings_ParsedAsNullSuccessfully()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services, username, password, [PermissionsList.Products.View, PermissionsList.Products.Create, PermissionsList.Products.Edit], CancellationToken.None, $"u_{uniqueId}@x.com")
+            .ConfigureAwait(true);
+        var loginResp = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResp.AccessToken);
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+
+        var cat = new ProductCategoryEntity { Name = $"C_{uniqueId}" };
+        var brand = new BrandEntity { Name = $"B_{uniqueId}" };
+        db.ProductCategories.Add(cat);
+        db.Brands.Add(brand);
+        if (!await db.ProductStatuses.AnyAsync(x => x.Key == Domain.Constants.ProductStatus.ForSale, CancellationToken.None))
+            db.ProductStatuses.Add(new ProductStatus { Key = Domain.Constants.ProductStatus.ForSale });
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var reqBody = new
+        {
+            name = "Test Product Decimal",
+            categoryId = cat.Id,
+            brandId = brand.Id,
+            weight = "",
+            displacement = "",
+            variants = new[]
+            {
+                new { urlSlug = $"test-dec-{uniqueId}", price = 1000, optionValueIds = Array.Empty<int>() }
+            }
+        };
+
+        var response = await _client.PostAsJsonAsync("/api/v1/product", reqBody).ConfigureAwait(true);
+        var content = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
+        response.IsSuccessStatusCode.Should().BeTrue("Response body: {0}", content);
+    }
+
+    [Fact(DisplayName = "PRODUCT_106 - Cập nhật sản phẩm verify xóa cứng VariantOptionValue")]
+    public async Task UpdateProduct_HardDeleteVariantOptionValue_Verified()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"u_{uniqueId}";
+        var password = "P1@password";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services, username, password, [PermissionsList.Products.View, PermissionsList.Products.Create, PermissionsList.Products.Edit], CancellationToken.None, $"{username}@x.com")
+            .ConfigureAwait(true);
+        var loginResp = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResp.AccessToken);
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+
+        var cat = new ProductCategoryEntity { Name = $"C_{uniqueId}" };
+        var brand = new BrandEntity { Name = $"B_{uniqueId}" };
+        var predefinedOption = new PredefinedOption { Key = "Color", Value = "Màu sắc" };
+        var option = new Option { Name = "Color" };
+        var optionValue = new OptionValue { Option = option, Name = "Red" };
+        db.ProductCategories.Add(cat);
+        db.Brands.Add(brand);
+        db.PredefinedOptions.Add(predefinedOption);
+        db.Options.Add(option);
+        db.OptionValues.Add(optionValue);
+        
+        if (!await db.ProductStatuses.AnyAsync(x => x.Key == Domain.Constants.ProductStatus.ForSale, CancellationToken.None))
+            db.ProductStatuses.Add(new ProductStatus { Key = Domain.Constants.ProductStatus.ForSale });
+        
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+        
+        var product = new ProductEntity { Name = "P1", CategoryId = cat.Id, BrandId = brand.Id, StatusId = Domain.Constants.ProductStatus.ForSale };
+        db.Products.Add(product);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var variant = new ProductVariant { ProductId = product.Id, UrlSlug = $"v-{uniqueId}", Price = 1000 };
+        db.ProductVariants.Add(variant);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var variantOptionValue = new VariantOptionValue { VariantId = variant.Id, OptionValueId = optionValue.Id };
+        db.Set<VariantOptionValue>().Add(variantOptionValue);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        // API Update removing the option values from variant
+        var updateCommand = new Application.Features.Products.Commands.UpdateProduct.UpdateProductCommand
+        {
+            Id = product.Id,
+            Name = "P1 Updated",
+            CategoryId = cat.Id,
+            BrandId = brand.Id,
+            Variants =
+            [
+                new UpdateProductVariantRequest
+                {
+                    Id = variant.Id,
+                    Price = 2000,
+                    OptionValues = [] // remove Color: Red mapping
+                }
+            ]
+        };
+
+        var response = await _client.PutAsJsonAsync($"/api/v1/product/{product.Id}", updateCommand).ConfigureAwait(true);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        // Verify hard delete
+        var exists = await db.Set<VariantOptionValue>().IgnoreQueryFilters().AnyAsync(v => v.VariantId == variant.Id).ConfigureAwait(true);
+        exists.Should().BeFalse();
+    }
+
+    [Fact(DisplayName = "PRODUCT_108 - Gọi API PredefinedOptions với quyền View hợp lệ")]
+    public async Task GetPredefinedOptions_ValidPermissions_ReturnsOk()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"u_{uniqueId}";
+        var password = "P1@password";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services, username, password, [PermissionsList.Products.View], CancellationToken.None, $"{username}@x.com")
+            .ConfigureAwait(true);
+        var loginResp = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResp.AccessToken);
+
+        var response = await _client.GetAsync("/api/v1/PredefinedOption").ConfigureAwait(true);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Fact(DisplayName = "PRODUCT_109 - Gọi API PredefinedOptions không có quyền hợp lệ trả về Forbidden")]
+    public async Task GetPredefinedOptions_NoPermissions_ReturnsForbidden()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"u_{uniqueId}";
+        var password = "P1@password";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services, username, password, [], CancellationToken.None, $"{username}@x.com")
+            .ConfigureAwait(true);
+        var loginResp = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResp.AccessToken);
+
+        var response = await _client.GetAsync("/api/v1/PredefinedOption").ConfigureAwait(true);
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
 #pragma warning restore CRR0035
 }

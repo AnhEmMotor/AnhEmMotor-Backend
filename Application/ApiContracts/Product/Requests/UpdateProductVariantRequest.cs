@@ -6,6 +6,7 @@ public class UpdateProductVariantRequest
 {
     public int? Id { get; set; }
 
+    [JsonConverter(typeof(Application.Common.Converters.NullableDecimalConverter))]
     public decimal? Price { get; set; }
 
     [JsonPropertyName("url")]

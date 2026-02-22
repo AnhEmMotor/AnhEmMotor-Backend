@@ -1,4 +1,5 @@
-﻿using Asp.Versioning;
+﻿using Application.Common.Converters;
+using Asp.Versioning;
 using WebAPI.Converters;
 using WebAPI.Middleware;
 
@@ -63,6 +64,8 @@ public static class MvcExtensions
                 options.SerializerOptions.Converters.Add(new EmptyStringConverter());
                 options.SerializerOptions.Converters.Add(new NullableDecimalConverter());
             });
+
+
 
         return services;
     }

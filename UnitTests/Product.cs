@@ -1374,6 +1374,33 @@ public class Product
 
         result.Should().NotBeNull();
     }
+    [Fact(DisplayName = "PRODUCT_110 - Kiểm tra Validation khi URL Slug bị trùng chéo lặp trong cùng request")]
+    public void CreateProduct_DuplicateUrlSlugInRequest_FailsValidation()
+    {
+        var command = new CreateProductCommand
+        {
+            Name = "Honda SH",
+            CategoryId = 1,
+            BrandId = 1,
+            Variants =
+                [ new CreateProductVariantRequest
+                {
+                    UrlSlug = "sh-red",
+                    Price = 100000000
+                }, new CreateProductVariantRequest
+                {
+                    UrlSlug = "sh-red",
+                    Price = 100000000
+                } ]
+        };
+
+        var validator = new CreateProductCommandValidator();
+        var result = validator.Validate(command);
+
+        result.Should().NotBeNull();
+        result.IsValid.Should().BeFalse();
+    }
+
 #pragma warning restore CRR0035
 #pragma warning restore IDE0079
 }

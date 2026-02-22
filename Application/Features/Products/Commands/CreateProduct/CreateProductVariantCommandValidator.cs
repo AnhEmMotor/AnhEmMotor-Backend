@@ -10,8 +10,8 @@ namespace Application.Features.Products.Commands.CreateProduct
             RuleFor(x => x.UrlSlug)
                 .NotEmpty()
                 .WithMessage("Variant URL slug is required.")
-                .MaximumLength(50)
-                .WithMessage("URL slug must not exceed 50 characters.")
+                .MaximumLength(255)
+                .WithMessage("URL slug must not exceed 250 characters.")
                 .Matches(@"^[a-z0-9]+(?:-[a-z0-9]+)*$")
                 .WithMessage("URL slug must be lowercase alphanumeric with hyphens only.");
 

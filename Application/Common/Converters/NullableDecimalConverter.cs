@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace WebAPI.Converters;
+namespace Application.Common.Converters;
 
 /// <summary>
 /// Provides a custom JSON converter for nullable decimals that handles empty strings by returning null.
