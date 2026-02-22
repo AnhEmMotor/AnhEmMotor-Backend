@@ -35,9 +35,7 @@ public class GetCurrentUserQueryHandler(IUserReadRepository userReadRepository, 
                 .ConfigureAwait(false) ??
             new List<string>();
 
-        List<string>? userPermissions = userPermissionNames.Count > 0
-            ? userPermissionNames
-            : null;
+        List<string>? userPermissions = userPermissionNames.Count > 0 ? userPermissionNames : null;
 
         return new UserResponse()
         {

@@ -270,6 +270,8 @@ namespace Infrastructure.MySqlMigrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Name");
+
                     b.ToTable("Option");
                 });
 
@@ -408,6 +410,31 @@ namespace Infrastructure.MySqlMigrations
                     b.HasKey("Id");
 
                     b.ToTable("Permissions", (string)null);
+                });
+
+            modelBuilder.Entity(
+                "Domain.Entities.PredefinedOption",
+                b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int").HasColumnName("Id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<long?>("CreatedAt").HasColumnType("bigint");
+
+                    b.Property<long?>("DeletedAt").HasColumnType("bigint");
+
+                    b.Property<string>("Key").IsRequired().HasColumnType("nvarchar(100)").HasColumnName("Key");
+
+                    b.Property<long?>("UpdatedAt").HasColumnType("bigint");
+
+                    b.Property<string>("Value").IsRequired().HasColumnType("nvarchar(200)").HasColumnName("Value");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Key").IsUnique();
+
+                    b.ToTable("PredefinedOption");
                 });
 
             modelBuilder.Entity(
@@ -892,6 +919,17 @@ namespace Infrastructure.MySqlMigrations
                     b.Navigation("ParentOutputInfo");
 
                     b.Navigation("ProductVariant");
+                });
+
+            modelBuilder.Entity(
+                "Domain.Entities.Option",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.PredefinedOption", null)
+                        .WithMany()
+                        .HasForeignKey("Name")
+                        .HasPrincipalKey("Key")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity(

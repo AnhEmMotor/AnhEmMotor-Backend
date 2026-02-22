@@ -4,7 +4,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
 using Application.Interfaces.Repositories.Option;
 using Application.Interfaces.Repositories.OptionValue;
-
+using Application.Interfaces.Repositories.PredefinedOption;
 using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.ProductCategory;
 using Application.Interfaces.Repositories.ProductVariant;
@@ -25,6 +25,7 @@ public sealed class CreateProductCommandHandler(
     IProductVariantReadRepository productVariantReadRepository,
     IOptionValueReadRepository optionValueReadRepository,
     IOptionReadRepository optionReadRepository,
+    IPredefinedOptionReadRepository predefinedOptionReadRepository,
     IProductInsertRepository productInsertRepository,
     IProductVariantInsertRepository productVariantInsertRepository,
     IOptionValueInsertRepository optionValueInsertRepository,
@@ -107,6 +108,20 @@ public sealed class CreateProductCommandHandler(
 
             if(potentialOptionNames.Count > 0)
             {
+                var allowedKeys = await predefinedOptionReadRepository.GetAllKeysAsync(cancellationToken)
+                    .ConfigureAwait(false);
+                var allowedKeysSet = new HashSet<string>(allowedKeys, StringComparer.OrdinalIgnoreCase);
+
+                var invalidOptions = potentialOptionNames.Where(n => !allowedKeysSet.Contains(n)).ToList();
+                if(invalidOptions.Count > 0)
+                {
+                    errors.Add(
+                        Error.BadRequest(
+                            $"The following option names are invalid: {string.Join(", ", invalidOptions)}",
+                            "Variants.OptionValues"));
+                    return Result<ProductDetailForManagerResponse?>.Failure(errors);
+                }
+
                 var existingOptions = await optionReadRepository.GetByNamesAsync(
                     potentialOptionNames,
                     cancellationToken,

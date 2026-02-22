@@ -337,6 +337,22 @@
             Xóa nhiều vai trò
             </summary>
         </member>
+        <member name="T:WebAPI.Controllers.V1.PredefinedOptionController">
+            <summary>
+            Quản lý danh sách các thuộc tính sản phẩm được định nghĩa sẵn (ví dụ: Loại xe, Màu sắc).
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.PredefinedOptionController.#ctor(MediatR.IMediator)">
+            <summary>
+            Quản lý danh sách các thuộc tính sản phẩm được định nghĩa sẵn (ví dụ: Loại xe, Màu sắc).
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.PredefinedOptionController.GetPredefinedOptionsAsync(System.Threading.CancellationToken)">
+            <summary>
+            Lấy danh sách các thuộc tính được định nghĩa sẵn dưới dạng từ điển key-value. Chỉ người dùng có quyền tạo hoặc
+            chỉnh sửa sản phẩm mới có thể truy cập.
+            </summary>
+        </member>
         <member name="T:WebAPI.Controllers.V1.ProductCategoryController">
             <summary>
             Quản lý danh mục sản phẩm.
@@ -1045,8 +1061,8 @@
         </member>
         <member name="M:WebAPI.Extensions.RateLimitingExtensions.AddRateLimitingServices(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
             <summary>
-            Adds rate limiting services to the specified <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/>.
-            Loopback (localhost) requests are excluded from rate limiting.
+            Adds rate limiting services to the specified <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/>. Loopback (localhost) requests are
+            excluded from rate limiting.
             </summary>
             <param name="services">The service collection to add rate limiting to.</param>
             <returns>The same <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> for chaining.</returns>

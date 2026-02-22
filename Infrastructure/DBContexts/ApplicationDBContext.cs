@@ -65,6 +65,8 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<Permission> Permissions { get; set; }
 
+    public virtual DbSet<PredefinedOption> PredefinedOptions { get; set; }
+
     public virtual DbSet<RolePermission> RolePermissions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -97,6 +99,15 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .WithMany(p => p.RolePermissions)
             .HasForeignKey(rp => rp.PermissionId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<PredefinedOption>().HasIndex(p => p.Key).IsUnique();
+
+        modelBuilder.Entity<Option>()
+            .HasOne<PredefinedOption>()
+            .WithMany()
+            .HasPrincipalKey(p => p.Key)
+            .HasForeignKey(o => o.Name)
+            .OnDelete(DeleteBehavior.Restrict);
 
         var isNotSqlServer = string.Compare(Database.ProviderName, "Microsoft.EntityFrameworkCore.SqlServer") != 0;
 

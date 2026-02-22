@@ -931,6 +931,7 @@ public class Product : IAsyncLifetime
         var brand = new BrandEntity { Name = $"Brand_{uniqueId}" };
         db.ProductCategories.Add(category);
         db.Brands.Add(brand);
+        db.PredefinedOptions.Add(new PredefinedOption { Key = $"Color_{uniqueId}", Value = "Màu sắc" });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var request = new CreateProductCommand
@@ -1009,6 +1010,7 @@ public class Product : IAsyncLifetime
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var optionName = $"Option_{uniqueId}";
+        db.PredefinedOptions.Add(new PredefinedOption { Key = optionName, Value = "Tuỳ chọn" });
         var optionValueName = "Red";
         var option = new Option { Name = optionName };
         db.Options.Add(option);
@@ -1094,6 +1096,10 @@ public class Product : IAsyncLifetime
 
         var option1 = new Option { Name = "Color" };
         var option2 = new Option { Name = "Size" };
+        db.PredefinedOptions
+            .AddRange(
+                new PredefinedOption { Key = "Color", Value = "Màu sắc" },
+                new PredefinedOption { Key = "Size", Value = "Size" });
         db.Options.AddRange(option1, option2);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
@@ -1393,6 +1399,135 @@ public class Product : IAsyncLifetime
             .FirstOrDefaultAsync(p => p.Id == p1.Id, CancellationToken.None)
             .ConfigureAwait(true);
         dbP1!.StatusId.Should().Be(productStatusId);
+    }
+
+    [Fact(DisplayName = "PRODUCT_101 - Lấy danh sách PredefinedOptions thành công khi có quyền Products.Create")]
+    public async Task GetPredefinedOptions_WithCreatePermission_ReturnsOkWithDictionary()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Products.Create ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        if(!await db.PredefinedOptions.AnyAsync(CancellationToken.None).ConfigureAwait(true))
+        {
+            db.PredefinedOptions
+                .AddRange(
+                    new PredefinedOption { Key = "VehicleType", Value = "Loại xe" },
+                    new PredefinedOption { Key = "Color", Value = "Màu sắc" });
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+        }
+
+        var response = await _client.GetAsync("/api/v1/predefinedoption").ConfigureAwait(true);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response.Content
+            .ReadFromJsonAsync<Dictionary<string, string>>(CancellationToken.None)
+            .ConfigureAwait(true);
+        content.Should().NotBeNullOrEmpty();
+        content!.Keys.Should().Contain("VehicleType");
+    }
+
+    [Fact(DisplayName = "PRODUCT_102 - Lấy danh sách PredefinedOptions thất bại khi không có quyền")]
+    public async Task GetPredefinedOptions_WithoutPermission_ReturnsForbidden()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Products.View ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        var response = await _client.GetAsync("/api/v1/predefinedoption").ConfigureAwait(true);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact(DisplayName = "PRODUCT_103 - Tạo sản phẩm thất bại khi Option Name không thuộc danh sách PredefinedOption")]
+    public async Task CreateProduct_WithInvalidOptionName_ReturnsBadRequest()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Products.Create ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+
+        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        if(!await db.ProductStatuses
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
+            .ConfigureAwait(true))
+            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
+
+        var category = new ProductCategoryEntity { Name = $"Cat_{uniqueId}" };
+        var brand = new BrandEntity { Name = $"Brand_{uniqueId}" };
+        db.ProductCategories.Add(category);
+        db.Brands.Add(brand);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var command = new CreateProductCommand
+        {
+            Name = $"TestProduct_{uniqueId}",
+            CategoryId = category.Id,
+            BrandId = brand.Id,
+            StatusId = productStatusId,
+            Variants =
+                [ new CreateProductVariantRequest
+                {
+                    Price = 100,
+                    OptionValues = new Dictionary<string, string> { { "INVALID_KEY_NOT_IN_PREDEFINED", "Val1" } }
+                } ]
+        };
+
+        var response = await _client.PostAsJsonAsync("/api/v1/product", command).ConfigureAwait(true);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 #pragma warning restore CRR0035
 }

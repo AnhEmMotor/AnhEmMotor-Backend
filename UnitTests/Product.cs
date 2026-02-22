@@ -15,6 +15,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
 using Application.Interfaces.Repositories.Option;
 using Application.Interfaces.Repositories.OptionValue;
+using Application.Interfaces.Repositories.PredefinedOption;
 using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.ProductCategory;
 using Application.Interfaces.Repositories.ProductVariant;
@@ -40,6 +41,7 @@ public class Product
     private readonly Mock<IOptionReadRepository> _optionReadRepoMock;
     private readonly Mock<IOptionValueInsertRepository> _optionValueInsertRepoMock;
     private readonly Mock<IOptionValueReadRepository> _optionValueReadRepoMock;
+    private readonly Mock<IPredefinedOptionReadRepository> _predefinedOptionReadRepoMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<IProductVariantInsertRepository> _productVariantInsertRepository;
 
@@ -58,6 +60,10 @@ public class Product
         _optionReadRepoMock = new Mock<IOptionReadRepository>();
         _optionValueInsertRepoMock = new Mock<IOptionValueInsertRepository>();
         _optionValueReadRepoMock = new Mock<IOptionValueReadRepository>();
+        _predefinedOptionReadRepoMock = new Mock<IPredefinedOptionReadRepository>();
+        _predefinedOptionReadRepoMock
+            .Setup(x => x.GetAllKeysAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<string> { "Màu sắc", "Phiên bản", "Kích thước" });
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _productVariantInsertRepository = new Mock<IProductVariantInsertRepository>();
     }
@@ -96,6 +102,7 @@ public class Product
             _variantReadRepoMock.Object,
             _optionValueReadRepoMock.Object,
             _optionReadRepoMock.Object,
+            _predefinedOptionReadRepoMock.Object,
             _productInsertRepoMock.Object,
             _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
@@ -141,6 +148,7 @@ public class Product
             _variantReadRepoMock.Object,
             _optionValueReadRepoMock.Object,
             _optionReadRepoMock.Object,
+            _predefinedOptionReadRepoMock.Object,
             _productInsertRepoMock.Object,
             _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
@@ -171,6 +179,7 @@ public class Product
             _variantReadRepoMock.Object,
             _optionValueReadRepoMock.Object,
             _optionReadRepoMock.Object,
+            _predefinedOptionReadRepoMock.Object,
             _productInsertRepoMock.Object,
             _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
@@ -203,6 +212,7 @@ public class Product
             _variantReadRepoMock.Object,
             _optionValueReadRepoMock.Object,
             _optionReadRepoMock.Object,
+            _predefinedOptionReadRepoMock.Object,
             _productInsertRepoMock.Object,
             _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
@@ -233,6 +243,7 @@ public class Product
             _variantReadRepoMock.Object,
             _optionValueReadRepoMock.Object,
             _optionReadRepoMock.Object,
+            _predefinedOptionReadRepoMock.Object,
             _productInsertRepoMock.Object,
             _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
@@ -265,6 +276,7 @@ public class Product
             _variantReadRepoMock.Object,
             _optionValueReadRepoMock.Object,
             _optionReadRepoMock.Object,
+            _predefinedOptionReadRepoMock.Object,
             _productInsertRepoMock.Object,
             _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
@@ -299,6 +311,7 @@ public class Product
             _variantReadRepoMock.Object,
             _optionValueReadRepoMock.Object,
             _optionReadRepoMock.Object,
+            _predefinedOptionReadRepoMock.Object,
             _productInsertRepoMock.Object,
             _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
@@ -333,6 +346,7 @@ public class Product
             _variantReadRepoMock.Object,
             _optionValueReadRepoMock.Object,
             _optionReadRepoMock.Object,
+            _predefinedOptionReadRepoMock.Object,
             _productInsertRepoMock.Object,
             _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
@@ -385,6 +399,7 @@ public class Product
             _variantReadRepoMock.Object,
             _optionValueReadRepoMock.Object,
             _optionReadRepoMock.Object,
+            _predefinedOptionReadRepoMock.Object,
             _productInsertRepoMock.Object,
             _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
@@ -462,7 +477,7 @@ public class Product
     }
 
     [Fact(DisplayName = "PRODUCT_014 - Tạo sản phẩm thất bại khi optionValues chứa Option không hợp lệ")]
-    public void CreateProduct_InvalidOption_FailsValidation()
+    public async Task CreateProduct_InvalidOption_FailsValidation()
     {
         var command = new CreateProductCommand
         {
@@ -478,11 +493,35 @@ public class Product
                 } ]
         };
 
-        var validator = new CreateProductCommandValidator();
+        _productCategoryReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Domain.Entities.ProductCategory { Id = 1, DeletedAt = null });
+        _brandReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Domain.Entities.Brand { Id = 1, DeletedAt = null });
+        _variantReadRepoMock.Setup(x => x.GetBySlugAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((ProductVariant?)null);
 
-        var result = validator.Validate(command);
+        var specificPredefinedOptionRepoMock = new Mock<IPredefinedOptionReadRepository>();
+        specificPredefinedOptionRepoMock
+            .Setup(x => x.GetAllKeysAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<string> { "Màu sắc", "Phiên bản" });
 
-        result.Should().NotBeNull();
+        var handler = new CreateProductCommandHandler(
+            _productCategoryReadRepoMock.Object,
+            _brandReadRepoMock.Object,
+            _variantReadRepoMock.Object,
+            _optionValueReadRepoMock.Object,
+            _optionReadRepoMock.Object,
+            specificPredefinedOptionRepoMock.Object,
+            _productInsertRepoMock.Object,
+            _productVariantInsertRepository.Object,
+            _optionValueInsertRepoMock.Object,
+            _unitOfWorkMock.Object);
+
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+
+        result.IsFailure.Should().BeTrue();
+        result.Errors.Should().NotBeNullOrEmpty();
+        result.Errors!.First().Code.Should().Be("BadRequest");
     }
 
     [Fact(DisplayName = "PRODUCT_015 - Tạo sản phẩm thất bại khi Option có nhưng OptionValue trống")]
@@ -533,6 +572,7 @@ public class Product
             _variantReadRepoMock.Object,
             _optionValueReadRepoMock.Object,
             _optionReadRepoMock.Object,
+            _predefinedOptionReadRepoMock.Object,
             _productInsertRepoMock.Object,
             _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
@@ -624,6 +664,7 @@ public class Product
             _variantReadRepoMock.Object,
             _optionValueReadRepoMock.Object,
             _optionReadRepoMock.Object,
+            _predefinedOptionReadRepoMock.Object,
             _productInsertRepoMock.Object,
             _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
