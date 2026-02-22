@@ -24,7 +24,7 @@ public class PredefinedOptionController(IMediator mediator) : ApiController
     /// chỉnh sửa sản phẩm mới có thể truy cập.
     /// </summary>
     [HttpGet]
-    [HasPermission(Products.Create)]
+    [RequiresAnyPermissions(Products.View, Products.Create, Products.Edit, Products.Delete)]
     [ProducesResponseType(typeof(Dictionary<string, string>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetPredefinedOptionsAsync(CancellationToken cancellationToken)

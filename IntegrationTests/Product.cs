@@ -1456,7 +1456,7 @@ public class Product : IAsyncLifetime
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Products.View ],
+            [ ],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);

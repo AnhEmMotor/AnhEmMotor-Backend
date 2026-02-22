@@ -61,6 +61,7 @@ public static class MvcExtensions
             {
                 options.SerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
                 options.SerializerOptions.Converters.Add(new EmptyStringConverter());
+                options.SerializerOptions.Converters.Add(new NullableDecimalConverter());
             });
 
         return services;

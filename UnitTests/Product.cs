@@ -19,6 +19,7 @@ using Application.Interfaces.Repositories.PredefinedOption;
 using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.ProductCategory;
 using Application.Interfaces.Repositories.ProductVariant;
+using Application.Interfaces.Repositories.VariantOptionValue;
 using Domain.Constants;
 using Domain.Entities;
 using FluentAssertions;
@@ -44,6 +45,7 @@ public class Product
     private readonly Mock<IPredefinedOptionReadRepository> _predefinedOptionReadRepoMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<IProductVariantInsertRepository> _productVariantInsertRepository;
+    private readonly Mock<IVariantOptionValueDeleteRepository> _variantOptionValueDeleteRepoMock;
 
     public Product()
     {
@@ -63,9 +65,10 @@ public class Product
         _predefinedOptionReadRepoMock = new Mock<IPredefinedOptionReadRepository>();
         _predefinedOptionReadRepoMock
             .Setup(x => x.GetAllKeysAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<string> { "Màu sắc", "Phiên bản", "Kích thước" });
+            .ReturnsAsync(["Màu sắc", "Phiên bản", "Kích thước"]);
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _productVariantInsertRepository = new Mock<IProductVariantInsertRepository>();
+        _variantOptionValueDeleteRepoMock = new Mock<IVariantOptionValueDeleteRepository>();
     }
 
 #pragma warning disable IDE0079 
@@ -503,7 +506,7 @@ public class Product
         var specificPredefinedOptionRepoMock = new Mock<IPredefinedOptionReadRepository>();
         specificPredefinedOptionRepoMock
             .Setup(x => x.GetAllKeysAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<string> { "Màu sắc", "Phiên bản" });
+            .ReturnsAsync(["Màu sắc", "Phiên bản"]);
 
         var handler = new CreateProductCommandHandler(
             _productCategoryReadRepoMock.Object,
@@ -699,8 +702,12 @@ public class Product
             _brandReadRepoMock.Object,
             _productCategoryReadRepoMock.Object,
             _variantReadRepoMock.Object,
+            _optionReadRepoMock.Object,
+            _predefinedOptionReadRepoMock.Object,
             _optionValueReadRepoMock.Object,
             _optionValueInsertRepoMock.Object,
+            _variantInsertRepoMock.Object,
+            _variantOptionValueDeleteRepoMock.Object,
             _productUpdateRepoMock.Object,
             _variantDeleteRepoMock.Object,
             _unitOfWorkMock.Object);
@@ -723,8 +730,12 @@ public class Product
             _brandReadRepoMock.Object,
             _productCategoryReadRepoMock.Object,
             _variantReadRepoMock.Object,
+            _optionReadRepoMock.Object,
+            _predefinedOptionReadRepoMock.Object,
             _optionValueReadRepoMock.Object,
             _optionValueInsertRepoMock.Object,
+            _variantInsertRepoMock.Object,
+            _variantOptionValueDeleteRepoMock.Object,
             _productUpdateRepoMock.Object,
             _variantDeleteRepoMock.Object,
             _unitOfWorkMock.Object);
@@ -747,8 +758,12 @@ public class Product
             _brandReadRepoMock.Object,
             _productCategoryReadRepoMock.Object,
             _variantReadRepoMock.Object,
+            _optionReadRepoMock.Object,
+            _predefinedOptionReadRepoMock.Object,
             _optionValueReadRepoMock.Object,
             _optionValueInsertRepoMock.Object,
+            _variantInsertRepoMock.Object,
+            _variantOptionValueDeleteRepoMock.Object,
             _productUpdateRepoMock.Object,
             _variantDeleteRepoMock.Object,
             _unitOfWorkMock.Object);
@@ -785,8 +800,12 @@ public class Product
             _brandReadRepoMock.Object,
             _productCategoryReadRepoMock.Object,
             _variantReadRepoMock.Object,
+            _optionReadRepoMock.Object,
+            _predefinedOptionReadRepoMock.Object,
             _optionValueReadRepoMock.Object,
             _optionValueInsertRepoMock.Object,
+            _variantInsertRepoMock.Object,
+            _variantOptionValueDeleteRepoMock.Object,
             _productUpdateRepoMock.Object,
             _variantDeleteRepoMock.Object,
             _unitOfWorkMock.Object);
@@ -811,8 +830,12 @@ public class Product
             _brandReadRepoMock.Object,
             _productCategoryReadRepoMock.Object,
             _variantReadRepoMock.Object,
+            _optionReadRepoMock.Object,
+            _predefinedOptionReadRepoMock.Object,
             _optionValueReadRepoMock.Object,
             _optionValueInsertRepoMock.Object,
+            _variantInsertRepoMock.Object,
+            _variantOptionValueDeleteRepoMock.Object,
             _productUpdateRepoMock.Object,
             _variantDeleteRepoMock.Object,
             _unitOfWorkMock.Object);
@@ -848,8 +871,12 @@ public class Product
             _brandReadRepoMock.Object,
             _productCategoryReadRepoMock.Object,
             _variantReadRepoMock.Object,
+            _optionReadRepoMock.Object,
+            _predefinedOptionReadRepoMock.Object,
             _optionValueReadRepoMock.Object,
             _optionValueInsertRepoMock.Object,
+            _variantInsertRepoMock.Object,
+            _variantOptionValueDeleteRepoMock.Object,
             _productUpdateRepoMock.Object,
             _variantDeleteRepoMock.Object,
             _unitOfWorkMock.Object);
@@ -885,8 +912,12 @@ public class Product
             _brandReadRepoMock.Object,
             _productCategoryReadRepoMock.Object,
             _variantReadRepoMock.Object,
+            _optionReadRepoMock.Object,
+            _predefinedOptionReadRepoMock.Object,
             _optionValueReadRepoMock.Object,
             _optionValueInsertRepoMock.Object,
+            _variantInsertRepoMock.Object,
+            _variantOptionValueDeleteRepoMock.Object,
             _productUpdateRepoMock.Object,
             _variantDeleteRepoMock.Object,
             _unitOfWorkMock.Object);
@@ -922,8 +953,12 @@ public class Product
             _brandReadRepoMock.Object,
             _productCategoryReadRepoMock.Object,
             _variantReadRepoMock.Object,
+            _optionReadRepoMock.Object,
+            _predefinedOptionReadRepoMock.Object,
             _optionValueReadRepoMock.Object,
             _optionValueInsertRepoMock.Object,
+            _variantInsertRepoMock.Object,
+            _variantOptionValueDeleteRepoMock.Object,
             _productUpdateRepoMock.Object,
             _variantDeleteRepoMock.Object,
             _unitOfWorkMock.Object);
