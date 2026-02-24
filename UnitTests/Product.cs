@@ -1,4 +1,5 @@
 ﻿using Application.ApiContracts.Product.Requests;
+using Application.ApiContracts.Product.Responses;
 using Application.Features.Products.Commands.CreateProduct;
 using Application.Features.Products.Commands.DeleteManyProducts;
 using Application.Features.Products.Commands.DeleteProduct;
@@ -23,6 +24,7 @@ using Application.Interfaces.Repositories.VariantOptionValue;
 using Domain.Constants;
 using Domain.Entities;
 using FluentAssertions;
+using Mapster;
 using Moq;
 
 namespace UnitTests;
@@ -1399,6 +1401,144 @@ public class Product
 
         result.Should().NotBeNull();
         result.IsValid.Should().BeFalse();
+    }
+
+    [Fact(DisplayName = "PRODUCT_CALC_001 - CalculateTotalStock tính tổng RemainingCount từ Input receipt Finished")]
+    public void MapProductToDetailForManagerResponse_CalculatesTotalStockCorrectly()
+    {
+        // Arrange
+        var product = new Domain.Entities.Product
+        {
+            Id = 1,
+            Name = "Honda Wave",
+            ProductVariants =
+            [
+                new ProductVariant
+                {
+                    Id = 1,
+                    InputInfos =
+                    [
+                        new InputInfo
+                        {
+                            RemainingCount = 10,
+                            InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
+                        },
+                        new InputInfo
+                        {
+                            RemainingCount = 5,
+                            InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Working }
+                        } // Working nên không cộng vào PhysicalStock
+                    ]
+                },
+                new ProductVariant
+                {
+                    Id = 2,
+                    InputInfos =
+                    [
+                        new InputInfo
+                        {
+                            RemainingCount = 15,
+                            InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
+                        }
+                    ]
+                }
+            ]
+        };
+
+        // Act
+        var response = product.Adapt<ProductDetailForManagerResponse>();
+
+        // Assert
+        // Chỉ những receipt Finished mới cộng: 10 + 15 = 25
+        response.Stock.Should().Be(25);
+    }
+
+    [Fact(DisplayName = "PRODUCT_CALC_002 - CalculateTotalBooked tính tổng Count từ Output Order Pending/Confirmed")]
+    public void MapProductToDetailForManagerResponse_CalculatesReservedStockCorrectly()
+    {
+        // Arrange
+        var product = new Domain.Entities.Product
+        {
+            Id = 1,
+            Name = "Yamaha",
+            ProductVariants =
+            [
+                new ProductVariant
+                {
+                    Id = 1,
+                    OutputInfos =
+                    [
+                        new OutputInfo
+                        {
+                            Count = 3,
+                            OutputOrder = new Output { StatusId = Domain.Constants.Order.OrderStatus.Pending }
+                        },
+                        new OutputInfo
+                        {
+                            Count = 2,
+                            OutputOrder = new Output { StatusId = Domain.Constants.Order.OrderStatus.ConfirmedCod }
+                        },
+                        new OutputInfo
+                        {
+                            Count = 5,
+                            OutputOrder = new Output { StatusId = Domain.Constants.Order.OrderStatus.Completed }
+                        } // Completed không tính vào hàng giữ chỗ (Reserved)
+                    ]
+                }
+            ]
+        };
+
+        // Act
+        var response = product.Adapt<ProductDetailForManagerResponse>();
+
+        // Assert
+        // Chỉ những order Pending/Confirmed mới cộng: 3 + 2 = 5
+        response.HasBeenBooked.Should().Be(5);
+    }
+
+    [Fact(DisplayName = "PRODUCT_CALC_003 - Tính toán Available To Sell (ATS) chính xác")]
+    public void MapProductToDetailForManagerResponse_CalculatesATSCorrectly()
+    {
+        // Arrange
+        var product = new Domain.Entities.Product
+        {
+            Id = 1,
+            Name = "Suzuki",
+            ProductVariants =
+            [
+                new ProductVariant
+                {
+                    Id = 1,
+                    InputInfos =
+                    [
+                        new InputInfo
+                        {
+                            RemainingCount = 50,
+                            InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
+                        }
+                    ],
+                    OutputInfos =
+                    [
+                        new OutputInfo
+                        {
+                            Count = 10,
+                            OutputOrder = new Output { StatusId = Domain.Constants.Order.OrderStatus.Pending }
+                        }
+                    ]
+                }
+            ]
+        };
+
+        // Act
+        var response = product.Adapt<ProductDetailForManagerResponse>();
+
+        // Assert
+        response.Stock.Should().Be(50); // Physical Stock
+        response.HasBeenBooked.Should().Be(10); // Reserved
+
+        // StatusStockId được mapping qua hàm GetStockStatus(availableStock) trong ProductMappingConfig
+        // ATS = 50 - 10 = 40 (> 0 => in_stock)
+        response.StatusStockId.Should().Be("in_stock");
     }
 
 #pragma warning restore CRR0035

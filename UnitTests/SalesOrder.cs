@@ -1791,4 +1791,23 @@ public class SalesOrder
         var resultInv2 = validator.TestValidate(invalidCommand2);
         resultInv2.ShouldHaveValidationErrorFor(x => x.CustomerPhone).WithErrorMessage("Invalid phone number format.");
     }
+
+    [Fact(DisplayName = "SO_105 - InventoryValuationService tính COGS theo FIFO 2 lô")]
+    public void CalculateUnitCostAndDeductInventory_WithMultipleBatches_ShouldCalculateFIFO()
+    {
+        // Arrange
+        var batches = new List<InputInfo>
+        {
+            new InputInfo { Id = 1, RemainingCount = 10, InputPrice = 100 },
+            new InputInfo { Id = 2, RemainingCount = 20, InputPrice = 150 }
+        };
+
+        // Act - Bán 15 cái: 10 cái giá 100, 5 cái giá 150 = (1000 + 750) = 1750. UnitCost = 1750 / 15 = 117 (làm tròn)
+        var unitCost = Domain.DomainServices.InventoryValuationService.CalculateUnitCostAndDeductInventory(batches, 15);
+
+        // Assert
+        unitCost.Should().Be(117);
+        batches[0].RemainingCount.Should().Be(0);
+        batches[1].RemainingCount.Should().Be(15);
+    }
 }

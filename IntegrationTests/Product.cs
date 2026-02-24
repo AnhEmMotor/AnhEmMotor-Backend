@@ -1719,5 +1719,66 @@ public class Product : IAsyncLifetime
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
+    [Fact(DisplayName = "PRODUCT_111 - Lấy thông tin chi tiết sản phẩm kiểm tra tồn kho vật lý, giữ chỗ, ATS")]
+    public async Task GetProductById_WithStockData_ReturnsCorrectStockCalculations()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"u_{uniqueId}";
+        var password = "P1@password";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services, username, password, [PermissionsList.Products.View], CancellationToken.None, $"{username}@x.com")
+            .ConfigureAwait(true);
+        var loginResp = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResp.AccessToken);
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+
+        var cat = new ProductCategoryEntity { Name = $"C_{uniqueId}" };
+        var brand = new BrandEntity { Name = $"B_{uniqueId}" };
+        db.ProductCategories.Add(cat);
+        db.Brands.Add(brand);
+        if (!await db.ProductStatuses.AnyAsync(x => x.Key == Domain.Constants.ProductStatus.ForSale, CancellationToken.None))
+            db.ProductStatuses.Add(new ProductStatus { Key = Domain.Constants.ProductStatus.ForSale });
+        if (!await db.InputStatuses.AnyAsync(x => x.Key == Domain.Constants.Input.InputStatus.Finish, CancellationToken.None))
+            db.InputStatuses.Add(new InputStatus { Key = Domain.Constants.Input.InputStatus.Finish });
+        if (!await db.OutputStatuses.AnyAsync(x => x.Key == Domain.Constants.Order.OrderStatus.Pending, CancellationToken.None))
+            db.OutputStatuses.Add(new OutputStatus { Key = Domain.Constants.Order.OrderStatus.Pending });
+            
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var product = new ProductEntity { Name = "P_Test_Stock", CategoryId = cat.Id, BrandId = brand.Id, StatusId = Domain.Constants.ProductStatus.ForSale };
+        db.Products.Add(product);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var variant = new ProductVariant { ProductId = product.Id, UrlSlug = $"v-stock-{uniqueId}", Price = 1000 };
+        db.ProductVariants.Add(variant);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var input = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish, InputDate = DateTimeOffset.UtcNow };
+        db.InputReceipts.Add(input);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var inputInfo = new InputInfo { InputId = input.Id, ProductId = variant.Id, Count = 100, RemainingCount = 100, InputPrice = 800 };
+        db.InputInfos.Add(inputInfo);
+
+        var output = new Output { StatusId = Domain.Constants.Order.OrderStatus.Pending };
+        db.OutputOrders.Add(output);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var outputInfo = new OutputInfo { OutputId = output.Id, ProductVarientId = variant.Id, Count = 30, Price = 1000 };
+        db.OutputInfos.Add(outputInfo);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var response = await _client.GetAsync($"/api/v1/product/{product.Id}/for-manager", CancellationToken.None).ConfigureAwait(true);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        
+        var content = await response.Content.ReadFromJsonAsync<ProductDetailForManagerResponse>(CancellationToken.None).ConfigureAwait(true);
+        content.Should().NotBeNull();
+        content!.Stock.Should().Be(100);
+        content.HasBeenBooked.Should().Be(30);
+        content.StatusStockId.Should().Be("in_stock");
+    }
+
 #pragma warning restore CRR0035
 }
