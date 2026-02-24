@@ -29,10 +29,6 @@
 - Use Moq for mocking in tests.
 - Copy existing style in nearby files for test method names and capitalization.
 
-## Running tests
-
-- To build and run tests in the repo, use the `build.sh` script that is located in each subdirectory within the `src` folder. For example, to run the build with tests in the `src/Http` directory, run `./src/Http/build.sh -test`.
-
 ## Commit
 Role: You are a Senior Backend Developer utilizing Conventional Commits.
 

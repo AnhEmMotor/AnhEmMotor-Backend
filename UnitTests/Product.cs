@@ -1544,6 +1544,87 @@ public class Product
         response.StatusStockId.Should().Be("in_stock");
     }
 
+    [Fact(DisplayName = "PRODUCT_112 - Tạo sản phẩm hợp lệ với 1 biến thể rỗng OptionValues")]
+    public void CreateProduct_SingleEmptyVariant_ValidationSuccess()
+    {
+        var command = new CreateProductCommand
+        {
+            Name = "Honda", CategoryId = 1, BrandId = 1,
+            Variants = [ new CreateProductVariantRequest { UrlSlug = "honda", Price = 100, OptionValues = [] } ]
+        };
+        var validator = new CreateProductCommandValidator();
+        var result = validator.Validate(command);
+        result.IsValid.Should().BeTrue();
+    }
+
+    [Fact(DisplayName = "PRODUCT_113 - Tạo sản phẩm thất bại khi trộn lẫn biến thể có và không có OptionValues")]
+    public void CreateProduct_MixedVariants_ValidationFails()
+    {
+        var command = new CreateProductCommand
+        {
+            Name = "Honda", CategoryId = 1, BrandId = 1,
+            Variants = [ 
+                new CreateProductVariantRequest { UrlSlug = "honda-1", Price = 100, OptionValues = new Dictionary<string, string> { {"Màu", "Đỏ"} } },
+                new CreateProductVariantRequest { UrlSlug = "honda-2", Price = 100, OptionValues = [] }
+            ]
+        };
+        var validator = new CreateProductCommandValidator();
+        var result = validator.Validate(command);
+        result.IsValid.Should().BeFalse();
+        result.Errors.Should().Contain(e => e.ErrorMessage.Contains("Multiple variants require all variants to have options"));
+    }
+
+    [Fact(DisplayName = "PRODUCT_114 - Tạo sản phẩm thất bại khi nhiều biến thể trùng OptionValues")]
+    public void CreateProduct_DuplicateVariants_ValidationFails()
+    {
+        var command = new CreateProductCommand
+        {
+            Name = "Honda", CategoryId = 1, BrandId = 1,
+            Variants = [ 
+                new CreateProductVariantRequest { UrlSlug = "honda-1", Price = 100, OptionValues = new Dictionary<string, string> { {"Màu", "Đỏ"} } },
+                new CreateProductVariantRequest { UrlSlug = "honda-2", Price = 100, OptionValues = new Dictionary<string, string> { {"Màu", "Đỏ"} } }
+            ]
+        };
+        var validator = new CreateProductCommandValidator();
+        var result = validator.Validate(command);
+        result.IsValid.Should().BeFalse();
+        result.Errors.Should().Contain(e => e.ErrorMessage.Contains("Duplicate option combinations"));
+    }
+
+    [Fact(DisplayName = "PRODUCT_115 - Sửa sản phẩm thất bại khi trộn lẫn biến thể có và không có OptionValues (Ép định danh)")]
+    public void UpdateProduct_MixedVariants_ValidationFails()
+    {
+        var command = new UpdateProductCommand
+        {
+            Id = 1, Name = "Honda", CategoryId = 1, BrandId = 1,
+            Variants = [ 
+                new UpdateProductVariantRequest { Id = 1, UrlSlug = "honda-1", Price = 100, OptionValues = [] },
+                new UpdateProductVariantRequest { UrlSlug = "honda-2", Price = 100, OptionValues = new Dictionary<string, string> { {"Màu", "Đỏ"} } }
+            ]
+        };
+        var validator = new UpdateProductCommandValidator();
+        var result = validator.Validate(command);
+        result.IsValid.Should().BeFalse();
+        result.Errors.Should().Contain(e => e.ErrorMessage.Contains("Multiple variants require all variants to have options"));
+    }
+
+    [Fact(DisplayName = "PRODUCT_116 - Sửa sản phẩm thất bại khi nhiều biến thể trùng OptionValues")]
+    public void UpdateProduct_DuplicateVariants_ValidationFails()
+    {
+        var command = new UpdateProductCommand
+        {
+            Id = 1, Name = "Honda", CategoryId = 1, BrandId = 1,
+            Variants = [ 
+                new UpdateProductVariantRequest { Id = 1, UrlSlug = "honda-1", Price = 100, OptionValues = new Dictionary<string, string> { {"Màu", "Đỏ"} } },
+                new UpdateProductVariantRequest { UrlSlug = "honda-2", Price = 100, OptionValues = new Dictionary<string, string> { {"Màu", "Đỏ"} } }
+            ]
+        };
+        var validator = new UpdateProductCommandValidator();
+        var result = validator.Validate(command);
+        result.IsValid.Should().BeFalse();
+        result.Errors.Should().Contain(e => e.ErrorMessage.Contains("Duplicate option combinations"));
+    }
+
 #pragma warning restore CRR0035
 #pragma warning restore IDE0079
 }
