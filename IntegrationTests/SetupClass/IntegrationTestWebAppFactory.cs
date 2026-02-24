@@ -41,7 +41,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
 
 #pragma warning disable IDE0079 
 #pragma warning disable CRR0039
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         string connectionString;
 

@@ -22,19 +22,19 @@ public class Auth : IAsyncLifetime
 {
     private readonly IntegrationTestWebAppFactory _factory;
     private readonly HttpClient _client;
-    private readonly Xunit.Abstractions.ITestOutputHelper _output;
+    private readonly ITestOutputHelper _output;
 
-    public Auth(IntegrationTestWebAppFactory factory, Xunit.Abstractions.ITestOutputHelper output)
+    public Auth(IntegrationTestWebAppFactory factory, ITestOutputHelper output)
     {
         _factory = factory;
         _client = _factory.CreateClient();
         _output = output;
     }
 
-    public Task InitializeAsync() => Task.CompletedTask;
+    public ValueTask InitializeAsync() => ValueTask.CompletedTask;
 
-    public async Task DisposeAsync()
-    { await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(false); }
+    public async ValueTask DisposeAsync()
+    { await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(false); GC.SuppressFinalize(this); }
 
 #pragma warning disable IDE0079 
 #pragma warning disable CRR0035
@@ -260,7 +260,7 @@ public class Auth : IAsyncLifetime
         var requestMsg = new HttpRequestMessage(HttpMethod.Post, "/api/v1/Auth/refresh-token");
         requestMsg.Headers.Add("Cookie", $"refreshToken={refreshToken}");
 
-        var response = await _client.SendAsync(requestMsg).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMsg, CancellationToken.None).ConfigureAwait(true);
 
         if(response.StatusCode == HttpStatusCode.OK)
         {
@@ -311,7 +311,7 @@ public class Auth : IAsyncLifetime
         var requestMsg = new HttpRequestMessage(HttpMethod.Post, "/api/v1/Auth/refresh-token");
         requestMsg.Headers.Add("Cookie", $"refreshToken={refreshToken}");
 
-        var response = await _client.SendAsync(requestMsg).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMsg, CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode
             .Should()

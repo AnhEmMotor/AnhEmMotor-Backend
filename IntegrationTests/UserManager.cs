@@ -33,9 +33,9 @@ public class UserManager : IAsyncLifetime
         _client = _factory.CreateClient();
     }
 
-    public Task InitializeAsync() => Task.CompletedTask;
+    public ValueTask InitializeAsync() => ValueTask.CompletedTask;
 
-    public async Task DisposeAsync() { await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(true); }
+    public async ValueTask DisposeAsync() { await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(true); GC.SuppressFinalize(this); }
 
 #pragma warning disable IDE0079
 #pragma warning disable CRR0035
@@ -64,24 +64,24 @@ public class UserManager : IAsyncLifetime
             _factory.Services,
             $"userA_{uniqueId}",
             "Pass@123",
-            email: $"userA_{uniqueId}@test.com")
+            email: $"userA_{uniqueId}@test.com", cancellationToken: CancellationToken.None)
             .ConfigureAwait(true);
         var userB = await IntegrationTestAuthHelper.CreateUserAsync(
             _factory.Services,
             $"userB_{uniqueId}",
             "Pass@123",
-            email: $"userB_{uniqueId}@test.com")
+            email: $"userB_{uniqueId}@test.com", cancellationToken: CancellationToken.None)
             .ConfigureAwait(true);
         var userC = await IntegrationTestAuthHelper.CreateUserAsync(
             _factory.Services,
             $"userC_{uniqueId}",
             "Pass@123",
             email: $"userC_{uniqueId}@test.com",
-            isLocked: true)
+            isLocked: true, cancellationToken: CancellationToken.None)
             .ConfigureAwait(true);
 
         var response = await _client.GetAsync(
-            $"/api/v1/UserManager?Filters=Status=={UserStatus.Active}&Sorts=-FullName&Page=1&PageSize=100")
+            $"/api/v1/UserManager?Filters=Status=={UserStatus.Active}&Sorts=-FullName&Page=1&PageSize=100", CancellationToken.None)
             .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -90,7 +90,7 @@ public class UserManager : IAsyncLifetime
             .ConfigureAwait(true);
         result.Should().NotBeNull();
 
-        var contentString = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
+        var contentString = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
         contentString.Should().Contain(userA.Id.ToString());
         contentString.Should().Contain(userB.Id.ToString());
         contentString.Should().NotContain(userC.Id.ToString());
@@ -122,10 +122,10 @@ public class UserManager : IAsyncLifetime
             $"del_{uniqueId}",
             "Pass@123",
             email: $"del_{uniqueId}@test.com",
-            deletedAt: DateTimeOffset.UtcNow.AddDays(-1))
+            deletedAt: DateTimeOffset.UtcNow.AddDays(-1), cancellationToken: CancellationToken.None)
             .ConfigureAwait(true);
 
-        var response = await _client.GetAsync($"/api/v1/UserManager/{softDeletedUser.Id}").ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/UserManager/{softDeletedUser.Id}", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
@@ -167,7 +167,7 @@ public class UserManager : IAsyncLifetime
 
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var updatedUser = await db.Users.FindAsync(targetUser.Id).ConfigureAwait(true);
+        var updatedUser = await db.Users.FindAsync([targetUser.Id], TestContext.Current.CancellationToken).ConfigureAwait(true);
         updatedUser!.FullName.Should().Be("Test User");
         updatedUser.PhoneNumber.Should().Be("0912345678");
     }
@@ -197,7 +197,7 @@ public class UserManager : IAsyncLifetime
             _factory.Services,
             $"target_{uniqueId}",
             "Pass@123",
-            email: $"test+tag_{uniqueId}@example.co.uk")
+            email: $"test+tag_{uniqueId}@example.co.uk", cancellationToken: CancellationToken.None)
             .ConfigureAwait(true);
 
         var request = new UpdateUserCommand { FullName = "Test User" };
@@ -209,7 +209,7 @@ public class UserManager : IAsyncLifetime
 
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var updatedUser = await db.Users.FindAsync(targetUser.Id).ConfigureAwait(true);
+        var updatedUser = await db.Users.FindAsync([targetUser.Id], TestContext.Current.CancellationToken).ConfigureAwait(true);
         updatedUser!.Email.Should().Be($"test+tag_{uniqueId}@example.co.uk");
     }
 
@@ -244,7 +244,7 @@ public class UserManager : IAsyncLifetime
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var u = await db.Users.FindAsync(targetUser.Id).ConfigureAwait(true);
+            var u = await db.Users.FindAsync([targetUser.Id], TestContext.Current.CancellationToken).ConfigureAwait(true);
             u!.PhoneNumber = phone;
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
@@ -261,7 +261,7 @@ public class UserManager : IAsyncLifetime
         var response = await _client.PutAsJsonAsync($"/api/v1/UserManager/{duplicateAttemptUser.Id}", request)
             .ConfigureAwait(true);
 
-        var content = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
+        var content = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.Conflict, content);
     }
 
@@ -358,7 +358,7 @@ public class UserManager : IAsyncLifetime
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var user = await db.Users.FindAsync(targetUser.Id).ConfigureAwait(true);
+            var user = await db.Users.FindAsync([targetUser.Id], TestContext.Current.CancellationToken).ConfigureAwait(true);
             user!.RefreshToken = "valid_refresh_token";
             user.RefreshTokenExpiryTime = DateTimeOffset.UtcNow.AddDays(7);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -377,7 +377,7 @@ public class UserManager : IAsyncLifetime
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var user = await db.Users.FindAsync(targetUser.Id).ConfigureAwait(true);
+            var user = await db.Users.FindAsync([targetUser.Id], TestContext.Current.CancellationToken).ConfigureAwait(true);
             (user!.RefreshToken == null || user.RefreshTokenExpiryTime < DateTimeOffset.UtcNow).Should().BeTrue();
         }
     }
@@ -523,7 +523,7 @@ public class UserManager : IAsyncLifetime
             $"target_{uniqueId}",
             "Pass@123",
             isLocked: true,
-            deletedAt: DateTimeOffset.UtcNow.AddDays(-1))
+            deletedAt: DateTimeOffset.UtcNow.AddDays(-1), cancellationToken: CancellationToken.None)
             .ConfigureAwait(true);
 
         var request = new ChangeUserStatusCommand { Status = UserStatus.Active };
@@ -585,8 +585,8 @@ public class UserManager : IAsyncLifetime
 
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var u1 = await db.Users.FindAsync(user1.Id).ConfigureAwait(true);
-        var u2 = await db.Users.FindAsync(user2.Id).ConfigureAwait(true);
+        var u1 = await db.Users.FindAsync([user1.Id], TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var u2 = await db.Users.FindAsync([user2.Id], TestContext.Current.CancellationToken).ConfigureAwait(true);
         u1!.Status.Should().Be(UserStatus.Active);
         u2!.Status.Should().Be(UserStatus.Active);
     }
@@ -668,7 +668,7 @@ public class UserManager : IAsyncLifetime
             $"del_{uniqueId}",
             "Pass@123",
             deletedAt: DateTimeOffset.UtcNow.AddDays(-1),
-            phoneNumber: deletedPhone)
+            phoneNumber: deletedPhone, cancellationToken: CancellationToken.None)
             .ConfigureAwait(true);
 
         var targetUser = await IntegrationTestAuthHelper.CreateUserAsync(
@@ -713,11 +713,11 @@ public class UserManager : IAsyncLifetime
                 _factory.Services,
                 $"u{i}_{uniqueId}",
                 "Pass@123",
-                email: $"u{i}_{uniqueId}@test.com")
+                email: $"u{i}_{uniqueId}@test.com", cancellationToken: CancellationToken.None)
                 .ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/UserManager?Filters=Email@=_{uniqueId}&Page=2&PageSize=10")
+        var response = await _client.GetAsync($"/api/v1/UserManager?Filters=Email@=_{uniqueId}&Page=2&PageSize=10", CancellationToken.None)
             .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -807,7 +807,7 @@ public class UserManager : IAsyncLifetime
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var user = await db.Users.FindAsync(targetUser.Id).ConfigureAwait(true);
+            var user = await db.Users.FindAsync([targetUser.Id], TestContext.Current.CancellationToken).ConfigureAwait(true);
             user!.RefreshToken = originalRefreshToken;
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
@@ -822,7 +822,7 @@ public class UserManager : IAsyncLifetime
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var user = await db.Users.FindAsync(targetUser.Id).ConfigureAwait(true);
+            var user = await db.Users.FindAsync([targetUser.Id], TestContext.Current.CancellationToken).ConfigureAwait(true);
             user!.FullName.Should().Be("New Name");
             user.RefreshToken.Should().Be(originalRefreshToken);
             user.Id.Should().Be(targetUser.Id);

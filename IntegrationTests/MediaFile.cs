@@ -14,7 +14,6 @@ namespace IntegrationTests;
 
 using System.Threading.Tasks;
 using Xunit;
-using Xunit.Abstractions;
 
 [Collection("Shared Integration Collection")]
 public class MediaFile : IAsyncLifetime
@@ -30,9 +29,9 @@ public class MediaFile : IAsyncLifetime
         _output = output;
     }
 
-    public Task InitializeAsync() => Task.CompletedTask;
+    public ValueTask InitializeAsync() => ValueTask.CompletedTask;
 
-    public async Task DisposeAsync() { await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(true); }
+    public async ValueTask DisposeAsync() { await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(true); GC.SuppressFinalize(this); }
 #pragma warning disable IDE0079 
 #pragma warning disable CRR0035
     [Fact(DisplayName = "MF_002 - Tải lên ảnh thành công với định dạng JPG hợp lệ")]
@@ -64,11 +63,11 @@ public class MediaFile : IAsyncLifetime
 
         var content = IntegrationTestFileHelper.CreateSingleImageForm();
 
-        var response = await _client.PostAsync("/api/v1/MediaFile/upload-image", content).ConfigureAwait(true);
+        var response = await _client.PostAsync("/api/v1/MediaFile/upload-image", content, CancellationToken.None).ConfigureAwait(true);
 
         if(response.StatusCode != HttpStatusCode.Created)
         {
-            var errorContent = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
+            var errorContent = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
             throw new Exception($"API returned {response.StatusCode}. Response Body: {errorContent}");
         }
 
@@ -113,7 +112,7 @@ public class MediaFile : IAsyncLifetime
             ("files", "image2.jpg", "image/jpeg", validBytes),
             ("files", "image3.jpg", "image/jpeg", validBytes));
 
-        var response = await _client.PostAsync("/api/v1/MediaFile/upload-images", content).ConfigureAwait(true);
+        var response = await _client.PostAsync("/api/v1/MediaFile, CancellationToken.None/upload-images", content, CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         var results = await response.Content
@@ -164,7 +163,7 @@ public class MediaFile : IAsyncLifetime
         db.MediaFiles.Add(mediaFile);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        var response = await _client.DeleteAsync($"/api/v1/MediaFile/{mediaFile.StoragePath}").ConfigureAwait(true);
+        var response = await _client.DeleteAsync($"/api/v1/MediaFile/{mediaFile.StoragePath}", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
@@ -207,7 +206,7 @@ public class MediaFile : IAsyncLifetime
             ("files", "delete2.jpg", "image/jpeg", validBytes),
             ("files", "delete3.jpg", "image/jpeg", validBytes));
 
-        var uploadRes = await _client.PostAsync("/api/v1/MediaFile/upload-images", content).ConfigureAwait(true);
+        var uploadRes = await _client.PostAsync("/api/v1/MediaFile/upload-images", content, CancellationToken.None).ConfigureAwait(true);
         uploadRes.EnsureSuccessStatusCode();
         var uploadedFiles = await uploadRes.Content
             .ReadFromJsonAsync<List<MediaFileResponse>>(CancellationToken.None)
@@ -219,7 +218,7 @@ public class MediaFile : IAsyncLifetime
         {
             Content = JsonContent.Create(requestBody)
         };
-        var response = await _client.SendAsync(requestMessage).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
@@ -276,7 +275,7 @@ public class MediaFile : IAsyncLifetime
         db.MediaFiles.Add(mediaFile);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        var response = await _client.PostAsync($"/api/v1/MediaFile/restore/{mediaFile.StoragePath}", null)
+        var response = await _client.PostAsync($"/api/v1/MediaFile/restore/{mediaFile.StoragePath}", null, CancellationToken.None)
             .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -284,7 +283,7 @@ public class MediaFile : IAsyncLifetime
         using var verifyScope = _factory.Services.CreateScope();
         var verifyDb = verifyScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var restoredFile = await verifyDb.MediaFiles
-            .FindAsync(mediaFile.Id, CancellationToken.None)
+            .FindAsync([mediaFile.Id], TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         restoredFile.Should().NotBeNull();
         restoredFile!.DeletedAt.Should().BeNull();
@@ -319,7 +318,7 @@ public class MediaFile : IAsyncLifetime
             ("files", "restore2.jpg", "image/jpeg", validBytes),
             ("files", "restore3.jpg", "image/jpeg", validBytes));
 
-        var uploadRes = await _client.PostAsync("/api/v1/MediaFile/upload-images", content).ConfigureAwait(true);
+        var uploadRes = await _client.PostAsync("/api/v1/MediaFile/upload-images", content, CancellationToken.None).ConfigureAwait(true);
         uploadRes.EnsureSuccessStatusCode();
         var uploadedFiles = await uploadRes.Content
             .ReadFromJsonAsync<List<MediaFileResponse>>(CancellationToken.None)
@@ -330,7 +329,7 @@ public class MediaFile : IAsyncLifetime
         {
             Content = JsonContent.Create(requestBody)
         };
-        var deleteRes = await _client.SendAsync(deleteMessage).ConfigureAwait(true);
+        var deleteRes = await _client.SendAsync(deleteMessage, CancellationToken.None).ConfigureAwait(true);
         deleteRes.EnsureSuccessStatusCode();
 
         var restoreRes = await _client.PostAsJsonAsync("/api/v1/MediaFile/restore-many", requestBody)
@@ -343,7 +342,7 @@ public class MediaFile : IAsyncLifetime
 
         foreach(var file in uploadedFiles!)
         {
-            var restoredFile = await verifyDb.MediaFiles.FindAsync(file.Id, CancellationToken.None).ConfigureAwait(true);
+            var restoredFile = await verifyDb.MediaFiles.FindAsync([file.Id], TestContext.Current.CancellationToken).ConfigureAwait(true);
             restoredFile.Should().NotBeNull();
             restoredFile!.DeletedAt.Should().BeNull();
         }
@@ -373,7 +372,7 @@ public class MediaFile : IAsyncLifetime
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var content = IntegrationTestFileHelper.CreateSingleImageForm();
-        var uploadRes = await _client.PostAsync("/api/v1/MediaFile/upload-image", content).ConfigureAwait(true);
+        var uploadRes = await _client.PostAsync("/api/v1/MediaFile/upload-image", content, CancellationToken.None).ConfigureAwait(true);
         uploadRes.EnsureSuccessStatusCode();
         var uploadedFile = await uploadRes.Content
             .ReadFromJsonAsync<MediaFileResponse>(CancellationToken.None)
@@ -412,7 +411,7 @@ public class MediaFile : IAsyncLifetime
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var content = IntegrationTestFileHelper.CreateSingleImageForm();
-        var uploadRes = await _client.PostAsync("/api/v1/MediaFile/upload-image", content).ConfigureAwait(true);
+        var uploadRes = await _client.PostAsync("/api/v1/MediaFile/upload-image", content, CancellationToken.None).ConfigureAwait(true);
         uploadRes.EnsureSuccessStatusCode();
         var uploadedFile = await uploadRes.Content
             .ReadFromJsonAsync<MediaFileResponse>(CancellationToken.None)
@@ -523,7 +522,7 @@ public class MediaFile : IAsyncLifetime
         db.MediaFiles.AddRange(files);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        var response = await _client.GetAsync("/api/v1/MediaFile?page=1&pageSize=10").ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/MediaFile?page=1&pageSize=10", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }

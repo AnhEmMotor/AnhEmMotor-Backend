@@ -33,10 +33,10 @@ public class Supplier : IAsyncLifetime
         _client = _factory.CreateClient();
     }
 
-    public Task InitializeAsync() => Task.CompletedTask;
+    public ValueTask InitializeAsync() => ValueTask.CompletedTask;
 
-    public async Task DisposeAsync()
-    { await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(false); }
+    public async ValueTask DisposeAsync()
+    { await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(false); GC.SuppressFinalize(this); }
 
 #pragma warning disable IDE0079
 #pragma warning disable CRR0035
@@ -97,7 +97,7 @@ public class Supplier : IAsyncLifetime
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier?Page=1&PageSize=10").ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/Supplier?Page=1&PageSize=10", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -157,7 +157,7 @@ public class Supplier : IAsyncLifetime
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier?Page=2&PageSize=5").ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/Supplier?Page=2&PageSize=5", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -228,7 +228,7 @@ public class Supplier : IAsyncLifetime
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier?Filters=Name@=Test_{uniqueId}").ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/Supplier?Filters=Name@=Test_{uniqueId}", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -299,7 +299,7 @@ public class Supplier : IAsyncLifetime
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier?Sorts=Name&Filters=Name@={uniqueId}")
+        var response = await _client.GetAsync($"/api/v1/Supplier?Sorts=Name&Filters=Name@={uniqueId}", CancellationToken.None)
             .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -383,7 +383,7 @@ public class Supplier : IAsyncLifetime
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier?Filters=Id@={uniqueId}").ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/Supplier?Filters=Id@={uniqueId}", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -450,7 +450,7 @@ public class Supplier : IAsyncLifetime
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier/deleted?Filters=Id@={uniqueId}").ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/Supplier/deleted?Filters=Id@={uniqueId}", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -509,7 +509,7 @@ public class Supplier : IAsyncLifetime
             supplierId = supplier.Id;
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}").ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -567,7 +567,7 @@ public class Supplier : IAsyncLifetime
             supplierId = supplier.Id;
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}").ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -593,7 +593,7 @@ public class Supplier : IAsyncLifetime
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var response = await _client.GetAsync("/api/v1/Supplier/999999").ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/Supplier/999999", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -658,7 +658,7 @@ public class Supplier : IAsyncLifetime
             Content = JsonContent.Create(request)
         };
 
-        var response = await _client.SendAsync(requestMessage).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
@@ -748,7 +748,7 @@ public class Supplier : IAsyncLifetime
             Content = JsonContent.Create(request)
         };
 
-        var response = await _client.SendAsync(requestMessage).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
@@ -997,7 +997,7 @@ public class Supplier : IAsyncLifetime
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}").ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -1102,7 +1102,7 @@ public class Supplier : IAsyncLifetime
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}").ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content

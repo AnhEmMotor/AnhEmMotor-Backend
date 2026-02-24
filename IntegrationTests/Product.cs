@@ -13,7 +13,6 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using Xunit.Abstractions;
 using BrandEntity = Domain.Entities.Brand;
 using ProductCategoryEntity = Domain.Entities.ProductCategory;
 using ProductEntity = Domain.Entities.Product;
@@ -37,9 +36,9 @@ public class Product : IAsyncLifetime
         _output = output;
     }
 
-    public Task InitializeAsync() => Task.CompletedTask;
+    public ValueTask InitializeAsync() => ValueTask.CompletedTask;
 
-    public async Task DisposeAsync() { await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(true); }
+    public async ValueTask DisposeAsync() { await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(true); GC.SuppressFinalize(this); }
 
 #pragma warning disable IDE0079
 #pragma warning disable CRR0035
@@ -97,7 +96,7 @@ public class Product : IAsyncLifetime
         db.Products.AddRange(products);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        var response = await _client.GetAsync("/api/v1/product").ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/product", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -165,7 +164,7 @@ public class Product : IAsyncLifetime
         db.Products.AddRange(p1, p2);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        var response = await _client.GetAsync($"/api/v1/product?filters=BrandId=={brand1.Id}").ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/product?filters=BrandId=={brand1.Id}", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -239,7 +238,7 @@ public class Product : IAsyncLifetime
         db.Products.AddRange(p3, p1, p2);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        var response = await _client.GetAsync("/api/v1/product?sorts=Name").ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/product?sorts=Name", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -320,7 +319,7 @@ public class Product : IAsyncLifetime
         db.ProductVariants.AddRange(v1, v2);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        var response = await _client.GetAsync($"/api/v1/product?filters=Id=={product.Id}").ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/product?filters=Id=={product.Id}", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -382,7 +381,7 @@ public class Product : IAsyncLifetime
         db.Products.Add(product);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        var response = await _client.GetAsync("/api/v1/product").ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/product", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -440,7 +439,7 @@ public class Product : IAsyncLifetime
         db.Products.Add(product);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        var response = await _client.GetAsync("/api/v1/product/for-manager").ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/product/for-manager", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -499,7 +498,7 @@ public class Product : IAsyncLifetime
         db.Products.Add(deletedProduct);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        var response = await _client.GetAsync("/api/v1/product/deleted").ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/product/deleted", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -563,7 +562,7 @@ public class Product : IAsyncLifetime
         db.ProductVariants.Add(variant);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        var response = await _client.GetAsync("/api/v1/product/variants-lite").ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/product/variants-lite", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -626,7 +625,7 @@ public class Product : IAsyncLifetime
         db.ProductVariants.Add(variant);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        var response = await _client.GetAsync("/api/v1/product/variants-lite/for-input").ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/product/variants-lite/for-input", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -689,7 +688,7 @@ public class Product : IAsyncLifetime
         db.ProductVariants.Add(variant);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        var response = await _client.GetAsync("/api/v1/product/variants-lite/for-output").ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/product/variants-lite/for-output", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -750,7 +749,7 @@ public class Product : IAsyncLifetime
         db.Products.Add(product);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        var response = await _client.GetAsync($"/api/v1/product/{product.Id}").ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/product/{product.Id}", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -812,7 +811,7 @@ public class Product : IAsyncLifetime
         db.Products.Add(product);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        var response = await _client.GetAsync($"/api/v1/product/{product.Id}").ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/product/{product.Id}", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -883,7 +882,7 @@ public class Product : IAsyncLifetime
         db.ProductVariants.AddRange(v1, v2);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        var response = await _client.GetAsync($"/api/v1/product/{product.Id}/variants-lite").ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/product/{product.Id}/variants-lite", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -952,7 +951,7 @@ public class Product : IAsyncLifetime
 
         if(response.StatusCode != HttpStatusCode.Created)
         {
-            var error = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
+            var error = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
             _output.WriteLine($"PRODUCT_074 Failed: {response.StatusCode} - {error}");
         }
         response.StatusCode.Should().Be(HttpStatusCode.Created);
@@ -1116,7 +1115,7 @@ public class Product : IAsyncLifetime
         db.VariantOptionValues.Add(new VariantOptionValue { VariantId = variant.Id, OptionValueId = val2.Id });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        var response = await _client.GetAsync($"/api/v1/product/{product.Id}").ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/product/{product.Id}", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -1182,7 +1181,7 @@ public class Product : IAsyncLifetime
         db.ProductVariants.Add(variant);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        var response = await _client.GetAsync($"/api/v1/product/{product.Id}/variants-lite").ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/product/{product.Id}/variants-lite", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -1317,8 +1316,8 @@ public class Product : IAsyncLifetime
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var dbP1 = await db.Products.FindAsync(p1.Id).ConfigureAwait(true);
-        var dbP2 = await db.Products.FindAsync(p2.Id).ConfigureAwait(true);
+        var dbP1 = await db.Products.FindAsync([p1.Id], TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var dbP2 = await db.Products.FindAsync([p2.Id], TestContext.Current.CancellationToken).ConfigureAwait(true);
         await db.Entry(dbP1!).ReloadAsync(CancellationToken.None).ConfigureAwait(true);
         await db.Entry(dbP2!).ReloadAsync(CancellationToken.None).ConfigureAwait(true);
         dbP1!.StatusId.Should().Be(outStockStatusId);
@@ -1435,7 +1434,7 @@ public class Product : IAsyncLifetime
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync("/api/v1/predefinedoption").ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/predefinedoption", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -1468,7 +1467,7 @@ public class Product : IAsyncLifetime
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var response = await _client.GetAsync("/api/v1/predefinedoption").ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/predefinedoption", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
@@ -1573,7 +1572,7 @@ public class Product : IAsyncLifetime
         var response = await _client.PostAsJsonAsync("/api/v1/product", command).ConfigureAwait(true);
         response.StatusCode.Should().BeOneOf(HttpStatusCode.Created, HttpStatusCode.OK);
 
-        var createdProduct = await db.ProductVariants.FirstOrDefaultAsync(v => v.UrlSlug == longSlug).ConfigureAwait(true);
+        var createdProduct = await db.ProductVariants.FirstOrDefaultAsync(v => v.UrlSlug == longSlug, CancellationToken.None).ConfigureAwait(true);
         createdProduct.Should().NotBeNull();
         createdProduct!.UrlSlug?.Length.Should().Be(200);
     }
@@ -1615,7 +1614,7 @@ public class Product : IAsyncLifetime
         };
 
         var response = await _client.PostAsJsonAsync("/api/v1/product", reqBody).ConfigureAwait(true);
-        var content = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
+        var content = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
         response.IsSuccessStatusCode.Should().BeTrue("Response body: {0}", content);
     }
 
@@ -1684,7 +1683,7 @@ public class Product : IAsyncLifetime
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         // Verify hard delete
-        var exists = await db.Set<VariantOptionValue>().IgnoreQueryFilters().AnyAsync(v => v.VariantId == variant.Id).ConfigureAwait(true);
+        var exists = await db.Set<VariantOptionValue>().IgnoreQueryFilters().AnyAsync(v => v.VariantId == variant.Id, CancellationToken.None).ConfigureAwait(true);
         exists.Should().BeFalse();
     }
 
@@ -1700,7 +1699,7 @@ public class Product : IAsyncLifetime
         var loginResp = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResp.AccessToken);
 
-        var response = await _client.GetAsync("/api/v1/PredefinedOption").ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/PredefinedOption", CancellationToken.None).ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
@@ -1716,7 +1715,7 @@ public class Product : IAsyncLifetime
         var loginResp = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResp.AccessToken);
 
-        var response = await _client.GetAsync("/api/v1/PredefinedOption").ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/PredefinedOption", CancellationToken.None).ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 

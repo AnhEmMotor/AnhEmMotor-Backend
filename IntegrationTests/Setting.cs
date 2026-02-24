@@ -8,7 +8,6 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
@@ -29,9 +28,9 @@ public class Setting : IAsyncLifetime
         _output = output;
     }
 
-    public Task InitializeAsync() => Task.CompletedTask;
+    public ValueTask InitializeAsync() => ValueTask.CompletedTask;
 
-    public async Task DisposeAsync() { await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(true); }
+    public async ValueTask DisposeAsync() { await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(true); GC.SuppressFinalize(this); }
 
 #pragma warning disable IDE0079
 #pragma warning disable CRR0035
@@ -88,7 +87,7 @@ public class Setting : IAsyncLifetime
                 .ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync("/api/v1/Setting").ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/Setting", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -137,7 +136,7 @@ public class Setting : IAsyncLifetime
                 .ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync("/api/v1/Setting").ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/Setting", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().BeOneOf(HttpStatusCode.Unauthorized, HttpStatusCode.Forbidden);
     }
@@ -160,7 +159,7 @@ public class Setting : IAsyncLifetime
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync("/api/v1/Setting").ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/Setting", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
@@ -195,7 +194,7 @@ public class Setting : IAsyncLifetime
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync("/api/v1/Setting").ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/Setting", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }

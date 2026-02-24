@@ -43,10 +43,10 @@ public class InventoryReceipts : IAsyncLifetime
         _client = _factory.CreateClient();
     }
 
-    public Task InitializeAsync() => Task.CompletedTask;
+    public ValueTask InitializeAsync() => ValueTask.CompletedTask;
 
-    public async Task DisposeAsync()
-    { await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(false); }
+    public async ValueTask DisposeAsync()
+    { await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(false); GC.SuppressFinalize(this);  }
 
 #pragma warning disable IDE0079 
 #pragma warning disable CRR0035
@@ -151,11 +151,11 @@ public class InventoryReceipts : IAsyncLifetime
         {
             Content = JsonContent.Create(request)
         };
-        var response = await _client.SendAsync(requestMessage).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
 
         if(response.StatusCode == HttpStatusCode.InternalServerError)
         {
-            var errorContent = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
+            var errorContent = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
             throw new Exception($"API returned 500. Response Body: {errorContent}");
         }
 
@@ -275,7 +275,7 @@ public class InventoryReceipts : IAsyncLifetime
         {
             Content = JsonContent.Create(request)
         };
-        var response = await _client.SendAsync(requestMessage).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         var content = await response.Content
@@ -321,7 +321,7 @@ public class InventoryReceipts : IAsyncLifetime
         {
             Content = JsonContent.Create(request)
         };
-        var response = await _client.SendAsync(requestMessage).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().BeOneOf(HttpStatusCode.NotFound, HttpStatusCode.BadRequest);
     }
@@ -360,7 +360,7 @@ public class InventoryReceipts : IAsyncLifetime
         {
             Content = JsonContent.Create(request)
         };
-        var response = await _client.SendAsync(requestMessage).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().BeOneOf(HttpStatusCode.NotFound, HttpStatusCode.BadRequest);
     }
@@ -457,7 +457,7 @@ public class InventoryReceipts : IAsyncLifetime
         {
             Content = JsonContent.Create(request)
         };
-        var response = await _client.SendAsync(requestMessage).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -547,7 +547,7 @@ public class InventoryReceipts : IAsyncLifetime
         {
             Content = JsonContent.Create(request)
         };
-        var response = await _client.SendAsync(requestMessage).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
 
@@ -583,7 +583,7 @@ public class InventoryReceipts : IAsyncLifetime
 
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, "/api/v1/InventoryReceipts?page=1&pageSize=10");
 
-        var response = await _client.SendAsync(requestMessage).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -621,7 +621,7 @@ public class InventoryReceipts : IAsyncLifetime
             HttpMethod.Get,
             "/api/v1/InventoryReceipts?filters=StatusId==working");
 
-        var response = await _client.SendAsync(requestMessage).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -709,11 +709,11 @@ public class InventoryReceipts : IAsyncLifetime
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, "/api/v1/InventoryReceipts?sorts=-InputDate");
-        var response = await _client.SendAsync(requestMessage).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
 
         if(response.StatusCode == HttpStatusCode.InternalServerError)
         {
-            var errorContent = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
+            var errorContent = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
             throw new Exception($"API returned 500. Response Body: {errorContent}");
         }
 
@@ -829,7 +829,7 @@ public class InventoryReceipts : IAsyncLifetime
 
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/InventoryReceipts/{input.Id}");
 
-        var response = await _client.SendAsync(requestMessage).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -871,7 +871,7 @@ public class InventoryReceipts : IAsyncLifetime
 
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/InventoryReceipts/{inputId}");
 
-        var response = await _client.SendAsync(requestMessage).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -1002,7 +1002,7 @@ public class InventoryReceipts : IAsyncLifetime
             $"/api/v1/InventoryReceipts/{inputReceipt.Id}");
         requestUpdateMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         requestUpdateMessage.Content = JsonContent.Create(updateRequest);
-        var response = await _client.SendAsync(requestUpdateMessage).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestUpdateMessage, CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -1134,7 +1134,7 @@ public class InventoryReceipts : IAsyncLifetime
             $"/api/v1/InventoryReceipts/{inputReceipt.Id}");
         requestUpdateMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         requestUpdateMessage.Content = JsonContent.Create(updateRequest);
-        var response = await _client.SendAsync(requestUpdateMessage).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestUpdateMessage, CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -1260,7 +1260,7 @@ public class InventoryReceipts : IAsyncLifetime
             $"/api/v1/InventoryReceipts/{inputReceipt.Id}");
         requestUpdateMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         requestUpdateMessage.Content = JsonContent.Create(updateRequest);
-        var response = await _client.SendAsync(requestUpdateMessage).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestUpdateMessage, CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -1855,7 +1855,7 @@ public class InventoryReceipts : IAsyncLifetime
                 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        var response = await _client.DeleteAsync($"/api/v1/InventoryReceipts/{inputReceipt.Id}").ConfigureAwait(true);
+        var response = await _client.DeleteAsync($"/api/v1/InventoryReceipts/{inputReceipt.Id}", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NoContent);
 
@@ -1975,7 +1975,7 @@ public class InventoryReceipts : IAsyncLifetime
                 Method = HttpMethod.Delete,
                 RequestUri = new Uri("/api/v1/InventoryReceipts", UriKind.Relative),
                 Content = JsonContent.Create(deleteRequest)
-            })
+            }, CancellationToken.None)
             .ConfigureAwait(true);
 
         response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NoContent);
@@ -2079,7 +2079,7 @@ public class InventoryReceipts : IAsyncLifetime
                 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        var response = await _client.PostAsync($"/api/v1/InventoryReceipts/{inputReceipt.Id}/restore", null)
+        var response = await _client.PostAsync($"/api/v1/InventoryReceipts/{inputReceipt.Id}/restore", null, CancellationToken.None)
             .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -2306,7 +2306,7 @@ public class InventoryReceipts : IAsyncLifetime
                 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        var response = await _client.PostAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}/clone", null)
+        var response = await _client.PostAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}/clone", null, CancellationToken.None)
             .ConfigureAwait(true);
 
         response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.Created);
@@ -2440,7 +2440,7 @@ public class InventoryReceipts : IAsyncLifetime
             db.SaveChanges();
         }
 
-        var response = await _client.PostAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}/clone", null)
+        var response = await _client.PostAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}/clone", null, CancellationToken.None)
             .ConfigureAwait(true);
 
         response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.Created);
@@ -2529,7 +2529,7 @@ public class InventoryReceipts : IAsyncLifetime
         }
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        var response = await _client.GetAsync($"/api/v1/InventoryReceipts/by-supplier/{supplierId}?page=1&pageSize=10")
+        var response = await _client.GetAsync($"/api/v1/InventoryReceipts/by-supplier/{supplierId}?page=1&pageSize=10", CancellationToken.None)
             .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -2626,7 +2626,7 @@ public class InventoryReceipts : IAsyncLifetime
         db.InputReceipts.Add(inputReceipt);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        var response = await _client.GetAsync("/api/v1/InventoryReceipts/deleted?page=1&pageSize=10")
+        var response = await _client.GetAsync("/api/v1/InventoryReceipts/deleted?page=1&pageSize=10", CancellationToken.None)
             .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -2918,7 +2918,7 @@ public class InventoryReceipts : IAsyncLifetime
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var response = await _client.GetAsync(
-            $"/api/v1/InventoryReceipts?filters=StatusId==working,SupplierId=={supplier.Id}")
+            $"/api/v1/InventoryReceipts?filters=StatusId==working,SupplierId=={supplier.Id}", CancellationToken.None)
             .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -2956,7 +2956,7 @@ public class InventoryReceipts : IAsyncLifetime
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var response = await _client.GetAsync("/api/v1/InventoryReceipts/status").ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/InventoryReceipts/status", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -2977,7 +2977,7 @@ public class InventoryReceipts : IAsyncLifetime
     {
         _client.DefaultRequestHeaders.Authorization = null;
 
-        var response = await _client.GetAsync("/api/v1/InventoryReceipts/status").ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/InventoryReceipts/status", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }

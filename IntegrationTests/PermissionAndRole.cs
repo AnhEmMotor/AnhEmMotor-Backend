@@ -26,9 +26,9 @@ public class PermissionAndRole : IAsyncLifetime
         _client = _factory.CreateClient();
     }
 
-    public Task InitializeAsync() => Task.CompletedTask;
+    public ValueTask InitializeAsync() => ValueTask.CompletedTask;
 
-    public async Task DisposeAsync() { await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(true); }
+    public async ValueTask DisposeAsync() { await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(true); GC.SuppressFinalize(this); }
 #pragma warning disable IDE0079
 #pragma warning disable CRR0035
     [Fact(DisplayName = "PERM_INT_001 - API lấy tất cả permissions trả về đầy đủ thông tin")]
@@ -130,7 +130,7 @@ public class PermissionAndRole : IAsyncLifetime
     public async Task GetMyPermissions_Unauthenticated_ReturnsUnauthorized()
     {
         _client.DefaultRequestHeaders.Authorization = null;
-        var response = await _client.GetAsync("/api/v1/Permission/my-permissions").ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/Permission/my-permissions", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
@@ -211,7 +211,7 @@ public class PermissionAndRole : IAsyncLifetime
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var response = await _client.GetAsync($"/api/v1/Permission/users/{targetUser.Id}/permissions")
+        var response = await _client.GetAsync($"/api/v1/Permission/users/{targetUser.Id}/permissions", CancellationToken.None)
             .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
@@ -294,7 +294,7 @@ public class PermissionAndRole : IAsyncLifetime
 
         var response = await _client.PostAsJsonAsync("/api/v1/permission/roles", request).ConfigureAwait(true);
 
-        var contentString = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
+        var contentString = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.Created, contentString);
 
         var content = await response.Content
@@ -443,7 +443,7 @@ public class PermissionAndRole : IAsyncLifetime
 
         if(response.StatusCode != HttpStatusCode.OK)
         {
-            var error = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
+            var error = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
             throw new Exception($"API Failed with {response.StatusCode}: {error}");
         }
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -526,7 +526,7 @@ public class PermissionAndRole : IAsyncLifetime
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var response = await _client.DeleteAsync($"/api/v1/Permission/roles/{roleName}").ConfigureAwait(true);
+        var response = await _client.DeleteAsync($"/api/v1/Permission/roles/{roleName}", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
@@ -647,7 +647,7 @@ public class PermissionAndRole : IAsyncLifetime
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var response = await _client.GetAsync("/api/v1/Permission/roles").ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/Permission/roles", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
