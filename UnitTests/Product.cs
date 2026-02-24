@@ -71,6 +71,9 @@ public class Product
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _productVariantInsertRepository = new Mock<IProductVariantInsertRepository>();
         _variantOptionValueDeleteRepoMock = new Mock<IVariantOptionValueDeleteRepository>();
+
+        // Khởi tạo các mapping config của Mapster
+        new Application.Features.Products.Mappings.ProductMappingConfig().Register(TypeAdapterConfig.GlobalSettings);
     }
 
 #pragma warning disable IDE0079 
