@@ -112,7 +112,7 @@ public class MediaFile : IAsyncLifetime
             ("files", "image2.jpg", "image/jpeg", validBytes),
             ("files", "image3.jpg", "image/jpeg", validBytes));
 
-        var response = await _client.PostAsync("/api/v1/MediaFile, CancellationToken.None/upload-images", content, CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.PostAsync("/api/v1/MediaFile/upload-images", content, TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         var results = await response.Content
