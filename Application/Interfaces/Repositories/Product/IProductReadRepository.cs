@@ -46,4 +46,11 @@ public interface IProductReadRepository
         string? filters,
         string? sorts,
         CancellationToken cancellationToken);
+
+    public Task<(List<ProductEntity> Items, int TotalCount)> GetPagedProductsForPriceManagementAsync(
+        int page,
+        int pageSize,
+        string? filters,
+        string? sorts,
+        CancellationToken cancellationToken);
 }

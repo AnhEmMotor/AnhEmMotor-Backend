@@ -17,6 +17,7 @@ using Application.Features.Products.Queries.GetActiveVariantLiteListForOutput;
 using Application.Features.Products.Queries.GetDeletedProductsList;
 using Application.Features.Products.Queries.GetProductById;
 using Application.Features.Products.Queries.GetProductsList;
+using Application.Features.Products.Queries.GetProductsListForPriceManagement;
 using Application.Features.Products.Queries.GetVariantLiteByProductId;
 using Asp.Versioning;
 using Domain.Constants;
@@ -67,6 +68,21 @@ public class ProductController(ISender sender) : ApiController
     {
         var query = Application.Features.Products.Queries.GetProductsListForManager.GetProductsListForManagerQuery
             .FromRequest(request);
+        var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy danh sách sản phẩm rút gọn dành cho việc thiết lập giá (chỉ có Tên SP, Tên biến thể và Giá).
+    /// </summary>
+    [HttpGet("for-price-management")]
+    [HasPermission(Products.View)]
+    [ProducesResponseType(typeof(PagedResult<ProductPriceLiteResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetProductsForPriceManagementAsync(
+        [FromQuery] SieveModel request,
+        CancellationToken cancellationToken)
+    {
+        var query = GetProductsListForPriceManagementQuery.FromRequest(request);
         var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }

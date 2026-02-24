@@ -16,6 +16,7 @@ using Application.Features.Products.Queries.GetActiveVariantLiteListForOutput;
 using Application.Features.Products.Queries.GetDeletedProductsList;
 using Application.Features.Products.Queries.GetProductsList;
 using Application.Features.Products.Queries.GetProductsListForManager;
+using Application.Features.Products.Queries.GetProductsListForPriceManagement;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -282,6 +283,16 @@ public class Product
 
         Assert.NotNull(result);
         _senderMock.Verify(m => m.Send(It.IsAny<GetProductsListQuery>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+    [Fact(DisplayName = "PRODUCT_119 - API lấy danh sách cho price management trả về 403 khi user không có quyền")]
+    public async Task GetProductsForPriceManagement_UserNoPermission_ReturnsForbidden()
+    {
+        _senderMock.Setup(m => m.Send(It.IsAny<GetProductsListForPriceManagementQuery>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new UnauthorizedAccessException());
+
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(
+            () => _controller.GetProductsForPriceManagementAsync(new Sieve.Models.SieveModel(), CancellationToken.None))
+            .ConfigureAwait(true);
     }
 #pragma warning restore CRR0035
 #pragma warning restore IDE0079

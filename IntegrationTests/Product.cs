@@ -1780,5 +1780,121 @@ public class Product : IAsyncLifetime
         content.StatusStockId.Should().Be("in_stock");
     }
 
+    [Fact(DisplayName = "PRODUCT_117 - Lấy danh sách sản phẩm rút gọn trả về đúng cấu trúc lite (Happy Path)")]
+    public async Task GetProductsForPriceManagement_ReturnsMinimalInfo()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"u_{uniqueId}";
+        var password = "P1@password";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services, username, password, [PermissionsList.Products.View], CancellationToken.None, $"{username}@x.com")
+            .ConfigureAwait(true);
+        var loginResp = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResp.AccessToken);
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+
+        var cat = new ProductCategoryEntity { Name = $"C_{uniqueId}" };
+        var brand = new BrandEntity { Name = $"B_{uniqueId}" };
+        db.ProductCategories.Add(cat);
+        db.Brands.Add(brand);
+        if (!await db.ProductStatuses.AnyAsync(x => x.Key == Domain.Constants.ProductStatus.ForSale, CancellationToken.None))
+        {
+            db.ProductStatuses.Add(new ProductStatus { Key = Domain.Constants.ProductStatus.ForSale });
+        }
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var product = new ProductEntity 
+        { 
+            Name = $"Lite_Product_{uniqueId}", 
+            CategoryId = cat.Id, 
+            BrandId = brand.Id, 
+            StatusId = Domain.Constants.ProductStatus.ForSale,
+            Description = "This should be hidden"
+        };
+        db.Products.Add(product);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var variant = new ProductVariant { ProductId = product.Id, UrlSlug = $"v-lite-{uniqueId}", Price = 1234.56m };
+        db.ProductVariants.Add(variant);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var response = await _client.GetAsync("/api/v1/product/for-price-management", CancellationToken.None).ConfigureAwait(true);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductPriceLiteResponse>>(CancellationToken.None).ConfigureAwait(true);
+        content.Should().NotBeNull();
+        var item = content!.Items!.FirstOrDefault(x => x.Id == product.Id);
+        item.Should().NotBeNull();
+        item!.Name.Should().Be(product.Name);
+        item.Variants.Should().HaveCount(1);
+        item.Variants[0].Price.Should().Be(1234.56m);
+        
+        // Trực quan hóa việc không có thông tin thừa (tên các field thừa sẽ không có trong DTO nên compile time đã check, 
+        // nhưng test JSON content cũng tốt)
+        var json = await response!.Content!.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
+        json.Should().NotContain("Description");
+        json.Should().NotContain("This should be hidden");
+    }
+
+    [Fact(DisplayName = "PRODUCT_118 - Phân trang và lọc theo tên sản phẩm")]
+    public async Task GetProductsForPriceManagement_FilteringByName_ReturnsMatchesOnly()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"u_{uniqueId}";
+        var password = "P1@password";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services, username, password, [PermissionsList.Products.View], CancellationToken.None, $"{username}@x.com")
+            .ConfigureAwait(true);
+        var loginResp = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResp.AccessToken);
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+
+        var cat = new ProductCategoryEntity { Name = $"C1_{uniqueId}" };
+        var brand = new BrandEntity { Name = $"B1_{uniqueId}" };
+        db.ProductCategories.Add(cat);
+        db.Brands.Add(brand);
+        if (!await db.ProductStatuses.AnyAsync(x => x.Key == Domain.Constants.ProductStatus.ForSale, CancellationToken.None))
+        {
+            db.ProductStatuses.Add(new ProductStatus { Key = Domain.Constants.ProductStatus.ForSale });
+        }
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var p1 = new ProductEntity { Name = $"Exciter_{uniqueId}", CategoryId = cat.Id, BrandId = brand.Id, StatusId = Domain.Constants.ProductStatus.ForSale };
+        var p2 = new ProductEntity { Name = $"Winner_{uniqueId}", CategoryId = cat.Id, BrandId = brand.Id, StatusId = Domain.Constants.ProductStatus.ForSale };
+        db.Products.AddRange(p1, p2);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var response = await _client.GetAsync($"/api/v1/product/for-price-management?Filters=Name@=Exciter_{uniqueId}", CancellationToken.None).ConfigureAwait(true);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductPriceLiteResponse>>(CancellationToken.None).ConfigureAwait(true);
+        content!.Items.Should().ContainSingle();
+        content.Items.First().Name.Should().Be(p1.Name);
+    }
+
+    [Fact(DisplayName = "PRODUCT_121 - Lấy danh sách trống khi không có sản phẩm")]
+    public async Task GetProductsForPriceManagement_NoProducts_ReturnsEmptyItems()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"u_{uniqueId}";
+        var password = "P1@password";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services, username, password, [PermissionsList.Products.View], CancellationToken.None, $"{username}@x.com")
+            .ConfigureAwait(true);
+        var loginResp = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResp.AccessToken);
+
+        // Clear products for this test (or use a filter that returns nothing)
+        var response = await _client.GetAsync("/api/v1/product/for-price-management?Filters=Name==NON_EXISTENT_NAME", CancellationToken.None).ConfigureAwait(true);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductPriceLiteResponse>>(CancellationToken.None).ConfigureAwait(true);
+        content!.Items.Should().BeEmpty();
+    }
+
 #pragma warning restore CRR0035
 }

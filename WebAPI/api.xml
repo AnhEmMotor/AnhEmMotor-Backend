@@ -438,6 +438,11 @@
             Lấy danh sách sản phẩm đầy đủ dành cho người quản lý (có phân trang, lọc, tìm kiếm).
             </summary>
         </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetProductsForPriceManagementAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+            <summary>
+            Lấy danh sách sản phẩm rút gọn dành cho việc thiết lập giá (chỉ có Tên SP, Tên biến thể và Giá).
+            </summary>
+        </member>
         <member name="M:WebAPI.Controllers.V1.ProductController.GetDeletedProductsAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách sản phẩm đã bị xoá (có phân trang, lọc, tìm kiếm).
