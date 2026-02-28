@@ -143,8 +143,6 @@ public class AuthController(IMediator mediator, IHttpTokenAccessorService httpTo
         [FromBody] LoginForManagerCommand command,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-
-        return HandleResult(result);
+        throw new NotImplementedException();
     }
 }
