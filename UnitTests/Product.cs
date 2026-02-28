@@ -12,6 +12,7 @@ using Application.Features.Products.Commands.UpdateProductPrice;
 using Application.Features.Products.Commands.UpdateProductStatus;
 using Application.Features.Products.Commands.UpdateVariantPrice;
 using Application.Features.Products.Queries.CheckSlugAvailability;
+using Application.Features.Products.Queries.GetProductsListForPriceManagement;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
 using Application.Interfaces.Repositories.Option;
@@ -26,6 +27,8 @@ using Domain.Entities;
 using FluentAssertions;
 using Mapster;
 using Moq;
+using Sieve.Models;
+using ProductEntity = Domain.Entities.Product;
 
 namespace UnitTests;
 
@@ -696,7 +699,7 @@ public class Product
         };
 
         _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Domain.Entities.Product { Id = 1, StatusId = "for-sale", DeletedAt = null });
+            .ReturnsAsync(new ProductEntity { Id = 1, StatusId = "for-sale", DeletedAt = null });
         _productCategoryReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.ProductCategory { Id = 1, DeletedAt = null });
         _brandReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
@@ -728,7 +731,7 @@ public class Product
         var command = new UpdateProductCommand { Id = 999, Name = "Honda Wave Alpha 2025" };
 
         _productReadRepoMock.Setup(x => x.GetByIdAsync(999, It.IsAny<CancellationToken>()))
-            .ReturnsAsync((Domain.Entities.Product?)null);
+            .ReturnsAsync((ProductEntity?)null);
 
         var handler = new UpdateProductCommandHandler(
             _productReadRepoMock.Object,
@@ -756,7 +759,7 @@ public class Product
         var command = new UpdateProductCommand { Id = 1, Name = "Honda Wave Alpha 2025" };
 
         _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Domain.Entities.Product { Id = 1, StatusId = "for-sale", DeletedAt = DateTime.UtcNow });
+            .ReturnsAsync(new ProductEntity { Id = 1, StatusId = "for-sale", DeletedAt = DateTime.UtcNow });
 
         var handler = new UpdateProductCommandHandler(
             _productReadRepoMock.Object,
@@ -796,7 +799,7 @@ public class Product
         var command = new UpdateProductCommand { Id = 1, Name = "Honda Wave", CategoryId = 999 };
 
         _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Domain.Entities.Product { Id = 1, StatusId = "for-sale", DeletedAt = null });
+            .ReturnsAsync(new ProductEntity { Id = 1, StatusId = "for-sale", DeletedAt = null });
         _productCategoryReadRepoMock.Setup(x => x.GetByIdAsync(999, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Domain.Entities.ProductCategory?)null);
 
@@ -826,7 +829,7 @@ public class Product
         var command = new UpdateProductCommand { Id = 1, Name = "Honda Wave", CategoryId = 1 };
 
         _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Domain.Entities.Product { Id = 1, StatusId = "for-sale", DeletedAt = null });
+            .ReturnsAsync(new ProductEntity { Id = 1, StatusId = "for-sale", DeletedAt = null });
         _productCategoryReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.ProductCategory { Id = 1, DeletedAt = DateTime.UtcNow });
 
@@ -863,7 +866,7 @@ public class Product
         };
 
         _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Domain.Entities.Product { Id = 1, StatusId = "for-sale", DeletedAt = null });
+            .ReturnsAsync(new ProductEntity { Id = 1, StatusId = "for-sale", DeletedAt = null });
         _productCategoryReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.ProductCategory { Id = 1, DeletedAt = null });
         _brandReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
@@ -904,7 +907,7 @@ public class Product
         };
 
         _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Domain.Entities.Product { Id = 1, StatusId = "for-sale", DeletedAt = null });
+            .ReturnsAsync(new ProductEntity { Id = 1, StatusId = "for-sale", DeletedAt = null });
         _productCategoryReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.ProductCategory { Id = 1, DeletedAt = null });
         _brandReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
@@ -945,7 +948,7 @@ public class Product
         };
 
         _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Domain.Entities.Product { Id = 1, StatusId = "for-sale", DeletedAt = null });
+            .ReturnsAsync(new ProductEntity { Id = 1, StatusId = "for-sale", DeletedAt = null });
         _productCategoryReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.ProductCategory { Id = 1, DeletedAt = null });
         _brandReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
@@ -997,7 +1000,7 @@ public class Product
         var command = new UpdateProductPriceCommand { Id = 1, Price = 30000000m };
 
         _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Domain.Entities.Product { Id = 1, DeletedAt = null });
+            .ReturnsAsync(new ProductEntity { Id = 1, DeletedAt = null });
         _variantReadRepoMock.Setup(x => x.GetByProductIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(
                 [ new() { Id = 1, ProductId = 1, DeletedAt = null }, new() { Id = 2, ProductId = 1, DeletedAt = null } ]);
@@ -1026,7 +1029,7 @@ public class Product
                 (List<int> ids, CancellationToken ct, DataFetchMode fetchMode) =>
                 {
                     return[ .. ids.Select(
-                        id => new Domain.Entities.Product
+                        id => new ProductEntity
                             {
                                 Id = id,
                                 ProductVariants = [ new ProductVariant { Id = id * 10, Price = 0 } ]
@@ -1042,7 +1045,7 @@ public class Product
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().HaveCount(2);
-        _productUpdateRepoMock.Verify(x => x.Update(It.IsAny<Domain.Entities.Product>()), Times.Exactly(2));
+        _productUpdateRepoMock.Verify(x => x.Update(It.IsAny<ProductEntity>()), Times.Exactly(2));
     }
 
     [Fact(DisplayName = "PRODUCT_033 - Sửa trạng thái một sản phẩm thành công")]
@@ -1051,7 +1054,7 @@ public class Product
         var command = new UpdateProductStatusCommand { Id = 1, StatusId = "out-of-stock" };
 
         _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Domain.Entities.Product { Id = 1, StatusId = "for-sale", DeletedAt = null });
+            .ReturnsAsync(new ProductEntity { Id = 1, StatusId = "for-sale", DeletedAt = null });
 
         var handler = new UpdateProductStatusCommandHandler(
             _productReadRepoMock.Object,
@@ -1117,7 +1120,7 @@ public class Product
         var productId = 1;
         var command = new DeleteProductCommand { Id = productId };
 
-        var product = new Domain.Entities.Product { Id = productId, StatusId = "for-sale", ProductVariants = [] };
+        var product = new ProductEntity { Id = productId, StatusId = "for-sale", ProductVariants = [] };
 
         _productReadRepoMock.Setup(x => x.GetByIdWithDetailsAsync(productId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(product);
@@ -1140,7 +1143,7 @@ public class Product
         var command = new DeleteProductCommand { Id = 999 };
 
         _productReadRepoMock.Setup(x => x.GetByIdAsync(999, It.IsAny<CancellationToken>()))
-            .ReturnsAsync((Domain.Entities.Product?)null);
+            .ReturnsAsync((ProductEntity?)null);
 
         var handler = new DeleteProductCommandHandler(
             _productReadRepoMock.Object,
@@ -1158,7 +1161,7 @@ public class Product
         var command = new DeleteProductCommand { Id = 1 };
 
         _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Domain.Entities.Product { Id = 1, StatusId = "for-sale", DeletedAt = DateTime.UtcNow });
+            .ReturnsAsync(new ProductEntity { Id = 1, StatusId = "for-sale", DeletedAt = DateTime.UtcNow });
 
         var handler = new DeleteProductCommandHandler(
             _productReadRepoMock.Object,
@@ -1253,7 +1256,7 @@ public class Product
         var command = new RestoreProductCommand { Id = 1 };
 
         _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Domain.Entities.Product { Id = 1, StatusId = "for-sale", DeletedAt = DateTime.UtcNow });
+            .ReturnsAsync(new ProductEntity { Id = 1, StatusId = "for-sale", DeletedAt = DateTime.UtcNow });
 
         var handler = new RestoreProductCommandHandler(
             _productReadRepoMock.Object,
@@ -1271,7 +1274,7 @@ public class Product
         var command = new RestoreProductCommand { Id = 1 };
 
         _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Domain.Entities.Product { Id = 1, StatusId = "for-sale", DeletedAt = null });
+            .ReturnsAsync(new ProductEntity { Id = 1, StatusId = "for-sale", DeletedAt = null });
 
         var handler = new RestoreProductCommandHandler(
             _productReadRepoMock.Object,
@@ -1288,7 +1291,7 @@ public class Product
     {
         var command = new RestoreManyProductsCommand { Ids = [ 1, 2, 3 ] };
         var deletedTime = DateTime.UtcNow;
-        var products = new List<Domain.Entities.Product>
+        var products = new List<ProductEntity>
         {
             new() { Id = 1, Name = "P1", DeletedAt = deletedTime },
             new() { Id = 2, Name = "P2", DeletedAt = deletedTime },
@@ -1308,7 +1311,7 @@ public class Product
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().HaveCount(3);
-        _productUpdateRepoMock.Verify(x => x.Restore(It.IsAny<List<Domain.Entities.Product>>()), Times.Once);
+        _productUpdateRepoMock.Verify(x => x.Restore(It.IsAny<List<ProductEntity>>()), Times.Once);
     }
 
     [Fact(DisplayName = "PRODUCT_045 - Khôi phục nhiều sản phẩm thất bại khi 1 trong số đó chưa bị xóa")]
@@ -1410,7 +1413,7 @@ public class Product
     public void MapProductToDetailForManagerResponse_CalculatesTotalStockCorrectly()
     {
         // Arrange
-        var product = new Domain.Entities.Product
+        var product = new ProductEntity
         {
             Id = 1,
             Name = "Honda Wave",
@@ -1460,7 +1463,7 @@ public class Product
     public void MapProductToDetailForManagerResponse_CalculatesReservedStockCorrectly()
     {
         // Arrange
-        var product = new Domain.Entities.Product
+        var product = new ProductEntity
         {
             Id = 1,
             Name = "Yamaha",
@@ -1503,7 +1506,7 @@ public class Product
     public void MapProductToDetailForManagerResponse_CalculatesATSCorrectly()
     {
         // Arrange
-        var product = new Domain.Entities.Product
+        var product = new ProductEntity
         {
             Id = 1,
             Name = "Suzuki",
@@ -1623,6 +1626,76 @@ public class Product
         var result = validator.Validate(command);
         result.IsValid.Should().BeFalse();
         result.Errors.Should().Contain(e => e.ErrorMessage.Contains("Duplicate option combinations"));
+    }
+
+    [Fact(DisplayName = "PRODUCT_120 - Handler ánh xạ đúng từ Entity sang DTO lite cho price management")]
+    public async Task Handle_ValidData_ReturnsMappedDto()
+    {
+    // Arrange
+        var products = new List<ProductEntity>
+        {
+            new() {
+                Id = 1,
+                Name = "Test Product",
+                ProductVariants =
+                [
+                    new() {
+                        Id = 101,
+                        Price = 50000,
+                        VariantOptionValues =
+                        [
+                            new VariantOptionValue { OptionValue = new OptionValue { Name = "Red" } },
+                            new VariantOptionValue { OptionValue = new OptionValue { Name = "XL" } }
+                        ],
+                        InputInfos =
+                        [
+                            new InputInfo
+                            {
+                                InputPrice = 45000,
+                                InputReceipt = new Input { InputDate = DateTimeOffset.UtcNow.AddDays(-1) }
+                            },
+                            new InputInfo
+                            {
+                                InputPrice = 40000,
+                                InputReceipt = new Input { InputDate = DateTimeOffset.UtcNow.AddDays(-2) }
+                            }
+                        ]
+                    },
+                    new() {
+                        Id = 102,
+                        Price = 0,
+                        VariantOptionValues = [],
+                        InputInfos = []
+                    }
+                ]
+            }
+        };
+
+        _productReadRepoMock.Setup(x => x.GetPagedProductsForPriceManagementAsync(
+            It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((products, products.Count));
+
+        var query = new GetProductsListForPriceManagementQuery { SieveModel = new SieveModel { Page = 1, PageSize = 10 } };
+
+        // Act
+        GetProductsListForPriceManagementQueryHandler _handler = new(_productReadRepoMock.Object);
+        var result = await _handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Items.Should().HaveCount(1);
+
+        var productDto = result.Value.Items.First();
+        productDto.Name.Should().Be("Test Product");
+        productDto.Variants.Should().HaveCount(2);
+
+        var v1 = productDto.Variants.First(v => v.Id == 101);
+        v1.Name.Should().Be("Red / XL");
+        v1.Price.Should().Be(50000);
+
+        var v2 = productDto.Variants.First(v => v.Id == 102);
+        v2.Name.Should().Be("Mặc định");
+        v2.Price.Should().Be(0);
     }
 
 #pragma warning restore CRR0035

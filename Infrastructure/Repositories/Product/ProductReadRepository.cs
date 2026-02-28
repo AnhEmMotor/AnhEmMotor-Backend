@@ -258,32 +258,25 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             .Where(p => p.DeletedAt == null)
             .AsNoTracking();
 
+        var effectiveSorts = string.IsNullOrWhiteSpace(sorts) ? "-CreatedAt" : sorts;
+
         var sieveModel = new SieveModel
         {
             Filters = filters,
-            Sorts = sorts,
+            Sorts = effectiveSorts,
             Page = normalizedPage,
             PageSize = normalizedPageSize
         };
 
-        // First apply filtration/sorting to count
-        var totalCountQuery = sieveProcessor.Apply(sieveModel, query, applyPagination: false);
-        var totalCount = await totalCountQuery.CountAsync(cancellationToken).ConfigureAwait(false);
+        var filteredQuery = sieveProcessor.Apply(sieveModel, query, applyPagination: false);
+        var totalCount = await filteredQuery.CountAsync(cancellationToken).ConfigureAwait(false);
 
-        // Then apply filtration/sorting (no pagination) and specific includes for lite response
-        IQueryable<ProductEntity> dbQuery = sieveProcessor.Apply(sieveModel, query, applyPagination: false)
+        IQueryable<ProductEntity> dbQuery = sieveProcessor.Apply(sieveModel, query)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
                 .ThenInclude(v => v.VariantOptionValues)
                     .ThenInclude(vov => vov.OptionValue);
 
-        if(string.IsNullOrWhiteSpace(sorts))
-        {
-            dbQuery = dbQuery.OrderByDescending(p => p.CreatedAt);
-        }
-
         var entities = await dbQuery
-            .Skip((normalizedPage - 1) * normalizedPageSize)
-            .Take(normalizedPageSize)
             .AsSplitQuery()
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
