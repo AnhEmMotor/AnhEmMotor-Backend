@@ -1896,5 +1896,290 @@ public class Product : IAsyncLifetime
         content!.Items.Should().BeEmpty();
     }
 
+    private async Task<string> AuthenticateForInputAsync(string uniqueId)
+    {
+        var username = $"u_{uniqueId}";
+        var password = "P1@password";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services, username, password,
+            [PermissionsList.Inputs.Edit], CancellationToken.None, $"{username}@x.com")
+            .ConfigureAwait(true);
+        var loginResp = await IntegrationTestAuthHelper.AuthenticateAsync(_client, username, password, CancellationToken.None).ConfigureAwait(true);
+        return loginResp.AccessToken;
+    }
+
+    private static async Task EnsureForSaleStatusAsync(ApplicationDBContext db)
+    {
+        if (!await db.ProductStatuses.AnyAsync(x => x.Key == Domain.Constants.ProductStatus.ForSale, CancellationToken.None).ConfigureAwait(true))
+        {
+            db.ProductStatuses.Add(new ProductStatus { Key = Domain.Constants.ProductStatus.ForSale });
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+        }
+    }
+
+    [Fact(DisplayName = "PRODUCT_122 - Tìm kiếm biến thể theo tên sản phẩm cha")]
+    public async Task GetVariantsLiteForInput_SearchByParentProductName_ReturnsOnlyMatchingVariants()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", await AuthenticateForInputAsync(uniqueId).ConfigureAwait(true));
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        await EnsureForSaleStatusAsync(db).ConfigureAwait(true);
+
+        var cat = new ProductCategoryEntity { Name = $"C_{uniqueId}" };
+        var brand = new BrandEntity { Name = $"B_{uniqueId}" };
+        db.ProductCategories.Add(cat);
+        db.Brands.Add(brand);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var honda = new ProductEntity { Name = $"Honda_{uniqueId}", CategoryId = cat.Id, BrandId = brand.Id, StatusId = Domain.Constants.ProductStatus.ForSale };
+        var yamaha = new ProductEntity { Name = $"Yamaha_{uniqueId}", CategoryId = cat.Id, BrandId = brand.Id, StatusId = Domain.Constants.ProductStatus.ForSale };
+        db.Products.AddRange(honda, yamaha);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var v1 = new ProductVariant { ProductId = honda.Id, Price = 100, UrlSlug = $"h1_{uniqueId}" };
+        var v2 = new ProductVariant { ProductId = honda.Id, Price = 200, UrlSlug = $"h2_{uniqueId}" };
+        var v3 = new ProductVariant { ProductId = honda.Id, Price = 300, UrlSlug = $"h3_{uniqueId}" };
+        var v4 = new ProductVariant { ProductId = yamaha.Id, Price = 400, UrlSlug = $"y1_{uniqueId}" };
+        var v5 = new ProductVariant { ProductId = yamaha.Id, Price = 500, UrlSlug = $"y2_{uniqueId}" };
+        db.ProductVariants.AddRange(v1, v2, v3, v4, v5);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var response = await _client.GetAsync($"/api/v1/product/variants-lite/for-input?filters=search@=Honda_{uniqueId}", CancellationToken.None).ConfigureAwait(true);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductVariantLiteResponseForInput>>(CancellationToken.None).ConfigureAwait(true);
+        content.Should().NotBeNull();
+        content!.Items.Should().HaveCount(3);
+        content.Items.Should().AllSatisfy(item => item.DisplayName.Should().Contain($"Honda_{uniqueId}"));
+        content.Items.Should().NotContain(item => item.DisplayName!.Contains($"Yamaha_{uniqueId}"));
+    }
+
+    [Fact(DisplayName = "PRODUCT_123 - Phân trang khi tìm lọc sản phẩm (trang 1)")]
+    public async Task GetVariantsLiteForInput_SearchWithPagination_Page1ReturnsCorrectVariants()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", await AuthenticateForInputAsync(uniqueId).ConfigureAwait(true));
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        await EnsureForSaleStatusAsync(db).ConfigureAwait(true);
+
+        var cat = new ProductCategoryEntity { Name = $"C_{uniqueId}" };
+        var brand = new BrandEntity { Name = $"B_{uniqueId}" };
+        db.ProductCategories.Add(cat);
+        db.Brands.Add(brand);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var pA = new ProductEntity { Name = $"A_Paged_{uniqueId}", CategoryId = cat.Id, BrandId = brand.Id, StatusId = Domain.Constants.ProductStatus.ForSale };
+        var pD = new ProductEntity { Name = $"D_Paged_{uniqueId}", CategoryId = cat.Id, BrandId = brand.Id, StatusId = Domain.Constants.ProductStatus.ForSale };
+        db.Products.AddRange(pA, pD);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var variantsA = Enumerable.Range(1, 7).Select(i => new ProductVariant { ProductId = pA.Id, Price = i * 100, UrlSlug = $"a{i}_{uniqueId}" }).ToList();
+        var variantsD = Enumerable.Range(1, 4).Select(i => new ProductVariant { ProductId = pD.Id, Price = i * 100, UrlSlug = $"d{i}_{uniqueId}" }).ToList();
+        db.ProductVariants.AddRange(variantsA);
+        db.ProductVariants.AddRange(variantsD);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var response = await _client.GetAsync($"/api/v1/product/variants-lite/for-input?filters=search@=_Paged_{uniqueId}&page=1&pageSize=10", CancellationToken.None).ConfigureAwait(true);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductVariantLiteResponseForInput>>(CancellationToken.None).ConfigureAwait(true);
+        content.Should().NotBeNull();
+        content!.TotalCount.Should().Be(11);
+        content.Items.Should().HaveCount(10);
+        content.TotalPages.Should().Be(2);
+    }
+
+    [Fact(DisplayName = "PRODUCT_124 - Phân trang lấy các phần tử còn lại (trang 2)")]
+    public async Task GetVariantsLiteForInput_SearchWithPagination_Page2ReturnsRemainingVariants()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", await AuthenticateForInputAsync(uniqueId).ConfigureAwait(true));
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        await EnsureForSaleStatusAsync(db).ConfigureAwait(true);
+
+        var cat = new ProductCategoryEntity { Name = $"C_{uniqueId}" };
+        var brand = new BrandEntity { Name = $"B_{uniqueId}" };
+        db.ProductCategories.Add(cat);
+        db.Brands.Add(brand);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var pA = new ProductEntity { Name = $"A_P2_{uniqueId}", CategoryId = cat.Id, BrandId = brand.Id, StatusId = Domain.Constants.ProductStatus.ForSale };
+        var pD = new ProductEntity { Name = $"D_P2_{uniqueId}", CategoryId = cat.Id, BrandId = brand.Id, StatusId = Domain.Constants.ProductStatus.ForSale };
+        db.Products.AddRange(pA, pD);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var variantsA = Enumerable.Range(1, 7).Select(i => new ProductVariant { ProductId = pA.Id, Price = i * 100, UrlSlug = $"a{i}_{uniqueId}" }).ToList();
+        var variantsD = Enumerable.Range(1, 4).Select(i => new ProductVariant { ProductId = pD.Id, Price = i * 100, UrlSlug = $"d{i}_{uniqueId}" }).ToList();
+        db.ProductVariants.AddRange(variantsA);
+        db.ProductVariants.AddRange(variantsD);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var response = await _client.GetAsync($"/api/v1/product/variants-lite/for-input?filters=search@=_P2_{uniqueId}&page=2&pageSize=10", CancellationToken.None).ConfigureAwait(true);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductVariantLiteResponseForInput>>(CancellationToken.None).ConfigureAwait(true);
+        content.Should().NotBeNull();
+        content!.TotalCount.Should().Be(11);
+        content.Items.Should().HaveCount(1);
+        content.PageNumber.Should().Be(2);
+    }
+
+    [Fact(DisplayName = "PRODUCT_125 - Hiển thị DisplayName có dịch tiếng Việt (1 option)")]
+    public async Task GetVariantsLiteForInput_VariantWithSingleOption_DisplayNameContainsVietnameseLabel()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", await AuthenticateForInputAsync(uniqueId).ConfigureAwait(true));
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        await EnsureForSaleStatusAsync(db).ConfigureAwait(true);
+
+        var cat = new ProductCategoryEntity { Name = $"C_{uniqueId}" };
+        var brand = new BrandEntity { Name = $"B_{uniqueId}" };
+        db.ProductCategories.Add(cat);
+        db.Brands.Add(brand);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var product = new ProductEntity { Name = $"Prod_{uniqueId}", CategoryId = cat.Id, BrandId = brand.Id, StatusId = Domain.Constants.ProductStatus.ForSale };
+        db.Products.Add(product);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        // Use predefined option key "Color" which translates to "Màu sắc"
+        if (!await db.PredefinedOptions.AnyAsync(x => x.Key == "Color", CancellationToken.None).ConfigureAwait(true))
+        {
+            db.PredefinedOptions.Add(new PredefinedOption { Key = "Color", Value = "Màu sắc" });
+        }
+
+        var colorOption = await db.Options.FirstOrDefaultAsync(o => o.Name == "Color", CancellationToken.None).ConfigureAwait(true);
+        if (colorOption is null)
+        {
+            colorOption = new Option { Name = "Color" };
+            db.Options.Add(colorOption);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+        }
+
+        var doOption = new OptionValue { OptionId = colorOption.Id, Name = "Đỏ" };
+        db.OptionValues.Add(doOption);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var variant = new ProductVariant { ProductId = product.Id, Price = 100, UrlSlug = $"v_{uniqueId}" };
+        db.ProductVariants.Add(variant);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        db.VariantOptionValues.Add(new VariantOptionValue { VariantId = variant.Id, OptionValueId = doOption.Id });
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var response = await _client.GetAsync($"/api/v1/product/variants-lite/for-input?filters=search@=Prod_{uniqueId}", CancellationToken.None).ConfigureAwait(true);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductVariantLiteResponseForInput>>(CancellationToken.None).ConfigureAwait(true);
+        content.Should().NotBeNull();
+        var item = content!.Items!.FirstOrDefault(v => v.Id == variant.Id);
+        item.Should().NotBeNull();
+        item!.DisplayName.Should().Be($"Prod_{uniqueId} (Màu sắc: Đỏ)");
+    }
+
+    [Fact(DisplayName = "PRODUCT_126 - Hiển thị DisplayName có dịch tiếng Việt (Nhiều option)")]
+    public async Task GetVariantsLiteForInput_VariantWithMultipleOptions_DisplayNameContainsAllTranslatedLabels()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", await AuthenticateForInputAsync(uniqueId).ConfigureAwait(true));
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        await EnsureForSaleStatusAsync(db).ConfigureAwait(true);
+
+        var cat = new ProductCategoryEntity { Name = $"C_{uniqueId}" };
+        var brand = new BrandEntity { Name = $"B_{uniqueId}" };
+        db.ProductCategories.Add(cat);
+        db.Brands.Add(brand);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var product = new ProductEntity { Name = $"Prod_{uniqueId}", CategoryId = cat.Id, BrandId = brand.Id, StatusId = Domain.Constants.ProductStatus.ForSale };
+        db.Products.Add(product);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        if (!await db.PredefinedOptions.AnyAsync(x => x.Key == "Color", CancellationToken.None).ConfigureAwait(true))
+            db.PredefinedOptions.Add(new PredefinedOption { Key = "Color", Value = "Màu sắc" });
+        if (!await db.PredefinedOptions.AnyAsync(x => x.Key == "Displacement", CancellationToken.None).ConfigureAwait(true))
+            db.PredefinedOptions.Add(new PredefinedOption { Key = "Displacement", Value = "Phân khối" });
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var colorOption = await db.Options.FirstOrDefaultAsync(o => o.Name == "Color", CancellationToken.None).ConfigureAwait(true)
+            ?? new Option { Name = "Color" };
+        var displOption = await db.Options.FirstOrDefaultAsync(o => o.Name == "Displacement", CancellationToken.None).ConfigureAwait(true)
+            ?? new Option { Name = "Displacement" };
+
+        if (colorOption.Id == 0) db.Options.Add(colorOption);
+        if (displOption.Id == 0) db.Options.Add(displOption);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var doOV = new OptionValue { OptionId = colorOption.Id, Name = "Đỏ" };
+        var cc150OV = new OptionValue { OptionId = displOption.Id, Name = "150cc" };
+        db.OptionValues.AddRange(doOV, cc150OV);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var variant = new ProductVariant { ProductId = product.Id, Price = 200, UrlSlug = $"v_{uniqueId}" };
+        db.ProductVariants.Add(variant);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        db.VariantOptionValues.Add(new VariantOptionValue { VariantId = variant.Id, OptionValueId = doOV.Id });
+        db.VariantOptionValues.Add(new VariantOptionValue { VariantId = variant.Id, OptionValueId = cc150OV.Id });
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var response = await _client.GetAsync($"/api/v1/product/variants-lite/for-input?filters=search@=Prod_{uniqueId}", CancellationToken.None).ConfigureAwait(true);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductVariantLiteResponseForInput>>(CancellationToken.None).ConfigureAwait(true);
+        content.Should().NotBeNull();
+        var item = content.Items?.FirstOrDefault(v => v.Id == variant.Id);
+        item.Should().NotBeNull();
+        item!.DisplayName.Should().StartWith($"Prod_{uniqueId} (");
+        item.DisplayName.Should().Contain("Màu sắc: Đỏ");
+        item.DisplayName.Should().Contain("Phân khối: 150cc");
+    }
+
+    [Fact(DisplayName = "PRODUCT_127 - Hiển thị DisplayName khi không có option")]
+    public async Task GetVariantsLiteForInput_VariantWithNoOptions_DisplayNameEqualsProductName()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", await AuthenticateForInputAsync(uniqueId).ConfigureAwait(true));
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        await EnsureForSaleStatusAsync(db).ConfigureAwait(true);
+
+        var cat = new ProductCategoryEntity { Name = $"C_{uniqueId}" };
+        var brand = new BrandEntity { Name = $"B_{uniqueId}" };
+        db.ProductCategories.Add(cat);
+        db.Brands.Add(brand);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var product = new ProductEntity { Name = $"Solo_{uniqueId}", CategoryId = cat.Id, BrandId = brand.Id, StatusId = Domain.Constants.ProductStatus.ForSale };
+        db.Products.Add(product);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var variant = new ProductVariant { ProductId = product.Id, Price = 50, UrlSlug = $"v_{uniqueId}" };
+        db.ProductVariants.Add(variant);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var response = await _client.GetAsync($"/api/v1/product/variants-lite/for-input?filters=search@=Solo_{uniqueId}", CancellationToken.None).ConfigureAwait(true);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductVariantLiteResponseForInput>>(CancellationToken.None).ConfigureAwait(true);
+        content.Should().NotBeNull();
+        var item = content!.Items!.FirstOrDefault(v => v.Id == variant.Id);
+        item.Should().NotBeNull();
+        item!.DisplayName.Should().Be($"Solo_{uniqueId}");
+    }
+
 #pragma warning restore CRR0035
+
+
 }

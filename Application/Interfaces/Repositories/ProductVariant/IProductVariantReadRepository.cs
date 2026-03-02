@@ -33,6 +33,7 @@ namespace Application.Interfaces.Repositories.ProductVariant
             string? filters,
             string? sorts,
             CancellationToken cancellationToken,
-            DataFetchMode mode = DataFetchMode.ActiveOnly);
+            DataFetchMode mode = DataFetchMode.ActiveOnly,
+            string? search = null);
     }
 }
