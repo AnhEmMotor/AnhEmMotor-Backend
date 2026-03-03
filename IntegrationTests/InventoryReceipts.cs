@@ -5,6 +5,7 @@ using Application.Features.Inputs.Commands.DeleteManyInputs;
 using Application.Features.Inputs.Commands.RestoreManyInputs;
 using Application.Features.Inputs.Commands.UpdateInput;
 using Application.Features.Inputs.Commands.UpdateInputStatus;
+using Application.Features.Inputs.Commands.UpdateInputNotes;
 using Application.Features.Inputs.Commands.UpdateManyInputStatus;
 using Domain.Constants.Permission;
 using Domain.Entities;
@@ -167,8 +168,8 @@ public class InventoryReceipts : IAsyncLifetime
         content!.Id.Should().NotBeNull();
         content.StatusId.Should().Be(Domain.Constants.Input.InputStatus.Working);
         content.Products.Should().HaveCount(1);
-        content.Products[0].Count.Should().Be(10);
-        content.Products[0].InputPrice.Should().Be(100000);
+        content.Products[0].Quantity.Should().Be(10);
+        content.Products[0].UnitPrice.Should().Be(100000);
         content.TotalPayable.Should().Be(1000000);
 
         var input = db.InputReceipts.FirstOrDefault(i => i.Id == content.Id);
@@ -263,11 +264,11 @@ public class InventoryReceipts : IAsyncLifetime
             Notes = "Test",
             SupplierId = supplier.Id,
             Products =
-                [ new CreateInputInfoRequest { ProductId = variant1.Id, Count = 5, InputPrice = 123456.78m }, new CreateInputInfoRequest
+                [ new CreateInputInfoRequest { ProductId = variant1.Id, Count = 5, InputPrice = 123456m }, new CreateInputInfoRequest
                 {
                     ProductId = variant2.Id,
                     Count = 3,
-                    InputPrice = 987654.32m
+                    InputPrice = 987654m
                 } ]
         };
 
@@ -283,7 +284,7 @@ public class InventoryReceipts : IAsyncLifetime
             .ConfigureAwait(true);
         content.Should().NotBeNull();
 
-        decimal expectedTotal = (5 * 123456.78m) + (3 * 987654.32m);
+        decimal expectedTotal = (5 * 123456m) + (3 * 987654m);
         content!.TotalPayable.Should().Be((long)expectedTotal);
     }
 
@@ -2980,6 +2981,89 @@ public class InventoryReceipts : IAsyncLifetime
         var response = await _client.GetAsync("/api/v1/InventoryReceipts/status", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+    [Fact(DisplayName = "INPUT_076 - Cập nhật ghi chú phiếu nhập hàng qua API riêng thành công")]
+    public async Task UpdateInputNotes_Success_ReturnsOk()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Inputs.Edit ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+
+        var supplierStatusId = Domain.Constants.SupplierStatus.Active;
+        if(!await db.SupplierStatuses
+            .AnyAsync(x => string.Compare(x.Key, supplierStatusId) == 0, CancellationToken.None)
+            .ConfigureAwait(true))
+            db.SupplierStatuses.Add(new SupplierStatus { Key = supplierStatusId });
+
+        var inputStatusId = Domain.Constants.Input.InputStatus.Working;
+        if(!await db.InputStatuses
+            .AnyAsync(x => string.Compare(x.Key, inputStatusId) == 0, CancellationToken.None)
+            .ConfigureAwait(true))
+            db.InputStatuses.Add(new InputStatus { Key = inputStatusId });
+
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var supplier = new SupplierEntity
+        {
+            Name = $"Supplier_{uniqueId}",
+            StatusId = supplierStatusId,
+            Email = $"sup_{uniqueId}@example.com",
+            Phone = "0123456789"
+        };
+        db.Suppliers.Add(supplier);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var input = new InputEntity
+        {
+            InputDate = DateTimeOffset.UtcNow,
+            StatusId = inputStatusId,
+            SupplierId = supplier.Id,
+            CreatedBy = user.Id,
+            Notes = "Ghi chú cũ"
+        };
+        db.InputReceipts.Add(input);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var request = new UpdateInputNotesCommand
+        {
+            Notes = "Ghi chú mới đã được cập nhật"
+        };
+
+        var requestMessage = new HttpRequestMessage(HttpMethod.Patch, $"/api/v1/InventoryReceipts/{input.Id}/notes")
+        {
+            Content = JsonContent.Create(request)
+        };
+        var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response.Content
+            .ReadFromJsonAsync<InputResponse>(CancellationToken.None)
+            .ConfigureAwait(true);
+        content.Should().NotBeNull();
+        content!.Notes.Should().Be("Ghi chú mới đã được cập nhật");
+
+        var updatedInput = await db.InputReceipts.AsNoTracking().FirstOrDefaultAsync(i => i.Id == input.Id).ConfigureAwait(true);
+        updatedInput.Should().NotBeNull();
+        updatedInput!.Notes.Should().Be("Ghi chú mới đã được cập nhật");
     }
 #pragma warning restore CRR0035
 }

@@ -202,6 +202,11 @@
             Cập nhật trạng thái của phiếu nhập.
             </summary>
         </member>
+        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.UpdateInputNotesAsync(System.Int32,Application.Features.Inputs.Commands.UpdateInputNotes.UpdateInputNotesCommand,System.Threading.CancellationToken)">
+            <summary>
+            Cập nhật ghi chú của phiếu nhập.
+            </summary>
+        </member>
         <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.UpdateManyInputStatusAsync(Application.Features.Inputs.Commands.UpdateManyInputStatus.UpdateManyInputStatusCommand,System.Threading.CancellationToken)">
             <summary>
             Cập nhật trạng thái của nhiều phiếu nhập cùng lúc.

@@ -14,9 +14,7 @@ public class InputResponse
 
     public string? SupplierName { get; set; }
 
-    public Guid? CreatedByUserId { get; set; }
-
-    public string? CreatedByUserName { get; set; }
+    public DateTimeOffset? Time { get; set; }
 
     public long? TotalPayable { get; set; }
 

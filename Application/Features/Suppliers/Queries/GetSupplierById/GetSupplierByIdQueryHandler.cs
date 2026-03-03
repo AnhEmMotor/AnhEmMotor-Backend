@@ -20,6 +20,9 @@ public sealed class GetSupplierByIdQueryHandler(ISupplierReadRepository reposito
             return Error.NotFound($"Supplier with Id {request.Id} not found.");
         }
 
-        return supplier.Adapt<SupplierResponse>();
+        var response = supplier.Adapt<SupplierResponse>();
+        Application.Common.Helper.AuditColumnMapper.Apply(supplier, response, Domain.Constants.AuditColumn.CreatedAt);
+
+        return response;
     }
 }

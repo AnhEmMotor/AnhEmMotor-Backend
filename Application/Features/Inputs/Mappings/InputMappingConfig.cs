@@ -16,20 +16,50 @@ public sealed class InputMappingConfig : IRegister
 
         config.NewConfig<Input, InputResponse>()
             .Map(dest => dest.SupplierName, src => src.Supplier != null ? src.Supplier.Name : null)
+            .Map(dest => dest.Time, src => src.CreatedAt)
+            .Map(dest => dest.InputDate, src => src.CreatedAt)
             .Map(
                 dest => dest.TotalPayable,
-                src => src.InputInfos != null ? src.InputInfos.Sum(ii => (ii.Count ?? 0) * (ii.InputPrice ?? 0)) : 0)
+                src => src.InputInfos != null ? src.InputInfos.Sum(ii => (long)(ii.Count ?? 0) * (long)(ii.InputPrice ?? 0)) : 0)
             .Map(dest => dest.Products, src => src.InputInfos);
 
         config.NewConfig<InputInfo, InputInfoResponse>()
-            .Map(
-                dest => dest.ProductName,
-                src => src.ProductVariant != null && src.ProductVariant.Product != null
-                    ? src.ProductVariant.Product.Name
-                    : null);
+            .Map(dest => dest.Name, src => BuildFullVariantName(src.ProductVariant))
+            .Map(dest => dest.Quantity, src => src.Count)
+            .Map(dest => dest.UnitPrice, src => src.InputPrice)
+            .Map(dest => dest.ImportPrice, src => src.InputPrice)
+            .Map(dest => dest.Discount, src => 0)
+            .Map(dest => dest.Total, src => (decimal)(src.Count ?? 0) * (src.InputPrice ?? 0));
 
         config.NewConfig<UpdateInputInfoRequest, InputInfo>().IgnoreNullValues(true);
 
         config.NewConfig<UpdateInputCommand, Input>().IgnoreNullValues(true);
+    }
+
+    private static string? BuildFullVariantName(ProductVariant? variant)
+    {
+        if (variant is null || variant.Product is null)
+        {
+            return null;
+        }
+
+        var productName = variant.Product.Name ?? string.Empty;
+
+        if (variant.VariantOptionValues is null || variant.VariantOptionValues.Count == 0)
+        {
+            return productName;
+        }
+
+        var parts = variant.VariantOptionValues
+            .Where(vov => vov.OptionValue is not null && !string.IsNullOrWhiteSpace(vov.OptionValue.Name))
+            .Select(vov => vov.OptionValue!.Name)
+            .ToList();
+
+        if (parts.Count == 0)
+        {
+            return productName;
+        }
+
+        return $"{productName} ({string.Join(" - ", parts)})";
     }
 }

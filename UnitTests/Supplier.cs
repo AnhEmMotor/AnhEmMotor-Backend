@@ -5,6 +5,7 @@ using Application.Features.Suppliers.Commands.UpdateSupplier;
 using Application.Features.Suppliers.Commands.UpdateSupplierStatus;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Supplier;
+using Application.Common.Helper;
 using Domain.Constants;
 using FluentAssertions;
 using FluentValidation.TestHelper;
@@ -798,4 +799,78 @@ public class Supplier
     }
 #pragma warning restore CRR0035
 #pragma warning restore IDE0079
+
+    public class TestEntity : Domain.Entities.BaseEntity
+    {
+        public int Id { get; set; }
+    }
+
+    public class TestResponse
+    {
+        public int Id { get; set; }
+        public DateTimeOffset? CreatedAt { get; set; }
+        public DateTimeOffset? UpdatedAt { get; set; }
+        public DateTimeOffset? DeletedAt { get; set; }
+    }
+
+    public class TestResponseNoAudit
+    {
+        public int Id { get; set; }
+    }
+
+    public class TestResponseWrongType
+    {
+        public int Id { get; set; }
+        public string? CreatedAt { get; set; }
+    }
+
+    [Fact(DisplayName = "SUP_061 - Gán CreatedAt thành công")]
+    public void SUP_061_Apply_CreatedAt_Success()
+    {
+        var now = DateTimeOffset.UtcNow;
+        var entity = new TestEntity { CreatedAt = now };
+        var response = new TestResponse();
+        AuditColumnMapper.Apply(entity, response, AuditColumn.CreatedAt);
+        Assert.Equal(now, response.CreatedAt);
+    }
+
+    [Fact(DisplayName = "SUP_062 - Gán nhiều cột (Flags) cùng lúc")]
+    public void SUP_062_Apply_MultipleColumns_Success()
+    {
+        var created = DateTimeOffset.UtcNow.AddDays(-1);
+        var updated = DateTimeOffset.UtcNow;
+        var entity = new TestEntity { CreatedAt = created, UpdatedAt = updated };
+        var response = new TestResponse();
+        AuditColumnMapper.Apply(entity, response, AuditColumn.CreatedAt | AuditColumn.UpdatedAt);
+        Assert.Equal(created, response.CreatedAt);
+        Assert.Equal(updated, response.UpdatedAt);
+    }
+
+    [Fact(DisplayName = "SUP_063 - Bỏ qua khi DTO không có thuộc tính")]
+    public void SUP_063_Apply_NoProperty_Ignore()
+    {
+        var entity = new TestEntity { CreatedAt = DateTimeOffset.UtcNow };
+        var response = new TestResponseNoAudit();
+        AuditColumnMapper.Apply(entity, response, AuditColumn.CreatedAt);
+        Assert.Equal(0, response.Id);
+    }
+
+    [Fact(DisplayName = "SUP_064 - Bỏ qua khi kiểu dữ liệu không khớp")]
+    public void SUP_064_Apply_WrongType_Ignore()
+    {
+        var entity = new TestEntity { CreatedAt = DateTimeOffset.UtcNow };
+        var response = new TestResponseWrongType();
+        AuditColumnMapper.Apply(entity, response, AuditColumn.CreatedAt);
+        Assert.Null(response.CreatedAt);
+    }
+
+    [Fact(DisplayName = "SUP_065 - Xử lý danh sách (List) thành công")]
+    public void SUP_065_Apply_List_Success()
+    {
+        var now = DateTimeOffset.UtcNow;
+        var entities = new List<TestEntity> { new TestEntity { Id = 1, CreatedAt = now } };
+        var responses = new List<TestResponse> { new TestResponse { Id = 1 } };
+        AuditColumnMapper.Apply(entities, responses, AuditColumn.CreatedAt);
+        Assert.Equal(entities[0].CreatedAt, responses[0].CreatedAt);
+    }
 }

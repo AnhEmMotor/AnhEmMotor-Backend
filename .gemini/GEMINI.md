@@ -56,11 +56,19 @@
 - Tuyệt đối không để lại comment trong code. Tên biến phải sử dụng tiếng Anh.
 - Tuyệt đối không được sao chép logic xử lý từ code chính vào mã nguồn test để tính toán kết quả mong đợi. Giá trị mong đợi phải là giá trị tĩnh (Static Expected Results) hoặc được xác định độc lập hoàn toàn dựa trên yêu cầu nghiệp vụ. Bài test phải kiểm tra kết quả thực tế dựa trên một "chân lý" bên ngoài, không phải tự suy diễn từ code đang được test.
 
+# Cấu trúc Response cho Tanstack Query (Frontend Support)
+
+- Để hỗ trợ quy trình CRUD chuẩn ở Frontend, Backend phải tuân thủ:
+- Create/Update (Mutation Support): \* Sau khi thực hiện thành công, Action phải trả về toàn bộ Object (DTO) vừa được tạo hoặc cập nhật, không chỉ trả về ID hay Boolean.
+- Dữ liệu trả về phải chứa đầy đủ các trường thông tin cần thiết để Frontend có thể gọi queryClient.setQueryData cập nhật cache tức thì.
+- Get Detail: Đảm bảo cấu trúc dữ liệu trả về của phương thức lấy chi tiết đồng nhất với dữ liệu trả về của phương thức Create/Update.
+- Delete: Trả về trạng thái thành công rõ ràng để Frontend thực hiện removeQueries và invalidateQueries.
+
 ## Build và Test
 
 - Mỗi khi có sự thay đổi trong code chạy dự án, bắt buộc phải build và test dự án.
 - Trước khi bắt đầu Build và Test, phải thực hiện đóng sạch (Force Stop) tất cả các tiến trình dotnet đang vận hành trên hệ thống. Việc này nhằm giải phóng hoàn toàn các tệp tin đang bị khóa (File Locking) và làm trống bộ nhớ đệm của trình biên dịch.
-- Thực thi và Ghi nhật ký: Chạy câu lệnh dotnet test với mức độ chi tiết normal. Toàn bộ dữ liệu đầu ra phải được điều hướng (Redirect) trực tiếp vào tệp tin có đuôi mở rộng là txt thay vì chỉ hiển thị trên cửa sổ lệnh.
+- Thực thi và Ghi nhật ký: Chạy câu lệnh dotnet test với mức độ chi tiết normal. Toàn bộ dữ liệu đầu ra phải được điều hướng (Redirect) trực tiếp vào tệp tin có đuôi mở rộng là log thay vì chỉ hiển thị trên cửa sổ lệnh.
 - Kiểm tra kết quả: Sau khi lệnh test dự án thành công, buộc phải đọc file đã tạo sau khi build xong để xem coi kết quả. Nếu như kết quả thất bại khi build hoặc khi test, buộc phải sửa lại lỗi dựa trên lỗi được chỉ ra dựa trên file đó cho đến khi file kết quả không có bất kì lỗi và cảnh báo nào (Đặc biệt là tuyệt đối không có bất kì cảnh báo nào). Trong quá trình sửa tuyệt đối không được làm mất logic test, đặc biệt là logic kiểm tra kết quả bài test đó.
 
 ## Commit Dự án

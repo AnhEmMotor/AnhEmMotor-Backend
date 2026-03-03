@@ -8,6 +8,7 @@ using Application.Features.Inputs.Commands.RestoreInput;
 using Application.Features.Inputs.Commands.RestoreManyInputs;
 using Application.Features.Inputs.Commands.UpdateInput;
 using Application.Features.Inputs.Commands.UpdateInputStatus;
+using Application.Features.Inputs.Commands.UpdateInputNotes;
 using Application.Features.Inputs.Commands.UpdateManyInputStatus;
 using Application.Features.Inputs.Queries.GetDeletedInputsList;
 using Application.Features.Inputs.Queries.GetInputById;
@@ -185,6 +186,23 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
             Id = id,
             CurrentUserId = Guid.TryParse(currentUserId, out var guid) ? guid : null
         };
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Cập nhật ghi chú của phiếu nhập.
+    /// </summary>
+    [HttpPatch("{id:int}/notes")]
+    [HasPermission(Inputs.Edit)]
+    [ProducesResponseType(typeof(InputResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateInputNotesAsync(
+        int id,
+        [FromBody] UpdateInputNotesCommand request,
+        CancellationToken cancellationToken)
+    {
+        var command = request with { Id = id };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
