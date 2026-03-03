@@ -208,3 +208,5 @@ vite.config.ts.timestamp-*
 .vite/
 
 TestResults
+TestPlans
+StrykerOutput
