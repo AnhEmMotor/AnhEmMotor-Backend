@@ -14,10 +14,19 @@ public sealed class InputMappingConfig : IRegister
         config.NewConfig<CreateInputCommand, Input>();
         config.NewConfig<CreateInputInfoRequest, InputInfo>();
 
-        config.NewConfig<Input, InputResponse>()
+        config.NewConfig<Input, InputListResponse>()
             .Map(dest => dest.SupplierName, src => src.Supplier != null ? src.Supplier.Name : null)
-            .Map(dest => dest.Time, src => src.CreatedAt)
-            .Map(dest => dest.InputDate, src => src.CreatedAt)
+            .Map(dest => dest.CreatedAt, src => src.CreatedAt)
+            .Map(
+                dest => dest.TotalPayable,
+                src => src.InputInfos != null ? src.InputInfos.Sum(ii => (long)(ii.Count ?? 0) * (long)(ii.InputPrice ?? 0)) : 0)
+            .Map(dest => dest.Products, src => src.InputInfos);
+
+        config.NewConfig<Input, InputDetailResponse>()
+            .Map(dest => dest.SupplierName, src => src.Supplier != null ? src.Supplier.Name : null)
+            .Map(dest => dest.SupplierPhone, src => src.Supplier != null ? src.Supplier.Phone : null)
+            .Map(dest => dest.SupplierEmail, src => src.Supplier != null ? src.Supplier.Email : null)
+            .Map(dest => dest.CreatedAt, src => src.CreatedAt)
             .Map(
                 dest => dest.TotalPayable,
                 src => src.InputInfos != null ? src.InputInfos.Sum(ii => (long)(ii.Count ?? 0) * (long)(ii.InputPrice ?? 0)) : 0)
@@ -52,7 +61,13 @@ public sealed class InputMappingConfig : IRegister
 
         var parts = variant.VariantOptionValues
             .Where(vov => vov.OptionValue is not null && !string.IsNullOrWhiteSpace(vov.OptionValue.Name))
-            .Select(vov => vov.OptionValue!.Name)
+            .Select(vov =>
+            {
+                var optionName = vov.OptionValue?.Option?.Name;
+                return string.IsNullOrWhiteSpace(optionName)
+                    ? vov.OptionValue!.Name
+                    : $"{optionName}: {vov.OptionValue!.Name}";
+            })
             .ToList();
 
         if (parts.Count == 0)
@@ -60,6 +75,6 @@ public sealed class InputMappingConfig : IRegister
             return productName;
         }
 
-        return $"{productName} ({string.Join(" - ", parts)})";
+        return $"{productName} ({string.Join(", ", parts)})";
     }
 }

@@ -44,7 +44,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// </summary>
     [HttpGet]
     [HasPermission(Inputs.View)]
-    [ProducesResponseType(typeof(PagedResult<InputResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedResult<InputListResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetInputsAsync(
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
@@ -72,7 +72,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// </summary>
     [HttpGet("deleted")]
     [HasPermission(Inputs.View)]
-    [ProducesResponseType(typeof(PagedResult<InputResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedResult<InputListResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetDeletedInputsAsync(
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
@@ -87,7 +87,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// </summary>
     [HttpGet("{id:int}", Name = RouteNames.InventoryReceipts.GetById)]
     [HasPermission(Inputs.View)]
-    [ProducesResponseType(typeof(InputResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(InputDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetInputByIdAsync(int id, CancellationToken cancellationToken)
     {
@@ -101,7 +101,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// </summary>
     [HttpGet("by-supplier/{supplierId:int}")]
     [RequiresAllPermissions(Suppliers.View, Inputs.View)]
-    [ProducesResponseType(typeof(PagedResult<InputResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedResult<InputListResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetInputsBySupplierIdAsync(
         int supplierId,
         [FromQuery] SieveModel sieveModel,
@@ -117,7 +117,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// </summary>
     [HttpPost]
     [HasPermission(Inputs.Create)]
-    [ProducesResponseType(typeof(InputResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(InputDetailResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateInputAsync(
         [FromBody] CreateInputCommand request,
@@ -136,7 +136,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// </summary>
     [HttpPost("{id:int}/clone")]
     [HasPermission(Inputs.Create)]
-    [ProducesResponseType(typeof(InputResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(InputDetailResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CloneInputAsync(int id, CancellationToken cancellationToken)
@@ -154,7 +154,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// </summary>
     [HttpPut("{id:int}")]
     [HasPermission(Inputs.Edit)]
-    [ProducesResponseType(typeof(InputResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(InputDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateInputAsync(
@@ -162,7 +162,12 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
         [FromBody] UpdateInputCommand request,
         CancellationToken cancellationToken)
     {
-        var command = request.Adapt<UpdateInputCommand>() with { Id = id };
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var command = request.Adapt<UpdateInputCommand>() with 
+        { 
+            Id = id,
+            CurrentUserId = Guid.TryParse(currentUserId, out var guid) ? guid : null
+        };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -172,7 +177,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// </summary>
     [HttpPatch("{id:int}/status")]
     [HasPermission(Inputs.ChangeStatus)]
-    [ProducesResponseType(typeof(InputResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(InputDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateInputStatusAsync(
@@ -195,7 +200,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// </summary>
     [HttpPatch("{id:int}/notes")]
     [HasPermission(Inputs.Edit)]
-    [ProducesResponseType(typeof(InputResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(InputDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateInputNotesAsync(
         int id,
@@ -212,7 +217,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// </summary>
     [HttpPatch("status")]
     [HasPermission(Inputs.ChangeStatus)]
-    [ProducesResponseType(typeof(List<InputResponse>), StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(List<InputDetailResponse>), StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateManyInputStatusAsync(
         [FromBody] UpdateManyInputStatusCommand request,
@@ -258,7 +263,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// </summary>
     [HttpPost("{id:int}/restore")]
     [HasPermission(Inputs.Delete)]
-    [ProducesResponseType(typeof(InputResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(InputDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RestoreInputAsync(int id, CancellationToken cancellationToken)
     {
@@ -272,7 +277,7 @@ public class InventoryReceiptsController(IMediator mediator) : ApiController
     /// </summary>
     [HttpPost("restore")]
     [HasPermission(Inputs.Delete)]
-    [ProducesResponseType(typeof(List<InputResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(List<InputDetailResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RestoreManyInputsAsync(
         [FromBody] RestoreManyInputsCommand request,

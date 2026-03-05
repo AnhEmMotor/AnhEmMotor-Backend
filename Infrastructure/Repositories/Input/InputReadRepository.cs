@@ -31,7 +31,8 @@ public class InputReadRepository(ApplicationDBContext context) : IInputReadRepos
             .ThenInclude(x => x!.Option)
             .Include(x => x.Supplier)
             .Include(x => x.CreatedByUser)
-            .Include(x => x.InputStatus);
+            .Include(x => x.InputStatus)
+            .AsSplitQuery();
     }
 
     public Task<IEnumerable<InputEntity>> GetAllAsync(

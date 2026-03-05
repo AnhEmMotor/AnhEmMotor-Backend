@@ -312,10 +312,9 @@ public class InventoryReceipts
     [Fact(DisplayName = "INPUT_075 - Mapster mapping tính TotalPayable chính xác dựa trên sum(Count * InputPrice)")]
     public void InputMappingConfig_CalculatesTotalPayableCorrectly()
     {
-        // Arrange
         var config = new TypeAdapterConfig();
         new InputMappingConfig().Register(config);
-        
+
         var input = new Input
         {
             Id = 1,
@@ -328,10 +327,8 @@ public class InventoryReceipts
             }
         };
 
-        // Act
-        var response = input.Adapt<InputResponse>(config);
+        var response = input.Adapt<InputDetailResponse>(config);
 
-        // Assert
         response.TotalPayable.Should().Be((2 * 150000) + (3 * 50000) + 0 + 0);
     }
 #pragma warning restore CRR0035

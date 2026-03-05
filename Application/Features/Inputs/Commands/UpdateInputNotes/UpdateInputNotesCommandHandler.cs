@@ -1,4 +1,4 @@
-using Application.ApiContracts.Input.Responses;
+﻿using Application.ApiContracts.Input.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
@@ -12,9 +12,9 @@ namespace Application.Features.Inputs.Commands.UpdateInputNotes;
 public sealed class UpdateInputNotesCommandHandler(
     IInputReadRepository readRepository,
     IInputUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateInputNotesCommand, Result<InputResponse>>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateInputNotesCommand, Result<InputDetailResponse>>
 {
-    public async Task<Result<InputResponse>> Handle(
+    public async Task<Result<InputDetailResponse>> Handle(
         UpdateInputNotesCommand request,
         CancellationToken cancellationToken)
     {
@@ -36,6 +36,6 @@ public sealed class UpdateInputNotesCommandHandler(
 
         var updated = await readRepository.GetByIdWithDetailsAsync(input.Id, cancellationToken).ConfigureAwait(false);
 
-        return updated!.Adapt<InputResponse>();
+        return updated!.Adapt<InputDetailResponse>();
     }
 }

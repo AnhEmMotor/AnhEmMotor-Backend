@@ -1,4 +1,4 @@
-using Application.ApiContracts.Input.Responses;
+﻿using Application.ApiContracts.Input.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.Input;
 
@@ -7,9 +7,9 @@ using MediatR;
 
 namespace Application.Features.Inputs.Queries.GetInputById;
 
-public sealed class GetInputByIdQueryHandler(IInputReadRepository repository) : IRequestHandler<GetInputByIdQuery, Result<InputResponse?>>
+public sealed class GetInputByIdQueryHandler(IInputReadRepository repository) : IRequestHandler<GetInputByIdQuery, Result<InputDetailResponse?>>
 {
-    public async Task<Result<InputResponse?>> Handle(GetInputByIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<InputDetailResponse?>> Handle(GetInputByIdQuery request, CancellationToken cancellationToken)
     {
         var input = await repository.GetByIdWithDetailsAsync(request.Id, cancellationToken).ConfigureAwait(false);
 
@@ -18,6 +18,6 @@ public sealed class GetInputByIdQueryHandler(IInputReadRepository repository) : 
             return Error.NotFound($"Không tìm thấy phiếu nhập có ID {request.Id}.");
         }
 
-        return input.Adapt<InputResponse>();
+        return input.Adapt<InputDetailResponse>();
     }
 }

@@ -1,4 +1,4 @@
-using Application.ApiContracts.Input.Responses;
+﻿using Application.ApiContracts.Input.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
@@ -17,9 +17,9 @@ public sealed class CloneInputCommandHandler(
     IInputInsertRepository inputInsertRepository,
     ISupplierReadRepository supplierReadRepository,
     IProductVariantReadRepository variantReadRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<CloneInputCommand, Result<InputResponse?>>
+    IUnitOfWork unitOfWork) : IRequestHandler<CloneInputCommand, Result<InputDetailResponse?>>
 {
-    public async Task<Result<InputResponse?>> Handle(CloneInputCommand command, CancellationToken cancellationToken)
+    public async Task<Result<InputDetailResponse?>> Handle(CloneInputCommand command, CancellationToken cancellationToken)
     {
         if(!command.Id.HasValue)
         {
@@ -116,7 +116,7 @@ public sealed class CloneInputCommandHandler(
         var createdInput = await inputReadRepository.GetByIdWithDetailsAsync(newInput.Id, cancellationToken)
             .ConfigureAwait(false);
 
-        return createdInput!.Adapt<InputResponse>();
+        return createdInput!.Adapt<InputDetailResponse>();
     }
 }
 

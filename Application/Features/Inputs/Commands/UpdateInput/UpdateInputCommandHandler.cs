@@ -1,4 +1,4 @@
-using Application.ApiContracts.Input.Responses;
+﻿using Application.ApiContracts.Input.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
@@ -18,9 +18,9 @@ public sealed class UpdateInputCommandHandler(
     IInputDeleteRepository deleteRepository,
     ISupplierReadRepository supplierRepository,
     IProductVariantReadRepository variantRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateInputCommand, Result<InputResponse?>>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateInputCommand, Result<InputDetailResponse?>>
 {
-    public async Task<Result<InputResponse?>> Handle(UpdateInputCommand request, CancellationToken cancellationToken)
+    public async Task<Result<InputDetailResponse?>> Handle(UpdateInputCommand request, CancellationToken cancellationToken)
     {
         var input = await readRepository.GetByIdWithDetailsAsync(
             request.Id,
@@ -98,6 +98,15 @@ public sealed class UpdateInputCommandHandler(
 
         request.Adapt(input);
 
+        if(string.Equals(
+            request.StatusId,
+            Domain.Constants.Input.InputStatus.Finish,
+            StringComparison.OrdinalIgnoreCase))
+        {
+            input.InputDate = DateTimeOffset.UtcNow;
+            input.ConfirmedBy = request.CurrentUserId;
+        }
+
         var existingInfoDict = input.InputInfos.ToDictionary(ii => ii.Id);
         var requestInfoDict = request.Products.Where(p => p.Id.HasValue && p.Id > 0).ToDictionary(p => p.Id!.Value);
 
@@ -134,6 +143,6 @@ public sealed class UpdateInputCommandHandler(
 
         var updated = await readRepository.GetByIdWithDetailsAsync(input.Id, cancellationToken).ConfigureAwait(false);
 
-        return updated!.Adapt<InputResponse>();
+        return updated!.Adapt<InputDetailResponse>();
     }
 }

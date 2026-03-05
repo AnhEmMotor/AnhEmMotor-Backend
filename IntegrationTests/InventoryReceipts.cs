@@ -1,4 +1,4 @@
-using Application.ApiContracts.Input.Requests;
+﻿using Application.ApiContracts.Input.Requests;
 using Application.ApiContracts.Input.Responses;
 using Application.Features.Inputs.Commands.CreateInput;
 using Application.Features.Inputs.Commands.DeleteManyInputs;
@@ -588,7 +588,7 @@ public class InventoryReceipts : IAsyncLifetime
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
-            .ReadFromJsonAsync<PagedResult<InputResponse>>(CancellationToken.None)
+            .ReadFromJsonAsync<PagedResult<InputListResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Items.Should().HaveCountLessThanOrEqualTo(10);
@@ -626,7 +626,7 @@ public class InventoryReceipts : IAsyncLifetime
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
-            .ReadFromJsonAsync<PagedResult<InputResponse>>(CancellationToken.None)
+            .ReadFromJsonAsync<PagedResult<InputListResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Items
@@ -720,7 +720,7 @@ public class InventoryReceipts : IAsyncLifetime
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
-            .ReadFromJsonAsync<PagedResult<InputResponse>>(CancellationToken.None)
+            .ReadFromJsonAsync<PagedResult<InputListResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
 
         content.Should().NotBeNull();
@@ -729,7 +729,7 @@ public class InventoryReceipts : IAsyncLifetime
         var items = content!.Items?.Where(i => createdIds.Contains(i.Id)).ToList();
 
         items.Should().HaveCount(3);
-        items.Should().BeInDescendingOrder(i => i.InputDate);
+        items.Should().BeInDescendingOrder(i => i.Time);
     }
 
     [Fact(DisplayName = "INPUT_020 - Lấy chi tiết phiếu nhập thành công")]
@@ -2535,7 +2535,7 @@ public class InventoryReceipts : IAsyncLifetime
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
-            .ReadFromJsonAsync<PagedResult<InputResponse>>(CancellationToken.None)
+            .ReadFromJsonAsync<PagedResult<InputListResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Items.Should().OnlyContain(i => i.SupplierId == supplierId);
@@ -2632,7 +2632,7 @@ public class InventoryReceipts : IAsyncLifetime
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
-            .ReadFromJsonAsync<PagedResult<InputResponse>>(CancellationToken.None)
+            .ReadFromJsonAsync<PagedResult<InputListResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         content.Should().NotBeNull();
     }
@@ -2924,7 +2924,7 @@ public class InventoryReceipts : IAsyncLifetime
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
-            .ReadFromJsonAsync<PagedResult<InputResponse>>(CancellationToken.None)
+            .ReadFromJsonAsync<PagedResult<InputListResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Items
