@@ -71,24 +71,6 @@
 - Thực thi và Ghi nhật ký: Chạy câu lệnh dotnet test với mức độ chi tiết normal. Toàn bộ dữ liệu đầu ra phải được điều hướng (Redirect) trực tiếp vào tệp tin có đuôi mở rộng là log thay vì chỉ hiển thị trên cửa sổ lệnh.
 - Kiểm tra kết quả: Sau khi lệnh test dự án thành công, buộc phải đọc file đã tạo sau khi build xong để xem coi kết quả. Nếu như kết quả thất bại khi build hoặc khi test, buộc phải sửa lại lỗi dựa trên lỗi được chỉ ra dựa trên file đó cho đến khi file kết quả không có bất kì lỗi và cảnh báo nào (Đặc biệt là tuyệt đối không có bất kì cảnh báo nào). Trong quá trình sửa tuyệt đối không được làm mất logic test, đặc biệt là logic kiểm tra kết quả bài test đó.
 
-## Commit Dự án
+## Tuyệt đối không tự ý Commit Dự án
 
-- Cấu trúc bắt buộc
-
-  ```
-  <type>: <subject>
-
-  - <bullet point 1>
-  - <bullet point 2>
-  ```
-
-- Quy tắc:
-  - Header:
-    - Không quá 300 ký tự.
-    - Sử dụng thể mệnh lệnh (Imperative mood).
-    - Phải thuộc các loại: feat, fix, docs, style, refactor, perf, test, chore, ci.
-  - Body:
-    - Bắt buộc phải là danh sách các gạch đầu dòng sử dụng dấu gạch ngang (-).
-    - Mỗi gạch đầu dòng chỉ được phép là MỘT câu duy nhất.
-    - Tuyệt đối không viết thành đoạn văn. Không nhóm nhiều câu vào một dòng.
-    - Phải bẻ nhỏ các logic phức tạp thành nhiều điểm thay đổi riêng biệt để dễ theo dõi.
+Tuyệt đối không tự ý commit và push code lên trên git cho dự án.

@@ -174,7 +174,7 @@ public class InventoryReceipts
         int inputId = 1;
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<RestoreInputCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<InputResponse>.Failure(Error.BadRequest("Input is not deleted")));
+            .ReturnsAsync(Result<InputDetailResponse>.Failure(Error.BadRequest("Input is not deleted")));
 
         var result = await _controller.RestoreInputAsync(inputId, CancellationToken.None).ConfigureAwait(true);
 
@@ -327,7 +327,7 @@ public class InventoryReceipts
         var expectedResponse = new InputDetailResponse { Id = inputId, StatusId = "finished" };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateInputStatusCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<InputResponse>.Success(expectedResponse));
+            .ReturnsAsync(Result<InputDetailResponse>.Success(expectedResponse));
 
         var result = await _controller.UpdateInputStatusAsync(inputId, request, CancellationToken.None)
             .ConfigureAwait(true);
