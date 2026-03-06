@@ -1,5 +1,6 @@
 ﻿using Application.ApiContracts.Supplier.Responses;
 using Application.Common.Models;
+using Application.Features.Inputs.Queries.GetInputsBySupplierId;
 using Application.Features.Suppliers.Commands.CreateSupplier;
 using Application.Features.Suppliers.Commands.DeleteManySuppliers;
 using Application.Features.Suppliers.Commands.DeleteSupplier;
@@ -85,6 +86,28 @@ public class SupplierController(IMediator mediator) : ApiController
     {
         var query = new GetSupplierByIdQuery() { Id = id };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy lịch sử nhập hàng của nhà cung cấp.
+    /// </summary>
+    /// <param name="id">Id nhà cung cấp.</param>
+    /// <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp.</param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    [HttpGet("{id:int}/purchase-history")]
+    [HasPermission(Suppliers.View)]
+    [ProducesResponseType(typeof(PagedResult<SupplierPurchaseHistoryResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetPurchaseHistoryAsync(
+        int id,
+        [FromQuery] SieveModel sieveModel,
+        CancellationToken cancellationToken)
+    {
+        var query = new GetSupplierPurchaseHistoryQuery() { SupplierId = id, SieveModel = sieveModel };
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+
         return HandleResult(result);
     }
 

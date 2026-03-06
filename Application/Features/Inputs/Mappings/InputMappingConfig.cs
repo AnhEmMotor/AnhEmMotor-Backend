@@ -1,5 +1,6 @@
 ﻿using Application.ApiContracts.Input.Requests;
 using Application.ApiContracts.Input.Responses;
+using Application.ApiContracts.Supplier.Responses;
 using Application.Features.Inputs.Commands.CreateInput;
 using Application.Features.Inputs.Commands.UpdateInput;
 using Domain.Entities;
@@ -43,6 +44,15 @@ public sealed class InputMappingConfig : IRegister
         config.NewConfig<UpdateInputInfoRequest, InputInfo>().IgnoreNullValues(true);
 
         config.NewConfig<UpdateInputCommand, Input>().IgnoreNullValues(true);
+
+        config.NewConfig<Input, SupplierPurchaseHistoryResponse>()
+            .Map(dest => dest.CreatedAt, src => src.CreatedAt)
+            .Map(
+                dest => dest.TotalPayable,
+                src => src.InputInfos != null ? src.InputInfos.Sum(ii => (long)(ii.Count ?? 0) * (long)(ii.InputPrice ?? 0)) : 0)
+            .Map(dest => dest.TotalItems, src => src.InputInfos != null ? src.InputInfos.Count() : 0);
+
+        config.NewConfig<InputListResponse, SupplierPurchaseHistoryResponse>();
     }
 
     private static string? BuildFullVariantName(ProductVariant? variant)

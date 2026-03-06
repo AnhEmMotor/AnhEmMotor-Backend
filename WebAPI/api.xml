@@ -754,6 +754,15 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
+        <member name="M:WebAPI.Controllers.V1.SupplierController.GetPurchaseHistoryAsync(System.Int32,Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+            <summary>
+            Lấy lịch sử nhập hàng của nhà cung cấp.
+            </summary>
+            <param name="id">Id nhà cung cấp.</param>
+            <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp.</param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
         <member name="M:WebAPI.Controllers.V1.SupplierController.CreateSupplierAsync(Application.Features.Suppliers.Commands.CreateSupplier.CreateSupplierCommand,System.Threading.CancellationToken)">
             <summary>
             Tạo nhà cung cấp mới.

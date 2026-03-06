@@ -1112,5 +1112,99 @@ public class Supplier : IAsyncLifetime
         content.Should().NotBeNull();
         content!.TotalInput.Should().Be(10000);
     }
-#pragma warning restore CRR0035
+    [Fact(DisplayName = "SUP_066 - Lấy lịch sử nhập hàng của nhà cung cấp thành công")]
+    public async Task GetPurchaseHistory_ValidSupplier_ReturnsPagedHistory()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Suppliers.View ],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        int supplierId;
+        using(var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+
+            await db.Database
+                .ExecuteSqlRawAsync(
+                    "INSERT IGNORE INTO SupplierStatus (`Key`) VALUES ({0})",
+                    Domain.Constants.SupplierStatus.Active)
+                .ConfigureAwait(true);
+
+            foreach(var status in new[]
+            {
+                Domain.Constants.Input.InputStatus.Finish,
+                Domain.Constants.Input.InputStatus.Working,
+                Domain.Constants.Input.InputStatus.Cancel
+            })
+            {
+                await db.Database
+                    .ExecuteSqlRawAsync("INSERT IGNORE INTO InputStatus (`Key`) VALUES ({0})", status)
+                    .ConfigureAwait(true);
+            }
+
+            var supplier = new SupplierEntity
+            {
+                Name = $"Supplier_{uniqueId}",
+                Phone = "099",
+                Address = "A",
+                StatusId = Domain.Constants.SupplierStatus.Active
+            };
+            await db.Suppliers.AddAsync(supplier, CancellationToken.None).ConfigureAwait(true);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+            supplierId = supplier.Id;
+
+            var user = await db.Users
+                .FirstOrDefaultAsync(u => string.Compare(u.UserName, username) == 0, CancellationToken.None)
+                .ConfigureAwait(true);
+            var userId = user?.Id ?? Guid.NewGuid();
+
+            for(int i = 1; i <= 5; i++)
+            {
+                var input = new Input
+                {
+                    SupplierId = supplierId,
+                    StatusId = Domain.Constants.Input.InputStatus.Finish,
+                    CreatedBy = userId
+                };
+                await db.InputReceipts.AddAsync(input, CancellationToken.None).ConfigureAwait(true);
+                await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+                var inputInfo = new InputInfo
+                {
+                    InputId = input.Id,
+                    InputPrice = 1000m * i,
+                    Count = i
+                };
+                await db.InputInfos.AddAsync(inputInfo, CancellationToken.None).ConfigureAwait(true);
+                await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+            }
+        }
+
+        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}/purchase-history", CancellationToken.None).ConfigureAwait(true);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response.Content
+            .ReadFromJsonAsync<PagedResult<SupplierPurchaseHistoryResponse>>(CancellationToken.None)
+            .ConfigureAwait(true);
+
+        content.Should().NotBeNull();
+        content!.Items.Should().HaveCount(5);
+        content.Items.Should().OnlyContain(x => x.TotalItems == 1);
+    }
+
+    #pragma warning restore CRR0035
 }
