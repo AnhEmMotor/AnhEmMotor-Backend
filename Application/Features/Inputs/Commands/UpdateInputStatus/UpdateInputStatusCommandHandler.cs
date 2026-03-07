@@ -1,4 +1,4 @@
-using Application.ApiContracts.Input.Responses;
+﻿using Application.ApiContracts.Input.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
@@ -12,9 +12,9 @@ namespace Application.Features.Inputs.Commands.UpdateInputStatus;
 public sealed class UpdateInputStatusCommandHandler(
     IInputReadRepository readRepository,
     IInputUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateInputStatusCommand, Result<InputResponse>>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateInputStatusCommand, Result<InputDetailResponse>>
 {
-    public async Task<Result<InputResponse>> Handle(
+    public async Task<Result<InputDetailResponse>> Handle(
         UpdateInputStatusCommand request,
         CancellationToken cancellationToken)
     {
@@ -55,6 +55,6 @@ public sealed class UpdateInputStatusCommandHandler(
 
         var updated = await readRepository.GetByIdWithDetailsAsync(input.Id, cancellationToken).ConfigureAwait(false);
 
-        return updated.Adapt<InputResponse>();
+        return updated.Adapt<InputDetailResponse>();
     }
 }

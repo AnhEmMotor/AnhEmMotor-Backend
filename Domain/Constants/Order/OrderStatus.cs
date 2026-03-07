@@ -40,5 +40,21 @@
                 return false;
             return NotDeletedPhases.Contains(value, StringComparer.OrdinalIgnoreCase);
         }
+
+        public static string GetDisplayName(string status) => status.ToLower() switch
+        {
+            Pending => "Chờ xác nhận",
+            ConfirmedCod => "Đã xác nhận (Chờ thanh toán COD)",
+            PaidProcessing => "Đã thanh toán (Chờ xử lý)",
+            WaitingDeposit => "Chờ đặt cọc",
+            DepositPaid => "Đã đặt cọc (Chờ xử lý)",
+            Delivering => "Đang giao hàng",
+            WaitingPickup => "Chờ lấy hàng tại cửa hàng",
+            Completed => "Đã hoàn thành",
+            Cancelled => "Đã hủy",
+            Refunding => "Đang hoàn tiền",
+            Refunded => "Đã hoàn tiền",
+            _ => status
+        };
     }
 }

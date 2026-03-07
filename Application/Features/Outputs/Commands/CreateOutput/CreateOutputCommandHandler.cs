@@ -15,9 +15,11 @@ public sealed class CreateOutputCommandHandler(
     IOutputReadRepository readRepository,
     IOutputInsertRepository insertRepository,
     IProductVariantReadRepository variantRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateOutputCommand, Result<OutputResponse?>>
+    IUnitOfWork unitOfWork) : IRequestHandler<CreateOutputCommand, Result<OrderDetailResponse>>
 {
-    public async Task<Result<OutputResponse?>> Handle(CreateOutputCommand request, CancellationToken cancellationToken)
+    public async Task<Result<OrderDetailResponse>> Handle(
+        CreateOutputCommand request,
+        CancellationToken cancellationToken)
     {
         var variantIds = request.OutputInfos
             .Where(p => p.ProductId.HasValue)
@@ -72,7 +74,7 @@ public sealed class CreateOutputCommandHandler(
 
         var created = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
 
-        return created.Adapt<OutputResponse>();
+        return created.Adapt<OrderDetailResponse>();
     }
 }
 

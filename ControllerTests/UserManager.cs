@@ -424,6 +424,67 @@ public class UserManager
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
+
+    [Fact(
+        DisplayName = "UMGR_047 - Lấy thông tin cơ bản của người dùng (basic-info) thành công với phân trang và dữ liệu đầy đủ")]
+    public async Task GetBasicUsersInfo_WithValidRequest_ReturnsUsersWithBasicFields()
+    {
+        var sieveModel = new SieveModel { Page = 1, PageSize = 5 };
+        var expectedItems = new List<UserDTOForOutputResponse>
+        {
+            new()
+            {
+                Id = Guid.NewGuid(),
+                FullName = "Nguyen Van A",
+                Email = "a@example.com",
+                PhoneNumber = "0912345678"
+            },
+            new() { Id = Guid.NewGuid(), FullName = "Tran Thi B", Email = "b@example.com", PhoneNumber = "0987654321" },
+        };
+        var expectedResponse = new PagedResult<UserDTOForOutputResponse>(expectedItems, 2, 1, 5);
+
+        _mediatorMock.Setup(m => m.Send(It.IsAny<GetUsersListForOutputQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(expectedResponse);
+
+        var result = await _controller.GetAllUsersForOutputAsync(sieveModel, CancellationToken.None)
+            .ConfigureAwait(true);
+
+        var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+        okResult.StatusCode.Should().Be(StatusCodes.Status200OK);
+        var response = okResult.Value.Should().BeAssignableTo<PagedResult<UserDTOForOutputResponse>>().Subject;
+        response.TotalCount.Should().Be(2);
+        response.Items.Should().HaveCount(2);
+        response.Items.First().FullName.Should().Be("Nguyen Van A");
+        response.Items.First().Email.Should().Be("a@example.com");
+        response.Items.First().PhoneNumber.Should().Be("0912345678");
+        response.Items.First().Id.Should().NotBeEmpty();
+
+        _mediatorMock.Verify(
+            m => m.Send(
+                It.Is<GetUsersListForOutputQuery>(q => q.SieveModel == sieveModel),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact(DisplayName = "UMGR_048 - Lấy basic-info với filter tìm kiếm trả về lỗi Forbidden khi không có quyền")]
+    public async Task GetBasicUsersInfo_WithoutPermission_ReturnsForbidden()
+    {
+        var sieveModel = new SieveModel { Filters = "FullName@=Nguyen" };
+
+        _mediatorMock.Setup(m => m.Send(It.IsAny<GetUsersListForOutputQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(
+                Result<PagedResult<UserDTOForOutputResponse>>.Failure(Error.Forbidden("Không có quyền truy cập")));
+
+        var result = await _controller.GetAllUsersForOutputAsync(sieveModel, CancellationToken.None)
+            .ConfigureAwait(true);
+
+        var objectResult = result.Should().BeOfType<ObjectResult>().Subject;
+        objectResult.StatusCode.Should().Be(StatusCodes.Status403Forbidden);
+
+        _mediatorMock.Verify(
+            m => m.Send(It.IsAny<GetUsersListForOutputQuery>(), It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
 #pragma warning restore CRR0035
 #pragma warning restore IDE0079
 }

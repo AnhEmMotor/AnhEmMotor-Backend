@@ -72,7 +72,8 @@ namespace Infrastructure.Repositories.ProductVariant
             string? filters,
             string? sorts,
             CancellationToken cancellationToken,
-            DataFetchMode mode = DataFetchMode.ActiveOnly)
+            DataFetchMode mode = DataFetchMode.ActiveOnly,
+            string? search = null)
         {
             var query = context.GetQuery<ProductVariantEntity>(mode);
 
@@ -82,6 +83,18 @@ namespace Infrastructure.Repositories.ProductVariant
             } else if(mode == DataFetchMode.DeletedOnly)
             {
                 query = query.Where(v => v.Product != null && v.Product.DeletedAt == null);
+            }
+
+            if(!string.IsNullOrWhiteSpace(search))
+            {
+                var searchPattern = $"%{search.Trim()}%";
+                query = query.Where(
+                    v => v.Product != null &&
+                        (EF.Functions.Like(v.Product.Name!, searchPattern) ||
+                            v.VariantOptionValues
+                                .Any(
+                                    vov => vov.OptionValue != null &&
+                                                    EF.Functions.Like(vov.OptionValue.Name!, searchPattern))));
             }
 
             var normalizedPage = Math.Max(page, 1);

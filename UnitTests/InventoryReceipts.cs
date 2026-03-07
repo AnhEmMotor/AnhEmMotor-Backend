@@ -1,6 +1,8 @@
 ﻿using Application.ApiContracts.Input.Requests;
+using Application.ApiContracts.Input.Responses;
 using Application.Features.Inputs.Commands.CreateInput;
 using Application.Features.Inputs.Commands.UpdateInput;
+using Application.Features.Inputs.Mappings;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
 using Application.Interfaces.Repositories.ProductVariant;
@@ -9,6 +11,7 @@ using Domain.Constants;
 using Domain.Entities;
 using FluentAssertions;
 using FluentValidation.TestHelper;
+using Mapster;
 using Moq;
 
 namespace UnitTests;
@@ -305,6 +308,30 @@ public class InventoryReceipts
         var result = validator.TestValidate(command);
 
         result.ShouldHaveValidationErrorFor(x => x.Products);
+    }
+
+    [Fact(DisplayName = "INPUT_075 - Mapster mapping tính TotalPayable chính xác dựa trên sum(Count * InputPrice)")]
+    public void InputMappingConfig_CalculatesTotalPayableCorrectly()
+    {
+        var config = new TypeAdapterConfig();
+        new InputMappingConfig().Register(config);
+
+        var input = new Input
+        {
+            Id = 1,
+            InputInfos =
+                new List<InputInfo>
+                {
+                    new InputInfo { Count = 2, InputPrice = 150000 },
+                    new InputInfo { Count = 3, InputPrice = 50000 },
+                    new InputInfo { Count = null, InputPrice = 20000 },
+                    new InputInfo { Count = 1, InputPrice = null }
+                }
+        };
+
+        var response = input.Adapt<InputDetailResponse>(config);
+
+        response.TotalPayable.Should().Be((2 * 150000) + (3 * 50000) + 0 + 0);
     }
 #pragma warning restore CRR0035
 #pragma warning restore IDE0079

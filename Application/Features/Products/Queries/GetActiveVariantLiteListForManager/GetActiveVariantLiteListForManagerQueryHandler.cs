@@ -21,7 +21,8 @@ public sealed class GetActiveVariantLiteListForManagerQueryHandler(IProductVaria
             pageSize,
             request.Filters,
             request.Sorts,
-            cancellationToken)
+            cancellationToken,
+            search: request.Search)
             .ConfigureAwait(false);
 
         var responses = variants.Select(v => v.Adapt<ProductVariantLiteResponse>()).ToList();

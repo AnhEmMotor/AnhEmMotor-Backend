@@ -13,7 +13,6 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
@@ -31,10 +30,14 @@ public class User : IAsyncLifetime
         _output = output;
     }
 
-    public Task InitializeAsync() => Task.CompletedTask;
+    public ValueTask InitializeAsync() => ValueTask.CompletedTask;
 
-    public async Task DisposeAsync()
-    { await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(false); }
+    public async ValueTask DisposeAsync()
+    {
+        await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(false);
+        GC.SuppressFinalize(this);
+    }
+
 #pragma warning disable IDE0079
 #pragma warning disable CRR0035
     [Fact(DisplayName = "USER_021 - Khôi phục tài khoản thành công")]
@@ -87,7 +90,8 @@ public class User : IAsyncLifetime
             userId = u!.Id.ToString();
         }
 
-        var response = await _client.PostAsync($"/api/v1/User/{userId}/restore", null).ConfigureAwait(true);
+        var response = await _client.PostAsync($"/api/v1/User/{userId}/restore", null, CancellationToken.None)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -99,7 +103,9 @@ public class User : IAsyncLifetime
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var updatedUser = await db.Users.FindAsync(Guid.Parse(userId)).ConfigureAwait(true);
+            var updatedUser = await db.Users
+                .FindAsync([ Guid.Parse(userId) ], TestContext.Current.CancellationToken)
+                .ConfigureAwait(true);
             updatedUser!.DeletedAt.Should().BeNull();
         }
     }
@@ -134,10 +140,11 @@ public class User : IAsyncLifetime
             CancellationToken.None)
             .ConfigureAwait(true);
 
-        var response = await _client.PostAsync($"/api/v1/User/{targetUser.Id}/restore", null).ConfigureAwait(true);
+        var response = await _client.PostAsync($"/api/v1/User/{targetUser.Id}/restore", null, CancellationToken.None)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var content = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
+        var content = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
         content.Should().Contain("User account is not deleted.");
     }
 
@@ -173,16 +180,19 @@ public class User : IAsyncLifetime
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var u = await db.Users.FindAsync(targetUser.Id).ConfigureAwait(true);
+            var u = await db.Users
+                .FindAsync([ targetUser.Id ], TestContext.Current.CancellationToken)
+                .ConfigureAwait(true);
             u!.Status = UserStatus.Banned;
             u.DeletedAt = DateTimeOffset.UtcNow.AddDays(-1);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.PostAsync($"/api/v1/User/{targetUser.Id}/restore", null).ConfigureAwait(true);
+        var response = await _client.PostAsync($"/api/v1/User/{targetUser.Id}/restore", null, CancellationToken.None)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var content = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
+        var content = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
         content.Should().Contain($"Cannot restore user with status '{UserStatus.Banned}'. User status must be Active.");
     }
 
@@ -208,7 +218,11 @@ public class User : IAsyncLifetime
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var nonExistentUserId = Guid.NewGuid();
-        var response = await _client.PostAsync($"/api/v1/User/{nonExistentUserId}/restore", null).ConfigureAwait(true);
+        var response = await _client.PostAsync(
+            $"/api/v1/User/{nonExistentUserId}/restore",
+            null,
+            CancellationToken.None)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -221,7 +235,12 @@ public class User : IAsyncLifetime
         var email = $"user_{uniqueId}@test.com";
         var password = "ThisIsStrongPassword1@";
 
-        await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, username, password, email: email)
+        await IntegrationTestAuthHelper.CreateUserAsync(
+            _factory.Services,
+            username,
+            password,
+            email: email,
+            cancellationToken: CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
             _client,
@@ -231,7 +250,7 @@ public class User : IAsyncLifetime
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var response = await _client.GetAsync("/api/v1/User/me").ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/User/me", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -246,7 +265,7 @@ public class User : IAsyncLifetime
     public async Task GetCurrentUser_NoJWT_ReturnsUnauthorized()
     {
         _client.DefaultRequestHeaders.Authorization = null;
-        var response = await _client.GetAsync("/api/v1/User/me").ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/User/me", CancellationToken.None).ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
@@ -315,7 +334,7 @@ public class User : IAsyncLifetime
         var response = await _client.PutAsJsonAsync("/api/v1/User/me", updateRequest).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var content = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
+        var content = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
         content.Should().Contain("Invalid phone number format");
     }
 
@@ -360,7 +379,7 @@ public class User : IAsyncLifetime
             .ConfigureAwait(true);
         newLoginResponse.AccessToken.Should().NotBeNullOrEmpty();
 
-        var oldTokenResponse = await _client.GetAsync("/api/v1/User/me").ConfigureAwait(true);
+        var oldTokenResponse = await _client.GetAsync("/api/v1/User/me", CancellationToken.None).ConfigureAwait(true);
         oldTokenResponse.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
@@ -395,7 +414,7 @@ public class User : IAsyncLifetime
             .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var errorContent = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
+        var errorContent = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
         errorContent.Should().Contain("Incorrect password.");
     }
 
@@ -416,7 +435,8 @@ public class User : IAsyncLifetime
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var response = await _client.PostAsync("/api/v1/User/delete-account", null).ConfigureAwait(true);
+        var response = await _client.PostAsync("/api/v1/User/delete-account", null, CancellationToken.None)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
@@ -429,7 +449,7 @@ public class User : IAsyncLifetime
             user!.DeletedAt.Should().NotBeNull();
         }
 
-        var tokenTestResponse = await _client.GetAsync("/api/v1/User/me").ConfigureAwait(true);
+        var tokenTestResponse = await _client.GetAsync("/api/v1/User/me", CancellationToken.None).ConfigureAwait(true);
         tokenTestResponse.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
@@ -457,12 +477,13 @@ public class User : IAsyncLifetime
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var u = await db.Users.FindAsync(user.Id).ConfigureAwait(true);
+            var u = await db.Users.FindAsync([ user.Id ], CancellationToken.None).ConfigureAwait(true);
             u!.Status = UserStatus.Banned;
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.PostAsync("/api/v1/User/delete-account", null).ConfigureAwait(true);
+        var response = await _client.PostAsync("/api/v1/User/delete-account", null, CancellationToken.None)
+            .ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
@@ -493,7 +514,7 @@ public class User : IAsyncLifetime
             .ConfigureAwait(true);
         changeResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var testResponse = await _client.GetAsync("/api/v1/User/me").ConfigureAwait(true);
+        var testResponse = await _client.GetAsync("/api/v1/User/me", CancellationToken.None).ConfigureAwait(true);
         testResponse.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
@@ -521,12 +542,12 @@ public class User : IAsyncLifetime
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var u = await db.Users.FindAsync(user.Id).ConfigureAwait(true);
+            var u = await db.Users.FindAsync([ user.Id ], TestContext.Current.CancellationToken).ConfigureAwait(true);
             u!.DeletedAt = DateTimeOffset.UtcNow;
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync("/api/v1/User/me").ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/User/me", CancellationToken.None).ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
@@ -554,16 +575,16 @@ public class User : IAsyncLifetime
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var u = await db.Users.FindAsync(user.Id).ConfigureAwait(true);
+            var u = await db.Users.FindAsync([ user.Id ], TestContext.Current.CancellationToken).ConfigureAwait(true);
             u!.Status = UserStatus.Banned;
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync("/api/v1/User/me").ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/User/me", CancellationToken.None).ConfigureAwait(true);
 
         if(response.StatusCode != HttpStatusCode.OK)
         {
-            var errorContent = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
+            var errorContent = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
             throw new Exception($"API returned not OK. Response Body: {errorContent}");
         }
 
@@ -599,7 +620,7 @@ public class User : IAsyncLifetime
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var response = await _client.GetAsync("/api/v1/User/me").ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/User/me", CancellationToken.None).ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         var content = await response.Content
@@ -607,8 +628,7 @@ public class User : IAsyncLifetime
             .ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Permissions.Should().NotBeNullOrEmpty();
-        content.Permissions!.Should().Contain(p => string.Compare(p.ID, PermissionsList.Users.View) == 0);
-        content.Permissions!.First().DisplayName.Should().NotBeNullOrEmpty();
+        content.Permissions!.Should().Contain(PermissionsList.Users.View);
     }
 
     [Fact(DisplayName = "USER_054 - Verify Status field cho Active user")]
@@ -628,7 +648,7 @@ public class User : IAsyncLifetime
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var response = await _client.GetAsync("/api/v1/User/me").ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/User/me", CancellationToken.None).ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         var content = await response.Content
@@ -657,7 +677,7 @@ public class User : IAsyncLifetime
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-        var response = await _client.SendAsync(request).ConfigureAwait(true);
+        var response = await _client.SendAsync(request, CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         response.Content.Headers.ContentType?.MediaType.Should().Be("application/json");
@@ -683,7 +703,11 @@ public class User : IAsyncLifetime
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
 
-        var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(true);
+        var response = await _client.SendAsync(
+            request,
+            HttpCompletionOption.ResponseHeadersRead,
+            CancellationToken.None)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         response.Content.Headers.ContentType?.MediaType.Should().Be("text/event-stream");
@@ -709,8 +733,12 @@ public class User : IAsyncLifetime
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
 
-        var response = await _client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(true);
-        var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(true);
+        var response = await _client.SendAsync(
+            request,
+            HttpCompletionOption.ResponseHeadersRead,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var stream = await response.Content.ReadAsStreamAsync(CancellationToken.None).ConfigureAwait(true);
         using var reader = new StreamReader(stream);
 
         string? line;
@@ -749,9 +777,12 @@ public class User : IAsyncLifetime
         sseRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         sseRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
 
-        var sseResponse = await _client.SendAsync(sseRequest, HttpCompletionOption.ResponseHeadersRead)
+        var sseResponse = await _client.SendAsync(
+            sseRequest,
+            HttpCompletionOption.ResponseHeadersRead,
+            CancellationToken.None)
             .ConfigureAwait(true);
-        var stream = await sseResponse.Content.ReadAsStreamAsync().ConfigureAwait(true);
+        var stream = await sseResponse.Content.ReadAsStreamAsync(CancellationToken.None).ConfigureAwait(true);
         var reader = new StreamReader(stream);
 
         await ReadEventAsync(reader).ConfigureAwait(true);
@@ -813,9 +844,13 @@ public class User : IAsyncLifetime
         var sseRequest = new HttpRequestMessage(HttpMethod.Get, "/api/v1/User/me");
         sseRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         sseRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
-        var sseResponse = await _client.SendAsync(sseRequest, HttpCompletionOption.ResponseHeadersRead)
+        var sseResponse = await _client.SendAsync(
+            sseRequest,
+            HttpCompletionOption.ResponseHeadersRead,
+            CancellationToken.None)
             .ConfigureAwait(true);
-        var reader = new StreamReader(await sseResponse.Content.ReadAsStreamAsync().ConfigureAwait(true));
+        var reader = new StreamReader(
+            await sseResponse.Content.ReadAsStreamAsync(CancellationToken.None).ConfigureAwait(true));
 
         await ReadEventAsync(reader).ConfigureAwait(true);
 
@@ -865,9 +900,13 @@ public class User : IAsyncLifetime
         var sseRequest = new HttpRequestMessage(HttpMethod.Get, "/api/v1/User/me");
         sseRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         sseRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
-        var sseResponse = await _client.SendAsync(sseRequest, HttpCompletionOption.ResponseHeadersRead)
+        var sseResponse = await _client.SendAsync(
+            sseRequest,
+            HttpCompletionOption.ResponseHeadersRead,
+            CancellationToken.None)
             .ConfigureAwait(true);
-        var reader = new StreamReader(await sseResponse.Content.ReadAsStreamAsync().ConfigureAwait(true));
+        var reader = new StreamReader(
+            await sseResponse.Content.ReadAsStreamAsync(CancellationToken.None).ConfigureAwait(true));
 
         await ReadEventAsync(reader).ConfigureAwait(true);
 
@@ -909,13 +948,13 @@ public class User : IAsyncLifetime
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var u = await db.Users.FindAsync(user.Id).ConfigureAwait(true);
+            var u = await db.Users.FindAsync([ user.Id ], TestContext.Current.CancellationToken).ConfigureAwait(true);
             u!.Status = UserStatus.Banned;
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-        var response = await _client.GetAsync("/api/v1/User/me").ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/User/me", CancellationToken.None).ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         var content = await response.Content
@@ -942,8 +981,10 @@ public class User : IAsyncLifetime
         var req1 = new HttpRequestMessage(HttpMethod.Get, "/api/v1/User/me");
         req1.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         req1.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
-        var resp1 = await _client.SendAsync(req1, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(true);
-        var reader1 = new StreamReader(await resp1.Content.ReadAsStreamAsync().ConfigureAwait(true));
+        var resp1 = await _client.SendAsync(req1, HttpCompletionOption.ResponseHeadersRead, CancellationToken.None)
+            .ConfigureAwait(true);
+        var reader1 = new StreamReader(
+            await resp1.Content.ReadAsStreamAsync(CancellationToken.None).ConfigureAwait(true));
         await ReadEventAsync(reader1).ConfigureAwait(true);
 
         reader1.Dispose();
@@ -951,8 +992,10 @@ public class User : IAsyncLifetime
         var req2 = new HttpRequestMessage(HttpMethod.Get, "/api/v1/User/me");
         req2.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         req2.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
-        var resp2 = await _client.SendAsync(req2, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(true);
-        var reader2 = new StreamReader(await resp2.Content.ReadAsStreamAsync().ConfigureAwait(true));
+        var resp2 = await _client.SendAsync(req2, HttpCompletionOption.ResponseHeadersRead, CancellationToken.None)
+            .ConfigureAwait(true);
+        var reader2 = new StreamReader(
+            await resp2.Content.ReadAsStreamAsync(CancellationToken.None).ConfigureAwait(true));
 
         var data = await ReadEventAsync(reader2).ConfigureAwait(true);
         data.Should().Contain(username);
@@ -976,15 +1019,19 @@ public class User : IAsyncLifetime
         var req1 = new HttpRequestMessage(HttpMethod.Get, "/api/v1/User/me");
         req1.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         req1.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
-        var resp1 = await _client.SendAsync(req1, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(true);
-        var reader1 = new StreamReader(await resp1.Content.ReadAsStreamAsync().ConfigureAwait(true));
+        var resp1 = await _client.SendAsync(req1, HttpCompletionOption.ResponseHeadersRead, CancellationToken.None)
+            .ConfigureAwait(true);
+        var reader1 = new StreamReader(
+            await resp1.Content.ReadAsStreamAsync(CancellationToken.None).ConfigureAwait(true));
         await ReadEventAsync(reader1).ConfigureAwait(true);
 
         var req2 = new HttpRequestMessage(HttpMethod.Get, "/api/v1/User/me");
         req2.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         req2.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
-        var resp2 = await _client.SendAsync(req2, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(true);
-        var reader2 = new StreamReader(await resp2.Content.ReadAsStreamAsync().ConfigureAwait(true));
+        var resp2 = await _client.SendAsync(req2, HttpCompletionOption.ResponseHeadersRead, CancellationToken.None)
+            .ConfigureAwait(true);
+        var reader2 = new StreamReader(
+            await resp2.Content.ReadAsStreamAsync(CancellationToken.None).ConfigureAwait(true));
         await ReadEventAsync(reader2).ConfigureAwait(true);
 
         reader1.Dispose();
@@ -1029,8 +1076,10 @@ public class User : IAsyncLifetime
         var reqA = new HttpRequestMessage(HttpMethod.Get, "/api/v1/User/me");
         reqA.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenA);
         reqA.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
-        var respA = await _client.SendAsync(reqA, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(true);
-        var readerA = new StreamReader(await respA.Content.ReadAsStreamAsync().ConfigureAwait(true));
+        var respA = await _client.SendAsync(reqA, HttpCompletionOption.ResponseHeadersRead, CancellationToken.None)
+            .ConfigureAwait(true);
+        var readerA = new StreamReader(
+            await respA.Content.ReadAsStreamAsync(CancellationToken.None).ConfigureAwait(true));
         await ReadEventAsync(readerA).ConfigureAwait(true);
 
         using(var scope = _factory.Services.CreateScope())
@@ -1093,8 +1142,10 @@ public class User : IAsyncLifetime
         var reqA = new HttpRequestMessage(HttpMethod.Get, "/api/v1/User/me");
         reqA.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenA);
         reqA.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
-        var respA = await _client.SendAsync(reqA, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(true);
-        var readerA = new StreamReader(await respA.Content.ReadAsStreamAsync().ConfigureAwait(true));
+        var respA = await _client.SendAsync(reqA, HttpCompletionOption.ResponseHeadersRead, CancellationToken.None)
+            .ConfigureAwait(true);
+        var readerA = new StreamReader(
+            await respA.Content.ReadAsStreamAsync(CancellationToken.None).ConfigureAwait(true));
         await ReadEventAsync(readerA).ConfigureAwait(true);
 
         var updateClientB = _factory.CreateClient();
@@ -1139,14 +1190,15 @@ public class User : IAsyncLifetime
         var req = new HttpRequestMessage(HttpMethod.Get, "/api/v1/User/me");
         req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
-        var resp = await _client.SendAsync(req, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(true);
-        var reader = new StreamReader(await resp.Content.ReadAsStreamAsync().ConfigureAwait(true));
+        var resp = await _client.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, CancellationToken.None)
+            .ConfigureAwait(true);
+        var reader = new StreamReader(await resp.Content.ReadAsStreamAsync(CancellationToken.None).ConfigureAwait(true));
         await ReadEventAsync(reader).ConfigureAwait(true);
 
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var u = await db.Users.FindAsync(user.Id).ConfigureAwait(true);
+            var u = await db.Users.FindAsync([ user.Id ], TestContext.Current.CancellationToken).ConfigureAwait(true);
             u!.DeletedAt = DateTime.UtcNow;
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
@@ -1187,7 +1239,8 @@ public class User : IAsyncLifetime
         req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
 
-        var resp = await _client.SendAsync(req, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(true);
+        var resp = await _client.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, CancellationToken.None)
+            .ConfigureAwait(true);
         resp.StatusCode.Should().Be(HttpStatusCode.OK);
 
         resp.Dispose();
@@ -1228,8 +1281,13 @@ public class User : IAsyncLifetime
         var requestB = new HttpRequestMessage(HttpMethod.Get, "/api/v1/User/me");
         requestB.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenB);
         requestB.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
-        var responseB = await _client.SendAsync(requestB, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(true);
-        var readerB = new StreamReader(await responseB.Content.ReadAsStreamAsync().ConfigureAwait(true));
+        var responseB = await _client.SendAsync(
+            requestB,
+            HttpCompletionOption.ResponseHeadersRead,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var readerB = new StreamReader(
+            await responseB.Content.ReadAsStreamAsync(CancellationToken.None).ConfigureAwait(true));
 
         await ReadEventAsync(readerB).ConfigureAwait(true);
 
@@ -1271,15 +1329,19 @@ public class User : IAsyncLifetime
         var req1 = new HttpRequestMessage(HttpMethod.Get, "/api/v1/User/me");
         req1.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         req1.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
-        var resp1 = await _client.SendAsync(req1, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(true);
-        var reader1 = new StreamReader(await resp1.Content.ReadAsStreamAsync().ConfigureAwait(true));
+        var resp1 = await _client.SendAsync(req1, HttpCompletionOption.ResponseHeadersRead, CancellationToken.None)
+            .ConfigureAwait(true);
+        var reader1 = new StreamReader(
+            await resp1.Content.ReadAsStreamAsync(CancellationToken.None).ConfigureAwait(true));
         await ReadEventAsync(reader1).ConfigureAwait(true);
 
         var req2 = new HttpRequestMessage(HttpMethod.Get, "/api/v1/User/me");
         req2.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         req2.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
-        var resp2 = await _client.SendAsync(req2, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(true);
-        var reader2 = new StreamReader(await resp2.Content.ReadAsStreamAsync().ConfigureAwait(true));
+        var resp2 = await _client.SendAsync(req2, HttpCompletionOption.ResponseHeadersRead, CancellationToken.None)
+            .ConfigureAwait(true);
+        var reader2 = new StreamReader(
+            await resp2.Content.ReadAsStreamAsync(CancellationToken.None).ConfigureAwait(true));
         await ReadEventAsync(reader2).ConfigureAwait(true);
 
         var updateClient = _factory.CreateClient();

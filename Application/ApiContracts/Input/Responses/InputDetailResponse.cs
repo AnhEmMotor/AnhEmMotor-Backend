@@ -1,10 +1,8 @@
 namespace Application.ApiContracts.Input.Responses;
 
-public class InputResponse
+public class InputDetailResponse
 {
     public int? Id { get; set; }
-
-    public DateTimeOffset? InputDate { get; set; }
 
     public string? Notes { get; set; }
 
@@ -14,9 +12,11 @@ public class InputResponse
 
     public string? SupplierName { get; set; }
 
-    public Guid? CreatedByUserId { get; set; }
+    public string? SupplierPhone { get; set; }
 
-    public string? CreatedByUserName { get; set; }
+    public string? SupplierEmail { get; set; }
+
+    public DateTimeOffset? CreatedAt { get; set; }
 
     public long? TotalPayable { get; set; }
 

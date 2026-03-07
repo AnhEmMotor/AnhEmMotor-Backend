@@ -53,7 +53,8 @@ namespace Application.Features.Products.Queries.GetActiveVariantLiteListForInput
                 var keyValue = part.Split([ '=', '@', '!' ], 2);
                 if(keyValue.Length == 2 && keyValue[0].Trim().Equals(key, StringComparison.OrdinalIgnoreCase))
                 {
-                    return keyValue[1].Trim();
+                    var value = keyValue[1].Trim();
+                    return value.TrimStart('=', '@', '!', '<', '>', '_');
                 }
             }
 

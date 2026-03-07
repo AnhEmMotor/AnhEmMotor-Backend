@@ -1,4 +1,4 @@
-using Application.ApiContracts.Input.Responses;
+﻿using Application.ApiContracts.Input.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
@@ -12,9 +12,11 @@ namespace Application.Features.Inputs.Commands.RestoreInput;
 public sealed class RestoreInputCommandHandler(
     IInputReadRepository readRepository,
     IInputUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<RestoreInputCommand, Result<InputResponse>>
+    IUnitOfWork unitOfWork) : IRequestHandler<RestoreInputCommand, Result<InputDetailResponse>>
 {
-    public async Task<Result<InputResponse>> Handle(RestoreInputCommand request, CancellationToken cancellationToken)
+    public async Task<Result<InputDetailResponse>> Handle(
+        RestoreInputCommand request,
+        CancellationToken cancellationToken)
     {
         var input = await readRepository.GetByIdAsync(request.Id!.Value, cancellationToken, DataFetchMode.DeletedOnly)
             .ConfigureAwait(false);
@@ -27,7 +29,7 @@ public sealed class RestoreInputCommandHandler(
         updateRepository.Restore(input);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return input.Adapt<InputResponse>();
+        return input.Adapt<InputDetailResponse>();
     }
 }
 

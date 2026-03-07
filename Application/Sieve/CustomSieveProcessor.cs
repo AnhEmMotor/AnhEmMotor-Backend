@@ -25,16 +25,16 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
             genericMethod.Invoke(null, [ mapper ]);
         }
 
-        mapper.Property<Brand>(p => p.Id).CanSort();
-        mapper.Property<Input>(p => p.Id).CanSort();
-        mapper.Property<Output>(p => p.Id).CanSort();
+        mapper.Property<Brand>(p => p.Id).CanSort().CanFilter();
+        mapper.Property<Input>(p => p.Id).CanSort().CanFilter();
+        mapper.Property<Output>(p => p.Id).CanSort().CanFilter();
         mapper.Property<Product>(p => p.Id).CanSort().CanFilter();
         mapper.Property<Product>(p => p.Name).CanSort().CanFilter();
         mapper.Property<Product>(p => p.BrandId).CanFilter();
         mapper.Property<Product>(p => p.CategoryId).CanFilter();
         mapper.Property<Product>(p => p.StatusId).CanFilter();
-        mapper.Property<ProductVariant>(p => p.Id).CanSort();
-        mapper.Property<Supplier>(p => p.Id).CanSort();
+        mapper.Property<ProductVariant>(p => p.Id).CanSort().CanFilter();
+        mapper.Property<Supplier>(p => p.Id).CanSort().CanFilter();
 
         mapper.Property<Brand>(b => b.Name).CanSort().CanFilter();
         mapper.Property<Brand>(b => b.Description).CanFilter();
@@ -42,12 +42,13 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<Input>(i => i.InputDate).CanSort().CanFilter();
         mapper.Property<Input>(i => i.StatusId).CanSort().CanFilter();
         mapper.Property<Input>(i => i.SupplierId).CanSort().CanFilter();
+        mapper.Property<Input>(i => i.Supplier!.Name).CanFilter().HasName("SupplierName");
         mapper.Property<Input>(i => i.Notes).CanFilter();
 
         mapper.Property<Output>(o => o.StatusId).CanSort().CanFilter();
         mapper.Property<Output>(o => o.Notes).CanFilter();
 
-        mapper.Property<ProductCategory>(c => c.Id).CanSort();
+        mapper.Property<ProductCategory>(c => c.Id).CanSort().CanFilter();
         mapper.Property<ProductCategory>(c => c.Name).CanSort().CanFilter();
         mapper.Property<ProductCategory>(c => c.Description).CanFilter();
 

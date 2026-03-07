@@ -162,6 +162,11 @@
             Lấy danh sách phiếu nhập (có phân trang, lọc, sắp xếp).
             </summary>
         </member>
+        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.GetInputStatusesAsync(System.Threading.CancellationToken)">
+            <summary>
+            Lấy danh sách trạng thái phiếu nhập.
+            </summary>
+        </member>
         <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.GetDeletedInputsAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách phiếu nhập đã bị xóa (có phân trang, lọc, sắp xếp).
@@ -195,6 +200,11 @@
         <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.UpdateInputStatusAsync(System.Int32,Application.Features.Inputs.Commands.UpdateInputStatus.UpdateInputStatusCommand,System.Threading.CancellationToken)">
             <summary>
             Cập nhật trạng thái của phiếu nhập.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.UpdateInputNotesAsync(System.Int32,Application.Features.Inputs.Commands.UpdateInputNotes.UpdateInputNotesCommand,System.Threading.CancellationToken)">
+            <summary>
+            Cập nhật ghi chú của phiếu nhập.
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.InventoryReceiptsController.UpdateManyInputStatusAsync(Application.Features.Inputs.Commands.UpdateManyInputStatus.UpdateManyInputStatusCommand,System.Threading.CancellationToken)">
@@ -337,6 +347,22 @@
             Xóa nhiều vai trò
             </summary>
         </member>
+        <member name="T:WebAPI.Controllers.V1.PredefinedOptionController">
+            <summary>
+            Quản lý danh sách các thuộc tính sản phẩm được định nghĩa sẵn (ví dụ: Loại xe, Màu sắc).
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.PredefinedOptionController.#ctor(MediatR.IMediator)">
+            <summary>
+            Quản lý danh sách các thuộc tính sản phẩm được định nghĩa sẵn (ví dụ: Loại xe, Màu sắc).
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.PredefinedOptionController.GetPredefinedOptionsAsync(System.Threading.CancellationToken)">
+            <summary>
+            Lấy danh sách các thuộc tính được định nghĩa sẵn dưới dạng từ điển key-value. Chỉ người dùng có quyền tạo hoặc
+            chỉnh sửa sản phẩm mới có thể truy cập.
+            </summary>
+        </member>
         <member name="T:WebAPI.Controllers.V1.ProductCategoryController">
             <summary>
             Quản lý danh mục sản phẩm.
@@ -415,6 +441,11 @@
         <member name="M:WebAPI.Controllers.V1.ProductController.GetProductsForManagerAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách sản phẩm đầy đủ dành cho người quản lý (có phân trang, lọc, tìm kiếm).
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetProductsForPriceManagementAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+            <summary>
+            Lấy danh sách sản phẩm rút gọn dành cho việc thiết lập giá (chỉ có Tên SP, Tên biến thể và Giá).
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.ProductController.GetDeletedProductsAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
@@ -553,6 +584,26 @@
         <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetDeletedOutputsAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách đơn hàng đã bị xóa (có phân trang, lọc, sắp xếp).
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetOutputStatusesAsync(System.Threading.CancellationToken)">
+            <summary>
+            Lấy danh sách trạng thái đơn hàng.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetStatusMap">
+            <summary>
+            Lấy bản đồ tên hiển thị nội bộ của trạng thái đơn hàng (Tiếng Việt).
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetTransitionMap">
+            <summary>
+            Lấy sơ đồ chuyển đổi trạng thái đơn hàng.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetLockedStatuses">
+            <summary>
+            Lấy danh sách các trạng thái đơn hàng bị khóa không cho phép sửa thông tin chi tiết.
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetOutputByIdAsync(System.Int32,System.Threading.CancellationToken)">
@@ -718,6 +769,15 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
+        <member name="M:WebAPI.Controllers.V1.SupplierController.GetPurchaseHistoryAsync(System.Int32,Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+            <summary>
+            Lấy lịch sử nhập hàng của nhà cung cấp.
+            </summary>
+            <param name="id">Id nhà cung cấp.</param>
+            <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp.</param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
         <member name="M:WebAPI.Controllers.V1.SupplierController.CreateSupplierAsync(Application.Features.Suppliers.Commands.CreateSupplier.CreateSupplierCommand,System.Threading.CancellationToken)">
             <summary>
             Tạo nhà cung cấp mới.
@@ -864,8 +924,8 @@
         </member>
         <member name="M:WebAPI.Controllers.V1.UserManagerController.GetAllUsersForOutputAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
-            Lấy danh sách tất cả người dùng (có phân trang, lọc, sắp xếp - chỉ vào được khi người dùng có quyền sửa hoặc xoá
-            phiếu bán hàng).
+            Lấy thông tin cơ bản của tất cả người dùng (Id, FullName, Email, PhoneNumber) để dùng trong các form nhập liệu.
+            Dành cho nhân viên có quyền tạo hoặc sửa phiếu bán hàng hoặc xem danh sách người dùng.
             </summary>
             <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
             <param name="cancellationToken"></param>
@@ -1039,16 +1099,17 @@
             <returns>The same service collection instance with OpenTelemetry tracing and metrics configured.</returns>
         </member>
         <member name="T:WebAPI.Extensions.RateLimitingExtensions">
-             <summary>
-            
-             </summary>
+            <summary>
+            Provides extension methods for configuring rate limiting services.
+            </summary>
         </member>
         <member name="M:WebAPI.Extensions.RateLimitingExtensions.AddRateLimitingServices(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
-             <summary>
-            
-             </summary>
-             <param name="services"></param>
-             <returns></returns>
+            <summary>
+            Adds rate limiting services to the specified <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/>. Loopback (localhost) requests are
+            excluded from rate limiting.
+            </summary>
+            <param name="services">The service collection to add rate limiting to.</param>
+            <returns>The same <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> for chaining.</returns>
         </member>
         <member name="T:WebAPI.Extensions.SwaggerExtensions">
             <summary>

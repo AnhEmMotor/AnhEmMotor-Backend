@@ -12,9 +12,11 @@ namespace Application.Features.Outputs.Commands.RestoreOutput;
 public sealed class RestoreOutputCommandHandler(
     IOutputReadRepository readRepository,
     IOutputUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<RestoreOutputCommand, Result<OutputResponse?>>
+    IUnitOfWork unitOfWork) : IRequestHandler<RestoreOutputCommand, Result<OrderDetailResponse>>
 {
-    public async Task<Result<OutputResponse?>> Handle(RestoreOutputCommand request, CancellationToken cancellationToken)
+    public async Task<Result<OrderDetailResponse>> Handle(
+        RestoreOutputCommand request,
+        CancellationToken cancellationToken)
     {
         var output = await readRepository.GetByIdAsync(request.Id, cancellationToken, DataFetchMode.DeletedOnly)
             .ConfigureAwait(false);
@@ -27,6 +29,6 @@ public sealed class RestoreOutputCommandHandler(
         updateRepository.Restore(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return output.Adapt<OutputResponse>();
+        return output.Adapt<OrderDetailResponse>();
     }
 }

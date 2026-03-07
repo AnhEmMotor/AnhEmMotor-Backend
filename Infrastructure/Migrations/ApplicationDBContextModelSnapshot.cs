@@ -14,7 +14,7 @@ namespace Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.2")
+                .HasAnnotation("ProductVersion", "10.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -276,6 +276,8 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Name");
+
                     b.ToTable("Option");
                 });
 
@@ -419,6 +421,31 @@ namespace Infrastructure.Migrations
                 });
 
             modelBuilder.Entity(
+                "Domain.Entities.PredefinedOption",
+                b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int").HasColumnName("Id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Key").IsRequired().HasColumnType("nvarchar(100)").HasColumnName("Key");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Value").IsRequired().HasColumnType("nvarchar(200)").HasColumnName("Value");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Key").IsUnique();
+
+                    b.ToTable("PredefinedOption");
+                });
+
+            modelBuilder.Entity(
                 "Domain.Entities.Product",
                 b =>
                 {
@@ -540,15 +567,9 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("datetimeoffset");
-
-                    b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
-
                     b.Property<string>("ImageUrl").HasColumnType("nvarchar(100)").HasColumnName("ImageUrl");
 
                     b.Property<int>("ProductVariantId").HasColumnType("int").HasColumnName("ProductVariantId");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
 
                     b.HasKey("Id");
 
@@ -594,7 +615,7 @@ namespace Infrastructure.Migrations
 
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
 
-                    b.Property<string>("UrlSlug").HasColumnType("nvarchar(50)").HasColumnName("UrlSlug");
+                    b.Property<string>("UrlSlug").HasColumnType("nvarchar(255)").HasColumnName("UrlSlug");
 
                     b.HasKey("Id");
 
@@ -730,13 +751,7 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("datetimeoffset");
-
-                    b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
-
                     b.Property<int?>("OptionValueId").HasColumnType("int").HasColumnName("OptionValueId");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
 
                     b.Property<int>("VariantId").HasColumnType("int").HasColumnName("VariantId");
 
@@ -903,6 +918,17 @@ namespace Infrastructure.Migrations
                 });
 
             modelBuilder.Entity(
+                "Domain.Entities.Option",
+                b =>
+                {
+                    b.HasOne("Domain.Entities.PredefinedOption", null)
+                        .WithMany()
+                        .HasForeignKey("Name")
+                        .HasPrincipalKey("Key")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity(
                 "Domain.Entities.OptionValue",
                 b =>
                 {
@@ -980,9 +1006,7 @@ namespace Infrastructure.Migrations
                 {
                     b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
                         .WithMany("ProductCollectionPhotos")
-                        .HasForeignKey("ProductVariantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ProductVariantId");
 
                     b.Navigation("ProductVariant");
                 });
@@ -1053,9 +1077,7 @@ namespace Infrastructure.Migrations
 
                     b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
                         .WithMany("VariantOptionValues")
-                        .HasForeignKey("VariantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("VariantId");
 
                     b.Navigation("OptionValue");
 

@@ -13,4 +13,6 @@ public class OutputInfoResponse
     public decimal? Price { get; set; }
 
     public decimal? CostPrice { get; set; }
+
+    public string? CoverImageUrl { get; set; }
 }

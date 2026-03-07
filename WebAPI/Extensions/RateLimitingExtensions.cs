@@ -1,6 +1,6 @@
+using Microsoft.AspNetCore.HttpOverrides;
 using System.Net;
 using System.Threading.RateLimiting;
-using Microsoft.AspNetCore.HttpOverrides;
 
 namespace WebAPI.Extensions;
 
@@ -10,8 +10,8 @@ namespace WebAPI.Extensions;
 public static class RateLimitingExtensions
 {
     /// <summary>
-    /// Adds rate limiting services to the specified <see cref="IServiceCollection"/>.
-    /// Loopback (localhost) requests are excluded from rate limiting.
+    /// Adds rate limiting services to the specified <see cref="IServiceCollection"/>. Loopback (localhost) requests are
+    /// excluded from rate limiting.
     /// </summary>
     /// <param name="services">The service collection to add rate limiting to.</param>
     /// <returns>The same <see cref="IServiceCollection"/> for chaining.</returns>
@@ -38,7 +38,7 @@ public static class RateLimitingExtensions
                     policyName: "public_api",
                     partitioner: httpContext =>
                     {
-                        if (IsLoopback(httpContext))
+                        if(IsLoopback(httpContext))
                         {
                             return RateLimitPartition.GetNoLimiter(string.Empty);
                         }
@@ -60,7 +60,7 @@ public static class RateLimitingExtensions
                     policyName: "auth_api",
                     partitioner: httpContext =>
                     {
-                        if (IsLoopback(httpContext))
+                        if(IsLoopback(httpContext))
                         {
                             return RateLimitPartition.GetNoLimiter(string.Empty);
                         }
@@ -80,7 +80,7 @@ public static class RateLimitingExtensions
                 options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(
                     httpContext =>
                     {
-                        if (IsLoopback(httpContext))
+                        if(IsLoopback(httpContext))
                         {
                             return RateLimitPartition.GetNoLimiter(string.Empty);
                         }

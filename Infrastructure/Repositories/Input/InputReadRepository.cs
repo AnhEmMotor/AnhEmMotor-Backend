@@ -24,9 +24,15 @@ public class InputReadRepository(ApplicationDBContext context) : IInputReadRepos
             .Include(x => x.InputInfos.Where(y => y.DeletedAt == null))
             .ThenInclude(x => x.ProductVariant)
             .ThenInclude(x => x!.Product)
+            .Include(x => x.InputInfos.Where(y => y.DeletedAt == null))
+            .ThenInclude(x => x.ProductVariant)
+            .ThenInclude(x => x!.VariantOptionValues)
+            .ThenInclude(x => x.OptionValue)
+            .ThenInclude(x => x!.Option)
             .Include(x => x.Supplier)
             .Include(x => x.CreatedByUser)
-            .Include(x => x.InputStatus);
+            .Include(x => x.InputStatus)
+            .AsSplitQuery();
     }
 
     public Task<IEnumerable<InputEntity>> GetAllAsync(

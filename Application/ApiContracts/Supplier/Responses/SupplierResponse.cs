@@ -19,5 +19,8 @@ namespace Application.ApiContracts.Supplier.Responses
         public long? TotalInput { get; set; }
 
         public string? TaxIdentificationNumber { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("created_at")]
+        public DateTimeOffset? CreatedAt { get; set; }
     }
 }

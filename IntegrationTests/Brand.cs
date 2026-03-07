@@ -31,10 +31,14 @@ public class Brand : IAsyncLifetime
         _client = _factory.CreateClient();
     }
 
-    public Task InitializeAsync() => Task.CompletedTask;
+    public ValueTask InitializeAsync() => ValueTask.CompletedTask;
 
-    public async Task DisposeAsync()
-    { await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(false); }
+    public async ValueTask DisposeAsync()
+    {
+        await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(false);
+        GC.SuppressFinalize(this);
+    }
+
 #pragma warning disable IDE0079 
 #pragma warning disable CRR0035
     [Fact(DisplayName = "BRAND_001 - CreateBrand - Success")]
@@ -63,17 +67,17 @@ public class Brand : IAsyncLifetime
         var requestMessage = new HttpRequestMessage(HttpMethod.Post, "/api/v1/brand");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         requestMessage.Content = JsonContent.Create(command);
-        var response = await _client.SendAsync(requestMessage).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
 
         if(response.StatusCode == HttpStatusCode.Unauthorized)
         {
-            var errorContent = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
+            var errorContent = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
             throw new Exception($"API returned 401. Response Body: {errorContent}");
         }
 
         if(response.StatusCode == HttpStatusCode.InternalServerError)
         {
-            var errorContent = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
+            var errorContent = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
             throw new Exception($"API returned 500. Response Body: {errorContent}");
         }
 
@@ -179,7 +183,7 @@ public class Brand : IAsyncLifetime
 
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/Brand/{id}");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-        var response = await _client.SendAsync(requestMessage).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -226,7 +230,7 @@ public class Brand : IAsyncLifetime
         var requestMessage = new HttpRequestMessage(HttpMethod.Put, $"/api/v1/Brand/{id}");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         requestMessage.Content = JsonContent.Create(request);
-        var response = await _client.SendAsync(requestMessage).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
@@ -266,7 +270,7 @@ public class Brand : IAsyncLifetime
 
         var requestMessage = new HttpRequestMessage(HttpMethod.Delete, $"/api/v1/Brand/{id}");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-        var response = await _client.SendAsync(requestMessage).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
@@ -306,7 +310,7 @@ public class Brand : IAsyncLifetime
 
         var requestMessage = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/Brand/restore/{id}");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-        var response = await _client.SendAsync(requestMessage).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
@@ -351,7 +355,7 @@ public class Brand : IAsyncLifetime
         var requestMessage = new HttpRequestMessage(HttpMethod.Delete, "/api/v1/Brand/delete-many");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         requestMessage.Content = JsonContent.Create(request);
-        var response = await _client.SendAsync(requestMessage).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
@@ -396,7 +400,7 @@ public class Brand : IAsyncLifetime
         var requestMessage = new HttpRequestMessage(HttpMethod.Post, "/api/v1/Brand/restore-many");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         requestMessage.Content = JsonContent.Create(request);
-        var response = await _client.SendAsync(requestMessage).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
@@ -425,17 +429,17 @@ public class Brand : IAsyncLifetime
 
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, "/api/v1/brand/deleted");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-        var response = await _client.SendAsync(requestMessage).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
 
         if(response.StatusCode == HttpStatusCode.Unauthorized)
         {
-            var errorContent = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
+            var errorContent = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
             throw new Exception($"API returned 401. Response Body: {errorContent}");
         }
 
         if(response.StatusCode == HttpStatusCode.InternalServerError)
         {
-            var errorContent = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
+            var errorContent = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
             throw new Exception($"API returned 500. Response Body: {errorContent}");
         }
 
@@ -469,7 +473,7 @@ public class Brand : IAsyncLifetime
         var requestMessage = new HttpRequestMessage(HttpMethod.Post, "/api/v1/Brand");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         requestMessage.Content = JsonContent.Create(request);
-        await _client.SendAsync(requestMessage).ConfigureAwait(true);
+        await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
 
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
@@ -515,7 +519,7 @@ public class Brand : IAsyncLifetime
         var requestMessage = new HttpRequestMessage(HttpMethod.Put, $"/api/v1/Brand/{id}");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         requestMessage.Content = JsonContent.Create(request);
-        await _client.SendAsync(requestMessage).ConfigureAwait(true);
+        await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
 
         using var verifyScope = _factory.Services.CreateScope();
         var verifyDb = verifyScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();

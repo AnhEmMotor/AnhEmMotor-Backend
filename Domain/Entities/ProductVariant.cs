@@ -14,7 +14,7 @@ namespace Domain.Entities
         [ForeignKey("Product")]
         public int ProductId { get; set; }
 
-        [Column("UrlSlug", TypeName = "nvarchar(50)")]
+        [Column("UrlSlug", TypeName = "nvarchar(255)")]
         public string? UrlSlug { get; set; }
 
         [Column("Price", TypeName = "decimal(18, 2)")]

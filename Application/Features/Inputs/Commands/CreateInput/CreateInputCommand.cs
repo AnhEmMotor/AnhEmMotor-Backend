@@ -1,11 +1,11 @@
-using Application.ApiContracts.Input.Requests;
+﻿using Application.ApiContracts.Input.Requests;
 using Application.ApiContracts.Input.Responses;
 using Application.Common.Models;
 using MediatR;
 
 namespace Application.Features.Inputs.Commands.CreateInput;
 
-public sealed record CreateInputCommand : IRequest<Result<InputResponse?>>
+public sealed record CreateInputCommand : IRequest<Result<InputDetailResponse?>>
 {
     public string? Notes { get; init; }
 

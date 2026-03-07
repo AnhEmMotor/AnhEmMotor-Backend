@@ -1,4 +1,4 @@
-using Application.ApiContracts.Input.Responses;
+﻿using Application.ApiContracts.Input.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
@@ -18,9 +18,11 @@ public sealed class CreateInputCommandHandler(
     IInputReadRepository readRepository,
     ISupplierReadRepository supplierRepository,
     IProductVariantReadRepository variantRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateInputCommand, Result<InputResponse?>>
+    IUnitOfWork unitOfWork) : IRequestHandler<CreateInputCommand, Result<InputDetailResponse?>>
 {
-    public async Task<Result<InputResponse?>> Handle(CreateInputCommand request, CancellationToken cancellationToken)
+    public async Task<Result<InputDetailResponse?>> Handle(
+        CreateInputCommand request,
+        CancellationToken cancellationToken)
     {
         if(request.SupplierId.HasValue)
         {
@@ -82,6 +84,6 @@ public sealed class CreateInputCommandHandler(
 
         var created = await readRepository.GetByIdWithDetailsAsync(input.Id, cancellationToken).ConfigureAwait(false);
 
-        return created!.Adapt<InputResponse>();
+        return created!.Adapt<InputDetailResponse>();
     }
 }

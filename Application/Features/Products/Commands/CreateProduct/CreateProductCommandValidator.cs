@@ -34,9 +34,44 @@ public sealed class CreateProductCommandValidator : AbstractValidator<CreateProd
             .NotEmpty()
             .WithMessage("At least one product variant is required.")
             .Must(HaveUniqueSlugs)
-            .WithMessage("Duplicate slugs found within the request.");
+            .WithMessage("Duplicate slugs found within the request.")
+            .Custom(ValidateVariantOptions);
 
         RuleForEach(x => x.Variants).SetValidator(new CreateProductVariantCommandValidator());
+    }
+
+    private void ValidateVariantOptions(
+        List<CreateProductVariantRequest> variants,
+        ValidationContext<CreateProductCommand> context)
+    {
+        if(variants == null || variants.Count <= 1)
+            return;
+
+        var hasVariantWithoutOptions = variants.Any(v => v.OptionValues == null || v.OptionValues.Count == 0);
+        if(hasVariantWithoutOptions)
+        {
+            context.AddFailure(
+                "Variants",
+                "Multiple variants require all variants to have options. Mixed states or empty options are not allowed.");
+            return;
+        }
+
+        var optionSignatures = new HashSet<string>();
+        foreach(var variant in variants)
+        {
+            if(variant.OptionValues == null)
+                continue;
+            var sig = string.Join(
+                "|",
+                variant.OptionValues
+                    .OrderBy(kvp => kvp.Key)
+                    .Select(kvp => $"{kvp.Key.Trim().ToLowerInvariant()}:{kvp.Value.Trim().ToLowerInvariant()}"));
+            if(!optionSignatures.Add(sig))
+            {
+                context.AddFailure("Variants", "Duplicate option combinations are not allowed within the same product.");
+                return;
+            }
+        }
     }
 
     private bool HaveUniqueSlugs(List<CreateProductVariantRequest> variants)

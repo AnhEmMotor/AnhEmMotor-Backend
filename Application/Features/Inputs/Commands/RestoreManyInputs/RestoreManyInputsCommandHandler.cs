@@ -12,9 +12,9 @@ namespace Application.Features.Inputs.Commands.RestoreManyInputs;
 public sealed class RestoreManyInputsCommandHandler(
     IInputReadRepository readRepository,
     IInputUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<RestoreManyInputsCommand, Result<List<InputResponse>>>
+    IUnitOfWork unitOfWork) : IRequestHandler<RestoreManyInputsCommand, Result<List<InputDetailResponse>>>
 {
-    public async Task<Result<List<InputResponse>>> Handle(
+    public async Task<Result<List<InputDetailResponse>>> Handle(
         RestoreManyInputsCommand request,
         CancellationToken cancellationToken)
     {
@@ -35,6 +35,6 @@ public sealed class RestoreManyInputsCommandHandler(
         updateRepository.Restore(inputsList);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return inputs.Adapt<List<InputResponse>>();
+        return inputs.Adapt<List<InputDetailResponse>>();
     }
 }

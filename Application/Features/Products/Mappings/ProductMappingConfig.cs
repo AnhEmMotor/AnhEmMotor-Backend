@@ -80,6 +80,9 @@ public class ProductMappingConfig : IRegister
 
         config.NewConfig<ProductVariantEntity, ProductVariantLiteResponse>()
             .MapWith(src => BuildVariantLiteResponse(src));
+
+        config.NewConfig<ProductVariantEntity, ProductVariantLiteResponseForInput>()
+            .MapWith(src => BuildVariantLiteResponseForInput(src, null));
     }
 
     private static ProductDetailForManagerResponse MapProductToDetailForManagerResponse(ProductEntity product)
@@ -229,6 +232,53 @@ public class ProductMappingConfig : IRegister
             .ToList();
 
         return string.Join(" - ", parts);
+    }
+
+    public static ProductVariantLiteResponseForInput BuildVariantLiteResponseForInput(
+        ProductVariantEntity variant,
+        Dictionary<string, string>? translations)
+    {
+        var optionPairs = variant.VariantOptionValues
+            .Select(
+                vov => new OptionPair
+                {
+                    OptionName = vov.OptionValue?.Option?.Name,
+                    OptionValue = vov.OptionValue?.Name
+                })
+            .ToList();
+
+        var productName = variant.Product?.Name ?? string.Empty;
+        string displayName;
+
+        if(optionPairs.Count == 0 || optionPairs.All(op => string.IsNullOrWhiteSpace(op.OptionValue)))
+        {
+            displayName = productName;
+        } else
+        {
+            var parts = optionPairs
+                .Where(op => !string.IsNullOrWhiteSpace(op.OptionValue))
+                .Select(
+                    op =>
+                    {
+                        var translatedKey = op.OptionName != null &&
+                                    translations != null &&
+                                    translations.TryGetValue(op.OptionName, out var translated)
+                            ? translated
+                            : op.OptionName ?? string.Empty;
+                        return $"{translatedKey}: {op.OptionValue}";
+                    })
+                .ToList();
+
+            displayName = $"{productName} ({string.Join(", ", parts)})";
+        }
+
+        return new ProductVariantLiteResponseForInput
+        {
+            Id = variant.Id,
+            DisplayName = displayName,
+            Price = variant.Price,
+            CoverImageUrl = variant.CoverImageUrl
+        };
     }
 
     private static string GetStockStatus(long availableStock)

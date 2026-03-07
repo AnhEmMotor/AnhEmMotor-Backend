@@ -9,15 +9,15 @@ using OutputEntity = Domain.Entities.Output;
 
 namespace Application.Features.Outputs.Queries.GetDeletedOutputsList;
 
-public sealed class GetDeletedOutputsListQueryHandler(IOutputReadRepository repository, ISievePaginator paginator) : IRequestHandler<GetDeletedOutputsListQuery, Result<PagedResult<OutputResponse>>>
+public sealed class GetDeletedOutputsListQueryHandler(IOutputReadRepository repository, ISievePaginator paginator) : IRequestHandler<GetDeletedOutputsListQuery, Result<PagedResult<OutputItemResponse>>>
 {
-    public async Task<Result<PagedResult<OutputResponse>>> Handle(
+    public async Task<Result<PagedResult<OutputItemResponse>>> Handle(
         GetDeletedOutputsListQuery request,
         CancellationToken cancellationToken)
     {
         var query = repository.GetQueryable(DataFetchMode.DeletedOnly);
 
-        var result = await paginator.ApplyAsync<OutputEntity, OutputResponse>(
+        var result = await paginator.ApplyAsync<OutputEntity, OutputItemResponse>(
             query,
             request.SieveModel!,
             cancellationToken: cancellationToken)

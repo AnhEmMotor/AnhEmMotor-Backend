@@ -10,9 +10,9 @@ namespace Application.Features.Inputs.Commands.UpdateManyInputStatus;
 public sealed class UpdateManyInputStatusCommandHandler(
     IInputReadRepository readRepository,
     IInputUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateManyInputStatusCommand, Result<List<InputResponse>?>>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateManyInputStatusCommand, Result<List<InputDetailResponse>?>>
 {
-    public async Task<Result<List<InputResponse>?>> Handle(
+    public async Task<Result<List<InputDetailResponse>?>> Handle(
         UpdateManyInputStatusCommand request,
         CancellationToken cancellationToken)
     {
@@ -61,6 +61,6 @@ public sealed class UpdateManyInputStatusCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return inputs.Adapt<List<InputResponse>>();
+        return inputs.Adapt<List<InputDetailResponse>>();
     }
 }

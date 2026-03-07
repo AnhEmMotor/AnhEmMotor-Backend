@@ -6,7 +6,7 @@ using Sieve.Models;
 
 namespace Application.Features.Outputs.Queries.GetOutputsList;
 
-public sealed record GetOutputsListQuery : IRequest<Result<PagedResult<OutputResponse>>>
+public sealed record GetOutputsListQuery : IRequest<Result<PagedResult<OutputItemResponse>>>
 {
     public SieveModel? SieveModel { get; init; }
 }

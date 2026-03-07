@@ -48,6 +48,7 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             .ThenInclude(v => v.ProductCollectionPhotos)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.InputInfos)
+            .ThenInclude(ii => ii.InputReceipt)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.OutputInfos)
             .ThenInclude(oi => oi.OutputOrder)
@@ -93,6 +94,7 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             .ThenInclude(v => v.ProductCollectionPhotos)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.InputInfos)
+            .ThenInclude(ii => ii.InputReceipt)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.OutputInfos)
             .ThenInclude(oi => oi.OutputOrder)
@@ -148,6 +150,7 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             .ThenInclude(v => v.ProductCollectionPhotos)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.InputInfos)
+            .ThenInclude(ii => ii.InputReceipt)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.OutputInfos)
             .ThenInclude(oi => oi.OutputOrder);
@@ -234,6 +237,44 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
         var entities = await dbQuery
             .Skip((normalizedPage - 1) * normalizedPageSize)
             .Take(normalizedPageSize)
+            .AsSplitQuery()
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        return (entities, totalCount);
+    }
+
+    public async Task<(List<ProductEntity> Items, int TotalCount)> GetPagedProductsForPriceManagementAsync(
+        int page,
+        int pageSize,
+        string? filters,
+        string? sorts,
+        CancellationToken cancellationToken)
+    {
+        var normalizedPage = Math.Max(page, 1);
+        var normalizedPageSize = Math.Max(pageSize, 1);
+
+        var query = context.Products.Where(p => p.DeletedAt == null).AsNoTracking();
+
+        var effectiveSorts = string.IsNullOrWhiteSpace(sorts) ? "-CreatedAt" : sorts;
+
+        var sieveModel = new SieveModel
+        {
+            Filters = filters,
+            Sorts = effectiveSorts,
+            Page = normalizedPage,
+            PageSize = normalizedPageSize
+        };
+
+        var filteredQuery = sieveProcessor.Apply(sieveModel, query, applyPagination: false);
+        var totalCount = await filteredQuery.CountAsync(cancellationToken).ConfigureAwait(false);
+
+        IQueryable<ProductEntity> dbQuery = sieveProcessor.Apply(sieveModel, query)
+            .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
+            .ThenInclude(v => v.VariantOptionValues)
+            .ThenInclude(vov => vov.OptionValue);
+
+        var entities = await dbQuery
             .AsSplitQuery()
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);

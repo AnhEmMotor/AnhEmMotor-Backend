@@ -6,7 +6,7 @@ using Sieve.Models;
 
 namespace Application.Features.Outputs.Queries.GetOutputsByUserIdByManager;
 
-public sealed record GetOutputsByUserIdByManagerQuery : IRequest<Result<PagedResult<OutputResponse>>>
+public sealed record GetOutputsByUserIdByManagerQuery : IRequest<Result<PagedResult<OutputItemResponse>>>
 {
     public Guid? BuyerId { get; init; }
 
