@@ -168,6 +168,22 @@ public class ProductController(ISender sender) : ApiController
     }
 
     /// <summary>
+    /// Lấy danh sách ánh xạ trạng thái tồn kho (Key -> Tên tiếng Việt).
+    /// </summary>
+    [HttpGet("inventory-statuses")]
+    [ProducesResponseType(typeof(Dictionary<string, string>), StatusCodes.Status200OK)]
+    public IActionResult GetInventoryStatuses()
+    {
+        var mapping = new Dictionary<string, string>
+        {
+            { InventoryStatus.InStock, "Còn hàng" },
+            { InventoryStatus.LowStock, "Sắp hết hàng" },
+            { InventoryStatus.OutOfStock, "Hết hàng" }
+        };
+        return Ok(mapping);
+    }
+
+    /// <summary>
     /// Lấy thông tin chi tiết sản phẩm theo Id (dành cho toàn bộ người dùng khách)
     /// </summary>
     [HttpGet("{id:int}", Name = RouteNames.Product.GetVarientById)]

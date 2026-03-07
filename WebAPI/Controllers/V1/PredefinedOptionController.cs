@@ -34,4 +34,29 @@ public class PredefinedOptionController(IMediator mediator) : ApiController
 
         return HandleResult(result);
     }
+
+    /// <summary>
+    /// Lấy danh sách ánh xạ trạng thái tồn kho (key tiếng Anh - nhãn tiếng Việt) để Frontend binding.
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// GET /api/v1/PredefinedOption/inventory-statuses
+    /// Response: [{ "key": "OutOfStock", "label": "Hết hàng" }, ...]
+    /// </code>
+    /// </example>
+    [HttpGet("inventory-statuses")]
+    [RequiresAnyPermissions(Products.View, Products.Create, Products.Edit, Products.Delete)]
+    [ProducesResponseType(typeof(IEnumerable<object>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
+    public IActionResult GetInventoryStatuses()
+    {
+        var statuses = new[]
+        {
+            new { key = nameof(Domain.Constants.InventoryStatus.OutOfStock), label = "Hết hàng" },
+            new { key = nameof(Domain.Constants.InventoryStatus.LowStock), label = "Sắp hết hàng" },
+            new { key = nameof(Domain.Constants.InventoryStatus.InStock), label = "Còn hàng" }
+        };
+
+        return Ok(statuses);
+    }
 }

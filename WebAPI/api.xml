@@ -363,6 +363,17 @@
             chỉnh sửa sản phẩm mới có thể truy cập.
             </summary>
         </member>
+        <member name="M:WebAPI.Controllers.V1.PredefinedOptionController.GetInventoryStatuses">
+            <summary>
+            Lấy danh sách ánh xạ trạng thái tồn kho (key tiếng Anh - nhãn tiếng Việt) để Frontend binding.
+            </summary>
+            <example>
+            <code>
+            GET /api/v1/PredefinedOption/inventory-statuses
+            Response: [{ "key": "OutOfStock", "label": "Hết hàng" }, ...]
+            </code>
+            </example>
+        </member>
         <member name="T:WebAPI.Controllers.V1.ProductCategoryController">
             <summary>
             Quản lý danh mục sản phẩm.
@@ -474,6 +485,11 @@
             <summary>
             Lấy danh sách biến thể sản phẩm của tất cả sản phẩm (có phân trang, lọc, tìm kiếm - chỉ có thể vào khi và chỉ
             khi có quyền thêm hoặc sửa phiếu bán hàng).
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetInventoryStatuses">
+            <summary>
+            Lấy danh sách ánh xạ trạng thái tồn kho (Key -> Tên tiếng Việt).
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.ProductController.GetVarientByIdAsync(System.Int32,System.Threading.CancellationToken)">
