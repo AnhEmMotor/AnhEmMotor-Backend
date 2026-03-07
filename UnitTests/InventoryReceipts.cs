@@ -309,6 +309,7 @@ public class InventoryReceipts
 
         result.ShouldHaveValidationErrorFor(x => x.Products);
     }
+
     [Fact(DisplayName = "INPUT_075 - Mapster mapping tính TotalPayable chính xác dựa trên sum(Count * InputPrice)")]
     public void InputMappingConfig_CalculatesTotalPayableCorrectly()
     {
@@ -318,13 +319,14 @@ public class InventoryReceipts
         var input = new Input
         {
             Id = 1,
-            InputInfos = new List<InputInfo>
-            {
-                new InputInfo { Count = 2, InputPrice = 150000 },
-                new InputInfo { Count = 3, InputPrice = 50000 },
-                new InputInfo { Count = null, InputPrice = 20000 },
-                new InputInfo { Count = 1, InputPrice = null }
-            }
+            InputInfos =
+                new List<InputInfo>
+                {
+                    new InputInfo { Count = 2, InputPrice = 150000 },
+                    new InputInfo { Count = 3, InputPrice = 50000 },
+                    new InputInfo { Count = null, InputPrice = 20000 },
+                    new InputInfo { Count = 1, InputPrice = null }
+                }
         };
 
         var response = input.Adapt<InputDetailResponse>(config);

@@ -1,5 +1,5 @@
-using Domain.Constants.Order;
 using Application.Common.Models;
+using Domain.Constants.Order;
 using MediatR;
 
 namespace Application.Features.Outputs.Queries.GetOutputStatusList;
@@ -25,6 +25,7 @@ public sealed class GetOutputStatusListQueryHandler : IRequestHandler<GetOutputS
         GetOutputStatusListQuery request,
         CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         return Task.FromResult(Result<Dictionary<string, string>>.Success(Statuses));
     }
 }

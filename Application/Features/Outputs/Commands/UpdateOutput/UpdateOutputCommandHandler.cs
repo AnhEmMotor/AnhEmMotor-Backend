@@ -18,7 +18,9 @@ public sealed class UpdateOutputCommandHandler(
     IProductVariantReadRepository variantRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateOutputCommand, Result<OrderDetailResponse>>
 {
-    public async Task<Result<OrderDetailResponse>> Handle(UpdateOutputCommand request, CancellationToken cancellationToken)
+    public async Task<Result<OrderDetailResponse>> Handle(
+        UpdateOutputCommand request,
+        CancellationToken cancellationToken)
     {
         if(request.CurrentUserId is null)
         {

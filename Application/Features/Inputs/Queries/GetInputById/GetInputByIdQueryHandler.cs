@@ -9,7 +9,9 @@ namespace Application.Features.Inputs.Queries.GetInputById;
 
 public sealed class GetInputByIdQueryHandler(IInputReadRepository repository) : IRequestHandler<GetInputByIdQuery, Result<InputDetailResponse?>>
 {
-    public async Task<Result<InputDetailResponse?>> Handle(GetInputByIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<InputDetailResponse?>> Handle(
+        GetInputByIdQuery request,
+        CancellationToken cancellationToken)
     {
         var input = await repository.GetByIdWithDetailsAsync(request.Id, cancellationToken).ConfigureAwait(false);
 

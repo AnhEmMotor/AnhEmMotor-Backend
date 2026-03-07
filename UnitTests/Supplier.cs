@@ -1,3 +1,4 @@
+using Application.Common.Helper;
 using Application.Features.Suppliers.Commands.CreateSupplier;
 using Application.Features.Suppliers.Commands.DeleteSupplier;
 using Application.Features.Suppliers.Commands.RestoreSupplier;
@@ -5,7 +6,6 @@ using Application.Features.Suppliers.Commands.UpdateSupplier;
 using Application.Features.Suppliers.Commands.UpdateSupplierStatus;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Supplier;
-using Application.Common.Helper;
 using Domain.Constants;
 using FluentAssertions;
 using FluentValidation.TestHelper;
@@ -797,6 +797,7 @@ public class Supplier
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
+
 #pragma warning restore CRR0035
 #pragma warning restore IDE0079
 
@@ -808,8 +809,11 @@ public class Supplier
     public class TestResponse
     {
         public int Id { get; set; }
+
         public DateTimeOffset? CreatedAt { get; set; }
+
         public DateTimeOffset? UpdatedAt { get; set; }
+
         public DateTimeOffset? DeletedAt { get; set; }
     }
 
@@ -821,6 +825,7 @@ public class Supplier
     public class TestResponseWrongType
     {
         public int Id { get; set; }
+
         public string? CreatedAt { get; set; }
     }
 

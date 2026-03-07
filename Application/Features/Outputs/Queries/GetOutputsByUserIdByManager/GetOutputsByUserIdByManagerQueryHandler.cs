@@ -1,6 +1,5 @@
 ﻿using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
-using Application.Features.Outputs.Queries.GetOutputsByUserId;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Domain.Primitives;

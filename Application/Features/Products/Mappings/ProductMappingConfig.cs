@@ -253,20 +253,20 @@ public class ProductMappingConfig : IRegister
         if(optionPairs.Count == 0 || optionPairs.All(op => string.IsNullOrWhiteSpace(op.OptionValue)))
         {
             displayName = productName;
-        }
-        else
+        } else
         {
             var parts = optionPairs
                 .Where(op => !string.IsNullOrWhiteSpace(op.OptionValue))
-                .Select(op =>
-                {
-                    var translatedKey = op.OptionName != null &&
-                        translations != null &&
-                        translations.TryGetValue(op.OptionName, out var translated)
+                .Select(
+                    op =>
+                    {
+                        var translatedKey = op.OptionName != null &&
+                                    translations != null &&
+                                    translations.TryGetValue(op.OptionName, out var translated)
                             ? translated
                             : op.OptionName ?? string.Empty;
-                    return $"{translatedKey}: {op.OptionValue}";
-                })
+                        return $"{translatedKey}: {op.OptionValue}";
+                    })
                 .ToList();
 
             displayName = $"{productName} ({string.Join(", ", parts)})";

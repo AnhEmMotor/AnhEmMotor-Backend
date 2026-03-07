@@ -4,8 +4,8 @@ using Application.Features.Inputs.Commands.CreateInput;
 using Application.Features.Inputs.Commands.DeleteManyInputs;
 using Application.Features.Inputs.Commands.RestoreManyInputs;
 using Application.Features.Inputs.Commands.UpdateInput;
-using Application.Features.Inputs.Commands.UpdateInputStatus;
 using Application.Features.Inputs.Commands.UpdateInputNotes;
+using Application.Features.Inputs.Commands.UpdateInputStatus;
 using Application.Features.Inputs.Commands.UpdateManyInputStatus;
 using Domain.Constants.Permission;
 using Domain.Entities;
@@ -47,7 +47,10 @@ public class InventoryReceipts : IAsyncLifetime
     public ValueTask InitializeAsync() => ValueTask.CompletedTask;
 
     public async ValueTask DisposeAsync()
-    { await _factory.ResetDatabaseAsync(TestContext.Current.CancellationToken).ConfigureAwait(false); GC.SuppressFinalize(this);  }
+    {
+        await _factory.ResetDatabaseAsync(TestContext.Current.CancellationToken).ConfigureAwait(false);
+        GC.SuppressFinalize(this);
+    }
 
 #pragma warning disable IDE0079 
 #pragma warning disable CRR0035
@@ -152,11 +155,14 @@ public class InventoryReceipts : IAsyncLifetime
         {
             Content = JsonContent.Create(request)
         };
-        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
 
         if(response.StatusCode == HttpStatusCode.InternalServerError)
         {
-            var errorContent = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+            var errorContent = await response.Content
+                .ReadAsStringAsync(TestContext.Current.CancellationToken)
+                .ConfigureAwait(true);
             throw new Exception($"API returned 500. Response Body: {errorContent}");
         }
 
@@ -276,7 +282,8 @@ public class InventoryReceipts : IAsyncLifetime
         {
             Content = JsonContent.Create(request)
         };
-        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         var content = await response.Content
@@ -322,7 +329,8 @@ public class InventoryReceipts : IAsyncLifetime
         {
             Content = JsonContent.Create(request)
         };
-        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().BeOneOf(HttpStatusCode.NotFound, HttpStatusCode.BadRequest);
     }
@@ -361,7 +369,8 @@ public class InventoryReceipts : IAsyncLifetime
         {
             Content = JsonContent.Create(request)
         };
-        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().BeOneOf(HttpStatusCode.NotFound, HttpStatusCode.BadRequest);
     }
@@ -458,7 +467,8 @@ public class InventoryReceipts : IAsyncLifetime
         {
             Content = JsonContent.Create(request)
         };
-        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -548,7 +558,8 @@ public class InventoryReceipts : IAsyncLifetime
         {
             Content = JsonContent.Create(request)
         };
-        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
 
@@ -584,7 +595,8 @@ public class InventoryReceipts : IAsyncLifetime
 
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, "/api/v1/InventoryReceipts?page=1&pageSize=10");
 
-        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -622,7 +634,8 @@ public class InventoryReceipts : IAsyncLifetime
             HttpMethod.Get,
             "/api/v1/InventoryReceipts?filters=StatusId==working");
 
-        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -710,11 +723,14 @@ public class InventoryReceipts : IAsyncLifetime
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, "/api/v1/InventoryReceipts?sorts=-InputDate");
-        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
 
         if(response.StatusCode == HttpStatusCode.InternalServerError)
         {
-            var errorContent = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+            var errorContent = await response.Content
+                .ReadAsStringAsync(TestContext.Current.CancellationToken)
+                .ConfigureAwait(true);
             throw new Exception($"API returned 500. Response Body: {errorContent}");
         }
 
@@ -830,7 +846,8 @@ public class InventoryReceipts : IAsyncLifetime
 
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/InventoryReceipts/{input.Id}");
 
-        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -872,7 +889,8 @@ public class InventoryReceipts : IAsyncLifetime
 
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/InventoryReceipts/{inputId}");
 
-        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -1003,7 +1021,8 @@ public class InventoryReceipts : IAsyncLifetime
             $"/api/v1/InventoryReceipts/{inputReceipt.Id}");
         requestUpdateMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         requestUpdateMessage.Content = JsonContent.Create(updateRequest);
-        var response = await _client.SendAsync(requestUpdateMessage, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestUpdateMessage, TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -1135,7 +1154,8 @@ public class InventoryReceipts : IAsyncLifetime
             $"/api/v1/InventoryReceipts/{inputReceipt.Id}");
         requestUpdateMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         requestUpdateMessage.Content = JsonContent.Create(updateRequest);
-        var response = await _client.SendAsync(requestUpdateMessage, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestUpdateMessage, TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -1261,7 +1281,8 @@ public class InventoryReceipts : IAsyncLifetime
             $"/api/v1/InventoryReceipts/{inputReceipt.Id}");
         requestUpdateMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         requestUpdateMessage.Content = JsonContent.Create(updateRequest);
-        var response = await _client.SendAsync(requestUpdateMessage, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestUpdateMessage, TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
@@ -1856,7 +1877,10 @@ public class InventoryReceipts : IAsyncLifetime
                 });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
-        var response = await _client.DeleteAsync($"/api/v1/InventoryReceipts/{inputReceipt.Id}", TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.DeleteAsync(
+            $"/api/v1/InventoryReceipts/{inputReceipt.Id}",
+            TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NoContent);
 
@@ -1976,7 +2000,8 @@ public class InventoryReceipts : IAsyncLifetime
                 Method = HttpMethod.Delete,
                 RequestUri = new Uri("/api/v1/InventoryReceipts", UriKind.Relative),
                 Content = JsonContent.Create(deleteRequest)
-            }, TestContext.Current.CancellationToken)
+            },
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
 
         response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NoContent);
@@ -2080,7 +2105,10 @@ public class InventoryReceipts : IAsyncLifetime
                 });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
-        var response = await _client.PostAsync($"/api/v1/InventoryReceipts/{inputReceipt.Id}/restore", null, TestContext.Current.CancellationToken)
+        var response = await _client.PostAsync(
+            $"/api/v1/InventoryReceipts/{inputReceipt.Id}/restore",
+            null,
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -2307,7 +2335,10 @@ public class InventoryReceipts : IAsyncLifetime
                 });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
-        var response = await _client.PostAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}/clone", null, TestContext.Current.CancellationToken)
+        var response = await _client.PostAsync(
+            $"/api/v1/InventoryReceipts/{createdInput!.Id}/clone",
+            null,
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
 
         response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.Created);
@@ -2441,7 +2472,10 @@ public class InventoryReceipts : IAsyncLifetime
             db.SaveChanges();
         }
 
-        var response = await _client.PostAsync($"/api/v1/InventoryReceipts/{createdInput!.Id}/clone", null, TestContext.Current.CancellationToken)
+        var response = await _client.PostAsync(
+            $"/api/v1/InventoryReceipts/{createdInput!.Id}/clone",
+            null,
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
 
         response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.Created);
@@ -2530,7 +2564,9 @@ public class InventoryReceipts : IAsyncLifetime
         }
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
-        var response = await _client.GetAsync($"/api/v1/InventoryReceipts/by-supplier/{supplierId}?page=1&pageSize=10", TestContext.Current.CancellationToken)
+        var response = await _client.GetAsync(
+            $"/api/v1/InventoryReceipts/by-supplier/{supplierId}?page=1&pageSize=10",
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -2627,7 +2663,9 @@ public class InventoryReceipts : IAsyncLifetime
         db.InputReceipts.Add(inputReceipt);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
-        var response = await _client.GetAsync("/api/v1/InventoryReceipts/deleted?page=1&pageSize=10", TestContext.Current.CancellationToken)
+        var response = await _client.GetAsync(
+            "/api/v1/InventoryReceipts/deleted?page=1&pageSize=10",
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -2919,7 +2957,8 @@ public class InventoryReceipts : IAsyncLifetime
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var response = await _client.GetAsync(
-            $"/api/v1/InventoryReceipts?filters=StatusId==working,SupplierId=={supplier.Id}", TestContext.Current.CancellationToken)
+            $"/api/v1/InventoryReceipts?filters=StatusId==working,SupplierId=={supplier.Id}",
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -2957,7 +2996,8 @@ public class InventoryReceipts : IAsyncLifetime
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var response = await _client.GetAsync("/api/v1/InventoryReceipts/status", TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/InventoryReceipts/status", TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -2965,12 +3005,9 @@ public class InventoryReceipts : IAsyncLifetime
             .ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Should().HaveCount(3);
-        content.Should().ContainKey(Domain.Constants.Input.InputStatus.Working)
-            .WhoseValue.Should().Be("Phiếu tạm");
-        content.Should().ContainKey(Domain.Constants.Input.InputStatus.Finish)
-            .WhoseValue.Should().Be("Hoàn thành");
-        content.Should().ContainKey(Domain.Constants.Input.InputStatus.Cancel)
-            .WhoseValue.Should().Be("Đã huỷ");
+        content.Should().ContainKey(Domain.Constants.Input.InputStatus.Working).WhoseValue.Should().Be("Phiếu tạm");
+        content.Should().ContainKey(Domain.Constants.Input.InputStatus.Finish).WhoseValue.Should().Be("Hoàn thành");
+        content.Should().ContainKey(Domain.Constants.Input.InputStatus.Cancel).WhoseValue.Should().Be("Đã huỷ");
     }
 
     [Fact(DisplayName = "INPUT_071 - Lấy danh sách trạng thái phiếu nhập khi chưa đăng nhập trả 401")]
@@ -2978,10 +3015,12 @@ public class InventoryReceipts : IAsyncLifetime
     {
         _client.DefaultRequestHeaders.Authorization = null;
 
-        var response = await _client.GetAsync("/api/v1/InventoryReceipts/status", TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/InventoryReceipts/status", TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
+
     [Fact(DisplayName = "INPUT_076 - Cập nhật ghi chú phiếu nhập hàng qua API riêng thành công")]
     public async Task UpdateInputNotes_Success_ReturnsOk()
     {
@@ -3043,16 +3082,14 @@ public class InventoryReceipts : IAsyncLifetime
         db.InputReceipts.Add(input);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
-        var request = new UpdateInputNotesCommand
-        {
-            Notes = "Ghi chú mới đã được cập nhật"
-        };
+        var request = new UpdateInputNotesCommand { Notes = "Ghi chú mới đã được cập nhật" };
 
         var requestMessage = new HttpRequestMessage(HttpMethod.Patch, $"/api/v1/InventoryReceipts/{input.Id}/notes")
         {
             Content = JsonContent.Create(request)
         };
-        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.SendAsync(requestMessage, TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -3061,7 +3098,10 @@ public class InventoryReceipts : IAsyncLifetime
         content.Should().NotBeNull();
         content!.Notes.Should().Be("Ghi chú mới đã được cập nhật");
 
-        var updatedInput = await db.InputReceipts.AsNoTracking().FirstOrDefaultAsync(i => i.Id == input.Id, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var updatedInput = await db.InputReceipts
+            .AsNoTracking()
+            .FirstOrDefaultAsync(i => i.Id == input.Id, TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         updatedInput.Should().NotBeNull();
         updatedInput!.Notes.Should().Be("Ghi chú mới đã được cập nhật");
     }

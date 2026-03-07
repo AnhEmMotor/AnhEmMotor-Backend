@@ -560,6 +560,7 @@ public class SalesOrder
         var handler = new CreateOutputByManagerCommandHandler(
             _readRepoMock.Object,
             _insertRepoMock.Object,
+            _updateRepoMock.Object,
             _variantRepoMock.Object,
             _userRepoMock.Object,
             _unitOfWorkMock.Object);
@@ -602,6 +603,7 @@ public class SalesOrder
         var handler = new CreateOutputByManagerCommandHandler(
             _readRepoMock.Object,
             _insertRepoMock.Object,
+            _updateRepoMock.Object,
             _variantRepoMock.Object,
             _userRepoMock.Object,
             _unitOfWorkMock.Object);
@@ -723,8 +725,15 @@ public class SalesOrder
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);
 
-        _variantRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
-            .ReturnsAsync([ new ProductVariant { Id = productId, Price = 100, Product = new ProductEntity { StatusId = ProductStatus.ForSale } } ]);
+        _variantRepoMock.Setup(
+            x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync(
+                [ new ProductVariant
+                {
+                    Id = productId,
+                    Price = 100,
+                    Product = new ProductEntity { StatusId = ProductStatus.ForSale }
+                } ]);
 
         var handler = new UpdateOutputForManagerCommandHandler(
             _readRepoMock.Object,
@@ -958,10 +967,12 @@ public class SalesOrder
         var orderId = 1;
         var expectedOrder = new Output { Id = orderId, BuyerId = Guid.NewGuid() };
 
-        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(orderId, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+        _readRepoMock.Setup(
+            x => x.GetByIdWithDetailsAsync(orderId, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(expectedOrder);
 
-        var result = await handler.Handle(new GetOutputByIdQuery { Id = orderId }, CancellationToken.None).ConfigureAwait(true);
+        var result = await handler.Handle(new GetOutputByIdQuery { Id = orderId }, CancellationToken.None)
+            .ConfigureAwait(true);
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
@@ -1397,10 +1408,12 @@ public class SalesOrder
         var handler = new GetOutputByIdQueryHandler(_readRepoMock.Object);
         var orderId = 1;
 
-        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(orderId, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+        _readRepoMock.Setup(
+            x => x.GetByIdWithDetailsAsync(orderId, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync((Output?)null);
 
-        var result = await handler.Handle(new GetOutputByIdQuery { Id = orderId }, CancellationToken.None);
+        var result = await handler.Handle(new GetOutputByIdQuery { Id = orderId }, CancellationToken.None)
+            .ConfigureAwait(true);
 
         result.IsFailure.Should().BeTrue();
     }
@@ -1845,17 +1858,14 @@ public class SalesOrder
     [Fact(DisplayName = "SO_105 - InventoryValuationService tính COGS theo FIFO 2 lô")]
     public void CalculateUnitCostAndDeductInventory_WithMultipleBatches_ShouldCalculateFIFO()
     {
-        // Arrange
         var batches = new List<InputInfo>
         {
-            new InputInfo { Id = 1, RemainingCount = 10, InputPrice = 100 },
-            new InputInfo { Id = 2, RemainingCount = 20, InputPrice = 150 }
+            new() { Id = 1, RemainingCount = 10, InputPrice = 100 },
+            new() { Id = 2, RemainingCount = 20, InputPrice = 150 }
         };
 
-        // Act - Bán 15 cái: 10 cái giá 100, 5 cái giá 150 = (1000 + 750) = 1750. UnitCost = 1750 / 15 = 117 (làm tròn)
         var unitCost = Domain.DomainServices.InventoryValuationService.CalculateUnitCostAndDeductInventory(batches, 15);
 
-        // Assert
         unitCost.Should().Be(117);
         batches[0].RemainingCount.Should().Be(0);
         batches[1].RemainingCount.Should().Be(15);

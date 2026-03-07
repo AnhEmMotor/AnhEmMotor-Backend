@@ -1,8 +1,5 @@
 ﻿using Application.Interfaces.Repositories.VariantOptionValue;
-using Domain.Entities;
 using Infrastructure.DBContexts;
-
-using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
 namespace Infrastructure.Repositories.VariantOptionValue
@@ -10,8 +7,6 @@ namespace Infrastructure.Repositories.VariantOptionValue
     public class VariantOptionValueDeleteRepository(ApplicationDBContext context) : IVariantOptionValueDeleteRepository
     {
         public void Delete(Domain.Entities.VariantOptionValue variantOptionValue)
-        {
-            context.VariantOptionValues.Remove(variantOptionValue);
-        }
+        { context.VariantOptionValues.Remove(variantOptionValue); }
     }
 }

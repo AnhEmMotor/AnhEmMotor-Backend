@@ -364,13 +364,16 @@ public class InventoryReceipts
         var result = await _controller.GetInputStatusesAsync(CancellationToken.None).ConfigureAwait(true);
 
         result.Should().BeOfType<OkObjectResult>();
-        _mediatorMock.Verify(m => m.Send(It.IsAny<GetInputStatusListQuery>(), It.IsAny<CancellationToken>()), Times.Once);
+        _mediatorMock.Verify(
+            m => m.Send(It.IsAny<GetInputStatusListQuery>(), It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
     [Fact(DisplayName = "INPUT_074 - Controller tr? d�ng d? li?u t? Handler khi l?y tr?ng th�i phi?u nh?p")]
     public async Task GetInputStatuses_ValidRequest_ReturnsExpectedData()
     {
-        var expectedStatuses = new Dictionary<string, string> { { Domain.Constants.Input.InputStatus.Working, "Phi?u t?m" } };
+        var expectedStatuses = new Dictionary<string, string>
+        { { Domain.Constants.Input.InputStatus.Working, "Phi?u t?m" } };
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetInputStatusListQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<Dictionary<string, string>>.Success(expectedStatuses));
 

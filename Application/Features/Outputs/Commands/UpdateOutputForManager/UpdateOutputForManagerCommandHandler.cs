@@ -36,8 +36,6 @@ public sealed class UpdateOutputForManagerCommandHandler(
             return Error.NotFound($"Không tìm thấy đơn hàng có ID {request.Id}.", "Id");
         }
 
-        // Manager có quyền Outputs.Edit (đã check ở Controller) thì được phép sửa mọi đơn hàng.
-
         if(request.BuyerId.HasValue && request.BuyerId != output.BuyerId)
         {
             var buyer = await userReadRepository.GetUserByIDAsync(request.BuyerId.Value, cancellationToken)
@@ -134,12 +132,12 @@ public sealed class UpdateOutputForManagerCommandHandler(
         updateRepository.Update(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        if(output.StatusId == OrderStatus.Completed && string.IsNullOrEmpty(output.FinishedBy?.ToString()))
+        if(string.Compare(output.StatusId, OrderStatus.Completed) == 0 &&
+            string.IsNullOrEmpty(output.FinishedBy?.ToString()))
         {
             output.FinishedBy = request.CurrentUserId;
             updateRepository.Update(output);
-            await updateRepository.ProcessCOGSForCompletedOrderAsync(output.Id, cancellationToken)
-                .ConfigureAwait(false);
+            await updateRepository.ProcessCOGSForCompletedOrderAsync(output.Id, cancellationToken).ConfigureAwait(false);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 

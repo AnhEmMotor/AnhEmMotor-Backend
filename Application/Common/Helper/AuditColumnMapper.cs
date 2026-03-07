@@ -1,7 +1,7 @@
-using System.Collections.Concurrent;
-using System.Reflection;
 using Domain.Constants;
 using Domain.Entities;
+using System.Collections.Concurrent;
+using System.Reflection;
 
 namespace Application.Common.Helper
 {
@@ -15,14 +15,13 @@ namespace Application.Common.Helper
     {
         private static readonly ConcurrentDictionary<Type, Dictionary<string, PropertyInfo>> _cache = new();
 
-        public static void Apply<TSource, TDest>(TSource source, TDest dest, AuditColumn columns)
-            where TSource : class
+        public static void Apply<TSource, TDest>(TSource source, TDest dest, AuditColumn columns) where TSource : class
             where TDest : class
         {
             ArgumentNullException.ThrowIfNull(source);
             ArgumentNullException.ThrowIfNull(dest);
 
-            if (columns == AuditColumn.None)
+            if(columns == AuditColumn.None)
             {
                 return;
             }
@@ -40,7 +39,7 @@ namespace Application.Common.Helper
             ArgumentNullException.ThrowIfNull(sources);
             ArgumentNullException.ThrowIfNull(dests);
 
-            if (columns == AuditColumn.None || sources.Count == 0)
+            if(columns == AuditColumn.None || sources.Count == 0)
             {
                 return;
             }
@@ -49,36 +48,36 @@ namespace Application.Common.Helper
             var destProps = GetAuditProperties(typeof(TDest));
             var count = Math.Min(sources.Count, dests.Count);
 
-            for (var i = 0; i < count; i++)
+            for(var i = 0; i < count; i++)
             {
                 ApplyInternal(sources[i], dests[i], columns, sourceProps, destProps);
             }
         }
 
         private static void ApplyInternal<TSource, TDest>(
-            TSource source, 
-            TDest dest, 
-            AuditColumn columns, 
-            Dictionary<string, PropertyInfo> sourceProps, 
+            TSource source,
+            TDest dest,
+            AuditColumn columns,
+            Dictionary<string, PropertyInfo> sourceProps,
             Dictionary<string, PropertyInfo> destProps)
         {
-            if ((columns & AuditColumn.CreatedAt) != 0 
-                && sourceProps.TryGetValue(nameof(AuditColumn.CreatedAt), out var sCreated)
-                && destProps.TryGetValue(nameof(AuditColumn.CreatedAt), out var dCreated))
+            if((columns & AuditColumn.CreatedAt) != 0 &&
+                sourceProps.TryGetValue(nameof(AuditColumn.CreatedAt), out var sCreated) &&
+                destProps.TryGetValue(nameof(AuditColumn.CreatedAt), out var dCreated))
             {
                 dCreated.SetValue(dest, sCreated.GetValue(source));
             }
 
-            if ((columns & AuditColumn.UpdatedAt) != 0 
-                && sourceProps.TryGetValue(nameof(AuditColumn.UpdatedAt), out var sUpdated)
-                && destProps.TryGetValue(nameof(AuditColumn.UpdatedAt), out var dUpdated))
+            if((columns & AuditColumn.UpdatedAt) != 0 &&
+                sourceProps.TryGetValue(nameof(AuditColumn.UpdatedAt), out var sUpdated) &&
+                destProps.TryGetValue(nameof(AuditColumn.UpdatedAt), out var dUpdated))
             {
                 dUpdated.SetValue(dest, sUpdated.GetValue(source));
             }
 
-            if ((columns & AuditColumn.DeletedAt) != 0 
-                && sourceProps.TryGetValue(nameof(AuditColumn.DeletedAt), out var sDeleted)
-                && destProps.TryGetValue(nameof(AuditColumn.DeletedAt), out var dDeleted))
+            if((columns & AuditColumn.DeletedAt) != 0 &&
+                sourceProps.TryGetValue(nameof(AuditColumn.DeletedAt), out var sDeleted) &&
+                destProps.TryGetValue(nameof(AuditColumn.DeletedAt), out var dDeleted))
             {
                 dDeleted.SetValue(dest, sDeleted.GetValue(source));
             }
@@ -86,19 +85,16 @@ namespace Application.Common.Helper
 
         private static Dictionary<string, PropertyInfo> GetAuditProperties(Type type)
         {
-            return _cache.GetOrAdd(type, t =>
-            {
-                var auditNames = new HashSet<string>
+            return _cache.GetOrAdd(
+                type,
+                t =>
                 {
-                    "CreatedAt",
-                    "UpdatedAt",
-                    "DeletedAt"
-                };
+                    var auditNames = new HashSet<string> { "CreatedAt", "UpdatedAt", "DeletedAt" };
 
-                return t.GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                    .Where(p => auditNames.Contains(p.Name) && p.PropertyType == typeof(DateTimeOffset?))
-                    .ToDictionary(p => p.Name);
-            });
+                    return t.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                        .Where(p => auditNames.Contains(p.Name) && p.PropertyType == typeof(DateTimeOffset?))
+                        .ToDictionary(p => p.Name);
+                });
         }
     }
 }

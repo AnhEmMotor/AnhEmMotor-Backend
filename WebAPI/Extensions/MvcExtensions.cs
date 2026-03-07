@@ -66,7 +66,6 @@ public static class MvcExtensions
             });
 
 
-
         return services;
     }
 }

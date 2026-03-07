@@ -21,7 +21,7 @@ public sealed class GetSupplierByIdQueryHandler(ISupplierReadRepository reposito
         }
 
         var response = supplier.Adapt<SupplierResponse>();
-        Application.Common.Helper.AuditColumnMapper.Apply(supplier, response, Domain.Constants.AuditColumn.CreatedAt);
+        Common.Helper.AuditColumnMapper.Apply(supplier, response, Domain.Constants.AuditColumn.CreatedAt);
 
         return response;
     }

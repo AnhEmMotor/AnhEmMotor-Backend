@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace Application.ApiContracts.Product.Responses;
 
 public class ProductPriceLiteResponse

@@ -19,7 +19,9 @@ public sealed class CloneInputCommandHandler(
     IProductVariantReadRepository variantReadRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<CloneInputCommand, Result<InputDetailResponse?>>
 {
-    public async Task<Result<InputDetailResponse?>> Handle(CloneInputCommand command, CancellationToken cancellationToken)
+    public async Task<Result<InputDetailResponse?>> Handle(
+        CloneInputCommand command,
+        CancellationToken cancellationToken)
     {
         if(!command.Id.HasValue)
         {

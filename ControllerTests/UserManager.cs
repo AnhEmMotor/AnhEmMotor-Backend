@@ -424,13 +424,21 @@ public class UserManager
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
-    [Fact(DisplayName = "UMGR_047 - Lấy thông tin cơ bản của người dùng (basic-info) thành công với phân trang và dữ liệu đầy đủ")]
+
+    [Fact(
+        DisplayName = "UMGR_047 - Lấy thông tin cơ bản của người dùng (basic-info) thành công với phân trang và dữ liệu đầy đủ")]
     public async Task GetBasicUsersInfo_WithValidRequest_ReturnsUsersWithBasicFields()
     {
         var sieveModel = new SieveModel { Page = 1, PageSize = 5 };
         var expectedItems = new List<UserDTOForOutputResponse>
         {
-            new() { Id = Guid.NewGuid(), FullName = "Nguyen Van A", Email = "a@example.com", PhoneNumber = "0912345678" },
+            new()
+            {
+                Id = Guid.NewGuid(),
+                FullName = "Nguyen Van A",
+                Email = "a@example.com",
+                PhoneNumber = "0912345678"
+            },
             new() { Id = Guid.NewGuid(), FullName = "Tran Thi B", Email = "b@example.com", PhoneNumber = "0987654321" },
         };
         var expectedResponse = new PagedResult<UserDTOForOutputResponse>(expectedItems, 2, 1, 5);
@@ -438,7 +446,8 @@ public class UserManager
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetUsersListForOutputQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
 
-        var result = await _controller.GetAllUsersForOutputAsync(sieveModel, CancellationToken.None).ConfigureAwait(true);
+        var result = await _controller.GetAllUsersForOutputAsync(sieveModel, CancellationToken.None)
+            .ConfigureAwait(true);
 
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
         okResult.StatusCode.Should().Be(StatusCodes.Status200OK);
@@ -451,7 +460,9 @@ public class UserManager
         response.Items.First().Id.Should().NotBeEmpty();
 
         _mediatorMock.Verify(
-            m => m.Send(It.Is<GetUsersListForOutputQuery>(q => q.SieveModel == sieveModel), It.IsAny<CancellationToken>()),
+            m => m.Send(
+                It.Is<GetUsersListForOutputQuery>(q => q.SieveModel == sieveModel),
+                It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -464,7 +475,8 @@ public class UserManager
             .ReturnsAsync(
                 Result<PagedResult<UserDTOForOutputResponse>>.Failure(Error.Forbidden("Không có quyền truy cập")));
 
-        var result = await _controller.GetAllUsersForOutputAsync(sieveModel, CancellationToken.None).ConfigureAwait(true);
+        var result = await _controller.GetAllUsersForOutputAsync(sieveModel, CancellationToken.None)
+            .ConfigureAwait(true);
 
         var objectResult = result.Should().BeOfType<ObjectResult>().Subject;
         objectResult.StatusCode.Should().Be(StatusCodes.Status403Forbidden);

@@ -1,42 +1,30 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 #nullable disable
 
 namespace Infrastructure.Migrations
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public partial class RemoveBaseEntityFromMappingTables : Migration
     {
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "CreatedAt",
-                table: "VariantOptionValue");
+            migrationBuilder.DropColumn(name: "CreatedAt", table: "VariantOptionValue");
 
-            migrationBuilder.DropColumn(
-                name: "DeletedAt",
-                table: "VariantOptionValue");
+            migrationBuilder.DropColumn(name: "DeletedAt", table: "VariantOptionValue");
 
-            migrationBuilder.DropColumn(
-                name: "UpdatedAt",
-                table: "VariantOptionValue");
+            migrationBuilder.DropColumn(name: "UpdatedAt", table: "VariantOptionValue");
 
-            migrationBuilder.DropColumn(
-                name: "CreatedAt",
-                table: "ProductCollectionPhoto");
+            migrationBuilder.DropColumn(name: "CreatedAt", table: "ProductCollectionPhoto");
 
-            migrationBuilder.DropColumn(
-                name: "DeletedAt",
-                table: "ProductCollectionPhoto");
+            migrationBuilder.DropColumn(name: "DeletedAt", table: "ProductCollectionPhoto");
 
-            migrationBuilder.DropColumn(
-                name: "UpdatedAt",
-                table: "ProductCollectionPhoto");
+            migrationBuilder.DropColumn(name: "UpdatedAt", table: "ProductCollectionPhoto");
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<DateTimeOffset>(

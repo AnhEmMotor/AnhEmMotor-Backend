@@ -17,7 +17,9 @@ public sealed class CreateOutputCommandHandler(
     IProductVariantReadRepository variantRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateOutputCommand, Result<OrderDetailResponse>>
 {
-    public async Task<Result<OrderDetailResponse>> Handle(CreateOutputCommand request, CancellationToken cancellationToken)
+    public async Task<Result<OrderDetailResponse>> Handle(
+        CreateOutputCommand request,
+        CancellationToken cancellationToken)
     {
         var variantIds = request.OutputInfos
             .Where(p => p.ProductId.HasValue)

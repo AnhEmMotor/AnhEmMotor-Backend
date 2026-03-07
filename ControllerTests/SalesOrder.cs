@@ -79,7 +79,8 @@ public class SalesOrder
         var sieveModel = new SieveModel();
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputsByUserIdQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<PagedResult<OutputItemResponse>>.Success(new PagedResult<OutputItemResponse>([], 0, 1, 10)));
+            .ReturnsAsync(
+                Result<PagedResult<OutputItemResponse>>.Success(new PagedResult<OutputItemResponse>([], 0, 1, 10)));
 
         var result = await _controller.GetPurchasesByIDAsync(sieveModel, buyerId, CancellationToken.None)
             .ConfigureAwait(true);
@@ -95,7 +96,8 @@ public class SalesOrder
     {
         var sieveModel = new SieveModel { Page = 1, PageSize = 10 };
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputsListQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<PagedResult<OutputItemResponse>>.Success(new PagedResult<OutputItemResponse>([], 0, 1, 10)));
+            .ReturnsAsync(
+                Result<PagedResult<OutputItemResponse>>.Success(new PagedResult<OutputItemResponse>([], 0, 1, 10)));
 
         var result = await _controller.GetOutputsAsync(sieveModel, CancellationToken.None).ConfigureAwait(true);
 
@@ -108,7 +110,8 @@ public class SalesOrder
     {
         var sieveModel = new SieveModel();
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetDeletedOutputsListQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<PagedResult<OutputItemResponse>>.Success(new PagedResult<OutputItemResponse>([], 0, 1, 10)));
+            .ReturnsAsync(
+                Result<PagedResult<OutputItemResponse>>.Success(new PagedResult<OutputItemResponse>([], 0, 1, 10)));
 
         var result = await _controller.GetDeletedOutputsAsync(sieveModel, CancellationToken.None).ConfigureAwait(true);
 
@@ -163,7 +166,9 @@ public class SalesOrder
 
         result.Should().NotBeNull();
         _mediatorMock.Verify(
-            m => m.Send(It.Is<CreateOutputByManagerCommand>(c => c.CurrentUserId == managerId), It.IsAny<CancellationToken>()),
+            m => m.Send(
+                It.Is<CreateOutputByManagerCommand>(c => c.CurrentUserId == managerId),
+                It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -200,7 +205,9 @@ public class SalesOrder
 
         result.Should().NotBeNull();
         _mediatorMock.Verify(
-            m => m.Send(It.Is<UpdateOutputForManagerCommand>(c => c.CurrentUserId == managerId), It.IsAny<CancellationToken>()),
+            m => m.Send(
+                It.Is<UpdateOutputForManagerCommand>(c => c.CurrentUserId == managerId),
+                It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -351,20 +358,24 @@ public class SalesOrder
     [Fact(DisplayName = "SO_103 - Controller g?i MediatR d�ng 1 l?n khi l?y danh s�ch tr?ng th�i don h�ng")]
     public async Task GetOutputStatuses_ValidRequest_CallsMediatorOnce()
     {
-        var expectedStatuses = new Dictionary<string, string> { { Domain.Constants.Order.OrderStatus.Pending, "Ch? x�c nh?n" } };
+        var expectedStatuses = new Dictionary<string, string>
+        { { Domain.Constants.Order.OrderStatus.Pending, "Ch? x�c nh?n" } };
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputStatusListQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<Dictionary<string, string>>.Success(expectedStatuses));
 
         var result = await _controller.GetOutputStatusesAsync(CancellationToken.None).ConfigureAwait(true);
 
         result.Should().BeOfType<OkObjectResult>();
-        _mediatorMock.Verify(m => m.Send(It.IsAny<GetOutputStatusListQuery>(), It.IsAny<CancellationToken>()), Times.Once);
+        _mediatorMock.Verify(
+            m => m.Send(It.IsAny<GetOutputStatusListQuery>(), It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 
     [Fact(DisplayName = "SO_104 - Controller tr? d�ng d? li?u t? Handler khi l?y tr?ng th�i don h�ng")]
     public async Task GetOutputStatuses_ValidRequest_ReturnsExpectedData()
     {
-        var expectedStatuses = new Dictionary<string, string> { { Domain.Constants.Order.OrderStatus.Pending, "Ch? x�c nh?n" } };
+        var expectedStatuses = new Dictionary<string, string>
+        { { Domain.Constants.Order.OrderStatus.Pending, "Ch? x�c nh?n" } };
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputStatusListQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<Dictionary<string, string>>.Success(expectedStatuses));
 

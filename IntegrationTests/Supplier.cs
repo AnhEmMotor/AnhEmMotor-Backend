@@ -36,7 +36,10 @@ public class Supplier : IAsyncLifetime
     public ValueTask InitializeAsync() => ValueTask.CompletedTask;
 
     public async ValueTask DisposeAsync()
-    { await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(false); GC.SuppressFinalize(this); }
+    {
+        await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(false);
+        GC.SuppressFinalize(this);
+    }
 
 #pragma warning disable IDE0079
 #pragma warning disable CRR0035
@@ -97,7 +100,8 @@ public class Supplier : IAsyncLifetime
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier?Page=1&PageSize=10", CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/Supplier?Page=1&PageSize=10", CancellationToken.None)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -157,7 +161,8 @@ public class Supplier : IAsyncLifetime
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier?Page=2&PageSize=5", CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/Supplier?Page=2&PageSize=5", CancellationToken.None)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -228,7 +233,8 @@ public class Supplier : IAsyncLifetime
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier?Filters=Name@=Test_{uniqueId}", CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/Supplier?Filters=Name@=Test_{uniqueId}", CancellationToken.None)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -299,7 +305,9 @@ public class Supplier : IAsyncLifetime
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier?Sorts=Name&Filters=Name@={uniqueId}", CancellationToken.None)
+        var response = await _client.GetAsync(
+            $"/api/v1/Supplier?Sorts=Name&Filters=Name@={uniqueId}",
+            CancellationToken.None)
             .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -383,7 +391,8 @@ public class Supplier : IAsyncLifetime
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier?Filters=Id@={uniqueId}", CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/Supplier?Filters=Id@={uniqueId}", CancellationToken.None)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -450,7 +459,10 @@ public class Supplier : IAsyncLifetime
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier/deleted?Filters=Id@={uniqueId}", CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync(
+            $"/api/v1/Supplier/deleted?Filters=Id@={uniqueId}",
+            CancellationToken.None)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -509,7 +521,8 @@ public class Supplier : IAsyncLifetime
             supplierId = supplier.Id;
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}", CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}", CancellationToken.None)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -567,7 +580,8 @@ public class Supplier : IAsyncLifetime
             supplierId = supplier.Id;
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}", CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}", CancellationToken.None)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -997,7 +1011,8 @@ public class Supplier : IAsyncLifetime
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}", CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}", CancellationToken.None)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -1102,7 +1117,8 @@ public class Supplier : IAsyncLifetime
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}", CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}", CancellationToken.None)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -1112,6 +1128,7 @@ public class Supplier : IAsyncLifetime
         content.Should().NotBeNull();
         content!.TotalInput.Should().Be(10000);
     }
+
     [Fact(DisplayName = "SUP_066 - Lấy lịch sử nhập hàng của nhà cung cấp thành công")]
     public async Task GetPurchaseHistory_ValidSupplier_ReturnsPagedHistory()
     {
@@ -1183,18 +1200,14 @@ public class Supplier : IAsyncLifetime
                 await db.InputReceipts.AddAsync(input, CancellationToken.None).ConfigureAwait(true);
                 await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-                var inputInfo = new InputInfo
-                {
-                    InputId = input.Id,
-                    InputPrice = 1000m * i,
-                    Count = i
-                };
+                var inputInfo = new InputInfo { InputId = input.Id, InputPrice = 1000m * i, Count = i };
                 await db.InputInfos.AddAsync(inputInfo, CancellationToken.None).ConfigureAwait(true);
                 await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             }
         }
 
-        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}/purchase-history", CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}/purchase-history", CancellationToken.None)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content

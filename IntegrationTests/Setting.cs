@@ -30,7 +30,11 @@ public class Setting : IAsyncLifetime
 
     public ValueTask InitializeAsync() => ValueTask.CompletedTask;
 
-    public async ValueTask DisposeAsync() { await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(true); GC.SuppressFinalize(this); }
+    public async ValueTask DisposeAsync()
+    {
+        await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(true);
+        GC.SuppressFinalize(this);
+    }
 
 #pragma warning disable IDE0079
 #pragma warning disable CRR0035

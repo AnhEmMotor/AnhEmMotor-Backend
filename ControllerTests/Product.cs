@@ -284,10 +284,12 @@ public class Product
         Assert.NotNull(result);
         _senderMock.Verify(m => m.Send(It.IsAny<GetProductsListQuery>(), It.IsAny<CancellationToken>()), Times.Once);
     }
+
     [Fact(DisplayName = "PRODUCT_119 - API lấy danh sách cho price management trả về 403 khi user không có quyền")]
     public async Task GetProductsForPriceManagement_UserNoPermission_ReturnsForbidden()
     {
-        _senderMock.Setup(m => m.Send(It.IsAny<GetProductsListForPriceManagementQuery>(), It.IsAny<CancellationToken>()))
+        _senderMock.Setup(
+            m => m.Send(It.IsAny<GetProductsListForPriceManagementQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException());
 
         await Assert.ThrowsAsync<UnauthorizedAccessException>(

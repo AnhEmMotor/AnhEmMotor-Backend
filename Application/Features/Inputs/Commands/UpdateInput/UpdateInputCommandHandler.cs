@@ -20,7 +20,9 @@ public sealed class UpdateInputCommandHandler(
     IProductVariantReadRepository variantRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateInputCommand, Result<InputDetailResponse?>>
 {
-    public async Task<Result<InputDetailResponse?>> Handle(UpdateInputCommand request, CancellationToken cancellationToken)
+    public async Task<Result<InputDetailResponse?>> Handle(
+        UpdateInputCommand request,
+        CancellationToken cancellationToken)
     {
         var input = await readRepository.GetByIdWithDetailsAsync(
             request.Id,

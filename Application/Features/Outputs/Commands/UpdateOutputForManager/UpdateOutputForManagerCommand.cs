@@ -11,7 +11,7 @@ public sealed record UpdateOutputForManagerCommand : IRequest<Result<OrderDetail
     public int Id { get; init; }
 
     public string? StatusId { get; init; }
-    
+
     public Guid? BuyerId { get; init; }
 
     public Guid? CurrentUserId { get; init; }

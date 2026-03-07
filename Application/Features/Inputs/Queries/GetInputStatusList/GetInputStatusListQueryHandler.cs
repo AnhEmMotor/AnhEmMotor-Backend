@@ -16,6 +16,7 @@ public sealed class GetInputStatusListQueryHandler : IRequestHandler<GetInputSta
         GetInputStatusListQuery request,
         CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         return Task.FromResult(Result<Dictionary<string, string>>.Success(Statuses));
     }
 }

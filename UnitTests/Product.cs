@@ -70,12 +70,11 @@ public class Product
         _predefinedOptionReadRepoMock = new Mock<IPredefinedOptionReadRepository>();
         _predefinedOptionReadRepoMock
             .Setup(x => x.GetAllKeysAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(["Màu sắc", "Phiên bản", "Kích thước"]);
+            .ReturnsAsync([ "Màu sắc", "Phiên bản", "Kích thước" ]);
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _productVariantInsertRepository = new Mock<IProductVariantInsertRepository>();
         _variantOptionValueDeleteRepoMock = new Mock<IVariantOptionValueDeleteRepository>();
 
-        // Khởi tạo các mapping config của Mapster
         new Application.Features.Products.Mappings.ProductMappingConfig().Register(TypeAdapterConfig.GlobalSettings);
     }
 
@@ -514,7 +513,7 @@ public class Product
         var specificPredefinedOptionRepoMock = new Mock<IPredefinedOptionReadRepository>();
         specificPredefinedOptionRepoMock
             .Setup(x => x.GetAllKeysAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(["Màu sắc", "Phiên bản"]);
+            .ReturnsAsync([ "Màu sắc", "Phiên bản" ]);
 
         var handler = new CreateProductCommandHandler(
             _productCategoryReadRepoMock.Object,
@@ -1382,6 +1381,7 @@ public class Product
 
         result.Should().NotBeNull();
     }
+
     [Fact(DisplayName = "PRODUCT_110 - Kiểm tra Validation khi URL Slug bị trùng chéo lặp trong cùng request")]
     public void CreateProduct_DuplicateUrlSlugInRequest_FailsValidation()
     {
@@ -1391,11 +1391,7 @@ public class Product
             CategoryId = 1,
             BrandId = 1,
             Variants =
-                [ new CreateProductVariantRequest
-                {
-                    UrlSlug = "sh-red",
-                    Price = 100000000
-                }, new CreateProductVariantRequest
+                [ new CreateProductVariantRequest { UrlSlug = "sh-red", Price = 100000000 }, new CreateProductVariantRequest
                 {
                     UrlSlug = "sh-red",
                     Price = 100000000
@@ -1412,138 +1408,105 @@ public class Product
     [Fact(DisplayName = "PRODUCT_CALC_001 - CalculateTotalStock tính tổng RemainingCount từ Input receipt Finished")]
     public void MapProductToDetailForManagerResponse_CalculatesTotalStockCorrectly()
     {
-        // Arrange
         var product = new ProductEntity
         {
             Id = 1,
             Name = "Honda Wave",
             ProductVariants =
-            [
-                new ProductVariant
+                [ new ProductVariant
                 {
                     Id = 1,
                     InputInfos =
-                    [
-                        new InputInfo
-                        {
-                            RemainingCount = 10,
-                            InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
-                        },
-                        new InputInfo
-                        {
-                            RemainingCount = 5,
-                            InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Working }
-                        } // Working nên không cộng vào PhysicalStock
-                    ]
-                },
-                new ProductVariant
+                        [ new InputInfo
+                            {
+                                RemainingCount = 10,
+                                InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
+                            }, new InputInfo
+                            {
+                                RemainingCount = 5,
+                                InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Working }
+                            } ]
+                }, new ProductVariant
                 {
                     Id = 2,
                     InputInfos =
-                    [
-                        new InputInfo
-                        {
-                            RemainingCount = 15,
-                            InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
-                        }
-                    ]
-                }
-            ]
+                        [ new InputInfo
+                            {
+                                RemainingCount = 15,
+                                InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
+                            } ]
+                } ]
         };
 
-        // Act
         var response = product.Adapt<ProductDetailForManagerResponse>();
 
-        // Assert
-        // Chỉ những receipt Finished mới cộng: 10 + 15 = 25
         response.Stock.Should().Be(25);
     }
 
     [Fact(DisplayName = "PRODUCT_CALC_002 - CalculateTotalBooked tính tổng Count từ Output Order Pending/Confirmed")]
     public void MapProductToDetailForManagerResponse_CalculatesReservedStockCorrectly()
     {
-        // Arrange
         var product = new ProductEntity
         {
             Id = 1,
             Name = "Yamaha",
             ProductVariants =
-            [
-                new ProductVariant
+                [ new ProductVariant
                 {
                     Id = 1,
                     OutputInfos =
-                    [
-                        new OutputInfo
-                        {
-                            Count = 3,
-                            OutputOrder = new Output { StatusId = Domain.Constants.Order.OrderStatus.Pending }
-                        },
-                        new OutputInfo
-                        {
-                            Count = 2,
-                            OutputOrder = new Output { StatusId = Domain.Constants.Order.OrderStatus.ConfirmedCod }
-                        },
-                        new OutputInfo
-                        {
-                            Count = 5,
-                            OutputOrder = new Output { StatusId = Domain.Constants.Order.OrderStatus.Completed }
-                        } // Completed không tính vào hàng giữ chỗ (Reserved)
-                    ]
-                }
-            ]
+                        [ new OutputInfo
+                            {
+                                Count = 3,
+                                OutputOrder = new Output { StatusId = Domain.Constants.Order.OrderStatus.Pending }
+                            }, new OutputInfo
+                            {
+                                Count = 2,
+                                OutputOrder = new Output { StatusId = Domain.Constants.Order.OrderStatus.ConfirmedCod }
+                            }, new OutputInfo
+                            {
+                                Count = 5,
+                                OutputOrder = new Output { StatusId = Domain.Constants.Order.OrderStatus.Completed }
+                            } ]
+                } ]
         };
 
-        // Act
         var response = product.Adapt<ProductDetailForManagerResponse>();
 
-        // Assert
-        // Chỉ những order Pending/Confirmed mới cộng: 3 + 2 = 5
         response.HasBeenBooked.Should().Be(5);
     }
 
     [Fact(DisplayName = "PRODUCT_CALC_003 - Tính toán Available To Sell (ATS) chính xác")]
     public void MapProductToDetailForManagerResponse_CalculatesATSCorrectly()
     {
-        // Arrange
         var product = new ProductEntity
         {
             Id = 1,
             Name = "Suzuki",
             ProductVariants =
-            [
-                new ProductVariant
+                [ new ProductVariant
                 {
                     Id = 1,
                     InputInfos =
-                    [
-                        new InputInfo
-                        {
-                            RemainingCount = 50,
-                            InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
-                        }
-                    ],
+                        [ new InputInfo
+                            {
+                                RemainingCount = 50,
+                                InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
+                            } ],
                     OutputInfos =
-                    [
-                        new OutputInfo
-                        {
-                            Count = 10,
-                            OutputOrder = new Output { StatusId = Domain.Constants.Order.OrderStatus.Pending }
-                        }
-                    ]
-                }
-            ]
+                        [ new OutputInfo
+                            {
+                                Count = 10,
+                                OutputOrder = new Output { StatusId = Domain.Constants.Order.OrderStatus.Pending }
+                            } ]
+                } ]
         };
 
-        // Act
         var response = product.Adapt<ProductDetailForManagerResponse>();
 
-        // Assert
-        response.Stock.Should().Be(50); // Physical Stock
-        response.HasBeenBooked.Should().Be(10); // Reserved
+        response.Stock.Should().Be(50);
+        response.HasBeenBooked.Should().Be(10);
 
-        // StatusStockId được mapping qua hàm GetStockStatus(availableStock) trong ProductMappingConfig
-        // ATS = 50 - 10 = 40 (> 0 => in_stock)
         response.StatusStockId.Should().Be("in_stock");
     }
 
@@ -1552,7 +1515,9 @@ public class Product
     {
         var command = new CreateProductCommand
         {
-            Name = "Honda", CategoryId = 1, BrandId = 1,
+            Name = "Honda",
+            CategoryId = 1,
+            BrandId = 1,
             Variants = [ new CreateProductVariantRequest { UrlSlug = "honda", Price = 100, OptionValues = [] } ]
         };
         var validator = new CreateProductCommandValidator();
@@ -1565,16 +1530,23 @@ public class Product
     {
         var command = new CreateProductCommand
         {
-            Name = "Honda", CategoryId = 1, BrandId = 1,
-            Variants = [ 
-                new CreateProductVariantRequest { UrlSlug = "honda-1", Price = 100, OptionValues = new Dictionary<string, string> { {"Màu", "Đỏ"} } },
-                new CreateProductVariantRequest { UrlSlug = "honda-2", Price = 100, OptionValues = [] }
-            ]
+            Name = "Honda",
+            CategoryId = 1,
+            BrandId = 1,
+            Variants =
+                [ new CreateProductVariantRequest
+                {
+                    UrlSlug = "honda-1",
+                    Price = 100,
+                    OptionValues = new Dictionary<string, string> { { "Màu", "Đỏ" } }
+                }, new CreateProductVariantRequest { UrlSlug = "honda-2", Price = 100, OptionValues = [] } ]
         };
         var validator = new CreateProductCommandValidator();
         var result = validator.Validate(command);
         result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(e => e.ErrorMessage.Contains("Multiple variants require all variants to have options"));
+        result.Errors
+            .Should()
+            .Contain(e => e.ErrorMessage.Contains("Multiple variants require all variants to have options"));
     }
 
     [Fact(DisplayName = "PRODUCT_114 - Tạo sản phẩm thất bại khi nhiều biến thể trùng OptionValues")]
@@ -1582,11 +1554,21 @@ public class Product
     {
         var command = new CreateProductCommand
         {
-            Name = "Honda", CategoryId = 1, BrandId = 1,
-            Variants = [ 
-                new CreateProductVariantRequest { UrlSlug = "honda-1", Price = 100, OptionValues = new Dictionary<string, string> { {"Màu", "Đỏ"} } },
-                new CreateProductVariantRequest { UrlSlug = "honda-2", Price = 100, OptionValues = new Dictionary<string, string> { {"Màu", "Đỏ"} } }
-            ]
+            Name = "Honda",
+            CategoryId = 1,
+            BrandId = 1,
+            Variants =
+                [ new CreateProductVariantRequest
+                {
+                    UrlSlug = "honda-1",
+                    Price = 100,
+                    OptionValues = new Dictionary<string, string> { { "Màu", "Đỏ" } }
+                }, new CreateProductVariantRequest
+                {
+                    UrlSlug = "honda-2",
+                    Price = 100,
+                    OptionValues = new Dictionary<string, string> { { "Màu", "Đỏ" } }
+                } ]
         };
         var validator = new CreateProductCommandValidator();
         var result = validator.Validate(command);
@@ -1594,21 +1576,30 @@ public class Product
         result.Errors.Should().Contain(e => e.ErrorMessage.Contains("Duplicate option combinations"));
     }
 
-    [Fact(DisplayName = "PRODUCT_115 - Sửa sản phẩm thất bại khi trộn lẫn biến thể có và không có OptionValues (Ép định danh)")]
+    [Fact(
+        DisplayName = "PRODUCT_115 - Sửa sản phẩm thất bại khi trộn lẫn biến thể có và không có OptionValues (Ép định danh)")]
     public void UpdateProduct_MixedVariants_ValidationFails()
     {
         var command = new UpdateProductCommand
         {
-            Id = 1, Name = "Honda", CategoryId = 1, BrandId = 1,
-            Variants = [ 
-                new UpdateProductVariantRequest { Id = 1, UrlSlug = "honda-1", Price = 100, OptionValues = [] },
-                new UpdateProductVariantRequest { UrlSlug = "honda-2", Price = 100, OptionValues = new Dictionary<string, string> { {"Màu", "Đỏ"} } }
-            ]
+            Id = 1,
+            Name = "Honda",
+            CategoryId = 1,
+            BrandId = 1,
+            Variants =
+                [ new UpdateProductVariantRequest { Id = 1, UrlSlug = "honda-1", Price = 100, OptionValues = [] }, new UpdateProductVariantRequest
+                {
+                    UrlSlug = "honda-2",
+                    Price = 100,
+                    OptionValues = new Dictionary<string, string> { { "Màu", "Đỏ" } }
+                } ]
         };
         var validator = new UpdateProductCommandValidator();
         var result = validator.Validate(command);
         result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(e => e.ErrorMessage.Contains("Multiple variants require all variants to have options"));
+        result.Errors
+            .Should()
+            .Contain(e => e.ErrorMessage.Contains("Multiple variants require all variants to have options"));
     }
 
     [Fact(DisplayName = "PRODUCT_116 - Sửa sản phẩm thất bại khi nhiều biến thể trùng OptionValues")]
@@ -1616,11 +1607,23 @@ public class Product
     {
         var command = new UpdateProductCommand
         {
-            Id = 1, Name = "Honda", CategoryId = 1, BrandId = 1,
-            Variants = [ 
-                new UpdateProductVariantRequest { Id = 1, UrlSlug = "honda-1", Price = 100, OptionValues = new Dictionary<string, string> { {"Màu", "Đỏ"} } },
-                new UpdateProductVariantRequest { UrlSlug = "honda-2", Price = 100, OptionValues = new Dictionary<string, string> { {"Màu", "Đỏ"} } }
-            ]
+            Id = 1,
+            Name = "Honda",
+            CategoryId = 1,
+            BrandId = 1,
+            Variants =
+                [ new UpdateProductVariantRequest
+                {
+                    Id = 1,
+                    UrlSlug = "honda-1",
+                    Price = 100,
+                    OptionValues = new Dictionary<string, string> { { "Màu", "Đỏ" } }
+                }, new UpdateProductVariantRequest
+                {
+                    UrlSlug = "honda-2",
+                    Price = 100,
+                    OptionValues = new Dictionary<string, string> { { "Màu", "Đỏ" } }
+                } ]
         };
         var validator = new UpdateProductCommandValidator();
         var result = validator.Validate(command);
@@ -1631,57 +1634,53 @@ public class Product
     [Fact(DisplayName = "PRODUCT_120 - Handler ánh xạ đúng từ Entity sang DTO lite cho price management")]
     public async Task Handle_ValidData_ReturnsMappedDto()
     {
-    // Arrange
         var products = new List<ProductEntity>
         {
-            new() {
+            new()
+            {
                 Id = 1,
                 Name = "Test Product",
                 ProductVariants =
-                [
-                    new() {
+                    [ new()
+                    {
                         Id = 101,
                         Price = 50000,
                         VariantOptionValues =
-                        [
-                            new VariantOptionValue { OptionValue = new OptionValue { Name = "Red" } },
-                            new VariantOptionValue { OptionValue = new OptionValue { Name = "XL" } }
-                        ],
+                            [ new VariantOptionValue { OptionValue = new OptionValue { Name = "Red" } }, new VariantOptionValue
+                                {
+                                    OptionValue = new OptionValue { Name = "XL" }
+                                } ],
                         InputInfos =
-                        [
-                            new InputInfo
-                            {
-                                InputPrice = 45000,
-                                InputReceipt = new Input { InputDate = DateTimeOffset.UtcNow.AddDays(-1) }
-                            },
-                            new InputInfo
-                            {
-                                InputPrice = 40000,
-                                InputReceipt = new Input { InputDate = DateTimeOffset.UtcNow.AddDays(-2) }
-                            }
-                        ]
-                    },
-                    new() {
-                        Id = 102,
-                        Price = 0,
-                        VariantOptionValues = [],
-                        InputInfos = []
-                    }
-                ]
+                            [ new InputInfo
+                                {
+                                    InputPrice = 45000,
+                                    InputReceipt = new Input { InputDate = DateTimeOffset.UtcNow.AddDays(-1) }
+                                }, new InputInfo
+                                {
+                                    InputPrice = 40000,
+                                    InputReceipt = new Input { InputDate = DateTimeOffset.UtcNow.AddDays(-2) }
+                                } ]
+                    }, new() { Id = 102, Price = 0, VariantOptionValues = [], InputInfos = [] } ]
             }
         };
 
-        _productReadRepoMock.Setup(x => x.GetPagedProductsForPriceManagementAsync(
-            It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()))
+        _productReadRepoMock.Setup(
+            x => x.GetPagedProductsForPriceManagementAsync(
+                It.IsAny<int>(),
+                It.IsAny<int>(),
+                It.IsAny<string?>(),
+                It.IsAny<string?>(),
+                It.IsAny<CancellationToken>()))
             .ReturnsAsync((products, products.Count));
 
-        var query = new GetProductsListForPriceManagementQuery { SieveModel = new SieveModel { Page = 1, PageSize = 10 } };
+        var query = new GetProductsListForPriceManagementQuery
+        {
+            SieveModel = new SieveModel { Page = 1, PageSize = 10 }
+        };
 
-        // Act
         GetProductsListForPriceManagementQueryHandler _handler = new(_productReadRepoMock.Object);
         var result = await _handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
-        // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Items.Should().HaveCount(1);
 

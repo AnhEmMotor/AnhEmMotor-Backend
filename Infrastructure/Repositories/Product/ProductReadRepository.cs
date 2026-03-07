@@ -254,9 +254,7 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
         var normalizedPage = Math.Max(page, 1);
         var normalizedPageSize = Math.Max(pageSize, 1);
 
-        var query = context.Products
-            .Where(p => p.DeletedAt == null)
-            .AsNoTracking();
+        var query = context.Products.Where(p => p.DeletedAt == null).AsNoTracking();
 
         var effectiveSorts = string.IsNullOrWhiteSpace(sorts) ? "-CreatedAt" : sorts;
 
@@ -273,8 +271,8 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
 
         IQueryable<ProductEntity> dbQuery = sieveProcessor.Apply(sieveModel, query)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
-                .ThenInclude(v => v.VariantOptionValues)
-                    .ThenInclude(vov => vov.OptionValue);
+            .ThenInclude(v => v.VariantOptionValues)
+            .ThenInclude(vov => vov.OptionValue);
 
         var entities = await dbQuery
             .AsSplitQuery()

@@ -34,7 +34,11 @@ public class Brand : IAsyncLifetime
     public ValueTask InitializeAsync() => ValueTask.CompletedTask;
 
     public async ValueTask DisposeAsync()
-    { await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(false); GC.SuppressFinalize(this); }
+    {
+        await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(false);
+        GC.SuppressFinalize(this);
+    }
+
 #pragma warning disable IDE0079 
 #pragma warning disable CRR0035
     [Fact(DisplayName = "BRAND_001 - CreateBrand - Success")]

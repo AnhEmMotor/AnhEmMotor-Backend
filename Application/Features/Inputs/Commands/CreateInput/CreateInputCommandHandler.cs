@@ -20,7 +20,9 @@ public sealed class CreateInputCommandHandler(
     IProductVariantReadRepository variantRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateInputCommand, Result<InputDetailResponse?>>
 {
-    public async Task<Result<InputDetailResponse?>> Handle(CreateInputCommand request, CancellationToken cancellationToken)
+    public async Task<Result<InputDetailResponse?>> Handle(
+        CreateInputCommand request,
+        CancellationToken cancellationToken)
     {
         if(request.SupplierId.HasValue)
         {

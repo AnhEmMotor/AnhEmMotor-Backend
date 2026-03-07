@@ -16,6 +16,7 @@ using Application.Features.Outputs.Queries.GetOutputsList;
 using Application.Features.Outputs.Queries.GetOutputStatusList;
 using Asp.Versioning;
 using Domain.Constants;
+using Domain.Constants.Order;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using Mapster;
@@ -145,8 +146,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(IEnumerable<object>), StatusCodes.Status200OK)]
     public IActionResult GetStatusMap()
     {
-        var result = Domain.Constants.Order.OrderStatus.All
-            .Select(s => new { Id = s, Name = Domain.Constants.Order.OrderStatus.GetDisplayName(s) });
+        var result = OrderStatus.All.Select(s => new { Id = s, Name = OrderStatus.GetDisplayName(s) });
         return Ok(result);
     }
 
@@ -158,7 +158,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(Dictionary<string, IEnumerable<string>>), StatusCodes.Status200OK)]
     public IActionResult GetTransitionMap()
     {
-        var result = Domain.Constants.Order.OrderStatusTransitions.GetAllowedTransitionsMap();
+        var result = OrderStatusTransitions.GetAllowedTransitionsMap();
         return Ok(result);
     }
 
@@ -168,10 +168,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     [HttpGet("locked-statuses")]
     [HasPermission(Outputs.View)]
     [ProducesResponseType(typeof(HashSet<string>), StatusCodes.Status200OK)]
-    public IActionResult GetLockedStatuses()
-    {
-        return Ok(Domain.Constants.Order.OrderConstants.LockedStatuses);
-    }
+    public IActionResult GetLockedStatuses() { return Ok(OrderLockStatus.LockedStatuses); }
 
     /// <summary>
     /// Lấy thông tin chi tiết của đơn hàng.

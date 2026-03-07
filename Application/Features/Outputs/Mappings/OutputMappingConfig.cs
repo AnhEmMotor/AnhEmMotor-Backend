@@ -33,7 +33,9 @@ public sealed class OutputMappingConfig : IRegister
         config.NewConfig<OutputInfo, OutputInfoResponse>()
             .Map(dest => dest.ProductId, src => src.ProductVarientId)
             .Map(dest => dest.ProductName, src => MapProductName(src))
-            .Map(dest => dest.CoverImageUrl, src => src.ProductVariant != null ? src.ProductVariant.CoverImageUrl : null);
+            .Map(
+                dest => dest.CoverImageUrl,
+                src => src.ProductVariant != null ? src.ProductVariant.CoverImageUrl : null);
 
         config.NewConfig<CreateOutputInfoRequest, OutputInfo>()
             .Map(dest => dest.ProductVarientId, src => src.ProductId)
@@ -64,9 +66,7 @@ public sealed class OutputMappingConfig : IRegister
 
         var productName = src.ProductVariant.Product.Name;
         var optionValues = src.ProductVariant.VariantOptionValues?
-            .Select(vov => vov.OptionValue?.Name)
-            .Where(name => !string.IsNullOrWhiteSpace(name))
-            .ToList();
+            .Select(vov => vov.OptionValue?.Name).Where(name => !string.IsNullOrWhiteSpace(name)).ToList();
 
         if(optionValues is null || optionValues.Count == 0)
         {

@@ -42,16 +42,16 @@ public sealed class UpdateProductCommandHandler(
         var product = await productReadRepository.GetByIdWithDetailsAsync(command.Id, cancellationToken)
             .ConfigureAwait(false);
 
-        if (product is null)
+        if(product is null)
         {
             return Error.NotFound($"Product with Id {command.Id} not found.");
         }
 
-        if (command.CategoryId.HasValue)
+        if(command.CategoryId.HasValue)
         {
             var category = await productCategoryReadRepository.GetByIdAsync(command.CategoryId.Value, cancellationToken)
                 .ConfigureAwait(false);
-            if (category is null)
+            if(category is null)
             {
                 errors.Add(
                     Error.NotFound(
@@ -60,11 +60,11 @@ public sealed class UpdateProductCommandHandler(
             }
         }
 
-        if (command.BrandId.HasValue)
+        if(command.BrandId.HasValue)
         {
             var brand = await brandReadRepository.GetByIdAsync(command.BrandId.Value, cancellationToken)
                 .ConfigureAwait(false);
-            if (brand is null)
+            if(brand is null)
             {
                 errors.Add(
                     Error.NotFound(
@@ -73,27 +73,27 @@ public sealed class UpdateProductCommandHandler(
             }
         }
 
-        if (command.Variants?.Count > 0)
+        if(command.Variants?.Count > 0)
         {
             var slugs = command.Variants
                 .Select(v => v.UrlSlug?.Trim())
                 .Where(s => !string.IsNullOrWhiteSpace(s))
                 .ToList();
 
-            if (slugs.Count != slugs.Distinct(StringComparer.OrdinalIgnoreCase).Count())
+            if(slugs.Count != slugs.Distinct(StringComparer.OrdinalIgnoreCase).Count())
             {
                 errors.Add(Error.BadRequest("Duplicate slugs found within the command.", nameof(command.Variants)));
             }
 
-            foreach (var variantReq in command.Variants.Where(v => !string.IsNullOrWhiteSpace(v.UrlSlug)))
+            foreach(var variantReq in command.Variants.Where(v => !string.IsNullOrWhiteSpace(v.UrlSlug)))
             {
                 var existing = await productVariantReadRepository.GetBySlugAsync(
                     variantReq.UrlSlug!.Trim(),
                     cancellationToken)
                     .ConfigureAwait(false);
-                if (existing is not null)
+                if(existing is not null)
                 {
-                    if (existing.ProductId == command.Id && existing.Id == variantReq.Id)
+                    if(existing.ProductId == command.Id && existing.Id == variantReq.Id)
                     {
                         continue;
                     }
@@ -103,7 +103,7 @@ public sealed class UpdateProductCommandHandler(
             }
         }
 
-        if (errors.Count > 0)
+        if(errors.Count > 0)
         {
             return errors;
         }
@@ -136,21 +136,21 @@ public sealed class UpdateProductCommandHandler(
         var optionNameMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         var inputVariants = command.Variants ?? [];
 
-        if (inputVariants.Count > 0)
+        if(inputVariants.Count > 0)
         {
             var allOptionValues = new Dictionary<int, HashSet<string>>();
             var potentialOptionNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            foreach (var variantReq in inputVariants)
+            foreach(var variantReq in inputVariants)
             {
-                if (variantReq.OptionValues?.Count > 0)
+                if(variantReq.OptionValues?.Count > 0)
                 {
-                    foreach (var kvp in variantReq.OptionValues)
+                    foreach(var kvp in variantReq.OptionValues)
                     {
-                        if (!int.TryParse(kvp.Key, out _))
+                        if(!int.TryParse(kvp.Key, out _))
                         {
                             var keyName = kvp.Key?.Trim();
-                            if (!string.IsNullOrWhiteSpace(keyName))
+                            if(!string.IsNullOrWhiteSpace(keyName))
                             {
                                 potentialOptionNames.Add(keyName);
                             }
@@ -159,14 +159,14 @@ public sealed class UpdateProductCommandHandler(
                 }
             }
 
-            if (potentialOptionNames.Count > 0)
+            if(potentialOptionNames.Count > 0)
             {
                 var allowedKeys = await predefinedOptionReadRepository.GetAllKeysAsync(cancellationToken)
                     .ConfigureAwait(false);
                 var allowedKeysSet = new HashSet<string>(allowedKeys, StringComparer.OrdinalIgnoreCase);
 
                 var invalidOptions = potentialOptionNames.Where(n => !allowedKeysSet.Contains(n)).ToList();
-                if (invalidOptions.Count > 0)
+                if(invalidOptions.Count > 0)
                 {
                     return Result<ProductDetailForManagerResponse?>.Failure(
                         Error.BadRequest(
@@ -180,24 +180,24 @@ public sealed class UpdateProductCommandHandler(
                     DataFetchMode.All)
                     .ConfigureAwait(false);
 
-                foreach (var opt in existingOptions)
+                foreach(var opt in existingOptions)
                 {
-                    if (opt.Name is not null)
+                    if(opt.Name is not null)
                     {
                         optionNameMap[opt.Name] = opt.Id;
                     }
                 }
 
                 var missingNames = potentialOptionNames.Where(n => !optionNameMap.ContainsKey(n)).ToList();
-                if (missingNames.Count > 0)
+                if(missingNames.Count > 0)
                 {
                     var newOptions = missingNames.Select(n => new OptionEntity { Name = n }).ToList();
                     productVariantInsertRepository.AddOptionRange(newOptions);
                     await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-                    foreach (var opt in newOptions)
+                    foreach(var opt in newOptions)
                     {
-                        if (opt.Name is not null)
+                        if(opt.Name is not null)
                         {
                             optionNameMap[opt.Name] = opt.Id;
                         }
@@ -205,33 +205,32 @@ public sealed class UpdateProductCommandHandler(
                 }
             }
 
-            foreach (var variantReq in inputVariants)
+            foreach(var variantReq in inputVariants)
             {
-                if (variantReq.OptionValues?.Count > 0)
+                if(variantReq.OptionValues?.Count > 0)
                 {
-                    foreach (var kvp in variantReq.OptionValues)
+                    foreach(var kvp in variantReq.OptionValues)
                     {
                         var optionId = 0;
-                        if (int.TryParse(kvp.Key, out var parsedId))
+                        if(int.TryParse(kvp.Key, out var parsedId))
                         {
                             optionId = parsedId;
-                        }
-                        else
+                        } else
                         {
                             var keyName = kvp.Key?.Trim();
-                            if (!string.IsNullOrWhiteSpace(keyName) &&
+                            if(!string.IsNullOrWhiteSpace(keyName) &&
                                 optionNameMap.TryGetValue(keyName, out var mappedId))
                             {
                                 optionId = mappedId;
                             }
                         }
 
-                        if (optionId > 0)
+                        if(optionId > 0)
                         {
                             var valueName = kvp.Value?.Trim();
-                            if (!string.IsNullOrWhiteSpace(valueName))
+                            if(!string.IsNullOrWhiteSpace(valueName))
                             {
-                                if (!allOptionValues.TryGetValue(optionId, out var valueSet))
+                                if(!allOptionValues.TryGetValue(optionId, out var valueSet))
                                 {
                                     valueSet = [];
                                     allOptionValues[optionId] = valueSet;
@@ -243,13 +242,13 @@ public sealed class UpdateProductCommandHandler(
                 }
             }
 
-            foreach (var optionKvp in allOptionValues)
+            foreach(var optionKvp in allOptionValues)
             {
                 var optionId = optionKvp.Key;
                 var valueNames = optionKvp.Value;
 
                 var option = await optionReadRepository.GetByIdAsync(optionId, cancellationToken).ConfigureAwait(false);
-                if (option is null)
+                if(option is null)
                 {
                     return Result<ProductDetailForManagerResponse?>.Failure(
                         Error.NotFound($"Option with Id {optionId} not found.", "Variants.OptionValues"));
@@ -257,7 +256,7 @@ public sealed class UpdateProductCommandHandler(
 
                 var valueMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
-                foreach (var valueName in valueNames)
+                foreach(var valueName in valueNames)
                 {
                     var existingValue = await optionValueReadRepository.GetByIdAndNameAsync(
                         optionId,
@@ -265,11 +264,10 @@ public sealed class UpdateProductCommandHandler(
                         cancellationToken)
                         .ConfigureAwait(false);
 
-                    if (existingValue is not null)
+                    if(existingValue is not null)
                     {
                         valueMap[valueName] = existingValue.Id;
-                    }
-                    else
+                    } else
                     {
                         var newValue = new OptionValueEntity { OptionId = optionId, Name = valueName };
                         optionValueInsertRepository.Add(newValue);
@@ -286,25 +284,24 @@ public sealed class UpdateProductCommandHandler(
         var inputVariantIds = inputVariants.Where(v => v.Id.HasValue).Select(v => v.Id!.Value).ToHashSet();
         var variantsToDelete = currentVariants.Where(v => !inputVariantIds.Contains(v.Id)).ToList();
 
-        foreach (var v in variantsToDelete)
+        foreach(var v in variantsToDelete)
         {
             productVarientDeleteRepository.Delete(v);
             product.ProductVariants.Remove(v);
         }
 
-        foreach (var variantReq in inputVariants)
+        foreach(var variantReq in inputVariants)
         {
             ProductVariant variantEntity;
 
-            if (variantReq.Id.HasValue && variantReq.Id > 0)
+            if(variantReq.Id.HasValue && variantReq.Id > 0)
             {
                 variantEntity = currentVariants.FirstOrDefault(v => v.Id == variantReq.Id.Value)!;
-                if (variantEntity is null)
+                if(variantEntity is null)
                 {
                     continue;
                 }
-            }
-            else
+            } else
             {
                 variantEntity = new ProductVariant { ProductId = command.Id };
                 product.ProductVariants.Add(variantEntity);
@@ -317,38 +314,34 @@ public sealed class UpdateProductCommandHandler(
             UpdateVariantPhotos(variantEntity, variantReq.PhotoCollection);
 
             var currentLinks = variantEntity.VariantOptionValues.ToList();
-            foreach (var link in currentLinks)
+            foreach(var link in currentLinks)
             {
                 variantOptionValueDeleteRepository.Delete(link);
                 variantEntity.VariantOptionValues.Remove(link);
             }
 
-            if (variantReq.OptionValues?.Count > 0)
+            if(variantReq.OptionValues?.Count > 0)
             {
-                foreach (var kvp in variantReq.OptionValues)
+                foreach(var kvp in variantReq.OptionValues)
                 {
                     int? resolvedOptionId = null;
-                    if (int.TryParse(kvp.Key, out var optionId))
+                    if(int.TryParse(kvp.Key, out var optionId))
                     {
                         resolvedOptionId = optionId;
-                    }
-                    else
+                    } else
                     {
                         var keyName = kvp.Key?.Trim();
-                        if (!string.IsNullOrWhiteSpace(keyName) &&
-                            optionNameMap.TryGetValue(keyName, out var mappedId))
+                        if(!string.IsNullOrWhiteSpace(keyName) && optionNameMap.TryGetValue(keyName, out var mappedId))
                         {
                             resolvedOptionId = mappedId;
                         }
                     }
 
-                    if (resolvedOptionId.HasValue)
+                    if(resolvedOptionId.HasValue)
                     {
                         var valueName = kvp.Value?.Trim();
-                        if (!string.IsNullOrWhiteSpace(valueName) &&
-                            optionIdToValueMap.TryGetValue(
-                                resolvedOptionId.Value,
-                                out var valueMap) &&
+                        if(!string.IsNullOrWhiteSpace(valueName) &&
+                            optionIdToValueMap.TryGetValue(resolvedOptionId.Value, out var valueMap) &&
                             valueMap.TryGetValue(valueName, out var valueId))
                         {
                             variantEntity.VariantOptionValues.Add(new VariantOptionValue { OptionValueId = valueId });
@@ -375,9 +368,9 @@ public sealed class UpdateProductCommandHandler(
 
         var currentPhotos = variant.ProductCollectionPhotos.ToList();
 
-        foreach (var photo in currentPhotos)
+        foreach(var photo in currentPhotos)
         {
-            if (!string.IsNullOrWhiteSpace(photo.ImageUrl) && !targetParams.Contains(photo.ImageUrl.Trim()))
+            if(!string.IsNullOrWhiteSpace(photo.ImageUrl) && !targetParams.Contains(photo.ImageUrl.Trim()))
             {
                 variant.ProductCollectionPhotos.Remove(photo);
             }
@@ -388,9 +381,9 @@ public sealed class UpdateProductCommandHandler(
             .Select(p => p.ImageUrl!.Trim())
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var url in targetParams)
+        foreach(var url in targetParams)
         {
-            if (!existingUrls.Contains(url))
+            if(!existingUrls.Contains(url))
             {
                 variant.ProductCollectionPhotos.Add(new ProductCollectionPhoto { ImageUrl = url });
             }

@@ -14,8 +14,7 @@ public sealed class GetOutputsByUserIdQueryHandler(IOutputReadRepository reposit
         GetOutputsByUserIdQuery request,
         CancellationToken cancellationToken)
     {
-        var query = repository.GetQueryable()
-            .Where(x => x.BuyerId == request.BuyerId);
+        var query = repository.GetQueryable().Where(x => x.BuyerId == request.BuyerId);
 
         var result = await paginator.ApplyAsync<OutputEntity, OutputItemResponse>(
             query,

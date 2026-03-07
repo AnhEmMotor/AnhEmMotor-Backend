@@ -1,5 +1,5 @@
-using Application.Common.Models;
 using Application.ApiContracts.Product.Responses;
+using Application.Common.Models;
 using Domain.Primitives;
 using MediatR;
 using Sieve.Models;

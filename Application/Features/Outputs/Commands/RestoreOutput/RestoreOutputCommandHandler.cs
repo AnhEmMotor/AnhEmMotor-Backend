@@ -14,7 +14,9 @@ public sealed class RestoreOutputCommandHandler(
     IOutputUpdateRepository updateRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<RestoreOutputCommand, Result<OrderDetailResponse>>
 {
-    public async Task<Result<OrderDetailResponse>> Handle(RestoreOutputCommand request, CancellationToken cancellationToken)
+    public async Task<Result<OrderDetailResponse>> Handle(
+        RestoreOutputCommand request,
+        CancellationToken cancellationToken)
     {
         var output = await readRepository.GetByIdAsync(request.Id, cancellationToken, DataFetchMode.DeletedOnly)
             .ConfigureAwait(false);

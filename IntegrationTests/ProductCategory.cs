@@ -36,7 +36,11 @@ public class ProductCategory : IAsyncLifetime
 
     public ValueTask InitializeAsync() => ValueTask.CompletedTask;
 
-    public async ValueTask DisposeAsync() { await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(true); GC.SuppressFinalize(this); }
+    public async ValueTask DisposeAsync()
+    {
+        await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(true);
+        GC.SuppressFinalize(this);
+    }
 
 #pragma warning disable IDE0079
 #pragma warning disable CRR0035
@@ -81,7 +85,9 @@ public class ProductCategory : IAsyncLifetime
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/ProductCategory?Page=1&PageSize=10&Filters=Name@={uniqueId}", CancellationToken.None)
+        var response = await _client.GetAsync(
+            $"/api/v1/ProductCategory?Page=1&PageSize=10&Filters=Name@={uniqueId}",
+            CancellationToken.None)
             .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -135,7 +141,9 @@ public class ProductCategory : IAsyncLifetime
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/ProductCategory?Page=2&PageSize=5&Filters=Name@={uniqueId}", CancellationToken.None)
+        var response = await _client.GetAsync(
+            $"/api/v1/ProductCategory?Page=2&PageSize=5&Filters=Name@={uniqueId}",
+            CancellationToken.None)
             .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -193,7 +201,9 @@ public class ProductCategory : IAsyncLifetime
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/ProductCategory?Filters=Name@=Phone,Name@={uniqueId}", CancellationToken.None)
+        var response = await _client.GetAsync(
+            $"/api/v1/ProductCategory?Filters=Name@=Phone,Name@={uniqueId}",
+            CancellationToken.None)
             .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -244,7 +254,9 @@ public class ProductCategory : IAsyncLifetime
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync($"/api/v1/ProductCategory?Sorts=Name&Filters=Name@={uniqueId}", CancellationToken.None)
+        var response = await _client.GetAsync(
+            $"/api/v1/ProductCategory?Sorts=Name&Filters=Name@={uniqueId}",
+            CancellationToken.None)
             .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -281,7 +293,9 @@ public class ProductCategory : IAsyncLifetime
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var response = await _client.GetAsync($"/api/v1/ProductCategory?Filters=Name@=NonExist{uniqueId}", CancellationToken.None)
+        var response = await _client.GetAsync(
+            $"/api/v1/ProductCategory?Filters=Name@=NonExist{uniqueId}",
+            CancellationToken.None)
             .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -335,7 +349,8 @@ public class ProductCategory : IAsyncLifetime
         }
 
         var response = await _client.GetAsync(
-            $"/api/v1/ProductCategory/for-manager?Page=1&PageSize=10&Filters=Name@={uniqueId}", CancellationToken.None)
+            $"/api/v1/ProductCategory/for-manager?Page=1&PageSize=10&Filters=Name@={uniqueId}",
+            CancellationToken.None)
             .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -392,7 +407,8 @@ public class ProductCategory : IAsyncLifetime
         }
 
         var response = await _client.GetAsync(
-            $"/api/v1/ProductCategory/deleted?Page=1&PageSize=10&Filters=Name@={uniqueId}", CancellationToken.None)
+            $"/api/v1/ProductCategory/deleted?Page=1&PageSize=10&Filters=Name@={uniqueId}",
+            CancellationToken.None)
             .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -443,7 +459,8 @@ public class ProductCategory : IAsyncLifetime
             categoryId = category.Id;
         }
 
-        var response = await _client.GetAsync($"/api/v1/ProductCategory/{categoryId}", CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/ProductCategory/{categoryId}", CancellationToken.None)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -477,7 +494,8 @@ public class ProductCategory : IAsyncLifetime
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var response = await _client.GetAsync("/api/v1/ProductCategory/99999", CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/ProductCategory/99999", CancellationToken.None)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -520,7 +538,8 @@ public class ProductCategory : IAsyncLifetime
             categoryId = category.Id;
         }
 
-        var response = await _client.GetAsync($"/api/v1/ProductCategory/{categoryId}", CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/ProductCategory/{categoryId}", CancellationToken.None)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -654,7 +673,8 @@ public class ProductCategory : IAsyncLifetime
             categoryId = category.Id;
         }
 
-        var response = await _client.DeleteAsync($"/api/v1/ProductCategory/{categoryId}", CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.DeleteAsync($"/api/v1/ProductCategory/{categoryId}", CancellationToken.None)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
@@ -792,7 +812,9 @@ public class ProductCategory : IAsyncLifetime
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             foreach(var id in validIds)
             {
-                var category = await db.ProductCategories.FindAsync([id], TestContext.Current.CancellationToken).ConfigureAwait(true);
+                var category = await db.ProductCategories
+                    .FindAsync([ id ], TestContext.Current.CancellationToken)
+                    .ConfigureAwait(true);
                 category!.DeletedAt.Should().BeNull();
             }
         }
@@ -855,7 +877,9 @@ public class ProductCategory : IAsyncLifetime
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var category = await db.ProductCategories.FindAsync([categoryIds[0]], TestContext.Current.CancellationToken).ConfigureAwait(true);
+            var category = await db.ProductCategories
+                .FindAsync([ categoryIds[0] ], TestContext.Current.CancellationToken)
+                .ConfigureAwait(true);
             category!.DeletedAt.Should().BeNull();
         }
     }
@@ -913,7 +937,9 @@ public class ProductCategory : IAsyncLifetime
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             foreach(var id in categoryIds)
             {
-                var category = await db.ProductCategories.FindAsync([id], TestContext.Current.CancellationToken).ConfigureAwait(true);
+                var category = await db.ProductCategories
+                    .FindAsync([ id ], TestContext.Current.CancellationToken)
+                    .ConfigureAwait(true);
                 category!.DeletedAt.Should().BeNull();
             }
         }

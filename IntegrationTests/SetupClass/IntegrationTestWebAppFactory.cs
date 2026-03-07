@@ -40,6 +40,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
     private DbConnection _connection = default!;
 
 #pragma warning disable IDE0079 
+#pragma warning disable CRR0035
 #pragma warning disable CRR0039
     public async ValueTask InitializeAsync()
     {
@@ -68,8 +69,6 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
             .ConfigureAwait(false);
     }
 
-#pragma warning restore CRR0039
-#pragma warning restore IDE0079 
 
     public async Task ResetDatabaseAsync(CancellationToken cancellationToken = default)
     {
@@ -83,6 +82,10 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
 
         await _mySqlContainer.StopAsync(CancellationToken.None).ConfigureAwait(false);
     }
+
+#pragma warning restore CRR0039
+#pragma warning restore CRR0035
+#pragma warning restore IDE0079 
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {

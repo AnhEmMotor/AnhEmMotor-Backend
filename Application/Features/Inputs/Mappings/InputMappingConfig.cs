@@ -20,7 +20,9 @@ public sealed class InputMappingConfig : IRegister
             .Map(dest => dest.CreatedAt, src => src.CreatedAt)
             .Map(
                 dest => dest.TotalPayable,
-                src => src.InputInfos != null ? src.InputInfos.Sum(ii => (long)(ii.Count ?? 0) * (long)(ii.InputPrice ?? 0)) : 0)
+                src => src.InputInfos != null
+                    ? src.InputInfos.Sum(ii => (long)(ii.Count ?? 0) * (long)(ii.InputPrice ?? 0))
+                    : 0)
             .Map(dest => dest.Products, src => src.InputInfos);
 
         config.NewConfig<Input, InputDetailResponse>()
@@ -30,7 +32,9 @@ public sealed class InputMappingConfig : IRegister
             .Map(dest => dest.CreatedAt, src => src.CreatedAt)
             .Map(
                 dest => dest.TotalPayable,
-                src => src.InputInfos != null ? src.InputInfos.Sum(ii => (long)(ii.Count ?? 0) * (long)(ii.InputPrice ?? 0)) : 0)
+                src => src.InputInfos != null
+                    ? src.InputInfos.Sum(ii => (long)(ii.Count ?? 0) * (long)(ii.InputPrice ?? 0))
+                    : 0)
             .Map(dest => dest.Products, src => src.InputInfos);
 
         config.NewConfig<InputInfo, InputInfoResponse>()
@@ -49,7 +53,9 @@ public sealed class InputMappingConfig : IRegister
             .Map(dest => dest.CreatedAt, src => src.CreatedAt)
             .Map(
                 dest => dest.TotalPayable,
-                src => src.InputInfos != null ? src.InputInfos.Sum(ii => (long)(ii.Count ?? 0) * (long)(ii.InputPrice ?? 0)) : 0)
+                src => src.InputInfos != null
+                    ? src.InputInfos.Sum(ii => (long)(ii.Count ?? 0) * (long)(ii.InputPrice ?? 0))
+                    : 0)
             .Map(dest => dest.TotalItems, src => src.InputInfos != null ? src.InputInfos.Count() : 0);
 
         config.NewConfig<InputListResponse, SupplierPurchaseHistoryResponse>();
@@ -57,30 +63,31 @@ public sealed class InputMappingConfig : IRegister
 
     private static string? BuildFullVariantName(ProductVariant? variant)
     {
-        if (variant is null || variant.Product is null)
+        if(variant is null || variant.Product is null)
         {
             return null;
         }
 
         var productName = variant.Product.Name ?? string.Empty;
 
-        if (variant.VariantOptionValues is null || variant.VariantOptionValues.Count == 0)
+        if(variant.VariantOptionValues is null || variant.VariantOptionValues.Count == 0)
         {
             return productName;
         }
 
         var parts = variant.VariantOptionValues
             .Where(vov => vov.OptionValue is not null && !string.IsNullOrWhiteSpace(vov.OptionValue.Name))
-            .Select(vov =>
-            {
-                var optionName = vov.OptionValue?.Option?.Name;
-                return string.IsNullOrWhiteSpace(optionName)
-                    ? vov.OptionValue!.Name
-                    : $"{optionName}: {vov.OptionValue!.Name}";
-            })
+            .Select(
+                vov =>
+                {
+                    var optionName = vov.OptionValue?.Option?.Name;
+                    return string.IsNullOrWhiteSpace(optionName)
+                        ? vov.OptionValue!.Name
+                        : $"{optionName}: {vov.OptionValue!.Name}";
+                })
             .ToList();
 
-        if (parts.Count == 0)
+        if(parts.Count == 0)
         {
             return productName;
         }

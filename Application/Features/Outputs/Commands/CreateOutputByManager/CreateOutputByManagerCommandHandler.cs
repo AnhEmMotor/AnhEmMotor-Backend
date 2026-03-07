@@ -82,12 +82,11 @@ public sealed class CreateOutputByManagerCommandHandler(
         insertRepository.Add(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        if(output.StatusId == OrderStatus.Completed)
+        if(string.Compare(output.StatusId, OrderStatus.Completed) == 0)
         {
             output.FinishedBy = request.CurrentUserId;
             updateRepository.Update(output);
-            await updateRepository.ProcessCOGSForCompletedOrderAsync(output.Id, cancellationToken)
-                .ConfigureAwait(false);
+            await updateRepository.ProcessCOGSForCompletedOrderAsync(output.Id, cancellationToken).ConfigureAwait(false);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
