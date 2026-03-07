@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Application.Features.Outputs.Commands.RestoreManyOutputs;
 
-public sealed record RestoreManyOutputsCommand : IRequest<Result<List<OutputResponse>?>>
+public sealed record RestoreManyOutputsCommand : IRequest<Result<List<OutputItemResponse>?>>
 {
     public ICollection<int> Ids { get; init; } = [];
 }

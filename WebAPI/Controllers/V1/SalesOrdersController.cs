@@ -43,7 +43,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     /// Lấy danh sách đơn hàng của khách hàng hiện tại (dựa trên JWT token).
     /// </summary>
     [HttpGet("my-purchases")]
-    [ProducesResponseType(typeof(PagedResult<OutputResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedResult<OutputItemResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetMyPurchasesAsync(
         [FromQuery] SieveModel sieveModel,
@@ -78,7 +78,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     /// </summary>
     [HttpGet("get-purchases/{id:Guid}")]
     [HasPermission(Outputs.View)]
-    [ProducesResponseType(typeof(PagedResult<OutputResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedResult<OutputItemResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetPurchasesByIDAsync(
         [FromQuery] SieveModel sieveModel,
@@ -99,7 +99,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     /// </summary>
     [HttpGet]
     [HasPermission(Outputs.View)]
-    [ProducesResponseType(typeof(PagedResult<OutputResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedResult<OutputItemResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetOutputsAsync(
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
@@ -114,7 +114,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     /// </summary>
     [HttpGet("deleted")]
     [HasPermission(Outputs.View)]
-    [ProducesResponseType(typeof(PagedResult<OutputResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedResult<OutputItemResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetDeletedOutputsAsync(
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
@@ -138,11 +138,47 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
+    /// Lấy bản đồ tên hiển thị nội bộ của trạng thái đơn hàng (Tiếng Việt).
+    /// </summary>
+    [HttpGet("status-map")]
+    [RequiresAnyPermissions(Outputs.View, Outputs.Create, Outputs.Edit)]
+    [ProducesResponseType(typeof(IEnumerable<object>), StatusCodes.Status200OK)]
+    public IActionResult GetStatusMap()
+    {
+        var result = Domain.Constants.Order.OrderStatus.All
+            .Select(s => new { Id = s, Name = Domain.Constants.Order.OrderStatus.GetDisplayName(s) });
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Lấy sơ đồ chuyển đổi trạng thái đơn hàng.
+    /// </summary>
+    [HttpGet("transition-map")]
+    [RequiresAnyPermissions(Outputs.Create, Outputs.Edit)]
+    [ProducesResponseType(typeof(Dictionary<string, IEnumerable<string>>), StatusCodes.Status200OK)]
+    public IActionResult GetTransitionMap()
+    {
+        var result = Domain.Constants.Order.OrderStatusTransitions.GetAllowedTransitionsMap();
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Lấy danh sách các trạng thái đơn hàng bị khóa không cho phép sửa thông tin chi tiết.
+    /// </summary>
+    [HttpGet("locked-statuses")]
+    [HasPermission(Outputs.View)]
+    [ProducesResponseType(typeof(HashSet<string>), StatusCodes.Status200OK)]
+    public IActionResult GetLockedStatuses()
+    {
+        return Ok(Domain.Constants.Order.OrderConstants.LockedStatuses);
+    }
+
+    /// <summary>
     /// Lấy thông tin chi tiết của đơn hàng.
     /// </summary>
     [HttpGet("{id:int}", Name = RouteNames.SaleOrders.GetById)]
     [HasPermission(Outputs.View)]
-    [ProducesResponseType(typeof(OutputResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(OrderDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetOutputByIdAsync(int id, CancellationToken cancellationToken)
     {
@@ -156,13 +192,17 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     /// </summary>
     [HttpPost("by-manager")]
     [HasPermission(Outputs.Create)]
-    [ProducesResponseType(typeof(OutputResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(OrderDetailResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateOutputForAdminAsync(
         [FromBody] CreateOutputByManagerCommand request,
         CancellationToken cancellationToken)
     {
-        var command = request.Adapt<CreateOutputByManagerCommand>();
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var command = request.Adapt<CreateOutputByManagerCommand>() with
+        {
+            CurrentUserId = Guid.TryParse(currentUserId, out var guid) ? guid : null
+        };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleCreated(
             result,
@@ -174,7 +214,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     /// Tạo đơn hàng mới (dành cho các tài khoản đã đăng nhập).
     /// </summary>
     [HttpPost]
-    [ProducesResponseType(typeof(OutputResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(OrderDetailResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateOutputAsync(
         [FromBody] CreateOutputCommand request,
@@ -193,7 +233,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     /// </summary>
     [HttpPut("{id:int}")]
     [Authorize]
-    [ProducesResponseType(typeof(OutputResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(OrderDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateOutputForManagerAsync(
@@ -217,7 +257,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     /// </summary>
     [HttpPut("for-manager/{id:int}")]
     [HasPermission(Outputs.Edit)]
-    [ProducesResponseType(typeof(OutputResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(OrderDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateOutputAsync(
@@ -225,7 +265,12 @@ public class SalesOrdersController(IMediator mediator) : ApiController
         [FromBody] UpdateOutputForManagerCommand request,
         CancellationToken cancellationToken)
     {
-        var command = request.Adapt<UpdateOutputForManagerCommand>() with { Id = id };
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var command = request.Adapt<UpdateOutputForManagerCommand>() with
+        {
+            Id = id,
+            CurrentUserId = Guid.TryParse(currentUserId, out var guid) ? guid : null
+        };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -236,7 +281,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     /// </summary>
     [HttpPatch("{id:int}/status")]
     [HasPermission(Outputs.ChangeStatus)]
-    [ProducesResponseType(typeof(OutputResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(OrderDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateOutputStatusAsync(
@@ -259,7 +304,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     /// </summary>
     [HttpPatch("status")]
     [HasPermission(Outputs.ChangeStatus)]
-    [ProducesResponseType(typeof(List<OutputResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(List<OutputItemResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateManyOutputStatusAsync(
         [FromBody] UpdateManyOutputStatusCommand request,
@@ -302,7 +347,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     /// Khôi phục đơn hàng đã bị xóa.
     /// </summary>
     [HttpPost("{id:int}/restore")]
-    [ProducesResponseType(typeof(OutputResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(OrderDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RestoreOutputAsync(int id, CancellationToken cancellationToken)
     {
@@ -315,7 +360,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     /// Khôi phục nhiều đơn hàng đã bị xóa cùng lúc.
     /// </summary>
     [HttpPost("restore")]
-    [ProducesResponseType(typeof(List<OutputResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(List<OutputItemResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RestoreManyOutputsAsync(
         [FromBody] RestoreManyOutputsCommand request,

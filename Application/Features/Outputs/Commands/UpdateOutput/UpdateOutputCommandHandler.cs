@@ -16,9 +16,9 @@ public sealed class UpdateOutputCommandHandler(
     IOutputUpdateRepository updateRepository,
     IOutputDeleteRepository deleteRepository,
     IProductVariantReadRepository variantRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateOutputCommand, Result<OutputResponse?>>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateOutputCommand, Result<OrderDetailResponse>>
 {
-    public async Task<Result<OutputResponse?>> Handle(UpdateOutputCommand request, CancellationToken cancellationToken)
+    public async Task<Result<OrderDetailResponse>> Handle(UpdateOutputCommand request, CancellationToken cancellationToken)
     {
         if(request.CurrentUserId is null)
         {
@@ -126,6 +126,6 @@ public sealed class UpdateOutputCommandHandler(
 
         var updated = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
 
-        return updated.Adapt<OutputResponse>();
+        return updated.Adapt<OrderDetailResponse>();
     }
 }

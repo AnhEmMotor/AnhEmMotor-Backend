@@ -88,7 +88,10 @@ namespace Infrastructure.Repositories.ProductVariant
             if(!string.IsNullOrWhiteSpace(search))
             {
                 var searchPattern = $"%{search.Trim()}%";
-                query = query.Where(v => v.Product != null && EF.Functions.Like(v.Product.Name!, searchPattern));
+                query = query.Where(v => v.Product != null && (
+                    EF.Functions.Like(v.Product.Name!, searchPattern) ||
+                    v.VariantOptionValues.Any(vov => vov.OptionValue != null && EF.Functions.Like(vov.OptionValue.Name!, searchPattern))
+                ));
             }
 
             var normalizedPage = Math.Max(page, 1);

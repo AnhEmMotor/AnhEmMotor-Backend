@@ -56,14 +56,14 @@ public class UserManagerController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Lấy danh sách tất cả người dùng (có phân trang, lọc, sắp xếp - chỉ vào được khi người dùng có quyền sửa hoặc xoá
-    /// phiếu bán hàng).
+    /// Lấy thông tin cơ bản của tất cả người dùng (Id, FullName, Email, PhoneNumber) để dùng trong các form nhập liệu.
+    /// Dành cho nhân viên có quyền tạo hoặc sửa phiếu bán hàng hoặc xem danh sách người dùng.
     /// </summary>
     /// <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
     /// <param name="cancellationToken"></param>
     [HttpGet("for-output")]
-    [RequiresAnyPermissions(Outputs.Edit, Outputs.Create)]
-    [ProducesResponseType(typeof(PagedResult<UserDTOForManagerResponse>), StatusCodes.Status200OK)]
+    [RequiresAnyPermissions(Outputs.Edit, Outputs.Create, Users.View)]
+    [ProducesResponseType(typeof(PagedResult<UserDTOForOutputResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllUsersForOutputAsync(
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)

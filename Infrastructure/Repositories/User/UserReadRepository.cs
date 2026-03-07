@@ -75,7 +75,13 @@ namespace Infrastructure.Repositories.User
 
             foreach(var user in entities)
             {
-                var response = new UserDTOForOutputResponse { Id = user.Id, FullName = user.FullName ?? string.Empty, };
+                var response = new UserDTOForOutputResponse
+                {
+                    Id = user.Id,
+                    FullName = user.FullName ?? string.Empty,
+                    Email = user.Email ?? string.Empty,
+                    PhoneNumber = user.PhoneNumber ?? string.Empty,
+                };
 
                 userResponses.Add(response);
             }

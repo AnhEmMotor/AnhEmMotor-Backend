@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 
 namespace Application.Features.Outputs.Commands.UpdateOutput;
 
-public sealed record UpdateOutputCommand : IRequest<Result<OutputResponse?>>
+public sealed record UpdateOutputCommand : IRequest<Result<OrderDetailResponse>>
 {
     public int Id { get; init; }
 

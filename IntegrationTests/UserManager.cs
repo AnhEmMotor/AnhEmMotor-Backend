@@ -909,5 +909,137 @@ public class UserManager : IAsyncLifetime
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
+    [Fact(DisplayName = "UMGR_044 - Lấy danh sách basic-info thành công với quyền hợp lệ")]
+    public async Task GetBasicUsersInfo_WithValidPermission_ReturnsBasicFields()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var adminName = $"admin_{uniqueId}";
+
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            adminName,
+            "Pass@123",
+            [ PermissionsList.Outputs.Create ],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            adminName,
+            "Pass@123",
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        var targetUser1 = await IntegrationTestAuthHelper.CreateUserAsync(
+            _factory.Services,
+            $"target1_{uniqueId}",
+            "Pass@123",
+            email: $"target1_{uniqueId}@test.com",
+            phoneNumber: "0911111111",
+            cancellationToken: CancellationToken.None)
+            .ConfigureAwait(true);
+
+        var targetUser2 = await IntegrationTestAuthHelper.CreateUserAsync(
+            _factory.Services,
+            $"target2_{uniqueId}",
+            "Pass@123",
+            email: $"target2_{uniqueId}@test.com",
+            phoneNumber: "0922222222",
+            cancellationToken: CancellationToken.None)
+            .ConfigureAwait(true);
+
+        var response = await _client.GetAsync($"/api/v1/UserManager/for-output?Page=1&PageSize=10", CancellationToken.None)
+            .ConfigureAwait(true);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var result = await response.Content
+            .ReadFromJsonAsync<Domain.Primitives.PagedResult<Application.ApiContracts.UserManager.Responses.UserDTOForOutputResponse>>(CancellationToken.None)
+            .ConfigureAwait(true);
+
+        result.Should().NotBeNull();
+        result!.Items.Should().Contain(u => u.Id == targetUser1.Id && string.Compare(u.Email, $"target1_{uniqueId}@test.com") == 0);
+        result.Items.Should().Contain(u => u.Id == targetUser2.Id && string.Compare(u.PhoneNumber, "0922222222") == 0);
+    }
+
+    [Fact(DisplayName = "UMGR_045 - Lấy danh sách basic-info tìm kiếm theo Email/Phone")]
+    public async Task GetBasicUsersInfo_WithFilter_ReturnsFilteredUsers()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var adminName = $"admin_{uniqueId}";
+
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            adminName,
+            "Pass@123",
+            [ PermissionsList.Outputs.Edit ],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            adminName,
+            "Pass@123",
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        var userToFind = await IntegrationTestAuthHelper.CreateUserAsync(
+            _factory.Services,
+            $"find_{uniqueId}",
+            "Pass@123",
+            email: $"unique_email_{uniqueId}@test.com",
+            phoneNumber: "0999888777",
+            cancellationToken: CancellationToken.None)
+            .ConfigureAwait(true);
+
+        await IntegrationTestAuthHelper.CreateUserAsync(
+            _factory.Services,
+            $"other_{uniqueId}",
+            "Pass@123",
+            email: $"other_{uniqueId}@test.com",
+            phoneNumber: "0911222333",
+            cancellationToken: CancellationToken.None)
+            .ConfigureAwait(true);
+
+        // Search by PhoneNumber
+        var response = await _client.GetAsync($"/api/v1/UserManager/for-output?Filters=PhoneNumber@=999888", CancellationToken.None)
+            .ConfigureAwait(true);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var result = await response.Content
+            .ReadFromJsonAsync<Domain.Primitives.PagedResult<Application.ApiContracts.UserManager.Responses.UserDTOForOutputResponse>>(CancellationToken.None)
+            .ConfigureAwait(true);
+
+        result.Should().NotBeNull();
+        result!.Items.Should().ContainSingle();
+        result.Items.First().Id.Should().Be(userToFind.Id);
+    }
+
+    [Fact(DisplayName = "UMGR_046 - Truy cập basic-info khi không có quyền hợp lệ")]
+    public async Task GetBasicUsersInfo_WithoutValidPermission_ReturnsForbidden()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var staffName = $"staff_{uniqueId}";
+
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            staffName,
+            "Pass@123",
+            [ PermissionsList.Products.View ], // Quyền không liên quan
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            staffName,
+            "Pass@123",
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        var response = await _client.GetAsync($"/api/v1/UserManager/for-output", CancellationToken.None)
+            .ConfigureAwait(true);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
 #pragma warning restore CRR0035
 }

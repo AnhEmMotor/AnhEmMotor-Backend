@@ -8,15 +8,15 @@ using OutputEntity = Domain.Entities.Output;
 
 namespace Application.Features.Outputs.Queries.GetOutputsList;
 
-public sealed class GetOutputsListQueryHandler(IOutputReadRepository repository, ISievePaginator paginator) : IRequestHandler<GetOutputsListQuery, Result<PagedResult<OutputResponse>>>
+public sealed class GetOutputsListQueryHandler(IOutputReadRepository repository, ISievePaginator paginator) : IRequestHandler<GetOutputsListQuery, Result<PagedResult<OutputItemResponse>>>
 {
-    public async Task<Result<PagedResult<OutputResponse>>> Handle(
+    public async Task<Result<PagedResult<OutputItemResponse>>> Handle(
         GetOutputsListQuery request,
         CancellationToken cancellationToken)
     {
         var query = repository.GetQueryable();
 
-        var result = await paginator.ApplyAsync<OutputEntity, OutputResponse>(
+        var result = await paginator.ApplyAsync<OutputEntity, OutputItemResponse>(
             query,
             request.SieveModel!,
             cancellationToken: cancellationToken)

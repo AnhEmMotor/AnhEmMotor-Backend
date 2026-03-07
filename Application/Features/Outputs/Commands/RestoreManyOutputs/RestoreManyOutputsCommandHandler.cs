@@ -12,9 +12,9 @@ namespace Application.Features.Outputs.Commands.RestoreManyOutputs;
 public sealed class RestoreManyOutputsCommandHandler(
     IOutputReadRepository readRepository,
     IOutputUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<RestoreManyOutputsCommand, Result<List<OutputResponse>?>>
+    IUnitOfWork unitOfWork) : IRequestHandler<RestoreManyOutputsCommand, Result<List<OutputItemResponse>?>>
 {
-    public async Task<Result<List<OutputResponse>?>> Handle(
+    public async Task<Result<List<OutputItemResponse>?>> Handle(
         RestoreManyOutputsCommand request,
         CancellationToken cancellationToken)
     {
@@ -35,6 +35,6 @@ public sealed class RestoreManyOutputsCommandHandler(
         updateRepository.Restore(outputsList);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return updateRepository.Adapt<List<OutputResponse>>();
+        return outputs.Adapt<List<OutputItemResponse>>();
     }
 }

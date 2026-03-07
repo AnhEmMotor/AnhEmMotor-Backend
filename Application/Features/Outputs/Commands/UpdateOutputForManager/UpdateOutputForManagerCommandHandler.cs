@@ -3,8 +3,10 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.ProductVariant;
+using Application.Interfaces.Repositories.User;
 
 using Domain.Constants;
+using Domain.Constants.Order;
 using Domain.Entities;
 using Mapster;
 using MediatR;
@@ -16,9 +18,10 @@ public sealed class UpdateOutputForManagerCommandHandler(
     IOutputUpdateRepository updateRepository,
     IOutputDeleteRepository deleteRepository,
     IProductVariantReadRepository variantRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateOutputForManagerCommand, Result<OutputResponse?>>
+    IUserReadRepository userReadRepository,
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateOutputForManagerCommand, Result<OrderDetailResponse>>
 {
-    public async Task<Result<OutputResponse?>> Handle(
+    public async Task<Result<OrderDetailResponse>> Handle(
         UpdateOutputForManagerCommand request,
         CancellationToken cancellationToken)
     {
@@ -33,9 +36,20 @@ public sealed class UpdateOutputForManagerCommandHandler(
             return Error.NotFound($"Không tìm thấy đơn hàng có ID {request.Id}.", "Id");
         }
 
-        if(output.CreatedBy != request.CurrentUserId)
+        // Manager có quyền Outputs.Edit (đã check ở Controller) thì được phép sửa mọi đơn hàng.
+
+        if(request.BuyerId.HasValue && request.BuyerId != output.BuyerId)
         {
-            return Error.Forbidden("Bạn không có quyền chỉnh sửa đơn hàng này.", "Permission");
+            var buyer = await userReadRepository.GetUserByIDAsync(request.BuyerId.Value, cancellationToken)
+                .ConfigureAwait(false);
+            if(buyer is null)
+            {
+                return Error.Forbidden(
+                    "ID này là 1 tài khoản không tồn tại/đã bị xoá/đã bị cấm. Vui lòng kiểm tra lại.",
+                    "BuyerId");
+            }
+
+            output.BuyerId = request.BuyerId;
         }
 
         var variantIds = request.OutputInfos
@@ -120,8 +134,17 @@ public sealed class UpdateOutputForManagerCommandHandler(
         updateRepository.Update(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
+        if(output.StatusId == OrderStatus.Completed && string.IsNullOrEmpty(output.FinishedBy?.ToString()))
+        {
+            output.FinishedBy = request.CurrentUserId;
+            updateRepository.Update(output);
+            await updateRepository.ProcessCOGSForCompletedOrderAsync(output.Id, cancellationToken)
+                .ConfigureAwait(false);
+            await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
         var updated = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
 
-        return updated.Adapt<OutputResponse>();
+        return updated.Adapt<OrderDetailResponse>();
     }
 }

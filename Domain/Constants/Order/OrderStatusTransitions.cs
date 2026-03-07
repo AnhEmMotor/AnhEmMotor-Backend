@@ -44,6 +44,8 @@ public static class OrderStatusTransitions
         return allowedStatuses.Contains(newStatus);
     }
 
+    public static Dictionary<string, HashSet<string>> GetAllowedTransitionsMap() => AllowedTransitions;
+
     public static HashSet<string> GetAllowedTransitions(string? currentStatus)
     {
         if(string.IsNullOrWhiteSpace(currentStatus))

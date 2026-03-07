@@ -12,9 +12,9 @@ namespace Application.Features.Outputs.Commands.UpdateManyOutputStatus;
 public sealed class UpdateManyOutputStatusCommandHandler(
     IOutputReadRepository readRepository,
     IOutputUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateManyOutputStatusCommand, Result<List<OutputResponse>?>>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateManyOutputStatusCommand, Result<List<OutputItemResponse>?>>
 {
-    public async Task<Result<List<OutputResponse>?>> Handle(
+    public async Task<Result<List<OutputItemResponse>?>> Handle(
         UpdateManyOutputStatusCommand request,
         CancellationToken cancellationToken)
     {
@@ -109,6 +109,6 @@ public sealed class UpdateManyOutputStatusCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return outputsList.Adapt<List<OutputResponse>>();
+        return outputsList.Adapt<List<OutputItemResponse>>();
     }
 }

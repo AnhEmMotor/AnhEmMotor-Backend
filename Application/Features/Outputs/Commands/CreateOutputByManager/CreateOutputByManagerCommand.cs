@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 
 namespace Application.Features.Outputs.Commands.CreateOutputByManager;
 
-public sealed record CreateOutputByManagerCommand : IRequest<Result<OutputResponse?>>
+public sealed record CreateOutputByManagerCommand : IRequest<Result<OrderDetailResponse>>
 {
     public Guid? BuyerId { get; init; }
 

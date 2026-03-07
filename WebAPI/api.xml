@@ -591,6 +591,21 @@
             Lấy danh sách trạng thái đơn hàng.
             </summary>
         </member>
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetStatusMap">
+            <summary>
+            Lấy bản đồ tên hiển thị nội bộ của trạng thái đơn hàng (Tiếng Việt).
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetTransitionMap">
+            <summary>
+            Lấy sơ đồ chuyển đổi trạng thái đơn hàng.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetLockedStatuses">
+            <summary>
+            Lấy danh sách các trạng thái đơn hàng bị khóa không cho phép sửa thông tin chi tiết.
+            </summary>
+        </member>
         <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetOutputByIdAsync(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Lấy thông tin chi tiết của đơn hàng.
@@ -909,8 +924,8 @@
         </member>
         <member name="M:WebAPI.Controllers.V1.UserManagerController.GetAllUsersForOutputAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
-            Lấy danh sách tất cả người dùng (có phân trang, lọc, sắp xếp - chỉ vào được khi người dùng có quyền sửa hoặc xoá
-            phiếu bán hàng).
+            Lấy thông tin cơ bản của tất cả người dùng (Id, FullName, Email, PhoneNumber) để dùng trong các form nhập liệu.
+            Dành cho nhân viên có quyền tạo hoặc sửa phiếu bán hàng hoặc xem danh sách người dùng.
             </summary>
             <param name="sieveModel">Các thông tin phân trang, lọc, sắp xếp theo quy tắc của Sieve.</param>
             <param name="cancellationToken"></param>

@@ -9,24 +9,31 @@ public sealed class OutputMappingConfig : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {
-        config.NewConfig<Output, OutputResponse>()
+        config.NewConfig<Output, OrderDetailResponse>()
             .Map(
                 dest => dest.Total,
                 src => src.OutputInfos != null ? src.OutputInfos.Sum(oi => (oi.Count ?? 0) * (oi.Price ?? 0)) : 0)
             .Map(dest => dest.BuyerName, src => src.Buyer != null ? src.Buyer.FullName : null)
+            .Map(dest => dest.BuyerPhone, src => src.Buyer != null ? src.Buyer.PhoneNumber : null)
+            .Map(dest => dest.BuyerEmail, src => src.Buyer != null ? src.Buyer.Email : null)
             .Map(
                 dest => dest.CompletedByUserName,
                 src => src.FinishedByUser != null ? src.FinishedByUser.FullName : null)
             .Map(dest => dest.CreatedByUserId, src => src.CreatedBy)
             .Map(dest => dest.Products, src => src.OutputInfos);
 
-        config.NewConfig<OutputInfo, OutputInfoResponse>()
+        config.NewConfig<Output, OutputItemResponse>()
+            .Map(dest => dest.BuyerName, src => src.Buyer != null ? src.Buyer.FullName : null)
+            .Map(dest => dest.CreatedAt, src => src.CreatedAt)
+            .Map(dest => dest.StatusId, src => src.StatusId)
             .Map(
-                dest => dest.ProductName,
-                src => src.ProductVariant != null && src.ProductVariant.Product != null
-                    ? src.ProductVariant.Product.Name
-                    : null);
+                dest => dest.Total,
+                src => src.OutputInfos != null ? src.OutputInfos.Sum(oi => (oi.Count ?? 0) * (oi.Price ?? 0)) : 0);
 
+        config.NewConfig<OutputInfo, OutputInfoResponse>()
+            .Map(dest => dest.ProductId, src => src.ProductVarientId)
+            .Map(dest => dest.ProductName, src => MapProductName(src))
+            .Map(dest => dest.CoverImageUrl, src => src.ProductVariant != null ? src.ProductVariant.CoverImageUrl : null);
 
         config.NewConfig<CreateOutputInfoRequest, OutputInfo>()
             .Map(dest => dest.ProductVarientId, src => src.ProductId)
@@ -37,8 +44,35 @@ public sealed class OutputMappingConfig : IRegister
             .Map(dest => dest.Count, src => src.Count)
             .Ignore(dest => dest.Id)
             .IgnoreNullValues(true);
+
         config.NewConfig<Commands.UpdateOutputForManager.UpdateOutputForManagerCommand, Output>()
+            .Map(dest => dest.CreatedBy, src => src.CurrentUserId)
             .IgnoreNullValues(true)
             .Ignore(dest => dest.OutputInfos);
+
+        config.NewConfig<Commands.CreateOutputByManager.CreateOutputByManagerCommand, Output>()
+            .Map(dest => dest.CreatedBy, src => src.CurrentUserId)
+            .IgnoreNullValues(true);
+    }
+
+    private static string? MapProductName(OutputInfo src)
+    {
+        if(src.ProductVariant is null || src.ProductVariant.Product is null)
+        {
+            return null;
+        }
+
+        var productName = src.ProductVariant.Product.Name;
+        var optionValues = src.ProductVariant.VariantOptionValues?
+            .Select(vov => vov.OptionValue?.Name)
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .ToList();
+
+        if(optionValues is null || optionValues.Count == 0)
+        {
+            return productName;
+        }
+
+        return $"{productName} ({string.Join(" - ", optionValues)})";
     }
 }

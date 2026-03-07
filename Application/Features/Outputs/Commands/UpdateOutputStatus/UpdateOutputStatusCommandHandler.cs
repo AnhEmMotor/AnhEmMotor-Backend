@@ -12,9 +12,9 @@ namespace Application.Features.Outputs.Commands.UpdateOutputStatus;
 public sealed class UpdateOutputStatusCommandHandler(
     IOutputReadRepository readRepository,
     IOutputUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateOutputStatusCommand, Result<OutputResponse?>>
+    IUnitOfWork unitOfWork) : IRequestHandler<UpdateOutputStatusCommand, Result<OrderDetailResponse>>
 {
-    public async Task<Result<OutputResponse?>> Handle(
+    public async Task<Result<OrderDetailResponse>> Handle(
         UpdateOutputStatusCommand request,
         CancellationToken cancellationToken)
     {
@@ -84,6 +84,6 @@ public sealed class UpdateOutputStatusCommandHandler(
 
         var updated = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
 
-        return updated.Adapt<OutputResponse>();
+        return updated.Adapt<OrderDetailResponse>();
     }
 }

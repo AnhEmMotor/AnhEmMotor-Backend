@@ -166,7 +166,7 @@ public class SalesOrder : IAsyncLifetime
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         var content = await response.Content
-            .ReadFromJsonAsync<OutputResponse>(CancellationToken.None)
+            .ReadFromJsonAsync<OrderDetailResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.BuyerId.Should().NotBeNull();
@@ -222,7 +222,7 @@ public class SalesOrder : IAsyncLifetime
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         var order = await response.Content
-            .ReadFromJsonAsync<OutputResponse>(CancellationToken.None)
+            .ReadFromJsonAsync<OrderDetailResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         order.Should().NotBeNull();
         order!.StatusId.Should().Be(OrderStatus.Pending);
@@ -280,7 +280,7 @@ public class SalesOrder : IAsyncLifetime
         var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
         var createResponse = await _client.PostAsync("/api/v1/SalesOrders", httpContent, CancellationToken.None).ConfigureAwait(true);
         var order = await createResponse.Content
-            .ReadFromJsonAsync<OutputResponse>(CancellationToken.None)
+            .ReadFromJsonAsync<OrderDetailResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         int orderId = order!.Id!.Value;
 
@@ -309,7 +309,7 @@ public class SalesOrder : IAsyncLifetime
         response3.StatusCode.Should().Be(HttpStatusCode.OK);
 
         var finalOrder = await response3.Content
-            .ReadFromJsonAsync<OutputResponse>(CancellationToken.None)
+            .ReadFromJsonAsync<OrderDetailResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         finalOrder!.StatusId.Should().Be(OrderStatus.Completed);
     }
@@ -367,7 +367,7 @@ public class SalesOrder : IAsyncLifetime
         var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
         var createResponse = await _client.PostAsync("/api/v1/SalesOrders", httpContent, CancellationToken.None).ConfigureAwait(true);
         var order = await createResponse.Content
-            .ReadFromJsonAsync<OutputResponse>(CancellationToken.None)
+            .ReadFromJsonAsync<OrderDetailResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         int orderId = order!.Id!.Value;
 
@@ -450,7 +450,7 @@ public class SalesOrder : IAsyncLifetime
         var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
         var createResponse = await _client.PostAsync("/api/v1/SalesOrders", httpContent, CancellationToken.None).ConfigureAwait(true);
         var order = await createResponse.Content
-            .ReadFromJsonAsync<OutputResponse>(CancellationToken.None)
+            .ReadFromJsonAsync<OrderDetailResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         int orderId = order!.Id!.Value;
 
@@ -563,7 +563,7 @@ public class SalesOrder : IAsyncLifetime
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
-            .ReadFromJsonAsync<PagedResult<OutputResponse>>(CancellationToken.None)
+            .ReadFromJsonAsync<PagedResult<OutputItemResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Items.Should().Contain(x => x.Notes != null && x.Notes.Contains(uniqueId));
@@ -709,7 +709,7 @@ public class SalesOrder : IAsyncLifetime
             .ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
-            .ReadFromJsonAsync<PagedResult<OutputResponse>>(CancellationToken.None)
+            .ReadFromJsonAsync<PagedResult<OutputItemResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         content.Should().NotBeNull();
     }
@@ -758,7 +758,7 @@ public class SalesOrder : IAsyncLifetime
             .ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
-            .ReadFromJsonAsync<PagedResult<OutputResponse>>(CancellationToken.None)
+            .ReadFromJsonAsync<PagedResult<OutputItemResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.Items.Should().HaveCount(10);
     }
@@ -813,7 +813,7 @@ public class SalesOrder : IAsyncLifetime
         createResponse.StatusCode.Should().Be(HttpStatusCode.Created);
 
         var order = await createResponse.Content
-            .ReadFromJsonAsync<OutputResponse>(CancellationToken.None)
+            .ReadFromJsonAsync<OrderDetailResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         var deleteResponse = await _client.DeleteAsync($"/api/v1/SalesOrders/{order!.Id}", CancellationToken.None)
             .ConfigureAwait(true);
@@ -863,7 +863,7 @@ public class SalesOrder : IAsyncLifetime
         var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
         var createResponse = await _client.PostAsync("/api/v1/SalesOrders", httpContent, CancellationToken.None).ConfigureAwait(true);
         var order = await createResponse.Content
-            .ReadFromJsonAsync<OutputResponse>(CancellationToken.None)
+            .ReadFromJsonAsync<OrderDetailResponse>(CancellationToken.None)
             .ConfigureAwait(true);
 
         await _client.DeleteAsync($"/api/v1/SalesOrders/{order!.Id}", CancellationToken.None).ConfigureAwait(true);
@@ -924,7 +924,7 @@ public class SalesOrder : IAsyncLifetime
             .ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
-            .ReadFromJsonAsync<PagedResult<OutputResponse>>(CancellationToken.None)
+            .ReadFromJsonAsync<PagedResult<OutputItemResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.Items.Should().Contain(x => string.Compare(x.Notes, $"Deleted_{uniqueId}") == 0);
         content.Items.Should().NotContain(x => x.Notes != null && string.Compare(x.Notes, $"Active_{uniqueId}") == 0);
@@ -1005,7 +1005,7 @@ public class SalesOrder : IAsyncLifetime
 
         var createResponse = await _client.PostAsync("/api/v1/SalesOrders", httpContent, CancellationToken.None).ConfigureAwait(true);
         var order = await createResponse.Content
-            .ReadFromJsonAsync<OutputResponse>(CancellationToken.None)
+            .ReadFromJsonAsync<OrderDetailResponse>(CancellationToken.None)
             .ConfigureAwait(true);
 
         var request = new UpdateOutputStatusCommand { StatusId = OrderStatus.Completed };
@@ -1060,11 +1060,11 @@ public class SalesOrder : IAsyncLifetime
         var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
 
         var r1 = await _client.PostAsync("/api/v1/SalesOrders", httpContent, CancellationToken.None).ConfigureAwait(true);
-        var o1 = await r1.Content.ReadFromJsonAsync<OutputResponse>(CancellationToken.None).ConfigureAwait(true);
+        var o1 = await r1.Content.ReadFromJsonAsync<OrderDetailResponse>(CancellationToken.None).ConfigureAwait(true);
 
         var httpContent2 = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
         var r2 = await _client.PostAsync("/api/v1/SalesOrders", httpContent2, CancellationToken.None).ConfigureAwait(true);
-        var o2 = await r2.Content.ReadFromJsonAsync<OutputResponse>(CancellationToken.None).ConfigureAwait(true);
+        var o2 = await r2.Content.ReadFromJsonAsync<OrderDetailResponse>(CancellationToken.None).ConfigureAwait(true);
 
         var request = new DeleteManyOutputsCommand { Ids = [ o1!.Id!.Value, o2!.Id!.Value ] };
         var deleteJson = System.Text.Json.JsonSerializer.Serialize(request);
@@ -1119,12 +1119,12 @@ public class SalesOrder : IAsyncLifetime
 
         var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
         var r1 = await _client.PostAsync("/api/v1/SalesOrders", httpContent, CancellationToken.None).ConfigureAwait(true);
-        var o1 = await r1.Content.ReadFromJsonAsync<OutputResponse>(CancellationToken.None).ConfigureAwait(true);
+        var o1 = await r1.Content.ReadFromJsonAsync<OrderDetailResponse>(CancellationToken.None).ConfigureAwait(true);
         await _client.DeleteAsync($"/api/v1/SalesOrders/{o1!.Id}", CancellationToken.None).ConfigureAwait(true);
 
         var httpContent2 = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
         var r2 = await _client.PostAsync("/api/v1/SalesOrders", httpContent2, CancellationToken.None).ConfigureAwait(true);
-        var o2 = await r2.Content.ReadFromJsonAsync<OutputResponse>(CancellationToken.None).ConfigureAwait(true);
+        var o2 = await r2.Content.ReadFromJsonAsync<OrderDetailResponse>(CancellationToken.None).ConfigureAwait(true);
         await _client.DeleteAsync($"/api/v1/SalesOrders/{o2!.Id}", CancellationToken.None).ConfigureAwait(true);
 
         var request = new RestoreManyOutputsCommand { Ids = [ o1.Id!.Value, o2.Id!.Value ] };
@@ -1179,11 +1179,11 @@ public class SalesOrder : IAsyncLifetime
         var httpContent = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
 
         var r1 = await _client.PostAsync("/api/v1/SalesOrders", httpContent, CancellationToken.None).ConfigureAwait(true);
-        var o1 = await r1.Content.ReadFromJsonAsync<OutputResponse>(CancellationToken.None).ConfigureAwait(true);
+        var o1 = await r1.Content.ReadFromJsonAsync<OrderDetailResponse>(CancellationToken.None).ConfigureAwait(true);
 
         var httpContent2 = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
         var r2 = await _client.PostAsync("/api/v1/SalesOrders", httpContent2, CancellationToken.None).ConfigureAwait(true);
-        var o2 = await r2.Content.ReadFromJsonAsync<OutputResponse>(CancellationToken.None).ConfigureAwait(true);
+        var o2 = await r2.Content.ReadFromJsonAsync<OrderDetailResponse>(CancellationToken.None).ConfigureAwait(true);
 
         var request = new UpdateManyOutputStatusCommand
         {
@@ -1250,7 +1250,7 @@ public class SalesOrder : IAsyncLifetime
         var response = await _client.GetAsync("/api/v1/SalesOrders/my-purchases", CancellationToken.None).ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
-            .ReadFromJsonAsync<PagedResult<OutputResponse>>(CancellationToken.None)
+            .ReadFromJsonAsync<PagedResult<OutputItemResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.Items.Should().Contain(x => string.Compare(x.Notes, $"Mine_{uniqueId}") == 0);
     }
@@ -1312,7 +1312,7 @@ public class SalesOrder : IAsyncLifetime
         var response = await _client.GetAsync($"/api/v1/SalesOrders/get-purchases/{buyerId}", CancellationToken.None).ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
-            .ReadFromJsonAsync<PagedResult<OutputResponse>>(CancellationToken.None)
+            .ReadFromJsonAsync<PagedResult<OutputItemResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.Items.Should().Contain(x => string.Compare(x.Notes, $"PurchasesOf_{uniqueId}") == 0);
     }
@@ -1361,6 +1361,103 @@ public class SalesOrder : IAsyncLifetime
         var response = await _client.GetAsync("/api/v1/SalesOrders/status", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact(DisplayName = "SO_106 - Lấy Status Map (Tiếng Việt) thành công với quyền View")]
+    public async Task GetStatusMap_WithViewPermission_ReturnsIdAndNameList()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Outputs.View ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        var response = await _client.GetAsync("/api/v1/SalesOrders/status-map", CancellationToken.None).ConfigureAwait(true);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response.Content.ReadFromJsonAsync<List<StatusMapResponse>>(CancellationToken.None).ConfigureAwait(true);
+        content.Should().NotBeNull();
+        content.Should().Contain(x => x.Id == OrderStatus.Pending && x.Name == "Chờ xác nhận");
+    }
+
+    private class StatusMapResponse 
+    {
+        public string Id { get; set; } = default!;
+        public string Name { get; set; } = default!;
+    }
+
+    [Fact(DisplayName = "SO_107 - Lấy Transition Map thành công với quyền Edit")]
+    public async Task GetTransitionMap_WithEditPermission_ReturnsDictionary()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Outputs.Edit ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        var response = await _client.GetAsync("/api/v1/SalesOrders/transition-map", CancellationToken.None).ConfigureAwait(true);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response.Content.ReadFromJsonAsync<Dictionary<string, HashSet<string>>>(CancellationToken.None).ConfigureAwait(true);
+        content.Should().NotBeNull();
+        content.Should().ContainKey(OrderStatus.Pending);
+        content![OrderStatus.Pending].Should().Contain(OrderStatus.Cancelled);
+    }
+
+    [Fact(DisplayName = "SO_108 - Lấy Transition Map bị từ chối khi chỉ có quyền View")]
+    public async Task GetTransitionMap_WithOnlyViewPermission_ReturnsForbidden()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Outputs.View ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        var response = await _client.GetAsync("/api/v1/SalesOrders/transition-map", CancellationToken.None).ConfigureAwait(true);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 #pragma warning restore CRR0035
 #pragma warning restore IDE0079

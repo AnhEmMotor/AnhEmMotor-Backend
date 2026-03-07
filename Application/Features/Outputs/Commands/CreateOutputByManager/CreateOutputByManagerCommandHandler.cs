@@ -16,11 +16,12 @@ namespace Application.Features.Outputs.Commands.CreateOutputByManager;
 public sealed class CreateOutputByManagerCommandHandler(
     IOutputReadRepository readRepository,
     IOutputInsertRepository insertRepository,
+    IOutputUpdateRepository updateRepository,
     IProductVariantReadRepository variantRepository,
     IUserReadRepository userReadRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateOutputByManagerCommand, Result<OutputResponse?>>
+    IUnitOfWork unitOfWork) : IRequestHandler<CreateOutputByManagerCommand, Result<OrderDetailResponse>>
 {
-    public async Task<Result<OutputResponse?>> Handle(
+    public async Task<Result<OrderDetailResponse>> Handle(
         CreateOutputByManagerCommand request,
         CancellationToken cancellationToken)
     {
@@ -81,9 +82,18 @@ public sealed class CreateOutputByManagerCommandHandler(
         insertRepository.Add(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
+        if(output.StatusId == OrderStatus.Completed)
+        {
+            output.FinishedBy = request.CurrentUserId;
+            updateRepository.Update(output);
+            await updateRepository.ProcessCOGSForCompletedOrderAsync(output.Id, cancellationToken)
+                .ConfigureAwait(false);
+            await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
         var created = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
 
-        return created!.Adapt<OutputResponse>();
+        return created!.Adapt<OrderDetailResponse>();
     }
 }
 
