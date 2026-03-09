@@ -751,6 +751,26 @@
             Lấy giá và tồn kho của một sản phẩm cụ thể.
             </summary>
         </member>
+        <member name="M:WebAPI.Controllers.V1.StatisticsController.GetAdminDashboardOverviewAsync(System.Threading.CancellationToken)">
+            <summary>
+            Lấy toàn bộ dữ liệu gộp cho Admin Dashboard.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.StatisticsController.GetAdminRevenueAnalysisAsync(System.Threading.CancellationToken)">
+            <summary>
+            Lấy toàn bộ phân tích doanh thu cho Admin (gộp).
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.StatisticsController.GetAdminProductReportAsync(System.Threading.CancellationToken)">
+            <summary>
+            Lấy báo cáo hiệu suất sản phẩm cho Admin (gộp).
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.StatisticsController.GetAdminWarehouseReportAsync(System.Threading.CancellationToken)">
+            <summary>
+            Lấy báo cáo tồn kho cho Admin (gộp).
+            </summary>
+        </member>
         <member name="T:WebAPI.Controllers.V1.SupplierController">
             <summary>
             Quản lý danh sách nhà cung cấp.
