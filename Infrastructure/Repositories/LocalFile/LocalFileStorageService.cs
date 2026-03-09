@@ -29,18 +29,22 @@ public class LocalFileStorageService : IFileStorageService
 
     private readonly List<string> _allowedMimeTypes = [ "image/jpeg", "image/png", "image/gif", "image/webp" ];
 
-    public async Task<Result<FileUpload>> SaveFileAsync(Stream file, CancellationToken cancellationToken)
+    public async Task<Result<FileUpload>> SaveFileAsync(Stream file, CancellationToken cancellationToken, string subFolder = "")
     {
         try
         {
-            if(file == null || file.Length == 0)
+            if(file is null || file.Length is 0)
             {
                 return Result<FileUpload>.Failure("File stream is empty");
             }
 
-            if(!Directory.Exists(_uploadFolder))
+            var targetFolder = string.IsNullOrWhiteSpace(subFolder) 
+                ? _uploadFolder 
+                : Path.Combine(_uploadFolder, subFolder);
+
+            if(!Directory.Exists(targetFolder))
             {
-                Directory.CreateDirectory(_uploadFolder);
+                Directory.CreateDirectory(targetFolder);
             }
 
             if(file.CanSeek)
@@ -50,7 +54,7 @@ public class LocalFileStorageService : IFileStorageService
 
             var format = await Image.DetectFormatAsync(file, cancellationToken).ConfigureAwait(false);
 
-            if(format == null)
+            if(format is null)
             {
                 return Result<FileUpload>.Failure("Unable to detect image format");
             }
@@ -61,7 +65,11 @@ public class LocalFileStorageService : IFileStorageService
             }
 
             var storageFileName = $"{Guid.NewGuid()}.webp";
-            var fullPath = Path.Combine(_uploadFolder, storageFileName);
+            var relativePath = string.IsNullOrWhiteSpace(subFolder) 
+                ? storageFileName 
+                : Path.Combine(subFolder, storageFileName).Replace("\\", "/");
+
+            var fullPath = Path.Combine(_uploadFolder, relativePath);
 
             using var compressedStream = await CompressImageAsync(file, 75, DefaultMaxWidth, cancellationToken)
                 .ConfigureAwait(false);
@@ -70,7 +78,7 @@ public class LocalFileStorageService : IFileStorageService
             using var fileStream = new FileStream(fullPath, FileMode.Create);
             await compressedStream.CopyToAsync(fileStream, cancellationToken).ConfigureAwait(false);
 
-            return new FileUpload(storageFileName, ".webp", compressedSize);
+            return new FileUpload(relativePath, ".webp", compressedSize);
         } catch(Exception ex)
         {
             return Result<FileUpload>.Failure(ex.Message);
@@ -106,9 +114,9 @@ public class LocalFileStorageService : IFileStorageService
     public string GetPublicUrl(string storagePath)
     {
         var request = _httpContextAccessor.HttpContext?.Request;
-        if(request == null)
-            return $"/api/v1/mediafile/view-image/{storagePath}";
-        return $"{request.Scheme}://{request.Host.Value}/api/v1/mediafile/view-image/{storagePath}";
+        if(request is null)
+            return $"/api/v1/MediaFile/view-image/{storagePath}";
+        return $"{request.Scheme}://{request.Host.Value}/api/v1/MediaFile/view-image/{storagePath}";
     }
 
     public async Task<(byte[] FileBytes, string ContentType)?> GetFileAsync(

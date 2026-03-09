@@ -257,19 +257,19 @@
             Lấy thông tin của tệp media được chọn.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.MediaFileController.UploadImageAsync(Microsoft.AspNetCore.Http.IFormFile,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.MediaFileController.UploadProductImageAsync(Microsoft.AspNetCore.Http.IFormFile,System.Threading.CancellationToken)">
             <summary>
-            Tải lên một tệp ảnh.
+            Tải lên một tệp ảnh cho sản phẩm.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.MediaFileController.UploadManyImagesAsync(System.Collections.Generic.List{Microsoft.AspNetCore.Http.IFormFile},System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.MediaFileController.UploadManyProductImagesAsync(System.Collections.Generic.List{Microsoft.AspNetCore.Http.IFormFile},System.Threading.CancellationToken)">
             <summary>
-            Tải lên nhiều ảnh cùng lúc.
+            Tải lên nhiều ảnh sản phẩm cùng lúc.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.MediaFileController.DeleteFileAsync(System.String,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.MediaFileController.DeleteProductFileAsync(System.String,System.Threading.CancellationToken)">
             <summary>
-            Xoá tệp media theo tên file.
+            Xoá tệp media sản phẩm theo tên file.
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.MediaFileController.DeleteFilesAsync(Application.Features.Files.Commands.DeleteManyFiles.DeleteManyFilesCommand,System.Threading.CancellationToken)">

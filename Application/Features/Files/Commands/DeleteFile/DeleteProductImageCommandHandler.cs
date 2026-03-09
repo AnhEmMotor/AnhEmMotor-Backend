@@ -7,13 +7,13 @@ using MediatR;
 
 namespace Application.Features.Files.Commands.DeleteFile;
 
-public sealed class DeleteFileCommandHandler(
+public sealed class DeleteProductImageCommandHandler(
     IMediaFileReadRepository readRepository,
     IMediaFileDeleteRepository deleteRepository,
     IUnitOfWork unitOfWork,
-    Interfaces.Repositories.LocalFile.IFileStorageService fileStorageService) : IRequestHandler<DeleteFileCommand, Result>
+    Interfaces.Repositories.LocalFile.IFileStorageService fileStorageService) : IRequestHandler<DeleteProductImageCommand, Result>
 {
-    public async Task<Result> Handle(DeleteFileCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(DeleteProductImageCommand request, CancellationToken cancellationToken)
     {
         var mediaFile = await readRepository.GetByStoragePathAsync(
             request.StoragePath,
