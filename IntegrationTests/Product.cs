@@ -2561,7 +2561,7 @@ public class Product : IAsyncLifetime
             .ConfigureAwait(true);
         content.Should().NotBeNull();
         
-        var items = content!.Items.ToList();
+        var items = content!.Items!.ToList();
         items.Should().HaveCount(3);
         items[0].Id.Should().Be(pOut.Id);
         items[1].Id.Should().Be(pLow.Id);

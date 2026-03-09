@@ -41,4 +41,5 @@ public class DailyRevenueTableResponse
     public decimal TotalRevenue { get; set; }
     public decimal TotalProfit { get; set; }
     public double Growth { get; set; }
+    public bool HasZeroCostPrice { get; set; }
 }
