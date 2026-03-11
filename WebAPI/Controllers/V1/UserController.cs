@@ -6,6 +6,7 @@ using Application.Features.Users.Commands.RestoreUserAccount;
 using Application.Features.Users.Commands.UpdateCurrentUser;
 using Application.Features.Users.Queries.GetCurrentUser;
 using Application.Interfaces.Services;
+using Application.Features.Users.Commands.UploadAvatar;
 using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -164,6 +165,26 @@ public class UserController(IMediator mediator, IUserStreamService userStreamSer
     {
         var result = await mediator.Send(new RestoreUserAccountCommand() { UserId = userId }, cancellationToken)
             .ConfigureAwait(false);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Tải lên ảnh đại diện cho người dùng hiện tại
+    /// </summary>
+    [HttpPost("avatar")]
+    [Authorize]
+    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UploadAvatarAsync(IFormFile file, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(file);
+        var command = new UploadAvatarCommand 
+        { 
+            UserId = User.FindFirstValue(ClaimTypes.NameIdentifier),
+            FileContent = file.OpenReadStream(),
+            FileName = file.FileName
+        };
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 }

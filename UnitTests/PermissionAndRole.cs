@@ -189,7 +189,7 @@ public class PermissionAndRole
             .ReturnsAsync(permissions);
 
         var handler = new GetRolePermissionsQueryHandler(roleReadRepoMock.Object);
-        var query = new GetRolePermissionsQuery { RoleName = "Manager" };
+        var query = new GetRolePermissionsQuery { RoleId = roleId };
 
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
@@ -206,7 +206,7 @@ public class PermissionAndRole
             .ReturnsAsync((ApplicationRole?)null);
 
         var handler = new GetRolePermissionsQueryHandler(roleReadRepoMock.Object);
-        var query = new GetRolePermissionsQuery { RoleName = "NonExistentRole" };
+        var query = new GetRolePermissionsQuery { RoleId = Guid.NewGuid() };
 
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
@@ -227,7 +227,7 @@ public class PermissionAndRole
             .ReturnsAsync(permissions);
 
         var handler = new GetRolePermissionsQueryHandler(roleReadRepoMock.Object);
-        var query = new GetRolePermissionsQuery { RoleName = "  Manager  " };
+        var query = new GetRolePermissionsQuery { RoleId = roleId };
 
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
 
@@ -379,7 +379,7 @@ public class PermissionAndRole
             unitOfWorkMock.Object);
         var command = new UpdateRoleCommand()
         {
-            RoleName = "Manager",
+            RoleId = roleId,
             Description = "Updated description",
             Permissions = null!
         };
@@ -448,7 +448,7 @@ public class PermissionAndRole
 
         var command = new UpdateRoleCommand()
         {
-            RoleName = "Manager",
+            RoleId = roleId,
             Description = null,
             Permissions = [ PermissionsList.Products.View, PermissionsList.Products.Create ]
         };
@@ -479,7 +479,7 @@ public class PermissionAndRole
             roleUpdateRepoMock.Object,
             permissionRepoMock.Object,
             unitOfWorkMock.Object);
-        var command = new UpdateRoleCommand() { RoleName = "Manager", Description = null, Permissions = [] };
+        var command = new UpdateRoleCommand() { RoleId = roleId, Description = null, Permissions = [] };
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
@@ -508,7 +508,7 @@ public class PermissionAndRole
             roleUpdateRepoMock.Object,
             permissionRepoMock.Object,
             unitOfWorkMock.Object);
-        var command = new UpdateRoleCommand() { RoleName = "NonExistentRole", Description = "Test" };
+        var command = new UpdateRoleCommand() { RoleId = Guid.NewGuid(), Description = "Test" };
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
@@ -531,7 +531,7 @@ public class PermissionAndRole
             roleReadRepoMock.Object,
             roleDeleteRepoMock.Object,
             protectedEntityServiceMock.Object);
-        var command = new DeleteRoleCommand() { RoleName = "OldRole" };
+        var command = new DeleteRoleCommand() { RoleId = roleId };
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
@@ -578,6 +578,36 @@ public class PermissionAndRole
             x => x.DeleteAsync(It.IsAny<ApplicationRole>(), CancellationToken.None),
             Times.Exactly(3));
     }
+    [Fact(DisplayName = "PR_001 - ValidateRules hợp lệ khi các quyền phụ thuộc được đáp ứng")]
+    public void ValidateRules_ValidDependencies_ReturnsSuccess()
+    {
+        var permissions = new List<string> { PermissionsList.Products.View, PermissionsList.Products.Create };
+        var (isValid, errorMessage) = PermissionsList.ValidateRules(permissions);
+        
+        isValid.Should().BeTrue();
+        errorMessage.Should().BeNull();
+    }
+
+    [Fact(DisplayName = "PR_002 - ValidateRules thất bại khi thiếu quyền phụ thuộc")]
+    public void ValidateRules_MissingDependencies_ReturnsFailure()
+    {
+        var permissions = new List<string> { PermissionsList.Products.Create }; // Missing View
+        var (isValid, errorMessage) = PermissionsList.ValidateRules(permissions);
+        
+        isValid.Should().BeFalse();
+        errorMessage.Should().Contain("requires");
+        errorMessage.Should().Contain(PermissionsList.Products.View);
+    }
+
+    [Fact(DisplayName = "PR_003 - Validator bắt lỗi dependency khi CreateRole")]
+    public void CreateRoleCommand_MissingDependency_ShouldHaveValidationError()
+    {
+        CreateRoleCommandValidator validator = new();
+        var command = new CreateRoleCommand { RoleName = "ValidRole", Permissions = [ PermissionsList.Brands.Create ] }; // Missing Brands.View
+        var result = validator.TestValidate(command);
+        result.ShouldHaveValidationErrorFor(x => x.Permissions).WithErrorMessage($"Permission '{PermissionsList.Brands.Create}' requires: {PermissionsList.Brands.View}");
+    }
+
 #pragma warning restore CRR0035
 #pragma warning restore IDE0079
 }

@@ -57,6 +57,11 @@ public class UpdateUserCommandHandler(
             }
         }
 
+        if(request.DateOfBirth.HasValue)
+        {
+            user.DateOfBirth = request.DateOfBirth.Value;
+        }
+
         var (succeeded, errors) = await userUpdateRepository.UpdateUserAsync(user, cancellationToken)
             .ConfigureAwait(false);
         if(!succeeded)
@@ -81,7 +86,7 @@ public class UpdateUserCommandHandler(
 
         userStreamService.NotifyUserUpdate(user.Id);
 
-        var roles = await userReadRepository.GetUserRolesAsync(user, cancellationToken).ConfigureAwait(false);
+        var roles = await userReadRepository.GetUserRoleIdsAsync(user, cancellationToken).ConfigureAwait(false);
 
         return new UserDTOForManagerResponse
         {
@@ -93,6 +98,8 @@ public class UpdateUserCommandHandler(
             PhoneNumber = user.PhoneNumber,
             EmailConfirmed = user.EmailConfirmed,
             Status = user.Status,
+            AvatarUrl = user.AvatarUrl,
+            DateOfBirth = user.DateOfBirth,
             DeletedAt = user.DeletedAt,
             Roles = roles
         };

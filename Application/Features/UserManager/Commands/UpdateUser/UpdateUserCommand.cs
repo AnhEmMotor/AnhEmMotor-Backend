@@ -13,4 +13,5 @@ public record UpdateUserCommand : IRequest<Result<UserDTOForManagerResponse>>
     public string? Gender { get; init; }
 
     public string? PhoneNumber { get; init; }
+    public DateTime? DateOfBirth { get; init; }
 }

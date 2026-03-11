@@ -13,9 +13,9 @@ public sealed class AssignRolesCommandHandler(
     IUserUpdateRepository userUpdateRepository,
     IUserCreateRepository userCreateRepository,
     IProtectedEntityManagerService protectedEntityManagerService,
-    IUserStreamService userStreamService) : IRequestHandler<AssignRolesCommand, Result<AssignRoleResponse>>
+    IUserStreamService userStreamService) : IRequestHandler<AssignRolesCommand, Result<UserDTOForManagerResponse>>
 {
-    public async Task<Result<AssignRoleResponse>> Handle(
+    public async Task<Result<UserDTOForManagerResponse>> Handle(
         AssignRolesCommand request,
         CancellationToken cancellationToken)
     {
@@ -26,23 +26,25 @@ public sealed class AssignRolesCommandHandler(
             return Error.NotFound("User not found.");
         }
 
-        var requestedRoles = request.RoleNames!.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        var requestedRoleIds = request.RoleIds!.Distinct().ToList();
 
-        var existingSystemRoles = await roleReadRepository.GetRolesByNameAsync(requestedRoles, cancellationToken)
+        var existingSystemRoles = await roleReadRepository.GetRolesByIdsAsync(requestedRoleIds, cancellationToken)
             .ConfigureAwait(false);
 
-        var existingRoleNames = existingSystemRoles.Select(r => r.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var invalidRoles = requestedRoles.Where(r => !existingRoleNames.Contains(r)).ToList();
+        var existingRoleIds = existingSystemRoles.Select(r => r.Id).ToHashSet();
+        var invalidRoleIds = requestedRoleIds.Where(id => !existingRoleIds.Contains(id)).ToList();
 
-        if(invalidRoles.Count > 0)
+        if(invalidRoleIds.Count > 0)
         {
-            return Error.Validation($"The following roles do not exist: {string.Join(", ", invalidRoles)}", "RoleNames");
+            return Error.Validation($"The following role IDs do not exist: {string.Join(", ", invalidRoleIds)}", "RoleIds");
         }
+
+        var requestedRoleNames = existingSystemRoles.Select(r => r.Name!).ToList();
 
         var currentUserRoles = await userReadRepository.GetUserRolesAsync(user, cancellationToken).ConfigureAwait(false);
 
-        var rolesToAdd = requestedRoles.Except(currentUserRoles, StringComparer.OrdinalIgnoreCase).ToList();
-        var rolesToRemove = currentUserRoles.Except(requestedRoles, StringComparer.OrdinalIgnoreCase).ToList();
+        var rolesToAdd = requestedRoleNames.Except(currentUserRoles, StringComparer.OrdinalIgnoreCase).ToList();
+        var rolesToRemove = currentUserRoles.Except(requestedRoleNames, StringComparer.OrdinalIgnoreCase).ToList();
 
         var superRoles = protectedEntityManagerService.GetSuperRoles() ?? [];
 
@@ -57,7 +59,7 @@ public sealed class AssignRolesCommandHandler(
                 {
                     return Error.Validation(
                         $"Cannot remove SuperRole '{roleToRemove}'. This user is the last one holding this role.",
-                        "RoleNames");
+                        "RoleIds");
                 }
             }
         }
@@ -74,7 +76,7 @@ public sealed class AssignRolesCommandHandler(
 
             if(!removeSucceeded)
             {
-                return Result<AssignRoleResponse>.Failure([ .. removeErrors.Select(e => Error.Failure(e)) ]);
+                return Result<UserDTOForManagerResponse>.Failure([ .. removeErrors.Select(e => Error.Failure(e)) ]);
             }
             hasChanged = true;
         }
@@ -89,7 +91,7 @@ public sealed class AssignRolesCommandHandler(
 
             if(!addSucceeded)
             {
-                return Result<AssignRoleResponse>.Failure([ .. addErrors.Select(e => Error.Failure(e)) ]);
+                return Result<UserDTOForManagerResponse>.Failure([ .. addErrors.Select(e => Error.Failure(e)) ]);
             }
             hasChanged = true;
         }
@@ -99,15 +101,23 @@ public sealed class AssignRolesCommandHandler(
             userStreamService.NotifyUserUpdate(user.Id);
         }
 
-        var finalRoles = await userReadRepository.GetUserRolesAsync(user, cancellationToken).ConfigureAwait(false);
+        // Return IDs of final roles
+        var finalRoleIds = await userReadRepository.GetUserRoleIdsAsync(user, cancellationToken).ConfigureAwait(false);
 
-        return new AssignRoleResponse
+        return new UserDTOForManagerResponse
         {
             Id = user.Id,
             UserName = user.UserName,
             Email = user.Email,
             FullName = user.FullName,
-            Roles = finalRoles
+            Gender = user.Gender,
+            PhoneNumber = user.PhoneNumber,
+            EmailConfirmed = user.EmailConfirmed,
+            Status = user.Status,
+            AvatarUrl = user.AvatarUrl,
+            DateOfBirth = user.DateOfBirth,
+            DeletedAt = user.DeletedAt,
+            Roles = finalRoleIds
         };
     }
 }

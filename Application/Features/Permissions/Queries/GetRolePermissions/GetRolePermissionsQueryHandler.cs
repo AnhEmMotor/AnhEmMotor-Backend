@@ -6,16 +6,15 @@ using MediatR;
 
 namespace Application.Features.Permissions.Queries.GetRolePermissions;
 
-public class GetRolePermissionsQueryHandler(IRoleReadRepository rolePermissionRepository) : IRequestHandler<GetRolePermissionsQuery, Result<List<PermissionResponse>>>
+public class GetRolePermissionsQueryHandler(IRoleReadRepository rolePermissionRepository) : IRequestHandler<GetRolePermissionsQuery, Result<List<string>>>
 {
-    public async Task<Result<List<PermissionResponse>>> Handle(
+    public async Task<Result<List<string>>> Handle(
         GetRolePermissionsQuery request,
         CancellationToken cancellationToken)
     {
-        var trimmedRoleName = request.RoleName?.Trim();
-
-        var role = await rolePermissionRepository.GetRoleByNameAsync(trimmedRoleName!, cancellationToken)
+        var roles = await rolePermissionRepository.GetRolesByIdsAsync([request.RoleId], cancellationToken)
             .ConfigureAwait(false);
+        var role = roles.FirstOrDefault();
 
         if(role is null)
         {
@@ -26,17 +25,6 @@ public class GetRolePermissionsQueryHandler(IRoleReadRepository rolePermissionRe
                 .ConfigureAwait(false) ??
             [];
 
-        var permissionsWithMetadata = permissions
-            .Select(p => new { Name = p, Metadata = PermissionsList.GetMetadata(p) })
-            .Select(
-                p => new PermissionResponse
-                {
-                    ID = p.Name,
-                    DisplayName = p.Metadata?.DisplayName ?? p.Name,
-                    Description = p.Metadata?.Description
-                })
-            .ToList();
-
-        return permissionsWithMetadata;
+        return permissions.ToList();
     }
 }

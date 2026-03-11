@@ -8,7 +8,7 @@ namespace Application.ApiContracts.Auth.Responses
 
         public string? UserName { get; set; }
 
-        public string[]? Roles { get; set; }
+        public IEnumerable<string>? Roles { get; set; }
 
         public string? Email { get; set; }
 
@@ -16,7 +16,7 @@ namespace Application.ApiContracts.Auth.Responses
 
         public string? Status { get; set; }
 
-        public string[]? AuthMethods { get; set; }
+        public IEnumerable<string>? AuthMethods { get; set; }
 
         public string? SecurityStamp { get; set; }
     }

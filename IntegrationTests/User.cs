@@ -857,9 +857,11 @@ public class User : IAsyncLifetime
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            if(!db.Roles.Any(r => r.Name == "Staff"))
+            var staffRole = db.Roles.FirstOrDefault(r => r.Name == "Staff");
+            if(staffRole == null)
             {
-                db.Roles.Add(new ApplicationRole { Name = "Staff", NormalizedName = "STAFF" });
+                staffRole = new ApplicationRole { Name = "Staff", NormalizedName = "STAFF" };
+                db.Roles.Add(staffRole);
                 await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             }
 
@@ -867,7 +869,7 @@ public class User : IAsyncLifetime
             var command = new Application.Features.UserManager.Commands.AssignRoles.AssignRolesCommand
             {
                 UserId = user.Id,
-                RoleNames = [ "Staff" ]
+                RoleIds = [ staffRole.Id ]
             };
 
             await mediator.Send(command, CancellationToken.None).ConfigureAwait(true);

@@ -13,7 +13,10 @@ using System;
 
 namespace Infrastructure.Repositories.User
 {
-    public class UserReadRepository(UserManager<ApplicationUser> userManager, ISieveProcessor sieveProcessor) : IUserReadRepository
+    public class UserReadRepository(
+        UserManager<ApplicationUser> userManager,
+        Infrastructure.DBContexts.ApplicationDBContext context,
+        ISieveProcessor sieveProcessor) : IUserReadRepository
     {
         public async Task<PagedResult<UserDTOForManagerResponse>> GetPagedListAsync(
             SieveModel sieveModel,
@@ -32,7 +35,11 @@ namespace Infrastructure.Repositories.User
 
             foreach(var user in entities)
             {
-                var roles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
+                var roles = await context.UserRoles
+                    .Where(ur => ur.UserId == user.Id)
+                    .Select(ur => ur.RoleId.ToString())
+                    .ToListAsync(cancellationToken)
+                    .ConfigureAwait(false);
 
                 var response = new UserDTOForManagerResponse
                 {
@@ -45,7 +52,7 @@ namespace Infrastructure.Repositories.User
                     EmailConfirmed = user.EmailConfirmed,
                     Status = user.Status ?? "Active",
                     DeletedAt = user.DeletedAt,
-                    Roles = [ .. roles ]
+                    Roles = roles
                 };
 
                 userResponses.Add(response);
@@ -111,13 +118,17 @@ namespace Infrastructure.Repositories.User
                 .FirstOrDefaultAsync(u => string.Compare(u.RefreshToken, refreshToken) == 0, cancellationToken)
                 .ConfigureAwait(false);
 
-            var roles = await userManager.GetRolesAsync(user!).ConfigureAwait(false);
+            var roles = await context.UserRoles
+                .Where(ur => ur.UserId == user!.Id)
+                .Select(ur => ur.RoleId.ToString())
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
 
             var UserAuth = new UserAuth
             {
                 Id = user!.Id,
                 UserName = user.UserName,
-                Roles = [ .. roles ],
+                Roles = roles,
                 Email = user.Email,
                 FullName = user.FullName,
                 Status = user.Status,
@@ -138,12 +149,17 @@ namespace Infrastructure.Repositories.User
                 .ConfigureAwait(false);
             if(user == null)
                 return null;
-            var roles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
+            var roles = await context.UserRoles
+                .Where(ur => ur.UserId == user.Id)
+                .Select(ur => ur.RoleId.ToString())
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
+
             return new UserAuth()
             {
                 Id = user.Id,
                 UserName = user.UserName,
-                Roles = [ .. roles ],
+                Roles = roles,
                 Email = user.Email,
                 FullName = user.FullName,
                 Status = user.Status,
@@ -230,6 +246,18 @@ namespace Infrastructure.Repositories.User
             cancellationToken.ThrowIfCancellationRequested();
             var result = await userManager.GetRolesAsync(user)
                 .ContinueWith(t => t.Result, cancellationToken)
+                .ConfigureAwait(false);
+            return result;
+        }
+
+        public async Task<IList<string>> GetUserRoleIdsAsync(
+            ApplicationUser user,
+            CancellationToken cancellationToken = default)
+        {
+            var result = await context.UserRoles
+                .Where(ur => ur.UserId == user.Id)
+                .Select(ur => ur.RoleId.ToString())
+                .ToListAsync(cancellationToken)
                 .ConfigureAwait(false);
             return result;
         }

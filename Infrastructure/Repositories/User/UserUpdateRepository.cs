@@ -29,8 +29,7 @@ namespace Infrastructure.Repositories.User
             cancellationToken.ThrowIfCancellationRequested();
 
             var result = await userManager.UpdateAsync(user).ConfigureAwait(false);
-
-            return (result.Succeeded, result.Errors.Select(e => e.Description));
+            return (result.Succeeded, result.Errors.Select(e => e.Description).AsEnumerable());
         }
 
         public async Task<(bool Succeeded, IEnumerable<string> Errors)> ChangePasswordAsync(
@@ -42,8 +41,7 @@ namespace Infrastructure.Repositories.User
             cancellationToken.ThrowIfCancellationRequested();
 
             var result = await userManager.ChangePasswordAsync(user, currentPassword, newPassword).ConfigureAwait(false);
-
-            return (result.Succeeded, result.Errors.Select(e => e.Description));
+            return (result.Succeeded, result.Errors.Select(e => e.Description).AsEnumerable());
         }
 
         public async Task<(bool Succeeded, IEnumerable<string> Errors)> ResetPasswordAsync(
@@ -55,8 +53,7 @@ namespace Infrastructure.Repositories.User
 
             var resetToken = await userManager.GeneratePasswordResetTokenAsync(user).ConfigureAwait(false);
             var result = await userManager.ResetPasswordAsync(user, resetToken, newPassword).ConfigureAwait(false);
-
-            return (result.Succeeded, result.Errors.Select(e => e.Description));
+            return (result.Succeeded, result.Errors.Select(e => e.Description).AsEnumerable());
         }
 
         public async Task ClearRefreshTokenAsync(Guid userId, CancellationToken cancellationToken = default)
@@ -81,7 +78,7 @@ namespace Infrastructure.Repositories.User
 
             var result = await userManager.RemoveFromRolesAsync(user, roleNames).ConfigureAwait(false);
 
-            return (result.Succeeded, result.Errors.Select(e => e.Description));
+            return (result.Succeeded, result.Errors.Select(e => e.Description).AsEnumerable());
         }
     }
 }

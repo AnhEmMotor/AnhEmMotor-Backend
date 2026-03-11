@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
 using static Domain.Constants.Permission.PermissionsList;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebAPI.Controllers.V1;
 
@@ -58,5 +59,23 @@ public class PredefinedOptionController(IMediator mediator) : ApiController
         };
 
         return Ok(statuses);
+    }
+
+    /// <summary>
+    /// Lấy danh sách ánh xạ giới tính (key tiếng Anh - nhãn tiếng Việt) để Frontend binding.
+    /// </summary>
+    [HttpGet("gender-options")]
+    [Authorize]
+    [ProducesResponseType(typeof(IEnumerable<object>), StatusCodes.Status200OK)]
+    public IActionResult GetGenderOptions()
+    {
+        var options = new[]
+        {
+            new { key = nameof(Domain.Constants.GenderStatus.Male), label = "Nam" },
+            new { key = nameof(Domain.Constants.GenderStatus.Female), label = "Nữ" },
+            new { key = nameof(Domain.Constants.GenderStatus.Other), label = "Khác" }
+        };
+
+        return Ok(options);
     }
 }

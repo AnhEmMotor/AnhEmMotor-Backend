@@ -18,7 +18,7 @@ public class GetUserByIdQueryHandler(IUserReadRepository userReadRepository) : I
             return Error.NotFound("User not found.");
         }
 
-        var roles = await userReadRepository.GetUserRolesAsync(user, cancellationToken).ConfigureAwait(false);
+        var roles = await userReadRepository.GetUserRoleIdsAsync(user, cancellationToken).ConfigureAwait(false);
 
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -32,6 +32,8 @@ public class GetUserByIdQueryHandler(IUserReadRepository userReadRepository) : I
             PhoneNumber = user.PhoneNumber,
             EmailConfirmed = user.EmailConfirmed,
             Status = user.Status,
+            AvatarUrl = user.AvatarUrl,
+            DateOfBirth = user.DateOfBirth,
             DeletedAt = user.DeletedAt,
             Roles = roles
         };

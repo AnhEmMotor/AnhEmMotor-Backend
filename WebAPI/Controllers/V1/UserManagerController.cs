@@ -4,6 +4,7 @@ using Application.Features.UserManager.Commands.AssignRoles;
 using Application.Features.UserManager.Commands.ChangeMultipleUsersStatus;
 using Application.Features.UserManager.Commands.ChangeUserStatus;
 using Application.Features.UserManager.Commands.UpdateUser;
+using Application.Features.Users.Commands.UploadAvatar;
 using Application.Features.UserManager.Queries.GetUserById;
 using Application.Features.UserManager.Queries.GetUsersList;
 using Application.Features.UserManager.Queries.GetUsersListForOutput;
@@ -185,6 +186,27 @@ public class UserManagerController(IMediator mediator) : ApiController
             },
             cancellationToken)
             .ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Tải lên ảnh đại diện cho người dùng theo Id (Admin)
+    /// </summary>
+    [HttpPost("{userId:guid}/avatar")]
+    [HasPermission(Users.Edit)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> AdminUploadAvatarAsync(Guid userId, IFormFile file, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(file);
+        var command = new UploadAvatarCommand 
+        { 
+            UserId = userId.ToString(),
+            FileContent = file.OpenReadStream(),
+            FileName = file.FileName
+        };
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
 }

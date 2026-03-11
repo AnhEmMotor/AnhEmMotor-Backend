@@ -6,6 +6,8 @@ namespace Application.Features.Permissions.Commands.UpdateRole;
 
 public record UpdateRoleCommand : IRequest<Result<PermissionRoleUpdateResponse>>
 {
+    public Guid RoleId { get; init; }
+
     public string? RoleName { get; init; }
 
     public List<string>? Permissions { get; init; } = [];

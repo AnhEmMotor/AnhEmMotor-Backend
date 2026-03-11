@@ -3,8 +3,10 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Permission;
 using Application.Interfaces.Repositories.Role;
+using Application.Interfaces.Services;
 using Domain.Entities;
 using MediatR;
+using Microsoft.AspNetCore.Identity;
 using System.Reflection;
 
 namespace Application.Features.Permissions.Commands.UpdateRole;
@@ -13,14 +15,18 @@ public class UpdateRoleCommandHandler(
     IRoleReadRepository roleReadRepository,
     IRoleUpdateRepository roleUpdateRepository,
     IPermissionReadRepository permissionReadRepository,
+    IUserStreamService userStreamService,
+    RoleManager<ApplicationRole> roleManager,
+    IProtectedEntityManagerService protectedEntityManagerService,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateRoleCommand, Result<PermissionRoleUpdateResponse>>
 {
     public async Task<Result<PermissionRoleUpdateResponse>> Handle(
         UpdateRoleCommand request,
         CancellationToken cancellationToken)
     {
-        var role = await roleReadRepository.GetRoleByNameAsync(request.RoleName!, cancellationToken)
+        var roles = await roleReadRepository.GetRolesByIdsAsync([request.RoleId], cancellationToken)
             .ConfigureAwait(false);
+        var role = roles.FirstOrDefault();
         if(role is null)
         {
             return Error.NotFound("Role not found.");
@@ -34,22 +40,26 @@ public class UpdateRoleCommandHandler(
             isRoleUpdated = true;
         }
 
-        if(request.Permissions == null)
+        if(!string.IsNullOrWhiteSpace(request.RoleName) && string.Compare(role.Name, request.RoleName) != 0)
         {
-            if(isRoleUpdated)
+            var superRoles = protectedEntityManagerService.GetSuperRoles() ?? [];
+            if(superRoles.Contains(role.Name!))
             {
-                await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                return Error.BadRequest("Cannot rename SuperRole.");
             }
-            return new PermissionRoleUpdateResponse();
+
+            if(await roleManager.RoleExistsAsync(request.RoleName).ConfigureAwait(false))
+            {
+                return Error.BadRequest($"Role name '{request.RoleName}' already exists.");
+            }
+
+            await roleManager.SetRoleNameAsync(role, request.RoleName).ConfigureAwait(false);
+            isRoleUpdated = true;
         }
 
-        if(request.Permissions.Count == 0)
+        if(request.Permissions == null)
         {
-            if(isRoleUpdated)
-            {
-                await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-            }
-            return new PermissionRoleUpdateResponse();
+            request = request with { Permissions = [] };
         }
 
         var validSystemPermissions = typeof(Domain.Constants.Permission.PermissionsList)
@@ -127,6 +137,15 @@ public class UpdateRoleCommandHandler(
         if(isRoleUpdated)
         {
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+            // Thông báo qua SSE cho tất cả người dùng thuộc vai trò này
+            var usersInRole = await roleReadRepository.GetUsersInRoleAsync(role.Name!, cancellationToken)
+                .ConfigureAwait(false);
+            
+            foreach(var user in usersInRole)
+            {
+                userStreamService.NotifyUserUpdate(user.Id);
+            }
         }
 
         return new PermissionRoleUpdateResponse();

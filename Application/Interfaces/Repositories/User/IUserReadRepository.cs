@@ -49,5 +49,9 @@ namespace Application.Interfaces.Repositories.User
             CancellationToken cancellationToken = default);
 
         public Task<IList<string>> GetRolesOfUserAsync(ApplicationUser user, CancellationToken cancellationToken);
+
+        public Task<IList<string>> GetUserRoleIdsAsync(
+            ApplicationUser user,
+            CancellationToken cancellationToken = default);
     }
 }

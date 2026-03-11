@@ -312,7 +312,7 @@ public class UserManager
     public async Task AssignRoles_WithValidRoles_ReturnsOk()
     {
         var userId = Guid.NewGuid();
-        var request = new AssignRolesCommand { RoleNames = [ "Manager", "Staff" ] };
+        var request = new AssignRolesCommand { RoleIds = [ Guid.NewGuid(), Guid.NewGuid() ] };
 
         var expectedResponse = new AssignRoleResponse
         {
@@ -341,7 +341,7 @@ public class UserManager
     public async Task AssignRoles_WithInvalidRole_ReturnsBadRequest()
     {
         var userId = Guid.NewGuid();
-        var request = new AssignRolesCommand { RoleNames = [ "InvalidRole" ] };
+        var request = new AssignRolesCommand { RoleIds = [ Guid.NewGuid() ] };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<AssignRolesCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<AssignRoleResponse>.Failure(Error.BadRequest("Role không tồn tại")));
