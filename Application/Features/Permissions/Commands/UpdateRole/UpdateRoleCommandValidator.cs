@@ -15,21 +15,21 @@ public class UpdateRoleCommandValidator : AbstractValidator<UpdateRoleCommand>
 
     public UpdateRoleCommandValidator()
     {
-        RuleFor(x => x.RoleId)
-            .NotEmpty()
-            .WithMessage("Role ID is required.");
+        RuleFor(x => x.RoleId).NotEmpty().WithMessage("Role ID is required.");
 
         RuleFor(x => x.Permissions)
             .Must(permissions => permissions == null || permissions.All(p => ValidPermissions.Contains(p)))
             .WithMessage("One or more permissions are invalid.")
-            .Custom((permissions, context) =>
-            {
-                if(permissions == null) return;
-                var (isValid, errorMessage) = Domain.Constants.Permission.PermissionsList.ValidateRules(permissions);
-                if(!isValid)
+            .Custom(
+                (permissions, context) =>
                 {
-                    context.AddFailure(errorMessage);
-                }
-            });
+                    if(permissions == null)
+                        return;
+                    var (isValid, errorMessage) = Domain.Constants.Permission.PermissionsList.ValidateRules(permissions);
+                    if(!isValid)
+                    {
+                        context.AddFailure(errorMessage);
+                    }
+                });
     }
 }

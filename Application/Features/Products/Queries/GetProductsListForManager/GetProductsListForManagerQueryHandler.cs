@@ -18,7 +18,8 @@ public sealed class GetProductsListForManagerQueryHandler(
         CancellationToken cancellationToken)
     {
         var settings = await settingRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
-        var alertLevelStr = settings.FirstOrDefault(s => string.Equals(s.Key, SettingKeys.InventoryAlertLevel, StringComparison.OrdinalIgnoreCase))?.Value;
+        var alertLevelStr = settings.FirstOrDefault(
+            s => string.Equals(s.Key, SettingKeys.InventoryAlertLevel, StringComparison.OrdinalIgnoreCase))?.Value;
         long.TryParse(alertLevelStr, out var alertLevel);
 
         var normalizedStatusIds = request.StatusIds
@@ -43,12 +44,13 @@ public sealed class GetProductsListForManagerQueryHandler(
 
         var filtered = string.IsNullOrWhiteSpace(request.InventoryStatusFilter)
             ? allItems
-            : allItems.Where(i => i.InventoryStatus == request.InventoryStatusFilter).ToList();
+            : [ .. allItems.Where(i => string.Compare(i.InventoryStatus, request.InventoryStatusFilter) == 0) ];
 
         var sortedItems = request.SortByInventoryStatus switch
         {
             SortDirection.Ascending => filtered.OrderBy(i => InventoryStatus.GetSeverity(i.InventoryStatus)).ToList(),
-            SortDirection.Descending => filtered.OrderByDescending(i => InventoryStatus.GetSeverity(i.InventoryStatus)).ToList(),
+            SortDirection.Descending => filtered.OrderByDescending(i => InventoryStatus.GetSeverity(i.InventoryStatus))
+                .ToList(),
             _ => filtered
         };
 

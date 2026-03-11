@@ -4,25 +4,17 @@
 
 namespace Infrastructure.Migrations
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public partial class AddAvatarUrlToUser : Migration
     {
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "AvatarUrl",
-                table: "Users",
-                type: "nvarchar(max)",
-                nullable: true);
+            migrationBuilder.AddColumn<string>(name: "AvatarUrl", table: "Users", type: "nvarchar(max)", nullable: true);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropColumn(
-                name: "AvatarUrl",
-                table: "Users");
-        }
+        { migrationBuilder.DropColumn(name: "AvatarUrl", table: "Users"); }
     }
 }

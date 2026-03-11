@@ -175,7 +175,8 @@ public class PermissionAndRole
         var roleReadRepoMock = new Mock<IRoleReadRepository>();
 
         var role = new ApplicationRole { Id = roleId, Name = "Manager" };
-        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("Manager", CancellationToken.None)).ReturnsAsync(role);
+        roleReadRepoMock.Setup(x => x.GetRolesByIdsAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([ role ]);
 
         var permissions = new List<string>
         {
@@ -202,8 +203,8 @@ public class PermissionAndRole
     {
         var roleReadRepoMock = new Mock<IRoleReadRepository>();
 
-        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("NonExistentRole", CancellationToken.None))
-            .ReturnsAsync((ApplicationRole?)null);
+        roleReadRepoMock.Setup(x => x.GetRolesByIdsAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
 
         var handler = new GetRolePermissionsQueryHandler(roleReadRepoMock.Object);
         var query = new GetRolePermissionsQuery { RoleId = Guid.NewGuid() };
@@ -219,7 +220,8 @@ public class PermissionAndRole
         var roleReadRepoMock = new Mock<IRoleReadRepository>();
 
         var role = new ApplicationRole { Id = roleId, Name = "Manager" };
-        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("Manager", CancellationToken.None)).ReturnsAsync(role);
+        roleReadRepoMock.Setup(x => x.GetRolesByIdsAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([ role ]);
 
         var permissions = new List<string> { PermissionsList.Brands.View, PermissionsList.Brands.Create };
 
@@ -370,12 +372,29 @@ public class PermissionAndRole
         var unitOfWorkMock = new Mock<IUnitOfWork>();
 
         var role = new ApplicationRole { Id = roleId, Name = "Manager", Description = "Old description" };
-        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("Manager", CancellationToken.None)).ReturnsAsync(role);
+        roleReadRepoMock.Setup(x => x.GetRolesByIdsAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([ role ]);
+        roleReadRepoMock.Setup(x => x.GetRolesPermissionByRoleIdAsync(roleId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+        roleReadRepoMock.Setup(x => x.GetUsersInRoleAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+
+        var userStreamServiceMock = new Mock<IUserStreamService>();
+        var roleManagerMock = new Mock<RoleManager<ApplicationRole>>(
+            new Mock<IRoleStore<ApplicationRole>>().Object,
+            null!,
+            null!,
+            null!,
+            null!);
+        var protectedEntityServiceMock = new Mock<IProtectedEntityManagerService>();
 
         var handler = new UpdateRoleCommandHandler(
             roleReadRepoMock.Object,
             roleUpdateRepoMock.Object,
             permissionRepoMock.Object,
+            userStreamServiceMock.Object,
+            roleManagerMock.Object,
+            protectedEntityServiceMock.Object,
             unitOfWorkMock.Object);
         var command = new UpdateRoleCommand()
         {
@@ -384,9 +403,13 @@ public class PermissionAndRole
             Permissions = null!
         };
 
+        roleManagerMock.Setup(x => x.FindByIdAsync(roleId.ToString())).ReturnsAsync(role);
+        roleManagerMock.Setup(x => x.UpdateAsync(It.IsAny<ApplicationRole>())).ReturnsAsync(IdentityResult.Success);
+
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         result.Should().NotBeNull();
+        result.IsSuccess.Should().BeTrue();
     }
 
     [Fact(DisplayName = "PERM_016 - Cập nhật permissions của role thành công")]
@@ -399,7 +422,8 @@ public class PermissionAndRole
         var permissionReadRepoMock = new Mock<IPermissionReadRepository>();
 
         var role = new ApplicationRole { Id = roleId, Name = "Manager", Description = "Test" };
-        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("Manager", CancellationToken.None)).ReturnsAsync(role);
+        roleReadRepoMock.Setup(x => x.GetRolesByIdsAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([ role ]);
 
         var oldPermissions = new List<RolePermission>
         {
@@ -419,6 +443,8 @@ public class PermissionAndRole
 
         roleReadRepoMock.Setup(x => x.GetRolesPermissionByRoleIdAsync(roleId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(oldPermissions);
+        roleReadRepoMock.Setup(x => x.GetUsersInRoleAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
 
         var newPermissions = new List<PermissionEntity>
         {
@@ -440,10 +466,22 @@ public class PermissionAndRole
                     PermissionId = 2
                 } ]);
 
+        var userStreamServiceMock = new Mock<IUserStreamService>();
+        var roleManagerMock = new Mock<RoleManager<ApplicationRole>>(
+            new Mock<IRoleStore<ApplicationRole>>().Object,
+            null!,
+            null!,
+            null!,
+            null!);
+        var protectedEntityServiceMock = new Mock<IProtectedEntityManagerService>();
+
         var handler = new UpdateRoleCommandHandler(
             roleReadRepoMock.Object,
             roleUpdateRepoMock.Object,
             permissionReadRepoMock.Object,
+            userStreamServiceMock.Object,
+            roleManagerMock.Object,
+            protectedEntityServiceMock.Object,
             unitOfWorkMock.Object);
 
         var command = new UpdateRoleCommand()
@@ -452,6 +490,9 @@ public class PermissionAndRole
             Description = null,
             Permissions = [ PermissionsList.Products.View, PermissionsList.Products.Create ]
         };
+
+        roleManagerMock.Setup(x => x.FindByIdAsync(roleId.ToString())).ReturnsAsync(role);
+        roleManagerMock.Setup(x => x.UpdateAsync(It.IsAny<ApplicationRole>())).ReturnsAsync(IdentityResult.Success);
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
@@ -472,14 +513,32 @@ public class PermissionAndRole
         var unitOfWorkMock = new Mock<IUnitOfWork>();
 
         var role = new ApplicationRole { Id = roleId, Name = "Manager", Description = "Original description" };
-        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("Manager", CancellationToken.None)).ReturnsAsync(role);
+        roleReadRepoMock.Setup(x => x.GetRolesByIdsAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([ role ]);
+        roleReadRepoMock.Setup(x => x.GetRolesPermissionByRoleIdAsync(roleId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+
+        var userStreamServiceMock = new Mock<IUserStreamService>();
+        var roleManagerMock = new Mock<RoleManager<ApplicationRole>>(
+            new Mock<IRoleStore<ApplicationRole>>().Object,
+            null!,
+            null!,
+            null!,
+            null!);
+        var protectedEntityServiceMock = new Mock<IProtectedEntityManagerService>();
 
         var handler = new UpdateRoleCommandHandler(
             roleReadRepoMock.Object,
             roleUpdateRepoMock.Object,
             permissionRepoMock.Object,
+            userStreamServiceMock.Object,
+            roleManagerMock.Object,
+            protectedEntityServiceMock.Object,
             unitOfWorkMock.Object);
         var command = new UpdateRoleCommand() { RoleId = roleId, Description = null, Permissions = [] };
+
+        roleManagerMock.Setup(x => x.FindByIdAsync(roleId.ToString())).ReturnsAsync(role);
+        roleManagerMock.Setup(x => x.UpdateAsync(It.IsAny<ApplicationRole>())).ReturnsAsync(IdentityResult.Success);
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
@@ -500,13 +559,25 @@ public class PermissionAndRole
         var roleUpdateRepoMock = new Mock<IRoleUpdateRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
 
-        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("NonExistentRole", CancellationToken.None))
-            .ReturnsAsync((ApplicationRole?)null);
+        roleReadRepoMock.Setup(x => x.GetRolesByIdsAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+
+        var userStreamServiceMock = new Mock<IUserStreamService>();
+        var roleManagerMock = new Mock<RoleManager<ApplicationRole>>(
+            new Mock<IRoleStore<ApplicationRole>>().Object,
+            null!,
+            null!,
+            null!,
+            null!);
+        var protectedEntityServiceMock = new Mock<IProtectedEntityManagerService>();
 
         var handler = new UpdateRoleCommandHandler(
             roleReadRepoMock.Object,
             roleUpdateRepoMock.Object,
             permissionRepoMock.Object,
+            userStreamServiceMock.Object,
+            roleManagerMock.Object,
+            protectedEntityServiceMock.Object,
             unitOfWorkMock.Object);
         var command = new UpdateRoleCommand() { RoleId = Guid.NewGuid(), Description = "Test" };
 
@@ -523,7 +594,8 @@ public class PermissionAndRole
         var protectedEntityServiceMock = new Mock<IProtectedEntityManagerService>();
 
         var role = new ApplicationRole { Id = roleId, Name = "OldRole" };
-        roleReadRepoMock.Setup(x => x.GetRoleByNameAsync("OldRole", CancellationToken.None)).ReturnsAsync(role);
+        roleReadRepoMock.Setup(x => x.GetRolesByIdsAsync(It.IsAny<IEnumerable<Guid>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([ role ]);
         roleReadRepoMock.Setup(x => x.GetUsersInRoleAsync("OldRole", CancellationToken.None)).ReturnsAsync([]);
         roleDeleteRepoMock.Setup(x => x.DeleteAsync(role, CancellationToken.None)).ReturnsAsync(IdentityResult.Success);
 
@@ -578,12 +650,13 @@ public class PermissionAndRole
             x => x.DeleteAsync(It.IsAny<ApplicationRole>(), CancellationToken.None),
             Times.Exactly(3));
     }
+
     [Fact(DisplayName = "PR_001 - ValidateRules hợp lệ khi các quyền phụ thuộc được đáp ứng")]
     public void ValidateRules_ValidDependencies_ReturnsSuccess()
     {
         var permissions = new List<string> { PermissionsList.Products.View, PermissionsList.Products.Create };
         var (isValid, errorMessage) = PermissionsList.ValidateRules(permissions);
-        
+
         isValid.Should().BeTrue();
         errorMessage.Should().BeNull();
     }
@@ -591,9 +664,9 @@ public class PermissionAndRole
     [Fact(DisplayName = "PR_002 - ValidateRules thất bại khi thiếu quyền phụ thuộc")]
     public void ValidateRules_MissingDependencies_ReturnsFailure()
     {
-        var permissions = new List<string> { PermissionsList.Products.Create }; // Missing View
+        var permissions = new List<string> { PermissionsList.Products.Create };
         var (isValid, errorMessage) = PermissionsList.ValidateRules(permissions);
-        
+
         isValid.Should().BeFalse();
         errorMessage.Should().Contain("requires");
         errorMessage.Should().Contain(PermissionsList.Products.View);
@@ -603,9 +676,10 @@ public class PermissionAndRole
     public void CreateRoleCommand_MissingDependency_ShouldHaveValidationError()
     {
         CreateRoleCommandValidator validator = new();
-        var command = new CreateRoleCommand { RoleName = "ValidRole", Permissions = [ PermissionsList.Brands.Create ] }; // Missing Brands.View
+        var command = new CreateRoleCommand { RoleName = "ValidRole", Permissions = [ PermissionsList.Brands.Create ] };
         var result = validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.Permissions).WithErrorMessage($"Permission '{PermissionsList.Brands.Create}' requires: {PermissionsList.Brands.View}");
+        result.ShouldHaveValidationErrorFor(x => x.Permissions)
+            .WithErrorMessage($"Permission '{PermissionsList.Brands.Create}' requires: {PermissionsList.Brands.View}");
     }
 
 #pragma warning restore CRR0035

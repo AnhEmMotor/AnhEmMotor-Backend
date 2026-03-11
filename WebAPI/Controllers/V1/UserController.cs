@@ -4,9 +4,9 @@ using Application.Common.Models;
 using Application.Features.Users.Commands.DeleteCurrentUserAccount;
 using Application.Features.Users.Commands.RestoreUserAccount;
 using Application.Features.Users.Commands.UpdateCurrentUser;
+using Application.Features.Users.Commands.UploadAvatar;
 using Application.Features.Users.Queries.GetCurrentUser;
 using Application.Interfaces.Services;
-using Application.Features.Users.Commands.UploadAvatar;
 using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -178,8 +178,8 @@ public class UserController(IMediator mediator, IUserStreamService userStreamSer
     public async Task<IActionResult> UploadAvatarAsync(IFormFile file, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(file);
-        var command = new UploadAvatarCommand 
-        { 
+        var command = new UploadAvatarCommand
+        {
             UserId = User.FindFirstValue(ClaimTypes.NameIdentifier),
             FileContent = file.OpenReadStream(),
             FileName = file.FileName

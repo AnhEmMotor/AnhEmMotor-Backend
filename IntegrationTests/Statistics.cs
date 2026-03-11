@@ -729,7 +729,8 @@ public class Statistics : IAsyncLifetime
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         await WipeStatisticsDataAsync(db, CancellationToken.None).ConfigureAwait(true);
         await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
-        var variantId = await SeedProductVariantAsync(db, uniqueId, 1000000, CancellationToken.None).ConfigureAwait(true);
+        var variantId = await SeedProductVariantAsync(db, uniqueId, 1000000, CancellationToken.None)
+            .ConfigureAwait(true);
 
         var today = DateTime.UtcNow;
         var o1 = new OutputEntity { StatusId = OrderStatus.Completed, CreatedAt = today };
@@ -738,13 +739,19 @@ public class Statistics : IAsyncLifetime
         db.OutputOrders.AddRange(o1, o2, o3);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        db.OutputInfos.Add(new OutputInfoEntity { OutputId = o1.Id, ProductVarientId = variantId, Price = 1000000, Count = 1 });
-        db.OutputInfos.Add(new OutputInfoEntity { OutputId = o2.Id, ProductVarientId = variantId, Price = 2000000, Count = 1 });
-        db.OutputInfos.Add(new OutputInfoEntity { OutputId = o3.Id, ProductVarientId = variantId, Price = 3000000, Count = 1 });
+        db.OutputInfos
+            .Add(new OutputInfoEntity { OutputId = o1.Id, ProductVarientId = variantId, Price = 1000000, Count = 1 });
+        db.OutputInfos
+            .Add(new OutputInfoEntity { OutputId = o2.Id, ProductVarientId = variantId, Price = 2000000, Count = 1 });
+        db.OutputInfos
+            .Add(new OutputInfoEntity { OutputId = o3.Id, ProductVarientId = variantId, Price = 3000000, Count = 1 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        var response = await _client.GetAsync("/api/v1/Statistics/daily-revenue?days=1", CancellationToken.None).ConfigureAwait(true);
-        var content = await response.Content.ReadFromJsonAsync<List<DailyRevenueResponse>>(CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/Statistics/daily-revenue?days=1", CancellationToken.None)
+            .ConfigureAwait(true);
+        var content = await response.Content
+            .ReadFromJsonAsync<List<DailyRevenueResponse>>(CancellationToken.None)
+            .ConfigureAwait(true);
 
         content!.First().TotalRevenue.Should().Be(1000000);
     }
@@ -757,17 +764,30 @@ public class Statistics : IAsyncLifetime
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         await WipeStatisticsDataAsync(db, CancellationToken.None).ConfigureAwait(true);
         await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
-        var variantId = await SeedProductVariantAsync(db, uniqueId, 1000000, CancellationToken.None).ConfigureAwait(true);
+        var variantId = await SeedProductVariantAsync(db, uniqueId, 1000000, CancellationToken.None)
+            .ConfigureAwait(true);
 
         var o1 = new OutputEntity { StatusId = OrderStatus.Completed, CreatedAt = DateTime.UtcNow };
         db.OutputOrders.Add(o1);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        db.OutputInfos.Add(new OutputInfoEntity { OutputId = o1.Id, ProductVarientId = variantId, Price = 1000000, CostPrice = 0, Count = 1 });
+        db.OutputInfos
+            .Add(
+                new OutputInfoEntity
+                {
+                    OutputId = o1.Id,
+                    ProductVarientId = variantId,
+                    Price = 1000000,
+                    CostPrice = 0,
+                    Count = 1
+                });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        var response = await _client.GetAsync("/api/v1/Statistics/revenue-analysis", CancellationToken.None).ConfigureAwait(true);
-        var content = await response.Content.ReadFromJsonAsync<AdminRevenueAnalysisResponse>(CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/Statistics/revenue-analysis", CancellationToken.None)
+            .ConfigureAwait(true);
+        var content = await response.Content
+            .ReadFromJsonAsync<AdminRevenueAnalysisResponse>(CancellationToken.None)
+            .ConfigureAwait(true);
 
         content!.DailyTableData.First().TotalRevenue.Should().Be(1000000);
         content.DailyTableData.First().TotalProfit.Should().Be(1000000);
@@ -782,17 +802,32 @@ public class Statistics : IAsyncLifetime
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         await WipeStatisticsDataAsync(db, CancellationToken.None).ConfigureAwait(true);
         await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
-        var variantId = await SeedProductVariantAsync(db, uniqueId, 1000000, CancellationToken.None).ConfigureAwait(true);
+        var variantId = await SeedProductVariantAsync(db, uniqueId, 1000000, CancellationToken.None)
+            .ConfigureAwait(true);
 
         var o1 = new OutputEntity { StatusId = OrderStatus.Completed, CreatedAt = DateTime.UtcNow };
         db.OutputOrders.Add(o1);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        db.OutputInfos.Add(new OutputInfoEntity { OutputId = o1.Id, ProductVarientId = variantId, Price = 2000000, CostPrice = 0, Count = 1 });
+        db.OutputInfos
+            .Add(
+                new OutputInfoEntity
+                {
+                    OutputId = o1.Id,
+                    ProductVarientId = variantId,
+                    Price = 2000000,
+                    CostPrice = 0,
+                    Count = 1
+                });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        var response = await _client.GetAsync("/api/v1/Statistics/monthly-revenue-profit?months=1", CancellationToken.None).ConfigureAwait(true);
-        var content = await response.Content.ReadFromJsonAsync<List<MonthlyRevenueProfitResponse>>(CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync(
+            "/api/v1/Statistics/monthly-revenue-profit?months=1",
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var content = await response.Content
+            .ReadFromJsonAsync<List<MonthlyRevenueProfitResponse>>(CancellationToken.None)
+            .ConfigureAwait(true);
 
         content!.First().TotalRevenue.Should().Be(2000000);
         content!.First().TotalProfit.Should().Be(2000000);
@@ -814,7 +849,13 @@ public class Statistics : IAsyncLifetime
         db.ProductCategories.Add(cat);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        var prod = new ProductEntity { Name = $"Prod_{uniqueId}", BrandId = brand.Id, CategoryId = cat.Id, StatusId = "ForSale" };
+        var prod = new ProductEntity
+        {
+            Name = $"Prod_{uniqueId}",
+            BrandId = brand.Id,
+            CategoryId = cat.Id,
+            StatusId = "ForSale"
+        };
         db.Products.Add(prod);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
@@ -822,7 +863,11 @@ public class Statistics : IAsyncLifetime
         db.ProductVariants.Add(vid);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        if (!await db.InputStatuses.AnyAsync(x => string.Compare(x.Key, Domain.Constants.Input.InputStatus.Finish) == 0, CancellationToken.None).ConfigureAwait(true))
+        if(!await db.InputStatuses
+            .AnyAsync(
+                x => string.Compare(x.Key, Domain.Constants.Input.InputStatus.Finish) == 0,
+                CancellationToken.None)
+            .ConfigureAwait(true))
         {
             db.InputStatuses.Add(new InputStatusEntity { Key = Domain.Constants.Input.InputStatus.Finish });
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -835,12 +880,14 @@ public class Statistics : IAsyncLifetime
         db.InputInfos.Add(new InputInfoEntity { InputId = inp.Id, ProductId = vid.Id, Count = 10, InputPrice = 50000 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        // Soft delete variant
         vid.DeletedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        var response = await _client.GetAsync("/api/v1/Statistics/warehouse-report", CancellationToken.None).ConfigureAwait(true);
-        var content = await response.Content.ReadFromJsonAsync<AdminWarehouseReportResponse>(CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/Statistics/warehouse-report", CancellationToken.None)
+            .ConfigureAwait(true);
+        var content = await response.Content
+            .ReadFromJsonAsync<AdminWarehouseReportResponse>(CancellationToken.None)
+            .ConfigureAwait(true);
 
         var brandData = content!.WarehouseTableData.FirstOrDefault(x => string.Compare(x.BrandName, brand.Name) == 0);
         brandData.Should().NotBeNull();
@@ -856,8 +903,11 @@ public class Statistics : IAsyncLifetime
         await WipeStatisticsDataAsync(db, CancellationToken.None).ConfigureAwait(true);
         await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
 
-        var baselineResponse = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None).ConfigureAwait(true);
-        var baselineContent = await baselineResponse.Content.ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None).ConfigureAwait(true);
+        var baselineResponse = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None)
+            .ConfigureAwait(true);
+        var baselineContent = await baselineResponse.Content
+            .ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None)
+            .ConfigureAwait(true);
         var initialCount = baselineContent!.PendingOrdersCount;
 
         var o1 = new OutputEntity { StatusId = OrderStatus.Pending, CreatedAt = DateTime.UtcNow };
@@ -865,14 +915,18 @@ public class Statistics : IAsyncLifetime
         db.OutputOrders.AddRange(o1, o2);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        // Update o2's CreatedAt to -35 days to bypass EF generation on Add
         await db.OutputOrders
             .Where(x => x.Id == o2.Id)
-            .ExecuteUpdateAsync(s => s.SetProperty(x => x.CreatedAt, DateTimeOffset.UtcNow.AddDays(-35)), CancellationToken.None)
+            .ExecuteUpdateAsync(
+                s => s.SetProperty(x => x.CreatedAt, DateTimeOffset.UtcNow.AddDays(-35)),
+                CancellationToken.None)
             .ConfigureAwait(true);
 
-        var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None).ConfigureAwait(true);
-        var content = await response.Content.ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None)
+            .ConfigureAwait(true);
+        var content = await response.Content
+            .ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None)
+            .ConfigureAwait(true);
 
         content!.PendingOrdersCount.Should().Be(initialCount + 1);
     }
@@ -892,7 +946,13 @@ public class Statistics : IAsyncLifetime
         db.ProductCategories.Add(cat);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        var prod = new ProductEntity { Name = $"Prod_{uniqueId}", BrandId = brand.Id, CategoryId = cat.Id, StatusId = "ForSale" };
+        var prod = new ProductEntity
+        {
+            Name = $"Prod_{uniqueId}",
+            BrandId = brand.Id,
+            CategoryId = cat.Id,
+            StatusId = "ForSale"
+        };
         db.Products.Add(prod);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
@@ -900,7 +960,11 @@ public class Statistics : IAsyncLifetime
         db.ProductVariants.Add(vid);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        if (!await db.InputStatuses.AnyAsync(x => string.Compare(x.Key, Domain.Constants.Input.InputStatus.Finish) == 0, CancellationToken.None).ConfigureAwait(true))
+        if(!await db.InputStatuses
+            .AnyAsync(
+                x => string.Compare(x.Key, Domain.Constants.Input.InputStatus.Finish) == 0,
+                CancellationToken.None)
+            .ConfigureAwait(true))
         {
             db.InputStatuses.Add(new InputStatusEntity { Key = Domain.Constants.Input.InputStatus.Finish });
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -911,20 +975,21 @@ public class Statistics : IAsyncLifetime
         db.InputReceipts.AddRange(inp1, inp2);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        // First receipt: 10 items @ 100k
-        db.InputInfos.Add(new InputInfoEntity { InputId = inp1.Id, ProductId = vid.Id, Count = 10, InputPrice = 100000 });
-        // Second receipt: 20 items @ 130k
-        db.InputInfos.Add(new InputInfoEntity { InputId = inp2.Id, ProductId = vid.Id, Count = 20, InputPrice = 130000 });
+        db.InputInfos
+            .Add(new InputInfoEntity { InputId = inp1.Id, ProductId = vid.Id, Count = 10, InputPrice = 100000 });
+        db.InputInfos
+            .Add(new InputInfoEntity { InputId = inp2.Id, ProductId = vid.Id, Count = 20, InputPrice = 130000 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        var response = await _client.GetAsync("/api/v1/Statistics/warehouse-report", CancellationToken.None).ConfigureAwait(true);
-        var content = await response.Content.ReadFromJsonAsync<AdminWarehouseReportResponse>(CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/Statistics/warehouse-report", CancellationToken.None)
+            .ConfigureAwait(true);
+        var content = await response.Content
+            .ReadFromJsonAsync<AdminWarehouseReportResponse>(CancellationToken.None)
+            .ConfigureAwait(true);
 
         var brandData = content!.WarehouseTableData.FirstOrDefault(x => string.Compare(x.BrandName, brand.Name) == 0);
         brandData.Should().NotBeNull();
         brandData!.TotalStock.Should().Be(30);
-        // WAC = (10 * 100k + 20 * 130k) / 30 = (1m + 2.6m) / 30 = 3.6m / 30 = 120k
-        // Value = 30 * 120k = 3.600.000
         brandData.Value.Should().Be(3600000);
     }
 
@@ -943,7 +1008,13 @@ public class Statistics : IAsyncLifetime
         db.ProductCategories.Add(cat);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        var prod = new ProductEntity { Name = $"Prod_Perf_{uniqueId}", BrandId = brand.Id, CategoryId = cat.Id, StatusId = "ForSale" };
+        var prod = new ProductEntity
+        {
+            Name = $"Prod_Perf_{uniqueId}",
+            BrandId = brand.Id,
+            CategoryId = cat.Id,
+            StatusId = "ForSale"
+        };
         db.Products.Add(prod);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
@@ -955,17 +1026,29 @@ public class Statistics : IAsyncLifetime
         db.OutputOrders.Add(o1);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        db.OutputInfos.Add(new OutputInfoEntity { OutputId = o1.Id, ProductVarientId = vid.Id, Count = 5, Price = 500000, CostPrice = 300000 });
+        db.OutputInfos
+            .Add(
+                new OutputInfoEntity
+                {
+                    OutputId = o1.Id,
+                    ProductVarientId = vid.Id,
+                    Count = 5,
+                    Price = 500000,
+                    CostPrice = 300000
+                });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        // Soft delete variant
         vid.DeletedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        var response = await _client.GetAsync("/api/v1/Statistics/product-report", CancellationToken.None).ConfigureAwait(true);
-        var content = await response.Content.ReadFromJsonAsync<AdminProductReportResponse>(CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/Statistics/product-report", CancellationToken.None)
+            .ConfigureAwait(true);
+        var content = await response.Content
+            .ReadFromJsonAsync<AdminProductReportResponse>(CancellationToken.None)
+            .ConfigureAwait(true);
 
-        var perfData = content!.ProductPerformanceTable.FirstOrDefault(x => string.Compare(x.ProductName, prod.Name) == 0);
+        var perfData = content!.ProductPerformanceTable
+            .FirstOrDefault(x => string.Compare(x.ProductName, prod.Name) == 0);
         perfData.Should().NotBeNull();
         perfData!.SoldCount30Days.Should().Be(5);
     }
@@ -976,31 +1059,34 @@ public class Statistics : IAsyncLifetime
         var uniqueId = await AuthenticateAsync(CancellationToken.None).ConfigureAwait(true);
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        
-        var u1 = new Domain.Entities.ApplicationUser
+
+        var u1 = new ApplicationUser
         {
             UserName = $"u1_{uniqueId}",
             Email = $"u1_{uniqueId}@test.com",
             CreatedAt = DateTime.UtcNow.AddMonths(-1).AddDays(1)
         };
-        var u2 = new Domain.Entities.ApplicationUser
+        var u2 = new ApplicationUser
         {
             UserName = $"u2_{uniqueId}",
             Email = $"u2_{uniqueId}@test.com",
             CreatedAt = DateTime.UtcNow.AddDays(1)
         };
-        var u3 = new Domain.Entities.ApplicationUser
+        var u3 = new ApplicationUser
         {
             UserName = $"u3_{uniqueId}",
             Email = $"u3_{uniqueId}@test.com",
             CreatedAt = DateTime.UtcNow.AddMonths(-2)
         };
-        
+
         db.Users.AddRange(u1, u2, u3);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None).ConfigureAwait(true);
-        var content = await response.Content.ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None)
+            .ConfigureAwait(true);
+        var content = await response.Content
+            .ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None)
+            .ConfigureAwait(true);
 
         content!.NewCustomersCount.Should().BeGreaterThanOrEqualTo(1);
     }

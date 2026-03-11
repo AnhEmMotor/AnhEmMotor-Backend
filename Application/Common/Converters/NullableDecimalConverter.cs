@@ -3,19 +3,8 @@ using System.Text.Json.Serialization;
 
 namespace Application.Common.Converters;
 
-/// <summary>
-/// Provides a custom JSON converter for nullable decimals that handles empty strings by returning null.
-/// </summary>
 public class NullableDecimalConverter : JsonConverter<decimal?>
 {
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="reader"></param>
-    /// <param name="typeToConvert"></param>
-    /// <param name="options"></param>
-    /// <returns></returns>
-    /// <exception cref="JsonException"></exception>
     public override decimal? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if(reader.TokenType == JsonTokenType.String)
@@ -47,12 +36,6 @@ public class NullableDecimalConverter : JsonConverter<decimal?>
         throw new JsonException($"Unexpected token parsing decimal. Expected String or Number, got {reader.TokenType}.");
     }
 
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="writer"></param>
-    /// <param name="value"></param>
-    /// <param name="options"></param>
     public override void Write(Utf8JsonWriter writer, decimal? value, JsonSerializerOptions options)
     {
         if(value.HasValue)

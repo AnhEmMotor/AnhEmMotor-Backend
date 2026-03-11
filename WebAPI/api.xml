@@ -373,10 +373,8 @@
             Lấy danh sách ánh xạ trạng thái tồn kho (key tiếng Anh - nhãn tiếng Việt) để Frontend binding.
             </summary>
             <example>
-            <code>
-            GET /api/v1/PredefinedOption/inventory-statuses
-            Response: [{ "key": "OutOfStock", "label": "Hết hàng" }, ...]
-            </code>
+            <code> GET /api/v1/PredefinedOption/inventory-statuses Response: [{ "key": "OutOfStock", "label": "Hết hàng" },
+            ...]</code>
             </example>
         </member>
         <member name="M:WebAPI.Controllers.V1.PredefinedOptionController.GetGenderOptions">

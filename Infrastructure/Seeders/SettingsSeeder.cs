@@ -5,9 +5,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Seeders;
 
-/// <summary>
-/// Seeder khởi tạo dữ liệu mặc định cho bảng Settings nếu chưa có.
-/// </summary>
 public static class SettingsSeeder
 {
     public static async Task SeedAsync(ApplicationDBContext context, CancellationToken cancellationToken)
@@ -30,7 +27,7 @@ public static class SettingsSeeder
             .Select(kv => new Setting { Key = kv.Key, Value = kv.Value })
             .ToList();
 
-        if (toAdd.Count == 0)
+        if(toAdd.Count == 0)
         {
             return;
         }

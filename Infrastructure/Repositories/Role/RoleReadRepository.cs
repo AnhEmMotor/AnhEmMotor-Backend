@@ -70,8 +70,7 @@ namespace Infrastructure.Repositories.Role
             SieveModel sieveModel,
             CancellationToken cancellationToken = default)
         {
-            var query = context.Roles.AsNoTracking()
-                .Select(r => new RoleSelectResponse { ID = r.Id, Name = r.Name });
+            var query = context.Roles.AsNoTracking().Select(r => new RoleSelectResponse { ID = r.Id, Name = r.Name });
 
             SieveHelper.ApplyDefaultSorting(sieveModel);
 

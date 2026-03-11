@@ -1,7 +1,5 @@
 ﻿using Application.Common.Models;
 using Application.Features.Files.Commands.DeleteFile;
-using Application.Features.Files.Commands.UploadProductImage;
-using Application.Features.Files.Commands.UploadManyProductImages;
 using FluentAssertions;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
@@ -93,7 +91,9 @@ public class MediaFile
     [Fact(DisplayName = "MF_CT_002: UploadProductImageAsync throws ArgumentNullException when file is null")]
     public async Task UploadProductImageAsync_ThrowsArgumentNullException_WhenFileIsNull()
     {
-        await Assert.ThrowsAsync<ArgumentNullException>(() => _controller.UploadProductImageAsync(null!, CancellationToken.None)).ConfigureAwait(true);
+        await Assert.ThrowsAsync<ArgumentNullException>(
+            () => _controller.UploadProductImageAsync(null!, CancellationToken.None))
+            .ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "MF_CT_003: DeleteFileAsync returns NoContent when mediator succeeds")]

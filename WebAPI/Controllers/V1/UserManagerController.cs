@@ -4,10 +4,10 @@ using Application.Features.UserManager.Commands.AssignRoles;
 using Application.Features.UserManager.Commands.ChangeMultipleUsersStatus;
 using Application.Features.UserManager.Commands.ChangeUserStatus;
 using Application.Features.UserManager.Commands.UpdateUser;
-using Application.Features.Users.Commands.UploadAvatar;
 using Application.Features.UserManager.Queries.GetUserById;
 using Application.Features.UserManager.Queries.GetUsersList;
 using Application.Features.UserManager.Queries.GetUsersListForOutput;
+using Application.Features.Users.Commands.UploadAvatar;
 using Asp.Versioning;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
@@ -197,11 +197,14 @@ public class UserManagerController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> AdminUploadAvatarAsync(Guid userId, IFormFile file, CancellationToken cancellationToken)
+    public async Task<IActionResult> AdminUploadAvatarAsync(
+        Guid userId,
+        IFormFile file,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(file);
-        var command = new UploadAvatarCommand 
-        { 
+        var command = new UploadAvatarCommand
+        {
             UserId = userId.ToString(),
             FileContent = file.OpenReadStream(),
             FileName = file.FileName

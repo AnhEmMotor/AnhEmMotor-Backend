@@ -27,13 +27,15 @@ public sealed class GetAdminWarehouseReportQueryHandler(IStatisticalReadReposito
             OutOfStockCount = outOfStockCount
         };
 
-        var stockByBrand = tableDataList.Select(x => new BrandStockResponse
-        {
-            BrandName = x.BrandName,
-            InStock = x.TotalStock - x.LowStock - x.OutOfStock,
-            LowStock = x.LowStock,
-            OutOfStock = x.OutOfStock
-        }).ToList();
+        var stockByBrand = tableDataList.Select(
+            x => new BrandStockResponse
+            {
+                BrandName = x.BrandName,
+                InStock = x.TotalStock - x.LowStock - x.OutOfStock,
+                LowStock = x.LowStock,
+                OutOfStock = x.OutOfStock
+            })
+            .ToList();
 
         var safeCount = totalStock - lowStockCount - outOfStockCount;
         var stockStatusRatio = new List<StockStatusRatioResponse>

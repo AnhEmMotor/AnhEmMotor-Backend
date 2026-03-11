@@ -4,7 +4,10 @@ namespace Application.Interfaces.Repositories.LocalFile;
 
 public interface IFileStorageService
 {
-    public Task<Result<FileUpload>> SaveFileAsync(Stream file, CancellationToken cancellationToken, string subFolder = "");
+    public Task<Result<FileUpload>> SaveFileAsync(
+        Stream file,
+        CancellationToken cancellationToken,
+        string subFolder = "");
 
     public bool DeleteFile(string storagePath);
 

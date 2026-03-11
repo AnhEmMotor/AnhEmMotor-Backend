@@ -11,13 +11,14 @@ public sealed class GetAdminRevenueAnalysisQueryHandler(IStatisticalReadReposito
         GetAdminRevenueAnalysisQuery request,
         CancellationToken cancellationToken)
     {
-        var summary = await repository.GetDashboardStatsAsync(cancellationToken).ConfigureAwait(false) ?? new DashboardStatsResponse();
+        var summary = await repository.GetDashboardStatsAsync(cancellationToken).ConfigureAwait(false) ??
+            new DashboardStatsResponse();
         var dailyRevenue = await repository.GetDailyRevenueAsync(30, cancellationToken).ConfigureAwait(false);
         var tableData = await repository.GetDailyRevenueTableDataAsync(30, cancellationToken).ConfigureAwait(false);
         var topProducts = await repository.GetTopProductsByRevenueAsync(5, cancellationToken).ConfigureAwait(false);
-        var brandDistribution = await repository.GetBrandRevenueDistributionAsync(cancellationToken).ConfigureAwait(false);
+        var brandDistribution = await repository.GetBrandRevenueDistributionAsync(cancellationToken)
+            .ConfigureAwait(false);
 
-        // Giả lập phương thức thanh toán vì database hiện tại không lưu cột PaymentMethod
         var paymentMethods = new List<PaymentMethodDistributionResponse>
         {
             new PaymentMethodDistributionResponse { MethodName = "Tiền mặt", Value = 65 },

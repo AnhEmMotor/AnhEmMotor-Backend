@@ -36,7 +36,9 @@ public sealed class AssignRolesCommandHandler(
 
         if(invalidRoleIds.Count > 0)
         {
-            return Error.Validation($"The following role IDs do not exist: {string.Join(", ", invalidRoleIds)}", "RoleIds");
+            return Error.Validation(
+                $"The following role IDs do not exist: {string.Join(", ", invalidRoleIds)}",
+                "RoleIds");
         }
 
         var requestedRoleNames = existingSystemRoles.Select(r => r.Name!).ToList();
@@ -101,7 +103,6 @@ public sealed class AssignRolesCommandHandler(
             userStreamService.NotifyUserUpdate(user.Id);
         }
 
-        // Return IDs of final roles
         var finalRoleIds = await userReadRepository.GetUserRoleIdsAsync(user, cancellationToken).ConfigureAwait(false);
 
         return new UserDTOForManagerResponse

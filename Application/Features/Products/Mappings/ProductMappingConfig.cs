@@ -88,9 +88,7 @@ public class ProductMappingConfig : IRegister
     }
 
     private static ProductDetailForManagerResponse MapProductToDetailForManagerResponse(ProductEntity product)
-    {
-        return MapProductToDetailForManagerResponseWithAlertLevel(product, 0);
-    }
+    { return MapProductToDetailForManagerResponseWithAlertLevel(product, 0); }
 
     public static ProductDetailForManagerResponse MapProductToDetailForManagerResponseWithAlertLevel(
         ProductEntity product,
@@ -99,31 +97,36 @@ public class ProductMappingConfig : IRegister
         var variantRows = product.ProductVariants.Select(variant => variant.Adapt<VariantRow>()).ToList();
 
         var variantResponses = variantRows
-            .Select(row =>
-            {
-                var available = row.Stock - row.HasBeenBooked;
-                var inventoryStatus = CalculateInventoryStatus(available, alertLevel);
-
-                return new ProductVariantDetailForManagerResponse
+            .Select(
+                row =>
                 {
-                    Id = row.Id,
-                    ProductId = row.ProductId,
-                    UrlSlug = row.UrlSlug,
-                    Price = row.Price,
-                    CoverImageUrl = row.CoverImageUrl,
-                    OptionValues = row.OptionPairs
-                        .Where(
-                            pair => !string.IsNullOrWhiteSpace(pair.OptionName) &&
-                                    !string.IsNullOrWhiteSpace(pair.OptionValue))
-                        .GroupBy(pair => pair.OptionName!, StringComparer.OrdinalIgnoreCase)
-                        .ToDictionary(g => g.Key, g => g.First().OptionValue!, StringComparer.OrdinalIgnoreCase),
-                    PhotoCollection = row.Photos,
-                    Stock = row.Stock,
-                    HasBeenBooked = row.HasBeenBooked,
-                    StatusStockId = GetStockStatus(available),
-                    InventoryStatus = inventoryStatus
-                };
-            })
+                    var available = row.Stock - row.HasBeenBooked;
+                    var inventoryStatus = CalculateInventoryStatus(available, alertLevel);
+
+                    return new ProductVariantDetailForManagerResponse
+                    {
+                        Id = row.Id,
+                        ProductId = row.ProductId,
+                        UrlSlug = row.UrlSlug,
+                        Price = row.Price,
+                        CoverImageUrl = row.CoverImageUrl,
+                        OptionValues =
+                            row.OptionPairs
+                                    .Where(
+                                        pair => !string.IsNullOrWhiteSpace(pair.OptionName) &&
+                                                    !string.IsNullOrWhiteSpace(pair.OptionValue))
+                                    .GroupBy(pair => pair.OptionName!, StringComparer.OrdinalIgnoreCase)
+                                    .ToDictionary(
+                                        g => g.Key,
+                                        g => g.First().OptionValue!,
+                                        StringComparer.OrdinalIgnoreCase),
+                        PhotoCollection = row.Photos,
+                        Stock = row.Stock,
+                        HasBeenBooked = row.HasBeenBooked,
+                        StatusStockId = GetStockStatus(available),
+                        InventoryStatus = inventoryStatus
+                    };
+                })
             .OrderBy(v => InventoryStatus.GetSeverity(v.InventoryStatus))
             .ThenBy(v => v.UrlSlug)
             .ToList();
@@ -320,12 +323,12 @@ public class ProductMappingConfig : IRegister
 
     public static string CalculateInventoryStatus(long availableStock, long alertLevel)
     {
-        if (availableStock <= 0)
+        if(availableStock <= 0)
         {
             return InventoryStatus.OutOfStock;
         }
 
-        if (availableStock <= alertLevel)
+        if(availableStock <= alertLevel)
         {
             return InventoryStatus.LowStock;
         }
@@ -334,9 +337,7 @@ public class ProductMappingConfig : IRegister
     }
 
     private static string GetStockStatus(long availableStock)
-    {
-        return availableStock > 0 ? "in_stock" : "out_of_stock";
-    }
+    { return availableStock > 0 ? "in_stock" : "out_of_stock"; }
 
     private static long CalculateTotalStock(ProductEntity product)
     {
@@ -357,18 +358,22 @@ public class ProductMappingConfig : IRegister
 
     public static string CalculateProductInventoryStatus(ProductEntity product, long alertLevel)
     {
-        var statuses = product.ProductVariants.Select(variant =>
-        {
-            var stock = variant.InputInfos
-                .Where(ii => ii.InputReceipt != null &&
-                             Domain.Constants.Input.InputStatus.IsFinished(ii.InputReceipt.StatusId))
-                .Sum(ii => ii.RemainingCount ?? 0);
-            var booked = variant.OutputInfos
-                .Where(oi => oi.OutputOrder != null && OrderStatus.IsBookingStatus(oi.OutputOrder.StatusId))
-                .Sum(oi => (long)(oi.Count ?? 0));
+        var statuses = product.ProductVariants
+            .Select(
+                variant =>
+                {
+                    var stock = variant.InputInfos
+                        .Where(
+                            ii => ii.InputReceipt != null &&
+                                    Domain.Constants.Input.InputStatus.IsFinished(ii.InputReceipt.StatusId))
+                        .Sum(ii => ii.RemainingCount ?? 0);
+                    var booked = variant.OutputInfos
+                        .Where(oi => oi.OutputOrder != null && OrderStatus.IsBookingStatus(oi.OutputOrder.StatusId))
+                        .Sum(oi => (long)(oi.Count ?? 0));
 
-            return CalculateInventoryStatus(stock - booked, alertLevel);
-        }).ToList();
+                    return CalculateInventoryStatus(stock - booked, alertLevel);
+                })
+            .ToList();
 
         return statuses.Count == 0 ? InventoryStatus.OutOfStock : statuses.MinBy(InventoryStatus.GetSeverity)!;
     }

@@ -6,8 +6,8 @@ using Application.Features.Permissions.Commands.DeleteRole;
 using Application.Features.Permissions.Queries.GetAllPermissions;
 using Application.Features.Permissions.Queries.GetAllRoles;
 using Application.Features.Permissions.Queries.GetMyPermissions;
-using Application.Features.Permissions.Queries.GetRolePermissions;
 using Application.Features.Permissions.Queries.GetPermissionStructure;
+using Application.Features.Permissions.Queries.GetRolePermissions;
 using Application.Features.Permissions.Queries.GetUserPermissionsById;
 using Asp.Versioning;
 using Domain.Constants;
@@ -136,7 +136,16 @@ public class PermissionController(IMediator mediator) : ApiController
         [FromQuery] Sieve.Models.SieveModel sieveModel,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetAllRolesQuery { Page = sieveModel.Page, PageSize = sieveModel.PageSize, Filters = sieveModel.Filters, Sorts = sieveModel.Sorts }, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(
+            new GetAllRolesQuery
+            {
+                Page = sieveModel.Page,
+                PageSize = sieveModel.PageSize,
+                Filters = sieveModel.Filters,
+                Sorts = sieveModel.Sorts
+            },
+            cancellationToken)
+            .ConfigureAwait(true);
         return HandleResult(result);
     }
 

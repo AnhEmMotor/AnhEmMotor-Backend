@@ -4,10 +4,10 @@
 
 namespace Infrastructure.MySqlMigrations
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public partial class AddCreatedColumn : Migration
     {
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
@@ -18,11 +18,7 @@ namespace Infrastructure.MySqlMigrations
                 name: "FK_VariantOptionValue_ProductVariant_VariantId",
                 table: "VariantOptionValue");
 
-            migrationBuilder.AddColumn<long>(
-                name: "CreatedAt",
-                table: "Users",
-                type: "bigint",
-                nullable: true);
+            migrationBuilder.AddColumn<long>(name: "CreatedAt", table: "Users", type: "bigint", nullable: true);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_ProductCollectionPhoto_ProductVariant_ProductVariantId",
@@ -39,7 +35,7 @@ namespace Infrastructure.MySqlMigrations
                 principalColumn: "Id");
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
@@ -50,9 +46,7 @@ namespace Infrastructure.MySqlMigrations
                 name: "FK_VariantOptionValue_ProductVariant_VariantId",
                 table: "VariantOptionValue");
 
-            migrationBuilder.DropColumn(
-                name: "CreatedAt",
-                table: "Users");
+            migrationBuilder.DropColumn(name: "CreatedAt", table: "Users");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_ProductCollectionPhoto_ProductVariant_ProductVariantId",

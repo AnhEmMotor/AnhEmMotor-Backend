@@ -3,11 +3,11 @@ using Application.Features.PredefinedOptions.Queries.GetPredefinedOptionsList;
 using Asp.Versioning;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
 using static Domain.Constants.Permission.PermissionsList;
-using Microsoft.AspNetCore.Authorization;
 
 namespace WebAPI.Controllers.V1;
 
@@ -40,10 +40,8 @@ public class PredefinedOptionController(IMediator mediator) : ApiController
     /// Lấy danh sách ánh xạ trạng thái tồn kho (key tiếng Anh - nhãn tiếng Việt) để Frontend binding.
     /// </summary>
     /// <example>
-    /// <code>
-    /// GET /api/v1/PredefinedOption/inventory-statuses
-    /// Response: [{ "key": "OutOfStock", "label": "Hết hàng" }, ...]
-    /// </code>
+    /// <code> GET /api/v1/PredefinedOption/inventory-statuses Response: [{ "key": "OutOfStock", "label": "Hết hàng" },
+    /// ...]</code>
     /// </example>
     [HttpGet("inventory-statuses")]
     [RequiresAnyPermissions(Products.View, Products.Create, Products.Edit, Products.Delete)]

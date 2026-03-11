@@ -160,7 +160,8 @@ public static class PermissionsList
     { return PermissionMetadataMap.TryGetValue(permissionName, out var metadata) ? metadata : null; }
     public static IEnumerable<(string Id, string Name, string Description)> GetMetadataList()
     {
-        return PermissionMetadataMap.Select(kv => (
+        return PermissionMetadataMap.Select(
+            kv => (
             kv.Key,
             kv.Value.DisplayName,
             kv.Value.Description
@@ -169,71 +170,76 @@ public static class PermissionsList
 
     public static readonly Dictionary<string, List<string>> Groups = new()
     {
-        { "Thương hiệu", [Brands.View, Brands.Create, Brands.Edit, Brands.Delete] },
-        { "Sản phẩm", [Products.View, Products.Create, Products.Edit, Products.Delete, Products.EditPrice, Products.ChangeStatus] },
-        { "Danh mục sản phẩm", [ProductCategories.View, ProductCategories.Create, ProductCategories.Edit, ProductCategories.Delete] },
-        { "Nhà cung cấp", [Suppliers.View, Suppliers.Create, Suppliers.Edit, Suppliers.Delete] },
-        { "Nhập hàng", [Inputs.View, Inputs.Create, Inputs.Edit, Inputs.Delete, Inputs.ChangeStatus] },
-        { "Xuất hàng", [Outputs.View, Outputs.Create, Outputs.Edit, Outputs.Delete, Outputs.ChangeStatus] },
-        { "Tệp tin", [Files.View, Files.Upload, Files.Delete] },
-        { "Cài đặt", [Settings.View, Settings.Edit] },
-        { "Thống kê", [Statistical.View, Statistical.Export] },
-        { "Vai trò", [Roles.View, Roles.Create, Roles.Edit, Roles.Delete] },
-        { "Người dùng", [Users.View, Users.Create, Users.Edit, Users.Delete, Users.AssignRoles, Users.ChangePassword] },
+        { "Thương hiệu", [ Brands.View, Brands.Create, Brands.Edit, Brands.Delete ] },
+        {
+            "Sản phẩm",
+            [ Products.View, Products.Create, Products.Edit, Products.Delete, Products.EditPrice, Products.ChangeStatus ]
+        },
+        {
+            "Danh mục sản phẩm",
+            [ ProductCategories.View, ProductCategories.Create, ProductCategories.Edit, ProductCategories.Delete ]
+        },
+        { "Nhà cung cấp", [ Suppliers.View, Suppliers.Create, Suppliers.Edit, Suppliers.Delete ] },
+        { "Nhập hàng", [ Inputs.View, Inputs.Create, Inputs.Edit, Inputs.Delete, Inputs.ChangeStatus ] },
+        { "Xuất hàng", [ Outputs.View, Outputs.Create, Outputs.Edit, Outputs.Delete, Outputs.ChangeStatus ] },
+        { "Tệp tin", [ Files.View, Files.Upload, Files.Delete ] },
+        { "Cài đặt", [ Settings.View, Settings.Edit ] },
+        { "Thống kê", [ Statistical.View, Statistical.Export ] },
+        { "Vai trò", [ Roles.View, Roles.Create, Roles.Edit, Roles.Delete ] },
+        {
+            "Người dùng",
+            [ Users.View, Users.Create, Users.Edit, Users.Delete, Users.AssignRoles, Users.ChangePassword ]
+        },
     };
 
-    public static readonly Dictionary<string, List<string>> Conflicts = new()
-    {
-        // Ví dụ: Nếu có quyền "Quản lý tất cả" thì không cần "Quản lý cá nhân"
-        // Ở đây chưa có logic "Own" nên tôi để trống hoặc thêm ví dụ nếu cần.
-    };
+    public static readonly Dictionary<string, List<string>> Conflicts = new() { };
 
     public static readonly Dictionary<string, List<string>> Dependencies = new()
     {
-        { Brands.Create, [Brands.View] },
-        { Brands.Edit, [Brands.View] },
-        { Brands.Delete, [Brands.View] },
+        { Brands.Create, [ Brands.View ] },
+        { Brands.Edit, [ Brands.View ] },
+        { Brands.Delete, [ Brands.View ] },
 
-        { Products.Create, [Products.View] },
-        { Products.Edit, [Products.View] },
-        { Products.Delete, [Products.View] },
-        { Products.EditPrice, [Products.View] },
-        { Products.ChangeStatus, [Products.View] },
+        { Products.Create, [ Products.View ] },
+        { Products.Edit, [ Products.View ] },
+        { Products.Delete, [ Products.View ] },
+        { Products.EditPrice, [ Products.View ] },
+        { Products.ChangeStatus, [ Products.View ] },
 
-        { ProductCategories.Create, [ProductCategories.View] },
-        { ProductCategories.Edit, [ProductCategories.View] },
-        { ProductCategories.Delete, [ProductCategories.View] },
+        { ProductCategories.Create, [ ProductCategories.View ] },
+        { ProductCategories.Edit, [ ProductCategories.View ] },
+        { ProductCategories.Delete, [ ProductCategories.View ] },
 
-        { Suppliers.Create, [Suppliers.View] },
-        { Suppliers.Edit, [Suppliers.View] },
-        { Suppliers.Delete, [Suppliers.View] },
+        { Suppliers.Create, [ Suppliers.View ] },
+        { Suppliers.Edit, [ Suppliers.View ] },
+        { Suppliers.Delete, [ Suppliers.View ] },
 
-        { Inputs.Create, [Inputs.View] },
-        { Inputs.Edit, [Inputs.View] },
-        { Inputs.Delete, [Inputs.View] },
-        { Inputs.ChangeStatus, [Inputs.View] },
+        { Inputs.Create, [ Inputs.View ] },
+        { Inputs.Edit, [ Inputs.View ] },
+        { Inputs.Delete, [ Inputs.View ] },
+        { Inputs.ChangeStatus, [ Inputs.View ] },
 
-        { Outputs.Create, [Outputs.View] },
-        { Outputs.Edit, [Outputs.View] },
-        { Outputs.Delete, [Outputs.View] },
-        { Outputs.ChangeStatus, [Outputs.View] },
+        { Outputs.Create, [ Outputs.View ] },
+        { Outputs.Edit, [ Outputs.View ] },
+        { Outputs.Delete, [ Outputs.View ] },
+        { Outputs.ChangeStatus, [ Outputs.View ] },
 
-        { Files.Upload, [Files.View] },
-        { Files.Delete, [Files.View] },
+        { Files.Upload, [ Files.View ] },
+        { Files.Delete, [ Files.View ] },
 
-        { Settings.Edit, [Settings.View] },
+        { Settings.Edit, [ Settings.View ] },
 
-        { Statistical.Export, [Statistical.View] },
+        { Statistical.Export, [ Statistical.View ] },
 
-        { Roles.Create, [Roles.View] },
-        { Roles.Edit, [Roles.View] },
-        { Roles.Delete, [Roles.View] },
+        { Roles.Create, [ Roles.View ] },
+        { Roles.Edit, [ Roles.View ] },
+        { Roles.Delete, [ Roles.View ] },
 
-        { Users.Create, [Users.View] },
-        { Users.Edit, [Users.View] },
-        { Users.Delete, [Users.View] },
-        { Users.AssignRoles, [Users.View, Roles.View] },
-        { Users.ChangePassword, [Users.View] },
+        { Users.Create, [ Users.View ] },
+        { Users.Edit, [ Users.View ] },
+        { Users.Delete, [ Users.View ] },
+        { Users.AssignRoles, [ Users.View, Roles.View ] },
+        { Users.ChangePassword, [ Users.View ] },
     };
 
     public static (bool IsValid, string? ErrorMessage) ValidateRules(IEnumerable<string> permissions)

@@ -2498,18 +2498,16 @@ public class Product : IAsyncLifetime
         db.Brands.Add(brand);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        // Product 1: InStock (Available 10 > 5)
         var p1 = CreateProductWithStock(db, $"P1_{uniqueId}", cat.Id, brand.Id, 10, 0, statusFinished, statusBooking);
-        // Product 2: OutOfStock (Available 0 <= 0)
         var p2 = CreateProductWithStock(db, $"P2_{uniqueId}", cat.Id, brand.Id, 10, 10, statusFinished, statusBooking);
-        
+
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        // Act: Filter by OutOfStock
-        var response = await _client.GetAsync($"/api/v1/product/for-manager?filters=inventoryStatus=={Domain.Constants.InventoryStatus.OutOfStock}", CancellationToken.None)
+        var response = await _client.GetAsync(
+            $"/api/v1/product/for-manager?filters=inventoryStatus=={Domain.Constants.InventoryStatus.OutOfStock}",
+            CancellationToken.None)
             .ConfigureAwait(true);
 
-        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
             .ReadFromJsonAsync<PagedResult<ProductDetailForManagerResponse>>(CancellationToken.None)
@@ -2543,24 +2541,39 @@ public class Product : IAsyncLifetime
         db.Brands.Add(brand);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        // Tạo 3 sản phẩm với 3 trạng thái khác nhau
         var pIn = CreateProductWithStock(db, $"PIn_{uniqueId}", cat.Id, brand.Id, 10, 0, statusFinished, statusBooking);
-        var pLow = CreateProductWithStock(db, $"PLow_{uniqueId}", cat.Id, brand.Id, 10, 7, statusFinished, statusBooking);
-        var pOut = CreateProductWithStock(db, $"POut_{uniqueId}", cat.Id, brand.Id, 10, 10, statusFinished, statusBooking);
-        
+        var pLow = CreateProductWithStock(
+            db,
+            $"PLow_{uniqueId}",
+            cat.Id,
+            brand.Id,
+            10,
+            7,
+            statusFinished,
+            statusBooking);
+        var pOut = CreateProductWithStock(
+            db,
+            $"POut_{uniqueId}",
+            cat.Id,
+            brand.Id,
+            10,
+            10,
+            statusFinished,
+            statusBooking);
+
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        // Act: Sort by inventoryStatus (asc by severity: OutOfStock(1) -> LowStock(2) -> InStock(3))
-        var response = await _client.GetAsync($"/api/v1/product/for-manager?sorts=inventoryStatus&filters=name@=_{uniqueId}", CancellationToken.None)
+        var response = await _client.GetAsync(
+            $"/api/v1/product/for-manager?sorts=inventoryStatus&filters=name@=_{uniqueId}",
+            CancellationToken.None)
             .ConfigureAwait(true);
 
-        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
             .ReadFromJsonAsync<PagedResult<ProductDetailForManagerResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         content.Should().NotBeNull();
-        
+
         var items = content!.Items!.ToList();
         items.Should().HaveCount(3);
         items[0].Id.Should().Be(pOut.Id);
@@ -2592,12 +2605,13 @@ public class Product : IAsyncLifetime
     private static async Task EnsureInventoryAlertLevelAsync(ApplicationDBContext db, long level)
     {
         var key = Domain.Constants.SettingKeys.InventoryAlertLevel;
-        var setting = await db.Settings.FirstOrDefaultAsync(s => s.Key == key, CancellationToken.None).ConfigureAwait(true);
-        if (setting is null)
+        var setting = await db.Settings
+            .FirstOrDefaultAsync(s => string.Compare(s.Key, key) == 0, CancellationToken.None)
+            .ConfigureAwait(true);
+        if(setting is null)
         {
             db.Settings.Add(new Domain.Entities.Setting { Key = key, Value = level.ToString() });
-        }
-        else
+        } else
         {
             setting.Value = level.ToString();
         }
@@ -2606,23 +2620,35 @@ public class Product : IAsyncLifetime
 
     private static async Task EnsureInputStatusAsync(ApplicationDBContext db, string key)
     {
-        if (!await db.InputStatuses.AnyAsync(s => s.Key == key, CancellationToken.None).ConfigureAwait(true))
+        if(!await db.InputStatuses
+            .AnyAsync(s => string.Compare(s.Key, key) == 0, CancellationToken.None)
+            .ConfigureAwait(true))
         {
-            db.InputStatuses.Add(new Domain.Entities.InputStatus { Key = key });
+            db.InputStatuses.Add(new InputStatus { Key = key });
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
     }
 
     private static async Task EnsureOutputStatusAsync(ApplicationDBContext db, string key)
     {
-        if (!await db.OutputStatuses.AnyAsync(s => s.Key == key, CancellationToken.None).ConfigureAwait(true))
+        if(!await db.OutputStatuses
+            .AnyAsync(s => string.Compare(s.Key, key) == 0, CancellationToken.None)
+            .ConfigureAwait(true))
         {
-            db.OutputStatuses.Add(new Domain.Entities.OutputStatus { Key = key });
+            db.OutputStatuses.Add(new OutputStatus { Key = key });
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
     }
 
-    private ProductEntity CreateProductWithStock(ApplicationDBContext db, string name, int catId, int brandId, int stock, int booked, string statusFinished, string statusBooking)
+    private ProductEntity CreateProductWithStock(
+        ApplicationDBContext db,
+        string name,
+        int catId,
+        int brandId,
+        int stock,
+        int booked,
+        string statusFinished,
+        string statusBooking)
     {
         var product = new ProductEntity
         {
@@ -2632,24 +2658,24 @@ public class Product : IAsyncLifetime
             StatusId = Domain.Constants.ProductStatus.ForSale
         };
         db.Products.Add(product);
-        db.SaveChanges(); // Lấy ID
+        db.SaveChanges();
 
         var variant = new ProductVariant { ProductId = product.Id, Price = 100, UrlSlug = $"v_{Guid.NewGuid():N}" };
         db.ProductVariants.Add(variant);
         db.SaveChanges();
 
-        if (stock > 0)
+        if(stock > 0)
         {
-            var receipt = new Domain.Entities.Input { StatusId = statusFinished };
+            var receipt = new Input { StatusId = statusFinished };
             db.InputReceipts.Add(receipt);
             db.SaveChanges();
 
             db.InputInfos.Add(new InputInfo { ProductId = variant.Id, InputId = receipt.Id, RemainingCount = stock });
         }
 
-        if (booked > 0)
+        if(booked > 0)
         {
-            var order = new Domain.Entities.Output { StatusId = statusBooking };
+            var order = new Output { StatusId = statusBooking };
             db.OutputOrders.Add(order);
             db.SaveChanges();
 

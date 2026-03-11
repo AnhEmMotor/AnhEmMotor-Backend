@@ -16,7 +16,9 @@ public sealed class UploadProductImageCommandHandler(
 {
     private const long MaxFileSize = 10 * 1024 * 1024;
 
-    public async Task<Result<MediaFileResponse>> Handle(UploadProductImageCommand request, CancellationToken cancellationToken)
+    public async Task<Result<MediaFileResponse>> Handle(
+        UploadProductImageCommand request,
+        CancellationToken cancellationToken)
     {
         if(string.IsNullOrWhiteSpace(request.FileName))
         {

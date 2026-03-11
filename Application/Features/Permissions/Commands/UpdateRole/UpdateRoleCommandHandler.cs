@@ -24,7 +24,7 @@ public class UpdateRoleCommandHandler(
         UpdateRoleCommand request,
         CancellationToken cancellationToken)
     {
-        var roles = await roleReadRepository.GetRolesByIdsAsync([request.RoleId], cancellationToken)
+        var roles = await roleReadRepository.GetRolesByIdsAsync([ request.RoleId ], cancellationToken)
             .ConfigureAwait(false);
         var role = roles.FirstOrDefault();
         if(role is null)
@@ -57,91 +57,90 @@ public class UpdateRoleCommandHandler(
             isRoleUpdated = true;
         }
 
-        if(request.Permissions == null)
+        if(request.Permissions != null)
         {
-            request = request with { Permissions = [] };
-        }
+            var validSystemPermissions = typeof(Domain.Constants.Permission.PermissionsList)
+                .GetNestedTypes()
+                .SelectMany(t => t.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy))
+                .Where(fi => fi.IsLiteral && !fi.IsInitOnly)
+                .Select(fi => fi.GetRawConstantValue() as string)
+                .Where(p => p is not null)
+                .ToHashSet();
 
-        var validSystemPermissions = typeof(Domain.Constants.Permission.PermissionsList)
-            .GetNestedTypes()
-            .SelectMany(t => t.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy))
-            .Where(fi => fi.IsLiteral && !fi.IsInitOnly)
-            .Select(fi => fi.GetRawConstantValue() as string)
-            .Where(p => p is not null)
-            .ToHashSet();
-
-        var invalidPermissions = request.Permissions.Where(p => !validSystemPermissions.Contains(p)).ToList();
-        if(invalidPermissions.Count != 0)
-        {
-            return Error.BadRequest($"Invalid permissions: {string.Join(", ", invalidPermissions)}");
-        }
-
-        var currentRolePermissions = await roleReadRepository.GetRolesPermissionByRoleIdAsync(
-            role.Id,
-            cancellationToken)
-            .ConfigureAwait(false);
-
-        var currentPermissionNames = currentRolePermissions
-            .Where(rp => rp.Permission is not null)
-            .Select(rp => rp.Permission!.Name)
-            .ToHashSet();
-
-        var permissionNamesToAdd = request.Permissions.Where(p => !currentPermissionNames.Contains(p)).ToList();
-
-        var rolePermissionsToRemove = currentRolePermissions
-            .Where(rp => rp.Permission is not null && !request.Permissions.Contains(rp.Permission.Name))
-            .ToList();
-
-        if(rolePermissionsToRemove.Count != 0)
-        {
-            var permissionIdsToRemove = rolePermissionsToRemove.Select(rp => rp.PermissionId).ToHashSet();
-
-            var existingAssignments = await permissionReadRepository.GetRolePermissionsByPermissionIdsAsync(
-                permissionIdsToRemove,
-                cancellationToken)
-                .ConfigureAwait(false);
-
-            var orphanedPermissions = existingAssignments
-                .GroupBy(rp => rp.PermissionId)
-                .Where(g => g.Count() == 1)
-                .Select(g => g.First().Permission!.Name)
-                .ToList();
-
-            if(orphanedPermissions.Count != 0)
+            var invalidPermissions = request.Permissions.Where(p => !validSystemPermissions.Contains(p)).ToList();
+            if(invalidPermissions.Count != 0)
             {
-                return Error.BadRequest(
-                    $"Cannot remove last role assignment for: {string.Join(", ", orphanedPermissions)}.");
+                return Error.BadRequest($"Invalid permissions: {string.Join(", ", invalidPermissions)}");
             }
 
-            roleUpdateRepository.RemovePermissionsFromRole(rolePermissionsToRemove);
-            isRoleUpdated = true;
-        }
+            var currentRolePermissions = await roleReadRepository.GetRolesPermissionByRoleIdAsync(
+                    role.Id,
+                    cancellationToken)
+                    .ConfigureAwait(false) ??
+                [];
 
-        if(permissionNamesToAdd.Count != 0)
-        {
-            var permissionsEntities = await permissionReadRepository.GetPermissionsByNamesAsync(
-                permissionNamesToAdd,
-                cancellationToken)
-                .ConfigureAwait(false);
+            var currentPermissionNames = currentRolePermissions
+                .Where(rp => rp.Permission is not null)
+                .Select(rp => rp.Permission!.Name)
+                .ToHashSet();
 
-            var newRolePermissions = permissionsEntities
-                .Select(p => new RolePermission { RoleId = role.Id, PermissionId = p.Id })
+            var permissionNamesToAdd = request.Permissions.Where(p => !currentPermissionNames.Contains(p)).ToList();
+
+            var rolePermissionsToRemove = currentRolePermissions
+                .Where(rp => rp.Permission is not null && !request.Permissions.Contains(rp.Permission.Name))
                 .ToList();
 
-            await roleUpdateRepository.AddPermissionsToRoleAsync(newRolePermissions, cancellationToken)
-                .ConfigureAwait(false);
+            if(rolePermissionsToRemove.Count != 0)
+            {
+                var permissionIdsToRemove = rolePermissionsToRemove.Select(rp => rp.PermissionId).ToHashSet();
 
-            isRoleUpdated = true;
+                var existingAssignments = await permissionReadRepository.GetRolePermissionsByPermissionIdsAsync(
+                    permissionIdsToRemove,
+                    cancellationToken)
+                    .ConfigureAwait(false);
+
+                var orphanedPermissions = existingAssignments
+                    .GroupBy(rp => rp.PermissionId)
+                    .Where(g => g.Count() == 1)
+                    .Select(g => g.First().Permission!.Name)
+                    .ToList();
+
+                if(orphanedPermissions.Count != 0)
+                {
+                    return Error.BadRequest(
+                        $"Cannot remove last role assignment for: {string.Join(", ", orphanedPermissions)}.");
+                }
+
+                roleUpdateRepository.RemovePermissionsFromRole(rolePermissionsToRemove);
+                isRoleUpdated = true;
+            }
+
+            if(permissionNamesToAdd.Count != 0)
+            {
+                var permissionsEntities = await permissionReadRepository.GetPermissionsByNamesAsync(
+                    permissionNamesToAdd,
+                    cancellationToken)
+                    .ConfigureAwait(false);
+
+                var newRolePermissions = permissionsEntities
+                    .Select(p => new RolePermission { RoleId = role.Id, PermissionId = p.Id })
+                    .ToList();
+
+                await roleUpdateRepository.AddPermissionsToRoleAsync(newRolePermissions, cancellationToken)
+                    .ConfigureAwait(false);
+
+                isRoleUpdated = true;
+            }
         }
 
         if(isRoleUpdated)
         {
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-            // Thông báo qua SSE cho tất cả người dùng thuộc vai trò này
             var usersInRole = await roleReadRepository.GetUsersInRoleAsync(role.Name!, cancellationToken)
-                .ConfigureAwait(false);
-            
+                    .ConfigureAwait(false) ??
+                [];
+
             foreach(var user in usersInRole)
             {
                 userStreamService.NotifyUserUpdate(user.Id);

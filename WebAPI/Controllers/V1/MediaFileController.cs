@@ -4,8 +4,8 @@ using Application.Features.Files.Commands.DeleteFile;
 using Application.Features.Files.Commands.DeleteManyFiles;
 using Application.Features.Files.Commands.RestoreFile;
 using Application.Features.Files.Commands.RestoreManyFiles;
-using Application.Features.Files.Commands.UploadProductImage;
 using Application.Features.Files.Commands.UploadManyProductImages;
+using Application.Features.Files.Commands.UploadProductImage;
 using Application.Features.Files.Queries.GetDeletedFilesList;
 using Application.Features.Files.Queries.GetFileById;
 using Application.Features.Files.Queries.GetFilesList;
@@ -101,7 +101,9 @@ public class MediaFileController(IMediator mediator) : ApiController
     [RequiresAnyPermissions(Products.Edit, Products.Create)]
     [ProducesResponseType(typeof(List<MediaFileResponse>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> UploadManyProductImagesAsync(List<IFormFile> files, CancellationToken cancellationToken)
+    public async Task<IActionResult> UploadManyProductImagesAsync(
+        List<IFormFile> files,
+        CancellationToken cancellationToken)
     {
         var fileDtos = new List<(Stream FileContent, string FileName)>();
 

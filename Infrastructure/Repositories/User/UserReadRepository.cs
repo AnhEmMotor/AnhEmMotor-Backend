@@ -15,7 +15,7 @@ namespace Infrastructure.Repositories.User
 {
     public class UserReadRepository(
         UserManager<ApplicationUser> userManager,
-        Infrastructure.DBContexts.ApplicationDBContext context,
+        DBContexts.ApplicationDBContext context,
         ISieveProcessor sieveProcessor) : IUserReadRepository
     {
         public async Task<PagedResult<UserDTOForManagerResponse>> GetPagedListAsync(

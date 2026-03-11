@@ -2,6 +2,7 @@
 using Application.Features.Permissions.Commands.CreateRole;
 using Domain.Constants.Permission;
 using Domain.Entities;
+using Domain.Primitives;
 using FluentAssertions;
 using Infrastructure.DBContexts;
 using IntegrationTests.SetupClass;
@@ -229,7 +230,7 @@ public class PermissionAndRole : IAsyncLifetime
     public async Task GetRolePermissions_ValidRole_ReturnsRolePermissions()
     {
         var roleName = $"Manager_{Guid.NewGuid():N}";
-        await CreateRoleWithPermissionsInternalAsync(
+        var roleId = await CreateRoleWithPermissionsInternalAsync(
             roleName,
             [ PermissionsList.Brands.View, PermissionsList.Brands.Create, PermissionsList.Brands.Edit, PermissionsList.Brands.Delete, PermissionsList.Products.View ])
             .ConfigureAwait(true);
@@ -251,17 +252,19 @@ public class PermissionAndRole : IAsyncLifetime
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var response = await _client.GetAsync(
-            $"/api/v1/Permission/roles/{roleName}/permissions",
-            CancellationToken.None)
+        var response = await _client.GetAsync($"/api/v1/Permission/roles/{roleId}/permissions", CancellationToken.None)
             .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
+
         var content = await response.Content
-            .ReadFromJsonAsync<List<PermissionResponse>>(CancellationToken.None)
+            .ReadFromJsonAsync<List<string>>(CancellationToken.None)
             .ConfigureAwait(true);
+
         content.Should().NotBeNull();
         content.Should().HaveCount(5);
+        content.Should().Contain(PermissionsList.Brands.View);
+        content.Should().Contain(PermissionsList.Products.View);
     }
 
     [Fact(DisplayName = "PERM_INT_007 - API tạo role mới thành công")]
@@ -406,7 +409,7 @@ public class PermissionAndRole : IAsyncLifetime
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var roleName = $"TestRole_{uniqueId}";
-        await CreateRoleWithPermissionsInternalAsync(
+        var roleId = await CreateRoleWithPermissionsInternalAsync(
             roleName,
             [ PermissionsList.Brands.View, PermissionsList.Brands.Create ])
             .ConfigureAwait(true);
@@ -446,8 +449,7 @@ public class PermissionAndRole : IAsyncLifetime
                 [ PermissionsList.Products.View, PermissionsList.Products.Create, PermissionsList.Products.Edit ]
         };
 
-        var response = await _client.PutAsJsonAsync($"/api/v1/Permission/roles/{roleName}", request)
-            .ConfigureAwait(true);
+        var response = await _client.PutAsJsonAsync($"/api/v1/Permission/roles/{roleId}", request).ConfigureAwait(true);
 
         if(response.StatusCode != HttpStatusCode.OK)
         {
@@ -473,7 +475,10 @@ public class PermissionAndRole : IAsyncLifetime
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var roleName = $"TestRole_{uniqueId}";
-        await CreateRoleWithPermissionsInternalAsync(roleName, [ PermissionsList.Brands.View ], "Original Description")
+        var roleId = await CreateRoleWithPermissionsInternalAsync(
+            roleName,
+            [ PermissionsList.Brands.View ],
+            "Original Description")
             .ConfigureAwait(true);
 
         var username = $"admin_{uniqueId}";
@@ -497,8 +502,7 @@ public class PermissionAndRole : IAsyncLifetime
             Description = "Updated Description"
         };
 
-        var response = await _client.PutAsJsonAsync($"/api/v1/Permission/roles/{roleName}", request)
-            .ConfigureAwait(true);
+        var response = await _client.PutAsJsonAsync($"/api/v1/Permission/roles/{roleId}", request).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
@@ -516,7 +520,8 @@ public class PermissionAndRole : IAsyncLifetime
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var roleName = $"TestRole_{uniqueId}";
-        await CreateRoleWithPermissionsInternalAsync(roleName, [ PermissionsList.Brands.View ]).ConfigureAwait(true);
+        var roleId = await CreateRoleWithPermissionsInternalAsync(roleName, [ PermissionsList.Brands.View ])
+            .ConfigureAwait(true);
 
         var username = $"admin_{uniqueId}";
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
@@ -534,7 +539,9 @@ public class PermissionAndRole : IAsyncLifetime
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var response = await _client.DeleteAsync($"/api/v1/Permission/roles/{roleName}", CancellationToken.None)
+        var response = await _client.DeleteAsync(
+            $"/api/v1/Permission/roles/{roleId}",
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -552,7 +559,8 @@ public class PermissionAndRole : IAsyncLifetime
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var roleName = $"TestRole_{uniqueId}";
-        await CreateRoleWithPermissionsInternalAsync(roleName, [ PermissionsList.Brands.View ]).ConfigureAwait(true);
+        var roleId = await CreateRoleWithPermissionsInternalAsync(roleName, [ PermissionsList.Brands.View ])
+            .ConfigureAwait(true);
 
         var username = $"user_{uniqueId}";
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
@@ -570,7 +578,9 @@ public class PermissionAndRole : IAsyncLifetime
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var response = await _client.DeleteAsync($"/api/v1/Permission/roles/{roleName}", CancellationToken.None)
+        var response = await _client.DeleteAsync(
+            $"/api/v1/Permission/roles/{roleId}",
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
@@ -660,14 +670,15 @@ public class PermissionAndRole : IAsyncLifetime
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
-            .ReadFromJsonAsync<List<RoleSelectResponse>>(CancellationToken.None)
+            .ReadFromJsonAsync<PagedResult<RoleSelectResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         content.Should().NotBeNull();
-        content.Should().Contain(r => string.Compare(r.Name, $"Role1_{uniqueId}") == 0);
-        content.Should().Contain(r => string.Compare(r.Name, $"Role2_{uniqueId}") == 0);
+        content!.Items.Should().NotBeEmpty();
+        content.Items.Should().Contain(r => string.Compare(r.Name, $"Role1_{uniqueId}") == 0);
+        content.Items.Should().Contain(r => string.Compare(r.Name, $"Role2_{uniqueId}") == 0);
     }
 
-    private async Task CreateRoleWithPermissionsInternalAsync(
+    private async Task<Guid> CreateRoleWithPermissionsInternalAsync(
         string roleName,
         string[] permissionNames,
         string? description = null)
@@ -697,6 +708,44 @@ public class PermissionAndRole : IAsyncLifetime
         }
 
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+        return roleEntity!.Id;
+    }
+
+
+    [Fact(DisplayName = "PERM_INT_016 - Lấy cấu trúc quyền hạn thành công")]
+    public async Task GetPermissionStructure_Success()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"admin_{uniqueId}";
+        var password = "StrongPassword1@";
+
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Roles.View ],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        var response = await _client.GetAsync("/api/v1/Permission/structure", TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var structure = await response.Content
+            .ReadFromJsonAsync<PermissionStructureResponse>(TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
+
+        structure.Should().NotBeNull();
+        structure!.Groups.Should().NotBeEmpty();
+        structure.Groups.Should().ContainKey("Sản phẩm");
+        structure.Dependencies.Should().ContainKey(PermissionsList.Products.Create);
     }
 
     private static async Task<Permission> EnsurePermissionExistsAsync(ApplicationDBContext db, string permName)

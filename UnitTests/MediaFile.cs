@@ -3,8 +3,8 @@ using Application.Features.Files.Commands.DeleteFile;
 using Application.Features.Files.Commands.DeleteManyFiles;
 using Application.Features.Files.Commands.RestoreFile;
 using Application.Features.Files.Commands.RestoreManyFiles;
-using Application.Features.Files.Commands.UploadProductImage;
 using Application.Features.Files.Commands.UploadManyProductImages;
+using Application.Features.Files.Commands.UploadProductImage;
 using Application.Features.Files.Queries.GetFileById;
 using Application.Features.Files.Queries.ViewImage;
 using Application.Interfaces.Repositories;
@@ -578,7 +578,10 @@ public class MediaFile
         var stream1 = new MemoryStream();
         var stream2 = new MemoryStream();
 
-        var command = new UploadManyProductImagesCommand { Files = [ new(stream1, "test1.jpg"), new(stream2, "test2.png") ] };
+        var command = new UploadManyProductImagesCommand
+        {
+            Files = [ new(stream1, "test1.jpg"), new(stream2, "test2.png") ]
+        };
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 

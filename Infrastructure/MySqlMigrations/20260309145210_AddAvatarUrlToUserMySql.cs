@@ -4,26 +4,18 @@
 
 namespace Infrastructure.MySqlMigrations
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public partial class AddAvatarUrlToUserMySql : Migration
     {
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "AvatarUrl",
-                table: "Users",
-                type: "longtext",
-                nullable: true)
+            migrationBuilder.AddColumn<string>(name: "AvatarUrl", table: "Users", type: "longtext", nullable: true)
                 .Annotation("MySql:CharSet", "utf8mb4");
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropColumn(
-                name: "AvatarUrl",
-                table: "Users");
-        }
+        { migrationBuilder.DropColumn(name: "AvatarUrl", table: "Users"); }
     }
 }

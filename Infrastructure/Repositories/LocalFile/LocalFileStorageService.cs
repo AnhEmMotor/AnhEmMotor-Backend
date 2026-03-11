@@ -29,7 +29,10 @@ public class LocalFileStorageService : IFileStorageService
 
     private readonly List<string> _allowedMimeTypes = [ "image/jpeg", "image/png", "image/gif", "image/webp" ];
 
-    public async Task<Result<FileUpload>> SaveFileAsync(Stream file, CancellationToken cancellationToken, string subFolder = "")
+    public async Task<Result<FileUpload>> SaveFileAsync(
+        Stream file,
+        CancellationToken cancellationToken,
+        string subFolder = "")
     {
         try
         {
@@ -38,8 +41,8 @@ public class LocalFileStorageService : IFileStorageService
                 return Result<FileUpload>.Failure("File stream is empty");
             }
 
-            var targetFolder = string.IsNullOrWhiteSpace(subFolder) 
-                ? _uploadFolder 
+            var targetFolder = string.IsNullOrWhiteSpace(subFolder)
+                ? _uploadFolder
                 : Path.Combine(_uploadFolder, subFolder);
 
             if(!Directory.Exists(targetFolder))
@@ -65,8 +68,8 @@ public class LocalFileStorageService : IFileStorageService
             }
 
             var storageFileName = $"{Guid.NewGuid()}.webp";
-            var relativePath = string.IsNullOrWhiteSpace(subFolder) 
-                ? storageFileName 
+            var relativePath = string.IsNullOrWhiteSpace(subFolder)
+                ? storageFileName
                 : Path.Combine(subFolder, storageFileName).Replace("\\", "/");
 
             var fullPath = Path.Combine(_uploadFolder, relativePath);

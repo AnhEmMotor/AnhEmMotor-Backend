@@ -27,14 +27,16 @@ public class CreateRoleCommandValidator : AbstractValidator<CreateRoleCommand>
             .WithMessage("At least one permission must be assigned.")
             .Must(permissions => permissions != null && permissions.All(p => ValidPermissions.Contains(p)))
             .WithMessage("One or more permissions are invalid.")
-            .Custom((permissions, context) =>
-            {
-                if(permissions == null) return;
-                var (isValid, errorMessage) = Domain.Constants.Permission.PermissionsList.ValidateRules(permissions);
-                if(!isValid)
+            .Custom(
+                (permissions, context) =>
                 {
-                    context.AddFailure(errorMessage);
-                }
-            });
+                    if(permissions == null)
+                        return;
+                    var (isValid, errorMessage) = Domain.Constants.Permission.PermissionsList.ValidateRules(permissions);
+                    if(!isValid)
+                    {
+                        context.AddFailure(errorMessage);
+                    }
+                });
     }
 }

@@ -9,11 +9,10 @@ using Application.Features.Permissions.Queries.GetMyPermissions;
 using Application.Features.Permissions.Queries.GetRolePermissions;
 using Application.Features.Permissions.Queries.GetUserPermissionsById;
 using Domain.Constants.Permission;
-using MediatR;
-using Microsoft.AspNetCore.Http;
-using Application.Common.Models;
 using Domain.Primitives;
 using FluentAssertions;
+using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System.Security.Claims;
@@ -195,9 +194,7 @@ public class PermissionAndRole
         };
 
         _mediatorMock.Setup(
-            m => m.Send(
-                It.Is<GetRolePermissionsQuery>(q => q.RoleId == roleId),
-                It.IsAny<CancellationToken>()))
+            m => m.Send(It.Is<GetRolePermissionsQuery>(q => q.RoleId == roleId), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedPermissions);
 
         var result = await _controller.GetRolePermissionsAsync(roleId, CancellationToken.None).ConfigureAwait(true);
@@ -215,9 +212,7 @@ public class PermissionAndRole
         var roleId = Guid.NewGuid();
 
         _mediatorMock.Setup(
-            m => m.Send(
-                It.Is<GetRolePermissionsQuery>(q => q.RoleId == roleId),
-                It.IsAny<CancellationToken>()))
+            m => m.Send(It.Is<GetRolePermissionsQuery>(q => q.RoleId == roleId), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<List<string>>.Failure(Error.NotFound($"Role not found")));
 
         var result = await _controller.GetRolePermissionsAsync(roleId, CancellationToken.None).ConfigureAwait(true);
@@ -230,12 +225,14 @@ public class PermissionAndRole
     {
         var sieveModel = new Sieve.Models.SieveModel();
         var expectedRoles = new PagedResult<RoleSelectResponse>(
-        [
-            new() { ID = Guid.NewGuid(), Name = "Admin" },
-            new() { ID = Guid.NewGuid(), Name = "Manager" },
-            new() { ID = Guid.NewGuid(), Name = "Staff" },
-            new() { ID = Guid.NewGuid(), Name = "User" }
-        ], 4, 1, 10);
+            [ new() { ID = Guid.NewGuid(), Name = "Admin" }, new() { ID = Guid.NewGuid(), Name = "Manager" }, new()
+            {
+                ID = Guid.NewGuid(),
+                Name = "Staff"
+            }, new() { ID = Guid.NewGuid(), Name = "User" } ],
+            4,
+            1,
+            10);
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetAllRolesQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedRoles);
@@ -339,9 +336,7 @@ public class PermissionAndRole
         var expectedResponse = new RoleDeleteResponse { Message = "Role deleted successfully" };
 
         _mediatorMock.Setup(
-            m => m.Send(
-                It.Is<DeleteRoleCommand>(c => c.RoleId == roleId),
-                It.IsAny<CancellationToken>()))
+            m => m.Send(It.Is<DeleteRoleCommand>(c => c.RoleId == roleId), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
 
         var result = await _controller.DeleteRoleAsync(roleId, CancellationToken.None).ConfigureAwait(true);
@@ -359,9 +354,7 @@ public class PermissionAndRole
         var roleId = Guid.NewGuid();
 
         _mediatorMock.Setup(
-            m => m.Send(
-                It.Is<DeleteRoleCommand>(c => c.RoleId == roleId),
-                It.IsAny<CancellationToken>()))
+            m => m.Send(It.Is<DeleteRoleCommand>(c => c.RoleId == roleId), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<RoleDeleteResponse>.Failure(Error.NotFound($"Role not found")));
 
         var result = await _controller.DeleteRoleAsync(roleId, CancellationToken.None).ConfigureAwait(true);

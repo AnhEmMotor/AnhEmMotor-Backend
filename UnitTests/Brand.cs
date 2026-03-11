@@ -140,7 +140,7 @@ public class Brand
 
         _readRepoMock.Setup(
             x => x.GetByNameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
-            .ReturnsAsync(new List<BrandEntities>());
+            .ReturnsAsync([]);
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
@@ -166,7 +166,7 @@ public class Brand
 
         _readRepoMock.Setup(
             x => x.GetByNameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
-            .ReturnsAsync(new List<BrandEntities>());
+            .ReturnsAsync([]);
 
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
@@ -264,7 +264,7 @@ public class Brand
 
         _readRepoMock.Setup(
             x => x.GetByNameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
-            .ReturnsAsync(new List<BrandEntities>());
+            .ReturnsAsync([]);
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
@@ -291,7 +291,7 @@ public class Brand
 
         _readRepoMock.Setup(
             x => x.GetByNameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
-            .ReturnsAsync(new List<BrandEntities>());
+            .ReturnsAsync([]);
 
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
