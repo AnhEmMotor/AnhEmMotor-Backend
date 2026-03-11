@@ -320,13 +320,11 @@ public class InventoryReceipts
         {
             Id = 1,
             InputInfos =
-                new List<InputInfo>
+                [ new InputInfo { Count = 2, InputPrice = 150000 }, new InputInfo { Count = 3, InputPrice = 50000 }, new InputInfo
                 {
-                    new InputInfo { Count = 2, InputPrice = 150000 },
-                    new InputInfo { Count = 3, InputPrice = 50000 },
-                    new InputInfo { Count = null, InputPrice = 20000 },
-                    new InputInfo { Count = 1, InputPrice = null }
-                }
+                    Count = null,
+                    InputPrice = 20000
+                }, new InputInfo { Count = 1, InputPrice = null } ]
         };
 
         var response = input.Adapt<InputDetailResponse>(config);

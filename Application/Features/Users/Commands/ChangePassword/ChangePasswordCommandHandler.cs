@@ -57,7 +57,7 @@ public class ChangePasswordCommandHandler(
             {
                 return Error.Validation("Failed to change password.", "ChangePasswordFailed");
             }
-            var validationErrors = errors.Select(e => Error.Validation("ChangePasswordError", e)).ToList();
+            var validationErrors = errors.Select(e => Error.Validation(e, "NewPassword")).ToList();
             return Result<ChangePasswordByUserResponse>.Failure(validationErrors);
         }
 

@@ -16,6 +16,9 @@ public class UserResponse
 
     public string? Status { get; set; } = string.Empty;
 
+    public string? AvatarUrl { get; set; }
+
+    public DateTime? DateOfBirth { get; set; }
+
     public List<string>? Permissions { get; set; }
 }
-

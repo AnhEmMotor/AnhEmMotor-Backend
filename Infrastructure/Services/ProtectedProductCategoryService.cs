@@ -10,7 +10,6 @@ public class ProtectedProductCategoryService(
 {
     private List<string>? _cachedProtectedCategories;
 
-    /// <inheritdoc/>
     public async Task<bool> IsProtectedAsync(int categoryId, CancellationToken cancellationToken)
     {
         var category = await readRepository.GetByIdAsync(categoryId, cancellationToken).ConfigureAwait(false);
@@ -23,7 +22,6 @@ public class ProtectedProductCategoryService(
         return await IsProtectedByNameAsync(category.Name, cancellationToken).ConfigureAwait(false);
     }
 
-    /// <inheritdoc/>
     public Task<bool> IsProtectedByNameAsync(string categoryName, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();

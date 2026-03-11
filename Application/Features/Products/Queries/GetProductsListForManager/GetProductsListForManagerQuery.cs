@@ -1,5 +1,6 @@
 using Application.ApiContracts.Product.Responses;
 using Application.Common.Models;
+using Domain.Constants;
 using Domain.Primitives;
 using MediatR;
 using Sieve.Models;
@@ -20,14 +21,25 @@ public sealed record GetProductsListForManagerQuery : IRequest<Result<PagedResul
 
     public string? Filters { get; init; }
 
+    public string? InventoryStatusFilter { get; init; }
+
+    public SortDirection? SortByInventoryStatus { get; init; }
+
     public static GetProductsListForManagerQuery FromRequest(SieveModel request)
     {
-        var search = ExtractFilterValue(request.Filters, "search");
+        var search = ExtractFilterValue(request.Filters, "name");
         var statusIds = ExtractFilterValue(request.Filters, "statusIds")?.Split(
                 ',',
                 StringSplitOptions.RemoveEmptyEntries)
                 .ToList() ??
             [];
+
+        var inventoryStatusFilter = ExtractFilterValue(request.Filters, "inventoryStatus");
+
+        var sortByInventoryStatus = request.Sorts is not null &&
+                request.Sorts.Contains("inventoryStatus", StringComparison.OrdinalIgnoreCase)
+            ? request.Sorts.TrimStart().StartsWith('-') ? SortDirection.Descending : SortDirection.Ascending
+            : (SortDirection?)null;
 
         return new GetProductsListForManagerQuery
         {
@@ -36,7 +48,9 @@ public sealed record GetProductsListForManagerQuery : IRequest<Result<PagedResul
             Search = search,
             StatusIds = statusIds,
             Sorts = request.Sorts,
-            Filters = request.Filters
+            Filters = request.Filters,
+            InventoryStatusFilter = inventoryStatusFilter,
+            SortByInventoryStatus = sortByInventoryStatus
         };
     }
 
@@ -50,10 +64,11 @@ public sealed record GetProductsListForManagerQuery : IRequest<Result<PagedResul
         var parts = filters.Split(',');
         foreach(var part in parts)
         {
-            var keyValue = part.Split([ '=', '@', '!' ], 2);
+            var keyValue = part.Split([ '=', '@', '!', '<', '>' ], 2);
             if(keyValue.Length == 2 && keyValue[0].Trim().Equals(key, StringComparison.OrdinalIgnoreCase))
             {
-                return keyValue[1].Trim();
+                var value = keyValue[1].Trim();
+                return value.TrimStart('=', '@', '!', '<', '>', '*');
             }
         }
 

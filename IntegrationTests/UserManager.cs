@@ -433,6 +433,7 @@ public class UserManager : IAsyncLifetime
 
         var staffRoleName = $"Staff_{uniqueId}";
         var managerRoleName = $"Manager_{uniqueId}";
+        Guid managerRoleId;
 
         using(var scope = _factory.Services.CreateScope())
         {
@@ -440,13 +441,15 @@ public class UserManager : IAsyncLifetime
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
             await roleManager.CreateAsync(new ApplicationRole { Name = staffRoleName }).ConfigureAwait(true);
-            await roleManager.CreateAsync(new ApplicationRole { Name = managerRoleName }).ConfigureAwait(true);
+            var managerRole = new ApplicationRole { Name = managerRoleName };
+            await roleManager.CreateAsync(managerRole).ConfigureAwait(true);
+            managerRoleId = managerRole.Id;
 
             var userInScope = await userManager.FindByIdAsync(targetUser.Id.ToString()).ConfigureAwait(true);
             await userManager.AddToRoleAsync(userInScope!, staffRoleName).ConfigureAwait(true);
         }
 
-        var request = new AssignRolesCommand { RoleNames = [ managerRoleName ] };
+        var request = new AssignRolesCommand { RoleIds = [ managerRoleId ] };
 
         var response = await _client.PostAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}/assign-roles", request)
             .ConfigureAwait(true);
@@ -502,7 +505,7 @@ public class UserManager : IAsyncLifetime
             await userManager.AddToRoleAsync(userInScope!, roleName).ConfigureAwait(true);
         }
 
-        var request = new AssignRolesCommand { RoleNames = [] };
+        var request = new AssignRolesCommand { RoleIds = [] };
 
         var response = await _client.PostAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}/assign-roles", request)
             .ConfigureAwait(true);
@@ -926,13 +929,16 @@ public class UserManager : IAsyncLifetime
             CancellationToken.None)
             .ConfigureAwait(true);
         var roleName = $"Manager_{uniqueId}";
+        Guid roleId;
         using(var scope = _factory.Services.CreateScope())
         {
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
-            await roleManager.CreateAsync(new ApplicationRole { Name = roleName }).ConfigureAwait(true);
+            var role = new ApplicationRole { Name = roleName };
+            await roleManager.CreateAsync(role).ConfigureAwait(true);
+            roleId = role.Id;
         }
 
-        var request = new AssignRolesCommand { RoleNames = [ roleName ] };
+        var request = new AssignRolesCommand { RoleIds = [ roleId ] };
 
         var response = await _client.PostAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}/assign-roles", request)
             .ConfigureAwait(true);

@@ -15,7 +15,7 @@ public class UserCreateRepository(UserManager<ApplicationUser> userManager) : IU
 
         var result = await userManager.CreateAsync(user, password).ConfigureAwait(false);
 
-        return (result.Succeeded, result.Errors.Select(e => e.Description));
+        return (result.Succeeded, result.Errors.Select(e => e.Description).AsEnumerable());
     }
 
     public async Task<(bool Succeeded, IEnumerable<string> Errors)> AddUserToRoleAsync(
@@ -27,7 +27,7 @@ public class UserCreateRepository(UserManager<ApplicationUser> userManager) : IU
 
         var result = await userManager.AddToRoleAsync(user, roleName).ConfigureAwait(false);
 
-        return (result.Succeeded, result.Errors.Select(e => e.Description));
+        return (result.Succeeded, result.Errors.Select(e => e.Description).AsEnumerable());
     }
 
     public async Task<(bool Succeeded, IEnumerable<string> Errors)> AddUserToRolesAsync(
@@ -39,6 +39,6 @@ public class UserCreateRepository(UserManager<ApplicationUser> userManager) : IU
 
         var result = await userManager.AddToRolesAsync(user, roleNames).ConfigureAwait(false);
 
-        return (result.Succeeded, result.Errors.Select(e => e.Description));
+        return (result.Succeeded, result.Errors.Select(e => e.Description).AsEnumerable());
     }
 }

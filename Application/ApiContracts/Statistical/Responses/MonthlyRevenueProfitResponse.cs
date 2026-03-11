@@ -7,5 +7,7 @@ namespace Application.ApiContracts.Statistical.Responses
         public decimal TotalRevenue { get; set; }
 
         public decimal TotalProfit { get; set; }
+
+        public bool HasZeroCostPrice { get; set; }
     }
 }

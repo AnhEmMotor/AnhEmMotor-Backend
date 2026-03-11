@@ -7,16 +7,18 @@ using Mapster;
 using MediatR;
 using MediaFileEntity = Domain.Entities.MediaFile;
 
-namespace Application.Features.Files.Commands.UploadImage;
+namespace Application.Features.Files.Commands.UploadProductImage;
 
-public sealed class UploadImageCommandHandler(
+public sealed class UploadProductImageCommandHandler(
     IFileStorageService fileStorageService,
     IMediaFileInsertRepository insertRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UploadImageCommand, Result<MediaFileResponse>>
+    IUnitOfWork unitOfWork) : IRequestHandler<UploadProductImageCommand, Result<MediaFileResponse>>
 {
     private const long MaxFileSize = 10 * 1024 * 1024;
 
-    public async Task<Result<MediaFileResponse>> Handle(UploadImageCommand request, CancellationToken cancellationToken)
+    public async Task<Result<MediaFileResponse>> Handle(
+        UploadProductImageCommand request,
+        CancellationToken cancellationToken)
     {
         if(string.IsNullOrWhiteSpace(request.FileName))
         {
@@ -33,7 +35,7 @@ public sealed class UploadImageCommandHandler(
             return Result<MediaFileResponse>.Failure("File size exceeds 10MB limit");
         }
 
-        var saveResult = await fileStorageService.SaveFileAsync(request.FileContent, cancellationToken)
+        var saveResult = await fileStorageService.SaveFileAsync(request.FileContent, cancellationToken, "products")
             .ConfigureAwait(false);
 
         if(saveResult.IsFailure)

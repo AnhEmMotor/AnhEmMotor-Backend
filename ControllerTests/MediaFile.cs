@@ -32,7 +32,7 @@ public class MediaFile
     [Fact(DisplayName = "MF_006 - Tải lên ảnh thất bại khi chưa đăng nhập")]
     public void UploadImage_NotAuthenticated_Unauthorized()
     {
-        var method = typeof(MediaFileController).GetMethod("UploadImageAsync");
+        var method = typeof(MediaFileController).GetMethod("UploadProductImageAsync");
 
         var hasAuthorize = method!.GetCustomAttributes(typeof(AuthorizeAttribute), true).Length != 0 ||
             typeof(MediaFileController).GetCustomAttributes(typeof(AuthorizeAttribute), true).Length != 0;
@@ -43,7 +43,7 @@ public class MediaFile
     [Fact(DisplayName = "MF_005: UploadImageAsync has RequiresAnyPermissions with Edit/Create permissions")]
     public void UploadImageAsync_HasCorrectPermissionsAttribute()
     {
-        var methodInfo = typeof(MediaFileController).GetMethod(nameof(MediaFileController.UploadImageAsync));
+        var methodInfo = typeof(MediaFileController).GetMethod(nameof(MediaFileController.UploadProductImageAsync));
         var attribute = methodInfo!.GetCustomAttribute<RequiresAnyPermissionsAttribute>();
 
         Assert.NotNull(attribute);
@@ -55,7 +55,7 @@ public class MediaFile
     [Fact(DisplayName = "MF_CT_004: DeleteFileAsync has RequiresAnyPermissions with Edit/Create permissions")]
     public void DeleteFileAsync_HasCorrectPermissionsAttribute()
     {
-        var methodInfo = typeof(MediaFileController).GetMethod(nameof(MediaFileController.DeleteFileAsync));
+        var methodInfo = typeof(MediaFileController).GetMethod(nameof(MediaFileController.DeleteProductFileAsync));
         var attribute = methodInfo!.GetCustomAttribute<RequiresAnyPermissionsAttribute>();
 
         Assert.NotNull(attribute);
@@ -67,7 +67,7 @@ public class MediaFile
     [Fact(DisplayName = "MF_012: DeleteFileAsync has RequiresAnyPermissions with Edit/Create permissions")]
     public void DeleteFileAsync_HasCorrectPermissionsAttribute1()
     {
-        var methodInfo = typeof(MediaFileController).GetMethod(nameof(MediaFileController.DeleteFileAsync));
+        var methodInfo = typeof(MediaFileController).GetMethod(nameof(MediaFileController.DeleteProductFileAsync));
         var attribute = methodInfo!.GetCustomAttribute<RequiresAnyPermissionsAttribute>();
 
         Assert.NotNull(attribute);
@@ -88,23 +88,22 @@ public class MediaFile
         Assert.Contains(Products.Create, attribute.Policy);
     }
 
-    [Fact(DisplayName = "MF_CT_002: UploadImageAsync returns BadRequest when file is null")]
-    public async Task UploadImageAsync_ReturnsBadRequest_WhenFileIsNull()
+    [Fact(DisplayName = "MF_CT_002: UploadProductImageAsync throws ArgumentNullException when file is null")]
+    public async Task UploadProductImageAsync_ThrowsArgumentNullException_WhenFileIsNull()
     {
-        var result = await _controller.UploadImageAsync(null!, CancellationToken.None).ConfigureAwait(true);
-
-        var statusCodeResult = Assert.IsType<BadRequestResult>(result);
-        Assert.Equal(StatusCodes.Status400BadRequest, statusCodeResult.StatusCode);
+        await Assert.ThrowsAsync<ArgumentNullException>(
+            () => _controller.UploadProductImageAsync(null!, CancellationToken.None))
+            .ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "MF_CT_003: DeleteFileAsync returns NoContent when mediator succeeds")]
     public async Task DeleteFileAsync_ReturnsNoContent_WhenMediatorSucceeds()
     {
         var storagePath = "test-file.webp";
-        _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteFileCommand>(), It.IsAny<CancellationToken>()))
+        _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteProductImageCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success());
 
-        var result = await _controller.DeleteFileAsync(storagePath, CancellationToken.None).ConfigureAwait(true);
+        var result = await _controller.DeleteProductFileAsync(storagePath, CancellationToken.None).ConfigureAwait(true);
 
         var statusCodeResult = Assert.IsType<NoContentResult>(result);
         Assert.Equal(StatusCodes.Status204NoContent, statusCodeResult.StatusCode);
@@ -116,10 +115,10 @@ public class MediaFile
         var storagePath = string.Empty;
         var validationError = Error.Validation("StoragePath is required", "StoragePath.Empty");
 
-        _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteFileCommand>(), It.IsAny<CancellationToken>()))
+        _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteProductImageCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Failure(validationError));
 
-        var result = await _controller.DeleteFileAsync(storagePath, CancellationToken.None).ConfigureAwait(true);
+        var result = await _controller.DeleteProductFileAsync(storagePath, CancellationToken.None).ConfigureAwait(true);
 
         var objectResult = Assert.IsType<BadRequestObjectResult>(result);
         Assert.Equal(StatusCodes.Status400BadRequest, objectResult.StatusCode);

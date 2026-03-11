@@ -3,6 +3,7 @@ using Application.Interfaces.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -58,7 +59,7 @@ public class TokenManagerService : ITokenManagerService
             new("AspNet.Identity.SecurityStamp", user.SecurityStamp ?? string.Empty)
         };
 
-        if(user.AuthMethods is { Length: > 0 })
+        if(user.AuthMethods is not null && user.AuthMethods.Any())
         {
             claims.Add(
                 new Claim(

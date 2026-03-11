@@ -312,9 +312,9 @@ public class UserManager
     public async Task AssignRoles_WithValidRoles_ReturnsOk()
     {
         var userId = Guid.NewGuid();
-        var request = new AssignRolesCommand { RoleNames = [ "Manager", "Staff" ] };
+        var request = new AssignRolesCommand { RoleIds = [ Guid.NewGuid(), Guid.NewGuid() ] };
 
-        var expectedResponse = new AssignRoleResponse
+        var expectedResponse = new UserDTOForManagerResponse
         {
             Id = userId,
             UserName = "testuser",
@@ -329,7 +329,7 @@ public class UserManager
         var result = await _controller.AssignRolesAsync(userId, request, CancellationToken.None).ConfigureAwait(true);
 
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
-        var response = okResult.Value.Should().BeAssignableTo<AssignRoleResponse>().Subject;
+        var response = okResult.Value.Should().BeAssignableTo<UserDTOForManagerResponse>().Subject;
         response.Roles.Should().Contain("Manager");
 
         _mediatorMock.Verify(
@@ -341,10 +341,10 @@ public class UserManager
     public async Task AssignRoles_WithInvalidRole_ReturnsBadRequest()
     {
         var userId = Guid.NewGuid();
-        var request = new AssignRolesCommand { RoleNames = [ "InvalidRole" ] };
+        var request = new AssignRolesCommand { RoleIds = [ Guid.NewGuid() ] };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<AssignRolesCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<AssignRoleResponse>.Failure(Error.BadRequest("Role không tồn tại")));
+            .ReturnsAsync(Result<UserDTOForManagerResponse>.Failure(Error.BadRequest("Role không tồn tại")));
 
         var result = await _controller.AssignRolesAsync(userId, request, CancellationToken.None).ConfigureAwait(true);
 

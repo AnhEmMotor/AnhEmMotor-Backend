@@ -257,19 +257,19 @@
             Lấy thông tin của tệp media được chọn.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.MediaFileController.UploadImageAsync(Microsoft.AspNetCore.Http.IFormFile,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.MediaFileController.UploadProductImageAsync(Microsoft.AspNetCore.Http.IFormFile,System.Threading.CancellationToken)">
             <summary>
-            Tải lên một tệp ảnh.
+            Tải lên một tệp ảnh cho sản phẩm.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.MediaFileController.UploadManyImagesAsync(System.Collections.Generic.List{Microsoft.AspNetCore.Http.IFormFile},System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.MediaFileController.UploadManyProductImagesAsync(System.Collections.Generic.List{Microsoft.AspNetCore.Http.IFormFile},System.Threading.CancellationToken)">
             <summary>
-            Tải lên nhiều ảnh cùng lúc.
+            Tải lên nhiều ảnh sản phẩm cùng lúc.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.MediaFileController.DeleteFileAsync(System.String,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.MediaFileController.DeleteProductFileAsync(System.String,System.Threading.CancellationToken)">
             <summary>
-            Xoá tệp media theo tên file.
+            Xoá tệp media sản phẩm theo tên file.
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.MediaFileController.DeleteFilesAsync(Application.Features.Files.Commands.DeleteManyFiles.DeleteManyFilesCommand,System.Threading.CancellationToken)">
@@ -307,6 +307,11 @@
             Lấy tất cả các permissions có trong hệ thống với mô tả
             </summary>
         </member>
+        <member name="M:WebAPI.Controllers.V1.PermissionController.GetPermissionStructureAsync(System.Threading.CancellationToken)">
+            <summary>
+            Lấy cấu trúc quyền hạn (Nhóm, Xung đột, Phụ thuộc)
+            </summary>
+        </member>
         <member name="M:WebAPI.Controllers.V1.PermissionController.GetMyPermissionsAsync(System.Threading.CancellationToken)">
             <summary>
             Lấy các quyền của người dùng hiện tại
@@ -317,19 +322,19 @@
             Lấy các quyền của một người dùng theo User ID
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.PermissionController.GetRolePermissionsAsync(System.String,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.PermissionController.GetRolePermissionsAsync(System.Guid,System.Threading.CancellationToken)">
             <summary>
             Lấy các quyền của một vai trò cụ thể
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.PermissionController.UpdateRoleAsync(System.String,Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommand,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.PermissionController.UpdateRoleAsync(System.Guid,Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommand,System.Threading.CancellationToken)">
             <summary>
             Cập nhật quyền cho một vai trò
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.PermissionController.GetAllRolesAsync(System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.PermissionController.GetAllRolesAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
-            Lấy tất cả các vai trò
+            Lấy tất cả các vai trò (có phân trang, lọc, sắp xếp)
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.PermissionController.CreateRoleAsync(Application.Features.Permissions.Commands.CreateRole.CreateRoleCommand,System.Threading.CancellationToken)">
@@ -337,7 +342,7 @@
             Tạo vai trò mới với các quyền được gán
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.PermissionController.DeleteRoleAsync(System.String,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.PermissionController.DeleteRoleAsync(System.Guid,System.Threading.CancellationToken)">
             <summary>
             Xóa vai trò
             </summary>
@@ -361,6 +366,20 @@
             <summary>
             Lấy danh sách các thuộc tính được định nghĩa sẵn dưới dạng từ điển key-value. Chỉ người dùng có quyền tạo hoặc
             chỉnh sửa sản phẩm mới có thể truy cập.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.PredefinedOptionController.GetInventoryStatuses">
+            <summary>
+            Lấy danh sách ánh xạ trạng thái tồn kho (key tiếng Anh - nhãn tiếng Việt) để Frontend binding.
+            </summary>
+            <example>
+            <code> GET /api/v1/PredefinedOption/inventory-statuses Response: [{ "key": "OutOfStock", "label": "Hết hàng" },
+            ...]</code>
+            </example>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.PredefinedOptionController.GetGenderOptions">
+            <summary>
+            Lấy danh sách ánh xạ giới tính (key tiếng Anh - nhãn tiếng Việt) để Frontend binding.
             </summary>
         </member>
         <member name="T:WebAPI.Controllers.V1.ProductCategoryController">
@@ -474,6 +493,11 @@
             <summary>
             Lấy danh sách biến thể sản phẩm của tất cả sản phẩm (có phân trang, lọc, tìm kiếm - chỉ có thể vào khi và chỉ
             khi có quyền thêm hoặc sửa phiếu bán hàng).
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetInventoryStatuses">
+            <summary>
+            Lấy danh sách ánh xạ trạng thái tồn kho (Key -> Tên tiếng Việt).
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.ProductController.GetVarientByIdAsync(System.Int32,System.Threading.CancellationToken)">
@@ -735,6 +759,26 @@
             Lấy giá và tồn kho của một sản phẩm cụ thể.
             </summary>
         </member>
+        <member name="M:WebAPI.Controllers.V1.StatisticsController.GetAdminDashboardOverviewAsync(System.Threading.CancellationToken)">
+            <summary>
+            Lấy toàn bộ dữ liệu gộp cho Admin Dashboard.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.StatisticsController.GetAdminRevenueAnalysisAsync(System.Threading.CancellationToken)">
+            <summary>
+            Lấy toàn bộ phân tích doanh thu cho Admin (gộp).
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.StatisticsController.GetAdminProductReportAsync(System.Threading.CancellationToken)">
+            <summary>
+            Lấy báo cáo hiệu suất sản phẩm cho Admin (gộp).
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.StatisticsController.GetAdminWarehouseReportAsync(System.Threading.CancellationToken)">
+            <summary>
+            Lấy báo cáo tồn kho cho Admin (gộp).
+            </summary>
+        </member>
         <member name="T:WebAPI.Controllers.V1.SupplierController">
             <summary>
             Quản lý danh sách nhà cung cấp.
@@ -888,6 +932,11 @@
             Khôi phục tài khoản người dùng
             </summary>
         </member>
+        <member name="M:WebAPI.Controllers.V1.UserController.UploadAvatarAsync(Microsoft.AspNetCore.Http.IFormFile,System.Threading.CancellationToken)">
+            <summary>
+            Tải lên ảnh đại diện cho người dùng hiện tại
+            </summary>
+        </member>
         <member name="T:WebAPI.Controllers.V1.UserManagerController">
             <summary>
             Quản lý người dùng (Chỉ có người dùng có quyền mới được vào đây)
@@ -958,6 +1007,11 @@
         <member name="M:WebAPI.Controllers.V1.UserManagerController.ChangeMultipleUsersStatusAsync(Application.Features.UserManager.Commands.ChangeMultipleUsersStatus.ChangeMultipleUsersStatusCommand,System.Threading.CancellationToken)">
             <summary>
             Thay đổi trạng thái của nhiều người dùng
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.UserManagerController.AdminUploadAvatarAsync(System.Guid,Microsoft.AspNetCore.Http.IFormFile,System.Threading.CancellationToken)">
+            <summary>
+            Tải lên ảnh đại diện cho người dùng theo Id (Admin)
             </summary>
         </member>
         <member name="T:WebAPI.Converters.EmptyStringConverter">

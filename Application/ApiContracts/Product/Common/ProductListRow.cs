@@ -60,6 +60,8 @@
 
         public int TotalStock { get; set; }
 
-        public int TotalBooked { get; set; }
+        public long TotalBooked { get; set; }
+
+        public string InventoryStatus { get; set; } = Domain.Constants.InventoryStatus.InStock;
     }
 }

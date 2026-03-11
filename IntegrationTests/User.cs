@@ -857,9 +857,11 @@ public class User : IAsyncLifetime
         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            if(!db.Roles.Any(r => r.Name == "Staff"))
+            var staffRole = db.Roles.FirstOrDefault(r => r.Name == "Staff");
+            if(staffRole == null)
             {
-                db.Roles.Add(new ApplicationRole { Name = "Staff", NormalizedName = "STAFF" });
+                staffRole = new ApplicationRole { Name = "Staff", NormalizedName = "STAFF" };
+                db.Roles.Add(staffRole);
                 await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             }
 
@@ -867,7 +869,7 @@ public class User : IAsyncLifetime
             var command = new Application.Features.UserManager.Commands.AssignRoles.AssignRolesCommand
             {
                 UserId = user.Id,
-                RoleNames = [ "Staff" ]
+                RoleIds = [ staffRole.Id ]
             };
 
             await mediator.Send(command, CancellationToken.None).ConfigureAwait(true);
@@ -1361,6 +1363,117 @@ public class User : IAsyncLifetime
 
         var data2 = await ReadEventAsync(reader2).ConfigureAwait(true);
         data2.Should().Contain("MultiTab Update");
+    }
+
+    [Fact(DisplayName = "USER_071 - Người dùng tự tải lên ảnh đại diện thành công")]
+    public async Task UploadAvatar_Self_Success()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var password = "StrongPassword1@";
+
+        await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, username, password, CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        var content = new MultipartFormDataContent();
+        byte[] gifData = [ 0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x01, 0x00, 0x01, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x21, 0xF9, 0x04, 0x01, 0x00, 0x00, 0x00, 0x00, 0x2C, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x02, 0x01, 0x44, 0x00, 0x3B ];
+        var fileContent = new ByteArrayContent(gifData);
+        fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/gif");
+        content.Add(fileContent, "file", "avatar.gif");
+
+        var response = await _client.PostAsync("/api/v1/User/avatar", content, TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
+
+        if(response.StatusCode != HttpStatusCode.OK)
+        {
+            var errorContent = await response.Content
+                .ReadAsStringAsync(TestContext.Current.CancellationToken)
+                .ConfigureAwait(true);
+            throw new Exception($"Upload failed with status {response.StatusCode}. Content: {errorContent}");
+        }
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var avatarUrl = await response.Content
+            .ReadAsStringAsync(TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
+        avatarUrl.Should().NotBeNullOrEmpty();
+        avatarUrl.Should().Contain("avatars/");
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        var user = await db.Users
+            .FirstOrDefaultAsync(u => string.Compare(u.UserName, username) == 0, TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
+        user!.AvatarUrl.Should().Be(avatarUrl.Trim('\"'));
+    }
+
+    [Fact(DisplayName = "USER_072 - Admin tải lên ảnh đại diện cho người dùng khác thành công")]
+    public async Task UploadAvatar_AdminForUser_Success()
+    {
+        var adminUniqueId = Guid.NewGuid().ToString("N")[..8];
+        var adminUsername = $"admin_{adminUniqueId}";
+        var password = "StrongPassword1@";
+
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            adminUsername,
+            password,
+            [ PermissionsList.Users.Edit ],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            adminUsername,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        var targetUniqueId = Guid.NewGuid().ToString("N")[..8];
+        var targetUser = await IntegrationTestAuthHelper.CreateUserAsync(
+            _factory.Services,
+            $"target_{targetUniqueId}",
+            "Pass123!",
+            CancellationToken.None)
+            .ConfigureAwait(true);
+
+        var content = new MultipartFormDataContent();
+        byte[] gifData = [ 0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x01, 0x00, 0x01, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x21, 0xF9, 0x04, 0x01, 0x00, 0x00, 0x00, 0x00, 0x2C, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x02, 0x01, 0x44, 0x00, 0x3B ];
+        var fileContent = new ByteArrayContent(gifData);
+        fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/gif");
+        content.Add(fileContent, "file", "avatar.gif");
+
+        var response = await _client.PostAsync(
+            $"/api/v1/UserManager/{targetUser.Id}/avatar",
+            content,
+            TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
+
+        if(response.StatusCode != HttpStatusCode.OK)
+        {
+            var errorContent = await response.Content
+                .ReadAsStringAsync(TestContext.Current.CancellationToken)
+                .ConfigureAwait(true);
+            throw new Exception($"Admin upload failed with status {response.StatusCode}. Content: {errorContent}");
+        }
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var avatarUrl = await response.Content
+            .ReadAsStringAsync(TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
+        avatarUrl.Should().NotBeNullOrEmpty();
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        var updatedUser = await db.Users
+            .FindAsync([ targetUser.Id ], TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
+        updatedUser!.AvatarUrl.Should().Be(avatarUrl.Trim('\"'));
     }
 
     private static async Task<string> ReadEventAsync(StreamReader reader)

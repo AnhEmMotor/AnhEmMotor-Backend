@@ -14,7 +14,7 @@ namespace Infrastructure.MySqlMigrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.2")
+                .HasAnnotation("ProductVersion", "10.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
@@ -48,7 +48,11 @@ namespace Infrastructure.MySqlMigrations
 
                     b.Property<int>("AccessFailedCount").HasColumnType("int");
 
+                    b.Property<string>("AvatarUrl").HasColumnType("longtext");
+
                     b.Property<string>("ConcurrencyStamp").IsConcurrencyToken().HasColumnType("longtext");
+
+                    b.Property<long?>("CreatedAt").HasColumnType("bigint");
 
                     b.Property<long?>("DeletedAt").HasColumnType("bigint");
 
@@ -998,9 +1002,7 @@ namespace Infrastructure.MySqlMigrations
                 {
                     b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
                         .WithMany("ProductCollectionPhotos")
-                        .HasForeignKey("ProductVariantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ProductVariantId");
 
                     b.Navigation("ProductVariant");
                 });
@@ -1071,9 +1073,7 @@ namespace Infrastructure.MySqlMigrations
 
                     b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
                         .WithMany("VariantOptionValues")
-                        .HasForeignKey("VariantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("VariantId");
 
                     b.Navigation("OptionValue");
 

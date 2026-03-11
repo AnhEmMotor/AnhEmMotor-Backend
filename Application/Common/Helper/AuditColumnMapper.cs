@@ -5,12 +5,6 @@ using System.Reflection;
 
 namespace Application.Common.Helper
 {
-    /// <summary>
-    /// Gán các thuộc tính kiểm toán của <see cref="BaseEntity"/> vào DTO tương ứng.
-    /// </summary>
-    /// <remarks>
-    /// Chỉ gán thuộc tính nếu DTO có thuộc tính cùng tên. Nếu không có, bỏ qua.
-    /// </remarks>
     public static class AuditColumnMapper
     {
         private static readonly ConcurrentDictionary<Type, Dictionary<string, PropertyInfo>> _cache = new();

@@ -19,4 +19,21 @@ public interface IStatisticalReadRepository
     public Task<ProductStockPriceResponse?> GetProductStockAndPriceAsync(
         int variantId,
         CancellationToken cancellationToken);
+
+    public Task<List<RecentOrderResponse>> GetRecentOrdersAsync(int count, CancellationToken cancellationToken);
+
+    public Task<IEnumerable<TopProductRevenueResponse>> GetTopProductsByRevenueAsync(
+        int limit,
+        CancellationToken cancellationToken);
+
+    public Task<IEnumerable<BrandRevenueResponse>> GetBrandRevenueDistributionAsync(CancellationToken cancellationToken);
+
+    public Task<IEnumerable<DailyRevenueTableResponse>> GetDailyRevenueTableDataAsync(
+        int days,
+        CancellationToken cancellationToken);
+
+    public Task<IEnumerable<ProductPerformanceTableResponse>> GetProductPerformanceTableAsync(
+        CancellationToken cancellationToken);
+
+    public Task<IEnumerable<WarehouseTableDataResponse>> GetWarehouseTableDataAsync(CancellationToken cancellationToken);
 }

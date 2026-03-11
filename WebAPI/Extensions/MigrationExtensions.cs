@@ -53,6 +53,7 @@ public static class MigrationExtensions
                 await SupplierStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
                 await PredefinedOptionSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
                 await ProductStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
+                await SettingsSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
                 await PermissionDataSeeder.SeedPermissionsAsync(dbContext, cancellationToken).ConfigureAwait(true);
                 await ProtectedEntitiesSeeder.SeedProtectedEntitiesAsync(
                     dbContext,

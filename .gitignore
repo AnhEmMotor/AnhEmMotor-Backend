@@ -210,3 +210,5 @@ vite.config.ts.timestamp-*
 TestResults
 TestPlans
 StrykerOutput
+Spec
+nul

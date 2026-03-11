@@ -4,8 +4,8 @@ using Application.Features.Files.Commands.DeleteFile;
 using Application.Features.Files.Commands.DeleteManyFiles;
 using Application.Features.Files.Commands.RestoreFile;
 using Application.Features.Files.Commands.RestoreManyFiles;
-using Application.Features.Files.Commands.UploadImage;
-using Application.Features.Files.Commands.UploadManyImage;
+using Application.Features.Files.Commands.UploadManyProductImages;
+using Application.Features.Files.Commands.UploadProductImage;
 using Application.Features.Files.Queries.GetDeletedFilesList;
 using Application.Features.Files.Queries.GetFileById;
 using Application.Features.Files.Queries.GetFilesList;
@@ -77,17 +77,16 @@ public class MediaFileController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Tải lên một tệp ảnh.
+    /// Tải lên một tệp ảnh cho sản phẩm.
     /// </summary>
-    [HttpPost("upload-image")]
+    [HttpPost("product/upload")]
     [RequiresAnyPermissions(Products.Edit, Products.Create)]
     [ProducesResponseType(typeof(MediaFileResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> UploadImageAsync(IFormFile file, CancellationToken cancellationToken)
+    public async Task<IActionResult> UploadProductImageAsync(IFormFile file, CancellationToken cancellationToken)
     {
-        if(file == null)
-            return BadRequest();
-        var command = new UploadImageCommand { FileContent = file.OpenReadStream(), FileName = file.FileName };
+        ArgumentNullException.ThrowIfNull(file);
+        var command = new UploadProductImageCommand { FileContent = file.OpenReadStream(), FileName = file.FileName };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleCreated(
             result,
@@ -96,13 +95,15 @@ public class MediaFileController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Tải lên nhiều ảnh cùng lúc.
+    /// Tải lên nhiều ảnh sản phẩm cùng lúc.
     /// </summary>
-    [HttpPost("upload-images")]
+    [HttpPost("product/upload-many")]
     [RequiresAnyPermissions(Products.Edit, Products.Create)]
     [ProducesResponseType(typeof(List<MediaFileResponse>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> UploadManyImagesAsync(List<IFormFile> files, CancellationToken cancellationToken)
+    public async Task<IActionResult> UploadManyProductImagesAsync(
+        List<IFormFile> files,
+        CancellationToken cancellationToken)
     {
         var fileDtos = new List<(Stream FileContent, string FileName)>();
 
@@ -114,22 +115,22 @@ public class MediaFileController(IMediator mediator) : ApiController
             }
         }
 
-        var command = new UploadManyImageCommand { Files = fileDtos };
+        var command = new UploadManyProductImagesCommand { Files = fileDtos };
 
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleCreated(result);
     }
 
     /// <summary>
-    /// Xoá tệp media theo tên file.
+    /// Xoá tệp media sản phẩm theo tên file.
     /// </summary>
-    [HttpDelete("{storagePath}")]
+    [HttpDelete("product/{**storagePath}")]
     [RequiresAnyPermissions(Products.Edit, Products.Create)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> DeleteFileAsync(string storagePath, CancellationToken cancellationToken)
+    public async Task<IActionResult> DeleteProductFileAsync(string storagePath, CancellationToken cancellationToken)
     {
-        var command = new DeleteFileCommand() with { StoragePath = storagePath };
+        var command = new DeleteProductImageCommand() { StoragePath = storagePath };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -152,7 +153,7 @@ public class MediaFileController(IMediator mediator) : ApiController
     /// <summary>
     /// Khôi phục lại tệp media đã xoá theo tên file.
     /// </summary>
-    [HttpPost("restore/{storagePath}")]
+    [HttpPost("restore/{**storagePath}")]
     [RequiresAnyPermissions(Products.Edit, Products.Create)]
     [ProducesResponseType(typeof(MediaFileResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -181,7 +182,7 @@ public class MediaFileController(IMediator mediator) : ApiController
     /// <summary>
     /// Xem ảnh với khả năng resize theo kích thước mong muốn.
     /// </summary>
-    [HttpGet("view-image/{storagePath}")]
+    [HttpGet("view-image/{**storagePath}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]

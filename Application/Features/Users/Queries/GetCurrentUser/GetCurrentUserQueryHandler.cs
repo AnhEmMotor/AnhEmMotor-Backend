@@ -46,6 +46,8 @@ public class GetCurrentUserQueryHandler(IUserReadRepository userReadRepository, 
             Gender = user.Gender,
             PhoneNumber = user.PhoneNumber,
             Status = user.Status,
+            AvatarUrl = user.AvatarUrl,
+            DateOfBirth = user.DateOfBirth,
             Permissions = userPermissions
         };
     }

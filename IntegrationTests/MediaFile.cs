@@ -68,7 +68,7 @@ public class MediaFile : IAsyncLifetime
 
         var content = IntegrationTestFileHelper.CreateSingleImageForm();
 
-        var response = await _client.PostAsync("/api/v1/MediaFile/upload-image", content, CancellationToken.None)
+        var response = await _client.PostAsync("/api/v1/MediaFile/product/upload", content, CancellationToken.None)
             .ConfigureAwait(true);
 
         if(response.StatusCode != HttpStatusCode.Created)
@@ -119,7 +119,7 @@ public class MediaFile : IAsyncLifetime
             ("files", "image3.jpg", "image/jpeg", validBytes));
 
         var response = await _client.PostAsync(
-            "/api/v1/MediaFile/upload-images",
+            "/api/v1/MediaFile/product/upload-many",
             content,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
@@ -173,7 +173,9 @@ public class MediaFile : IAsyncLifetime
         db.MediaFiles.Add(mediaFile);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        var response = await _client.DeleteAsync($"/api/v1/MediaFile/{mediaFile.StoragePath}", CancellationToken.None)
+        var response = await _client.DeleteAsync(
+            $"/api/v1/MediaFile/product/{mediaFile.StoragePath}",
+            CancellationToken.None)
             .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -217,7 +219,10 @@ public class MediaFile : IAsyncLifetime
             ("files", "delete2.jpg", "image/jpeg", validBytes),
             ("files", "delete3.jpg", "image/jpeg", validBytes));
 
-        var uploadRes = await _client.PostAsync("/api/v1/MediaFile/upload-images", content, CancellationToken.None)
+        var uploadRes = await _client.PostAsync(
+            "/api/v1/MediaFile/product/upload-many",
+            content,
+            CancellationToken.None)
             .ConfigureAwait(true);
         uploadRes.EnsureSuccessStatusCode();
         var uploadedFiles = await uploadRes.Content
@@ -333,7 +338,10 @@ public class MediaFile : IAsyncLifetime
             ("files", "restore2.jpg", "image/jpeg", validBytes),
             ("files", "restore3.jpg", "image/jpeg", validBytes));
 
-        var uploadRes = await _client.PostAsync("/api/v1/MediaFile/upload-images", content, CancellationToken.None)
+        var uploadRes = await _client.PostAsync(
+            "/api/v1/MediaFile/product/upload-many",
+            content,
+            CancellationToken.None)
             .ConfigureAwait(true);
         uploadRes.EnsureSuccessStatusCode();
         var uploadedFiles = await uploadRes.Content
@@ -390,7 +398,7 @@ public class MediaFile : IAsyncLifetime
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var content = IntegrationTestFileHelper.CreateSingleImageForm();
-        var uploadRes = await _client.PostAsync("/api/v1/MediaFile/upload-image", content, CancellationToken.None)
+        var uploadRes = await _client.PostAsync("/api/v1/MediaFile/product/upload", content, CancellationToken.None)
             .ConfigureAwait(true);
         uploadRes.EnsureSuccessStatusCode();
         var uploadedFile = await uploadRes.Content
@@ -430,7 +438,7 @@ public class MediaFile : IAsyncLifetime
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var content = IntegrationTestFileHelper.CreateSingleImageForm();
-        var uploadRes = await _client.PostAsync("/api/v1/MediaFile/upload-image", content, CancellationToken.None)
+        var uploadRes = await _client.PostAsync("/api/v1/MediaFile/product/upload", content, CancellationToken.None)
             .ConfigureAwait(true);
         uploadRes.EnsureSuccessStatusCode();
         var uploadedFile = await uploadRes.Content

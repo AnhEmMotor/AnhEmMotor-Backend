@@ -12,7 +12,9 @@ public record UpdateCurrentUserCommand : IRequest<Result<UserDTOForManagerRespon
 
     public string? FullName { get; init; }
 
-    public string? Gender { get; init; }
+    public string? Gender { get; set; }
 
-    public string? PhoneNumber { get; init; }
+    public string? PhoneNumber { get; set; }
+
+    public DateTime? DateOfBirth { get; init; }
 }

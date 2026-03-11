@@ -17,5 +17,11 @@ public class ApplicationUser : IdentityUser<Guid>
 
     public DateTimeOffset? DeletedAt { get; set; }
 
+    public DateTimeOffset? CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+
+    public string? AvatarUrl { get; set; }
+
+    public DateTime? DateOfBirth { get; set; }
+
     public ICollection<IdentityUserRole<Guid>> UserRoles { get; set; } = [];
 }

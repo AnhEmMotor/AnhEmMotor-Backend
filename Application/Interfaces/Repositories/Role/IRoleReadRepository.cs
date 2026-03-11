@@ -1,5 +1,7 @@
 ﻿using Application.ApiContracts.Permission.Responses;
 using Domain.Entities;
+using Domain.Primitives;
+using Sieve.Models;
 using System;
 
 namespace Application.Interfaces.Repositories.Role
@@ -8,6 +10,10 @@ namespace Application.Interfaces.Repositories.Role
     {
         public Task<List<ApplicationRole>> GetRolesByNameAsync(
             IEnumerable<string> names,
+            CancellationToken cancellationToken = default);
+
+        public Task<List<ApplicationRole>> GetRolesByIdsAsync(
+            IEnumerable<Guid> ids,
             CancellationToken cancellationToken = default);
 
         public Task<List<RolePermission>> GetRolesPermissionByRoleIdAsync(
@@ -23,6 +29,10 @@ namespace Application.Interfaces.Repositories.Role
             CancellationToken cancellationToken = default);
 
         public Task<List<RoleSelectResponse>> GetAllRolesSelectAsync(CancellationToken cancellationToken = default);
+
+        public Task<PagedResult<RoleSelectResponse>> GetPagedRolesSelectAsync(
+            SieveModel sieveModel,
+            CancellationToken cancellationToken = default);
 
         public Task<bool> IsRoleExistAsync(string roleName, CancellationToken cancellationToken = default);
 

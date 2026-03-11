@@ -18,6 +18,10 @@ public class UserDTOForManagerResponse
 
     public string? Status { get; set; } = string.Empty;
 
+    public string? AvatarUrl { get; set; }
+
+    public DateTime? DateOfBirth { get; set; }
+
     public DateTimeOffset? DeletedAt { get; set; }
 
     public IEnumerable<string>? Roles { get; set; } = [];

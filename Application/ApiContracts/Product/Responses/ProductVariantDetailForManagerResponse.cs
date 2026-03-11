@@ -30,5 +30,8 @@ public class ProductVariantDetailForManagerResponse
 
     [JsonPropertyName("status_stock_id")]
     public string StatusStockId { get; set; } = string.Empty;
+
+    [JsonPropertyName("inventory_status")]
+    public string InventoryStatus { get; set; } = Domain.Constants.InventoryStatus.InStock;
 }
 

@@ -11,6 +11,7 @@ using Application.Features.Products.Commands.UpdateProduct;
 using Application.Features.Products.Commands.UpdateProductPrice;
 using Application.Features.Products.Commands.UpdateProductStatus;
 using Application.Features.Products.Commands.UpdateVariantPrice;
+using Application.Features.Products.Mappings;
 using Application.Features.Products.Queries.CheckSlugAvailability;
 using Application.Features.Products.Queries.GetProductsListForPriceManagement;
 using Application.Interfaces.Repositories;
@@ -75,7 +76,7 @@ public class Product
         _productVariantInsertRepository = new Mock<IProductVariantInsertRepository>();
         _variantOptionValueDeleteRepoMock = new Mock<IVariantOptionValueDeleteRepository>();
 
-        new Application.Features.Products.Mappings.ProductMappingConfig().Register(TypeAdapterConfig.GlobalSettings);
+        new ProductMappingConfig().Register(TypeAdapterConfig.GlobalSettings);
     }
 
 #pragma warning disable IDE0079 
@@ -1695,6 +1696,81 @@ public class Product
         var v2 = productDto.Variants.First(v => v.Id == 102);
         v2.Name.Should().Be("Mặc định");
         v2.Price.Should().Be(0);
+    }
+
+    [Fact(DisplayName = "PRODUCT_128 - CalculateInventoryStatus - Trường hợp Còn hàng")]
+    public void CalculateInventoryStatus_AvailableMoreThanAlert_ReturnsInStock()
+    {
+        long availableStock = 10;
+        long alertLevel = 5;
+
+        var result = ProductMappingConfig.CalculateInventoryStatus(availableStock, alertLevel);
+
+        result.Should().Be(InventoryStatus.InStock);
+    }
+
+    [Fact(DisplayName = "PRODUCT_129 - CalculateInventoryStatus - Trường hợp Sắp hết hàng")]
+    public void CalculateInventoryStatus_AvailableLessThanOrEqualToAlert_ReturnsLowStock()
+    {
+        long availableStock = 3;
+        long alertLevel = 5;
+
+        var result = ProductMappingConfig.CalculateInventoryStatus(availableStock, alertLevel);
+
+        result.Should().Be(InventoryStatus.LowStock);
+    }
+
+    [Fact(DisplayName = "PRODUCT_130 - CalculateInventoryStatus - Trường hợp Hết hàng")]
+    public void CalculateInventoryStatus_AvailableZeroOrLess_ReturnsOutOfStock()
+    {
+        long availableStock = 0;
+        long alertLevel = 5;
+
+        var result = ProductMappingConfig.CalculateInventoryStatus(availableStock, alertLevel);
+
+        result.Should().Be(InventoryStatus.OutOfStock);
+    }
+
+    [Fact(DisplayName = "PRODUCT_131 - CalculateProductInventoryStatus - Lấy trạng thái tệ nhất")]
+    public void CalculateProductInventoryStatus_MixedVariants_ReturnsWorstStatus()
+    {
+        long alertLevel = 5;
+        var product = new ProductEntity
+        {
+            ProductVariants =
+                [ new ProductVariant
+                {
+                    InputInfos =
+                        [ new InputInfo
+                            {
+                                RemainingCount = 10,
+                                InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
+                            } ],
+                    OutputInfos = []
+                }, new ProductVariant
+                {
+                    InputInfos =
+                        [ new InputInfo
+                            {
+                                RemainingCount = 3,
+                                InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
+                            } ],
+                    OutputInfos = []
+                }, new ProductVariant
+                {
+                    InputInfos =
+                        [ new InputInfo
+                            {
+                                RemainingCount = 0,
+                                InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
+                            } ],
+                    OutputInfos = []
+                } ]
+        };
+
+        var result = ProductMappingConfig.CalculateProductInventoryStatus(product, alertLevel);
+
+        result.Should().Be(InventoryStatus.OutOfStock);
     }
 
 #pragma warning restore CRR0035
