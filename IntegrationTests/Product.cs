@@ -516,71 +516,6 @@ public class Product : IAsyncLifetime
         content!.Items.Should().Contain(p => p.Id == deletedProduct.Id);
     }
 
-    [Fact(DisplayName = "PRODUCT_068 - Lấy danh sách variants-lite chỉ trả về variants của sản phẩm for-sale")]
-    public async Task GetVariantsLite_ReturnsOnlyForSaleProductVariants()
-    {
-        var uniqueId = Guid.NewGuid().ToString("N")[..8];
-        var username = $"user_{uniqueId}";
-        var email = $"user_{uniqueId}@gmail.com";
-        var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
-            _factory.Services,
-            username,
-            password,
-            [ PermissionsList.Products.View ],
-            CancellationToken.None,
-            email)
-            .ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
-            _client,
-            username,
-            password,
-            CancellationToken.None)
-            .ConfigureAwait(true);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
-        using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
-        if(!await db.ProductStatuses
-            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
-            .ConfigureAwait(true))
-            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
-        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
-        var category = new ProductCategoryEntity { Name = $"Category_{uniqueId}" };
-        var brand = new BrandEntity { Name = $"Brand_{uniqueId}" };
-        db.ProductCategories.Add(category);
-        db.Brands.Add(brand);
-        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
-        var product = new ProductEntity
-        {
-            Name = $"Product_{uniqueId}",
-            CategoryId = category.Id,
-            BrandId = brand.Id,
-            StatusId = productStatusId,
-            DeletedAt = null
-        };
-        db.Products.Add(product);
-        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
-        var variant = new ProductVariant { ProductId = product.Id, Price = 100, UrlSlug = $"v_{uniqueId}" };
-        db.ProductVariants.Add(variant);
-        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
-        var response = await _client.GetAsync("/api/v1/product/variants-lite", CancellationToken.None)
-            .ConfigureAwait(true);
-
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
-            .ReadFromJsonAsync<PagedResult<ProductVariantLiteResponse>>(CancellationToken.None)
-            .ConfigureAwait(true);
-        content.Should().NotBeNull();
-        content!.Items.Should().Contain(v => v.Id == variant.Id);
-    }
-
     [Fact(DisplayName = "PRODUCT_069 - Lấy variants-lite/for-input chỉ trả về Id, Name, CoverImageUrl, Price")]
     public async Task GetVariantsLiteForInput_ReturnsOnlyRequiredFields()
     {
@@ -707,126 +642,6 @@ public class Product : IAsyncLifetime
             .ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Items.Should().Contain(v => v.Id == variant.Id);
-    }
-
-    [Fact(DisplayName = "PRODUCT_071 - Lấy chi tiết sản phẩm trả về đầy đủ thông tin kỹ thuật")]
-    public async Task GetProductById_ReturnsFullTechnicalDetails()
-    {
-        var uniqueId = Guid.NewGuid().ToString("N")[..8];
-        var username = $"user_{uniqueId}";
-        var email = $"user_{uniqueId}@gmail.com";
-        var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
-            _factory.Services,
-            username,
-            password,
-            [ PermissionsList.Products.View ],
-            CancellationToken.None,
-            email)
-            .ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
-            _client,
-            username,
-            password,
-            CancellationToken.None)
-            .ConfigureAwait(true);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
-        using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
-        if(!await db.ProductStatuses
-            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
-            .ConfigureAwait(true))
-            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
-        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
-        var category = new ProductCategoryEntity { Name = $"Category_{uniqueId}" };
-        var brand = new BrandEntity { Name = $"Brand_{uniqueId}" };
-        db.ProductCategories.Add(category);
-        db.Brands.Add(brand);
-        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
-        var product = new ProductEntity
-        {
-            Name = $"Product_{uniqueId}",
-            CategoryId = category.Id,
-            BrandId = brand.Id,
-            StatusId = productStatusId,
-            Displacement = 150.5m,
-            MaxPower = "12.5HP"
-        };
-        db.Products.Add(product);
-        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
-        var response = await _client.GetAsync($"/api/v1/product/{product.Id}", CancellationToken.None)
-            .ConfigureAwait(true);
-
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
-            .ReadFromJsonAsync<ProductDetailResponse>(CancellationToken.None)
-            .ConfigureAwait(true);
-        content.Should().NotBeNull();
-        content!.Id.Should().Be(product.Id);
-        content.Displacement.Should().Be(150.5m);
-        content.MaxPower.Should().Be("12.5HP");
-    }
-
-    [Fact(DisplayName = "PRODUCT_072 - Lấy chi tiết sản phẩm thất bại khi sản phẩm bị xóa")]
-    public async Task GetProductById_DeletedProduct_ReturnsNotFound()
-    {
-        var uniqueId = Guid.NewGuid().ToString("N")[..8];
-        var username = $"user_{uniqueId}";
-        var email = $"user_{uniqueId}@gmail.com";
-        var password = "ThisIsStrongPassword1@";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
-            _factory.Services,
-            username,
-            password,
-            [ PermissionsList.Products.View ],
-            CancellationToken.None,
-            email)
-            .ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
-            _client,
-            username,
-            password,
-            CancellationToken.None)
-            .ConfigureAwait(true);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
-        using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
-        if(!await db.ProductStatuses
-            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
-            .ConfigureAwait(true))
-            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
-        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
-        var category = new ProductCategoryEntity { Name = $"Category_{uniqueId}" };
-        var brand = new BrandEntity { Name = $"Brand_{uniqueId}" };
-        db.ProductCategories.Add(category);
-        db.Brands.Add(brand);
-        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
-        var product = new ProductEntity
-        {
-            Name = $"Deleted_{uniqueId}",
-            CategoryId = category.Id,
-            BrandId = brand.Id,
-            StatusId = productStatusId,
-            DeletedAt = DateTimeOffset.UtcNow
-        };
-        db.Products.Add(product);
-        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
-        var response = await _client.GetAsync($"/api/v1/product/{product.Id}", CancellationToken.None)
-            .ConfigureAwait(true);
-
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
     [Fact(DisplayName = "PRODUCT_073 - Lấy variants theo ProductId chỉ trả về variants chưa xóa")]
@@ -1129,7 +944,7 @@ public class Product : IAsyncLifetime
         db.VariantOptionValues.Add(new VariantOptionValue { VariantId = variant.Id, OptionValueId = val2.Id });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        var response = await _client.GetAsync($"/api/v1/product/{product.Id}", CancellationToken.None)
+        var response = await _client.GetAsync($"/api/v1/product/{product.Id}/for-manager", CancellationToken.None)
             .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);

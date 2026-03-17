@@ -77,7 +77,7 @@
 - Mỗi khi có sự thay đổi trong code chạy dự án, bắt buộc phải build và test dự án.
 - Trước khi bắt đầu Build và Test, phải thực hiện đóng sạch (Force Stop) tất cả các tiến trình dotnet đang vận hành trên hệ thống. Việc này nhằm giải phóng hoàn toàn các tệp tin đang bị khóa (File Locking) và làm trống bộ nhớ đệm của trình biên dịch.
 - Kiểm tra biên dịch: Chạy câu lệnh dotnet build để kiểm tra xem có cảnh báo và lỗi cú pháp hay không.
-- Ngay sau đó, Chạy câu lệnh dotnet test với mức độ chi tiết normal. Toàn bộ dữ liệu đầu ra phải hiển thị trên cửa sổ lệnh, chỉ khi nào cửa sổ lệnh hoàn tất thì mới được tiếp tục sang bước tiếp theo.
+- Ngay sau đó, Chạy câu lệnh dotnet test. Toàn bộ dữ liệu đầu ra phải hiển thị trên cửa sổ lệnh, chỉ khi nào cửa sổ lệnh hoàn tất thì mới được tiếp tục sang bước tiếp theo.
 - Kiểm tra kết quả: Sau khi lệnh test dự án thành công, buộc phải đọc cửa sổ lệnh sau khi xong để xem coi kết quả. Nếu như kết quả thất bại khi build hoặc khi test, buộc phải sửa lại lỗi dựa trên lỗi được chỉ ra dựa trên cửa sổ lệnh đó cho đến khi file kết quả không có bất kì lỗi và cảnh báo nào (Đặc biệt là tuyệt đối không có bất kì cảnh báo nào). Trong quá trình sửa tuyệt đối không được làm mất logic test, đặc biệt là logic kiểm tra kết quả bài test đó.
 
 ## Tuyệt đối không tự ý Commit Dự án

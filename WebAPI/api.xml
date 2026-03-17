@@ -463,11 +463,6 @@
             khi có quyền xem danh sách sản phẩm).
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.GetActiveVariantLiteProductsPublicAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
-            <summary>
-            Lấy danh sách biến thể sản phẩm của tất cả sản phẩm (có phân trang, lọc, tìm kiếm - cho phép vào với mọi user).
-            </summary>
-        </member>
         <member name="M:WebAPI.Controllers.V1.ProductController.GetActiveVariantLiteProductsForInputAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             `Lấy danh sách biến thể sản phẩm của tất cả sản phẩm (có phân trang, lọc, tìm kiếm - chỉ có thể vào khi và chỉ
@@ -489,11 +484,6 @@
         <member name="M:WebAPI.Controllers.V1.ProductController.GetInventoryStatuses">
             <summary>
             Lấy danh sách ánh xạ trạng thái tồn kho (Key -> Tên tiếng Việt).
-            </summary>
-        </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.GetVarientByIdAsync(System.Int32,System.Threading.CancellationToken)">
-            <summary>
-            Lấy thông tin chi tiết sản phẩm theo Id (dành cho toàn bộ người dùng khách)
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.ProductController.GetVarientByIdForManagerAsync(System.Int32,System.Threading.CancellationToken)">
