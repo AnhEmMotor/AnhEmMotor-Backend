@@ -1,30 +1,18 @@
 ﻿using Domain.Constants;
-using System;
 using OptionEntity = Domain.Entities.Option;
 
-namespace Application.Interfaces.Repositories.Option
+namespace Application.Interfaces.Repositories.Option;
+
+public interface IOptionReadRepository
 {
-    public interface IOptionReadRepository
-    {
-        public IQueryable<OptionEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly);
+    public IQueryable<OptionEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-        public Task<IEnumerable<OptionEntity>> GetAllAsync(
-            CancellationToken cancellationToken,
-            DataFetchMode mode = DataFetchMode.ActiveOnly);
+    public Task<OptionEntity?> GetByIdAsync(int id, CancellationToken cancellationToken);
 
-        public Task<OptionEntity?> GetByIdAsync(
-            int id,
-            CancellationToken cancellationToken,
-            DataFetchMode mode = DataFetchMode.ActiveOnly);
+    public Task<List<OptionEntity>> GetByNamesAsync(
+        IEnumerable<string> names,
+        CancellationToken cancellationToken,
+        DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-        public Task<IEnumerable<OptionEntity>> GetByIdAsync(
-            IEnumerable<int> ids,
-            CancellationToken cancellationToken,
-            DataFetchMode mode = DataFetchMode.ActiveOnly);
-
-        public Task<IEnumerable<OptionEntity>> GetByNamesAsync(
-            IEnumerable<string> names,
-            CancellationToken cancellationToken,
-            DataFetchMode mode = DataFetchMode.ActiveOnly);
-    }
+    public Task<List<OptionEntity>> GetAllWithOptionsAsync(CancellationToken cancellationToken);
 }

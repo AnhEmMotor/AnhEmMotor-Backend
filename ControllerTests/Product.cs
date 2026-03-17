@@ -17,6 +17,8 @@ using Application.Features.Products.Queries.GetDeletedProductsList;
 using Application.Features.Products.Queries.GetProductsList;
 using Application.Features.Products.Queries.GetProductsListForManager;
 using Application.Features.Products.Queries.GetProductsListForPriceManagement;
+using Application.ApiContracts.Product.Responses;
+using Domain.Primitives;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -79,13 +81,10 @@ public class Product
     {
         _senderMock.Setup(m => m.Send(It.IsAny<GetProductsListQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(
-                new Domain.Primitives.PagedResult<Application.ApiContracts.Product.Responses.ProductDetailResponse>(
-                    [],
-                    0,
-                    1,
-                    10));
+                Result<PagedResult<ProductListStoreResponse>>.Success(
+                    new PagedResult<ProductListStoreResponse>([], 0, 1, 10)));
 
-        var result = await _controller.GetProductsAsync(new Sieve.Models.SieveModel(), CancellationToken.None)
+        var result = await _controller.GetProductsAsync(new GetProductsRequest(), CancellationToken.None)
             .ConfigureAwait(true);
 
         Assert.NotNull(result);
@@ -269,12 +268,9 @@ public class Product
     [Fact(DisplayName = "PRODUCT_100 - API hỗ trợ pagination với custom page size")]
     public async Task GetProducts_CustomPageSize_ReturnsCorrectPagedResult()
     {
-        var sieveModel = new Sieve.Models.SieveModel { Page = 2, PageSize = 5 };
-        var expectedResult = new Domain.Primitives.PagedResult<Application.ApiContracts.Product.Responses.ProductDetailResponse>(
-            [],
-            15,
-            2,
-            5);
+        var sieveModel = new GetProductsRequest { Page = 2, PageSize = 5 };
+        var expectedResult = Result<PagedResult<ProductListStoreResponse>>.Success(
+            new PagedResult<ProductListStoreResponse>([], 15, 2, 5));
 
         _senderMock.Setup(m => m.Send(It.IsAny<GetProductsListQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResult);

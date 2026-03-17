@@ -30,6 +30,7 @@
         public static class Product
         {
             public const string GetVarientById = "GetVarientById";
+            public const string GetVarientByIdForManager = "GetVarientByIdForManager";
         }
 
         public static class SaleOrders

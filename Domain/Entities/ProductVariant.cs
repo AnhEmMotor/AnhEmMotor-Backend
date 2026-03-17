@@ -20,7 +20,7 @@ namespace Domain.Entities
         [Column("Price", TypeName = "decimal(18, 2)")]
         public decimal? Price { get; set; }
 
-        [Column("CoverImageUrl", TypeName = "nvarchar(100)")]
+        [Column("CoverImageUrl", TypeName = "nvarchar(1000)")]
         public string? CoverImageUrl { get; set; }
 
         public Product? Product { get; set; }

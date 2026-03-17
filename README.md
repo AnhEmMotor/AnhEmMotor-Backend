@@ -1,11 +1,14 @@
 # AnhEmMotor Backend API
 
-[English](#english) | [Tiếng Việt](#tiếng-việt)
+[English](#english) | [Tiếng Việt](#tiếng-việt) | [Rules (Quy chuẩn)](./RULES.md)
 
 ---
 
 <a id="english"></a>
+
 # English
+
+[Project Rules](./RULES.md)
 
 **Copyright (C) 2026 Tran Thanh Binh, Nguyen Huynh Kim Ngan, Nguyen Trinh Anh Khoi, Trinh Minh Uyen.**
 
@@ -29,6 +32,23 @@ See the [LICENSE](LICENSE) file for details.
 > - 💥 **The application will CRASH when running!**
 >
 > ➡️ For details, see [Section 3. Create and Manage Database Migrations](#3-create-and-manage-database-migrations)
+
+## Table of Contents
+
+- [1. System Requirements](#1-system-requirements)
+- [2. Project Setup](#2-project-setup)
+  - [1. Clone the project, Restore NuGet & NodeJS Packages](#1-clone-the-project-restore-nuget--nodejs-packages)
+  - [2. Create configuration files](#2-create-configuration-files)
+  - [3. Application Configuration](#3-application-configuration)
+  - [4. Database Creation](#4-database-creation)
+- [3. Create and Manage Database Migrations](#3-create-and-manage-database-migrations)
+  - [Create Migration (Recommended Way)](#create-migration-recommended-way)
+  - [Create Migration Manually (Advanced)](#create-migration-manually-advanced)
+  - [Useful Migration Commands](#useful-migration-commands)
+- [4. Running the application](#4-running-the-application)
+- [5. Test Environment Configuration (Required)](#5-test-environment-configuration-required)
+- [6. GitHub Secrets Configuration (For Production Deploy)](#6-github-secrets-configuration-for-production-deploy)
+- [7. Troubleshooting](#7-troubleshooting)
 
 # 1. System Requirements
 
@@ -92,10 +112,10 @@ Open the `WebAPI/appsettings.json` file and fill in the following information:
 
   ```json
   {
-    "Provider": "SqlServer",
-    "ConnectionStrings": {
-      "StringConnection": "Server=localhost;Database=AnhEmMotorDB;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true"
-    }
+  	"Provider": "SqlServer",
+  	"ConnectionStrings": {
+  		"StringConnection": "Server=localhost;Database=AnhEmMotorDB;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true"
+  	}
   }
   ```
 
@@ -103,10 +123,10 @@ Open the `WebAPI/appsettings.json` file and fill in the following information:
 
   ```json
   {
-    "Provider": "MySql",
-    "ConnectionStrings": {
-      "StringConnection": "Server=localhost;Database=anhemmotor;User=root;Password=your_password;"
-    }
+  	"Provider": "MySql",
+  	"ConnectionStrings": {
+  		"StringConnection": "Server=localhost;Database=anhemmotor;User=root;Password=your_password;"
+  	}
   }
   ```
 
@@ -169,6 +189,7 @@ Or allow all:
 ```
 
 ### 5. CORS Configuration
+
 Configure CORS to allow other domains to call the API:
 
 ```json
@@ -176,7 +197,9 @@ Configure CORS to allow other domains to call the API:
   "AllowedOrigins": "https://frontend.com;http://localhost:3000"
 }
 ```
+
 Or allow all (only for development):
+
 ```json
 "Cors": {
   "AllowedOrigins": "*"
@@ -264,9 +287,9 @@ Configure initial data seeding:
 
    **Important:** After running for the first time, disable `RunDataSeedingOnStartup`:
 
-    ```json
-    "RunDataSeedingOnStartup": false
-    ```
+   ```json
+   "RunDataSeedingOnStartup": false
+   ```
 
 # 3. Create and Manage Database Migrations
 
@@ -330,8 +353,6 @@ dotnet ef migrations add MigrationName --context MySqlDbContext --output-dir MyS
 >
 > **Recommendation:** Always use `add-migration.ps1` to prevent forgetting!
 
-
-
 ## Useful Migration Commands
 
 ### View migration list
@@ -379,7 +400,7 @@ https://localhost:7001/swagger
 2. Run the application:
 
    ```powershell
-   dotnet build --project "WebAPI" --launch-profile "https"
+   dotnet watch --project "WebAPI/WebAPI.csproj" --launch-profile "https"
    ```
 
 3. The application will run at:
@@ -417,18 +438,19 @@ The following secrets need to be set up in the GitHub repository:
 
 ### Required Secrets
 
-| Secret Name       | Description                         | Example                                                        |
-| ----------------- | ----------------------------------- | -------------------------------------------------------------- |
-| `ALLOWED_HOSTS`   | Allowed domains                     | `api.yourdomain.com;yourdomain.com` or `*`                     |
-| `CORS_ALLOWED_ORIGINS` | CORS Allowed Origins           | `https://yourdomain.com;http://localhost:3000` or `*`          |
-| `DB_CONNECTION`   | MySQL connection string             | `Server=localhost;Database=anhemmotor;User=root;Password=xxx;` |
-| `JWT_KEY`         | JWT secret key (>= 32 chars)        | `Your-Super-Secret-JWT-Key-32-Chars`                           |
-| `JWT_ISSUER`      | API URL                             | `https://api.yourdomain.com`                                   |
-| `JWT_AUDIENCE`    | Client URL                          | `https://yourdomain.com`                                       |
-| `HOST`            | VPS IP or domain, or \*             | `*`                                                            |
-| `USERNAME`        | SSH username                        | `root` or `youruser`                                           |
-| `SSH_PRIVATE_KEY` | Private SSH key                     | Content of `~/.ssh/id_rsa`                                     |
-| `RUN_DATA_SEEDING` | Run data seeding on deploy (true/false) | `false` (production) or `true` (first-time setup)        |
+| Secret Name            | Description                             | Example                                                        |
+| ---------------------- | --------------------------------------- | -------------------------------------------------------------- |
+| `ALLOWED_HOSTS`        | Allowed domains                         | `api.yourdomain.com;yourdomain.com` or `*`                     |
+| `CORS_ALLOWED_ORIGINS` | CORS Allowed Origins                    | `https://yourdomain.com;http://localhost:3000` or `*`          |
+| `DB_CONNECTION`        | MySQL connection string                 | `Server=localhost;Database=anhemmotor;User=root;Password=xxx;` |
+| `JWT_KEY`              | JWT secret key (>= 32 chars)            | `Your-Super-Secret-JWT-Key-32-Chars`                           |
+| `JWT_ISSUER`           | API URL                                 | `https://api.yourdomain.com`                                   |
+| `JWT_AUDIENCE`         | Client URL                              | `https://yourdomain.com`                                       |
+| `HOST`                 | VPS IP or domain, or \*                 | `*`                                                            |
+| `USERNAME`             | SSH username                            | `root` or `youruser`                                           |
+| `SSH_PRIVATE_KEY`      | Private SSH key                         | Content of `~/.ssh/id_rsa`                                     |
+| `RUN_DATA_SEEDING`     | Run data seeding on deploy (true/false) | `false` (production) or `true` (first-time setup)              |
+| `COOKIE_DOMAIN`        | Cookie Domain (for refresh tokens)      | `.yourdomain.com` or empty for IP address                      |
 
 ### Array Secrets (SuperRoles, ProtectedUsers, DefaultRoles)
 
@@ -459,7 +481,11 @@ The following secrets need to be set up in the GitHub repository:
 **Multiple users:**
 
 ```json
-["admin@anhem.com:Admin@123456","manager@anhem.com","support@anhem.com:Support@2024"]
+[
+	"admin@anhem.com:Admin@123456",
+	"manager@anhem.com",
+	"support@anhem.com:Support@2024"
+]
 ```
 
 #### DEFAULT_ROLES
@@ -473,10 +499,11 @@ The following secrets need to be set up in the GitHub repository:
 **Multiple roles:**
 
 ```json
-["User","Customer"]
+["User", "Customer"]
 ```
 
 > **Note:** Do not include spaces after commas in the JSON array! For example, the following two examples are incorrect:
+
 ```json
 ["admin@anhem.com:Admin@123456" , "manager@anhem.com"]
 ["admin@anhem.com:Admin@123456", "manager@anhem.com"]
@@ -526,6 +553,7 @@ Ensure `Jwt.Key` in `appsettings.json` is longer than 32 characters.
 **Solution:**
 
 Try run 2 command in Command Prompt Administrator:
+
 ```
 sc stop winnat
 sc start winnat
@@ -542,7 +570,10 @@ If it does not work, change the port in the `WebAPI/Properties/launchSettings.js
 ---
 
 <a id="tiếng-việt"></a>
+
 # Tiếng Việt
+
+[Quy chuẩn dự án](./RULES.md)
 
 **Copyright (C) 2026 Tran Thanh Binh, Nguyen Huynh Kim Ngan, Nguyen Trinh Anh Khoi, Trinh Minh Uyen.**
 
@@ -566,8 +597,26 @@ Xem tệp [LICENSE](LICENSE) để biết chi tiết.
 > - 💥 **Application sẽ CRASH khi chạy!**
 >
 > ➡️ Chi tiết xem [Section 3. Tạo và Quản Lý Database Migrations](#3-tạo-và-quản-lý-database-migrations)
+>
+> **🚨 QUAN TRỌNG VỀ DEPLOY:**
+> **Khi deploy lên host, hãy nhớ cấu hình `COOKIE_DOMAIN` trong GitHub Secrets. Nếu để trống khi sử dụng tên miền, session sẽ không thể duy trì khi reload trang!**
 
+## Mục lục
 
+- [1. Yêu cầu hệ thống](#1-yêu-cầu-hệ-thống)
+- [2. Thiết lập dự án](#2-thiết-lập-dự-án)
+  - [1. Clone dự án, Restore NuGet & NodeJS Package](#1-clone-dự-án-restore-nuget--nodejs-package)
+  - [2. Tạo file cấu hình](#2-tạo-file-cấu-hình)
+  - [3. Cấu hình ứng dụng](#3-cấu-hình-ứng-dụng)
+  - [4. Tạo Database](#4-tạo-database)
+- [3. Tạo và Quản Lý Database Migrations](#3-tạo-và-quản-lý-database-migrations)
+  - [Tạo Migration (Recommended Way)](#tạo-migration-recommended-way)
+  - [Tạo Migration Thủ Công (Advanced)](#tạo-migration-thủ-công-advanced)
+  - [Các Lệnh Migration Hữu Ích](#các-lệnh-migration-hữu-ích)
+- [4. Chạy ứng dụng](#4-chạy-ứng-dụng)
+- [5. Cấu hình Môi trường Test (Yêu cầu)](#5-cấu-hình-môi-trường-test-yêu-cầu)
+- [6. GitHub Secrets Configuration (Cho Production Deploy)](#6-github-secrets-configuration-cho-production-deploy)
+- [7. Troubleshooting](#7-troubleshooting-1)
 
 # 1. Yêu cầu hệ thống
 
@@ -631,10 +680,10 @@ Mở file `WebAPI/appsettings.json` và điền các thông tin sau:
 
   ```json
   {
-    "Provider": "SqlServer",
-    "ConnectionStrings": {
-      "StringConnection": "Server=localhost;Database=AnhEmMotorDB;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true"
-    }
+  	"Provider": "SqlServer",
+  	"ConnectionStrings": {
+  		"StringConnection": "Server=localhost;Database=AnhEmMotorDB;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true"
+  	}
   }
   ```
 
@@ -642,10 +691,10 @@ Mở file `WebAPI/appsettings.json` và điền các thông tin sau:
 
   ```json
   {
-    "Provider": "MySql",
-    "ConnectionStrings": {
-      "StringConnection": "Server=localhost;Database=anhemmotor;User=root;Password=your_password;"
-    }
+  	"Provider": "MySql",
+  	"ConnectionStrings": {
+  		"StringConnection": "Server=localhost;Database=anhemmotor;User=root;Password=your_password;"
+  	}
   }
   ```
 
@@ -654,7 +703,6 @@ Mở file `WebAPI/appsettings.json` và điền các thông tin sau:
 > - **Local Development:** Dùng **SQL Server**
 > - **Production/VPS:** sử dụng **MySQL**
 > - **Testing:** Tự động dùng MySQL qua Docker (không cần cấu hình, nhưng cần phải cài đặt Docker)
-
 
 ### 2. Connection String Chi Tiết
 
@@ -709,6 +757,7 @@ Hoặc cho phép tất cả:
 ```
 
 ### 5. CORS Configuration
+
 Cấu hình CORS để cho phép các domain khác gọi API:
 
 ```json
@@ -716,7 +765,9 @@ Cấu hình CORS để cho phép các domain khác gọi API:
   "AllowedOrigins": "https://frontend.com;http://localhost:3000"
 }
 ```
+
 Hoặc cho phép tất cả (chỉ dùng cho dev):
+
 ```json
 "Cors": {
   "AllowedOrigins": "*"
@@ -804,11 +855,9 @@ Cấu hình seeding dữ liệu ban đầu:
 
    **Quan trọng:** Sau khi chạy lần đầu, tắt `RunDataSeedingOnStartup`:
 
-    ```json
-    "RunDataSeedingOnStartup": false
-    ```
-
-
+   ```json
+   "RunDataSeedingOnStartup": false
+   ```
 
 # 3. Tạo và Quản Lý Database Migrations
 
@@ -872,8 +921,6 @@ dotnet ef migrations add TenMigration --context MySqlDbContext --output-dir MySq
 >
 > **Khuyến nghị:** Luôn dùng `add-migration.ps1` để tránh quên!
 
-
-
 ## Các Lệnh Migration Hữu Ích
 
 ### Xem danh sách migrations
@@ -921,7 +968,7 @@ https://localhost:7001/swagger
 2. Chạy ứng dụng:
 
    ```powershell
-   dotnet build --project "WebAPI" --launch-profile "https"
+   dotnet watch --project "WebAPI/WebAPI.csproj" --launch-profile "https"
    ```
 
 3. Ứng dụng sẽ chạy tại:
@@ -959,18 +1006,19 @@ Cần setup các secrets sau trong GitHub repository:
 
 ### Required Secrets
 
-| Secret Name       | Mô Tả                               | Ví Dụ                                                          |
-| ----------------- | ----------------------------------- | -------------------------------------------------------------- |
-| `ALLOWED_HOSTS`   | Domains được phép                   | `api.yourdomain.com;yourdomain.com` hoặc `*`                   |
-| `CORS_ALLOWED_ORIGINS` | CORS Allowed Origins           | `https://yourdomain.com;http://localhost:3000` hoặc `*`        |
-| `DB_CONNECTION`   | MySQL connection string             | `Server=localhost;Database=anhemmotor;User=root;Password=xxx;` |
-| `JWT_KEY`         | JWT secret key (>= 32 chars)        | `Your-Super-Secret-JWT-Key-32-Chars`                           |
-| `JWT_ISSUER`      | API URL                             | `https://api.yourdomain.com`                                   |
-| `JWT_AUDIENCE`    | Client URL                          | `https://yourdomain.com`                                       |
-| `HOST`            | VPS IP hoặc domain, hoặc dấu \*     | `*`                                                            |
-| `USERNAME`        | SSH username                        | `root` hoặc `youruser`                                         |
-| `SSH_PRIVATE_KEY` | Private SSH key                     | Nội dung file `~/.ssh/id_rsa`                                  |
-| `RUN_DATA_SEEDING` | Chạy data seeding khi deploy (true/false) | `false` (production) hoặc `true` (lần đầu setup) |
+| Secret Name            | Mô Tả                                     | Ví Dụ                                                                  |
+| ---------------------- | ----------------------------------------- | ---------------------------------------------------------------------- |
+| `ALLOWED_HOSTS`        | Domains được phép                         | `api.yourdomain.com;yourdomain.com` hoặc `*`                           |
+| `CORS_ALLOWED_ORIGINS` | CORS Allowed Origins                      | `https://yourdomain.com;http://localhost:3000` hoặc `*`                |
+| `DB_CONNECTION`        | MySQL connection string                   | `Server=localhost;Database=anhemmotor;User=root;Password=xxx;`         |
+| `JWT_KEY`              | JWT secret key (>= 32 chars)              | `Your-Super-Secret-JWT-Key-32-Chars`                                   |
+| `JWT_ISSUER`           | API URL                                   | `https://api.yourdomain.com`                                           |
+| `JWT_AUDIENCE`         | Client URL                                | `https://yourdomain.com`                                               |
+| `HOST`                 | VPS IP hoặc domain, hoặc dấu \*           | `*`                                                                    |
+| `USERNAME`             | SSH username                              | `root` hoặc `youruser`                                                 |
+| `SSH_PRIVATE_KEY`      | Private SSH key                           | Nội dung file `~/.ssh/id_rsa`                                          |
+| `RUN_DATA_SEEDING`     | Chạy data seeding khi deploy (true/false) | `false` (production) hoặc `true` (lần đầu setup)                       |
+| `COOKIE_DOMAIN`        | Cookie Domain (for refresh tokens)        | `.yourdomain.com` hoặc để trống nếu đang chạy trên Localhost (Your IP) |
 
 ### Array Secrets (SuperRoles, ProtectedUsers, DefaultRoles)
 
@@ -1001,7 +1049,11 @@ Cần setup các secrets sau trong GitHub repository:
 **Multiple users:**
 
 ```json
-["admin@anhem.com:Admin@123456","manager@anhem.com","support@anhem.com:Support@2024"]
+[
+	"admin@anhem.com:Admin@123456",
+	"manager@anhem.com",
+	"support@anhem.com:Support@2024"
+]
 ```
 
 #### DEFAULT_ROLES
@@ -1015,10 +1067,11 @@ Cần setup các secrets sau trong GitHub repository:
 **Multiple roles:**
 
 ```json
-["User","Customer"]
+["User", "Customer"]
 ```
 
 > **Lưu ý:** Không có space (khoảng cách) sau dấu phẩy trong JSON array! Ví dụ viết như 2 ví dụ sau là sai:
+
 ```json
 ["admin@anhem.com:Admin@123456" , "manager@anhem.com"]
 ["admin@anhem.com:Admin@123456", "manager@anhem.com"]
@@ -1068,6 +1121,7 @@ Thêm `TrustServerCertificate=True` vào connection string:
 **Giải pháp:**
 
 Chạy 2 lệnh sau trong Command Prompt với quyền quản trị viên:
+
 ```
 sc stop winnat
 sc start winnat

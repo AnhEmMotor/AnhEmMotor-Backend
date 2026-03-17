@@ -42,18 +42,22 @@ public class UpdateUserCommandHandler(
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        if(!string.IsNullOrWhiteSpace(request.PhoneNumber))
+        if (request.PhoneNumber is not null)
         {
-            var phoneNumber = request.PhoneNumber.Trim();
-            if(string.Compare(phoneNumber, user.PhoneNumber) != 0)
+            var trimmedPhone = request.PhoneNumber.Trim();
+            if (string.IsNullOrEmpty(trimmedPhone))
             {
-                var existingUser = await userReadRepository.FindUserByPhoneNumberAsync(phoneNumber, cancellationToken)
+                user.PhoneNumber = null;
+            }
+            else if (trimmedPhone != user.PhoneNumber)
+            {
+                var existingUser = await userReadRepository.FindUserByPhoneNumberAsync(trimmedPhone, cancellationToken)
                     .ConfigureAwait(false);
-                if(existingUser != null && existingUser.Id != user.Id)
+                if (existingUser != null && existingUser.Id != user.Id)
                 {
-                    return Error.Conflict($"Phone number '{phoneNumber}' is already taken.", "PhoneNumber");
+                    return Error.Conflict($"Phone number '{trimmedPhone}' is already taken.", "PhoneNumber");
                 }
-                user.PhoneNumber = phoneNumber;
+                user.PhoneNumber = trimmedPhone;
             }
         }
 

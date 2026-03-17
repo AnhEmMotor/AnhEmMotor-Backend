@@ -128,10 +128,13 @@ public sealed class CreateProductCommandHandler(
                     DataFetchMode.All)
                     .ConfigureAwait(false);
 
-                foreach(var opt in existingOptions)
+                if (existingOptions != null)
                 {
-                    if(opt.Name != null)
-                        optionNameMap[opt.Name] = opt.Id;
+                    foreach(var opt in existingOptions)
+                    {
+                        if(opt.Name != null)
+                            optionNameMap[opt.Name] = opt.Id;
+                    }
                 }
 
                 var missingNames = potentialOptionNames.Where(n => !optionNameMap.ContainsKey(n)).ToList();

@@ -26,6 +26,6 @@ public sealed class UpdateCurrentUserCommandValidator : AbstractValidator<Update
             .MaximumLength(100)
             .WithMessage("Full Name cannot exceed 100 characters.");
 
-        RuleFor(x => x.PhoneNumber).NotEmpty().WithMessage("Phone Number is required.").MustBeValidPhoneNumber();
+        RuleFor(x => x.PhoneNumber).MustBeValidPhoneNumber().When(x => !string.IsNullOrEmpty(x.PhoneNumber));
     }
 }

@@ -17,28 +17,30 @@ if(!environment.IsEnvironment("Test"))
 
 builder.Services
     .AddCustomMvc()
-    .AddCors(
-        options =>
+    .AddCors(options =>
+    {
+        options.AddPolicy("CorsPolicy", policy =>
         {
-            options.AddPolicy(
-                "CorsPolicy",
-                builder =>
-                {
-                    var allowedOrigins = configuration["Cors:AllowedOrigins"]?.Split(
-                        ';',
-                        StringSplitOptions.RemoveEmptyEntries);
-                    if(allowedOrigins != null && allowedOrigins.Length > 0)
-                    {
-                        if(allowedOrigins.Contains("*"))
-                        {
-                            builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
-                        } else
-                        {
-                            builder.WithOrigins(allowedOrigins).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
-                        }
-                    }
-                });
-        })
+            var rawOrigins = configuration["Cors:AllowedOrigins"];
+
+            if (string.IsNullOrWhiteSpace(rawOrigins))
+            {
+                throw new InvalidOperationException("CORS AllowedOrigins is missing in appsettings.json.");
+            }
+
+            var allowedOrigins = rawOrigins.Split(';', StringSplitOptions.RemoveEmptyEntries);
+
+            if (allowedOrigins.Any(origin => origin == "*"))
+            {
+                throw new InvalidOperationException("Wildcard '*' is not allowed when using AllowCredentials. Please specify exact origins.");
+            }
+
+            policy.WithOrigins(allowedOrigins)
+                  .AllowAnyMethod()
+                  .AllowAnyHeader()
+                  .AllowCredentials();
+        });
+    })
     .AddJwtAuthentication(configuration)
     .AddAuthorization()
     .AddCustomSwagger(environment)

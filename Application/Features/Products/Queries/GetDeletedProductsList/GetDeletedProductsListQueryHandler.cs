@@ -16,13 +16,16 @@ public sealed class GetDeletedProductsListQueryHandler(IProductReadRepository re
         var page = request.Page <= 0 ? 1 : request.Page;
         var pageSize = request.PageSize <= 0 ? 10 : request.PageSize;
 
-        var (products, totalCount) = await repository.GetPagedDeletedProductsAsync(
+        var pagedResult = await repository.GetPagedDeletedProductsAsync(
             page,
             pageSize,
             request.Filters,
             request.Sorts,
             cancellationToken)
             .ConfigureAwait(false);
+
+        var products = pagedResult.Items;
+        var totalCount = pagedResult.TotalCount;
 
         var responses = products.Select(p => p.Adapt<ProductDetailForManagerResponse>()).ToList();
 

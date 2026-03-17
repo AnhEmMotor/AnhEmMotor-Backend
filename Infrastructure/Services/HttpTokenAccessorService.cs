@@ -4,34 +4,48 @@ using System;
 
 namespace Infrastructure.Services
 {
-    public class HttpTokenAccessorService(IHttpContextAccessor httpContextAccessor) : IHttpTokenAccessorService
+    public class HttpTokenAccessorService(IHttpContextAccessor httpContextAccessor, Microsoft.Extensions.Configuration.IConfiguration configuration) : IHttpTokenAccessorService
     {
         public string? GetRefreshTokenFromCookie()
         { return httpContextAccessor.HttpContext?.Request.Cookies["refreshToken"]; }
 
         public void SetRefreshTokenToCookie(string token, DateTimeOffset expiresAt)
         {
+            var cookieDomain = configuration["CookieDomain"];
+
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
                 Expires = expiresAt,
                 Secure = true,
                 SameSite = SameSiteMode.None,
-                Path = "/api/v1/auth/refresh-token"
+                Path = "/"
             };
+
+            if (!string.IsNullOrEmpty(cookieDomain))
+            {
+                cookieOptions.Domain = cookieDomain;
+            }
 
             httpContextAccessor.HttpContext?.Response.Cookies.Append("refreshToken", token, cookieOptions);
         }
 
         public void DeleteRefreshTokenFromCookie()
         {
+            var cookieDomain = configuration["CookieDomain"];
+
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.None,
-                Path = "/api/v1/auth/refresh-token"
+                Path = "/"
             };
+
+            if (!string.IsNullOrEmpty(cookieDomain))
+            {
+                cookieOptions.Domain = cookieDomain;
+            }
 
             httpContextAccessor.HttpContext?.Response.Cookies.Delete("refreshToken", cookieOptions);
         }

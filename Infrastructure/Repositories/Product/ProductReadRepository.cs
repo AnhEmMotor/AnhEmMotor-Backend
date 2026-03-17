@@ -170,9 +170,11 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
         return (items, totalCount);
     }
 
-    public async Task<(List<ProductEntity> Items, int TotalCount)> GetPagedProductsAsync(
+    public async Task<(List<ProductEntity> Items, int TotalCount, List<List<int>> GroupedOptionValueIds)> GetPagedProductsAsync(
         string? search,
         List<string> statusIds,
+        List<int> categoryIds,
+        List<int> optionValueIds,
         int page,
         int pageSize,
         string? filters,
@@ -198,6 +200,81 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             query = query.Where(p => p.StatusId != null && statusIds.Contains(p.StatusId));
         }
 
+        if(categoryIds != null && categoryIds.Count > 0)
+        {
+            query = query.Where(p => p.CategoryId != null && categoryIds.Contains(p.CategoryId.Value));
+        }
+
+        var groupedByOption = new List<List<int>>();
+
+        if(optionValueIds != null && optionValueIds.Count > 0)
+        {
+            var valueToOptionMapping = await context.OptionValues
+                .Where(ov => optionValueIds.Contains(ov.Id))
+                .Select(ov => new { ov.Id, ov.OptionId })
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            if (valueToOptionMapping.Count == 0)
+            {
+                // Nếu không tìm thấy mapping nào, biến thể không thể khớp
+                query = query.Where(p => false);
+            }
+            else
+            {
+                groupedByOption = valueToOptionMapping
+                    .GroupBy(x => x.OptionId)
+                    .Select(g => g.Select(x => x.Id).ToList())
+                    .ToList();
+
+                if (groupedByOption.Count == 1)
+                {
+                    var g1 = groupedByOption[0];
+                    query = query.Where(p => p.ProductVariants.Any(v => 
+                        v.DeletedAt == null && 
+                        v.VariantOptionValues.Any(vov => vov.OptionValueId != null && g1.Contains(vov.OptionValueId.Value))
+                    ));
+                }
+                else if (groupedByOption.Count == 2)
+                {
+                    var g1 = groupedByOption[0];
+                    var g2 = groupedByOption[1];
+                    query = query.Where(p => p.ProductVariants.Any(v => 
+                        v.DeletedAt == null && 
+                        v.VariantOptionValues.Any(vov => vov.OptionValueId != null && g1.Contains(vov.OptionValueId.Value)) &&
+                        v.VariantOptionValues.Any(vov => vov.OptionValueId != null && g2.Contains(vov.OptionValueId.Value))
+                    ));
+                }
+                else if (groupedByOption.Count >= 3)
+                {
+                    var g1 = groupedByOption[0];
+                    var g2 = groupedByOption[1];
+                    var g3 = groupedByOption[2];
+                    
+                    if (groupedByOption.Count == 3)
+                    {
+                        query = query.Where(p => p.ProductVariants.Any(v => 
+                            v.DeletedAt == null && 
+                            v.VariantOptionValues.Any(vov => vov.OptionValueId != null && g1.Contains(vov.OptionValueId.Value)) &&
+                            v.VariantOptionValues.Any(vov => vov.OptionValueId != null && g2.Contains(vov.OptionValueId.Value)) &&
+                            v.VariantOptionValues.Any(vov => vov.OptionValueId != null && g3.Contains(vov.OptionValueId.Value))
+                        ));
+                    }
+                    else
+                    {
+                        var g4 = groupedByOption[3];
+                        query = query.Where(p => p.ProductVariants.Any(v => 
+                            v.DeletedAt == null && 
+                            v.VariantOptionValues.Any(vov => vov.OptionValueId != null && g1.Contains(vov.OptionValueId.Value)) &&
+                            v.VariantOptionValues.Any(vov => vov.OptionValueId != null && g2.Contains(vov.OptionValueId.Value)) &&
+                            v.VariantOptionValues.Any(vov => vov.OptionValueId != null && g3.Contains(vov.OptionValueId.Value)) &&
+                            v.VariantOptionValues.Any(vov => vov.OptionValueId != null && g4.Contains(vov.OptionValueId.Value))
+                        ));
+                    }
+                }
+            }
+        }
+
         var sieveModel = new SieveModel
         {
             Filters = filters,
@@ -214,20 +291,17 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             .Include(p => p.ProductCategory)
             .Include(p => p.Brand)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
-            .ThenInclude(v => v.InputInfos.Where(ii => ii.DeletedAt == null && ii.InputReceipt!.DeletedAt == null))
-            .ThenInclude(ii => ii.InputReceipt)
-
+                .ThenInclude(v => v.InputInfos.Where(ii => ii.DeletedAt == null && ii.InputReceipt!.DeletedAt == null))
+                .ThenInclude(ii => ii.InputReceipt)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
-            .ThenInclude(v => v.OutputInfos.Where(oi => oi.DeletedAt == null && oi.OutputOrder!.DeletedAt == null))
-            .ThenInclude(oi => oi.OutputOrder)
-
+                .ThenInclude(v => v.OutputInfos.Where(oi => oi.DeletedAt == null && oi.OutputOrder!.DeletedAt == null))
+                .ThenInclude(oi => oi.OutputOrder)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
-            .ThenInclude(v => v.ProductCollectionPhotos)
-
+                .ThenInclude(v => v.ProductCollectionPhotos)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
-            .ThenInclude(v => v.VariantOptionValues)
-            .ThenInclude(vov => vov.OptionValue)
-            .ThenInclude(ov => ov!.Option);
+                .ThenInclude(v => v.VariantOptionValues)
+                .ThenInclude(vov => vov.OptionValue)
+                .ThenInclude(ov => ov!.Option);
 
         if(string.IsNullOrWhiteSpace(sorts))
         {
@@ -241,7 +315,7 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
 
-        return (entities, totalCount);
+        return (entities, totalCount, groupedByOption);
     }
 
     public async Task<(List<ProductEntity> Items, int TotalCount)> GetPagedProductsForPriceManagementAsync(

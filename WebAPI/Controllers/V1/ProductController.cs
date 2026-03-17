@@ -1,5 +1,6 @@
 ﻿using Application.ApiContracts.Product.Responses;
 using Application.Common.Models;
+using Application.Features.PredefinedOptions.Queries.GetPredefinedOptionsList;
 using Application.Features.Products.Commands.CreateProduct;
 using Application.Features.Products.Commands.DeleteManyProducts;
 using Application.Features.Products.Commands.DeleteProduct;
@@ -46,9 +47,9 @@ public class ProductController(ISender sender) : ApiController
     /// Lấy danh sách sản phẩm đầy đủ dành cho khách hàng (có phân trang, lọc, tìm kiếm).
     /// </summary>
     [HttpGet]
-    [ProducesResponseType(typeof(PagedResult<ProductDetailResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedResult<ProductListStoreResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetProductsAsync(
-        [FromQuery] SieveModel request,
+        [FromQuery] GetProductsRequest request,
         CancellationToken cancellationToken)
     {
         var query = GetProductsListQuery.FromRequest(request);
@@ -120,21 +121,6 @@ public class ProductController(ISender sender) : ApiController
     }
 
     /// <summary>
-    /// Lấy danh sách biến thể sản phẩm của tất cả sản phẩm (có phân trang, lọc, tìm kiếm - cho phép vào với mọi user).
-    /// </summary>
-    [HttpGet("variants-lite")]
-    [ProducesResponseType(typeof(PagedResult<ProductVariantLiteResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetActiveVariantLiteProductsPublicAsync(
-        [FromQuery] SieveModel request,
-        CancellationToken cancellationToken = default)
-    {
-        var query = Application.Features.Products.Queries.GetActiveVariantLiteListForManager.GetActiveVariantLiteListForManagerQuery
-            .FromRequest(request);
-        var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
-    }
-
-    /// <summary>
     /// `Lấy danh sách biến thể sản phẩm của tất cả sản phẩm (có phân trang, lọc, tìm kiếm - chỉ có thể vào khi và chỉ
     /// khi có quyền thêm hoặc sửa phiếu nhập).
     /// </summary>
@@ -168,37 +154,41 @@ public class ProductController(ISender sender) : ApiController
     }
 
     /// <summary>
-    /// Lấy danh sách ánh xạ trạng thái tồn kho (Key -> Tên tiếng Việt).
+    /// Lấy danh sách các thuộc tính được định nghĩa sẵn dưới dạng từ điển key-value. Chỉ người dùng có quyền tạo hoặc
+    /// chỉnh sửa sản phẩm mới có thể truy cập.
     /// </summary>
-    [HttpGet("inventory-statuses")]
+    [HttpGet("predefined-options")]
+    [RequiresAnyPermissions(Products.View, Products.Create, Products.Edit, Products.Delete)]
     [ProducesResponseType(typeof(Dictionary<string, string>), StatusCodes.Status200OK)]
-    public IActionResult GetInventoryStatuses()
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> GetPredefinedOptionsAsync(CancellationToken cancellationToken)
     {
-        var mapping = new Dictionary<string, string>
-        {
-            { InventoryStatus.InStock, "Còn hàng" },
-            { InventoryStatus.LowStock, "Sắp hết hàng" },
-            { InventoryStatus.OutOfStock, "Hết hàng" }
-        };
-        return Ok(mapping);
+        var query = new GetPredefinedOptionsListQuery();
+        var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
+
+        return HandleResult(result);
     }
 
     /// <summary>
-    /// Lấy thông tin chi tiết sản phẩm theo Id (dành cho toàn bộ người dùng khách)
+    /// Lấy danh sách ánh xạ trạng thái tồn kho (Key -> Tên tiếng Việt).
     /// </summary>
-    [HttpGet("{id:int}", Name = RouteNames.Product.GetVarientById)]
-    [ProducesResponseType(typeof(ProductDetailForManagerResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetVarientByIdAsync(int id, CancellationToken cancellationToken = default)
+    [HttpGet("inventory-statuses")]
+    [ProducesResponseType(typeof(IEnumerable<object>), StatusCodes.Status200OK)]
+    public IActionResult GetInventoryStatuses()
     {
-        var result = await sender.Send(new GetProductByIdQuery() { Id = id }, cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
+        var statuses = new[]
+        {
+            new { key = nameof(InventoryStatus.OutOfStock), label = "Hết hàng" },
+            new { key = nameof(InventoryStatus.LowStock), label = "Sắp hết hàng" },
+            new { key = nameof(InventoryStatus.InStock), label = "Còn hàng" }
+        };
+        return Ok(statuses);
     }
 
     /// <summary>
     /// Lấy thông tin chi tiết sản phẩm theo Id (dành cho người quản lý)
     /// </summary>
-    [HttpGet("{id:int}/for-manager")]
+    [HttpGet("{id:int}/for-manager", Name = RouteNames.Product.GetVarientByIdForManager)]
     [HasPermission(Products.View)]
     [ProducesResponseType(typeof(ProductDetailForManagerResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -258,7 +248,7 @@ public class ProductController(ISender sender) : ApiController
         var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleCreated(
             result,
-            RouteNames.Product.GetVarientById,
+            RouteNames.Product.GetVarientByIdForManager,
             new { id = result.IsSuccess ? result.Value?.Id : 0 });
     }
 
