@@ -1,5 +1,6 @@
 ﻿using Application.ApiContracts.Product.Requests;
 using Application.ApiContracts.Product.Responses;
+using Application.ApiContracts.Option.Responses;
 using Application.Features.Products.Commands.CreateProduct;
 using Application.Features.Products.Commands.UpdateManyProductStatuses;
 using Domain.Constants.Permission;
@@ -2683,6 +2684,244 @@ public class Product : IAsyncLifetime
         }
 
         return product;
+    }
+
+    [Fact(DisplayName = "PRODUCT_134 - Lấy danh sách Options thành công")]
+    public async Task GetOptions_ReturnsOptionsAndValues()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Products.View ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+
+        var preOpt = new PredefinedOption { Key = $"Color_{uniqueId}", Value = "Màu sắc" };
+        db.PredefinedOptions.Add(preOpt);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var option = new Option { Name = preOpt.Key };
+        db.Options.Add(option);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var val1 = new OptionValue { OptionId = option.Id, Name = "Red" };
+        var val2 = new OptionValue { OptionId = option.Id, Name = "Blue" };
+        db.OptionValues.AddRange(val1, val2);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var response = await _client.GetAsync("/api/v1/option", CancellationToken.None).ConfigureAwait(true);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response.Content
+            .ReadFromJsonAsync<List<OptionResponse>>(CancellationToken.None)
+            .ConfigureAwait(true);
+        content.Should().NotBeNull();
+        content.Should().Contain(o => o.Id == option.Id);
+        var optRes = content!.First(o => o.Id == option.Id);
+        optRes.OptionValues.Should().Contain(v => v.Id == val1.Id);
+        optRes.OptionValues.Should().Contain(v => v.Id == val2.Id);
+    }
+
+    [Fact(DisplayName = "PRODUCT_135 - Lọc sản phẩm theo OptionValueIds")]
+    public async Task GetProducts_FilterByOptionValueIds_ReturnsMatchingProducts()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Products.View ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+
+        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        if(!await db.ProductStatuses.AnyAsync(x => x.Key == productStatusId).ConfigureAwait(true))
+            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
+        await db.SaveChangesAsync().ConfigureAwait(true);
+
+        var category = new ProductCategoryEntity { Name = $"Cat_{uniqueId}" };
+        var brand = new BrandEntity { Name = $"Brand_{uniqueId}" };
+        db.ProductCategories.Add(category);
+        db.Brands.Add(brand);
+        
+        var preOpt = new PredefinedOption { Key = $"Color_{uniqueId}", Value = "Màu sắc" };
+        db.PredefinedOptions.Add(preOpt);
+        
+        var option = new Option { Name = preOpt.Key };
+        db.Options.Add(option);
+        await db.SaveChangesAsync().ConfigureAwait(true);
+
+        var valRed = new OptionValue { OptionId = option.Id, Name = "Red" };
+        var valBlue = new OptionValue { OptionId = option.Id, Name = "Blue" };
+        db.OptionValues.AddRange(valRed, valBlue);
+        await db.SaveChangesAsync().ConfigureAwait(true);
+
+        var p1 = new ProductEntity { Name = $"P1_{uniqueId}", CategoryId = category.Id, BrandId = brand.Id, StatusId = productStatusId };
+        var p2 = new ProductEntity { Name = $"P2_{uniqueId}", CategoryId = category.Id, BrandId = brand.Id, StatusId = productStatusId };
+        db.Products.AddRange(p1, p2);
+        await db.SaveChangesAsync().ConfigureAwait(true);
+
+        var v1_red = new ProductVariant { ProductId = p1.Id, Price = 100, UrlSlug = $"v1_red_{uniqueId}" };
+        var v2_blue = new ProductVariant { ProductId = p2.Id, Price = 200, UrlSlug = $"v2_blue_{uniqueId}" };
+        db.ProductVariants.AddRange(v1_red, v2_blue);
+        await db.SaveChangesAsync().ConfigureAwait(true);
+
+        db.VariantOptionValues.AddRange(
+            new VariantOptionValue { VariantId = v1_red.Id, OptionValueId = valRed.Id },
+            new VariantOptionValue { VariantId = v2_blue.Id, OptionValueId = valBlue.Id }
+        );
+        await db.SaveChangesAsync().ConfigureAwait(true);
+
+        var response = await _client.GetAsync($"/api/v1/product?optionValueIds={valRed.Id}", CancellationToken.None)
+            .ConfigureAwait(true);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response.Content
+            .ReadFromJsonAsync<PagedResult<ProductDetailResponse>>(CancellationToken.None)
+            .ConfigureAwait(true);
+        
+        content.Should().NotBeNull();
+        content!.Items.Should().Contain(p => p.Id == p1.Id);
+        content.Items.Should().NotContain(p => p.Id == p2.Id);
+        
+        var item1 = content.Items.First(p => p.Id == p1.Id);
+        item1.Variants.Should().Contain(v => v.Id == v1_red.Id);
+        item1.Variants.Should().NotContain(v => v.Id == v2_blue.Id);
+    }
+
+    [Fact(DisplayName = "PRODUCT_136 - Tìm kiếm tên và lọc theo OptionValueIds")]
+    public async Task GetProducts_SearchAndFilterByOption_ReturnsMatchingProduct()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Products.View ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+
+        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        if(!await db.ProductStatuses.AnyAsync(x => x.Key == productStatusId).ConfigureAwait(true))
+            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
+        
+        var category = new ProductCategoryEntity { Name = $"Cat_{uniqueId}" };
+        var brand = new BrandEntity { Name = $"Brand_{uniqueId}" };
+        db.ProductCategories.Add(category);
+        db.Brands.Add(brand);
+        
+        var preOpt = new PredefinedOption { Key = $"Color_{uniqueId}", Value = "Màu sắc" };
+        db.PredefinedOptions.Add(preOpt);
+
+        var option = new Option { Name = preOpt.Key };
+        db.Options.Add(option);
+        await db.SaveChangesAsync().ConfigureAwait(true);
+
+        var valRed = new OptionValue { OptionId = option.Id, Name = "Red" };
+        db.OptionValues.Add(valRed);
+        await db.SaveChangesAsync().ConfigureAwait(true);
+
+        var pMatch = new ProductEntity { Name = $"UniqueName_{uniqueId}", CategoryId = category.Id, BrandId = brand.Id, StatusId = productStatusId };
+        var pOther = new ProductEntity { Name = $"OtherName_{uniqueId}", CategoryId = category.Id, BrandId = brand.Id, StatusId = productStatusId };
+        db.Products.AddRange(pMatch, pOther);
+        await db.SaveChangesAsync().ConfigureAwait(true);
+
+        var vMatch = new ProductVariant { ProductId = pMatch.Id, Price = 100, UrlSlug = $"v_match_{uniqueId}" };
+        db.ProductVariants.Add(vMatch);
+        await db.SaveChangesAsync().ConfigureAwait(true);
+
+        db.VariantOptionValues.Add(new VariantOptionValue { VariantId = vMatch.Id, OptionValueId = valRed.Id });
+        await db.SaveChangesAsync().ConfigureAwait(true);
+
+        var response = await _client.GetAsync($"/api/v1/product?filters=search=UniqueName_{uniqueId},optionValueIds={valRed.Id}", CancellationToken.None)
+            .ConfigureAwait(true);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response.Content
+            .ReadFromJsonAsync<PagedResult<ProductDetailResponse>>(CancellationToken.None)
+            .ConfigureAwait(true);
+        
+        content.Should().NotBeNull();
+        content!.Items.Should().ContainSingle(p => p.Id == pMatch.Id);
+    }
+
+    [Fact(DisplayName = "PRODUCT_137 - Lọc theo OptionValueIds không tồn tại")]
+    public async Task GetProducts_FilterByNonExistentOption_ReturnsEmpty()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Products.View ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        var response = await _client.GetAsync("/api/v1/product?filters=optionValueIds=999999", CancellationToken.None)
+            .ConfigureAwait(true);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response.Content
+            .ReadFromJsonAsync<PagedResult<ProductDetailResponse>>(CancellationToken.None)
+            .ConfigureAwait(true);
+        
+        content.Should().NotBeNull();
+        content!.Items.Should().BeEmpty();
     }
 
 #pragma warning restore CRR0035

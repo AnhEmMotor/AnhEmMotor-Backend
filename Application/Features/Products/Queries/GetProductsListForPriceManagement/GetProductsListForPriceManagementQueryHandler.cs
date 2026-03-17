@@ -15,13 +15,16 @@ public sealed class GetProductsListForPriceManagementQueryHandler(IProductReadRe
     {
         var sieveModel = request.SieveModel ?? new SieveModel();
 
-        var (productsEntities, totalCount) = await repository.GetPagedProductsForPriceManagementAsync(
+        var pagedResult = await repository.GetPagedProductsForPriceManagementAsync(
             sieveModel.Page ?? 1,
             sieveModel.PageSize ?? 10,
             sieveModel.Filters,
             sieveModel.Sorts,
             cancellationToken)
             .ConfigureAwait(false);
+
+        var productsEntities = pagedResult.Items;
+        var totalCount = pagedResult.TotalCount;
 
         var products = productsEntities.Select(
             p => new ProductPriceLiteResponse

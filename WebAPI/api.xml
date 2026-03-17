@@ -292,6 +292,21 @@
             Xem ảnh với khả năng resize theo kích thước mong muốn.
             </summary>
         </member>
+        <member name="T:WebAPI.Controllers.V1.OptionController">
+            <summary>
+            Quản lý các tùy chọn (Options) của sản phẩm.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.OptionController.#ctor(MediatR.ISender)">
+            <summary>
+            Quản lý các tùy chọn (Options) của sản phẩm.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.OptionController.GetOptionsAsync(System.Threading.CancellationToken)">
+            <summary>
+            Lấy danh sách tất cả các tùy chọn và giá trị của chúng.
+            </summary>
+        </member>
         <member name="T:WebAPI.Controllers.V1.PermissionController">
             <summary>
             Controller quản lý quyền hạn và vai trò
@@ -452,7 +467,7 @@
             Quản lý sản phẩm.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.GetProductsAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetProductsAsync(Application.Features.Products.Queries.GetProductsList.GetProductsRequest,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách sản phẩm đầy đủ dành cho khách hàng (có phân trang, lọc, tìm kiếm).
             </summary>

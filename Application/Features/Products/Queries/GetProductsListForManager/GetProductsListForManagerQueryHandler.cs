@@ -28,15 +28,18 @@ public sealed class GetProductsListForManagerQueryHandler(
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
 
-        var (entities, totalCount) = await readRepository.GetPagedProductsAsync(
+        var (entities, totalCount, _) = await readRepository.GetPagedProductsAsync(
             request.Search,
             normalizedStatusIds,
+            [],
+            [],
             request.Page,
             request.PageSize,
             request.Filters,
             request.Sorts,
             cancellationToken)
             .ConfigureAwait(false);
+// Giải phóng biến rườm rà
 
         var allItems = entities
             .Select(e => ProductMappingConfig.MapProductToDetailForManagerResponseWithAlertLevel(e, alertLevel))

@@ -46,9 +46,9 @@ public class ProductController(ISender sender) : ApiController
     /// Lấy danh sách sản phẩm đầy đủ dành cho khách hàng (có phân trang, lọc, tìm kiếm).
     /// </summary>
     [HttpGet]
-    [ProducesResponseType(typeof(PagedResult<ProductDetailResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedResult<ProductListStoreResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetProductsAsync(
-        [FromQuery] SieveModel request,
+        [FromQuery] GetProductsRequest request,
         CancellationToken cancellationToken)
     {
         var query = GetProductsListQuery.FromRequest(request);

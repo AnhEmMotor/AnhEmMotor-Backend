@@ -49,9 +49,17 @@ public class UpdateCurrentUserCommandHandler(
             user.Gender = request.Gender;
         }
 
-        if(!string.IsNullOrWhiteSpace(request.PhoneNumber))
+        if (request.PhoneNumber is not null)
         {
-            user.PhoneNumber = request.PhoneNumber.Trim();
+            var trimmedPhone = request.PhoneNumber.Trim();
+            if (string.IsNullOrEmpty(trimmedPhone))
+            {
+                user.PhoneNumber = null;
+            }
+            else if (trimmedPhone != user.PhoneNumber)
+            {
+                user.PhoneNumber = trimmedPhone;
+            }
         }
 
         if(request.DateOfBirth.HasValue)
