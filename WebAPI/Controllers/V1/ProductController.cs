@@ -1,5 +1,6 @@
 ﻿using Application.ApiContracts.Product.Responses;
 using Application.Common.Models;
+using Application.Features.PredefinedOptions.Queries.GetPredefinedOptionsList;
 using Application.Features.Products.Commands.CreateProduct;
 using Application.Features.Products.Commands.DeleteManyProducts;
 using Application.Features.Products.Commands.DeleteProduct;
@@ -168,19 +169,35 @@ public class ProductController(ISender sender) : ApiController
     }
 
     /// <summary>
+    /// Lấy danh sách các thuộc tính được định nghĩa sẵn dưới dạng từ điển key-value. Chỉ người dùng có quyền tạo hoặc
+    /// chỉnh sửa sản phẩm mới có thể truy cập.
+    /// </summary>
+    [HttpGet("predefined-options")]
+    [RequiresAnyPermissions(Products.View, Products.Create, Products.Edit, Products.Delete)]
+    [ProducesResponseType(typeof(Dictionary<string, string>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> GetPredefinedOptionsAsync(CancellationToken cancellationToken)
+    {
+        var query = new GetPredefinedOptionsListQuery();
+        var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
+
+        return HandleResult(result);
+    }
+
+    /// <summary>
     /// Lấy danh sách ánh xạ trạng thái tồn kho (Key -> Tên tiếng Việt).
     /// </summary>
     [HttpGet("inventory-statuses")]
-    [ProducesResponseType(typeof(Dictionary<string, string>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IEnumerable<object>), StatusCodes.Status200OK)]
     public IActionResult GetInventoryStatuses()
     {
-        var mapping = new Dictionary<string, string>
+        var statuses = new[]
         {
-            { InventoryStatus.InStock, "Còn hàng" },
-            { InventoryStatus.LowStock, "Sắp hết hàng" },
-            { InventoryStatus.OutOfStock, "Hết hàng" }
+            new { key = nameof(InventoryStatus.OutOfStock), label = "Hết hàng" },
+            new { key = nameof(InventoryStatus.LowStock), label = "Sắp hết hàng" },
+            new { key = nameof(InventoryStatus.InStock), label = "Còn hàng" }
         };
-        return Ok(mapping);
+        return Ok(statuses);
     }
 
     /// <summary>

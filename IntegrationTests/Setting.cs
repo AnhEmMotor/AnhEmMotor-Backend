@@ -449,15 +449,15 @@ public class Setting : IAsyncLifetime
         var request = new Dictionary<string, string?> { { "Deposit_ratio", "0" } };
 
         var response = await _client.PutAsJsonAsync("/api/v1/Setting", request).ConfigureAwait(true);
-
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var content = await response.Content
-            .ReadFromJsonAsync<ErrorResponse>(CancellationToken.None)
-            .ConfigureAwait(true);
-        content.Should().NotBeNull();
-        content!.Errors.Should().Contain(e => e.Message.Contains("between 1.0 and 99.0"));
-
-        using(var scope = _factory.Services.CreateScope())
+ 
+         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+         var content = await response.Content
+             .ReadFromJsonAsync<ErrorResponse>(CancellationToken.None)
+             .ConfigureAwait(true);
+         content.Should().NotBeNull();
+         content!.Errors.Should().Contain(e => e.Message != null && e.Message.Contains("between 1.0 and 99.0"));
+ 
+         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var setting = db.Settings.First(s => s.Key == "Deposit_ratio");
@@ -502,15 +502,15 @@ public class Setting : IAsyncLifetime
         var request = new Dictionary<string, string?> { { "Deposit_ratio", "100" } };
 
         var response = await _client.PutAsJsonAsync("/api/v1/Setting", request).ConfigureAwait(true);
-
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var content = await response.Content
-            .ReadFromJsonAsync<ErrorResponse>(CancellationToken.None)
-            .ConfigureAwait(true);
-        content.Should().NotBeNull();
-        content!.Errors.Should().Contain(e => e.Message.Contains("between 1.0 and 99.0"));
-
-        using(var scope = _factory.Services.CreateScope())
+ 
+         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+         var content = await response.Content
+             .ReadFromJsonAsync<ErrorResponse>(CancellationToken.None)
+             .ConfigureAwait(true);
+         content.Should().NotBeNull();
+         content!.Errors.Should().Contain(e => e.Message != null && e.Message.Contains("between 1.0 and 99.0"));
+ 
+         using(var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var setting = db.Settings.First(s => s.Key == "Deposit_ratio");
@@ -555,14 +555,14 @@ public class Setting : IAsyncLifetime
         var request = new Dictionary<string, string?> { { "Deposit_ratio", "50.55" } };
 
         var response = await _client.PutAsJsonAsync("/api/v1/Setting", request).ConfigureAwait(true);
-
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var content = await response.Content
-            .ReadFromJsonAsync<ErrorResponse>(CancellationToken.None)
-            .ConfigureAwait(true);
-        content.Should().NotBeNull();
-        content!.Errors.Should().Contain(e => e.Message.Contains("decimal place"));
-    }
+ 
+         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+         var content = await response.Content
+             .ReadFromJsonAsync<ErrorResponse>(CancellationToken.None)
+             .ConfigureAwait(true);
+         content.Should().NotBeNull();
+         content!.Errors.Should().Contain(e => e.Message != null && e.Message.Contains("decimal place"));
+     }
 
     [Fact(DisplayName = "SETTING_012 - SetSettings - Request body rỗng")]
     public async Task SETTING_012_SetSettings_EmptyRequest_BadRequest()
@@ -601,14 +601,14 @@ public class Setting : IAsyncLifetime
         var request = new Dictionary<string, string?>();
 
         var response = await _client.PutAsJsonAsync("/api/v1/Setting", request).ConfigureAwait(true);
-
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var content = await response.Content
-            .ReadFromJsonAsync<ErrorResponse>(CancellationToken.None)
-            .ConfigureAwait(true);
-        content.Should().NotBeNull();
-        content!.Errors.Should().Contain(e => e.Message.Contains("cannot be empty"));
-    }
+ 
+         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+         var content = await response.Content
+             .ReadFromJsonAsync<ErrorResponse>(CancellationToken.None)
+             .ConfigureAwait(true);
+         content.Should().NotBeNull();
+         content!.Errors.Should().Contain(e => e.Message != null && e.Message.Contains("cannot be empty"));
+     }
 #pragma warning restore CRR0035
 #pragma warning restore IDE0079
 }

@@ -187,4 +187,22 @@ public class UserController(IMediator mediator, IUserStreamService userStreamSer
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return HandleResult(result);
     }
+
+    /// <summary>
+    /// Lấy danh sách ánh xạ giới tính (key tiếng Anh - nhãn tiếng Việt) để Frontend binding.
+    /// </summary>
+    [HttpGet("gender-options")]
+    [Authorize]
+    [ProducesResponseType(typeof(IEnumerable<object>), StatusCodes.Status200OK)]
+    public IActionResult GetGenderOptions()
+    {
+        var options = new[]
+        {
+            new { key = nameof(Domain.Constants.GenderStatus.Male), label = "Nam" },
+            new { key = nameof(Domain.Constants.GenderStatus.Female), label = "Nữ" },
+            new { key = nameof(Domain.Constants.GenderStatus.Other), label = "Khác" }
+        };
+
+        return Ok(options);
+    }
 }

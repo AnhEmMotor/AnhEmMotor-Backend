@@ -1450,7 +1450,7 @@ public class Product : IAsyncLifetime
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync("/api/v1/predefinedoption", CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/product/predefined-options", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -1483,7 +1483,7 @@ public class Product : IAsyncLifetime
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var response = await _client.GetAsync("/api/v1/predefinedoption", CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/product/predefined-options", CancellationToken.None).ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
@@ -1755,7 +1755,7 @@ public class Product : IAsyncLifetime
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResp.AccessToken);
 
-        var response = await _client.GetAsync("/api/v1/PredefinedOption", CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/product/predefined-options", CancellationToken.None).ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
@@ -1781,7 +1781,7 @@ public class Product : IAsyncLifetime
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResp.AccessToken);
 
-        var response = await _client.GetAsync("/api/v1/PredefinedOption", CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/product/predefined-options", CancellationToken.None).ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
@@ -2765,9 +2765,9 @@ public class Product : IAsyncLifetime
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
         var productStatusId = Domain.Constants.ProductStatus.ForSale;
-        if(!await db.ProductStatuses.AnyAsync(x => x.Key == productStatusId).ConfigureAwait(true))
+        if(!await db.ProductStatuses.AnyAsync(x => x.Key == productStatusId, TestContext.Current.CancellationToken).ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
-        await db.SaveChangesAsync().ConfigureAwait(true);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var category = new ProductCategoryEntity { Name = $"Cat_{uniqueId}" };
         var brand = new BrandEntity { Name = $"Brand_{uniqueId}" };
@@ -2779,28 +2779,28 @@ public class Product : IAsyncLifetime
         
         var option = new Option { Name = preOpt.Key };
         db.Options.Add(option);
-        await db.SaveChangesAsync().ConfigureAwait(true);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var valRed = new OptionValue { OptionId = option.Id, Name = "Red" };
         var valBlue = new OptionValue { OptionId = option.Id, Name = "Blue" };
         db.OptionValues.AddRange(valRed, valBlue);
-        await db.SaveChangesAsync().ConfigureAwait(true);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var p1 = new ProductEntity { Name = $"P1_{uniqueId}", CategoryId = category.Id, BrandId = brand.Id, StatusId = productStatusId };
         var p2 = new ProductEntity { Name = $"P2_{uniqueId}", CategoryId = category.Id, BrandId = brand.Id, StatusId = productStatusId };
         db.Products.AddRange(p1, p2);
-        await db.SaveChangesAsync().ConfigureAwait(true);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var v1_red = new ProductVariant { ProductId = p1.Id, Price = 100, UrlSlug = $"v1_red_{uniqueId}" };
         var v2_blue = new ProductVariant { ProductId = p2.Id, Price = 200, UrlSlug = $"v2_blue_{uniqueId}" };
         db.ProductVariants.AddRange(v1_red, v2_blue);
-        await db.SaveChangesAsync().ConfigureAwait(true);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         db.VariantOptionValues.AddRange(
             new VariantOptionValue { VariantId = v1_red.Id, OptionValueId = valRed.Id },
             new VariantOptionValue { VariantId = v2_blue.Id, OptionValueId = valBlue.Id }
         );
-        await db.SaveChangesAsync().ConfigureAwait(true);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var response = await _client.GetAsync($"/api/v1/product?optionValueIds={valRed.Id}", CancellationToken.None)
             .ConfigureAwait(true);
@@ -2846,7 +2846,7 @@ public class Product : IAsyncLifetime
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
         var productStatusId = Domain.Constants.ProductStatus.ForSale;
-        if(!await db.ProductStatuses.AnyAsync(x => x.Key == productStatusId).ConfigureAwait(true))
+        if(!await db.ProductStatuses.AnyAsync(x => x.Key == productStatusId, TestContext.Current.CancellationToken).ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         
         var category = new ProductCategoryEntity { Name = $"Cat_{uniqueId}" };
@@ -2859,23 +2859,23 @@ public class Product : IAsyncLifetime
 
         var option = new Option { Name = preOpt.Key };
         db.Options.Add(option);
-        await db.SaveChangesAsync().ConfigureAwait(true);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var valRed = new OptionValue { OptionId = option.Id, Name = "Red" };
         db.OptionValues.Add(valRed);
-        await db.SaveChangesAsync().ConfigureAwait(true);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var pMatch = new ProductEntity { Name = $"UniqueName_{uniqueId}", CategoryId = category.Id, BrandId = brand.Id, StatusId = productStatusId };
         var pOther = new ProductEntity { Name = $"OtherName_{uniqueId}", CategoryId = category.Id, BrandId = brand.Id, StatusId = productStatusId };
         db.Products.AddRange(pMatch, pOther);
-        await db.SaveChangesAsync().ConfigureAwait(true);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var vMatch = new ProductVariant { ProductId = pMatch.Id, Price = 100, UrlSlug = $"v_match_{uniqueId}" };
         db.ProductVariants.Add(vMatch);
-        await db.SaveChangesAsync().ConfigureAwait(true);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         db.VariantOptionValues.Add(new VariantOptionValue { VariantId = vMatch.Id, OptionValueId = valRed.Id });
-        await db.SaveChangesAsync().ConfigureAwait(true);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var response = await _client.GetAsync($"/api/v1/product?filters=search=UniqueName_{uniqueId},optionValueIds={valRed.Id}", CancellationToken.None)
             .ConfigureAwait(true);

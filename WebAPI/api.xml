@@ -367,36 +367,6 @@
             Xóa nhiều vai trò
             </summary>
         </member>
-        <member name="T:WebAPI.Controllers.V1.PredefinedOptionController">
-            <summary>
-            Quản lý danh sách các thuộc tính sản phẩm được định nghĩa sẵn (ví dụ: Loại xe, Màu sắc).
-            </summary>
-        </member>
-        <member name="M:WebAPI.Controllers.V1.PredefinedOptionController.#ctor(MediatR.IMediator)">
-            <summary>
-            Quản lý danh sách các thuộc tính sản phẩm được định nghĩa sẵn (ví dụ: Loại xe, Màu sắc).
-            </summary>
-        </member>
-        <member name="M:WebAPI.Controllers.V1.PredefinedOptionController.GetPredefinedOptionsAsync(System.Threading.CancellationToken)">
-            <summary>
-            Lấy danh sách các thuộc tính được định nghĩa sẵn dưới dạng từ điển key-value. Chỉ người dùng có quyền tạo hoặc
-            chỉnh sửa sản phẩm mới có thể truy cập.
-            </summary>
-        </member>
-        <member name="M:WebAPI.Controllers.V1.PredefinedOptionController.GetInventoryStatuses">
-            <summary>
-            Lấy danh sách ánh xạ trạng thái tồn kho (key tiếng Anh - nhãn tiếng Việt) để Frontend binding.
-            </summary>
-            <example>
-            <code> GET /api/v1/PredefinedOption/inventory-statuses Response: [{ "key": "OutOfStock", "label": "Hết hàng" },
-            ...]</code>
-            </example>
-        </member>
-        <member name="M:WebAPI.Controllers.V1.PredefinedOptionController.GetGenderOptions">
-            <summary>
-            Lấy danh sách ánh xạ giới tính (key tiếng Anh - nhãn tiếng Việt) để Frontend binding.
-            </summary>
-        </member>
         <member name="T:WebAPI.Controllers.V1.ProductCategoryController">
             <summary>
             Quản lý danh mục sản phẩm.
@@ -508,6 +478,12 @@
             <summary>
             Lấy danh sách biến thể sản phẩm của tất cả sản phẩm (có phân trang, lọc, tìm kiếm - chỉ có thể vào khi và chỉ
             khi có quyền thêm hoặc sửa phiếu bán hàng).
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetPredefinedOptionsAsync(System.Threading.CancellationToken)">
+            <summary>
+            Lấy danh sách các thuộc tính được định nghĩa sẵn dưới dạng từ điển key-value. Chỉ người dùng có quyền tạo hoặc
+            chỉnh sửa sản phẩm mới có thể truy cập.
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.ProductController.GetInventoryStatuses">
@@ -950,6 +926,11 @@
         <member name="M:WebAPI.Controllers.V1.UserController.UploadAvatarAsync(Microsoft.AspNetCore.Http.IFormFile,System.Threading.CancellationToken)">
             <summary>
             Tải lên ảnh đại diện cho người dùng hiện tại
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.UserController.GetGenderOptions">
+            <summary>
+            Lấy danh sách ánh xạ giới tính (key tiếng Anh - nhãn tiếng Việt) để Frontend binding.
             </summary>
         </member>
         <member name="T:WebAPI.Controllers.V1.UserManagerController">

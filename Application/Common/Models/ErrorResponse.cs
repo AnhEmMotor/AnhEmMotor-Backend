@@ -1,17 +1,23 @@
-﻿using FluentValidation.Results;
+﻿using System.Text.Json.Serialization;
+using FluentValidation.Results;
 
 namespace Application.Common.Models
 {
     public class ErrorResponse(string? message = null)
     {
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? Message { get; set; } = message;
 
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? Type { get; set; }
 
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? Details { get; set; }
 
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public List<ErrorDetail>? Errors { get; set; }
 
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public ErrorResponse? InnerException { get; set; }
 
         public static ErrorResponse CreateProductionError(string message) { return new ErrorResponse(message); }
@@ -30,7 +36,7 @@ namespace Application.Common.Models
 
         public static ErrorResponse CreateValidationError(IEnumerable<ValidationFailure> failures)
         {
-            return new ErrorResponse("One or more validation errors occurred.")
+            return new ErrorResponse(null)
             {
                 Errors =
                     [ .. failures.Select(f => new ErrorDetail { Field = f.PropertyName, Message = f.ErrorMessage }) ]
@@ -39,11 +45,12 @@ namespace Application.Common.Models
 
         public static ErrorResponse FromError(Error error)
         {
-            return new ErrorResponse(error.Message)
+            var hasErrors = error.Field is not null || error.Id is not null;
+            return new ErrorResponse(hasErrors ? null : error.Message)
             {
                 Type = error.Code,
                 Errors =
-                    error.Field is not null || error.Id is not null
+                    hasErrors
                         ? [ new ErrorDetail { Field = error.Field, Message = error.Message, Id = error.Id } ]
                         : null
             };
@@ -52,7 +59,7 @@ namespace Application.Common.Models
         public static ErrorResponse FromErrors(List<Error> errors)
         {
             var firstError = errors.FirstOrDefault();
-            return new ErrorResponse(firstError?.Message ?? "One or more errors occurred.")
+            return new ErrorResponse(null)
             {
                 Type = firstError?.Code,
                 Errors = [ .. errors.Select(e => new ErrorDetail { Field = e.Field, Message = e.Message, Id = e.Id }) ]
@@ -60,3 +67,4 @@ namespace Application.Common.Models
         }
     }
 }
+
