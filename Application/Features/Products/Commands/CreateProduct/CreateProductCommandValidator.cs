@@ -28,6 +28,21 @@ public sealed class CreateProductCommandValidator : AbstractValidator<CreateProd
             .When(x => !string.IsNullOrWhiteSpace(x.Description))
             .WithMessage("Description must not exceed 2000 characters.");
 
+        RuleFor(x => x.ShortDescription)
+            .MaximumLength(255)
+            .When(x => !string.IsNullOrWhiteSpace(x.ShortDescription))
+            .WithMessage("Short Description must not exceed 255 characters.");
+
+        RuleFor(x => x.MetaTitle)
+            .MaximumLength(100)
+            .When(x => !string.IsNullOrWhiteSpace(x.MetaTitle))
+            .WithMessage("Meta Title must not exceed 100 characters.");
+
+        RuleFor(x => x.MetaDescription)
+            .MaximumLength(255)
+            .When(x => !string.IsNullOrWhiteSpace(x.MetaDescription))
+            .WithMessage("Meta Description must not exceed 255 characters.");
+
         RuleFor(x => x.Weight).GreaterThan(0).When(x => x.Weight.HasValue).WithMessage("Weight must be greater than 0.");
 
         RuleFor(x => x.Variants)

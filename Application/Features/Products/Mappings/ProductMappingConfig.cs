@@ -170,6 +170,9 @@ public class ProductMappingConfig : IRegister
             Displacement = product.Displacement,
             BoreStroke = product.BoreStroke,
             CompressionRatio = product.CompressionRatio,
+            ShortDescription = product.ShortDescription,
+            MetaTitle = product.MetaTitle,
+            MetaDescription = product.MetaDescription,
             StatusId = product.StatusId,
             CoverImageUrl = variantResponses.FirstOrDefault()?.CoverImageUrl,
             Stock = (int)totalStock,
@@ -218,6 +221,9 @@ public class ProductMappingConfig : IRegister
             Displacement = product.Displacement,
             BoreStroke = product.BoreStroke,
             CompressionRatio = product.CompressionRatio,
+            ShortDescription = product.ShortDescription,
+            MetaTitle = product.MetaTitle,
+            MetaDescription = product.MetaDescription,
             CoverImageUrl = variantResponses.FirstOrDefault()?.CoverImageUrl,
             Variants = variantResponses
         };

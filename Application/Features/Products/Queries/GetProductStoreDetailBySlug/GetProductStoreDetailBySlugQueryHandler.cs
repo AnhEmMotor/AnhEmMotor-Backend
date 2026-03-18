@@ -27,12 +27,16 @@ public sealed class GetProductStoreDetailBySlugQueryHandler(IProductReadReposito
             Brand = product.Brand?.Name,
             Category = product.ProductCategory?.Name,
             Description = product.Description,
+            ShortDescription = product.ShortDescription,
+            MetaTitle = product.MetaTitle,
+            MetaDescription = product.MetaDescription,
             Specifications = []
         };
 
         var specProperties = typeof(Domain.Entities.Product)
             .GetProperties(BindingFlags.Public | BindingFlags.Instance)
             .Where(p => p.Name != "Id" && p.Name != "Name" && p.Name != "Description" && 
+                        p.Name != "ShortDescription" && p.Name != "MetaTitle" && p.Name != "MetaDescription" &&
                         p.Name != "Brand" && p.Name != "ProductCategory" && p.Name != "ProductStatus" &&
                         p.Name != "ProductVariants" && p.Name != "BrandId" && p.Name != "CategoryId" && 
                         p.Name != "StatusId" && p.Name != "CreatedAt" && p.Name != "UpdatedAt" && 

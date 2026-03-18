@@ -131,6 +131,9 @@ public sealed class UpdateProductCommandHandler(
         product.Displacement = command.Displacement;
         product.BoreStroke = command.BoreStroke?.Trim();
         product.CompressionRatio = command.CompressionRatio?.Trim();
+        product.ShortDescription = command.ShortDescription?.Trim();
+        product.MetaTitle = command.MetaTitle?.Trim();
+        product.MetaDescription = command.MetaDescription?.Trim();
 
         var optionIdToValueMap = new Dictionary<int, Dictionary<string, int>>();
         var optionNameMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);

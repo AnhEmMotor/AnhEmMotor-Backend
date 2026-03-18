@@ -19,6 +19,15 @@ public class ProductInfoStoreResponse
     public string? Brand { get; set; }
     public string? Category { get; set; }
     public string? Description { get; set; }
+
+    [JsonPropertyName("short_description")]
+    public string? ShortDescription { get; set; }
+
+    [JsonPropertyName("meta_title")]
+    public string? MetaTitle { get; set; }
+
+    [JsonPropertyName("meta_description")]
+    public string? MetaDescription { get; set; }
     
     [JsonExtensionData]
     public Dictionary<string, object?> Specifications { get; set; } = [];

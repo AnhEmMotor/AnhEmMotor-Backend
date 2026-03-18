@@ -24,6 +24,21 @@ public sealed class UpdateProductCommandValidator : AbstractValidator<UpdateProd
             .When(x => x.CategoryId.HasValue)
             .WithMessage("Product Category Id must be greater than 0.");
 
+        RuleFor(x => x.ShortDescription)
+            .MaximumLength(255)
+            .When(x => !string.IsNullOrWhiteSpace(x.ShortDescription))
+            .WithMessage("Short Description must not exceed 255 characters.");
+
+        RuleFor(x => x.MetaTitle)
+            .MaximumLength(100)
+            .When(x => !string.IsNullOrWhiteSpace(x.MetaTitle))
+            .WithMessage("Meta Title must not exceed 100 characters.");
+
+        RuleFor(x => x.MetaDescription)
+            .MaximumLength(255)
+            .When(x => !string.IsNullOrWhiteSpace(x.MetaDescription))
+            .WithMessage("Meta Description must not exceed 255 characters.");
+
         RuleFor(x => x.Variants)
             .NotEmpty()
             .WithMessage("At least one product variant is required.")

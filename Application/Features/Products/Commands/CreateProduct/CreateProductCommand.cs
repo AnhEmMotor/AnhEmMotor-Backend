@@ -61,6 +61,15 @@ public sealed record CreateProductCommand : IRequest<Result<ProductDetailForMana
     public string? BoreStroke { get; init; }
 
     public string? CompressionRatio { get; init; }
+    
+    [JsonPropertyName("short_description")]
+    public string? ShortDescription { get; init; }
+    
+    [JsonPropertyName("meta_title")]
+    public string? MetaTitle { get; init; }
+    
+    [JsonPropertyName("meta_description")]
+    public string? MetaDescription { get; init; }
 
     public List<CreateProductVariantRequest> Variants { get; init; } = [];
 }
