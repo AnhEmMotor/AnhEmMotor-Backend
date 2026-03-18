@@ -29,6 +29,7 @@ using SupplierEntity = Domain.Entities.Supplier;
 
 namespace IntegrationTests;
 
+using ProductStatusConstants = Domain.Constants.Product.ProductStatus;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -80,12 +81,12 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
         {
-            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
         }
 
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
@@ -209,11 +210,11 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
 
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if(!await db.SupplierStatuses
@@ -401,11 +402,11 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
 
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if(!await db.SupplierStatuses
@@ -499,11 +500,11 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
 
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if(!await db.SupplierStatuses
@@ -774,11 +775,11 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
 
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if(!await db.SupplierStatuses
@@ -921,11 +922,11 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
 
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if(!await db.SupplierStatuses
@@ -1059,11 +1060,11 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
 
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if(!await db.SupplierStatuses
@@ -1186,11 +1187,11 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
 
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if(!await db.SupplierStatuses
@@ -1313,11 +1314,11 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
 
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if(!await db.SupplierStatuses
@@ -1437,11 +1438,11 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
 
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if(!await db.SupplierStatuses
@@ -1555,11 +1556,11 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
 
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if(!await db.SupplierStatuses
@@ -1686,11 +1687,11 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
 
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if(!await db.SupplierStatuses
@@ -1806,11 +1807,11 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
 
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if(!await db.SupplierStatuses
@@ -1916,11 +1917,11 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
 
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if(!await db.SupplierStatuses
@@ -2033,11 +2034,11 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
 
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if(!await db.SupplierStatuses
@@ -2145,11 +2146,11 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
 
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if(!await db.SupplierStatuses
@@ -2264,11 +2265,11 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
 
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if(!await db.SupplierStatuses
@@ -2376,11 +2377,11 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
 
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if(!await db.SupplierStatuses
@@ -2512,11 +2513,11 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
 
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if(!await db.SupplierStatuses
@@ -2602,11 +2603,11 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
 
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if(!await db.SupplierStatuses
@@ -2701,11 +2702,11 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
 
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if(!await db.SupplierStatuses
@@ -2803,11 +2804,11 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
 
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if(!await db.SupplierStatuses

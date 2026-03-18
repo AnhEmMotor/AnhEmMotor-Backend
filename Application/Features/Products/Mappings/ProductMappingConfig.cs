@@ -103,13 +103,17 @@ public class ProductMappingConfig : IRegister
                     var available = row.Stock - row.HasBeenBooked;
                     var inventoryStatus = CalculateInventoryStatus(available, alertLevel);
 
+                    var coverImage = string.IsNullOrWhiteSpace(row.CoverImageUrl)
+                        ? row.Photos.FirstOrDefault()
+                        : row.CoverImageUrl;
+
                     return new ProductVariantDetailForManagerResponse
                     {
                         Id = row.Id,
                         ProductId = row.ProductId,
                         UrlSlug = row.UrlSlug,
                         Price = row.Price,
-                        CoverImageUrl = row.CoverImageUrl,
+                        CoverImageUrl = coverImage,
                         OptionValues =
                             row.OptionPairs
                                     .Where(
@@ -178,7 +182,10 @@ public class ProductMappingConfig : IRegister
 
     private static ProductDetailResponse MapProductToDetailResponse(ProductEntity product)
     {
-        var variantRows = product.ProductVariants.Select(variant => variant.Adapt<VariantRow>()).ToList();
+        var variantRows = product.ProductVariants
+            .Where(v => v.DeletedAt == null)
+            .Select(variant => variant.Adapt<VariantRow>())
+            .ToList();
 
         var variantResponses = variantRows
             .Select(variant => variant.Adapt<ProductVariantDetailResponse>())
@@ -244,6 +251,10 @@ public class ProductMappingConfig : IRegister
             .Where(url => !string.IsNullOrWhiteSpace(url))
             .ToList();
 
+        var coverImage = string.IsNullOrWhiteSpace(variant.CoverImageUrl)
+            ? photos.FirstOrDefault()
+            : variant.CoverImageUrl;
+
         return new ProductVariantLiteResponse
         {
             Id = variant.Id,
@@ -253,7 +264,7 @@ public class ProductMappingConfig : IRegister
             DisplayName = displayName,
             Price = variant.Price,
             StatusId = variant.Product?.StatusId ?? string.Empty,
-            CoverImageUrl = variant.CoverImageUrl,
+            CoverImageUrl = coverImage,
             Stock = stock,
             Photos = photos
         };

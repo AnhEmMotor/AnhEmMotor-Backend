@@ -1,4 +1,6 @@
+using Application.Common.Models;
 using Domain.Constants;
+using Domain.Entities;
 using ProductEntity = Domain.Entities.Product;
 
 namespace Application.Interfaces.Repositories.Product;
@@ -55,4 +57,9 @@ public interface IProductReadRepository
         string? filters,
         string? sorts,
         CancellationToken cancellationToken);
+
+    public Task<Domain.Entities.ProductVariant?> GetByVariantSlugWithDetailsAsync(
+        string slug,
+        CancellationToken cancellationToken,
+        DataFetchMode mode = DataFetchMode.ActiveOnly);
 }

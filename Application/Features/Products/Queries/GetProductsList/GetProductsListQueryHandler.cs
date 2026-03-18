@@ -36,18 +36,28 @@ public sealed class GetProductsListQueryHandler(IProductReadRepository readRepos
             Id = e.Id,
             Name = e.Name,
             Variants = e.ProductVariants
-                .Where(v => groupedOptionValueIds.Count == 0 || groupedOptionValueIds.All(groupIds => 
-                    v.VariantOptionValues.Any(vov => vov.OptionValueId != null && groupIds.Contains(vov.OptionValueId.Value))))
-                .Select(v => new ProductVariantListStoreResponse
-            {
-                Id = v.Id,
-                UrlSlug = v.UrlSlug,
-                Price = v.Price,
-                CoverImageUrl = v.CoverImageUrl,
-                OptionValuesText = string.Join(" - ", v.VariantOptionValues
-                    .Where(vov => vov.OptionValue != null)
-                    .Select(vov => vov.OptionValue!.Name))
-            }).ToList()
+                .Where(v => request.OptionValueIds.Count == 0 || (groupedOptionValueIds.Count > 0 && groupedOptionValueIds.All(groupIds => 
+                    v.VariantOptionValues.Any(vov => vov.OptionValueId != null && groupIds.Contains(vov.OptionValueId.Value)))))
+                .Select(v => {
+                    var photos = v.ProductCollectionPhotos
+                        .Where(p => !string.IsNullOrEmpty(p.ImageUrl))
+                        .Select(p => p.ImageUrl!)
+                        .ToList();
+                    var coverImage = string.IsNullOrWhiteSpace(v.CoverImageUrl)
+                        ? photos.FirstOrDefault()
+                        : v.CoverImageUrl;
+
+                    return new ProductVariantListStoreResponse
+                    {
+                        Id = v.Id,
+                        UrlSlug = v.UrlSlug,
+                        Price = v.Price,
+                        CoverImageUrl = coverImage,
+                        OptionValuesText = string.Join(" - ", v.VariantOptionValues
+                            .Where(vov => vov.OptionValue != null)
+                            .Select(vov => vov.OptionValue!.Name))
+                    };
+                }).ToList()
         }).ToList();
 
         return new PagedResult<ProductListStoreResponse>(items, totalCount, request.Page, request.PageSize);

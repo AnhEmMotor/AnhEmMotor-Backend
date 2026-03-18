@@ -16,7 +16,9 @@ using Application.Features.Products.Commands.UpdateVariantPrice;
 using Application.Features.Products.Queries.CheckSlugAvailability;
 using Application.Features.Products.Queries.GetActiveVariantLiteListForOutput;
 using Application.Features.Products.Queries.GetDeletedProductsList;
+using Application.Features.Products.Queries.GetProductAttributeLabels;
 using Application.Features.Products.Queries.GetProductById;
+using Application.Features.Products.Queries.GetProductStoreDetailBySlug;
 using Application.Features.Products.Queries.GetProductsList;
 using Application.Features.Products.Queries.GetProductsListForPriceManagement;
 using Application.Features.Products.Queries.GetVariantLiteByProductId;
@@ -439,6 +441,29 @@ public class ProductController(ISender sender) : ApiController
             new UpdateManyProductStatusesCommand() { Ids = request.Ids, StatusId = request.StatusId },
             cancellationToken)
             .ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy chi tiết thông tin sản phẩm và biến thể dựa trên URL Slug dành cho cửa hàng.
+    /// </summary>
+    [HttpGet("store/{slug}")]
+    [ProducesResponseType(typeof(ProductStoreDetailResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetProductDetailBySlugAsync(string slug, CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetProductStoreDetailBySlugQuery(slug), cancellationToken);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy danh sách nhãn hiển thị cho các thuộc tính kỹ thuật sản phẩm dành cho cửa hàng.
+    /// </summary>
+    [HttpGet("store/attribute-labels")]
+    [ProducesResponseType(typeof(Dictionary<string, string>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAttributeLabelsAsync(CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetProductAttributeLabelsQuery(), cancellationToken);
         return HandleResult(result);
     }
 }

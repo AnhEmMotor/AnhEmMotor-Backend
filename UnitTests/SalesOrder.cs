@@ -29,7 +29,7 @@ using Mapster;
 using Moq;
 using Sieve.Models;
 using ProductEntity = Domain.Entities.Product;
-using ProductStatus = Domain.Constants.ProductStatus;
+using ProductStatus = Domain.Constants.Product.ProductStatus;
 
 namespace UnitTests;
 

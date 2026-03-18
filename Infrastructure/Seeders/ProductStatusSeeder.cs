@@ -1,3 +1,4 @@
+using Domain.Constants.Product;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,7 +8,7 @@ public static class ProductStatusSeeder
 {
     public static async Task SeedAsync(ApplicationDBContext context, CancellationToken cancellationToken)
     {
-        var allStatuses = Domain.Constants.ProductStatus.All;
+        var allStatuses = ProductStatus.All;
 
         if(allStatuses.Count == 0)
         {

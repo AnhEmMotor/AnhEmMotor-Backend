@@ -355,4 +355,42 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
 
         return (entities, totalCount);
     }
+
+    public async Task<Domain.Entities.ProductVariant?> GetByVariantSlugWithDetailsAsync(
+        string slug,
+        CancellationToken cancellationToken,
+        DataFetchMode mode = DataFetchMode.ActiveOnly)
+    {
+        IQueryable<Domain.Entities.ProductVariant> query = context.ProductVariants.IgnoreQueryFilters();
+
+        if (mode == DataFetchMode.ActiveOnly)
+        {
+            query = query.Where(v => v.DeletedAt == null);
+        }
+        else if (mode == DataFetchMode.DeletedOnly)
+        {
+            query = query.Where(v => v.DeletedAt != null);
+        }
+
+        return await query
+            .Include(v => v.Product)
+                .ThenInclude(p => p.ProductCategory)
+            .Include(v => v.Product)
+                .ThenInclude(p => p.Brand)
+            .Include(v => v.Product)
+                .ThenInclude(p => p.ProductVariants.Where(pv => pv.DeletedAt == null))
+                    .ThenInclude(pv => pv.VariantOptionValues)
+                        .ThenInclude(vov => vov.OptionValue)
+            .Include(v => v.VariantOptionValues)
+                .ThenInclude(vov => vov.OptionValue)
+                    .ThenInclude(ov => ov.Option)
+            .Include(v => v.ProductCollectionPhotos)
+            .Include(v => v.InputInfos.Where(ii => ii.DeletedAt == null))
+                .ThenInclude(ii => ii.InputReceipt)
+            .Include(v => v.OutputInfos.Where(oi => oi.DeletedAt == null))
+                .ThenInclude(oi => oi.OutputOrder)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(v => v.UrlSlug == slug, cancellationToken)
+            .ConfigureAwait(false);
+    }
 }

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Domain.Constants
+namespace Domain.Constants.Product
 {
     public static class ProductStatus
     {

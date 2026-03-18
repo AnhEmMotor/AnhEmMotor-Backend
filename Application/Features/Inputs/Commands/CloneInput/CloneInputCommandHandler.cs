@@ -5,6 +5,7 @@ using Application.Interfaces.Repositories.Input;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Supplier;
 using Domain.Constants;
+using Domain.Constants.Product;
 using Mapster;
 using MediatR;
 using InputEntity = Domain.Entities.Input;

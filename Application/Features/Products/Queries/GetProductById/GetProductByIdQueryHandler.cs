@@ -13,7 +13,7 @@ public sealed class GetProductByIdQueryHandler(IProductReadRepository readReposi
         GetProductByIdQuery request,
         CancellationToken cancellationToken)
     {
-        var product = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
+        var product = await readRepository.GetByIdWithDetailsAsync(request.Id, cancellationToken).ConfigureAwait(false);
 
         if(product == null)
         {
