@@ -17,6 +17,12 @@ public class OrderDetailResponse
 
     public string? BuyerEmail { get; set; }
 
+    public string? CustomerName { get; set; }
+
+    public string? CustomerAddress { get; set; }
+
+    public string? CustomerPhone { get; set; }
+
     public Guid? CreatedByUserId { get; set; }
 
     public string? CompletedByUserName { get; set; }

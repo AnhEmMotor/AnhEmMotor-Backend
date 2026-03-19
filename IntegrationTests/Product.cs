@@ -2826,5 +2826,128 @@ public class Product : IAsyncLifetime
         detailResult!.CurrentVariant.CoverImageUrl.Should().Be(firstPhotoUrl);
     }
 
+    [Fact(DisplayName = "PRODUCT_141 - Lấy thông tin batch cho nhiều biến thể hợp lệ")]
+    public async Task GetVariantCartDetailsBatch_ValidIds_ReturnsDetails()
+    {
+        // Arrange
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+
+        var productStatusId = ProductStatusConstants.ForSale;
+        if (!await db.ProductStatuses.AnyAsync(x => x.Key == productStatusId, CancellationToken.None).ConfigureAwait(true))
+        {
+            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
+        }
+
+        var category = new ProductCategoryEntity { Name = $"Cat_{uniqueId}" };
+        var brand = new BrandEntity { Name = $"Brand_{uniqueId}" };
+        db.ProductCategories.Add(category);
+        db.Brands.Add(brand);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var product = new ProductEntity
+        {
+            Name = $"Xe May {uniqueId}",
+            CategoryId = category.Id,
+            BrandId = brand.Id,
+            StatusId = productStatusId
+        };
+        db.Products.Add(product);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var v1 = new ProductVariant
+        {
+            ProductId = product.Id,
+            Price = 50000000,
+            UrlSlug = $"v1-{uniqueId}",
+            CoverImageUrl = "http://honda.com/v1.jpg"
+        };
+        var v2 = new ProductVariant
+        {
+            ProductId = product.Id,
+            Price = 60000000,
+            UrlSlug = $"v2-{uniqueId}",
+            CoverImageUrl = "http://honda.com/v2.jpg"
+        };
+        db.ProductVariants.AddRange(v1, v2);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        // Act
+        var response = await _client.PostAsJsonAsync("/api/v1/product/variants-cart-details-batch", new List<int> { v1.Id, v2.Id })
+            .ConfigureAwait(true);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response.Content.ReadFromJsonAsync<List<VariantCartDetailResponse>>().ConfigureAwait(true);
+        content.Should().NotBeNull();
+        content.Should().HaveCount(2);
+        
+        var v1Res = content!.FirstOrDefault(x => x.Id == v1.Id);
+        v1Res.Should().NotBeNull();
+        v1Res!.DisplayName.Should().Contain(product.Name);
+        v1Res.Price.Should().Be(v1.Price ?? 0);
+        v1Res.CoverImageUrl.Should().Be(v1.CoverImageUrl);
+    }
+
+    [Fact(DisplayName = "PRODUCT_142 - Lấy ảnh từ bộ sưu tập nếu CoverImageUrl của biến thể bị trống")]
+    public async Task GetVariantCartDetailsBatch_NoCoverImage_FallsBackToCollection()
+    {
+        // Arrange
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+
+        var productStatusId = ProductStatusConstants.ForSale;
+        if (!await db.ProductStatuses.AnyAsync(x => x.Key == productStatusId, CancellationToken.None).ConfigureAwait(true))
+        {
+            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
+        }
+
+        var category = new ProductCategoryEntity { Name = $"Cat_{uniqueId}" };
+        var brand = new BrandEntity { Name = $"Brand_{uniqueId}" };
+        db.ProductCategories.Add(category);
+        db.Brands.Add(brand);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var product = new ProductEntity
+        {
+            Name = $"Xe {uniqueId}",
+            CategoryId = category.Id,
+            BrandId = brand.Id,
+            StatusId = productStatusId
+        };
+        db.Products.Add(product);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var v1 = new ProductVariant
+        {
+            ProductId = product.Id,
+            Price = 40000000,
+            UrlSlug = $"v-no-cover-{uniqueId}",
+            CoverImageUrl = null
+        };
+        db.ProductVariants.Add(v1);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var photo = new ProductCollectionPhoto
+        {
+            ProductVariantId = v1.Id,
+            ImageUrl = "http://honda.com/collection1.jpg"
+        };
+        db.ProductCollectionPhotos.Add(photo);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        // Act
+        var response = await _client.PostAsJsonAsync("/api/v1/product/variants-cart-details-batch", new List<int> { v1.Id })
+            .ConfigureAwait(true);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response.Content.ReadFromJsonAsync<List<VariantCartDetailResponse>>().ConfigureAwait(true);
+        content.Should().NotBeNull();
+        content![0].CoverImageUrl.Should().Be(photo.ImageUrl);
+    }
+
 #pragma warning restore CRR0035
 }

@@ -204,13 +204,18 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     /// Tạo đơn hàng mới (dành cho các tài khoản đã đăng nhập).
     /// </summary>
     [HttpPost]
+    [Authorize]
     [ProducesResponseType(typeof(OrderDetailResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateOutputAsync(
         [FromBody] CreateOutputCommand request,
         CancellationToken cancellationToken)
     {
-        var command = request.Adapt<CreateOutputCommand>();
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var command = request.Adapt<CreateOutputCommand>() with
+        {
+            BuyerId = Guid.TryParse(currentUserId, out var guid) ? guid : null
+        };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleCreated(
             result,

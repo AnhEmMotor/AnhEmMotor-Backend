@@ -20,11 +20,12 @@ using Application.Features.Products.Queries.GetActiveVariantLiteListForOutput;
 using Application.Features.Products.Queries.GetDeletedProductsList;
 using Application.Features.Products.Queries.GetProductAttributeLabels;
 using Application.Features.Products.Queries.GetProductById;
+using Application.Features.Products.Queries.GetVariantCartDetailsBatch;
+using Application.Features.Products.Queries.GetVariantLiteByProductId;
+using Application.Features.Products.Queries.GetProductStoreDetailBySlug;
 using Application.Features.Products.Queries.GetProductsList;
 using Application.Features.Products.Queries.GetProductsListForManager;
 using Application.Features.Products.Queries.GetProductsListForPriceManagement;
-using Application.Features.Products.Queries.GetProductStoreDetailBySlug;
-using Application.Features.Products.Queries.GetVariantLiteByProductId;
 using Asp.Versioning;
 using Domain.Constants;
 using Domain.Primitives;
@@ -468,6 +469,20 @@ public class ProductController(ISender sender) : ApiController
     public async Task<IActionResult> GetAttributeLabelsAsync(CancellationToken cancellationToken)
     {
         var result = await sender.Send(new GetProductAttributeLabelsQuery(), cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy danh sách thông tin của các mã biến thể được truyền vào để trả ra các thông tin phục vụ cho giỏ hàng
+    /// </summary>
+    [HttpPost("variants-cart-details-batch")]
+    [ProducesResponseType(typeof(List<VariantCartDetailResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetVariantCartDetailsBatchAsync(
+        [FromBody] List<int> variantIds,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetVariantCartDetailsBatchQuery { VariantIds = variantIds }, cancellationToken)
+            .ConfigureAwait(true);
         return HandleResult(result);
     }
 }

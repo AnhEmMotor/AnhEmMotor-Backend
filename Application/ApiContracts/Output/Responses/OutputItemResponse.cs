@@ -10,6 +10,12 @@ public class OutputItemResponse
 
     public string? BuyerId { get; set; }
 
+    public string? CustomerName { get; set; }
+
+    public string? CustomerAddress { get; set; }
+
+    public string? CustomerPhone { get; set; }
+
     public DateTimeOffset? CreatedAt { get; set; }
 
     public string? StatusId { get; init; }
