@@ -15,20 +15,16 @@ public static class InputStatusSeeder
             return;
         }
 
-        var existingStatuses = await context.Set<Domain.Entities.InputStatus>()
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
+        var existingStatuses = await context.Set<InputStatus>().ToListAsync(cancellationToken).ConfigureAwait(false);
 
         var newStatuses = allStatuses
             .Except(existingStatuses.Select(s => s.Key), StringComparer.OrdinalIgnoreCase)
-            .Select(key => new Domain.Entities.InputStatus { Key = key })
+            .Select(key => new InputStatus { Key = key })
             .ToList();
 
         if(newStatuses.Count != 0)
         {
-            await context.Set<Domain.Entities.InputStatus>()
-                .AddRangeAsync(newStatuses, cancellationToken)
-                .ConfigureAwait(false);
+            await context.Set<InputStatus>().AddRangeAsync(newStatuses, cancellationToken).ConfigureAwait(false);
             await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
@@ -45,7 +41,7 @@ public static class InputStatusSeeder
 
             if(!hasReferences)
             {
-                context.Set<Domain.Entities.InputStatus>().RemoveRange(statusesToDelete);
+                context.Set<InputStatus>().RemoveRange(statusesToDelete);
                 await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
         }

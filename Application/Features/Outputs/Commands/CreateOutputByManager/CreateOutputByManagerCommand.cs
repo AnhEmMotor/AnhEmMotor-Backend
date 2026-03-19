@@ -16,6 +16,12 @@ public sealed record CreateOutputByManagerCommand : IRequest<Result<OrderDetailR
 
     public string? StatusId { get; init; }
 
+    public string? CustomerName { get; init; }
+
+    public string? CustomerAddress { get; init; }
+
+    public string? CustomerPhone { get; init; }
+
     [JsonPropertyName("products")]
     public List<CreateOutputInfoRequest> OutputInfos { get; init; } = [];
 }

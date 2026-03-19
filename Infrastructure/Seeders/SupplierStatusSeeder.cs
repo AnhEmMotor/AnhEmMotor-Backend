@@ -15,20 +15,16 @@ public static class SupplierStatusSeeder
             return;
         }
 
-        var existingStatuses = await context.Set<Domain.Entities.SupplierStatus>()
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
+        var existingStatuses = await context.Set<SupplierStatus>().ToListAsync(cancellationToken).ConfigureAwait(false);
 
         var newStatuses = allStatuses
             .Except(existingStatuses.Select(s => s.Key), StringComparer.OrdinalIgnoreCase)
-            .Select(key => new Domain.Entities.SupplierStatus { Key = key })
+            .Select(key => new SupplierStatus { Key = key })
             .ToList();
 
         if(newStatuses.Count != 0)
         {
-            await context.Set<Domain.Entities.SupplierStatus>()
-                .AddRangeAsync(newStatuses, cancellationToken)
-                .ConfigureAwait(false);
+            await context.Set<SupplierStatus>().AddRangeAsync(newStatuses, cancellationToken).ConfigureAwait(false);
             await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
@@ -45,7 +41,7 @@ public static class SupplierStatusSeeder
 
             if(!hasReferences)
             {
-                context.Set<Domain.Entities.SupplierStatus>().RemoveRange(statusesToDelete);
+                context.Set<SupplierStatus>().RemoveRange(statusesToDelete);
                 await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
         }

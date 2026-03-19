@@ -62,6 +62,10 @@ namespace Infrastructure.Repositories.ProductVariant
             return context.GetQuery<ProductVariantEntity>(mode)
                 .Where(v => ids.Contains(v.Id))
                 .Include(v => v.Product)
+                .Include(v => v.ProductCollectionPhotos)
+                .Include(v => v.VariantOptionValues)
+                .ThenInclude(vov => vov.OptionValue)
+                .AsSplitQuery()
                 .ToListAsync(cancellationToken)
                 .ContinueWith<IEnumerable<ProductVariantEntity>>(t => t.Result, cancellationToken);
         }

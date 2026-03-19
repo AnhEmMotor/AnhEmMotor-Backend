@@ -16,10 +16,15 @@ namespace Application.Features.Outputs.Commands.CreateOutput
 
             RuleForEach(x => x.OutputInfos).SetValidator(new CreateOutputProductCommandValidator());
 
+            RuleFor(x => x.CustomerName).NotEmpty().WithMessage("Customer name is required.");
+
+            RuleFor(x => x.CustomerAddress).NotEmpty().WithMessage("Customer address is required.");
+
             RuleFor(x => x.CustomerPhone)
+                .NotEmpty()
+                .WithMessage("Customer phone is required.")
                 .MustBeValidPhoneNumber()
-                .WithMessage("Invalid phone number format.")
-                .When(x => !string.IsNullOrEmpty(x.CustomerPhone));
+                .WithMessage("Invalid phone number format.");
         }
 
         private bool HaveUniqueProducts(List<CreateOutputInfoRequest> products)

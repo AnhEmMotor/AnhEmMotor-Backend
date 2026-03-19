@@ -84,6 +84,9 @@ public class ProductMappingConfig : IRegister
 
         config.NewConfig<ProductVariantEntity, ProductVariantLiteResponseForInput>()
             .MapWith(src => BuildVariantLiteResponseForInput(src, null));
+
+        config.NewConfig<ProductVariantEntity, VariantCartDetailResponse>()
+            .MapWith(src => BuildVariantCartDetailResponse(src));
     }
 
     private static ProductDetailForManagerResponse MapProductToDetailForManagerResponse(ProductEntity product)
@@ -367,6 +370,34 @@ public class ProductMappingConfig : IRegister
             .SelectMany(variant => variant.OutputInfos)
             .Where(info => info.OutputOrder != null && OrderStatus.IsBookingStatus(info.OutputOrder.StatusId))
             .Sum(info => (long)(info.Count ?? 0));
+    }
+
+    public static VariantCartDetailResponse BuildVariantCartDetailResponse(ProductVariantEntity variant)
+    {
+        var optionPairs = variant.VariantOptionValues
+            .Select(
+                vov => new OptionPair
+                {
+                    OptionName = vov.OptionValue?.Option?.Name,
+                    OptionValue = vov.OptionValue?.Name
+                })
+            .ToList();
+
+        var variantName = BuildVariantName(optionPairs);
+        var productName = variant.Product?.Name ?? string.Empty;
+        var displayName = string.IsNullOrWhiteSpace(variantName) ? productName : $"{productName} ({variantName})";
+
+        var coverImage = string.IsNullOrWhiteSpace(variant.CoverImageUrl)
+            ? variant.ProductCollectionPhotos.FirstOrDefault()?.ImageUrl
+            : variant.CoverImageUrl;
+
+        return new VariantCartDetailResponse
+        {
+            Id = variant.Id,
+            DisplayName = displayName,
+            Price = variant.Price ?? 0,
+            CoverImageUrl = coverImage
+        };
     }
 
     public static string CalculateProductInventoryStatus(ProductEntity product, long alertLevel)

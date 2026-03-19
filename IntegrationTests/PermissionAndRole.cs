@@ -16,8 +16,7 @@ using System.Net.Http.Json;
 
 namespace IntegrationTests;
 
-[Collection("Shared Integration Collection")]
-public class PermissionAndRole : IAsyncLifetime
+public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
 {
     private readonly IntegrationTestWebAppFactory _factory;
     private readonly HttpClient _client;

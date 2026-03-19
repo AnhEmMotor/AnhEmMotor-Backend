@@ -18,6 +18,12 @@ public sealed record UpdateOutputForManagerCommand : IRequest<Result<OrderDetail
 
     public string? Notes { get; init; }
 
+    public string? CustomerName { get; init; }
+
+    public string? CustomerAddress { get; init; }
+
+    public string? CustomerPhone { get; init; }
+
     [JsonPropertyName("products")]
     public ICollection<UpdateOutputInfoRequest> OutputInfos { get; init; } = [];
 }

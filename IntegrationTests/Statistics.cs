@@ -25,8 +25,7 @@ using ProductStatusEntity = Domain.Entities.ProductStatus;
 
 namespace IntegrationTests;
 
-[Collection("Shared Integration Collection")]
-public class Statistics : IAsyncLifetime
+public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
 {
     private readonly IntegrationTestWebAppFactory _factory;
     private readonly HttpClient _client;

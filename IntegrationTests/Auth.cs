@@ -17,8 +17,7 @@ namespace IntegrationTests;
 using System.Threading.Tasks;
 using Xunit;
 
-[Collection("Shared Integration Collection")]
-public class Auth : IAsyncLifetime
+public class Auth : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
 {
     private readonly IntegrationTestWebAppFactory _factory;
     private readonly HttpClient _client;

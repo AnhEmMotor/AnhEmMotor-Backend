@@ -15,8 +15,7 @@ namespace IntegrationTests;
 using System.Threading.Tasks;
 using Xunit;
 
-[Collection("Shared Integration Collection")]
-public class MediaFile : IAsyncLifetime
+public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
 {
     private readonly IntegrationTestWebAppFactory _factory;
     private readonly HttpClient _client;

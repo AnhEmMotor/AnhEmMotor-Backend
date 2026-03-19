@@ -571,6 +571,11 @@
             Lấy danh sách nhãn hiển thị cho các thuộc tính kỹ thuật sản phẩm dành cho cửa hàng.
             </summary>
         </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetVariantCartDetailsBatchAsync(System.Collections.Generic.List{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Lấy danh sách thông tin của các mã biến thể được truyền vào để trả ra các thông tin phục vụ cho giỏ hàng
+            </summary>
+        </member>
         <member name="T:WebAPI.Controllers.V1.SalesOrdersController">
             <summary>
             Quản lý đơn hàng/phiếu xuất.
