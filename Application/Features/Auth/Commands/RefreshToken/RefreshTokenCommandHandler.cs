@@ -2,6 +2,7 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Services;
+using Domain.Constants;
 using Mapster;
 using MediatR;
 
@@ -37,9 +38,7 @@ public sealed class RefreshTokenCommandHandler(
 
         if(!string.IsNullOrEmpty(request.AccessToken))
         {
-            var oldStatusClaim = tokenService.GetClaimFromToken(
-                request.AccessToken,
-                Domain.Constants.ClaimJWTPayload.Status);
+            var oldStatusClaim = tokenService.GetClaimFromToken(request.AccessToken, ClaimJWTPayload.Status);
 
             if(!string.IsNullOrEmpty(oldStatusClaim) &&
                 !string.Equals(oldStatusClaim, user.Status, StringComparison.OrdinalIgnoreCase))

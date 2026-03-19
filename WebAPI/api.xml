@@ -561,6 +561,16 @@
             Chỉnh trạng thái nhiều sản phẩm cùng lúc.
             </summary>
         </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetProductDetailBySlugAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Lấy chi tiết thông tin sản phẩm và biến thể dựa trên URL Slug dành cho cửa hàng.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetAttributeLabelsAsync(System.Threading.CancellationToken)">
+            <summary>
+            Lấy danh sách nhãn hiển thị cho các thuộc tính kỹ thuật sản phẩm dành cho cửa hàng.
+            </summary>
+        </member>
         <member name="T:WebAPI.Controllers.V1.SalesOrdersController">
             <summary>
             Quản lý đơn hàng/phiếu xuất.

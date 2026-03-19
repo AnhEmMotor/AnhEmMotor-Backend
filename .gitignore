@@ -212,3 +212,4 @@ TestPlans
 StrykerOutput
 Spec
 nul
+*.txt

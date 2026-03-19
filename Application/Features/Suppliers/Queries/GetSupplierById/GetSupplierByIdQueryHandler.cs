@@ -1,7 +1,8 @@
 using Application.ApiContracts.Supplier.Responses;
+using Application.Common.Helper;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.Supplier;
-
+using Domain.Constants;
 using Mapster;
 using MediatR;
 
@@ -21,7 +22,7 @@ public sealed class GetSupplierByIdQueryHandler(ISupplierReadRepository reposito
         }
 
         var response = supplier.Adapt<SupplierResponse>();
-        Common.Helper.AuditColumnMapper.Apply(supplier, response, Domain.Constants.AuditColumn.CreatedAt);
+        AuditColumnMapper.Apply(supplier, response, AuditColumn.CreatedAt);
 
         return response;
     }

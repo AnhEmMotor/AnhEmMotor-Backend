@@ -5,6 +5,8 @@ using Application.Interfaces.Repositories.Input;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Supplier;
 using Domain.Constants;
+using Domain.Constants.Input;
+using Domain.Constants.Product;
 using Mapster;
 using MediatR;
 using InputEntity = Domain.Entities.Input;
@@ -106,7 +108,7 @@ public sealed class CloneInputCommandHandler(
         {
             Notes = originalInput.Notes,
             SupplierId = originalInput.SupplierId,
-            StatusId = Domain.Constants.Input.InputStatus.Working,
+            StatusId = InputStatus.Working,
             InputInfos = validProducts,
             CreatedAt = DateTimeOffset.UtcNow,
             UpdatedAt = DateTimeOffset.UtcNow

@@ -3,6 +3,7 @@ using Application.Common.Models;
 using Application.Features.Permissions.Commands.CreateRole;
 using Application.Features.Permissions.Commands.DeleteMultipleRoles;
 using Application.Features.Permissions.Commands.DeleteRole;
+using Application.Features.Permissions.Commands.UpdateRole;
 using Application.Features.Permissions.Queries.GetAllPermissions;
 using Application.Features.Permissions.Queries.GetAllRoles;
 using Application.Features.Permissions.Queries.GetMyPermissions;
@@ -11,10 +12,12 @@ using Application.Features.Permissions.Queries.GetUserPermissionsById;
 using Domain.Constants.Permission;
 using Domain.Primitives;
 using FluentAssertions;
+using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using Sieve.Models;
 using System.Security.Claims;
 using WebAPI.Controllers.V1;
 
@@ -223,7 +226,7 @@ public class PermissionAndRole
     [Fact(DisplayName = "PERM_CTRL_009 - Controller gọi GetAllRoles thành công")]
     public async Task GetAllRoles_MediatorReturnsData_ReturnsOkWithRoles()
     {
-        var sieveModel = new Sieve.Models.SieveModel();
+        var sieveModel = new SieveModel();
         var expectedRoles = new PagedResult<RoleSelectResponse>(
             [ new() { ID = Guid.NewGuid(), Name = "Admin" }, new() { ID = Guid.NewGuid(), Name = "Manager" }, new()
             {
@@ -289,34 +292,24 @@ public class PermissionAndRole
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateRoleCommand>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new FluentValidation.ValidationException("Role name already exists"));
+            .ThrowsAsync(new ValidationException("Role name already exists"));
 
         Func<Task> act = async () => await _controller.CreateRoleAsync(request, CancellationToken.None)
             .ConfigureAwait(true);
 
-        await act.Should()
-            .ThrowAsync<FluentValidation.ValidationException>()
-            .WithMessage("*already exists*")
-            .ConfigureAwait(true);
+        await act.Should().ThrowAsync<ValidationException>().WithMessage("*already exists*").ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "PERM_CTRL_012 - Controller calls UpdateRole successfully")]
     public async Task UpdateRole_ValidRequest_ReturnsOkWithUpdatedRole()
     {
         var roleId = Guid.NewGuid();
-        var request = new Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommand
-        {
-            RoleId = roleId,
-            Description = "Updated Description"
-        };
+        var request = new UpdateRoleCommand { RoleId = roleId, Description = "Updated Description" };
 
         var expectedResponse = new PermissionRoleUpdateResponse { Message = "Role updated successfully" };
 
         _mediatorMock
-            .Setup(
-                m => m.Send(
-                    It.IsAny<Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommand>(),
-                    It.IsAny<CancellationToken>()))
+            .Setup(m => m.Send(It.IsAny<UpdateRoleCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PermissionRoleUpdateResponse>.Success(expectedResponse));
 
         var result = await _controller.UpdateRoleAsync(roleId, request, CancellationToken.None).ConfigureAwait(true);

@@ -6,8 +6,10 @@ using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Supplier;
 
 using Domain.Constants;
+using Domain.Constants.Input;
 using Mapster;
 using MediatR;
+using System.Text.RegularExpressions;
 using InputEntity = Domain.Entities.Input;
 using InputInfoEntity = Domain.Entities.InputInfo;
 
@@ -66,10 +68,10 @@ public sealed class CreateInputCommandHandler(
 
         if(!string.IsNullOrEmpty(input.Notes))
         {
-            input.Notes = System.Text.RegularExpressions.Regex.Replace(input.Notes, "<.*?>", string.Empty);
+            input.Notes = Regex.Replace(input.Notes, "<.*?>", string.Empty);
         }
 
-        input.StatusId = Domain.Constants.Input.InputStatus.Working;
+        input.StatusId = InputStatus.Working;
         input.InputInfos = [ .. request.Products
             .Select(
                 p =>

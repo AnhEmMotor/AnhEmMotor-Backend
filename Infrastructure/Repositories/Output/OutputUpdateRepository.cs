@@ -1,4 +1,5 @@
 using Application.Interfaces.Repositories.Output;
+using Domain.DomainServices;
 using Domain.Entities;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
@@ -31,7 +32,7 @@ public class OutputUpdateRepository(ApplicationDBContext context) : IOutputUpdat
             var batches = await GetAvailableBatchesAsync(outputInfo.ProductVarientId.Value, cancellationToken)
                 .ConfigureAwait(false);
 
-            var unitCost = Domain.DomainServices.InventoryValuationService
+            var unitCost = InventoryValuationService
                 .CalculateUnitCostAndDeductInventory(batches, outputInfo.Count.Value);
 
             outputInfo.CostPrice = unitCost;

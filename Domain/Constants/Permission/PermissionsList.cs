@@ -1,3 +1,4 @@
+
 namespace Domain.Constants.Permission;
 
 public static class PermissionsList

@@ -1,6 +1,7 @@
 ﻿using Application.ApiContracts.Product.Common;
 using Application.ApiContracts.Product.Responses;
 using Domain.Constants;
+using Domain.Constants.Input;
 using Domain.Constants.Order;
 using Mapster;
 using ProductEntity = Domain.Entities.Product;
@@ -43,9 +44,7 @@ public class ProductMappingConfig : IRegister
             .Map(
                 dest => dest.Stock,
                 src => src.InputInfos
-                        .Where(
-                            ii => ii.InputReceipt != null &&
-                                        Domain.Constants.Input.InputStatus.IsFinished(ii.InputReceipt.StatusId))
+                        .Where(ii => ii.InputReceipt != null && InputStatus.IsFinished(ii.InputReceipt.StatusId))
                         .Sum(ii => ii.RemainingCount) ??
                     0)
 
@@ -103,13 +102,17 @@ public class ProductMappingConfig : IRegister
                     var available = row.Stock - row.HasBeenBooked;
                     var inventoryStatus = CalculateInventoryStatus(available, alertLevel);
 
+                    var coverImage = string.IsNullOrWhiteSpace(row.CoverImageUrl)
+                        ? row.Photos.FirstOrDefault()
+                        : row.CoverImageUrl;
+
                     return new ProductVariantDetailForManagerResponse
                     {
                         Id = row.Id,
                         ProductId = row.ProductId,
                         UrlSlug = row.UrlSlug,
                         Price = row.Price,
-                        CoverImageUrl = row.CoverImageUrl,
+                        CoverImageUrl = coverImage,
                         OptionValues =
                             row.OptionPairs
                                     .Where(
@@ -166,6 +169,9 @@ public class ProductMappingConfig : IRegister
             Displacement = product.Displacement,
             BoreStroke = product.BoreStroke,
             CompressionRatio = product.CompressionRatio,
+            ShortDescription = product.ShortDescription,
+            MetaTitle = product.MetaTitle,
+            MetaDescription = product.MetaDescription,
             StatusId = product.StatusId,
             CoverImageUrl = variantResponses.FirstOrDefault()?.CoverImageUrl,
             Stock = (int)totalStock,
@@ -178,7 +184,10 @@ public class ProductMappingConfig : IRegister
 
     private static ProductDetailResponse MapProductToDetailResponse(ProductEntity product)
     {
-        var variantRows = product.ProductVariants.Select(variant => variant.Adapt<VariantRow>()).ToList();
+        var variantRows = product.ProductVariants
+            .Where(v => v.DeletedAt == null)
+            .Select(variant => variant.Adapt<VariantRow>())
+            .ToList();
 
         var variantResponses = variantRows
             .Select(variant => variant.Adapt<ProductVariantDetailResponse>())
@@ -211,6 +220,9 @@ public class ProductMappingConfig : IRegister
             Displacement = product.Displacement,
             BoreStroke = product.BoreStroke,
             CompressionRatio = product.CompressionRatio,
+            ShortDescription = product.ShortDescription,
+            MetaTitle = product.MetaTitle,
+            MetaDescription = product.MetaDescription,
             CoverImageUrl = variantResponses.FirstOrDefault()?.CoverImageUrl,
             Variants = variantResponses
         };
@@ -234,15 +246,17 @@ public class ProductMappingConfig : IRegister
             : $"{productName} ({variantName})";
 
         var stock = variant.InputInfos
-                .Where(
-                    ii => ii.InputReceipt != null &&
-                            Domain.Constants.Input.InputStatus.IsFinished(ii.InputReceipt.StatusId))
+                .Where(ii => ii.InputReceipt != null && InputStatus.IsFinished(ii.InputReceipt.StatusId))
                 .Sum(ii => ii.RemainingCount) ??
             0;
         var photos = variant.ProductCollectionPhotos
             .Select(p => p.ImageUrl ?? string.Empty)
             .Where(url => !string.IsNullOrWhiteSpace(url))
             .ToList();
+
+        var coverImage = string.IsNullOrWhiteSpace(variant.CoverImageUrl)
+            ? photos.FirstOrDefault()
+            : variant.CoverImageUrl;
 
         return new ProductVariantLiteResponse
         {
@@ -253,7 +267,7 @@ public class ProductMappingConfig : IRegister
             DisplayName = displayName,
             Price = variant.Price,
             StatusId = variant.Product?.StatusId ?? string.Empty,
-            CoverImageUrl = variant.CoverImageUrl,
+            CoverImageUrl = coverImage,
             Stock = stock,
             Photos = photos
         };
@@ -343,8 +357,7 @@ public class ProductMappingConfig : IRegister
     {
         return product.ProductVariants
             .SelectMany(variant => variant.InputInfos)
-            .Where(
-                ii => ii.InputReceipt != null && Domain.Constants.Input.InputStatus.IsFinished(ii.InputReceipt.StatusId))
+            .Where(ii => ii.InputReceipt != null && InputStatus.IsFinished(ii.InputReceipt.StatusId))
             .Sum(info => info.RemainingCount ?? 0);
     }
 
@@ -363,9 +376,7 @@ public class ProductMappingConfig : IRegister
                 variant =>
                 {
                     var stock = variant.InputInfos
-                        .Where(
-                            ii => ii.InputReceipt != null &&
-                                    Domain.Constants.Input.InputStatus.IsFinished(ii.InputReceipt.StatusId))
+                        .Where(ii => ii.InputReceipt != null && InputStatus.IsFinished(ii.InputReceipt.StatusId))
                         .Sum(ii => ii.RemainingCount ?? 0);
                     var booked = variant.OutputInfos
                         .Where(oi => oi.OutputOrder != null && OrderStatus.IsBookingStatus(oi.OutputOrder.StatusId))

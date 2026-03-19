@@ -1,4 +1,4 @@
-using Domain.Constants;
+using Domain.Constants.Product;
 using FluentValidation;
 
 namespace Application.Features.Products.Commands.UpdateProductStatus;

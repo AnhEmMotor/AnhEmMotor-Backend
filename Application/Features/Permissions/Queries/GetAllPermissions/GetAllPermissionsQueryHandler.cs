@@ -1,5 +1,6 @@
 using Application.ApiContracts.Permission.Responses;
 using Application.Common.Models;
+using Domain.Constants.Permission;
 using MediatR;
 using System.Reflection;
 
@@ -12,7 +13,7 @@ public class GetAllPermissionsQueryHandler : IRequestHandler<GetAllPermissionsQu
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var permissionDefinitions = typeof(Domain.Constants.Permission.PermissionsList)
+        var permissionDefinitions = typeof(PermissionsList)
             .GetNestedTypes()
             .SelectMany(
                 type => type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy))
@@ -34,7 +35,7 @@ public class GetAllPermissionsQueryHandler : IRequestHandler<GetAllPermissionsQu
                 g => g.Select(
                     p =>
                     {
-                        var metadata = Domain.Constants.Permission.PermissionsList.GetMetadata(p.Permission!);
+                        var metadata = PermissionsList.GetMetadata(p.Permission!);
                         return new PermissionResponse()
                         {
                             ID = p.Permission,

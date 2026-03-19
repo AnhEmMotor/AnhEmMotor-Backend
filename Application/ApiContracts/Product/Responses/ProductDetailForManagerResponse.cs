@@ -75,6 +75,15 @@ public class ProductDetailForManagerResponse
     [JsonPropertyName("compression_ratio")]
     public string? CompressionRatio { get; set; }
 
+    [JsonPropertyName("short_description")]
+    public string? ShortDescription { get; set; }
+
+    [JsonPropertyName("meta_title")]
+    public string? MetaTitle { get; set; }
+
+    [JsonPropertyName("meta_description")]
+    public string? MetaDescription { get; set; }
+
     [JsonPropertyName("status_id")]
     public string? StatusId { get; set; }
 

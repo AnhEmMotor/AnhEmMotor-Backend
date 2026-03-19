@@ -8,6 +8,8 @@ using Infrastructure.DBContexts;
 using Infrastructure.Repositories;
 using Infrastructure.Repositories.LocalFile;
 using Infrastructure.Services;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -15,6 +17,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging.Abstractions;
 using MySqlConnector;
 using Respawn;
 using System.Data.Common;
@@ -29,7 +32,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
     public IntegrationTestWebAppFactory()
     {
         _mySqlContainer = new MySqlBuilder("mysql:8.0")
-            .WithLogger(Microsoft.Extensions.Logging.Abstractions.NullLogger.Instance)
+            .WithLogger(NullLogger.Instance)
             .WithDatabase("AnhEmMotor_Test")
             .WithUsername("root")
             .WithPassword("root")
@@ -156,11 +159,11 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                     .AddEntityFrameworkStores<ApplicationDBContext>()
                     .AddDefaultTokenProviders();
 
-                services.Configure<Microsoft.AspNetCore.Authentication.AuthenticationOptions>(
+                services.Configure<AuthenticationOptions>(
                     options =>
                     {
-                        options.DefaultAuthenticateScheme = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme;
-                        options.DefaultChallengeScheme = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme;
+                        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                     });
 
                 services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();

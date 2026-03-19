@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using Application.Common.Converters;
+using System.Text.Json.Serialization;
 
 namespace Application.ApiContracts.Product.Requests;
 
@@ -6,7 +7,7 @@ public class UpdateProductVariantRequest
 {
     public int? Id { get; set; }
 
-    [JsonConverter(typeof(Application.Common.Converters.NullableDecimalConverter))]
+    [JsonConverter(typeof(NullableDecimalConverter))]
     public decimal? Price { get; set; }
 
     [JsonPropertyName("url")]

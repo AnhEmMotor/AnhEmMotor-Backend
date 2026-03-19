@@ -4,6 +4,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Permission;
 using Application.Interfaces.Repositories.Role;
 using Application.Interfaces.Services;
+using Domain.Constants.Permission;
 using Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
@@ -59,7 +60,7 @@ public class UpdateRoleCommandHandler(
 
         if(request.Permissions != null)
         {
-            var validSystemPermissions = typeof(Domain.Constants.Permission.PermissionsList)
+            var validSystemPermissions = typeof(PermissionsList)
                 .GetNestedTypes()
                 .SelectMany(t => t.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy))
                 .Where(fi => fi.IsLiteral && !fi.IsInitOnly)

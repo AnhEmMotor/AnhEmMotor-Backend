@@ -1,5 +1,6 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.LocalFile;
 using Application.Interfaces.Repositories.MediaFile;
 
 using Domain.Constants;
@@ -11,7 +12,7 @@ public sealed class DeleteProductImageCommandHandler(
     IMediaFileReadRepository readRepository,
     IMediaFileDeleteRepository deleteRepository,
     IUnitOfWork unitOfWork,
-    Interfaces.Repositories.LocalFile.IFileStorageService fileStorageService) : IRequestHandler<DeleteProductImageCommand, Result>
+    IFileStorageService fileStorageService) : IRequestHandler<DeleteProductImageCommand, Result>
 {
     public async Task<Result> Handle(DeleteProductImageCommand request, CancellationToken cancellationToken)
     {

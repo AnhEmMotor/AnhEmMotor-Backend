@@ -55,4 +55,9 @@ public interface IProductReadRepository
         string? filters,
         string? sorts,
         CancellationToken cancellationToken);
+
+    public Task<Domain.Entities.ProductVariant?> GetByVariantSlugWithDetailsAsync(
+        string slug,
+        CancellationToken cancellationToken,
+        DataFetchMode mode = DataFetchMode.ActiveOnly);
 }

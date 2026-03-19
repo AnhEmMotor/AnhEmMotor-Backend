@@ -1,5 +1,7 @@
-﻿using Application.Features.UserManager.Commands.AssignRoles;
+﻿using Application.ApiContracts.UserManager.Responses;
+using Application.Features.UserManager.Commands.AssignRoles;
 using Application.Features.UserManager.Commands.ChangeMultipleUsersStatus;
+using Application.Features.UserManager.Commands.ChangePasswordByManager;
 using Application.Features.UserManager.Commands.ChangeUserStatus;
 using Application.Features.UserManager.Commands.UpdateUser;
 using Domain.Constants;
@@ -15,6 +17,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text.Json;
 
 namespace IntegrationTests;
 
@@ -383,10 +386,7 @@ public class UserManager : IAsyncLifetime
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var request = new Application.Features.UserManager.Commands.ChangePasswordByManager.ChangePasswordByManagerCommand
-        {
-            NewPassword = "NewPass@123"
-        };
+        var request = new ChangePasswordByManagerCommand { NewPassword = "NewPass@123" };
 
         var response = await _client.PostAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}/change-password", request)
             .ConfigureAwait(true);
@@ -756,8 +756,8 @@ public class UserManager : IAsyncLifetime
         result.Should().NotBeNull();
         result!.PageNumber.Should().Be(2);
         result.PageSize.Should().Be(10);
-        var itemsJson = System.Text.Json.JsonSerializer.Serialize(result.Items);
-        var itemsList = System.Text.Json.JsonSerializer.Deserialize<List<object>>(itemsJson);
+        var itemsJson = JsonSerializer.Serialize(result.Items);
+        var itemsList = JsonSerializer.Deserialize<List<object>>(itemsJson);
         itemsList!.Count.Should().Be(2);
     }
 
@@ -890,10 +890,7 @@ public class UserManager : IAsyncLifetime
             CancellationToken.None)
             .ConfigureAwait(true);
 
-        var request = new Application.Features.UserManager.Commands.ChangePasswordByManager.ChangePasswordByManagerCommand
-        {
-            NewPassword = "NewPass@123"
-        };
+        var request = new ChangePasswordByManagerCommand { NewPassword = "NewPass@123" };
 
         var response = await _client.PostAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}/change-password", request)
             .ConfigureAwait(true);
@@ -992,8 +989,7 @@ public class UserManager : IAsyncLifetime
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var result = await response.Content
-            .ReadFromJsonAsync<PagedResult<Application.ApiContracts.UserManager.Responses.UserDTOForOutputResponse>>(
-                CancellationToken.None)
+            .ReadFromJsonAsync<PagedResult<UserDTOForOutputResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
 
         result.Should().NotBeNull();
@@ -1049,8 +1045,7 @@ public class UserManager : IAsyncLifetime
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var result = await response.Content
-            .ReadFromJsonAsync<PagedResult<Application.ApiContracts.UserManager.Responses.UserDTOForOutputResponse>>(
-                CancellationToken.None)
+            .ReadFromJsonAsync<PagedResult<UserDTOForOutputResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
 
         result.Should().NotBeNull();

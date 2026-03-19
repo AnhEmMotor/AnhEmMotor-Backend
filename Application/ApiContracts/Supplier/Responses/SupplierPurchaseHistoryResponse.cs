@@ -1,3 +1,4 @@
+
 namespace Application.ApiContracts.Supplier.Responses;
 
 public sealed class SupplierPurchaseHistoryResponse

@@ -22,6 +22,7 @@ using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.User;
 using Domain.Constants;
 using Domain.Constants.Order;
+using Domain.DomainServices;
 using Domain.Entities;
 using FluentAssertions;
 using FluentValidation.TestHelper;
@@ -29,7 +30,7 @@ using Mapster;
 using Moq;
 using Sieve.Models;
 using ProductEntity = Domain.Entities.Product;
-using ProductStatus = Domain.Constants.ProductStatus;
+using ProductStatus = Domain.Constants.Product.ProductStatus;
 
 namespace UnitTests;
 
@@ -1864,7 +1865,7 @@ public class SalesOrder
             new() { Id = 2, RemainingCount = 20, InputPrice = 150 }
         };
 
-        var unitCost = Domain.DomainServices.InventoryValuationService.CalculateUnitCostAndDeductInventory(batches, 15);
+        var unitCost = InventoryValuationService.CalculateUnitCostAndDeductInventory(batches, 15);
 
         unitCost.Should().Be(117);
         batches[0].RemainingCount.Should().Be(0);

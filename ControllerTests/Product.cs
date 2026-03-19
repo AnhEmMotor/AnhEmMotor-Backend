@@ -1,4 +1,5 @@
-﻿using Application.Common.Models;
+﻿using Application.ApiContracts.Product.Responses;
+using Application.Common.Models;
 using Application.Features.Products.Commands.CreateProduct;
 using Application.Features.Products.Commands.DeleteManyProducts;
 using Application.Features.Products.Commands.DeleteProduct;
@@ -17,12 +18,12 @@ using Application.Features.Products.Queries.GetDeletedProductsList;
 using Application.Features.Products.Queries.GetProductsList;
 using Application.Features.Products.Queries.GetProductsListForManager;
 using Application.Features.Products.Queries.GetProductsListForPriceManagement;
-using Application.ApiContracts.Product.Responses;
 using Domain.Primitives;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using Sieve.Models;
 using WebAPI.Controllers.V1;
 
 namespace ControllerTests;
@@ -72,7 +73,7 @@ public class Product
             .ThrowsAsync(new UnauthorizedAccessException());
 
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
-            () => _controller.GetProductsForManagerAsync(new Sieve.Models.SieveModel(), CancellationToken.None))
+            () => _controller.GetProductsForManagerAsync(new SieveModel(), CancellationToken.None))
             .ConfigureAwait(true);
     }
 
@@ -119,7 +120,7 @@ public class Product
             .ThrowsAsync(new UnauthorizedAccessException());
 
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
-            () => _controller.GetDeletedProductsAsync(new Sieve.Models.SieveModel(), CancellationToken.None))
+            () => _controller.GetDeletedProductsAsync(new SieveModel(), CancellationToken.None))
             .ConfigureAwait(true);
     }
 
@@ -231,9 +232,7 @@ public class Product
             .ThrowsAsync(new UnauthorizedAccessException());
 
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
-            () => _controller.GetActiveVariantLiteProductsForInputAsync(
-                new Sieve.Models.SieveModel(),
-                CancellationToken.None))
+            () => _controller.GetActiveVariantLiteProductsForInputAsync(new SieveModel(), CancellationToken.None))
             .ConfigureAwait(true);
     }
 
@@ -245,9 +244,7 @@ public class Product
             .ThrowsAsync(new UnauthorizedAccessException());
 
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
-            () => _controller.GetActiveVariantLiteProductsForOutputAsync(
-                new Sieve.Models.SieveModel(),
-                CancellationToken.None))
+            () => _controller.GetActiveVariantLiteProductsForOutputAsync(new SieveModel(), CancellationToken.None))
             .ConfigureAwait(true);
     }
 
@@ -255,9 +252,7 @@ public class Product
     public async Task CreateProduct_MissingName_ReturnsBadRequest()
     {
         _senderMock.Setup(m => m.Send(It.IsAny<CreateProductCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(
-                Result<Application.ApiContracts.Product.Responses.ProductDetailForManagerResponse?>.Failure(
-                    Error.BadRequest("Name là bắt buộc")));
+            .ReturnsAsync(Result<ProductDetailForManagerResponse?>.Failure(Error.BadRequest("Name là bắt buộc")));
 
         var result = await _controller.CreateProductAsync(new CreateProductCommand(), CancellationToken.None)
             .ConfigureAwait(true);
@@ -289,7 +284,7 @@ public class Product
             .ThrowsAsync(new UnauthorizedAccessException());
 
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
-            () => _controller.GetProductsForPriceManagementAsync(new Sieve.Models.SieveModel(), CancellationToken.None))
+            () => _controller.GetProductsForPriceManagementAsync(new SieveModel(), CancellationToken.None))
             .ConfigureAwait(true);
     }
 #pragma warning restore CRR0035

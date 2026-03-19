@@ -15,7 +15,7 @@ using Application.Features.Outputs.Queries.GetOutputById;
 using Application.Features.Outputs.Queries.GetOutputsByUserId;
 using Application.Features.Outputs.Queries.GetOutputsList;
 using Application.Features.Outputs.Queries.GetOutputStatusList;
-
+using Domain.Constants.Order;
 using Domain.Primitives;
 using FluentAssertions;
 using MediatR;
@@ -265,7 +265,7 @@ public class SalesOrder
         result!.StatusCode.Should().Be(200);
         var value = result.Value as HashSet<string>;
         value.Should().NotBeNull();
-        value.Should().Contain(Domain.Constants.Order.OrderStatus.Completed);
+        value.Should().Contain(OrderStatus.Completed);
     }
 
     [Fact(DisplayName = "SO_093 - DeleteManyOutputs - Xa nhi?u don hng")]
@@ -358,8 +358,7 @@ public class SalesOrder
     [Fact(DisplayName = "SO_103 - Controller g?i MediatR d�ng 1 l?n khi l?y danh s�ch tr?ng th�i don h�ng")]
     public async Task GetOutputStatuses_ValidRequest_CallsMediatorOnce()
     {
-        var expectedStatuses = new Dictionary<string, string>
-        { { Domain.Constants.Order.OrderStatus.Pending, "Ch? x�c nh?n" } };
+        var expectedStatuses = new Dictionary<string, string> { { OrderStatus.Pending, "Ch? x�c nh?n" } };
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputStatusListQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<Dictionary<string, string>>.Success(expectedStatuses));
 
@@ -374,8 +373,7 @@ public class SalesOrder
     [Fact(DisplayName = "SO_104 - Controller tr? d�ng d? li?u t? Handler khi l?y tr?ng th�i don h�ng")]
     public async Task GetOutputStatuses_ValidRequest_ReturnsExpectedData()
     {
-        var expectedStatuses = new Dictionary<string, string>
-        { { Domain.Constants.Order.OrderStatus.Pending, "Ch? x�c nh?n" } };
+        var expectedStatuses = new Dictionary<string, string> { { OrderStatus.Pending, "Ch? x�c nh?n" } };
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputStatusListQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<Dictionary<string, string>>.Success(expectedStatuses));
 

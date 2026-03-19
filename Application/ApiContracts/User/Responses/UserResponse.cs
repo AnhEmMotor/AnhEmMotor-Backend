@@ -1,4 +1,5 @@
-﻿namespace Application.ApiContracts.User.Responses;
+﻿
+namespace Application.ApiContracts.User.Responses;
 
 public class UserResponse
 {

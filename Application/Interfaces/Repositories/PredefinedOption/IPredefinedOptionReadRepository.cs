@@ -1,3 +1,4 @@
+
 namespace Application.Interfaces.Repositories.PredefinedOption;
 
 public interface IPredefinedOptionReadRepository

@@ -1,4 +1,5 @@
-﻿namespace Application.ApiContracts.Auth.Responses;
+﻿
+namespace Application.ApiContracts.Auth.Responses;
 
 public class RegisterResponse
 {

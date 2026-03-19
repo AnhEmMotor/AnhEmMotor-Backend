@@ -7,6 +7,7 @@ using Application.Features.Suppliers.Commands.UpdateSupplierStatus;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Supplier;
 using Domain.Constants;
+using Domain.Entities;
 using FluentAssertions;
 using FluentValidation.TestHelper;
 using Moq;
@@ -801,7 +802,7 @@ public class Supplier
 #pragma warning restore CRR0035
 #pragma warning restore IDE0079
 
-    public class TestEntity : Domain.Entities.BaseEntity
+    public class TestEntity : BaseEntity
     {
         public int Id { get; set; }
     }

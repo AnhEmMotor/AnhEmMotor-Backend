@@ -2,7 +2,6 @@
 using Application.Common.Models;
 using Domain.Primitives;
 using MediatR;
-using Sieve.Models;
 
 namespace Application.Features.Products.Queries.GetProductsList;
 
@@ -34,21 +33,26 @@ public sealed record GetProductsListQuery : IRequest<Result<PagedResult<ProductL
             [];
 
         var categoryIds = request.CategoryIds?.Split(',', StringSplitOptions.RemoveEmptyEntries)
-            .Select(int.Parse).ToList() ?? [];
-            
+                .Select(int.Parse)
+                .ToList() ??
+            [];
+
         var optionValueIds = request.OptionValueIds?.Split(',', StringSplitOptions.RemoveEmptyEntries)
-            .Select(int.Parse).ToList() ?? [];
+                .Select(int.Parse)
+                .ToList() ??
+            [];
 
         var filters = request.Filters;
         if(!string.IsNullOrWhiteSpace(filters))
         {
             var filterParts = filters.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                .Where(f =>
-                {
-                    var trimmed = f.Trim();
-                    return !trimmed.StartsWith("search", StringComparison.OrdinalIgnoreCase) &&
-                           !trimmed.StartsWith("statusIds", StringComparison.OrdinalIgnoreCase);
-                })
+                .Where(
+                    f =>
+                    {
+                        var trimmed = f.Trim();
+                        return !trimmed.StartsWith("search", StringComparison.OrdinalIgnoreCase) &&
+                            !trimmed.StartsWith("statusIds", StringComparison.OrdinalIgnoreCase);
+                    })
                 .ToList();
             filters = filterParts.Count > 0 ? string.Join(",", filterParts) : null;
         }

@@ -1,4 +1,7 @@
 ﻿using Application.ApiContracts.User.Responses;
+using Application.Features.UserManager.Commands.AssignRoles;
+using Application.Features.UserManager.Commands.ChangePasswordByManager;
+using Application.Features.UserManager.Commands.ChangeUserStatus;
 using Application.Features.UserManager.Commands.UpdateUser;
 using Application.Interfaces.Services;
 using Domain.Constants;
@@ -7,6 +10,7 @@ using Domain.Entities;
 using FluentAssertions;
 using Infrastructure.DBContexts;
 using IntegrationTests.SetupClass;
+using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -360,7 +364,7 @@ public class User : IAsyncLifetime
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var changePasswordRequest = new Application.Features.UserManager.Commands.ChangePasswordByManager.ChangePasswordByManagerCommand
+        var changePasswordRequest = new ChangePasswordByManagerCommand
         {
             CurrentPassword = oldPassword,
             NewPassword = newPassword
@@ -404,7 +408,7 @@ public class User : IAsyncLifetime
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var changePasswordRequest = new Application.Features.UserManager.Commands.ChangePasswordByManager.ChangePasswordByManagerCommand
+        var changePasswordRequest = new ChangePasswordByManagerCommand
         {
             CurrentPassword = "WrongPassword",
             NewPassword = "NewPass456!"
@@ -505,7 +509,7 @@ public class User : IAsyncLifetime
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var changePasswordRequest = new Application.Features.UserManager.Commands.ChangePasswordByManager.ChangePasswordByManagerCommand
+        var changePasswordRequest = new ChangePasswordByManagerCommand
         {
             CurrentPassword = password,
             NewPassword = newPassword
@@ -865,12 +869,8 @@ public class User : IAsyncLifetime
                 await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             }
 
-            var mediator = scope.ServiceProvider.GetRequiredService<MediatR.IMediator>();
-            var command = new Application.Features.UserManager.Commands.AssignRoles.AssignRolesCommand
-            {
-                UserId = user.Id,
-                RoleIds = [ staffRole.Id ]
-            };
+            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+            var command = new AssignRolesCommand { UserId = user.Id, RoleIds = [ staffRole.Id ] };
 
             await mediator.Send(command, CancellationToken.None).ConfigureAwait(true);
         }
@@ -914,12 +914,8 @@ public class User : IAsyncLifetime
 
         using(var scope = _factory.Services.CreateScope())
         {
-            var mediator = scope.ServiceProvider.GetRequiredService<MediatR.IMediator>();
-            var command = new Application.Features.UserManager.Commands.ChangeUserStatus.ChangeUserStatusCommand
-            {
-                UserId = user.Id,
-                Status = UserStatus.Banned
-            };
+            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+            var command = new ChangeUserStatusCommand { UserId = user.Id, Status = UserStatus.Banned };
             await mediator.Send(command, CancellationToken.None).ConfigureAwait(true);
         }
 
@@ -1086,13 +1082,9 @@ public class User : IAsyncLifetime
 
         using(var scope = _factory.Services.CreateScope())
         {
-            var mediator = scope.ServiceProvider.GetRequiredService<MediatR.IMediator>();
+            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
             await mediator.Send(
-                new Application.Features.UserManager.Commands.ChangeUserStatus.ChangeUserStatusCommand
-                {
-                    UserId = userB.Id,
-                    Status = UserStatus.Banned
-                },
+                new ChangeUserStatusCommand { UserId = userB.Id, Status = UserStatus.Banned },
                 CancellationToken.None)
                 .ConfigureAwait(true);
         }

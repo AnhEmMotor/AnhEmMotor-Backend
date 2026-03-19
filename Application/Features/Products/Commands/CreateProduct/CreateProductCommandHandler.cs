@@ -128,7 +128,7 @@ public sealed class CreateProductCommandHandler(
                     DataFetchMode.All)
                     .ConfigureAwait(false);
 
-                if (existingOptions != null)
+                if(existingOptions != null)
                 {
                     foreach(var opt in existingOptions)
                     {
@@ -252,6 +252,9 @@ public sealed class CreateProductCommandHandler(
             Displacement = request.Displacement,
             BoreStroke = request.BoreStroke?.Trim(),
             CompressionRatio = request.CompressionRatio?.Trim(),
+            ShortDescription = request.ShortDescription?.Trim(),
+            MetaTitle = request.MetaTitle?.Trim(),
+            MetaDescription = request.MetaDescription?.Trim(),
             StatusId = "for-sale",
             ProductVariants = []
         };

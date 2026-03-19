@@ -2,7 +2,6 @@ using Application.ApiContracts.Option.Responses;
 using Application.Features.Options.Queries.GetOptionsList;
 using Asp.Versioning;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;

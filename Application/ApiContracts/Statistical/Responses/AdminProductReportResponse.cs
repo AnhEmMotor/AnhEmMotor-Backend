@@ -1,3 +1,4 @@
+
 namespace Application.ApiContracts.Statistical.Responses;
 
 public class AdminProductReportResponse

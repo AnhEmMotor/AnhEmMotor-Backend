@@ -31,6 +31,7 @@ namespace IntegrationTests;
 
 using System.Threading.Tasks;
 using Xunit;
+using ProductStatusConstants = Domain.Constants.Product.ProductStatus;
 
 [Collection("Shared Integration Collection")]
 public class InventoryReceipts : IAsyncLifetime
@@ -80,7 +81,7 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
@@ -209,7 +210,7 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
@@ -401,7 +402,7 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
@@ -499,7 +500,7 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
@@ -774,7 +775,7 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
@@ -921,7 +922,7 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
@@ -1059,7 +1060,7 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
@@ -1186,7 +1187,7 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
@@ -1313,7 +1314,7 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
@@ -1437,7 +1438,7 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
@@ -1555,7 +1556,7 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
@@ -1686,7 +1687,7 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
@@ -1806,7 +1807,7 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
@@ -1916,7 +1917,7 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
@@ -2033,7 +2034,7 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
@@ -2145,7 +2146,7 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
@@ -2264,7 +2265,7 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
@@ -2376,7 +2377,7 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
@@ -2512,7 +2513,7 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
@@ -2602,7 +2603,7 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
@@ -2701,7 +2702,7 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
@@ -2803,7 +2804,7 @@ public class InventoryReceipts : IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var productStatusId = Domain.Constants.ProductStatus.ForSale;
+        var productStatusId = ProductStatusConstants.ForSale;
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))

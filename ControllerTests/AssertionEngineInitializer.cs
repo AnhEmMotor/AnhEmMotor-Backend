@@ -1,7 +1,8 @@
 ﻿using ControllerTests;
 using FluentAssertions;
+using FluentAssertions.Extensibility;
 
-[assembly: FluentAssertions.Extensibility.AssertionEngineInitializer(
+[assembly: AssertionEngineInitializer(
     typeof(AssertionEngineInitializer),
     nameof(AssertionEngineInitializer.AcknowledgeSoftWarning))]
 

@@ -52,8 +52,6 @@ public partial class RegisterCommandValidator : AbstractValidator<RegisterComman
             .Matches("[^a-zA-Z0-9]")
             .WithMessage("Password must contain at least one special character.");
 
-        RuleFor(x => x.PhoneNumber)
-            .MustBeValidPhoneNumber()
-            .When(x => !string.IsNullOrEmpty(x.PhoneNumber));
+        RuleFor(x => x.PhoneNumber).MustBeValidPhoneNumber().When(x => !string.IsNullOrEmpty(x.PhoneNumber));
     }
 }

@@ -1,8 +1,10 @@
 ﻿using FluentAssertions;
+using FluentAssertions.Extensibility;
+using UnitTests;
 
-[assembly: FluentAssertions.Extensibility.AssertionEngineInitializer(
-    typeof(UnitTests.AssertionEngineInitializer),
-    nameof(UnitTests.AssertionEngineInitializer.AcknowledgeSoftWarning))]
+[assembly: AssertionEngineInitializer(
+    typeof(AssertionEngineInitializer),
+    nameof(AssertionEngineInitializer.AcknowledgeSoftWarning))]
 
 namespace UnitTests;
 

@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Application.ApiContracts.Supplier.Responses
 {
     public class SupplierResponse
@@ -20,7 +22,7 @@ namespace Application.ApiContracts.Supplier.Responses
 
         public string? TaxIdentificationNumber { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("created_at")]
+        [JsonPropertyName("created_at")]
         public DateTimeOffset? CreatedAt { get; set; }
     }
 }

@@ -5,6 +5,7 @@ using Application.Sieve;
 using Domain.Constants;
 using Domain.Entities;
 using Domain.Primitives;
+using Infrastructure.DBContexts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
@@ -15,7 +16,7 @@ namespace Infrastructure.Repositories.User
 {
     public class UserReadRepository(
         UserManager<ApplicationUser> userManager,
-        DBContexts.ApplicationDBContext context,
+        ApplicationDBContext context,
         ISieveProcessor sieveProcessor) : IUserReadRepository
     {
         public async Task<PagedResult<UserDTOForManagerResponse>> GetPagedListAsync(

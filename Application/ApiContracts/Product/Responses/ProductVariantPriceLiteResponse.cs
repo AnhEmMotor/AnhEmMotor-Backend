@@ -1,3 +1,4 @@
+
 namespace Application.ApiContracts.Product.Responses;
 
 public class ProductVariantPriceLiteResponse

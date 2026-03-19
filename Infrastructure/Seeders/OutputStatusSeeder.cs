@@ -1,3 +1,5 @@
+using Domain.Constants.Order;
+using Domain.Entities;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,27 +9,23 @@ public static class OutputStatusSeeder
 {
     public static async Task SeedAsync(ApplicationDBContext context, CancellationToken cancellationToken)
     {
-        var allStatuses = Domain.Constants.Order.OrderStatus.All;
+        var allStatuses = OrderStatus.All;
 
         if(allStatuses.Count == 0)
         {
             return;
         }
 
-        var existingStatuses = await context.Set<Domain.Entities.OutputStatus>()
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
+        var existingStatuses = await context.Set<OutputStatus>().ToListAsync(cancellationToken).ConfigureAwait(false);
 
         var newStatuses = allStatuses
             .Except(existingStatuses.Select(s => s.Key), StringComparer.OrdinalIgnoreCase)
-            .Select(key => new Domain.Entities.OutputStatus { Key = key })
+            .Select(key => new OutputStatus { Key = key })
             .ToList();
 
         if(newStatuses.Count != 0)
         {
-            await context.Set<Domain.Entities.OutputStatus>()
-                .AddRangeAsync(newStatuses, cancellationToken)
-                .ConfigureAwait(false);
+            await context.Set<OutputStatus>().AddRangeAsync(newStatuses, cancellationToken).ConfigureAwait(false);
             await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
@@ -38,13 +36,13 @@ public static class OutputStatusSeeder
         if(statusesToDelete.Count != 0)
         {
             var statusKeys = statusesToDelete.Select(s => s.Key).ToList();
-            var hasReferences = await context.Set<Domain.Entities.Output>()
+            var hasReferences = await context.Set<Output>()
                 .AnyAsync(o => o.StatusId != null && statusKeys.Contains(o.StatusId), cancellationToken)
                 .ConfigureAwait(false);
 
             if(!hasReferences)
             {
-                context.Set<Domain.Entities.OutputStatus>().RemoveRange(statusesToDelete);
+                context.Set<OutputStatus>().RemoveRange(statusesToDelete);
                 await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
         }

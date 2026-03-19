@@ -1,5 +1,7 @@
 using Application.ApiContracts.Output.Requests;
 using Application.ApiContracts.Output.Responses;
+using Application.Features.Outputs.Commands.CreateOutputByManager;
+using Application.Features.Outputs.Commands.UpdateOutputForManager;
 using Domain.Entities;
 using Mapster;
 
@@ -47,12 +49,12 @@ public sealed class OutputMappingConfig : IRegister
             .Ignore(dest => dest.Id)
             .IgnoreNullValues(true);
 
-        config.NewConfig<Commands.UpdateOutputForManager.UpdateOutputForManagerCommand, Output>()
+        config.NewConfig<UpdateOutputForManagerCommand, Output>()
             .Map(dest => dest.CreatedBy, src => src.CurrentUserId)
             .IgnoreNullValues(true)
             .Ignore(dest => dest.OutputInfos);
 
-        config.NewConfig<Commands.CreateOutputByManager.CreateOutputByManagerCommand, Output>()
+        config.NewConfig<CreateOutputByManagerCommand, Output>()
             .Map(dest => dest.CreatedBy, src => src.CurrentUserId)
             .IgnoreNullValues(true);
     }

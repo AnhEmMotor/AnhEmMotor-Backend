@@ -1,11 +1,12 @@
 ﻿using Domain.Constants;
+using Domain.Primitives;
 using Sieve.Models;
 
 namespace Application.Interfaces.Repositories
 {
     public interface ISievePaginator
     {
-        public Task<Domain.Primitives.PagedResult<TResponse>> ApplyAsync<TEntity, TResponse>(
+        public Task<PagedResult<TResponse>> ApplyAsync<TEntity, TResponse>(
             IQueryable<TEntity> query,
             SieveModel sieveModel,
             DataFetchMode? defaultSortMode = DataFetchMode.ActiveOnly,

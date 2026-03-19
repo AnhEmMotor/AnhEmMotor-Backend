@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces.Repositories.Output;
 using Domain.Constants;
+using Domain.Constants.Input;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using OutputEntity = Domain.Entities.Output;
@@ -88,7 +89,7 @@ public class OutputReadRepository(ApplicationDBContext context) : IOutputReadRep
 
     public async Task<long> GetStockQuantityByVariantIdAsync(int variantId, CancellationToken cancellationToken)
     {
-        var validStatusIds = Domain.Constants.Input.InputStatus.FinishInputValues;
+        var validStatusIds = InputStatus.FinishInputValues;
 
         var currentStock = await context.InputInfos
             .AsNoTracking()

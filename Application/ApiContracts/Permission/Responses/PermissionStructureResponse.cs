@@ -1,3 +1,4 @@
+
 namespace Application.ApiContracts.Permission.Responses;
 
 public class PermissionStructureResponse

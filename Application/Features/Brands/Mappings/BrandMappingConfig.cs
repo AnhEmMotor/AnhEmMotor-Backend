@@ -1,4 +1,4 @@
-﻿
+﻿using Application.ApiContracts.Brand.Responses;
 using Application.Features.Brands.Commands.CreateBrand;
 using Application.Features.Brands.Commands.UpdateBrand;
 using Mapster;
@@ -12,7 +12,7 @@ public sealed class BrandMappingConfig : IRegister
     {
         config.NewConfig<CreateBrandCommand, BrandEntity>();
 
-        config.NewConfig<BrandEntity, ApiContracts.Brand.Responses.BrandResponse>();
+        config.NewConfig<BrandEntity, BrandResponse>();
 
         config.NewConfig<UpdateBrandCommand, BrandEntity>().IgnoreNullValues(true);
     }

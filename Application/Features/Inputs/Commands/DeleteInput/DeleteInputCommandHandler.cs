@@ -1,7 +1,7 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
-
+using Domain.Constants.Input;
 using MediatR;
 
 namespace Application.Features.Inputs.Commands.DeleteInput;
@@ -20,7 +20,7 @@ public sealed class DeleteInputCommandHandler(
             return Result.Failure(Error.NotFound($"Không tìm thấy phiếu nhập có ID {request.Id}.", "Id"));
         }
 
-        if(Domain.Constants.Input.InputStatus.IsCannotDelete(input.StatusId))
+        if(InputStatus.IsCannotDelete(input.StatusId))
         {
             return Result.Failure(
                 Error.BadRequest($"Không thể xóa đơn hàng có trạng thái '{input.StatusId}'.", "StatusId"));

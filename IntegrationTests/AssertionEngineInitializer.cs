@@ -1,8 +1,10 @@
 ﻿using FluentAssertions;
+using FluentAssertions.Extensibility;
+using IntegrationTests;
 
-[assembly: FluentAssertions.Extensibility.AssertionEngineInitializer(
-    typeof(IntegrationTests.AssertionEngineInitializer),
-    nameof(IntegrationTests.AssertionEngineInitializer.AcknowledgeSoftWarning))]
+[assembly: AssertionEngineInitializer(
+    typeof(AssertionEngineInitializer),
+    nameof(AssertionEngineInitializer.AcknowledgeSoftWarning))]
 
 namespace IntegrationTests;
 

@@ -15,8 +15,10 @@ using Application.Features.Inputs.Queries.GetInputById;
 using Application.Features.Inputs.Queries.GetInputsBySupplierId;
 using Application.Features.Inputs.Queries.GetInputsList;
 using Application.Features.Inputs.Queries.GetInputStatusList;
+using Domain.Constants.Input;
 using Domain.Primitives;
 using FluentAssertions;
+using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -213,9 +215,9 @@ public class InventoryReceipts
         var request = new DeleteManyInputsCommand { Ids = [] };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteManyInputsCommand>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new FluentValidation.ValidationException("InputIds cannot be empty"));
+            .ThrowsAsync(new ValidationException("InputIds cannot be empty"));
 
-        await Assert.ThrowsAsync<FluentValidation.ValidationException>(
+        await Assert.ThrowsAsync<ValidationException>(
             () => _controller.DeleteManyInputsAsync(request, CancellationToken.None))
             .ConfigureAwait(true);
     }
@@ -226,9 +228,9 @@ public class InventoryReceipts
         var request = new UpdateManyInputStatusCommand { Ids = [], StatusId = "finished" };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateManyInputStatusCommand>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new FluentValidation.ValidationException("InputIds cannot be empty"));
+            .ThrowsAsync(new ValidationException("InputIds cannot be empty"));
 
-        await Assert.ThrowsAsync<FluentValidation.ValidationException>(
+        await Assert.ThrowsAsync<ValidationException>(
             () => _controller.UpdateManyInputStatusAsync(request, CancellationToken.None))
             .ConfigureAwait(true);
     }
@@ -239,9 +241,9 @@ public class InventoryReceipts
         var request = new RestoreManyInputsCommand { Ids = [] };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<RestoreManyInputsCommand>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new FluentValidation.ValidationException("InputIds cannot be empty"));
+            .ThrowsAsync(new ValidationException("InputIds cannot be empty"));
 
-        await Assert.ThrowsAsync<FluentValidation.ValidationException>(
+        await Assert.ThrowsAsync<ValidationException>(
             () => _controller.RestoreManyInputsAsync(request, CancellationToken.None))
             .ConfigureAwait(true);
     }
@@ -354,9 +356,9 @@ public class InventoryReceipts
     {
         var expectedStatuses = new Dictionary<string, string>
         {
-            { Domain.Constants.Input.InputStatus.Working, "Phi?u t?m" },
-            { Domain.Constants.Input.InputStatus.Finish, "Ho�n th�nh" },
-            { Domain.Constants.Input.InputStatus.Cancel, "�� hu?" },
+            { InputStatus.Working, "Phi?u t?m" },
+            { InputStatus.Finish, "Ho�n th�nh" },
+            { InputStatus.Cancel, "�� hu?" },
         };
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetInputStatusListQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<Dictionary<string, string>>.Success(expectedStatuses));
@@ -372,8 +374,7 @@ public class InventoryReceipts
     [Fact(DisplayName = "INPUT_074 - Controller tr? d�ng d? li?u t? Handler khi l?y tr?ng th�i phi?u nh?p")]
     public async Task GetInputStatuses_ValidRequest_ReturnsExpectedData()
     {
-        var expectedStatuses = new Dictionary<string, string>
-        { { Domain.Constants.Input.InputStatus.Working, "Phi?u t?m" } };
+        var expectedStatuses = new Dictionary<string, string> { { InputStatus.Working, "Phi?u t?m" } };
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetInputStatusListQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<Dictionary<string, string>>.Success(expectedStatuses));
 

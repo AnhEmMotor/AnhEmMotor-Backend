@@ -2,6 +2,7 @@ using Application.ApiContracts.Permission.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.Role;
 using Application.Interfaces.Repositories.User;
+using Domain.Constants.Permission;
 using MediatR;
 
 namespace Application.Features.Permissions.Queries.GetUserPermissionsById;
@@ -30,7 +31,7 @@ public class GetUserPermissionsByIdQueryHandler(
             .ConfigureAwait(false);
 
         var userPermissions = userPermissionNames
-            .Select(p => new { Name = p, Metadata = Domain.Constants.Permission.PermissionsList.GetMetadata(p) })
+            .Select(p => new { Name = p, Metadata = PermissionsList.GetMetadata(p) })
             .Select(p => p.Name)
             .ToList();
 

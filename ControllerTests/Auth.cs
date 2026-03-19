@@ -5,6 +5,7 @@ using Application.Features.Auth.Commands.Logout;
 using Application.Features.Auth.Commands.Register;
 using Application.Interfaces.Services;
 using FluentAssertions;
+using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -43,10 +44,9 @@ public class Auth
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<RegisterCommand>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new FluentValidation.ValidationException("Validation failed: Password is required"));
+            .ThrowsAsync(new ValidationException("Validation failed: Password is required"));
 
-        await Assert.ThrowsAsync<FluentValidation.ValidationException>(
-            () => _controller.RegisterAsync(request, CancellationToken.None))
+        await Assert.ThrowsAsync<ValidationException>(() => _controller.RegisterAsync(request, CancellationToken.None))
             .ConfigureAwait(true);
     }
 
@@ -62,10 +62,9 @@ public class Auth
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<RegisterCommand>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new FluentValidation.ValidationException("Validation failed: Email and Username are required"));
+            .ThrowsAsync(new ValidationException("Validation failed: Email and Username are required"));
 
-        await Assert.ThrowsAsync<FluentValidation.ValidationException>(
-            () => _controller.RegisterAsync(request, CancellationToken.None))
+        await Assert.ThrowsAsync<ValidationException>(() => _controller.RegisterAsync(request, CancellationToken.None))
             .ConfigureAwait(true);
     }
 
@@ -81,10 +80,9 @@ public class Auth
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<RegisterCommand>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new FluentValidation.ValidationException("Validation failed: FullName is required"));
+            .ThrowsAsync(new ValidationException("Validation failed: FullName is required"));
 
-        await Assert.ThrowsAsync<FluentValidation.ValidationException>(
-            () => _controller.RegisterAsync(request, CancellationToken.None))
+        await Assert.ThrowsAsync<ValidationException>(() => _controller.RegisterAsync(request, CancellationToken.None))
             .ConfigureAwait(true);
     }
 

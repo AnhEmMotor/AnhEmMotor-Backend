@@ -56,7 +56,7 @@ public sealed class CreateOutputByManagerCommandHandler(
 
         foreach(var variant in variantsList)
         {
-            if(string.Compare(variant.Product?.StatusId, Domain.Constants.ProductStatus.ForSale) != 0)
+            if(string.Compare(variant.Product?.StatusId, Domain.Constants.Product.ProductStatus.ForSale) != 0)
             {
                 return Error.BadRequest(
                     $"Sản phẩm '{variant.Product?.Name ?? variant.Id.ToString()}' không còn được bán.",

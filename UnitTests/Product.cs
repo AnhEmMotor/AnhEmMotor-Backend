@@ -13,7 +13,9 @@ using Application.Features.Products.Commands.UpdateProductStatus;
 using Application.Features.Products.Commands.UpdateVariantPrice;
 using Application.Features.Products.Mappings;
 using Application.Features.Products.Queries.CheckSlugAvailability;
+using Application.Features.Products.Queries.GetProductAttributeLabels;
 using Application.Features.Products.Queries.GetProductsListForPriceManagement;
+using Application.Features.Products.Queries.GetProductStoreDetailBySlug;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
 using Application.Interfaces.Repositories.Option;
@@ -24,6 +26,7 @@ using Application.Interfaces.Repositories.ProductCategory;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.VariantOptionValue;
 using Domain.Constants;
+using Domain.Constants.Order;
 using Domain.Entities;
 using FluentAssertions;
 using Mapster;
@@ -1456,18 +1459,14 @@ public class Product
                 {
                     Id = 1,
                     OutputInfos =
-                        [ new OutputInfo
-                            {
-                                Count = 3,
-                                OutputOrder = new Output { StatusId = Domain.Constants.Order.OrderStatus.Pending }
-                            }, new OutputInfo
+                        [ new OutputInfo { Count = 3, OutputOrder = new Output { StatusId = OrderStatus.Pending } }, new OutputInfo
                             {
                                 Count = 2,
-                                OutputOrder = new Output { StatusId = Domain.Constants.Order.OrderStatus.ConfirmedCod }
+                                OutputOrder = new Output { StatusId = OrderStatus.ConfirmedCod }
                             }, new OutputInfo
                             {
                                 Count = 5,
-                                OutputOrder = new Output { StatusId = Domain.Constants.Order.OrderStatus.Completed }
+                                OutputOrder = new Output { StatusId = OrderStatus.Completed }
                             } ]
                 } ]
         };
@@ -1495,11 +1494,7 @@ public class Product
                                 InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
                             } ],
                     OutputInfos =
-                        [ new OutputInfo
-                            {
-                                Count = 10,
-                                OutputOrder = new Output { StatusId = Domain.Constants.Order.OrderStatus.Pending }
-                            } ]
+                        [ new OutputInfo { Count = 10, OutputOrder = new Output { StatusId = OrderStatus.Pending } } ]
                 } ]
         };
 
@@ -1771,6 +1766,81 @@ public class Product
         var result = ProductMappingConfig.CalculateProductInventoryStatus(product, alertLevel);
 
         result.Should().Be(InventoryStatus.OutOfStock);
+    }
+
+    [Fact(DisplayName = "PRODUCT_138 - Lấy danh sách nhãn thuộc tính thành công")]
+    public async Task GetProductAttributeLabels_Success()
+    {
+        var query = new GetProductAttributeLabelsQuery();
+        var handler = new GetProductAttributeLabelsQueryHandler();
+
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
+
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value.Should().ContainKey("EngineType");
+        result.Value!["EngineType"].Should().Be("Loại động cơ");
+    }
+
+    [Fact(DisplayName = "PRODUCT_139 - Lấy chi tiết sản phẩm theo Slug thành công khi biến thể tồn tại")]
+    public async Task GetProductStoreDetailBySlug_VariantExists_Success()
+    {
+        var slug = "sh160i-red";
+        var query = new GetProductStoreDetailBySlugQuery(slug);
+
+        var product = new ProductEntity
+        {
+            Id = 1,
+            Name = "Honda SH160i",
+            Description = "Xe ga cao cấp",
+            Brand = new Domain.Entities.Brand { Name = "Honda" },
+            ProductCategory = new Domain.Entities.ProductCategory { Name = "Xe ga" },
+            ProductVariants = []
+        };
+
+        var variant = new ProductVariant
+        {
+            Id = 10,
+            UrlSlug = slug,
+            Price = 100000000,
+            Product = product,
+            VariantOptionValues = [ new VariantOptionValue { OptionValue = new OptionValue { Name = "Đỏ" } } ],
+            ProductCollectionPhotos = []
+        };
+        product.ProductVariants.Add(variant);
+
+        _productReadRepoMock.Setup(
+            x => x.GetByVariantSlugWithDetailsAsync(slug, It.IsAny<CancellationToken>(), DataFetchMode.ActiveOnly))
+            .ReturnsAsync(variant);
+
+        var handler = new GetProductStoreDetailBySlugQueryHandler(_productReadRepoMock.Object);
+
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
+
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value!.Product.Name.Should().Be("Honda SH160i");
+        result.Value.CurrentVariant.Price.Should().Be(100000000);
+        result.Value.CurrentVariant.DisplayName.Should().Be("Đỏ");
+    }
+
+    [Fact(DisplayName = "PRODUCT_140 - Lấy chi tiết sản phẩm theo Slug thất bại khi biến thể không tồn tại")]
+    public async Task GetProductStoreDetailBySlug_VariantNotExists_ReturnsFailure()
+    {
+        var slug = "non-existent-slug";
+        var query = new GetProductStoreDetailBySlugQuery(slug);
+
+        _productReadRepoMock.Setup(
+            x => x.GetByVariantSlugWithDetailsAsync(slug, It.IsAny<CancellationToken>(), DataFetchMode.ActiveOnly))
+            .ReturnsAsync((ProductVariant?)null);
+
+        var handler = new GetProductStoreDetailBySlugQueryHandler(_productReadRepoMock.Object);
+
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
+
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().NotBeNull();
+        result.Error!.Code.Should().Be("ProductDetail.NotFound");
     }
 
 #pragma warning restore CRR0035
