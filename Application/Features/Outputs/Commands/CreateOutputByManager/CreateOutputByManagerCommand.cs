@@ -15,7 +15,7 @@ public sealed record CreateOutputByManagerCommand : IRequest<Result<OrderDetailR
     public string? Notes { get; init; }
 
     public string? StatusId { get; init; }
-    
+
     public string? CustomerName { get; init; }
 
     public string? CustomerAddress { get; init; }

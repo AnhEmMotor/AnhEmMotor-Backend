@@ -385,9 +385,7 @@ public class ProductMappingConfig : IRegister
 
         var variantName = BuildVariantName(optionPairs);
         var productName = variant.Product?.Name ?? string.Empty;
-        var displayName = string.IsNullOrWhiteSpace(variantName)
-            ? productName
-            : $"{productName} ({variantName})";
+        var displayName = string.IsNullOrWhiteSpace(variantName) ? productName : $"{productName} ({variantName})";
 
         var coverImage = string.IsNullOrWhiteSpace(variant.CoverImageUrl)
             ? variant.ProductCollectionPhotos.FirstOrDefault()?.ImageUrl

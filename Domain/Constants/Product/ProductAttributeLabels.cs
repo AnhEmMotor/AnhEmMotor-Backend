@@ -26,7 +26,7 @@ public static class ProductAttributeLabels
         { "CompressionRatio", "Tỉ số nén" }
     };
 
-    public static readonly string[] InternalProperties =[ "Id", "Name", "Description", "ShortDescription", "MetaTitle", "MetaDescription", "Brand", "ProductCategory", "ProductStatus", "ProductVariants", "BrandId", "CategoryId", "StatusId", "CreatedAt", "UpdatedAt", "DeletedAt", "CreatedBy", "UpdatedBy" ];
+    public static readonly string[] InternalProperties = [ "Id", "Name", "Description", "ShortDescription", "MetaTitle", "MetaDescription", "Brand", "ProductCategory", "ProductStatus", "ProductVariants", "BrandId", "CategoryId", "StatusId", "CreatedAt", "UpdatedAt", "DeletedAt", "CreatedBy", "UpdatedBy" ];
 
     public static bool IsInternalProperty(string propertyName)
     {

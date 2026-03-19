@@ -46,7 +46,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
 
         _dbName = $"AnhEmMotor_Test_{Guid.NewGuid():N}";
         var baseConnectionString = _mySqlContainer.GetConnectionString();
-        var builder = new MySqlConnectionStringBuilder(baseConnectionString) { Database = "" };
+        var builder = new MySqlConnectionStringBuilder(baseConnectionString) { Database = string.Empty };
 
         using(var masterConnection = new MySqlConnection(builder.ConnectionString))
         {
@@ -91,7 +91,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
         await _connection.DisposeAsync().ConfigureAwait(false);
 
         var baseConnectionString = _mySqlContainer.GetConnectionString();
-        var builder = new MySqlConnectionStringBuilder(baseConnectionString) { Database = "" };
+        var builder = new MySqlConnectionStringBuilder(baseConnectionString) { Database = string.Empty };
 
         using(var masterConnection = new MySqlConnection(builder.ConnectionString))
         {

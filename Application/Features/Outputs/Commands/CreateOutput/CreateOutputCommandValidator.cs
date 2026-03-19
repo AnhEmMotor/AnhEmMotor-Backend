@@ -16,14 +16,13 @@ namespace Application.Features.Outputs.Commands.CreateOutput
 
             RuleForEach(x => x.OutputInfos).SetValidator(new CreateOutputProductCommandValidator());
 
-            RuleFor(x => x.CustomerName)
-                .NotEmpty().WithMessage("Customer name is required.");
+            RuleFor(x => x.CustomerName).NotEmpty().WithMessage("Customer name is required.");
 
-            RuleFor(x => x.CustomerAddress)
-                .NotEmpty().WithMessage("Customer address is required.");
+            RuleFor(x => x.CustomerAddress).NotEmpty().WithMessage("Customer address is required.");
 
             RuleFor(x => x.CustomerPhone)
-                .NotEmpty().WithMessage("Customer phone is required.")
+                .NotEmpty()
+                .WithMessage("Customer phone is required.")
                 .MustBeValidPhoneNumber()
                 .WithMessage("Invalid phone number format.");
         }

@@ -294,14 +294,15 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await SeedInventoryAsync(variantId, 10, uniqueId, CancellationToken.None).ConfigureAwait(true);
 
         var jsonContent = JsonSerializer
-            .Serialize(new
-            {
-                buyerId = user.Id,
-                customerName = "Khách hàng Test",
-                customerPhone = "0987654321",
-                customerAddress = "Số 123, Đường Test, Hà Nội",
-                products = new[] { new { productId = variantId, count = 1 } }
-            });
+            .Serialize(
+                new
+                {
+                    buyerId = user.Id,
+                    customerName = "Khách hàng Test",
+                    customerPhone = "0987654321",
+                    customerAddress = "Số 123, Đường Test, Hà Nội",
+                    products = new[] { new { productId = variantId, count = 1 } }
+                });
         var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
         var createResponse = await _client.PostAsync("/api/v1/SalesOrders", httpContent, CancellationToken.None)
             .ConfigureAwait(true);
@@ -389,14 +390,15 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await SeedInventoryAsync(variantId, 10, uniqueId, CancellationToken.None).ConfigureAwait(true);
 
         var jsonContent = JsonSerializer
-            .Serialize(new
-            {
-                buyerId = user.Id,
-                customerName = "Khách hàng Test",
-                customerPhone = "0987654321",
-                customerAddress = "Số 123, Đường Test, Hà Nội",
-                products = new[] { new { productId = variantId, count = 1 } }
-            });
+            .Serialize(
+                new
+                {
+                    buyerId = user.Id,
+                    customerName = "Khách hàng Test",
+                    customerPhone = "0987654321",
+                    customerAddress = "Số 123, Đường Test, Hà Nội",
+                    products = new[] { new { productId = variantId, count = 1 } }
+                });
         var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
         var createResponse = await _client.PostAsync("/api/v1/SalesOrders", httpContent, CancellationToken.None)
             .ConfigureAwait(true);
@@ -480,14 +482,15 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await SeedInventoryAsync(variantId, 10, uniqueId, CancellationToken.None).ConfigureAwait(true);
 
         var jsonContent = JsonSerializer
-            .Serialize(new
-            {
-                buyerId = user.Id,
-                customerName = "Khách hàng Test",
-                customerPhone = "0987654321",
-                customerAddress = "Số 123, Đường Test, Hà Nội",
-                products = new[] { new { productId = variantId, count = 1 } }
-            });
+            .Serialize(
+                new
+                {
+                    buyerId = user.Id,
+                    customerName = "Khách hàng Test",
+                    customerPhone = "0987654321",
+                    customerAddress = "Số 123, Đường Test, Hà Nội",
+                    products = new[] { new { productId = variantId, count = 1 } }
+                });
         var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
         var createResponse = await _client.PostAsync("/api/v1/SalesOrders", httpContent, CancellationToken.None)
             .ConfigureAwait(true);
@@ -549,14 +552,15 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var variantId = await SeedProductVariantAsync(uniqueId, CancellationToken.None).ConfigureAwait(true);
 
         var jsonContent = JsonSerializer
-            .Serialize(new
-            {
-                buyerId = user.Id,
-                customerName = "Khách hàng Test",
-                customerPhone = "0987654321",
-                customerAddress = "Số 123, Đường Test, Hà Nội",
-                products = new[] { new { productId = variantId, count = 1 } }
-            });
+            .Serialize(
+                new
+                {
+                    buyerId = user.Id,
+                    customerName = "Khách hàng Test",
+                    customerPhone = "0987654321",
+                    customerAddress = "Số 123, Đường Test, Hà Nội",
+                    products = new[] { new { productId = variantId, count = 1 } }
+                });
         var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
         var response = await _client.PostAsync("/api/v1/SalesOrders/by-manager", httpContent, CancellationToken.None)
             .ConfigureAwait(true);
@@ -922,14 +926,15 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var variantId = await SeedProductVariantAsync(uniqueId, CancellationToken.None).ConfigureAwait(true);
 
         var jsonContent = JsonSerializer
-            .Serialize(new
-            {
-                buyerId = user.Id,
-                customerName = "Khách hàng Test",
-                customerPhone = "0987654321",
-                customerAddress = "Số 123, Đường Test, Hà Nội",
-                products = new[] { new { productId = variantId, count = 1 } }
-            });
+            .Serialize(
+                new
+                {
+                    buyerId = user.Id,
+                    customerName = "Khách hàng Test",
+                    customerPhone = "0987654321",
+                    customerAddress = "Số 123, Đường Test, Hà Nội",
+                    products = new[] { new { productId = variantId, count = 1 } }
+                });
         var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
         var createResponse = await _client.PostAsync("/api/v1/SalesOrders", httpContent, CancellationToken.None)
             .ConfigureAwait(true);
@@ -1076,14 +1081,15 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var variantId = await SeedProductVariantAsync(uniqueId, CancellationToken.None).ConfigureAwait(true);
 
         var jsonContent = JsonSerializer
-            .Serialize(new
-            {
-                buyerId = user.Id,
-                customerName = "Khách hàng Test",
-                customerPhone = "0987654321",
-                customerAddress = "Số 123, Đường Test, Hà Nội",
-                products = new[] { new { productId = variantId, count = 1 } }
-            });
+            .Serialize(
+                new
+                {
+                    buyerId = user.Id,
+                    customerName = "Khách hàng Test",
+                    customerPhone = "0987654321",
+                    customerAddress = "Số 123, Đường Test, Hà Nội",
+                    products = new[] { new { productId = variantId, count = 1 } }
+                });
         var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
         var createResponse = await _client.PostAsync("/api/v1/SalesOrders", httpContent, CancellationToken.None)
@@ -1140,14 +1146,15 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var variantId = await SeedProductVariantAsync(uniqueId, CancellationToken.None).ConfigureAwait(true);
 
         var jsonContent = JsonSerializer
-            .Serialize(new
-            {
-                buyerId = user.Id,
-                customerName = "Khách hàng Test",
-                customerPhone = "0987654321",
-                customerAddress = "Số 123, Đường Test, Hà Nội",
-                products = new[] { new { productId = variantId, count = 1 } }
-            });
+            .Serialize(
+                new
+                {
+                    buyerId = user.Id,
+                    customerName = "Khách hàng Test",
+                    customerPhone = "0987654321",
+                    customerAddress = "Số 123, Đường Test, Hà Nội",
+                    products = new[] { new { productId = variantId, count = 1 } }
+                });
         var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
         var r1 = await _client.PostAsync("/api/v1/SalesOrders", httpContent, CancellationToken.None)
@@ -1208,14 +1215,15 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var variantId = await SeedProductVariantAsync(uniqueId, CancellationToken.None).ConfigureAwait(true);
 
         var jsonContent = JsonSerializer
-            .Serialize(new
-            {
-                buyerId = user.Id,
-                customerName = "Khách hàng Test",
-                customerPhone = "0987654321",
-                customerAddress = "Số 123, Đường Test, Hà Nội",
-                products = new[] { new { productId = variantId, count = 1 } }
-            });
+            .Serialize(
+                new
+                {
+                    buyerId = user.Id,
+                    customerName = "Khách hàng Test",
+                    customerPhone = "0987654321",
+                    customerAddress = "Số 123, Đường Test, Hà Nội",
+                    products = new[] { new { productId = variantId, count = 1 } }
+                });
 
         var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
         var r1 = await _client.PostAsync("/api/v1/SalesOrders", httpContent, CancellationToken.None)
@@ -1277,14 +1285,15 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await SeedInventoryAsync(variantId, 10, uniqueId, CancellationToken.None).ConfigureAwait(true);
 
         var jsonContent = JsonSerializer
-            .Serialize(new
-            {
-                buyerId = user.Id,
-                customerName = "Khách hàng Test",
-                customerPhone = "0987654321",
-                customerAddress = "Số 123, Đường Test, Hà Nội",
-                products = new[] { new { productId = variantId, count = 1 } }
-            });
+            .Serialize(
+                new
+                {
+                    buyerId = user.Id,
+                    customerName = "Khách hàng Test",
+                    customerPhone = "0987654321",
+                    customerAddress = "Số 123, Đường Test, Hà Nội",
+                    products = new[] { new { productId = variantId, count = 1 } }
+                });
         var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
         var r1 = await _client.PostAsync("/api/v1/SalesOrders", httpContent, CancellationToken.None)

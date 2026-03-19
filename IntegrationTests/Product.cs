@@ -2828,13 +2828,14 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
     [Fact(DisplayName = "PRODUCT_141 - Lấy thông tin batch cho nhiều biến thể hợp lệ")]
     public async Task GetVariantCartDetailsBatch_ValidIds_ReturnsDetails()
     {
-        // Arrange
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
         var productStatusId = ProductStatusConstants.ForSale;
-        if (!await db.ProductStatuses.AnyAsync(x => x.Key == productStatusId, CancellationToken.None).ConfigureAwait(true))
+        if(!await db.ProductStatuses
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
+            .ConfigureAwait(true))
         {
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         }
@@ -2872,16 +2873,18 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         db.ProductVariants.AddRange(v1, v2);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/product/variants-cart-details-batch", new List<int> { v1.Id, v2.Id })
+        var response = await _client.PostAsJsonAsync(
+            "/api/v1/product/variants-cart-details-batch",
+            new List<int> { v1.Id, v2.Id })
             .ConfigureAwait(true);
 
-        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<List<VariantCartDetailResponse>>(CancellationToken.None).ConfigureAwait(true);
+        var content = await response.Content
+            .ReadFromJsonAsync<List<VariantCartDetailResponse>>(CancellationToken.None)
+            .ConfigureAwait(true);
         content.Should().NotBeNull();
         content.Should().HaveCount(2);
-        
+
         var v1Res = content!.FirstOrDefault(x => x.Id == v1.Id);
         v1Res.Should().NotBeNull();
         v1Res!.DisplayName.Should().Contain(product.Name);
@@ -2892,13 +2895,14 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
     [Fact(DisplayName = "PRODUCT_142 - Lấy ảnh từ bộ sưu tập nếu CoverImageUrl của biến thể bị trống")]
     public async Task GetVariantCartDetailsBatch_NoCoverImage_FallsBackToCollection()
     {
-        // Arrange
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
         var productStatusId = ProductStatusConstants.ForSale;
-        if (!await db.ProductStatuses.AnyAsync(x => x.Key == productStatusId, CancellationToken.None).ConfigureAwait(true))
+        if(!await db.ProductStatuses
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
+            .ConfigureAwait(true))
         {
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         }
@@ -2937,13 +2941,15 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         db.ProductCollectionPhotos.Add(photo);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/product/variants-cart-details-batch", new List<int> { v1.Id })
+        var response = await _client.PostAsJsonAsync(
+            "/api/v1/product/variants-cart-details-batch",
+            new List<int> { v1.Id })
             .ConfigureAwait(true);
 
-        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<List<VariantCartDetailResponse>>(CancellationToken.None).ConfigureAwait(true);
+        var content = await response.Content
+            .ReadFromJsonAsync<List<VariantCartDetailResponse>>(CancellationToken.None)
+            .ConfigureAwait(true);
         content.Should().NotBeNull();
         content![0].CoverImageUrl.Should().Be(photo.ImageUrl);
     }

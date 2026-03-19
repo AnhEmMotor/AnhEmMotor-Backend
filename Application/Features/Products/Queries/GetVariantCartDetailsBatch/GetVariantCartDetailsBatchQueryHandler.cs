@@ -6,8 +6,7 @@ using MediatR;
 
 namespace Application.Features.Products.Queries.GetVariantCartDetailsBatch;
 
-public class GetVariantCartDetailsBatchQueryHandler(IProductVariantReadRepository repository)
-    : IRequestHandler<GetVariantCartDetailsBatchQuery, Result<List<VariantCartDetailResponse>>>
+public class GetVariantCartDetailsBatchQueryHandler(IProductVariantReadRepository repository) : IRequestHandler<GetVariantCartDetailsBatchQuery, Result<List<VariantCartDetailResponse>>>
 {
     public async Task<Result<List<VariantCartDetailResponse>>> Handle(
         GetVariantCartDetailsBatchQuery request,

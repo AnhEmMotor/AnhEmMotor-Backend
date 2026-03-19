@@ -20,12 +20,12 @@ using Application.Features.Products.Queries.GetActiveVariantLiteListForOutput;
 using Application.Features.Products.Queries.GetDeletedProductsList;
 using Application.Features.Products.Queries.GetProductAttributeLabels;
 using Application.Features.Products.Queries.GetProductById;
-using Application.Features.Products.Queries.GetVariantCartDetailsBatch;
-using Application.Features.Products.Queries.GetVariantLiteByProductId;
-using Application.Features.Products.Queries.GetProductStoreDetailBySlug;
 using Application.Features.Products.Queries.GetProductsList;
 using Application.Features.Products.Queries.GetProductsListForManager;
 using Application.Features.Products.Queries.GetProductsListForPriceManagement;
+using Application.Features.Products.Queries.GetProductStoreDetailBySlug;
+using Application.Features.Products.Queries.GetVariantCartDetailsBatch;
+using Application.Features.Products.Queries.GetVariantLiteByProductId;
 using Asp.Versioning;
 using Domain.Constants;
 using Domain.Primitives;
@@ -481,7 +481,9 @@ public class ProductController(ISender sender) : ApiController
         [FromBody] List<int> variantIds,
         CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetVariantCartDetailsBatchQuery { VariantIds = variantIds }, cancellationToken)
+        var result = await sender.Send(
+            new GetVariantCartDetailsBatchQuery { VariantIds = variantIds },
+            cancellationToken)
             .ConfigureAwait(true);
         return HandleResult(result);
     }
