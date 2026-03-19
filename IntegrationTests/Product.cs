@@ -2879,7 +2879,7 @@ public class Product : IAsyncLifetime
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<List<VariantCartDetailResponse>>().ConfigureAwait(true);
+        var content = await response.Content.ReadFromJsonAsync<List<VariantCartDetailResponse>>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content.Should().HaveCount(2);
         
@@ -2944,7 +2944,7 @@ public class Product : IAsyncLifetime
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<List<VariantCartDetailResponse>>().ConfigureAwait(true);
+        var content = await response.Content.ReadFromJsonAsync<List<VariantCartDetailResponse>>(CancellationToken.None).ConfigureAwait(true);
         content.Should().NotBeNull();
         content![0].CoverImageUrl.Should().Be(photo.ImageUrl);
     }

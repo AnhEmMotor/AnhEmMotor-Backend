@@ -14,6 +14,12 @@ public sealed record UpdateOutputCommand : IRequest<Result<OrderDetailResponse>>
     public Guid? CurrentUserId { get; init; }
 
     public string? StatusId { get; init; }
+    
+    public string? CustomerName { get; init; }
+
+    public string? CustomerAddress { get; init; }
+
+    public string? CustomerPhone { get; init; }
 
     public string? Notes { get; init; }
 

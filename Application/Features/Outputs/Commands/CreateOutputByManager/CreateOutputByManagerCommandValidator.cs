@@ -1,4 +1,5 @@
 using Application.ApiContracts.Output.Requests;
+using Application.Common.Validators;
 using FluentValidation;
 
 namespace Application.Features.Outputs.Commands.CreateOutputByManager
@@ -14,6 +15,17 @@ namespace Application.Features.Outputs.Commands.CreateOutputByManager
                 .WithMessage("Product ID cannot be duplicated in a single output.");
 
             RuleForEach(x => x.OutputInfos).SetValidator(new CreateOutputProductByManagerCommandValidator());
+
+            RuleFor(x => x.CustomerName)
+                .NotEmpty().WithMessage("Customer name is required.");
+
+            RuleFor(x => x.CustomerAddress)
+                .NotEmpty().WithMessage("Customer address is required.");
+
+            RuleFor(x => x.CustomerPhone)
+                .NotEmpty().WithMessage("Customer phone is required.")
+                .MustBeValidPhoneNumber()
+                .WithMessage("Invalid phone number format.");
         }
 
         private bool HaveUniqueProducts(List<CreateOutputInfoRequest> products)

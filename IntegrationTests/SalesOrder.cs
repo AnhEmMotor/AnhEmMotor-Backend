@@ -166,7 +166,15 @@ public class SalesOrder : IAsyncLifetime
 
         var jsonContent = JsonSerializer
             .Serialize(
-                new { buyerId = user.Id, notes = "Test", products = new[] { new { productId = variantId, count = 1 } } });
+                new
+                {
+                    buyerId = user.Id,
+                    customerName = "Khách hàng Test",
+                    customerPhone = "0987654321",
+                    customerAddress = "Số 123, Đường Test, Hà Nội",
+                    notes = "Test",
+                    products = new[] { new { productId = variantId, count = 1 } }
+                });
         var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
         var response = await _client.PostAsync("/api/v1/SalesOrders", httpContent, CancellationToken.None)
             .ConfigureAwait(true);
@@ -221,6 +229,9 @@ public class SalesOrder : IAsyncLifetime
                 new
                 {
                     buyerId = user.Id,
+                    customerName = "Khách hàng Test",
+                    customerPhone = "0987654321",
+                    customerAddress = "Số 123, Đường Test, Hà Nội",
                     notes = "COD Order",
                     products = new[] { new { productId = variantId, count = 1 } }
                 });
@@ -284,7 +295,14 @@ public class SalesOrder : IAsyncLifetime
         await SeedInventoryAsync(variantId, 10, uniqueId, CancellationToken.None).ConfigureAwait(true);
 
         var jsonContent = JsonSerializer
-            .Serialize(new { buyerId = user.Id, products = new[] { new { productId = variantId, count = 1 } } });
+            .Serialize(new
+            {
+                buyerId = user.Id,
+                customerName = "Khách hàng Test",
+                customerPhone = "0987654321",
+                customerAddress = "Số 123, Đường Test, Hà Nội",
+                products = new[] { new { productId = variantId, count = 1 } }
+            });
         var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
         var createResponse = await _client.PostAsync("/api/v1/SalesOrders", httpContent, CancellationToken.None)
             .ConfigureAwait(true);
@@ -372,7 +390,14 @@ public class SalesOrder : IAsyncLifetime
         await SeedInventoryAsync(variantId, 10, uniqueId, CancellationToken.None).ConfigureAwait(true);
 
         var jsonContent = JsonSerializer
-            .Serialize(new { buyerId = user.Id, products = new[] { new { productId = variantId, count = 1 } } });
+            .Serialize(new
+            {
+                buyerId = user.Id,
+                customerName = "Khách hàng Test",
+                customerPhone = "0987654321",
+                customerAddress = "Số 123, Đường Test, Hà Nội",
+                products = new[] { new { productId = variantId, count = 1 } }
+            });
         var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
         var createResponse = await _client.PostAsync("/api/v1/SalesOrders", httpContent, CancellationToken.None)
             .ConfigureAwait(true);
@@ -456,7 +481,14 @@ public class SalesOrder : IAsyncLifetime
         await SeedInventoryAsync(variantId, 10, uniqueId, CancellationToken.None).ConfigureAwait(true);
 
         var jsonContent = JsonSerializer
-            .Serialize(new { buyerId = user.Id, products = new[] { new { productId = variantId, count = 1 } } });
+            .Serialize(new
+            {
+                buyerId = user.Id,
+                customerName = "Khách hàng Test",
+                customerPhone = "0987654321",
+                customerAddress = "Số 123, Đường Test, Hà Nội",
+                products = new[] { new { productId = variantId, count = 1 } }
+            });
         var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
         var createResponse = await _client.PostAsync("/api/v1/SalesOrders", httpContent, CancellationToken.None)
             .ConfigureAwait(true);
@@ -518,7 +550,14 @@ public class SalesOrder : IAsyncLifetime
         var variantId = await SeedProductVariantAsync(uniqueId, CancellationToken.None).ConfigureAwait(true);
 
         var jsonContent = JsonSerializer
-            .Serialize(new { buyerId = user.Id, products = new[] { new { productId = variantId, count = 1 } } });
+            .Serialize(new
+            {
+                buyerId = user.Id,
+                customerName = "Khách hàng Test",
+                customerPhone = "0987654321",
+                customerAddress = "Số 123, Đường Test, Hà Nội",
+                products = new[] { new { productId = variantId, count = 1 } }
+            });
         var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
         var response = await _client.PostAsync("/api/v1/SalesOrders/by-manager", httpContent, CancellationToken.None)
             .ConfigureAwait(true);
@@ -651,6 +690,9 @@ public class SalesOrder : IAsyncLifetime
                 new
                 {
                     buyerId = user.Id,
+                    customerName = "Khách hàng Test",
+                    customerPhone = "0987654321",
+                    customerAddress = "Số 123, Đường Test, Hà Nội",
                     products = new[]
                     {
                         new { productId = variantId1, count = 1 },
@@ -823,6 +865,9 @@ public class SalesOrder : IAsyncLifetime
                 new
                 {
                     buyerId = user.Id,
+                    customerName = "Khách hàng Test",
+                    customerPhone = "0987654321",
+                    customerAddress = "Số 123, Đường Test, Hà Nội",
                     notes = "DeleteMe",
                     products = new[] { new { productId = variantId, count = 1 } }
                 });
@@ -878,7 +923,14 @@ public class SalesOrder : IAsyncLifetime
         var variantId = await SeedProductVariantAsync(uniqueId, CancellationToken.None).ConfigureAwait(true);
 
         var jsonContent = JsonSerializer
-            .Serialize(new { buyerId = user.Id, products = new[] { new { productId = variantId, count = 1 } } });
+            .Serialize(new
+            {
+                buyerId = user.Id,
+                customerName = "Khách hàng Test",
+                customerPhone = "0987654321",
+                customerAddress = "Số 123, Đường Test, Hà Nội",
+                products = new[] { new { productId = variantId, count = 1 } }
+            });
         var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
         var createResponse = await _client.PostAsync("/api/v1/SalesOrders", httpContent, CancellationToken.None)
             .ConfigureAwait(true);
@@ -1025,7 +1077,14 @@ public class SalesOrder : IAsyncLifetime
         var variantId = await SeedProductVariantAsync(uniqueId, CancellationToken.None).ConfigureAwait(true);
 
         var jsonContent = JsonSerializer
-            .Serialize(new { buyerId = user.Id, products = new[] { new { productId = variantId, count = 1 } } });
+            .Serialize(new
+            {
+                buyerId = user.Id,
+                customerName = "Khách hàng Test",
+                customerPhone = "0987654321",
+                customerAddress = "Số 123, Đường Test, Hà Nội",
+                products = new[] { new { productId = variantId, count = 1 } }
+            });
         var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
         var createResponse = await _client.PostAsync("/api/v1/SalesOrders", httpContent, CancellationToken.None)
@@ -1082,7 +1141,14 @@ public class SalesOrder : IAsyncLifetime
         var variantId = await SeedProductVariantAsync(uniqueId, CancellationToken.None).ConfigureAwait(true);
 
         var jsonContent = JsonSerializer
-            .Serialize(new { buyerId = user.Id, products = new[] { new { productId = variantId, count = 1 } } });
+            .Serialize(new
+            {
+                buyerId = user.Id,
+                customerName = "Khách hàng Test",
+                customerPhone = "0987654321",
+                customerAddress = "Số 123, Đường Test, Hà Nội",
+                products = new[] { new { productId = variantId, count = 1 } }
+            });
         var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
         var r1 = await _client.PostAsync("/api/v1/SalesOrders", httpContent, CancellationToken.None)
@@ -1143,7 +1209,14 @@ public class SalesOrder : IAsyncLifetime
         var variantId = await SeedProductVariantAsync(uniqueId, CancellationToken.None).ConfigureAwait(true);
 
         var jsonContent = JsonSerializer
-            .Serialize(new { buyerId = user.Id, products = new[] { new { productId = variantId, count = 1 } } });
+            .Serialize(new
+            {
+                buyerId = user.Id,
+                customerName = "Khách hàng Test",
+                customerPhone = "0987654321",
+                customerAddress = "Số 123, Đường Test, Hà Nội",
+                products = new[] { new { productId = variantId, count = 1 } }
+            });
 
         var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
         var r1 = await _client.PostAsync("/api/v1/SalesOrders", httpContent, CancellationToken.None)
@@ -1205,7 +1278,14 @@ public class SalesOrder : IAsyncLifetime
         await SeedInventoryAsync(variantId, 10, uniqueId, CancellationToken.None).ConfigureAwait(true);
 
         var jsonContent = JsonSerializer
-            .Serialize(new { buyerId = user.Id, products = new[] { new { productId = variantId, count = 1 } } });
+            .Serialize(new
+            {
+                buyerId = user.Id,
+                customerName = "Khách hàng Test",
+                customerPhone = "0987654321",
+                customerAddress = "Số 123, Đường Test, Hà Nội",
+                products = new[] { new { productId = variantId, count = 1 } }
+            });
         var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
         var r1 = await _client.PostAsync("/api/v1/SalesOrders", httpContent, CancellationToken.None)
@@ -1271,6 +1351,9 @@ public class SalesOrder : IAsyncLifetime
                 new
                 {
                     buyerId = user.Id,
+                    customerName = "Khách hàng Test",
+                    customerPhone = "0987654321",
+                    customerAddress = "Số 123, Đường Test, Hà Nội",
                     notes = $"Mine_{uniqueId}",
                     products = new[] { new { productId = variantId, count = 1 } }
                 });
