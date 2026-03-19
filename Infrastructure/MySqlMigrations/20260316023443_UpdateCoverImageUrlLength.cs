@@ -1,14 +1,14 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 #nullable disable
 
 namespace Infrastructure.MySqlMigrations
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public partial class UpdateCoverImageUrlLength : Migration
     {
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<DateTime>(
@@ -27,12 +27,10 @@ namespace Infrastructure.MySqlMigrations
                 oldNullable: true);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "DateOfBirth",
-                table: "Users");
+            migrationBuilder.DropColumn(name: "DateOfBirth", table: "Users");
 
             migrationBuilder.AlterColumn<string>(
                 name: "CoverImageUrl",

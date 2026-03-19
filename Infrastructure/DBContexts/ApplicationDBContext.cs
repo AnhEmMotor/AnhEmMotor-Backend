@@ -3,6 +3,7 @@ using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System;
 using System.Linq.Expressions;
 using InputStatus = Domain.Entities.InputStatus;
@@ -161,8 +162,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
                     if(property.ClrType == typeof(DateTimeOffset) || property.ClrType == typeof(DateTimeOffset?))
                     {
-                        property.SetValueConverter(
-                            typeof(Microsoft.EntityFrameworkCore.Storage.ValueConversion.DateTimeOffsetToBinaryConverter));
+                        property.SetValueConverter(typeof(DateTimeOffsetToBinaryConverter));
                     }
                 }
             }

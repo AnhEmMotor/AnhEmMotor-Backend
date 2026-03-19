@@ -1,8 +1,10 @@
-﻿using Application.ApiContracts.Product.Requests;
+﻿using Application.ApiContracts.Option.Responses;
+using Application.ApiContracts.Product.Requests;
 using Application.ApiContracts.Product.Responses;
-using Application.ApiContracts.Option.Responses;
 using Application.Features.Products.Commands.CreateProduct;
 using Application.Features.Products.Commands.UpdateManyProductStatuses;
+using Application.Features.Products.Commands.UpdateProduct;
+using Domain.Constants.Order;
 using Domain.Constants.Permission;
 using Domain.Entities;
 using Domain.Primitives;
@@ -20,9 +22,9 @@ using ProductEntity = Domain.Entities.Product;
 
 namespace IntegrationTests;
 
-using ProductStatusConstants = Domain.Constants.Product.ProductStatus;
 using System.Threading.Tasks;
 using Xunit;
+using ProductStatusConstants = Domain.Constants.Product.ProductStatus;
 
 [Collection("Shared Integration Collection")]
 public class Product : IAsyncLifetime
@@ -78,7 +80,7 @@ public class Product : IAsyncLifetime
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
 
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
@@ -143,7 +145,7 @@ public class Product : IAsyncLifetime
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var category = new ProductCategoryEntity { Name = $"Category_{uniqueId}", DeletedAt = null };
@@ -212,7 +214,7 @@ public class Product : IAsyncLifetime
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var category = new ProductCategoryEntity { Name = $"Category_{uniqueId}", DeletedAt = null };
@@ -289,7 +291,7 @@ public class Product : IAsyncLifetime
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var category = new ProductCategoryEntity { Name = $"Category_{uniqueId}", DeletedAt = null };
@@ -370,7 +372,7 @@ public class Product : IAsyncLifetime
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var category = new ProductCategoryEntity { Name = $"Category_{uniqueId}", DeletedAt = null };
@@ -428,7 +430,7 @@ public class Product : IAsyncLifetime
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var category = new ProductCategoryEntity { Name = $"Category_{uniqueId}", DeletedAt = null };
@@ -487,7 +489,7 @@ public class Product : IAsyncLifetime
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var category = new ProductCategoryEntity { Name = $"Category_{uniqueId}" };
@@ -547,7 +549,7 @@ public class Product : IAsyncLifetime
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var category = new ProductCategoryEntity { Name = $"Category_{uniqueId}" };
@@ -611,7 +613,7 @@ public class Product : IAsyncLifetime
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var category = new ProductCategoryEntity { Name = $"Category_{uniqueId}" };
@@ -675,7 +677,7 @@ public class Product : IAsyncLifetime
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var category = new ProductCategoryEntity { Name = $"Category_{uniqueId}" };
@@ -753,7 +755,7 @@ public class Product : IAsyncLifetime
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var category = new ProductCategoryEntity { Name = $"Category_{uniqueId}" };
@@ -829,7 +831,7 @@ public class Product : IAsyncLifetime
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var category = new ProductCategoryEntity { Name = $"Category_{uniqueId}" };
@@ -904,7 +906,7 @@ public class Product : IAsyncLifetime
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var category = new ProductCategoryEntity { Name = $"Category_{uniqueId}" };
@@ -989,7 +991,7 @@ public class Product : IAsyncLifetime
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var category = new ProductCategoryEntity { Name = $"Category_{uniqueId}" };
@@ -1052,7 +1054,7 @@ public class Product : IAsyncLifetime
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var category = new ProductCategoryEntity { Name = $"Category_{uniqueId}" };
@@ -1110,11 +1112,11 @@ public class Product : IAsyncLifetime
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, outStockStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = outStockStatusId });
+            db.ProductStatuses.Add(new ProductStatus { Key = outStockStatusId });
 
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
@@ -1188,11 +1190,11 @@ public class Product : IAsyncLifetime
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, outStockStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = outStockStatusId });
+            db.ProductStatuses.Add(new ProductStatus { Key = outStockStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var category = new ProductCategoryEntity { Name = $"Category_{uniqueId}" };
@@ -1266,7 +1268,8 @@ public class Product : IAsyncLifetime
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
 
-        var response = await _client.GetAsync("/api/v1/product/predefined-options", CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/product/predefined-options", CancellationToken.None)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
@@ -1299,7 +1302,8 @@ public class Product : IAsyncLifetime
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var response = await _client.GetAsync("/api/v1/product/predefined-options", CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/product/predefined-options", CancellationToken.None)
+            .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
@@ -1334,7 +1338,7 @@ public class Product : IAsyncLifetime
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
+            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
 
         var category = new ProductCategoryEntity { Name = $"Cat_{uniqueId}" };
         var brand = new BrandEntity { Name = $"Brand_{uniqueId}" };
@@ -1393,7 +1397,7 @@ public class Product : IAsyncLifetime
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, ProductStatusConstants.ForSale) == 0, CancellationToken.None)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = ProductStatusConstants.ForSale });
+            db.ProductStatuses.Add(new ProductStatus { Key = ProductStatusConstants.ForSale });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         string longSlug = new('a', 200);
@@ -1448,7 +1452,7 @@ public class Product : IAsyncLifetime
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, ProductStatusConstants.ForSale) == 0, CancellationToken.None)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = ProductStatusConstants.ForSale });
+            db.ProductStatuses.Add(new ProductStatus { Key = ProductStatusConstants.ForSale });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var reqBody = new
@@ -1508,7 +1512,7 @@ public class Product : IAsyncLifetime
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, ProductStatusConstants.ForSale) == 0, CancellationToken.None)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = ProductStatusConstants.ForSale });
+            db.ProductStatuses.Add(new ProductStatus { Key = ProductStatusConstants.ForSale });
 
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
@@ -1530,7 +1534,7 @@ public class Product : IAsyncLifetime
         db.Set<VariantOptionValue>().Add(variantOptionValue);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-        var updateCommand = new Application.Features.Products.Commands.UpdateProduct.UpdateProductCommand
+        var updateCommand = new UpdateProductCommand
         {
             Id = product.Id,
             Name = "P1 Updated",
@@ -1571,7 +1575,8 @@ public class Product : IAsyncLifetime
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResp.AccessToken);
 
-        var response = await _client.GetAsync("/api/v1/product/predefined-options", CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/product/predefined-options", CancellationToken.None)
+            .ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
@@ -1597,7 +1602,8 @@ public class Product : IAsyncLifetime
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResp.AccessToken);
 
-        var response = await _client.GetAsync("/api/v1/product/predefined-options", CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/product/predefined-options", CancellationToken.None)
+            .ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
@@ -1633,7 +1639,7 @@ public class Product : IAsyncLifetime
         if(!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, ProductStatusConstants.ForSale) == 0, CancellationToken.None)
             .ConfigureAwait(true))
-            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = ProductStatusConstants.ForSale });
+            db.ProductStatuses.Add(new ProductStatus { Key = ProductStatusConstants.ForSale });
         if(!await db.InputStatuses
             .AnyAsync(
                 x => string.Compare(x.Key, Domain.Constants.Input.InputStatus.Finish) == 0,
@@ -1641,11 +1647,9 @@ public class Product : IAsyncLifetime
             .ConfigureAwait(true))
             db.InputStatuses.Add(new InputStatus { Key = Domain.Constants.Input.InputStatus.Finish });
         if(!await db.OutputStatuses
-            .AnyAsync(
-                x => string.Compare(x.Key, Domain.Constants.Order.OrderStatus.Pending) == 0,
-                CancellationToken.None)
+            .AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, CancellationToken.None)
             .ConfigureAwait(true))
-            db.OutputStatuses.Add(new OutputStatus { Key = Domain.Constants.Order.OrderStatus.Pending });
+            db.OutputStatuses.Add(new OutputStatus { Key = OrderStatus.Pending });
 
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
@@ -1681,7 +1685,7 @@ public class Product : IAsyncLifetime
         };
         db.InputInfos.Add(inputInfo);
 
-        var output = new Output { StatusId = Domain.Constants.Order.OrderStatus.Pending };
+        var output = new Output { StatusId = OrderStatus.Pending };
         db.OutputOrders.Add(output);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
@@ -1741,7 +1745,7 @@ public class Product : IAsyncLifetime
             .AnyAsync(x => string.Compare(x.Key, ProductStatusConstants.ForSale) == 0, CancellationToken.None)
             .ConfigureAwait(true))
         {
-            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = ProductStatusConstants.ForSale });
+            db.ProductStatuses.Add(new ProductStatus { Key = ProductStatusConstants.ForSale });
         }
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
@@ -1812,7 +1816,7 @@ public class Product : IAsyncLifetime
             .AnyAsync(x => string.Compare(x.Key, ProductStatusConstants.ForSale) == 0, CancellationToken.None)
             .ConfigureAwait(true))
         {
-            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = ProductStatusConstants.ForSale });
+            db.ProductStatuses.Add(new ProductStatus { Key = ProductStatusConstants.ForSale });
         }
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
@@ -1907,7 +1911,7 @@ public class Product : IAsyncLifetime
             .AnyAsync(x => string.Compare(x.Key, ProductStatusConstants.ForSale) == 0, CancellationToken.None)
             .ConfigureAwait(true))
         {
-            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = ProductStatusConstants.ForSale });
+            db.ProductStatuses.Add(new ProductStatus { Key = ProductStatusConstants.ForSale });
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
     }
@@ -2305,7 +2309,7 @@ public class Product : IAsyncLifetime
         await EnsureInventoryAlertLevelAsync(db, 5).ConfigureAwait(true);
 
         var statusFinished = Domain.Constants.Input.InputStatus.Finish;
-        var statusBooking = Domain.Constants.Order.OrderStatus.Pending;
+        var statusBooking = OrderStatus.Pending;
         await EnsureInputStatusAsync(db, statusFinished).ConfigureAwait(true);
         await EnsureOutputStatusAsync(db, statusBooking).ConfigureAwait(true);
 
@@ -2348,7 +2352,7 @@ public class Product : IAsyncLifetime
         await EnsureInventoryAlertLevelAsync(db, 5).ConfigureAwait(true);
 
         var statusFinished = Domain.Constants.Input.InputStatus.Finish;
-        var statusBooking = Domain.Constants.Order.OrderStatus.Pending;
+        var statusBooking = OrderStatus.Pending;
         await EnsureInputStatusAsync(db, statusFinished).ConfigureAwait(true);
         await EnsureOutputStatusAsync(db, statusBooking).ConfigureAwait(true);
 
@@ -2457,7 +2461,7 @@ public class Product : IAsyncLifetime
         }
     }
 
-    private ProductEntity CreateProductWithStock(
+    private static ProductEntity CreateProductWithStock(
         ApplicationDBContext db,
         string name,
         int catId,
@@ -2581,18 +2585,20 @@ public class Product : IAsyncLifetime
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
         var productStatusId = ProductStatusConstants.ForSale;
-        if(!await db.ProductStatuses.AnyAsync(x => x.Key == productStatusId, TestContext.Current.CancellationToken).ConfigureAwait(true))
-            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
+        if(!await db.ProductStatuses
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
+            .ConfigureAwait(true))
+            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var category = new ProductCategoryEntity { Name = $"Cat_{uniqueId}" };
         var brand = new BrandEntity { Name = $"Brand_{uniqueId}" };
         db.ProductCategories.Add(category);
         db.Brands.Add(brand);
-        
+
         var preOpt = new PredefinedOption { Key = $"Color_{uniqueId}", Value = "Màu sắc" };
         db.PredefinedOptions.Add(preOpt);
-        
+
         var option = new Option { Name = preOpt.Key };
         db.Options.Add(option);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
@@ -2602,8 +2608,20 @@ public class Product : IAsyncLifetime
         db.OptionValues.AddRange(valRed, valBlue);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
-        var p1 = new ProductEntity { Name = $"P1_{uniqueId}", CategoryId = category.Id, BrandId = brand.Id, StatusId = productStatusId };
-        var p2 = new ProductEntity { Name = $"P2_{uniqueId}", CategoryId = category.Id, BrandId = brand.Id, StatusId = productStatusId };
+        var p1 = new ProductEntity
+        {
+            Name = $"P1_{uniqueId}",
+            CategoryId = category.Id,
+            BrandId = brand.Id,
+            StatusId = productStatusId
+        };
+        var p2 = new ProductEntity
+        {
+            Name = $"P2_{uniqueId}",
+            CategoryId = category.Id,
+            BrandId = brand.Id,
+            StatusId = productStatusId
+        };
         db.Products.AddRange(p1, p2);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
@@ -2612,10 +2630,10 @@ public class Product : IAsyncLifetime
         db.ProductVariants.AddRange(v1_red, v2_blue);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
-        db.VariantOptionValues.AddRange(
-            new VariantOptionValue { VariantId = v1_red.Id, OptionValueId = valRed.Id },
-            new VariantOptionValue { VariantId = v2_blue.Id, OptionValueId = valBlue.Id }
-        );
+        db.VariantOptionValues
+            .AddRange(
+                new VariantOptionValue { VariantId = v1_red.Id, OptionValueId = valRed.Id },
+                new VariantOptionValue { VariantId = v2_blue.Id, OptionValueId = valBlue.Id });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var response = await _client.GetAsync($"/api/v1/product?optionValueIds={valRed.Id}", CancellationToken.None)
@@ -2625,11 +2643,11 @@ public class Product : IAsyncLifetime
         var content = await response.Content
             .ReadFromJsonAsync<PagedResult<ProductDetailResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        
+
         content.Should().NotBeNull();
         content!.Items.Should().Contain(p => p.Id == p1.Id);
         content.Items.Should().NotContain(p => p.Id == p2.Id);
-        
+
         var item1 = content.Items.First(p => p.Id == p1.Id);
         item1.Variants.Should().Contain(v => v.Id == v1_red.Id);
         item1.Variants.Should().NotContain(v => v.Id == v2_blue.Id);
@@ -2662,14 +2680,16 @@ public class Product : IAsyncLifetime
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
         var productStatusId = ProductStatusConstants.ForSale;
-        if(!await db.ProductStatuses.AnyAsync(x => x.Key == productStatusId, TestContext.Current.CancellationToken).ConfigureAwait(true))
-            db.ProductStatuses.Add(new Domain.Entities.ProductStatus { Key = productStatusId });
-        
+        if(!await db.ProductStatuses
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
+            .ConfigureAwait(true))
+            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
+
         var category = new ProductCategoryEntity { Name = $"Cat_{uniqueId}" };
         var brand = new BrandEntity { Name = $"Brand_{uniqueId}" };
         db.ProductCategories.Add(category);
         db.Brands.Add(brand);
-        
+
         var preOpt = new PredefinedOption { Key = $"Color_{uniqueId}", Value = "Màu sắc" };
         db.PredefinedOptions.Add(preOpt);
 
@@ -2681,8 +2701,20 @@ public class Product : IAsyncLifetime
         db.OptionValues.Add(valRed);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
-        var pMatch = new ProductEntity { Name = $"UniqueName_{uniqueId}", CategoryId = category.Id, BrandId = brand.Id, StatusId = productStatusId };
-        var pOther = new ProductEntity { Name = $"OtherName_{uniqueId}", CategoryId = category.Id, BrandId = brand.Id, StatusId = productStatusId };
+        var pMatch = new ProductEntity
+        {
+            Name = $"UniqueName_{uniqueId}",
+            CategoryId = category.Id,
+            BrandId = brand.Id,
+            StatusId = productStatusId
+        };
+        var pOther = new ProductEntity
+        {
+            Name = $"OtherName_{uniqueId}",
+            CategoryId = category.Id,
+            BrandId = brand.Id,
+            StatusId = productStatusId
+        };
         db.Products.AddRange(pMatch, pOther);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
@@ -2693,95 +2725,106 @@ public class Product : IAsyncLifetime
         db.VariantOptionValues.Add(new VariantOptionValue { VariantId = vMatch.Id, OptionValueId = valRed.Id });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
-        var response = await _client.GetAsync($"/api/v1/product?filters=search=UniqueName_{uniqueId},optionValueIds={valRed.Id}", CancellationToken.None)
+        var response = await _client.GetAsync(
+            $"/api/v1/product?filters=search=UniqueName_{uniqueId},optionValueIds={valRed.Id}",
+            CancellationToken.None)
             .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
             .ReadFromJsonAsync<PagedResult<ProductDetailResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        
+
         content.Should().NotBeNull();
         content!.Items.Should().ContainSingle(p => p.Id == pMatch.Id);
     }
 
-    //[Fact(DisplayName = "PRODUCT_139 - Kiểm tra logic fallback của CoverImageUrl khi biến thể chỉ có PhotoCollection")]
-    //public async Task GetProducts_CoverImageFilterFallback_ReturnsFirstPhoto()
-    //{
-    //    var uniqueId = Guid.NewGuid().ToString("N")[..8];
-    //    var username = $"user_{uniqueId}";
-    //    var email = $"user_{uniqueId}@gmail.com";
-    //    var password = "ThisIsStrongPassword1@";
-    //    await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
-    //        _factory.Services,
-    //        username,
-    //        password,
-    //        [ PermissionsList.Products.View ],
-    //        CancellationToken.None,
-    //        email)
-    //        .ConfigureAwait(true);
-    //    var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
-    //        _client,
-    //        username,
-    //        password,
-    //        CancellationToken.None)
-    //        .ConfigureAwait(true);
-    //    _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+    [Fact(DisplayName = "PRODUCT_139 - Kiểm tra logic fallback của CoverImageUrl khi biến thể chỉ có PhotoCollection")]
+    public async Task GetProducts_CoverImageFilterFallback_ReturnsFirstPhoto()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Products.View ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-    //    using var scope = _factory.Services.CreateScope();
-    //    var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-    //    var category = new ProductCategoryEntity { Name = $"Category_{uniqueId}" };
-    //    var brand = new BrandEntity { Name = $"Brand_{uniqueId}" };
-    //    db.ProductCategories.Add(category);
-    //    db.Brands.Add(brand);
-    //    await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+        var productStatusId = ProductStatusConstants.ForSale;
+        if(!await db.ProductStatuses
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
+            .ConfigureAwait(true))
+        {
+            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
+        }
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-    //    var firstPhotoUrl = $"https://example.com/photo1_{uniqueId}.jpg";
-    //    var secondPhotoUrl = $"https://example.com/photo2_{uniqueId}.jpg";
+        var category = new ProductCategoryEntity { Name = $"Category_{uniqueId}" };
+        var brand = new BrandEntity { Name = $"Brand_{uniqueId}" };
+        db.ProductCategories.Add(category);
+        db.Brands.Add(brand);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
 
-    //    var product = new ProductEntity
-    //    {
-    //        Name = $"Product_{uniqueId}",
-    //        CategoryId = category.Id,
-    //        BrandId = brand.Id,
-    //        StatusId = ProductStatusConstants.ForSale,
-    //        ProductVariants = [
-    //            new ProductVariant
-    //            {
-    //                UrlSlug = $"slug-{uniqueId}",
-    //                Price = 1000000,
-    //                CoverImageUrl = null, // Không có ảnh bìa
-    //                ProductCollectionPhotos = [
-    //                    new ProductCollectionPhoto { ImageUrl = firstPhotoUrl },
-    //                    new ProductCollectionPhoto { ImageUrl = secondPhotoUrl }
-    //                ]
-    //            }
-    //        ]
-    //    };
-    //    db.Products.Add(product);
-    //    await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-    //    var variant = product.ProductVariants.First();
+        var firstPhotoUrl = $"https://example.com/photo1_{uniqueId}.jpg";
+        var secondPhotoUrl = $"https://example.com/photo2_{uniqueId}.jpg";
 
-    //    // 1. Kiểm tra API danh sách sản phẩm
-    //    var listResponse = await _client.GetAsync($"/api/v1/product?filters=Id=={product.Id}", CancellationToken.None)
-    //        .ConfigureAwait(true);
-    //    listResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-    //    var listResult = await listResponse.Content.ReadFromJsonAsync<PagedResult<ProductListStoreResponse>>(CancellationToken.None)
-    //        .ConfigureAwait(true);
-        
-    //    var variantInList = listResult!.Items.First().Variants.First(v => v.Id == variant.Id);
-    //    variantInList.CoverImageUrl.Should().Be(firstPhotoUrl);
+        var product = new ProductEntity
+        {
+            Name = $"Product_{uniqueId}",
+            CategoryId = category.Id,
+            BrandId = brand.Id,
+            StatusId = ProductStatusConstants.ForSale,
+            ProductVariants =
+                [ new ProductVariant
+                {
+                    UrlSlug = $"slug-{uniqueId}",
+                    Price = 1000000,
+                    CoverImageUrl = null,
+                    ProductCollectionPhotos =
+                        [ new ProductCollectionPhoto { ImageUrl = firstPhotoUrl }, new ProductCollectionPhoto
+                            {
+                                ImageUrl = secondPhotoUrl
+                            } ]
+                } ]
+        };
+        db.Products.Add(product);
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+        var variant = product.ProductVariants.First();
 
-    //    // 2. Kiểm tra API chi tiết sản phẩm cửa hàng
-    //    var detailResponse = await _client.GetAsync($"/api/v1/product/store/{variant.UrlSlug}", CancellationToken.None)
-    //        .ConfigureAwait(true);
-    //    detailResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-    //    var detailResult = await detailResponse.Content.ReadFromJsonAsync<ProductStoreDetailResponse>(CancellationToken.None)
-    //        .ConfigureAwait(true);
-        
-    //    detailResult!.CurrentVariant.CoverImageUrl.Should().Be(firstPhotoUrl);
-    //}
+        var listResponse = await _client.GetAsync($"/api/v1/product?filters=Id=={product.Id}", CancellationToken.None)
+            .ConfigureAwait(true);
+        listResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var listResult = await listResponse.Content
+            .ReadFromJsonAsync<PagedResult<ProductListStoreResponse>>(CancellationToken.None)
+            .ConfigureAwait(true);
+
+        var variantInList = listResult!.Items?.First().Variants.First(v => v.Id == variant.Id);
+        variantInList?.CoverImageUrl.Should().Be(firstPhotoUrl);
+
+        var detailResponse = await _client.GetAsync($"/api/v1/product/store/{variant.UrlSlug}", CancellationToken.None)
+            .ConfigureAwait(true);
+        detailResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var detailResult = await detailResponse.Content
+            .ReadFromJsonAsync<ProductStoreDetailResponse>(CancellationToken.None)
+            .ConfigureAwait(true);
+
+        detailResult!.CurrentVariant.CoverImageUrl.Should().Be(firstPhotoUrl);
+    }
 
 #pragma warning restore CRR0035
 }

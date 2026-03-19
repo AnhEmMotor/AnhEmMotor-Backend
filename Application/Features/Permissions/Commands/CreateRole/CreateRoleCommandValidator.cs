@@ -1,11 +1,12 @@
-﻿using FluentValidation;
+﻿using Domain.Constants.Permission;
+using FluentValidation;
 using System.Reflection;
 
 namespace Application.Features.Permissions.Commands.CreateRole;
 
 public class CreateRoleCommandValidator : AbstractValidator<CreateRoleCommand>
 {
-    private static readonly HashSet<string> ValidPermissions = [ .. typeof(Domain.Constants.Permission.PermissionsList)
+    private static readonly HashSet<string> ValidPermissions = [ .. typeof(PermissionsList)
         .GetNestedTypes()
         .SelectMany(type => type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy))
         .Where(fieldInfo => fieldInfo.IsLiteral && !fieldInfo.IsInitOnly)
@@ -32,7 +33,7 @@ public class CreateRoleCommandValidator : AbstractValidator<CreateRoleCommand>
                 {
                     if(permissions == null)
                         return;
-                    var (isValid, errorMessage) = Domain.Constants.Permission.PermissionsList.ValidateRules(permissions);
+                    var (isValid, errorMessage) = PermissionsList.ValidateRules(permissions);
                     if(!isValid)
                     {
                         context.AddFailure(errorMessage);

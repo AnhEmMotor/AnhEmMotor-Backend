@@ -6,6 +6,7 @@ using Application.Features.Statistical.Queries.GetOrderStatusCounts;
 using Application.Features.Statistical.Queries.GetProductReportLastMonth;
 using Application.Features.Statistical.Queries.GetProductStockAndPrice;
 using FluentAssertions;
+using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -85,9 +86,9 @@ public class Statistics
     {
         var days = -5;
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetDailyRevenueQuery>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new FluentValidation.ValidationException("days phải lớn hơn 0"));
+            .ThrowsAsync(new ValidationException("days phải lớn hơn 0"));
 
-        await Assert.ThrowsAsync<FluentValidation.ValidationException>(
+        await Assert.ThrowsAsync<ValidationException>(
             () => _controller.GetDailyRevenueAsync(days, CancellationToken.None))
             .ConfigureAwait(true);
     }
@@ -97,9 +98,9 @@ public class Statistics
     {
         var days = 0;
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetDailyRevenueQuery>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new FluentValidation.ValidationException("days phải lớn hơn 0"));
+            .ThrowsAsync(new ValidationException("days phải lớn hơn 0"));
 
-        await Assert.ThrowsAsync<FluentValidation.ValidationException>(
+        await Assert.ThrowsAsync<ValidationException>(
             () => _controller.GetDailyRevenueAsync(days, CancellationToken.None))
             .ConfigureAwait(true);
     }
@@ -109,9 +110,9 @@ public class Statistics
     {
         var days = 366;
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetDailyRevenueQuery>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new FluentValidation.ValidationException("days không được vượt quá 365"));
+            .ThrowsAsync(new ValidationException("days không được vượt quá 365"));
 
-        await Assert.ThrowsAsync<FluentValidation.ValidationException>(
+        await Assert.ThrowsAsync<ValidationException>(
             () => _controller.GetDailyRevenueAsync(days, CancellationToken.None))
             .ConfigureAwait(true);
     }
@@ -182,9 +183,9 @@ public class Statistics
     {
         var months = -3;
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetMonthlyRevenueProfitQuery>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new FluentValidation.ValidationException("months phải lớn hơn 0"));
+            .ThrowsAsync(new ValidationException("months phải lớn hơn 0"));
 
-        await Assert.ThrowsAsync<FluentValidation.ValidationException>(
+        await Assert.ThrowsAsync<ValidationException>(
             () => _controller.GetMonthlyRevenueProfitAsync(months, CancellationToken.None))
             .ConfigureAwait(true);
     }
@@ -194,9 +195,9 @@ public class Statistics
     {
         var months = 0;
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetMonthlyRevenueProfitQuery>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new FluentValidation.ValidationException("months phải lớn hơn 0"));
+            .ThrowsAsync(new ValidationException("months phải lớn hơn 0"));
 
-        await Assert.ThrowsAsync<FluentValidation.ValidationException>(
+        await Assert.ThrowsAsync<ValidationException>(
             () => _controller.GetMonthlyRevenueProfitAsync(months, CancellationToken.None))
             .ConfigureAwait(true);
     }
@@ -206,9 +207,9 @@ public class Statistics
     {
         var months = 25;
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetMonthlyRevenueProfitQuery>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new FluentValidation.ValidationException("months không được vượt quá 24"));
+            .ThrowsAsync(new ValidationException("months không được vượt quá 24"));
 
-        await Assert.ThrowsAsync<FluentValidation.ValidationException>(
+        await Assert.ThrowsAsync<ValidationException>(
             () => _controller.GetMonthlyRevenueProfitAsync(months, CancellationToken.None))
             .ConfigureAwait(true);
     }
@@ -315,9 +316,9 @@ public class Statistics
     {
         var variantId = -5;
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetProductStockAndPriceQuery>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new FluentValidation.ValidationException("variantId không hợp lệ"));
+            .ThrowsAsync(new ValidationException("variantId không hợp lệ"));
 
-        await Assert.ThrowsAsync<FluentValidation.ValidationException>(
+        await Assert.ThrowsAsync<ValidationException>(
             () => _controller.GetProductStockAndPriceAsync(variantId, CancellationToken.None))
             .ConfigureAwait(true);
     }

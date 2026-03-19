@@ -1,4 +1,5 @@
 ﻿using Application;
+using Asp.Versioning.ApiExplorer;
 using Infrastructure;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.SwaggerUI;
@@ -17,30 +18,31 @@ if(!environment.IsEnvironment("Test"))
 
 builder.Services
     .AddCustomMvc()
-    .AddCors(options =>
-    {
-        options.AddPolicy("CorsPolicy", policy =>
+    .AddCors(
+        options =>
         {
-            var rawOrigins = configuration["Cors:AllowedOrigins"];
+            options.AddPolicy(
+                "CorsPolicy",
+                policy =>
+                {
+                    var rawOrigins = configuration["Cors:AllowedOrigins"];
 
-            if (string.IsNullOrWhiteSpace(rawOrigins))
-            {
-                throw new InvalidOperationException("CORS AllowedOrigins is missing in appsettings.json.");
-            }
+                    if(string.IsNullOrWhiteSpace(rawOrigins))
+                    {
+                        throw new InvalidOperationException("CORS AllowedOrigins is missing in appsettings.json.");
+                    }
 
-            var allowedOrigins = rawOrigins.Split(';', StringSplitOptions.RemoveEmptyEntries);
+                    var allowedOrigins = rawOrigins.Split(';', StringSplitOptions.RemoveEmptyEntries);
 
-            if (allowedOrigins.Any(origin => origin == "*"))
-            {
-                throw new InvalidOperationException("Wildcard '*' is not allowed when using AllowCredentials. Please specify exact origins.");
-            }
+                    if(allowedOrigins.Any(origin => string.Compare(origin, "*") == 0))
+                    {
+                        throw new InvalidOperationException(
+                            "Wildcard '*' is not allowed when using AllowCredentials. Please specify exact origins.");
+                    }
 
-            policy.WithOrigins(allowedOrigins)
-                  .AllowAnyMethod()
-                  .AllowAnyHeader()
-                  .AllowCredentials();
-        });
-    })
+                    policy.WithOrigins(allowedOrigins).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+                });
+        })
     .AddJwtAuthentication(configuration)
     .AddAuthorization()
     .AddCustomSwagger(environment)
@@ -65,7 +67,7 @@ if(app.Environment.IsDevelopment())
     app.UseSwaggerUI(
         options =>
         {
-            var provider = app.Services.GetRequiredService<Asp.Versioning.ApiExplorer.IApiVersionDescriptionProvider>();
+            var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
             foreach(var description in provider.ApiVersionDescriptions)
             {
                 options.SwaggerEndpoint(

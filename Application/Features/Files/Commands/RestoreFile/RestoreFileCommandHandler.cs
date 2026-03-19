@@ -1,6 +1,7 @@
 using Application.ApiContracts.File.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.LocalFile;
 using Application.Interfaces.Repositories.MediaFile;
 
 using Domain.Constants;
@@ -12,7 +13,7 @@ namespace Application.Features.Files.Commands.RestoreFile;
 public sealed class RestoreFileCommandHandler(
     IMediaFileReadRepository readRepository,
     IMediaFileUpdateRepository updateRepository,
-    Interfaces.Repositories.LocalFile.IFileStorageService fileStorageService,
+    IFileStorageService fileStorageService,
     IUnitOfWork unitOfWork) : IRequestHandler<RestoreFileCommand, Result<MediaFileResponse?>>
 {
     public async Task<Result<MediaFileResponse?>> Handle(

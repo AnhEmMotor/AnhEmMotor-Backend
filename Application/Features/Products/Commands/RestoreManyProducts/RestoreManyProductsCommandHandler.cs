@@ -4,6 +4,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Product;
 
 using Domain.Constants;
+using Domain.Entities;
 using Mapster;
 using MediatR;
 
@@ -25,7 +26,7 @@ public sealed class RestoreManyProductsCommandHandler(
 
         var allProductsMap = allProducts.ToDictionary(p => p.Id);
         var errorDetails = new List<Error>();
-        var productsToRestore = new List<Domain.Entities.Product>();
+        var productsToRestore = new List<Product>();
 
         foreach(var id in uniqueIds)
         {

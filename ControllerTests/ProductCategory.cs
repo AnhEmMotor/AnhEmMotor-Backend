@@ -11,6 +11,7 @@ using Application.Features.ProductCategories.Queries.GetProductCategoriesList;
 using Application.Features.ProductCategories.Queries.GetProductCategoryById;
 using Domain.Primitives;
 using FluentAssertions;
+using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -135,9 +136,9 @@ public class ProductCategory
     {
         var request = new CreateProductCategoryCommand { Name = new string('a', 300), Description = "Test" };
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateProductCategoryCommand>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new FluentValidation.ValidationException("Name exceeds maximum length"));
+            .ThrowsAsync(new ValidationException("Name exceeds maximum length"));
 
-        await Assert.ThrowsAsync<FluentValidation.ValidationException>(
+        await Assert.ThrowsAsync<ValidationException>(
             () => _controller.CreateProductCategoryAsync(request, CancellationToken.None))
             .ConfigureAwait(true);
     }
@@ -158,9 +159,9 @@ public class ProductCategory
     {
         var request = new DeleteManyProductCategoriesCommand { Ids = [] };
         _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteManyProductCategoriesCommand>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new FluentValidation.ValidationException("Ids list cannot be empty"));
+            .ThrowsAsync(new ValidationException("Ids list cannot be empty"));
 
-        await Assert.ThrowsAsync<FluentValidation.ValidationException>(
+        await Assert.ThrowsAsync<ValidationException>(
             () => _controller.DeleteProductCategoriesAsync(request, CancellationToken.None))
             .ConfigureAwait(true);
     }
@@ -170,9 +171,9 @@ public class ProductCategory
     {
         var request = new RestoreManyProductCategoriesCommand { Ids = null! };
         _mediatorMock.Setup(m => m.Send(It.IsAny<RestoreManyProductCategoriesCommand>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new FluentValidation.ValidationException("Ids is required"));
+            .ThrowsAsync(new ValidationException("Ids is required"));
 
-        await Assert.ThrowsAsync<FluentValidation.ValidationException>(
+        await Assert.ThrowsAsync<ValidationException>(
             () => _controller.RestoreProductCategoriesAsync(request, CancellationToken.None))
             .ConfigureAwait(true);
     }

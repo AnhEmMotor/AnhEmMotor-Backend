@@ -4,6 +4,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
 
 using Domain.Constants;
+using Domain.Constants.Input;
 using Mapster;
 using MediatR;
 
@@ -29,22 +30,19 @@ public sealed class UpdateInputStatusCommandHandler(
             return Error.NotFound($"Không tìm thấy phiếu nhập có ID {request.Id}.", "Id");
         }
 
-        if(Domain.Constants.Input.InputStatus.IsCannotEdit(input.StatusId))
+        if(InputStatus.IsCannotEdit(input.StatusId))
         {
             return Error.BadRequest("Không thể sửa trạng thái phiếu nhập đã hoàn thành hoặc đã hủy.", "StatusId");
         }
 
-        if(!Domain.Constants.Input.InputStatus.IsValid(request.StatusId))
+        if(!InputStatus.IsValid(request.StatusId))
         {
             return Error.BadRequest($"Trạng thái '{request.StatusId}' không hợp lệ.", "StatusId");
         }
 
         input.StatusId = request.StatusId;
 
-        if(string.Equals(
-            request.StatusId,
-            Domain.Constants.Input.InputStatus.Finish,
-            StringComparison.OrdinalIgnoreCase))
+        if(string.Equals(request.StatusId, InputStatus.Finish, StringComparison.OrdinalIgnoreCase))
         {
             input.InputDate = DateTimeOffset.UtcNow;
             input.ConfirmedBy = request.CurrentUserId;

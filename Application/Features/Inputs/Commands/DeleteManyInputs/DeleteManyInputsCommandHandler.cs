@@ -1,7 +1,7 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
-
+using Domain.Constants.Input;
 using MediatR;
 
 namespace Application.Features.Inputs.Commands.DeleteManyInputs;
@@ -29,7 +29,7 @@ public sealed class DeleteManyInputsCommandHandler(
 
         foreach(var output in inputsList)
         {
-            if(Domain.Constants.Input.InputStatus.IsCannotDelete(output.StatusId))
+            if(InputStatus.IsCannotDelete(output.StatusId))
             {
                 errors.Add(Error.BadRequest($"Phiếu nhập với Id {output.Id} đã bị xóa trước đó", "Ids"));
             }

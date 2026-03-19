@@ -1,10 +1,11 @@
 
 using Application.Common.Models;
+using Application.Interfaces.Repositories.LocalFile;
 using MediatR;
 
 namespace Application.Features.Files.Queries.ViewImage;
 
-public sealed class ViewImageQueryHandler(Interfaces.Repositories.LocalFile.IFileStorageService fileStorageService) : IRequestHandler<ViewImageQuery, Result<(Stream FileStream, string ContentType)?>>
+public sealed class ViewImageQueryHandler(IFileStorageService fileStorageService) : IRequestHandler<ViewImageQuery, Result<(Stream FileStream, string ContentType)?>>
 {
     public async Task<Result<(Stream FileStream, string ContentType)?>> Handle(
         ViewImageQuery request,

@@ -9,34 +9,17 @@ namespace Infrastructure.Repositories.Option;
 public class OptionReadRepository(ApplicationDBContext context) : IOptionReadRepository
 {
     public IQueryable<OptionEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
-    {
-        return context.GetQuery<OptionEntity>(mode);
-    }
+    { return context.GetQuery<OptionEntity>(mode); }
 
-    public async Task<OptionEntity?> GetByIdAsync(int id, CancellationToken cancellationToken)
-    {
-        return await context.Options
-            .FirstOrDefaultAsync(o => o.Id == id, cancellationToken)
-            .ConfigureAwait(false);
-    }
+    public Task<OptionEntity?> GetByIdAsync(int id, CancellationToken cancellationToken)
+    { return context.Options.FirstOrDefaultAsync(o => o.Id == id, cancellationToken); }
 
-    public async Task<List<OptionEntity>> GetByNamesAsync(
+    public Task<List<OptionEntity>> GetByNamesAsync(
         IEnumerable<string> names,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
-    {
-        return await GetQueryable(mode)
-            .Where(o => o.Name != null && names.Contains(o.Name))
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
-    }
+    { return GetQueryable(mode).Where(o => o.Name != null && names.Contains(o.Name)).ToListAsync(cancellationToken); }
 
-    public async Task<List<OptionEntity>> GetAllWithOptionsAsync(CancellationToken cancellationToken)
-    {
-        return await context.Options
-            .Include(o => o.OptionValues)
-            .AsNoTracking()
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
-    }
+    public Task<List<OptionEntity>> GetAllWithOptionsAsync(CancellationToken cancellationToken)
+    { return context.Options.Include(o => o.OptionValues).AsNoTracking().ToListAsync(cancellationToken); }
 }

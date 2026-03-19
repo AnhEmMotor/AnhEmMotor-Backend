@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
@@ -58,7 +59,7 @@ public static class AuthenticationExtensions
                         ValidAudience = configuration["Jwt:Audience"],
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
                         RoleClaimType = "role",
-                        NameClaimType = System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Name
+                        NameClaimType = JwtRegisteredClaimNames.Name
                     };
 
                     options.Events = new JwtBearerEvents

@@ -5,6 +5,7 @@ using Application.Features.ProductCategories.Commands.UpdateProductCategory;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductCategory;
 using Application.Interfaces.Services;
+using Domain.Constants;
 using FluentAssertions;
 using FluentValidation.TestHelper;
 using Moq;
@@ -40,7 +41,7 @@ public class ProductCategory
             _unitOfWorkMock.Object);
         var command = new CreateProductCategoryCommand { Name = "Điện thoại", Description = "Các sản phẩm điện thoại" };
 
-        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>()))
+        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>()))
             .Returns(new List<ProductCategoryEntity>().AsQueryable());
 
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -65,7 +66,7 @@ public class ProductCategory
             _unitOfWorkMock.Object);
         var command = new CreateProductCategoryCommand { Name = "Laptop", Description = null };
 
-        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>()))
+        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>()))
             .Returns(new List<ProductCategoryEntity>().AsQueryable());
 
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -85,7 +86,7 @@ public class ProductCategory
             _unitOfWorkMock.Object);
         var command = new CreateProductCategoryCommand { Name = "Tablet", Description = string.Empty };
 
-        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>()))
+        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>()))
             .Returns(new List<ProductCategoryEntity>().AsQueryable());
 
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -104,7 +105,7 @@ public class ProductCategory
             _unitOfWorkMock.Object);
         var command = new CreateProductCategoryCommand { Name = "  Phụ kiện  ", Description = "Test" };
 
-        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>()))
+        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>()))
             .Returns(new List<ProductCategoryEntity>().AsQueryable());
 
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -122,7 +123,7 @@ public class ProductCategory
             _unitOfWorkMock.Object);
         var command = new CreateProductCategoryCommand { Name = "Máy tính", Description = "  Mô tả test  " };
 
-        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>()))
+        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>()))
             .Returns(new List<ProductCategoryEntity>().AsQueryable());
 
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -140,7 +141,7 @@ public class ProductCategory
             _unitOfWorkMock.Object);
         var command = new CreateProductCategoryCommand { Name = "Đồ điện tử & Công nghệ <Tag>", Description = "Test" };
 
-        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>()))
+        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>()))
             .Returns(new List<ProductCategoryEntity>().AsQueryable());
 
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -184,7 +185,7 @@ public class ProductCategory
             x => x.ExistsByNameAsync(
                 It.Is<string>(s => s.Equals("gaming", StringComparison.OrdinalIgnoreCase)),
                 It.IsAny<CancellationToken>(),
-                Domain.Constants.DataFetchMode.All))
+                DataFetchMode.All))
             .ReturnsAsync(true);
 
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -204,7 +205,7 @@ public class ProductCategory
             x => x.ExistsByNameAsync(
                 It.Is<string>(s => s.Equals("gaming", StringComparison.OrdinalIgnoreCase)),
                 It.IsAny<CancellationToken>(),
-                Domain.Constants.DataFetchMode.All))
+                DataFetchMode.All))
             .ReturnsAsync(true);
 
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -220,8 +221,7 @@ public class ProductCategory
             _unitOfWorkMock.Object);
         var command = new CreateProductCategoryCommand { Name = "Đã xóa", Description = "Test" };
 
-        _readRepoMock.Setup(
-            x => x.ExistsByNameAsync("Đã xóa", It.IsAny<CancellationToken>(), Domain.Constants.DataFetchMode.All))
+        _readRepoMock.Setup(x => x.ExistsByNameAsync("Đã xóa", It.IsAny<CancellationToken>(), DataFetchMode.All))
             .ReturnsAsync(true);
 
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -237,7 +237,7 @@ public class ProductCategory
             _unitOfWorkMock.Object);
         var command = new CreateProductCategoryCommand { Name = "Valid", Description = "Valid" };
 
-        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>()))
+        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>()))
             .Returns(new List<ProductCategoryEntity>().AsQueryable());
 
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -261,11 +261,10 @@ public class ProductCategory
             Description = "Updated Description"
         };
 
-        _readRepoMock.Setup(
-            x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<Domain.Constants.DataFetchMode>()))
+        _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(
                 new ProductCategoryEntity { Id = 1, Name = "Original", Description = "Original Desc", DeletedAt = null });
-        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>()))
+        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>()))
             .Returns(new List<ProductCategoryEntity>().AsQueryable());
 
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -288,11 +287,10 @@ public class ProductCategory
             _unitOfWorkMock.Object);
         var command = new UpdateProductCategoryCommand { Id = 2, Name = "Only Name Updated", Description = null };
 
-        _readRepoMock.Setup(
-            x => x.GetByIdAsync(2, It.IsAny<CancellationToken>(), It.IsAny<Domain.Constants.DataFetchMode>()))
+        _readRepoMock.Setup(x => x.GetByIdAsync(2, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(
                 new ProductCategoryEntity { Id = 2, Name = "Original", Description = "Keep This", DeletedAt = null });
-        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>()))
+        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>()))
             .Returns(new List<ProductCategoryEntity>().AsQueryable());
 
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -312,11 +310,10 @@ public class ProductCategory
             _unitOfWorkMock.Object);
         var command = new UpdateProductCategoryCommand { Id = 3, Name = null, Description = "Only Description Updated" };
 
-        _readRepoMock.Setup(
-            x => x.GetByIdAsync(3, It.IsAny<CancellationToken>(), It.IsAny<Domain.Constants.DataFetchMode>()))
+        _readRepoMock.Setup(x => x.GetByIdAsync(3, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(
                 new ProductCategoryEntity { Id = 3, Name = "Keep This", Description = "Original", DeletedAt = null });
-        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<Domain.Constants.DataFetchMode>()))
+        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>()))
             .Returns(new List<ProductCategoryEntity>().AsQueryable());
 
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -347,16 +344,11 @@ public class ProductCategory
             _unitOfWorkMock.Object);
         var command = new UpdateProductCategoryCommand { Id = 5, Name = "Existing", Description = null };
 
-        _readRepoMock.Setup(
-            x => x.GetByIdAsync(5, It.IsAny<CancellationToken>(), It.IsAny<Domain.Constants.DataFetchMode>()))
+        _readRepoMock.Setup(x => x.GetByIdAsync(5, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(new ProductCategoryEntity { Id = 5, Name = "Original", DeletedAt = null });
 
         _readRepoMock.Setup(
-            x => x.ExistsByNameExceptIdAsync(
-                "Existing",
-                5,
-                It.IsAny<CancellationToken>(),
-                Domain.Constants.DataFetchMode.All))
+            x => x.ExistsByNameExceptIdAsync("Existing", 5, It.IsAny<CancellationToken>(), DataFetchMode.All))
             .ReturnsAsync(true);
 
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -373,8 +365,7 @@ public class ProductCategory
             _unitOfWorkMock.Object);
         var command = new UpdateProductCategoryCommand { Id = 999, Name = "Updated" };
 
-        _readRepoMock.Setup(
-            x => x.GetByIdAsync(999, It.IsAny<CancellationToken>(), It.IsAny<Domain.Constants.DataFetchMode>()))
+        _readRepoMock.Setup(x => x.GetByIdAsync(999, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync((ProductCategoryEntity?)null);
 
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -391,8 +382,7 @@ public class ProductCategory
             _unitOfWorkMock.Object);
         var command = new UpdateProductCategoryCommand { Id = 7, Name = "Updated" };
 
-        _readRepoMock.Setup(
-            x => x.GetByIdAsync(7, It.IsAny<CancellationToken>(), It.IsAny<Domain.Constants.DataFetchMode>()))
+        _readRepoMock.Setup(x => x.GetByIdAsync(7, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(new ProductCategoryEntity { Id = 7, Name = "Deleted", DeletedAt = DateTime.UtcNow });
 
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -410,8 +400,7 @@ public class ProductCategory
             _unitOfWorkMock.Object);
         var command = new DeleteProductCategoryCommand { Id = 8 };
 
-        _readRepoMock.Setup(
-            x => x.GetByIdAsync(8, It.IsAny<CancellationToken>(), It.IsAny<Domain.Constants.DataFetchMode>()))
+        _readRepoMock.Setup(x => x.GetByIdAsync(8, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(new ProductCategoryEntity { Id = 8, Name = "To Delete", DeletedAt = null });
         _protectedCategoryServiceMock.Setup(x => x.IsProtectedAsync(8, It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
@@ -433,8 +422,7 @@ public class ProductCategory
             _unitOfWorkMock.Object);
         var command = new DeleteProductCategoryCommand { Id = 999 };
 
-        _readRepoMock.Setup(
-            x => x.GetByIdAsync(999, It.IsAny<CancellationToken>(), It.IsAny<Domain.Constants.DataFetchMode>()))
+        _readRepoMock.Setup(x => x.GetByIdAsync(999, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync((ProductCategoryEntity?)null);
 
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -452,8 +440,7 @@ public class ProductCategory
             _unitOfWorkMock.Object);
         var command = new DeleteProductCategoryCommand { Id = 9 };
 
-        _readRepoMock.Setup(
-            x => x.GetByIdAsync(9, It.IsAny<CancellationToken>(), It.IsAny<Domain.Constants.DataFetchMode>()))
+        _readRepoMock.Setup(x => x.GetByIdAsync(9, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(new ProductCategoryEntity { Id = 9, Name = "Already Deleted", DeletedAt = DateTime.UtcNow });
 
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -470,8 +457,7 @@ public class ProductCategory
             _unitOfWorkMock.Object);
         var command = new RestoreProductCategoryCommand { Id = 10 };
 
-        _readRepoMock.Setup(
-            x => x.GetByIdAsync(10, It.IsAny<CancellationToken>(), Domain.Constants.DataFetchMode.DeletedOnly))
+        _readRepoMock.Setup(x => x.GetByIdAsync(10, It.IsAny<CancellationToken>(), DataFetchMode.DeletedOnly))
             .ReturnsAsync(new ProductCategoryEntity { Id = 10, Name = "To Restore", DeletedAt = DateTime.UtcNow });
 
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -491,8 +477,7 @@ public class ProductCategory
             _unitOfWorkMock.Object);
         var command = new RestoreProductCategoryCommand { Id = 11 };
 
-        _readRepoMock.Setup(
-            x => x.GetByIdAsync(11, It.IsAny<CancellationToken>(), Domain.Constants.DataFetchMode.DeletedOnly))
+        _readRepoMock.Setup(x => x.GetByIdAsync(11, It.IsAny<CancellationToken>(), DataFetchMode.DeletedOnly))
             .ReturnsAsync((ProductCategoryEntity?)null);
 
         var resultObj = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);

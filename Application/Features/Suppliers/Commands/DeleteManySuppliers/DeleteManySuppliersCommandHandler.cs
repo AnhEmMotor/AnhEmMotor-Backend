@@ -3,6 +3,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
 using Application.Interfaces.Repositories.Supplier;
 using Domain.Constants;
+using Domain.Constants.Input;
 using MediatR;
 
 
@@ -30,9 +31,7 @@ public sealed class DeleteManySuppliersCommandHandler(
             .ConfigureAwait(false);
 
         var suppliersWithWorkingInputsSet = relevantInputs
-            .Where(
-                x => string.Compare(x.StatusId, Domain.Constants.Input.InputStatus.Working) == 0 &&
-                    x.SupplierId.HasValue)
+            .Where(x => string.Compare(x.StatusId, InputStatus.Working) == 0 && x.SupplierId.HasValue)
             .Select(x => x.SupplierId!.Value)
             .ToHashSet();
 

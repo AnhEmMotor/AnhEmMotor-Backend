@@ -39,8 +39,6 @@ public sealed class GetProductsListForManagerQueryHandler(
             request.Sorts,
             cancellationToken)
             .ConfigureAwait(false);
-// Giải phóng biến rườm rà
-
         var allItems = entities
             .Select(e => ProductMappingConfig.MapProductToDetailForManagerResponseWithAlertLevel(e, alertLevel))
             .ToList();

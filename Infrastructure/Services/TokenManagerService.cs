@@ -1,5 +1,6 @@
 using Application.ApiContracts.Auth.Responses;
 using Application.Interfaces.Services;
+using Domain.Constants;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -54,8 +55,8 @@ public class TokenManagerService : ITokenManagerService
             new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
             new(JwtRegisteredClaimNames.Name, user.UserName ?? string.Empty),
-            new(Domain.Constants.ClaimJWTPayload.FullName, user.FullName ?? string.Empty),
-            new(Domain.Constants.ClaimJWTPayload.Status, user.Status ?? string.Empty),
+            new(ClaimJWTPayload.FullName, user.FullName ?? string.Empty),
+            new(ClaimJWTPayload.Status, user.Status ?? string.Empty),
             new("AspNet.Identity.SecurityStamp", user.SecurityStamp ?? string.Empty)
         };
 
@@ -63,7 +64,7 @@ public class TokenManagerService : ITokenManagerService
         {
             claims.Add(
                 new Claim(
-                    Domain.Constants.ClaimJWTPayload.Amr,
+                    ClaimJWTPayload.Amr,
                     JsonSerializer.Serialize(user.AuthMethods),
                     JsonClaimValueTypes.JsonArray));
         }
@@ -72,7 +73,7 @@ public class TokenManagerService : ITokenManagerService
         {
             foreach(var role in user.Roles)
             {
-                claims.Add(new Claim(Domain.Constants.ClaimJWTPayload.Role, role));
+                claims.Add(new Claim(ClaimJWTPayload.Role, role));
             }
         }
 

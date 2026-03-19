@@ -215,61 +215,87 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
                 .ToListAsync(cancellationToken)
                 .ConfigureAwait(false);
 
-            if (valueToOptionMapping.Count == 0)
+            if(valueToOptionMapping.Count == 0)
             {
-                // Nếu không tìm thấy mapping nào, biến thể không thể khớp
                 query = query.Where(p => false);
-            }
-            else
+            } else
             {
                 groupedByOption = valueToOptionMapping
                     .GroupBy(x => x.OptionId)
                     .Select(g => g.Select(x => x.Id).ToList())
                     .ToList();
 
-                if (groupedByOption.Count == 1)
+                if(groupedByOption.Count == 1)
                 {
                     var g1 = groupedByOption[0];
-                    query = query.Where(p => p.ProductVariants.Any(v => 
-                        v.DeletedAt == null && 
-                        v.VariantOptionValues.Any(vov => vov.OptionValueId != null && g1.Contains(vov.OptionValueId.Value))
-                    ));
-                }
-                else if (groupedByOption.Count == 2)
+                    query = query.Where(
+                        p => p.ProductVariants
+                            .Any(
+                                v => v.DeletedAt == null &&
+                                        v.VariantOptionValues
+                                            .Any(
+                                                vov => vov.OptionValueId != null && g1.Contains(vov.OptionValueId.Value))));
+                } else if(groupedByOption.Count == 2)
                 {
                     var g1 = groupedByOption[0];
                     var g2 = groupedByOption[1];
-                    query = query.Where(p => p.ProductVariants.Any(v => 
-                        v.DeletedAt == null && 
-                        v.VariantOptionValues.Any(vov => vov.OptionValueId != null && g1.Contains(vov.OptionValueId.Value)) &&
-                        v.VariantOptionValues.Any(vov => vov.OptionValueId != null && g2.Contains(vov.OptionValueId.Value))
-                    ));
-                }
-                else if (groupedByOption.Count >= 3)
+                    query = query.Where(
+                        p => p.ProductVariants
+                            .Any(
+                                v => v.DeletedAt == null &&
+                                        v.VariantOptionValues
+                                            .Any(
+                                                vov => vov.OptionValueId != null && g1.Contains(vov.OptionValueId.Value)) &&
+                                        v.VariantOptionValues
+                                            .Any(
+                                                vov => vov.OptionValueId != null && g2.Contains(vov.OptionValueId.Value))));
+                } else if(groupedByOption.Count >= 3)
                 {
                     var g1 = groupedByOption[0];
                     var g2 = groupedByOption[1];
                     var g3 = groupedByOption[2];
-                    
-                    if (groupedByOption.Count == 3)
+
+                    if(groupedByOption.Count == 3)
                     {
-                        query = query.Where(p => p.ProductVariants.Any(v => 
-                            v.DeletedAt == null && 
-                            v.VariantOptionValues.Any(vov => vov.OptionValueId != null && g1.Contains(vov.OptionValueId.Value)) &&
-                            v.VariantOptionValues.Any(vov => vov.OptionValueId != null && g2.Contains(vov.OptionValueId.Value)) &&
-                            v.VariantOptionValues.Any(vov => vov.OptionValueId != null && g3.Contains(vov.OptionValueId.Value))
-                        ));
-                    }
-                    else
+                        query = query.Where(
+                            p => p.ProductVariants
+                                .Any(
+                                    v => v.DeletedAt == null &&
+                                            v.VariantOptionValues
+                                                .Any(
+                                                    vov => vov.OptionValueId != null &&
+                                                                    g1.Contains(vov.OptionValueId.Value)) &&
+                                            v.VariantOptionValues
+                                                .Any(
+                                                    vov => vov.OptionValueId != null &&
+                                                                    g2.Contains(vov.OptionValueId.Value)) &&
+                                            v.VariantOptionValues
+                                                .Any(
+                                                    vov => vov.OptionValueId != null &&
+                                                                    g3.Contains(vov.OptionValueId.Value))));
+                    } else
                     {
                         var g4 = groupedByOption[3];
-                        query = query.Where(p => p.ProductVariants.Any(v => 
-                            v.DeletedAt == null && 
-                            v.VariantOptionValues.Any(vov => vov.OptionValueId != null && g1.Contains(vov.OptionValueId.Value)) &&
-                            v.VariantOptionValues.Any(vov => vov.OptionValueId != null && g2.Contains(vov.OptionValueId.Value)) &&
-                            v.VariantOptionValues.Any(vov => vov.OptionValueId != null && g3.Contains(vov.OptionValueId.Value)) &&
-                            v.VariantOptionValues.Any(vov => vov.OptionValueId != null && g4.Contains(vov.OptionValueId.Value))
-                        ));
+                        query = query.Where(
+                            p => p.ProductVariants
+                                .Any(
+                                    v => v.DeletedAt == null &&
+                                            v.VariantOptionValues
+                                                .Any(
+                                                    vov => vov.OptionValueId != null &&
+                                                                    g1.Contains(vov.OptionValueId.Value)) &&
+                                            v.VariantOptionValues
+                                                .Any(
+                                                    vov => vov.OptionValueId != null &&
+                                                                    g2.Contains(vov.OptionValueId.Value)) &&
+                                            v.VariantOptionValues
+                                                .Any(
+                                                    vov => vov.OptionValueId != null &&
+                                                                    g3.Contains(vov.OptionValueId.Value)) &&
+                                            v.VariantOptionValues
+                                                .Any(
+                                                    vov => vov.OptionValueId != null &&
+                                                                    g4.Contains(vov.OptionValueId.Value))));
                     }
                 }
             }
@@ -291,17 +317,17 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             .Include(p => p.ProductCategory)
             .Include(p => p.Brand)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
-                .ThenInclude(v => v.InputInfos.Where(ii => ii.DeletedAt == null && ii.InputReceipt!.DeletedAt == null))
-                .ThenInclude(ii => ii.InputReceipt)
+            .ThenInclude(v => v.InputInfos.Where(ii => ii.DeletedAt == null && ii.InputReceipt!.DeletedAt == null))
+            .ThenInclude(ii => ii.InputReceipt)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
-                .ThenInclude(v => v.OutputInfos.Where(oi => oi.DeletedAt == null && oi.OutputOrder!.DeletedAt == null))
-                .ThenInclude(oi => oi.OutputOrder)
+            .ThenInclude(v => v.OutputInfos.Where(oi => oi.DeletedAt == null && oi.OutputOrder!.DeletedAt == null))
+            .ThenInclude(oi => oi.OutputOrder)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
-                .ThenInclude(v => v.ProductCollectionPhotos)
+            .ThenInclude(v => v.ProductCollectionPhotos)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
-                .ThenInclude(v => v.VariantOptionValues)
-                .ThenInclude(vov => vov.OptionValue)
-                .ThenInclude(ov => ov!.Option);
+            .ThenInclude(v => v.VariantOptionValues)
+            .ThenInclude(vov => vov.OptionValue)
+            .ThenInclude(ov => ov!.Option);
 
         if(string.IsNullOrWhiteSpace(sorts))
         {
@@ -356,41 +382,39 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
         return (entities, totalCount);
     }
 
-    public async Task<Domain.Entities.ProductVariant?> GetByVariantSlugWithDetailsAsync(
+    public Task<Domain.Entities.ProductVariant?> GetByVariantSlugWithDetailsAsync(
         string slug,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         IQueryable<Domain.Entities.ProductVariant> query = context.ProductVariants.IgnoreQueryFilters();
 
-        if (mode == DataFetchMode.ActiveOnly)
+        if(mode == DataFetchMode.ActiveOnly)
         {
             query = query.Where(v => v.DeletedAt == null);
-        }
-        else if (mode == DataFetchMode.DeletedOnly)
+        } else if(mode == DataFetchMode.DeletedOnly)
         {
             query = query.Where(v => v.DeletedAt != null);
         }
 
-        return await query
+        return query
             .Include(v => v.Product)
-                .ThenInclude(p => p.ProductCategory)
+            .ThenInclude(p => p!.ProductCategory)
             .Include(v => v.Product)
-                .ThenInclude(p => p.Brand)
+            .ThenInclude(p => p!.Brand)
             .Include(v => v.Product)
-                .ThenInclude(p => p.ProductVariants.Where(pv => pv.DeletedAt == null))
-                    .ThenInclude(pv => pv.VariantOptionValues)
-                        .ThenInclude(vov => vov.OptionValue)
+            .ThenInclude(p => p!.ProductVariants.Where(pv => pv.DeletedAt == null))
+            .ThenInclude(pv => pv.VariantOptionValues)
+            .ThenInclude(vov => vov.OptionValue)
             .Include(v => v.VariantOptionValues)
-                .ThenInclude(vov => vov.OptionValue)
-                    .ThenInclude(ov => ov.Option)
+            .ThenInclude(vov => vov.OptionValue)
+            .ThenInclude(ov => ov!.Option)
             .Include(v => v.ProductCollectionPhotos)
             .Include(v => v.InputInfos.Where(ii => ii.DeletedAt == null))
-                .ThenInclude(ii => ii.InputReceipt)
+            .ThenInclude(ii => ii.InputReceipt)
             .Include(v => v.OutputInfos.Where(oi => oi.DeletedAt == null))
-                .ThenInclude(oi => oi.OutputOrder)
+            .ThenInclude(oi => oi.OutputOrder)
             .AsSplitQuery()
-            .FirstOrDefaultAsync(v => v.UrlSlug == slug, cancellationToken)
-            .ConfigureAwait(false);
+            .FirstOrDefaultAsync(v => string.Compare(v.UrlSlug, slug) == 0, cancellationToken);
     }
 }

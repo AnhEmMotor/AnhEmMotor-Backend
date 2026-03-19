@@ -11,11 +11,4 @@ namespace Application.ApiContracts.Option.Responses
         [JsonPropertyName("values")]
         public List<OptionValueResponse> OptionValues { get; set; } = [];
     }
-
-    public class OptionValueResponse
-    {
-        public int Id { get; set; }
-
-        public string? Name { get; set; }
-    }
 }

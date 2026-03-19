@@ -8,6 +8,7 @@ using Application.Interfaces.Repositories.Input;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.Supplier;
 using Domain.Constants;
+using Domain.Constants.Input;
 using Domain.Entities;
 using FluentAssertions;
 using FluentValidation.TestHelper;
@@ -97,7 +98,7 @@ public class InventoryReceipts
         var currentStatus = Domain.Constants.Input.InputStatus.Finish;
         var newStatus = Domain.Constants.Input.InputStatus.Working;
 
-        bool isAllowed = Domain.Constants.Input.InputStatusTransitions.IsTransitionAllowed(currentStatus, newStatus);
+        bool isAllowed = InputStatusTransitions.IsTransitionAllowed(currentStatus, newStatus);
 
         isAllowed.Should().BeFalse();
     }
@@ -208,7 +209,7 @@ public class InventoryReceipts
         var currentStatus = Domain.Constants.Input.InputStatus.Working;
         var newStatus = Domain.Constants.Input.InputStatus.Finish;
 
-        bool isAllowed = Domain.Constants.Input.InputStatusTransitions.IsTransitionAllowed(currentStatus, newStatus);
+        bool isAllowed = InputStatusTransitions.IsTransitionAllowed(currentStatus, newStatus);
 
         isAllowed.Should().BeTrue();
     }

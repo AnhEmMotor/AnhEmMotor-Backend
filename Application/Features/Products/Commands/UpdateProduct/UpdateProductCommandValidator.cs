@@ -1,3 +1,4 @@
+using Application.ApiContracts.Product.Requests;
 using FluentValidation;
 
 namespace Application.Features.Products.Commands.UpdateProduct;
@@ -46,7 +47,7 @@ public sealed class UpdateProductCommandValidator : AbstractValidator<UpdateProd
     }
 
     private void ValidateVariantOptions(
-        List<ApiContracts.Product.Requests.UpdateProductVariantRequest> variants,
+        List<UpdateProductVariantRequest> variants,
         ValidationContext<UpdateProductCommand> context)
     {
         if(variants == null || variants.Count <= 1)

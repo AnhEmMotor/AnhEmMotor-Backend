@@ -1,3 +1,4 @@
+using Domain.Entities;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 
@@ -38,7 +39,7 @@ public static class InputStatusSeeder
         if(statusesToDelete.Count != 0)
         {
             var statusKeys = statusesToDelete.Select(s => s.Key).ToList();
-            var hasReferences = await context.Set<Domain.Entities.Input>()
+            var hasReferences = await context.Set<Input>()
                 .AnyAsync(i => i.StatusId != null && statusKeys.Contains(i.StatusId), cancellationToken)
                 .ConfigureAwait(false);
 

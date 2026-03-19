@@ -1,3 +1,4 @@
+
 namespace IntegrationTests.SetupClass;
 
 [CollectionDefinition("Shared Integration Collection")]

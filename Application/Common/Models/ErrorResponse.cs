@@ -1,5 +1,5 @@
-﻿using System.Text.Json.Serialization;
-using FluentValidation.Results;
+﻿using FluentValidation.Results;
+using System.Text.Json.Serialization;
 
 namespace Application.Common.Models
 {

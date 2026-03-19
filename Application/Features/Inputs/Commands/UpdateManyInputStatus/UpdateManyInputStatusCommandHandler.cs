@@ -2,6 +2,7 @@ using Application.ApiContracts.Input.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
+using Domain.Constants.Input;
 using Mapster;
 using MediatR;
 
@@ -16,7 +17,7 @@ public sealed class UpdateManyInputStatusCommandHandler(
         UpdateManyInputStatusCommand request,
         CancellationToken cancellationToken)
     {
-        if(!Domain.Constants.Input.InputStatus.IsValid(request.StatusId))
+        if(!InputStatus.IsValid(request.StatusId))
         {
             return Error.BadRequest($"Trạng thái '{request.StatusId}' không hợp lệ.", "StatusId");
         }
@@ -38,7 +39,7 @@ public sealed class UpdateManyInputStatusCommandHandler(
 
         foreach(var input in inputsList)
         {
-            if(Domain.Constants.Input.InputStatus.IsCannotEdit(input.StatusId))
+            if(InputStatus.IsCannotEdit(input.StatusId))
             {
                 errors.Add(
                     Error.BadRequest(

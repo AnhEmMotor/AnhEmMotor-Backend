@@ -3,6 +3,7 @@ using Application.Common.Models;
 using Application.Features.Permissions.Commands.CreateRole;
 using Application.Features.Permissions.Commands.DeleteMultipleRoles;
 using Application.Features.Permissions.Commands.DeleteRole;
+using Application.Features.Permissions.Commands.UpdateRole;
 using Application.Features.Permissions.Queries.GetAllPermissions;
 using Application.Features.Permissions.Queries.GetAllRoles;
 using Application.Features.Permissions.Queries.GetMyPermissions;
@@ -17,6 +18,7 @@ using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
 using WebAPI.Controllers.Base;
@@ -110,11 +112,11 @@ public class PermissionController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(PermissionRoleUpdateResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> UpdateRoleAsync(
         Guid roleId,
-        [FromBody] Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommand model,
+        [FromBody] UpdateRoleCommand model,
         CancellationToken cancellationToken)
     {
         var result = await mediator.Send(
-            new Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommand()
+            new UpdateRoleCommand()
             {
                 RoleId = roleId,
                 RoleName = model.RoleName,
@@ -133,7 +135,7 @@ public class PermissionController(IMediator mediator) : ApiController
     [HasPermission(PermissionsList.Roles.View)]
     [ProducesResponseType(typeof(PagedResult<RoleSelectResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllRolesAsync(
-        [FromQuery] Sieve.Models.SieveModel sieveModel,
+        [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
     {
         var result = await mediator.Send(

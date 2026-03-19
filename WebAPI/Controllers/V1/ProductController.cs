@@ -14,13 +14,16 @@ using Application.Features.Products.Commands.UpdateProductPrice;
 using Application.Features.Products.Commands.UpdateProductStatus;
 using Application.Features.Products.Commands.UpdateVariantPrice;
 using Application.Features.Products.Queries.CheckSlugAvailability;
+using Application.Features.Products.Queries.GetActiveVariantLiteListForInput;
+using Application.Features.Products.Queries.GetActiveVariantLiteListForManager;
 using Application.Features.Products.Queries.GetActiveVariantLiteListForOutput;
 using Application.Features.Products.Queries.GetDeletedProductsList;
 using Application.Features.Products.Queries.GetProductAttributeLabels;
 using Application.Features.Products.Queries.GetProductById;
-using Application.Features.Products.Queries.GetProductStoreDetailBySlug;
 using Application.Features.Products.Queries.GetProductsList;
+using Application.Features.Products.Queries.GetProductsListForManager;
 using Application.Features.Products.Queries.GetProductsListForPriceManagement;
+using Application.Features.Products.Queries.GetProductStoreDetailBySlug;
 using Application.Features.Products.Queries.GetVariantLiteByProductId;
 using Asp.Versioning;
 using Domain.Constants;
@@ -69,7 +72,7 @@ public class ProductController(ISender sender) : ApiController
         [FromQuery] SieveModel request,
         CancellationToken cancellationToken)
     {
-        var query = Application.Features.Products.Queries.GetProductsListForManager.GetProductsListForManagerQuery
+        var query = GetProductsListForManagerQuery
             .FromRequest(request);
         var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
@@ -116,7 +119,7 @@ public class ProductController(ISender sender) : ApiController
         [FromQuery] SieveModel request,
         CancellationToken cancellationToken = default)
     {
-        var query = Application.Features.Products.Queries.GetActiveVariantLiteListForManager.GetActiveVariantLiteListForManagerQuery
+        var query = GetActiveVariantLiteListForManagerQuery
             .FromRequest(request);
         var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
@@ -133,7 +136,7 @@ public class ProductController(ISender sender) : ApiController
         [FromQuery] SieveModel request,
         CancellationToken cancellationToken = default)
     {
-        var query = Application.Features.Products.Queries.GetActiveVariantLiteListForInput.GetActiveVariantLiteListForInputQuery
+        var query = GetActiveVariantLiteListForInputQuery
             .FromRequest(request);
         var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
@@ -452,7 +455,8 @@ public class ProductController(ISender sender) : ApiController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetProductDetailBySlugAsync(string slug, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetProductStoreDetailBySlugQuery(slug), cancellationToken);
+        var result = await sender.Send(new GetProductStoreDetailBySlugQuery(slug), cancellationToken)
+            .ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -463,7 +467,7 @@ public class ProductController(ISender sender) : ApiController
     [ProducesResponseType(typeof(Dictionary<string, string>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAttributeLabelsAsync(CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetProductAttributeLabelsQuery(), cancellationToken);
+        var result = await sender.Send(new GetProductAttributeLabelsQuery(), cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 }

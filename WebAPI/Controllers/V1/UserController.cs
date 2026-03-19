@@ -1,6 +1,7 @@
 ﻿using Application.ApiContracts.User.Responses;
 using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Models;
+using Application.Features.Users.Commands.ChangePassword;
 using Application.Features.Users.Commands.DeleteCurrentUserAccount;
 using Application.Features.Users.Commands.RestoreUserAccount;
 using Application.Features.Users.Commands.UpdateCurrentUser;
@@ -8,6 +9,7 @@ using Application.Features.Users.Commands.UploadAvatar;
 using Application.Features.Users.Queries.GetCurrentUser;
 using Application.Interfaces.Services;
 using Asp.Versioning;
+using Domain.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -128,7 +130,7 @@ public class UserController(IMediator mediator, IUserStreamService userStreamSer
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> ChangePasswordCurrentUserAsync(
-        [FromBody] Application.Features.Users.Commands.ChangePassword.ChangePasswordCommand model,
+        [FromBody] ChangePasswordCommand model,
         CancellationToken cancellationToken)
     {
         var modelToSend = model with { UserId = User.FindFirstValue(ClaimTypes.NameIdentifier) };
@@ -198,9 +200,9 @@ public class UserController(IMediator mediator, IUserStreamService userStreamSer
     {
         var options = new[]
         {
-            new { key = nameof(Domain.Constants.GenderStatus.Male), label = "Nam" },
-            new { key = nameof(Domain.Constants.GenderStatus.Female), label = "Nữ" },
-            new { key = nameof(Domain.Constants.GenderStatus.Other), label = "Khác" }
+            new { key = nameof(GenderStatus.Male), label = "Nam" },
+            new { key = nameof(GenderStatus.Female), label = "Nữ" },
+            new { key = nameof(GenderStatus.Other), label = "Khác" }
         };
 
         return Ok(options);

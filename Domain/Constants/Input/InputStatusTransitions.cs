@@ -1,3 +1,4 @@
+
 namespace Domain.Constants.Input;
 
 public static class InputStatusTransitions

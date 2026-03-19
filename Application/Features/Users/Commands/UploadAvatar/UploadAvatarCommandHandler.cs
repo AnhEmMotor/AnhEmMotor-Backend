@@ -4,6 +4,7 @@ using Application.Interfaces.Repositories.LocalFile;
 using Application.Interfaces.Repositories.MediaFile;
 using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Services;
+using Domain.Constants;
 using Domain.Entities;
 using MediatR;
 
@@ -37,7 +38,7 @@ public class UploadAvatarCommandHandler(
             return Error.Forbidden("User account is deleted.");
         }
 
-        if(string.Compare(user.Status, Domain.Constants.UserStatus.Banned) == 0)
+        if(string.Compare(user.Status, UserStatus.Banned) == 0)
         {
             return Error.Forbidden("User account is banned.");
         }

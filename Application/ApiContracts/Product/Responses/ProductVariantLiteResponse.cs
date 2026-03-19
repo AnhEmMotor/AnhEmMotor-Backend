@@ -1,4 +1,5 @@
-﻿namespace Application.ApiContracts.Product.Responses;
+﻿
+namespace Application.ApiContracts.Product.Responses;
 
 public class ProductVariantLiteResponse
 {

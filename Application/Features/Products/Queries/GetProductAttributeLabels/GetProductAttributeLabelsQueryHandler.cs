@@ -6,8 +6,11 @@ namespace Application.Features.Products.Queries.GetProductAttributeLabels;
 
 public sealed class GetProductAttributeLabelsQueryHandler : IRequestHandler<GetProductAttributeLabelsQuery, Result<Dictionary<string, string>>>
 {
-    public Task<Result<Dictionary<string, string>>> Handle(GetProductAttributeLabelsQuery request, CancellationToken cancellationToken)
+    public Task<Result<Dictionary<string, string>>> Handle(
+        GetProductAttributeLabelsQuery request,
+        CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         return Task.FromResult(Result<Dictionary<string, string>>.Success(ProductAttributeLabels.Labels));
     }
 }

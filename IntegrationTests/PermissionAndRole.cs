@@ -1,5 +1,6 @@
 ﻿using Application.ApiContracts.Permission.Responses;
 using Application.Features.Permissions.Commands.CreateRole;
+using Application.Features.Permissions.Commands.UpdateRole;
 using Domain.Constants.Permission;
 using Domain.Entities;
 using Domain.Primitives;
@@ -443,7 +444,7 @@ public class PermissionAndRole : IAsyncLifetime
             [ PermissionsList.Brands.View, PermissionsList.Brands.Create ])
             .ConfigureAwait(true);
 
-        var request = new Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommand
+        var request = new UpdateRoleCommand
         {
             Permissions =
                 [ PermissionsList.Products.View, PermissionsList.Products.Create, PermissionsList.Products.Edit ]
@@ -497,10 +498,7 @@ public class PermissionAndRole : IAsyncLifetime
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
-        var request = new Application.Features.Permissions.Commands.UpdateRole.UpdateRoleCommand
-        {
-            Description = "Updated Description"
-        };
+        var request = new UpdateRoleCommand { Description = "Updated Description" };
 
         var response = await _client.PutAsJsonAsync($"/api/v1/Permission/roles/{roleId}", request).ConfigureAwait(true);
 

@@ -1,6 +1,4 @@
-using Application.Common.Models;
 using Domain.Constants;
-using Domain.Entities;
 using ProductEntity = Domain.Entities.Product;
 
 namespace Application.Interfaces.Repositories.Product;

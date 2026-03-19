@@ -1,5 +1,6 @@
 using Application.ApiContracts.File.Responses;
 using Application.Common.Models;
+using Application.Interfaces.Repositories.LocalFile;
 using Application.Interfaces.Repositories.MediaFile;
 
 using Mapster;
@@ -7,9 +8,7 @@ using MediatR;
 
 namespace Application.Features.Files.Queries.GetFileById;
 
-public sealed class GetFileByIdQueryHandler(
-    IMediaFileReadRepository repository,
-    Interfaces.Repositories.LocalFile.IFileStorageService fileStorageService) : IRequestHandler<GetFileByIdQuery, Result<MediaFileResponse?>>
+public sealed class GetFileByIdQueryHandler(IMediaFileReadRepository repository, IFileStorageService fileStorageService) : IRequestHandler<GetFileByIdQuery, Result<MediaFileResponse?>>
 {
     public async Task<Result<MediaFileResponse?>> Handle(GetFileByIdQuery request, CancellationToken cancellationToken)
     {

@@ -1,3 +1,4 @@
+
 namespace Application.ApiContracts.File.Responses;
 
 public class MediaFileResponse

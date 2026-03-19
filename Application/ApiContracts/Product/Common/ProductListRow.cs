@@ -1,4 +1,5 @@
-﻿namespace Application.ApiContracts.Product.Common
+﻿
+namespace Application.ApiContracts.Product.Common
 {
     public sealed class ProductListRow
     {

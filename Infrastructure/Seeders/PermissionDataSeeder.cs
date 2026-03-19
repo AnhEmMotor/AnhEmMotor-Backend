@@ -1,3 +1,4 @@
+using Domain.Constants.Permission;
 using Domain.Entities;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
@@ -9,7 +10,7 @@ public static class PermissionDataSeeder
 {
     public static async Task SeedPermissionsAsync(ApplicationDBContext context, CancellationToken cancellationToken)
     {
-        var allPermissions = typeof(Domain.Constants.Permission.PermissionsList)
+        var allPermissions = typeof(PermissionsList)
             .GetNestedTypes()
             .SelectMany(
                 type => type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy))

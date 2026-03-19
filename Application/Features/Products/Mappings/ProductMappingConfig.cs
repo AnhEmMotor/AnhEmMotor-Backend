@@ -1,6 +1,7 @@
 ﻿using Application.ApiContracts.Product.Common;
 using Application.ApiContracts.Product.Responses;
 using Domain.Constants;
+using Domain.Constants.Input;
 using Domain.Constants.Order;
 using Mapster;
 using ProductEntity = Domain.Entities.Product;
@@ -43,9 +44,7 @@ public class ProductMappingConfig : IRegister
             .Map(
                 dest => dest.Stock,
                 src => src.InputInfos
-                        .Where(
-                            ii => ii.InputReceipt != null &&
-                                        Domain.Constants.Input.InputStatus.IsFinished(ii.InputReceipt.StatusId))
+                        .Where(ii => ii.InputReceipt != null && InputStatus.IsFinished(ii.InputReceipt.StatusId))
                         .Sum(ii => ii.RemainingCount) ??
                     0)
 
@@ -247,9 +246,7 @@ public class ProductMappingConfig : IRegister
             : $"{productName} ({variantName})";
 
         var stock = variant.InputInfos
-                .Where(
-                    ii => ii.InputReceipt != null &&
-                            Domain.Constants.Input.InputStatus.IsFinished(ii.InputReceipt.StatusId))
+                .Where(ii => ii.InputReceipt != null && InputStatus.IsFinished(ii.InputReceipt.StatusId))
                 .Sum(ii => ii.RemainingCount) ??
             0;
         var photos = variant.ProductCollectionPhotos
@@ -360,8 +357,7 @@ public class ProductMappingConfig : IRegister
     {
         return product.ProductVariants
             .SelectMany(variant => variant.InputInfos)
-            .Where(
-                ii => ii.InputReceipt != null && Domain.Constants.Input.InputStatus.IsFinished(ii.InputReceipt.StatusId))
+            .Where(ii => ii.InputReceipt != null && InputStatus.IsFinished(ii.InputReceipt.StatusId))
             .Sum(info => info.RemainingCount ?? 0);
     }
 
@@ -380,9 +376,7 @@ public class ProductMappingConfig : IRegister
                 variant =>
                 {
                     var stock = variant.InputInfos
-                        .Where(
-                            ii => ii.InputReceipt != null &&
-                                    Domain.Constants.Input.InputStatus.IsFinished(ii.InputReceipt.StatusId))
+                        .Where(ii => ii.InputReceipt != null && InputStatus.IsFinished(ii.InputReceipt.StatusId))
                         .Sum(ii => ii.RemainingCount ?? 0);
                     var booked = variant.OutputInfos
                         .Where(oi => oi.OutputOrder != null && OrderStatus.IsBookingStatus(oi.OutputOrder.StatusId))

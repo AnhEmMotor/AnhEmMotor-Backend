@@ -1,4 +1,5 @@
-﻿using Application.Sieve;
+﻿using Application.Behaviors;
+using Application.Sieve;
 using FluentValidation;
 using Mapster;
 using MapsterMapper;
@@ -18,7 +19,7 @@ public static class DependencyInjection
             cfg =>
             {
                 cfg.RegisterServicesFromAssembly(assembly);
-                cfg.AddOpenBehavior(typeof(Behaviors.ValidationBehavior<,>));
+                cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
             });
 
         services.AddValidatorsFromAssembly(assembly);

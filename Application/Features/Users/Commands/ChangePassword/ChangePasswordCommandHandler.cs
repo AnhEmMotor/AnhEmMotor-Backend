@@ -1,6 +1,7 @@
 using Application.ApiContracts.User.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.User;
+using Domain.Constants;
 using MediatR;
 
 namespace Application.Features.Users.Commands.ChangePassword;
@@ -29,7 +30,7 @@ public class ChangePasswordCommandHandler(
             return Error.Forbidden("User account is deleted.");
         }
 
-        if(string.Compare(user.Status, Domain.Constants.UserStatus.Banned) == 0)
+        if(string.Compare(user.Status, UserStatus.Banned) == 0)
         {
             return Error.Forbidden("User account is banned.");
         }

@@ -60,6 +60,7 @@ public static class MigrationExtensions
                     roleManager,
                     userManager,
                     configuration,
+                    logger,
                     cancellationToken)
                     .ConfigureAwait(true);
             }

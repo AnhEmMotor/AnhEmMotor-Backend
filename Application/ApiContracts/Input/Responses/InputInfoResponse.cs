@@ -1,3 +1,4 @@
+
 namespace Application.ApiContracts.Input.Responses;
 
 public class InputInfoResponse

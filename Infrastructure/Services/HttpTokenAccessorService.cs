@@ -1,10 +1,11 @@
 ﻿using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using System;
 
 namespace Infrastructure.Services
 {
-    public class HttpTokenAccessorService(IHttpContextAccessor httpContextAccessor, Microsoft.Extensions.Configuration.IConfiguration configuration) : IHttpTokenAccessorService
+    public class HttpTokenAccessorService(IHttpContextAccessor httpContextAccessor, IConfiguration configuration) : IHttpTokenAccessorService
     {
         public string? GetRefreshTokenFromCookie()
         { return httpContextAccessor.HttpContext?.Request.Cookies["refreshToken"]; }
@@ -22,7 +23,7 @@ namespace Infrastructure.Services
                 Path = "/"
             };
 
-            if (!string.IsNullOrEmpty(cookieDomain))
+            if(!string.IsNullOrEmpty(cookieDomain))
             {
                 cookieOptions.Domain = cookieDomain;
             }
@@ -42,7 +43,7 @@ namespace Infrastructure.Services
                 Path = "/"
             };
 
-            if (!string.IsNullOrEmpty(cookieDomain))
+            if(!string.IsNullOrEmpty(cookieDomain))
             {
                 cookieOptions.Domain = cookieDomain;
             }

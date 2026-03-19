@@ -2,6 +2,7 @@ using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Services;
+using Domain.Constants;
 using MediatR;
 
 namespace Application.Features.Users.Commands.UpdateCurrentUser;
@@ -31,7 +32,7 @@ public class UpdateCurrentUserCommandHandler(
             return Error.Forbidden("User account is deleted.");
         }
 
-        if(string.Compare(user.Status, Domain.Constants.UserStatus.Banned) == 0)
+        if(string.Compare(user.Status, UserStatus.Banned) == 0)
         {
             return Error.Forbidden("User account is banned.");
         }
@@ -49,14 +50,13 @@ public class UpdateCurrentUserCommandHandler(
             user.Gender = request.Gender;
         }
 
-        if (request.PhoneNumber is not null)
+        if(request.PhoneNumber is not null)
         {
             var trimmedPhone = request.PhoneNumber.Trim();
-            if (string.IsNullOrEmpty(trimmedPhone))
+            if(string.IsNullOrEmpty(trimmedPhone))
             {
                 user.PhoneNumber = null;
-            }
-            else if (trimmedPhone != user.PhoneNumber)
+            } else if(string.Compare(trimmedPhone, user.PhoneNumber) != 0)
             {
                 user.PhoneNumber = trimmedPhone;
             }

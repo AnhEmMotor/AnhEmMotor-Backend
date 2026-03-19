@@ -1,5 +1,6 @@
 using Application.ApiContracts.Product.Requests;
 using Application.ApiContracts.Product.Responses;
+using Application.Common.Converters;
 using Application.Common.Models;
 using MediatR;
 using System.Text.Json.Serialization;
@@ -20,7 +21,7 @@ public sealed record UpdateProductCommand : IRequest<Result<ProductDetailForMana
 
     public string? Description { get; init; }
 
-    [JsonConverter(typeof(Common.Converters.NullableDecimalConverter))]
+    [JsonConverter(typeof(NullableDecimalConverter))]
     public decimal? Weight { get; init; }
 
     public string? Dimensions { get; init; }
@@ -28,15 +29,15 @@ public sealed record UpdateProductCommand : IRequest<Result<ProductDetailForMana
     public string? Wheelbase { get; init; }
 
     [JsonPropertyName("seat_height")]
-    [JsonConverter(typeof(Common.Converters.NullableDecimalConverter))]
+    [JsonConverter(typeof(NullableDecimalConverter))]
     public decimal? SeatHeight { get; init; }
 
     [JsonPropertyName("ground_clearance")]
-    [JsonConverter(typeof(Common.Converters.NullableDecimalConverter))]
+    [JsonConverter(typeof(NullableDecimalConverter))]
     public decimal? GroundClearance { get; init; }
 
     [JsonPropertyName("fuel_capacity")]
-    [JsonConverter(typeof(Common.Converters.NullableDecimalConverter))]
+    [JsonConverter(typeof(NullableDecimalConverter))]
     public decimal? FuelCapacity { get; init; }
 
     [JsonPropertyName("tire_size")]
@@ -55,7 +56,7 @@ public sealed record UpdateProductCommand : IRequest<Result<ProductDetailForMana
     public string? MaxPower { get; init; }
 
     [JsonPropertyName("oil_capacity")]
-    [JsonConverter(typeof(Common.Converters.NullableDecimalConverter))]
+    [JsonConverter(typeof(NullableDecimalConverter))]
     public decimal? OilCapacity { get; init; }
 
     [JsonPropertyName("fuel_consumption")]
@@ -70,7 +71,7 @@ public sealed record UpdateProductCommand : IRequest<Result<ProductDetailForMana
     [JsonPropertyName("max_torque")]
     public string? MaxTorque { get; init; }
 
-    [JsonConverter(typeof(Common.Converters.NullableDecimalConverter))]
+    [JsonConverter(typeof(NullableDecimalConverter))]
     public decimal? Displacement { get; init; }
 
     [JsonPropertyName("bore_stroke")]

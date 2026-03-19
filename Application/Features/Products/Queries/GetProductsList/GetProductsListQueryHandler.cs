@@ -2,7 +2,6 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories.Product;
 using Domain.Primitives;
-using Mapster;
 using MediatR;
 
 namespace Application.Features.Products.Queries.GetProductsList;
@@ -31,34 +30,49 @@ public sealed class GetProductsListQueryHandler(IProductReadRepository readRepos
             cancellationToken)
             .ConfigureAwait(false);
 
-        var items = entities.Select(e => new ProductListStoreResponse
-        {
-            Id = e.Id,
-            Name = e.Name,
-            Variants = e.ProductVariants
-                .Where(v => request.OptionValueIds.Count == 0 || (groupedOptionValueIds.Count > 0 && groupedOptionValueIds.All(groupIds => 
-                    v.VariantOptionValues.Any(vov => vov.OptionValueId != null && groupIds.Contains(vov.OptionValueId.Value)))))
-                .Select(v => {
-                    var photos = v.ProductCollectionPhotos
-                        .Where(p => !string.IsNullOrEmpty(p.ImageUrl))
-                        .Select(p => p.ImageUrl!)
-                        .ToList();
-                    var coverImage = string.IsNullOrWhiteSpace(v.CoverImageUrl)
-                        ? photos.FirstOrDefault()
-                        : v.CoverImageUrl;
+        var items = entities.Select(
+            e => new ProductListStoreResponse
+            {
+                Id = e.Id,
+                Name = e.Name,
+                Variants =
+                    [ .. e.ProductVariants
+                            .Where(
+                                v => request.OptionValueIds.Count == 0 ||
+                                            (groupedOptionValueIds?.Count > 0 &&
+                                                groupedOptionValueIds.All(
+                                                    groupIds => v.VariantOptionValues
+                                                        .Any(
+                                                            vov => vov.OptionValueId != null &&
+                                                                                        groupIds.Contains(
+                                                                                            vov.OptionValueId.Value)))))
+                            .Select(
+                                v =>
+                                {
+                                    var photos = v.ProductCollectionPhotos
+                                        .Where(p => !string.IsNullOrEmpty(p.ImageUrl))
+                                        .Select(p => p.ImageUrl!)
+                                        .ToList();
+                                    var coverImage = string.IsNullOrWhiteSpace(v.CoverImageUrl)
+                                        ? photos.FirstOrDefault()
+                                        : v.CoverImageUrl;
 
-                    return new ProductVariantListStoreResponse
-                    {
-                        Id = v.Id,
-                        UrlSlug = v.UrlSlug,
-                        Price = v.Price,
-                        CoverImageUrl = coverImage,
-                        OptionValuesText = string.Join(" - ", v.VariantOptionValues
-                            .Where(vov => vov.OptionValue != null)
-                            .Select(vov => vov.OptionValue!.Name))
-                    };
-                }).ToList()
-        }).ToList();
+                                    return new ProductVariantListStoreResponse
+                            {
+                                Id = v.Id,
+                                UrlSlug = v.UrlSlug,
+                                Price = v.Price,
+                                CoverImageUrl = coverImage,
+                                OptionValuesText =
+                                    string.Join(
+                                                    " - ",
+                                                    v.VariantOptionValues
+                                                        .Where(vov => vov.OptionValue != null)
+                                                        .Select(vov => vov.OptionValue!.Name))
+                            };
+                                }) ]
+            })
+            .ToList();
 
         return new PagedResult<ProductListStoreResponse>(items, totalCount, request.Page, request.PageSize);
     }

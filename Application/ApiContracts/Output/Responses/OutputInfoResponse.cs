@@ -1,3 +1,4 @@
+
 namespace Application.ApiContracts.Output.Responses;
 
 public class OutputInfoResponse

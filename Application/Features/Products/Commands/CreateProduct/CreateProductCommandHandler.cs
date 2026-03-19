@@ -128,7 +128,7 @@ public sealed class CreateProductCommandHandler(
                     DataFetchMode.All)
                     .ConfigureAwait(false);
 
-                if (existingOptions != null)
+                if(existingOptions != null)
                 {
                     foreach(var opt in existingOptions)
                     {

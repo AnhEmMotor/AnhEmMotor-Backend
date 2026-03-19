@@ -1,3 +1,4 @@
+
 namespace Application.Common.Models;
 
 public record Error(string Code, string Message, string? Field = null, string? Id = null)
