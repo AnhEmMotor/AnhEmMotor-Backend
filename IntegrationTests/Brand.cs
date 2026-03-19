@@ -19,8 +19,7 @@ namespace IntegrationTests;
 using System.Threading.Tasks;
 using Xunit;
 
-[Collection("Shared Integration Collection")]
-public class Brand : IAsyncLifetime
+public class Brand : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
 {
     private readonly IntegrationTestWebAppFactory _factory;
     private readonly HttpClient _client;

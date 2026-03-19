@@ -20,8 +20,7 @@ using System.Net.Http.Json;
 
 namespace IntegrationTests;
 
-[Collection("Shared Integration Collection")]
-public class User : IAsyncLifetime
+public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
 {
     private readonly IntegrationTestWebAppFactory _factory;
     private readonly HttpClient _client;

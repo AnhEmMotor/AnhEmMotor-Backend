@@ -26,8 +26,7 @@ using System.Threading.Tasks;
 using Xunit;
 using ProductStatusConstants = Domain.Constants.Product.ProductStatus;
 
-[Collection("Shared Integration Collection")]
-public class Product : IAsyncLifetime
+public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
 {
     private readonly IntegrationTestWebAppFactory _factory;
     private readonly HttpClient _client;

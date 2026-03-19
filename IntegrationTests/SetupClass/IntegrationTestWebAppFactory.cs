@@ -27,18 +27,13 @@ namespace IntegrationTests.SetupClass;
 
 public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
-    private readonly MySqlContainer _mySqlContainer;
+    private static readonly MySqlContainer _mySqlContainer = new MySqlBuilder("mysql:8.0")
+        .WithLogger(NullLogger.Instance)
+        .WithUsername("root")
+        .WithPassword("root")
+        .Build();
 
-    public IntegrationTestWebAppFactory()
-    {
-        _mySqlContainer = new MySqlBuilder("mysql:8.0")
-            .WithLogger(NullLogger.Instance)
-            .WithDatabase("AnhEmMotor_Test")
-            .WithUsername("root")
-            .WithPassword("root")
-            .Build();
-    }
-
+    private string _dbName = default!;
     private Respawner _respawner = default!;
     private DbConnection _connection = default!;
 
@@ -47,10 +42,22 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
 #pragma warning disable CRR0039
     public async ValueTask InitializeAsync()
     {
-        string connectionString;
-
         await _mySqlContainer.StartAsync().ConfigureAwait(false);
-        connectionString = _mySqlContainer.GetConnectionString();
+
+        _dbName = $"AnhEmMotor_Test_{Guid.NewGuid():N}";
+        var baseConnectionString = _mySqlContainer.GetConnectionString();
+        var builder = new MySqlConnectionStringBuilder(baseConnectionString) { Database = "" };
+
+        using(var masterConnection = new MySqlConnection(builder.ConnectionString))
+        {
+            await masterConnection.OpenAsync().ConfigureAwait(false);
+            using var command = masterConnection.CreateCommand();
+            command.CommandText = $"CREATE DATABASE `{_dbName}`;";
+            await command.ExecuteNonQueryAsync().ConfigureAwait(false);
+        }
+
+        builder.Database = _dbName;
+        var connectionString = builder.ConnectionString;
 
         _connection = new MySqlConnection(connectionString);
         await _connection.OpenAsync().ConfigureAwait(false);
@@ -66,7 +73,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
             new RespawnerOptions
             {
                 DbAdapter = DbAdapter.MySql,
-                SchemasToInclude = [ "AnhEmMotor_Test" ],
+                SchemasToInclude = [ _dbName ],
                 TablesToIgnore = [ "__EFMigrationsHistory" ]
             })
             .ConfigureAwait(false);
@@ -83,7 +90,16 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
     {
         await _connection.DisposeAsync().ConfigureAwait(false);
 
-        await _mySqlContainer.StopAsync(CancellationToken.None).ConfigureAwait(false);
+        var baseConnectionString = _mySqlContainer.GetConnectionString();
+        var builder = new MySqlConnectionStringBuilder(baseConnectionString) { Database = "" };
+
+        using(var masterConnection = new MySqlConnection(builder.ConnectionString))
+        {
+            await masterConnection.OpenAsync().ConfigureAwait(false);
+            using var command = masterConnection.CreateCommand();
+            command.CommandText = $"DROP DATABASE IF EXISTS `{_dbName}`;";
+            await command.ExecuteNonQueryAsync().ConfigureAwait(false);
+        }
     }
 
 #pragma warning restore CRR0039
@@ -97,7 +113,9 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
         builder.ConfigureAppConfiguration(
             (context, config) =>
             {
-                var connString = _mySqlContainer.GetConnectionString();
+                var connectionString = _mySqlContainer.GetConnectionString();
+                var connBuilder = new MySqlConnectionStringBuilder(connectionString) { Database = _dbName };
+                var connString = connBuilder.ConnectionString;
 
                 config.AddInMemoryCollection(
                     new Dictionary<string, string?>
