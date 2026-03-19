@@ -107,6 +107,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                             ["Jwt:Audience"] = "https://test.anhemmotor.com",
                             ["Jwt:AccessTokenExpiryInMinutes"] = "15",
                             ["Jwt:RefreshTokenExpiryInDays"] = "7",
+                            ["Cors:AllowedOrigins"] = "http://localhost:3000",
                             ["ConnectionStrings:StringConnection"] = connString,
                             ["ProtectedAuthorizationEntities:SuperRoles:0"] = "Administrator",
                             ["Logging:LogLevel:Default"] = "Warning",
