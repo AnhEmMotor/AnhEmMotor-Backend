@@ -40,14 +40,14 @@ public class UpdateCurrentUserCommandHandler(
         cancellationToken.ThrowIfCancellationRequested();
 
 
-        if(!string.IsNullOrWhiteSpace(request.FullName))
+        if(request.FullName is not null)
         {
             user.FullName = request.FullName.Trim();
         }
 
-        if(!string.IsNullOrWhiteSpace(request.Gender))
+        if(request.Gender is not null)
         {
-            user.Gender = request.Gender;
+            user.Gender = request.Gender.Trim();
         }
 
         if(request.PhoneNumber is not null)

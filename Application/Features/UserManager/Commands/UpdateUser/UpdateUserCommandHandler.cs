@@ -23,15 +23,15 @@ public class UpdateUserCommandHandler(
             return Error.NotFound("User not found.");
         }
 
-        if(!string.IsNullOrWhiteSpace(request.FullName))
+        if(request.FullName is not null)
         {
             user.FullName = request.FullName.Trim();
         }
 
-        if(!string.IsNullOrWhiteSpace(request.Gender))
+        if(request.Gender is not null)
         {
             var gender = request.Gender.Trim();
-            if(!GenderStatus.IsValid(gender))
+            if(!string.IsNullOrEmpty(gender) && !GenderStatus.IsValid(gender))
             {
                 return Error.Validation(
                     $"Invalid gender value. Allowed values: {string.Join(", ", GenderStatus.All)}",

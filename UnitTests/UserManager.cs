@@ -10,8 +10,8 @@ public class UserManager
 {
 #pragma warning disable IDE0079 
 #pragma warning disable CRR0035
-    [Fact(DisplayName = "UMGR_037 - Validate FullName không được rỗng")]
-    public void ValidateFullName_EmptyString_ValidationFails()
+    [Fact(DisplayName = "UMGR_037 - Validate FullName rỗng vẫn hợp lệ")]
+    public void ValidateFullName_EmptyString_ValidationPasses()
     {
         var userId = Guid.NewGuid();
         var command = new UpdateUserCommand() { UserId = userId, FullName = string.Empty };
@@ -19,8 +19,7 @@ public class UserManager
 
         var result = validator.Validate(command);
 
-        result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(e => e.PropertyName.Contains("FullName"));
+        result.IsValid.Should().BeTrue();
     }
 
     [Fact(DisplayName = "UMGR_038 - Validate FullName có độ dài tối đa hợp lệ")]
@@ -81,7 +80,7 @@ public class UserManager
         validator.TestValidate(invalidCommand2).ShouldHaveValidationErrorFor(x => x.PhoneNumber);
     }
 
-    [Fact(DisplayName = "UMGR_042 - Validate Gender chỉ chấp nhận các giá trị hợp lệ")]
+    [Fact(DisplayName = "UMGR_042 - Validate Gender chỉ chấp nhận các giá trị hợp lệ hoặc rỗng")]
     public void ValidateGender_VariousValues_ReturnsCorrectValidation()
     {
         UpdateUserCommandValidator.IsValidGender(GenderStatus.Male).Should().BeTrue();
@@ -92,7 +91,12 @@ public class UserManager
 
         UpdateUserCommandValidator.IsValidGender("InvalidGender").Should().BeFalse();
 
+        // Utility method still returns false for empty, but Validator will skip it
         UpdateUserCommandValidator.IsValidGender(string.Empty).Should().BeFalse();
+        
+        var validator = new UpdateUserCommandValidator();
+        var command = new UpdateUserCommand { Gender = string.Empty };
+        validator.TestValidate(command).ShouldNotHaveValidationErrorFor(x => x.Gender);
     }
 
     [Fact(DisplayName = "UMGR_043 - Validate Password strength requirements")]
