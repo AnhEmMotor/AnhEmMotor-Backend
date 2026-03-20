@@ -31,6 +31,8 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
         .WithLogger(NullLogger.Instance)
         .WithUsername("root")
         .WithPassword("root")
+        .WithReuse(true)
+        .WithCommand("--innodb_flush_log_at_trx_commit=2", "--sync_binlog=0", "--innodb_use_native_aio=0")
         .Build();
 
     private string _dbName = default!;
