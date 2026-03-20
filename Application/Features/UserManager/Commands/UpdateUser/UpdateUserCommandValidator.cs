@@ -9,11 +9,7 @@ public partial class UpdateUserCommandValidator : AbstractValidator<UpdateUserCo
 {
     public UpdateUserCommandValidator()
     {
-        RuleFor(x => x.FullName)
-            .NotEmpty()
-            .WithMessage("Full Name is required.")
-            .MaximumLength(255)
-            .WithMessage("Full Name must not exceed 255 characters.");
+        RuleFor(x => x.FullName).MaximumLength(255).WithMessage("Full Name must not exceed 255 characters.");
 
         RuleFor(x => x.PhoneNumber).MustBeValidPhoneNumber().When(x => !string.IsNullOrEmpty(x.PhoneNumber));
 

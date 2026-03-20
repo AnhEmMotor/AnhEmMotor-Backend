@@ -15,16 +15,14 @@ public sealed class UpdateCurrentUserCommandValidator : AbstractValidator<Update
             .WithMessage("Invalid User ID format.");
 
         RuleFor(x => x.Gender)
-            .NotEmpty()
-            .WithMessage("Gender is required.")
             .Must(GenderStatus.IsValid)
-            .WithMessage("Invalid gender. Please check again.");
+            .WithMessage("Invalid gender. Please check again.")
+            .When(x => !string.IsNullOrEmpty(x.Gender));
 
         RuleFor(x => x.FullName)
-            .NotEmpty()
-            .WithMessage("Full Name is required.")
-            .MaximumLength(100)
-            .WithMessage("Full Name cannot exceed 100 characters.");
+            .MaximumLength(255)
+            .WithMessage("Full Name must not exceed 255 characters.")
+            .When(x => !string.IsNullOrEmpty(x.FullName));
 
         RuleFor(x => x.PhoneNumber).MustBeValidPhoneNumber().When(x => !string.IsNullOrEmpty(x.PhoneNumber));
     }
