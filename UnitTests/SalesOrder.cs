@@ -761,21 +761,15 @@ public class SalesOrder
         var handler = new UpdateOutputCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
-            _deleteRepoMock.Object,
-            _variantRepoMock.Object,
             _unitOfWorkMock.Object);
 
-        var command = new UpdateOutputCommand
-        {
-            Id = 1,
-            CurrentUserId = userId,
-            OutputInfos = [ new() { ProductId = productId, Count = 3 } ]
-        };
+        var command = new UpdateOutputCommand { Id = 1, CurrentUserId = userId, CustomerName = "New Customer Name" };
 
         var existingOutput = new Output
         {
             Id = 1,
             StatusId = "pending",
+            BuyerId = userId,
             Buyer = new ApplicationUser { Id = userId },
             OutputInfos = []
         };
@@ -997,7 +991,7 @@ public class SalesOrder
 
         result.Should().NotBeNull();
         _paginatorMock.Verify(
-            x => x.ApplyAsync<Output, OutputItemResponse>(
+            x => x.ApplyAsync<Output, MyOrderResponse>(
                 It.IsAny<IQueryable<Output>>(),
                 It.IsAny<SieveModel>(),
                 It.IsAny<DataFetchMode?>(),
@@ -1267,11 +1261,9 @@ public class SalesOrder
         var handler = new UpdateOutputCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
-            _deleteRepoMock.Object,
-            _variantRepoMock.Object,
             _unitOfWorkMock.Object);
 
-        var command = new UpdateOutputCommand { Id = 1, OutputInfos = { new() { ProductId = 1, Count = 5 } } };
+        var command = new UpdateOutputCommand { Id = 1, CustomerName = "New Name" };
 
         var completedOutput = new Output { Id = 1, StatusId = "completed" };
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
@@ -1288,11 +1280,9 @@ public class SalesOrder
         var handler = new UpdateOutputCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
-            _deleteRepoMock.Object,
-            _variantRepoMock.Object,
             _unitOfWorkMock.Object);
 
-        var command = new UpdateOutputCommand { Id = 1, OutputInfos = { new() { ProductId = 1, Count = 5 } } };
+        var command = new UpdateOutputCommand { Id = 1, CustomerName = "New Name" };
 
         var deletedOutput = new Output { Id = 1, DeletedAt = DateTime.UtcNow };
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
@@ -1564,7 +1554,7 @@ public class SalesOrder
 
         result.Should().NotBeNull();
         _paginatorMock.Verify(
-            x => x.ApplyAsync<Output, OutputItemResponse>(
+            x => x.ApplyAsync<Output, MyOrderResponse>(
                 It.IsAny<IQueryable<Output>>(),
                 It.IsAny<SieveModel>(),
                 It.IsAny<DataFetchMode?>(),
@@ -1596,19 +1586,24 @@ public class SalesOrder
             Times.Once);
     }
 
-    [Fact(DisplayName = "SO_054 - UpdateOutput kiểm tra ProductId trong products")]
-    public async Task UpdateOutput_WithInvalidProductId_ShouldThrowException()
+    [Fact(DisplayName = "SO_054 - UpdateOutputForManager kiểm tra ProductId trong products")]
+    public async Task UpdateOutputForManager_WithInvalidProductId_ShouldThrowException()
     {
-        var handler = new UpdateOutputCommandHandler(
+        var handler = new UpdateOutputForManagerCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
             _deleteRepoMock.Object,
             _variantRepoMock.Object,
+            _userRepoMock.Object,
             _unitOfWorkMock.Object);
 
-        var command = new UpdateOutputCommand { Id = 1, OutputInfos = { new() { ProductId = 999, Count = 1 } } };
+        var command = new UpdateOutputForManagerCommand
+        {
+            Id = 1,
+            OutputInfos = [ new() { ProductId = 999, Count = 1 } ]
+        };
 
-        var existingOutput = new Output { Id = 1, StatusId = "pending" };
+        var existingOutput = new Output { Id = 1, StatusId = "pending", OutputInfos = [] };
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);
 
@@ -1728,16 +1723,13 @@ public class SalesOrder
         var handler = new UpdateOutputCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
-            _deleteRepoMock.Object,
-            _variantRepoMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new UpdateOutputCommand
         {
             Id = 1,
             CurrentUserId = currentUserId,
-            Notes = "Cập nhật: Giao vào sáng mai",
-            OutputInfos = [ new() { ProductId = productId, Count = 2 } ]
+            Notes = "Cập nhật: Giao vào sáng mai"
         };
 
         var existingOutput = new Output
@@ -1745,6 +1737,7 @@ public class SalesOrder
             Id = 1,
             StatusId = "pending",
             Notes = "Old notes",
+            BuyerId = currentUserId,
             Buyer = new ApplicationUser() { Id = currentUserId },
             OutputInfos = []
         };

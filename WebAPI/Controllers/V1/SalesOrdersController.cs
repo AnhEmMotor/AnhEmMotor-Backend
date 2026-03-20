@@ -1,5 +1,6 @@
 ﻿using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
+using Application.Features.Outputs.Commands.CancelOrderByBuyer;
 using Application.Features.Outputs.Commands.CreateOutput;
 using Application.Features.Outputs.Commands.CreateOutputByManager;
 using Application.Features.Outputs.Commands.DeleteManyOutputs;
@@ -10,7 +11,6 @@ using Application.Features.Outputs.Commands.UpdateManyOutputStatus;
 using Application.Features.Outputs.Commands.UpdateOutput;
 using Application.Features.Outputs.Commands.UpdateOutputForManager;
 using Application.Features.Outputs.Commands.UpdateOutputStatus;
-using Application.Features.Outputs.Commands.UpdateOutputInfoByUser;
 using Application.Features.Outputs.Queries.GetDeletedOutputsList;
 using Application.Features.Outputs.Queries.GetOutputById;
 using Application.Features.Outputs.Queries.GetOutputsByUserId;
@@ -279,36 +279,10 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> CancelMyOrderAsync(
-        int id,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> CancelMyOrderAsync(int id, CancellationToken cancellationToken)
     {
         var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var command = new Application.Features.Outputs.Commands.CancelOrderByBuyer.CancelOrderByBuyerCommand
-        {
-            Id = id,
-            CurrentUserId = Guid.TryParse(currentUserId, out var guid) ? guid : null
-        };
-        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
-    }
-
-    /// <summary>
-    /// Cập nhật thông tin nhận hàng và ghi chú (Dành cho người sở hữu đơn hàng).
-    /// </summary>
-    [HttpPatch("{id:int}/user-update")]
-    [Authorize]
-    [ProducesResponseType(typeof(OrderDetailResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> UpdateOutputInfoByUserAsync(
-        int id,
-        [FromBody] UpdateOutputInfoByUserCommand request,
-        CancellationToken cancellationToken)
-    {
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var command = request with
+        var command = new CancelOrderByBuyerCommand
         {
             Id = id,
             CurrentUserId = Guid.TryParse(currentUserId, out var guid) ? guid : null

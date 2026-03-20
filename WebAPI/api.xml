@@ -656,11 +656,6 @@
             Hủy đơn hàng (Dành cho người sở hữu đơn hàng).
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.UpdateOutputInfoByUserAsync(System.Int32,Application.Features.Outputs.Commands.UpdateOutputInfoByUser.UpdateOutputInfoByUserCommand,System.Threading.CancellationToken)">
-            <summary>
-            Cập nhật thông tin nhận hàng và ghi chú (Dành cho người sở hữu đơn hàng).
-            </summary>
-        </member>
         <member name="M:WebAPI.Controllers.V1.SalesOrdersController.UpdateOutputAsync(System.Int32,Application.Features.Outputs.Commands.UpdateOutputForManager.UpdateOutputForManagerCommand,System.Threading.CancellationToken)">
             <summary>
             Cập nhật đơn hàng (Cho phép sửa tất cả đơn hàng, nhưng chỉ cho phép cập nhật khi và chỉ khi có quyền chỉnh sửa

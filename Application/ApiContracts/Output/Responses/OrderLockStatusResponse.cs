@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 
 namespace Application.ApiContracts.Output.Responses;
 

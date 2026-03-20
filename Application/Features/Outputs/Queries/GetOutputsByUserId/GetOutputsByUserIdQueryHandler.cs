@@ -8,10 +8,7 @@ using OutputEntity = Domain.Entities.Output;
 
 namespace Application.Features.Outputs.Queries.GetOutputsByUserId;
 
-public class GetOutputsByUserIdQueryHandler(
-        IOutputReadRepository outputReadRepository,
-        ISievePaginator sievePaginator)
-    : IRequestHandler<GetOutputsByUserIdQuery, Result<PagedResult<MyOrderResponse>>>
+public class GetOutputsByUserIdQueryHandler(IOutputReadRepository outputReadRepository, ISievePaginator sievePaginator) : IRequestHandler<GetOutputsByUserIdQuery, Result<PagedResult<MyOrderResponse>>>
 {
     public async Task<Result<PagedResult<MyOrderResponse>>> Handle(
         GetOutputsByUserIdQuery request,

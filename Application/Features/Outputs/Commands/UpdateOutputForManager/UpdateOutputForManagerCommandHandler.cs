@@ -85,28 +85,30 @@ public sealed class UpdateOutputForManagerCommandHandler(
             }
         }
 
-        if (OrderLockStatus.LockedStatuses.Contains(output.StatusId ?? string.Empty))
+        if(OrderLockStatus.LockedStatuses.Contains(output.StatusId ?? string.Empty))
         {
-            if (request.OutputInfos.Count != output.OutputInfos.Count ||
+            if(request.OutputInfos.Count != output.OutputInfos.Count ||
                 request.OutputInfos.Any(ri => !output.OutputInfos.Any(oi => oi.Id == ri.Id)))
             {
-                 return Error.BadRequest("Đơn hàng đã bị khoá, không thể thay đổi danh sách sản phẩm.", "StatusId");
+                return Error.BadRequest("Đơn hàng đã bị khoá, không thể thay đổi danh sách sản phẩm.", "StatusId");
             }
         }
 
-        if (OrderLockStatus.DeliveryInfoLockedStatuses.Contains(output.StatusId ?? string.Empty))
+        if(OrderLockStatus.DeliveryInfoLockedStatuses.Contains(output.StatusId ?? string.Empty))
         {
-            if (request.CustomerName != output.CustomerName ||
-                request.CustomerPhone != output.CustomerPhone ||
-                request.CustomerAddress != output.CustomerAddress)
+            if(string.Compare(request.CustomerName, output.CustomerName) != 0 ||
+                string.Compare(request.CustomerPhone, output.CustomerPhone) != 0 ||
+                string.Compare(request.CustomerAddress, output.CustomerAddress) != 0)
             {
-                return Error.BadRequest("Trạng thái đơn hàng hiện tại không cho phép thay đổi thông tin giao hàng.", "StatusId");
+                return Error.BadRequest(
+                    "Trạng thái đơn hàng hiện tại không cho phép thay đổi thông tin giao hàng.",
+                    "StatusId");
             }
         }
 
-        if (OrderLockStatus.NotesLockedStatuses.Contains(output.StatusId ?? string.Empty))
+        if(OrderLockStatus.NotesLockedStatuses.Contains(output.StatusId ?? string.Empty))
         {
-            if (request.Notes != output.Notes)
+            if(string.Compare(request.Notes, output.Notes) != 0)
             {
                 return Error.BadRequest("Trạng thái đơn hàng hiện tại không cho phép thay đổi ghi chú.", "StatusId");
             }

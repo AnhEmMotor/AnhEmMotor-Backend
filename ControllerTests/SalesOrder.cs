@@ -79,8 +79,7 @@ public class SalesOrder
         var sieveModel = new SieveModel();
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputsByUserIdQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(
-                Result<PagedResult<MyOrderResponse>>.Success(new PagedResult<MyOrderResponse>([], 0, 1, 10)));
+            .ReturnsAsync(Result<PagedResult<MyOrderResponse>>.Success(new PagedResult<MyOrderResponse>([], 0, 1, 10)));
 
         var result = await _controller.GetPurchasesByIDAsync(sieveModel, buyerId, CancellationToken.None)
             .ConfigureAwait(true);
@@ -263,9 +262,11 @@ public class SalesOrder
 
         result.Should().NotBeNull();
         result!.StatusCode.Should().Be(200);
-        var value = result.Value as HashSet<string>;
+        var value = result.Value as OrderLockStatusResponse;
         value.Should().NotBeNull();
-        value.Should().Contain(OrderStatus.Completed);
+        value!.BuyerAndProducts.Should().Contain(OrderStatus.Completed);
+        value.DeliveryInfo.Should().Contain(OrderStatus.Completed);
+        value.Notes.Should().Contain(OrderStatus.Completed);
     }
 
     [Fact(DisplayName = "SO_093 - DeleteManyOutputs - Xa nhi?u don hng")]

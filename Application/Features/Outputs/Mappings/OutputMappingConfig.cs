@@ -49,9 +49,7 @@ public sealed class OutputMappingConfig : IRegister
         config.NewConfig<OutputInfo, OutputInfoResponse>()
             .Map(dest => dest.ProductId, src => src.ProductVarientId)
             .Map(dest => dest.ProductName, src => MapProductName(src))
-            .Map(
-                dest => dest.CoverImageUrl,
-                src => MapCoverImageUrl(src.ProductVariant));
+            .Map(dest => dest.CoverImageUrl, src => MapCoverImageUrl(src.ProductVariant));
 
         config.NewConfig<CreateOutputInfoRequest, OutputInfo>()
             .Map(dest => dest.ProductVarientId, src => src.ProductId)
@@ -105,8 +103,6 @@ public sealed class OutputMappingConfig : IRegister
         }
 
         return variant.ProductCollectionPhotos?
-            .OrderBy(p => p.Id)
-            .Select(p => p.ImageUrl)
-            .FirstOrDefault();
+            .OrderBy(p => p.Id).Select(p => p.ImageUrl).FirstOrDefault();
     }
 }
