@@ -38,6 +38,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
     private string _dbName = default!;
     private Respawner _respawner = default!;
     private DbConnection _connection = default!;
+    private string _fullConnectionString = default!;
 
 #pragma warning disable IDE0079 
 #pragma warning disable CRR0035
@@ -46,29 +47,35 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
     {
         await _mySqlContainer.StartAsync().ConfigureAwait(false);
 
-        _dbName = $"AnhEmMotor_Test_{Guid.NewGuid():N}";
-        var baseConnectionString = _mySqlContainer.GetConnectionString();
-        var builder = new MySqlConnectionStringBuilder(baseConnectionString) { Database = string.Empty };
+        _dbName = $"Test_{Guid.NewGuid():N}";
+        var baseConn = _mySqlContainer.GetConnectionString();
+        var builder = new MySqlConnectionStringBuilder(baseConn) 
+        { 
+            Database = string.Empty,
+            AllowPublicKeyRetrieval = true 
+        };
 
-        using(var masterConnection = new MySqlConnection(builder.ConnectionString))
+        using(var masterConn = new MySqlConnection(builder.ConnectionString))
         {
-            await masterConnection.OpenAsync().ConfigureAwait(false);
-            using var command = masterConnection.CreateCommand();
-            command.CommandText = $"CREATE DATABASE `{_dbName}`;";
-            await command.ExecuteNonQueryAsync().ConfigureAwait(false);
+            await masterConn.OpenAsync().ConfigureAwait(false);
+            using var cmd = masterConn.CreateCommand();
+            cmd.CommandText = $"CREATE DATABASE `{_dbName}`;";
+            await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
         }
 
         builder.Database = _dbName;
-        var connectionString = builder.ConnectionString;
+        _fullConnectionString = builder.ConnectionString;
 
-        _connection = new MySqlConnection(connectionString);
+        _connection = new MySqlConnection(_fullConnectionString);
         await _connection.OpenAsync().ConfigureAwait(false);
 
-        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDBContext>();
-        optionsBuilder.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 0)));
+        var serverVersion = ServerVersion.AutoDetect(_fullConnectionString);
+        var options = new DbContextOptionsBuilder<ApplicationDBContext>()
+            .UseMySql(_fullConnectionString, serverVersion)
+            .Options;
 
-        using var tempDbContext = new ApplicationDBContext(optionsBuilder.Options);
-        await tempDbContext.Database.EnsureCreatedAsync().ConfigureAwait(false);
+        using var context = new ApplicationDBContext(options);
+        await context.Database.EnsureCreatedAsync().ConfigureAwait(false);
 
         _respawner = await Respawner.CreateAsync(
             _connection,
@@ -81,27 +88,15 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
             .ConfigureAwait(false);
     }
 
-
     public async Task ResetDatabaseAsync(CancellationToken cancellationToken = default)
     {
-        cancellationToken.ThrowIfCancellationRequested();
+        if (cancellationToken.IsCancellationRequested) return;
         await _respawner.ResetAsync(_connection).ConfigureAwait(false);
     }
 
-    public new async Task DisposeAsync()
-    {
-        await _connection.DisposeAsync().ConfigureAwait(false);
-
-        var baseConnectionString = _mySqlContainer.GetConnectionString();
-        var builder = new MySqlConnectionStringBuilder(baseConnectionString) { Database = string.Empty };
-
-        using(var masterConnection = new MySqlConnection(builder.ConnectionString))
-        {
-            await masterConnection.OpenAsync().ConfigureAwait(false);
-            using var command = masterConnection.CreateCommand();
-            command.CommandText = $"DROP DATABASE IF EXISTS `{_dbName}`;";
-            await command.ExecuteNonQueryAsync().ConfigureAwait(false);
-        }
+    public new async Task DisposeAsync() 
+    { 
+        if (_connection != null) await _connection.DisposeAsync().ConfigureAwait(false); 
     }
 
 #pragma warning restore CRR0039
@@ -112,14 +107,9 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
     {
         builder.UseEnvironment("Test");
 
-        builder.ConfigureAppConfiguration(
-            (context, config) =>
-            {
-                var connectionString = _mySqlContainer.GetConnectionString();
-                var connBuilder = new MySqlConnectionStringBuilder(connectionString) { Database = _dbName };
-                var connString = connBuilder.ConnectionString;
-
-                config.AddInMemoryCollection(
+        builder.ConfigureAppConfiguration((context, config) =>
+        {
+            config.AddInMemoryCollection(
                     new Dictionary<string, string?>
                         {
                             ["Jwt:Key"] = "ThisIsMySuperSecretAndLongEnoughKeyForJWTGenerationHehehe!@$#@#",
@@ -128,7 +118,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                             ["Jwt:AccessTokenExpiryInMinutes"] = "15",
                             ["Jwt:RefreshTokenExpiryInDays"] = "7",
                             ["Cors:AllowedOrigins"] = "http://localhost:3000",
-                            ["ConnectionStrings:StringConnection"] = connString,
+                            ["ConnectionStrings:StringConnection"] = _fullConnectionString,
                             ["ProtectedAuthorizationEntities:SuperRoles:0"] = "Administrator",
                             ["Logging:LogLevel:Default"] = "Warning",
                             ["Logging:LogLevel:Microsoft.EntityFrameworkCore.Database.Command"] = "None",
@@ -136,9 +126,8 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                             ["Logging:LogLevel:Microsoft.AspNetCore"] = "Warning",
                             ["Logging:LogLevel:LuckyPennySoftware.MediatR.License"] = "None"
                         });
-
-                config.AddEnvironmentVariables();
-            });
+            config.AddEnvironmentVariables();
+        });
 
         builder.ConfigureServices(
             services =>

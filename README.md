@@ -32,6 +32,20 @@ See the [LICENSE](LICENSE) file for details.
 > - 💥 **The application will CRASH when running!**
 >
 > ➡️ For details, see [Section 3. Create and Manage Database Migrations](#3-create-and-manage-database-migrations)
+>
+> **🚨 IMPORTANT REGARDING DEPLOYMENT:**
+>
+> **When deploying to a host, remember to configure `COOKIE_DOMAIN` in GitHub Secrets. If left blank when using a domain name, the session will not persist when the page reloads!**
+>
+> Additionally, to run project tests quickly in Windows operation, you should also add this project folder to the exclusion list in Windows Defender (If you feel it's dangerous, you can omit this.). Follow these steps to exclude a specific folder from Windows Defender scans:
+>
+> 1.  **Open Windows Security**: Press the `Windows` key, type **Windows Security**, and press **Enter**.
+> 2.  **Navigate to Protection**: Click on **Virus & threat protection** in the left menu.
+> 3.  **Manage Settings**: Under the **Virus & threat protection settings** section, click **Manage settings**.
+> 4.  **Exclusions**: Scroll down to the bottom and click **Add or remove exclusions**.
+> 5.  **Add Folder**: Click the **+ Add an exclusion** button and select **Folder** from the dropdown menu.
+> 6.  **Select Path**: Browse to the folder you want to exclude (folder contain project), select it, and click **Select Folder**.
+> 7.  **Confirm**: If a User Account Control (UAC) prompt appears, click **Yes**.
 
 ## Table of Contents
 
@@ -600,6 +614,16 @@ Xem tệp [LICENSE](LICENSE) để biết chi tiết.
 >
 > **🚨 QUAN TRỌNG VỀ DEPLOY:**
 > **Khi deploy lên host, hãy nhớ cấu hình `COOKIE_DOMAIN` trong GitHub Secrets. Nếu để trống khi sử dụng tên miền, session sẽ không thể duy trì khi reload trang!**
+>
+> Ngoài ra, để dự án Test chạy nhanh hơn trên máy Windows, hãy làm theo các bước sau để thêm folder dự án này vào danh sách không quét của Windows Defender (nếu bạn lo ngại về mã độc, bạn có thể không làm):
+>
+> 1.  **Mở Windows Security**: Nhấn phím `Windows`, gõ **Windows Security** và nhấn **Enter**.
+> 2.  **Đi đến mục Bảo vệ**: Nhấn vào **Virus & threat protection** ở danh mục bên trái.
+> 3.  **Quản lý cài đặt**: Tại phần **Virus & threat protection settings**, nhấn vào dòng **Manage settings**.
+> 4.  **Loại trừ (Exclusions)**: Cuộn xuống dưới cùng và nhấn vào **Add or remove exclusions**.
+> 5.  **Thêm thư mục**: Nhấn nút **+ Add an exclusion** và chọn **Folder** từ trình đơn thả xuống.
+> 6.  **Chọn đường dẫn**: Tìm đến thư mục chứa dự án này, chọn nó và nhấn **Select Folder**.
+> 7.  **Xác nhận**: Nếu có bảng thông báo User Account Control (UAC) hiện lên, hãy chọn **Yes**.
 
 ## Mục lục
 
