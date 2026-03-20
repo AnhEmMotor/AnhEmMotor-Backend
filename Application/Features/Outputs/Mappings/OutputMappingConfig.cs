@@ -26,18 +26,32 @@ public sealed class OutputMappingConfig : IRegister
 
         config.NewConfig<Output, OutputItemResponse>()
             .Map(dest => dest.BuyerName, src => src.Buyer != null ? src.Buyer.FullName : null)
+            .Map(dest => dest.BuyerEmail, src => src.Buyer != null ? src.Buyer.Email : null)
             .Map(dest => dest.CreatedAt, src => src.CreatedAt)
             .Map(dest => dest.StatusId, src => src.StatusId)
             .Map(
                 dest => dest.Total,
                 src => src.OutputInfos != null ? src.OutputInfos.Sum(oi => (oi.Count ?? 0) * (oi.Price ?? 0)) : 0);
 
+        config.NewConfig<Output, MyOrderResponse>()
+            .Map(dest => dest.CreatedAt, src => src.CreatedAt)
+            .Map(dest => dest.OutputInfos, src => src.OutputInfos)
+            .Map(
+                dest => dest.Total,
+                src => src.OutputInfos != null ? src.OutputInfos.Sum(oi => (oi.Count ?? 0) * (oi.Price ?? 0)) : 0);
+
+        config.NewConfig<OutputInfo, MyOrderItemResponse>()
+            .Map(dest => dest.ProductName, src => MapProductName(src))
+            .Map(dest => dest.Count, src => src.Count)
+            .Map(dest => dest.Price, src => src.Price)
+            .Map(dest => dest.CoverImageUrl, src => MapCoverImageUrl(src.ProductVariant));
+
         config.NewConfig<OutputInfo, OutputInfoResponse>()
             .Map(dest => dest.ProductId, src => src.ProductVarientId)
             .Map(dest => dest.ProductName, src => MapProductName(src))
             .Map(
                 dest => dest.CoverImageUrl,
-                src => src.ProductVariant != null ? src.ProductVariant.CoverImageUrl : null);
+                src => MapCoverImageUrl(src.ProductVariant));
 
         config.NewConfig<CreateOutputInfoRequest, OutputInfo>()
             .Map(dest => dest.ProductVarientId, src => src.ProductId)
@@ -76,5 +90,23 @@ public sealed class OutputMappingConfig : IRegister
         }
 
         return $"{productName} ({string.Join(" - ", optionValues)})";
+    }
+
+    private static string? MapCoverImageUrl(ProductVariant? variant)
+    {
+        if(variant == null)
+        {
+            return null;
+        }
+
+        if(!string.IsNullOrEmpty(variant.CoverImageUrl))
+        {
+            return variant.CoverImageUrl;
+        }
+
+        return variant.ProductCollectionPhotos?
+            .OrderBy(p => p.Id)
+            .Select(p => p.ImageUrl)
+            .FirstOrDefault();
     }
 }

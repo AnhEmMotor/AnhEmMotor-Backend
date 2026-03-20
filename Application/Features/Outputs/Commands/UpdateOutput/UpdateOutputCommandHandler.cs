@@ -3,6 +3,7 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.ProductVariant;
+using Domain.Constants.Order;
 
 using Domain.Constants;
 using Domain.Entities;
@@ -80,6 +81,29 @@ public sealed class UpdateOutputCommandHandler(
                         $"Sản phẩm '{variant.Product?.Name ?? variant.Id.ToString()}' không còn được bán.",
                         "Products");
                 }
+            }
+        }
+
+        if (OrderLockStatus.LockedStatuses.Contains(output.StatusId ?? string.Empty))
+        {
+            return Error.BadRequest("Đơn hàng đã bị khoá, không thể thay đổi sản phẩm.", "StatusId");
+        }
+
+        if (OrderLockStatus.DeliveryInfoLockedStatuses.Contains(output.StatusId ?? string.Empty))
+        {
+            if (request.CustomerName != output.CustomerName ||
+                request.CustomerPhone != output.CustomerPhone ||
+                request.CustomerAddress != output.CustomerAddress)
+            {
+                return Error.BadRequest("Trạng thái đơn hàng hiện tại không cho phép thay đổi thông tin giao hàng.", "StatusId");
+            }
+        }
+
+        if (OrderLockStatus.NotesLockedStatuses.Contains(output.StatusId ?? string.Empty))
+        {
+            if (request.Notes != output.Notes)
+            {
+                return Error.BadRequest("Trạng thái đơn hàng hiện tại không cho phép thay đổi ghi chú.", "StatusId");
             }
         }
 

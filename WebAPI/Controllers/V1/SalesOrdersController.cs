@@ -10,6 +10,7 @@ using Application.Features.Outputs.Commands.UpdateManyOutputStatus;
 using Application.Features.Outputs.Commands.UpdateOutput;
 using Application.Features.Outputs.Commands.UpdateOutputForManager;
 using Application.Features.Outputs.Commands.UpdateOutputStatus;
+using Application.Features.Outputs.Commands.UpdateOutputInfoByUser;
 using Application.Features.Outputs.Queries.GetDeletedOutputsList;
 using Application.Features.Outputs.Queries.GetOutputById;
 using Application.Features.Outputs.Queries.GetOutputsByUserId;
@@ -45,7 +46,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     /// Lấy danh sách đơn hàng của khách hàng hiện tại (dựa trên JWT token).
     /// </summary>
     [HttpGet("my-purchases")]
-    [ProducesResponseType(typeof(PagedResult<OutputItemResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedResult<MyOrderResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetMyPurchasesAsync(
         [FromQuery] SieveModel sieveModel,
@@ -76,7 +77,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     /// </summary>
     [HttpGet("get-purchases/{id:Guid}")]
     [HasPermission(Outputs.View)]
-    [ProducesResponseType(typeof(PagedResult<OutputItemResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedResult<MyOrderResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetPurchasesByIDAsync(
         [FromQuery] SieveModel sieveModel,
@@ -135,7 +136,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     /// Lấy bản đồ tên hiển thị nội bộ của trạng thái đơn hàng (Tiếng Việt).
     /// </summary>
     [HttpGet("status-map")]
-    [RequiresAnyPermissions(Outputs.View, Outputs.Create, Outputs.Edit)]
+    [Authorize]
     [ProducesResponseType(typeof(IEnumerable<object>), StatusCodes.Status200OK)]
     public IActionResult GetStatusMap()
     {
@@ -156,12 +157,35 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     }
 
     /// <summary>
-    /// Lấy danh sách các trạng thái đơn hàng bị khóa không cho phép sửa thông tin chi tiết.
+    /// Lấy danh sách trạng thái đơn hàng bị khóa không cho phép sửa thông tin chi tiết.
     /// </summary>
     [HttpGet("locked-statuses")]
-    [HasPermission(Outputs.View)]
-    [ProducesResponseType(typeof(HashSet<string>), StatusCodes.Status200OK)]
-    public IActionResult GetLockedStatuses() { return Ok(OrderLockStatus.LockedStatuses); }
+    [Authorize]
+    [ProducesResponseType(typeof(OrderLockStatusResponse), StatusCodes.Status200OK)]
+    public IActionResult GetLockedStatuses()
+    {
+        return Ok(
+            new OrderLockStatusResponse
+            {
+                BuyerAndProducts = OrderLockStatus.LockedStatuses,
+                DeliveryInfo = OrderLockStatus.DeliveryInfoLockedStatuses,
+                Notes = OrderLockStatus.NotesLockedStatuses
+            });
+    }
+
+    /// <summary>
+    /// Lấy danh sách các mã trạng thái có thể hủy đơn hàng trực tiếp.
+    /// </summary>
+    [HttpGet("cancellable-statuses")]
+    [Authorize]
+    [ProducesResponseType(typeof(IEnumerable<string>), StatusCodes.Status200OK)]
+    public IActionResult GetCancellableStatuses()
+    {
+        var result = OrderStatusTransitions.GetAllowedTransitionsMap()
+            .Where(t => t.Value.Contains(OrderStatus.Cancelled))
+            .Select(t => t.Key);
+        return Ok(result);
+    }
 
     /// <summary>
     /// Lấy thông tin chi tiết của đơn hàng.
@@ -238,6 +262,53 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     {
         var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var command = request.Adapt<UpdateOutputCommand>() with
+        {
+            Id = id,
+            CurrentUserId = Guid.TryParse(currentUserId, out var guid) ? guid : null
+        };
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Hủy đơn hàng (Dành cho người sở hữu đơn hàng).
+    /// </summary>
+    [HttpPatch("{id:int}/cancel-my-order")]
+    [Authorize]
+    [ProducesResponseType(typeof(OrderDetailResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> CancelMyOrderAsync(
+        int id,
+        CancellationToken cancellationToken)
+    {
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var command = new Application.Features.Outputs.Commands.CancelOrderByBuyer.CancelOrderByBuyerCommand
+        {
+            Id = id,
+            CurrentUserId = Guid.TryParse(currentUserId, out var guid) ? guid : null
+        };
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Cập nhật thông tin nhận hàng và ghi chú (Dành cho người sở hữu đơn hàng).
+    /// </summary>
+    [HttpPatch("{id:int}/user-update")]
+    [Authorize]
+    [ProducesResponseType(typeof(OrderDetailResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UpdateOutputInfoByUserAsync(
+        int id,
+        [FromBody] UpdateOutputInfoByUserCommand request,
+        CancellationToken cancellationToken)
+    {
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var command = request with
         {
             Id = id,
             CurrentUserId = Guid.TryParse(currentUserId, out var guid) ? guid : null
