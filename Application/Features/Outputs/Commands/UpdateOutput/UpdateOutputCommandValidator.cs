@@ -7,27 +7,14 @@ public sealed class UpdateOutputCommandValidator : AbstractValidator<UpdateOutpu
 {
     public UpdateOutputCommandValidator()
     {
-        RuleFor(x => x.CurrentUserId).NotEmpty().WithMessage("CurrentUserId không được để trống.");
+        RuleFor(x => x.CustomerName).NotEmpty().WithMessage("Tên người nhận không được để trống.");
 
-        RuleFor(x => x.CustomerName).NotEmpty().WithMessage("Tên khách hàng không được để trống.");
-
-        RuleFor(x => x.CustomerAddress).NotEmpty().WithMessage("Địa chỉ khách hàng không được để trống.");
+        RuleFor(x => x.CustomerAddress).NotEmpty().WithMessage("Địa chỉ giao hàng không được để trống.");
 
         RuleFor(x => x.CustomerPhone)
             .NotEmpty()
             .WithMessage("Số điện thoại không được để trống.")
             .MustBeValidPhoneNumber()
-            .WithMessage("Định dạng số điện thoại không hợp lệ.");
-
-
-        RuleFor(x => x.OutputInfos).NotEmpty().WithMessage("Ðon xu?t hàng ph?i có ít nh?t m?t s?n ph?m.");
-
-        RuleForEach(x => x.OutputInfos)
-            .ChildRules(
-                item =>
-                {
-                    item.RuleFor(i => i.ProductId).NotEmpty().GreaterThan(0);
-                    item.RuleFor(i => i.Count).NotEmpty().GreaterThan(0);
-                });
+            .WithMessage("Định dạng số điện thoại Việt Nam không hợp lệ.");
     }
 }

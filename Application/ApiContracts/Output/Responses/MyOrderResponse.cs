@@ -2,15 +2,9 @@ using System;
 
 namespace Application.ApiContracts.Output.Responses;
 
-public class OutputItemResponse
+public class MyOrderResponse
 {
     public int Id { get; set; }
-
-    public string? BuyerName { get; set; }
-
-    public string? BuyerId { get; set; }
-
-    public string? BuyerEmail { get; set; }
 
     public string? CustomerName { get; set; }
 
@@ -25,4 +19,6 @@ public class OutputItemResponse
     public string? Notes { get; init; }
 
     public decimal Total { get; init; }
+
+    public List<MyOrderItemResponse> OutputInfos { get; set; } = [];
 }

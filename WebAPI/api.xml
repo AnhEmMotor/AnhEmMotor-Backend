@@ -623,7 +623,12 @@
         </member>
         <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetLockedStatuses">
             <summary>
-            Lấy danh sách các trạng thái đơn hàng bị khóa không cho phép sửa thông tin chi tiết.
+            Lấy danh sách trạng thái đơn hàng bị khóa không cho phép sửa thông tin chi tiết.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetCancellableStatuses">
+            <summary>
+            Lấy danh sách các mã trạng thái có thể hủy đơn hàng trực tiếp.
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetOutputByIdAsync(System.Int32,System.Threading.CancellationToken)">
@@ -644,6 +649,11 @@
         <member name="M:WebAPI.Controllers.V1.SalesOrdersController.UpdateOutputForManagerAsync(System.Int32,Application.Features.Outputs.Commands.UpdateOutput.UpdateOutputCommand,System.Threading.CancellationToken)">
             <summary>
             Cập nhật đơn hàng (Cho phép sửa đơn hàng do chính mình tạo ra)
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.CancelMyOrderAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Hủy đơn hàng (Dành cho người sở hữu đơn hàng).
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.SalesOrdersController.UpdateOutputAsync(System.Int32,Application.Features.Outputs.Commands.UpdateOutputForManager.UpdateOutputForManagerCommand,System.Threading.CancellationToken)">

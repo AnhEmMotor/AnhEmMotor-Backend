@@ -8,20 +8,21 @@ using OutputEntity = Domain.Entities.Output;
 
 namespace Application.Features.Outputs.Queries.GetOutputsByUserId;
 
-public sealed class GetOutputsByUserIdQueryHandler(IOutputReadRepository repository, ISievePaginator paginator) : IRequestHandler<GetOutputsByUserIdQuery, Result<PagedResult<OutputItemResponse>>>
+public class GetOutputsByUserIdQueryHandler(IOutputReadRepository outputReadRepository, ISievePaginator sievePaginator) : IRequestHandler<GetOutputsByUserIdQuery, Result<PagedResult<MyOrderResponse>>>
 {
-    public async Task<Result<PagedResult<OutputItemResponse>>> Handle(
+    public async Task<Result<PagedResult<MyOrderResponse>>> Handle(
         GetOutputsByUserIdQuery request,
         CancellationToken cancellationToken)
     {
-        var query = repository.GetQueryable().Where(x => x.BuyerId == request.BuyerId);
+        var query = outputReadRepository.GetQueryable();
+        query = query.Where(o => o.BuyerId == request.BuyerId);
 
-        var result = await paginator.ApplyAsync<OutputEntity, OutputItemResponse>(
+        var pagedResult = await sievePaginator.ApplyAsync<OutputEntity, MyOrderResponse>(
             query,
             request.SieveModel!,
             cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
-        return result;
+        return pagedResult;
     }
 }
