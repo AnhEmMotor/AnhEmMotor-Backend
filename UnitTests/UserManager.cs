@@ -91,9 +91,8 @@ public class UserManager
 
         UpdateUserCommandValidator.IsValidGender("InvalidGender").Should().BeFalse();
 
-        // Utility method still returns false for empty, but Validator will skip it
         UpdateUserCommandValidator.IsValidGender(string.Empty).Should().BeFalse();
-        
+
         var validator = new UpdateUserCommandValidator();
         var command = new UpdateUserCommand { Gender = string.Empty };
         validator.TestValidate(command).ShouldNotHaveValidationErrorFor(x => x.Gender);
