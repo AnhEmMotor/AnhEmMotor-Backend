@@ -1,4 +1,4 @@
-name: Deploy Production from Template
+name: AnhEmMotor Backend - Deploy
 
 on:
   push:
@@ -27,23 +27,35 @@ jobs:
           sed -i 's|[[:blank:]]\+//.*||g' appsettings.Production.json
 
       - name: Inject Secrets
-        uses: microsoft/variable-substitution@v1
-        with:
-          files: "appsettings.Production.json"
         env:
-          Provider: PostgreSql
-          AllowedHosts: ${{ secrets.ALLOWED_HOSTS }}
-          Cors.AllowedOrigins: ${{ secrets.CORS_ALLOWED_ORIGINS }}
-          ConnectionStrings.StringConnection: ${{ secrets.DB_CONNECTION_STRING }}
-          Jwt.Key: ${{ secrets.JWT_SECRET_KEY }}
-          Jwt.Issuer: ${{ secrets.JWT_ISSUER }}
-          Jwt.Audience: ${{ secrets.JWT_AUDIENCE }}
-          ProtectedAuthorizationEntities.SuperRoles: ${{ secrets.SUPER_ROLES_LIST }}
-          ProtectedAuthorizationEntities.ProtectedUsers: ${{ secrets.PROTECTED_USERS_LIST }}
-          ProtectedAuthorizationEntities.DefaultRolesForNewUsers: ${{ secrets.DEFAULT_ROLES_FOR_NEW_USER_LIST }}
-          SeedingOptions.RunDataSeedingOnStartup: ${{ secrets.ENABLE_DATABASE_SEEDING }}
-          CookieDomain: ${{ secrets.COOKIE_DOMAIN }}
-          OpenTelemetry.OtlpEndpoint: ${{ secrets.OTLP_ENDPOINT }}
+          ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
+          CORS_ALLOWED_ORIGINS: ${{ secrets.CORS_ALLOWED_ORIGINS }}
+          DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
+          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+          JWT_ISSUER: ${{ secrets.JWT_ISSUER }}
+          JWT_AUDIENCE: ${{ secrets.JWT_AUDIENCE }}
+          SUPER_ROLES_LIST: ${{ secrets.SUPER_ROLES_LIST || '[]' }}
+          PROTECTED_USERS_LIST: ${{ secrets.PROTECTED_USERS_LIST || '[]' }}
+          DEFAULT_ROLES_FOR_NEW_USER_LIST: ${{ secrets.DEFAULT_ROLES_FOR_NEW_USER_LIST || '[]' }}
+          ENABLE_DATABASE_SEEDING: ${{ secrets.ENABLE_DATABASE_SEEDING || 'false' }}
+          COOKIE_DOMAIN: ${{ secrets.COOKIE_DOMAIN }}
+          OTLP_ENDPOINT: ${{ secrets.OTLP_ENDPOINT }}
+        run: |
+          jq '
+            .Provider = "PostgreSql" |
+            .AllowedHosts = env.ALLOWED_HOSTS |
+            .Cors.AllowedOrigins = env.CORS_ALLOWED_ORIGINS |
+            .ConnectionStrings.StringConnection = env.DB_CONNECTION_STRING |
+            .Jwt.Key = env.JWT_SECRET_KEY |
+            .Jwt.Issuer = env.JWT_ISSUER |
+            .Jwt.Audience = env.JWT_AUDIENCE |
+            .ProtectedAuthorizationEntities.SuperRoles = (env.SUPER_ROLES_LIST | fromjson) |
+            .ProtectedAuthorizationEntities.ProtectedUsers = (env.PROTECTED_USERS_LIST | fromjson) |
+            .ProtectedAuthorizationEntities.DefaultRolesForNewUsers = (env.DEFAULT_ROLES_FOR_NEW_USER_LIST | fromjson) |
+            .SeedingOptions.RunDataSeedingOnStartup = (env.ENABLE_DATABASE_SEEDING | fromjson) |
+            .CookieDomain = env.COOKIE_DOMAIN |
+            .OpenTelemetry.OtlpEndpoint = env.OTLP_ENDPOINT
+          ' appsettings.Production.json > tmp.json && mv tmp.json appsettings.Production.json
 
       - name: Restore dependencies
         run: dotnet restore
@@ -108,6 +120,6 @@ jobs:
               /var/www/anhemmotor/backend/postgres_bundle --connection "${{ secrets.DB_CONNECTION_STRING }}"
               rm /var/www/anhemmotor/backend/postgres_bundle
             fi
-            sed -i 's/\r$//' /var/www/anhemmotor/scripts/restart_backend.sh
-            chmod +x /var/www/anhemmotor/scripts/restart_backend.sh
-            bash /var/www/anhemmotor/scripts/restart_backend.sh
+            sed -i 's/\r$//' /var/www/anhemmotor/scripts/restart-backend.sh
+            chmod +x /var/www/anhemmotor/scripts/restart-backend.sh
+            bash /var/www/anhemmotor/scripts/restart-backend.sh

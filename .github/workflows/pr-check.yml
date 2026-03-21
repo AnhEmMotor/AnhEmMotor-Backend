@@ -1,4 +1,4 @@
-name: Run All Tests
+name: AnhEmMotor Backend - Pull Request (Pre-deploy) check
 
 on:
   pull_request:
