@@ -35,6 +35,15 @@ public static class DependencyInjection
                 {
                     options.UseMySql(connectionString, serverVersion);
                 });
+        } else if(string.Compare(provider, "PostgreSql") == 0)
+        {
+            var connectionString = configuration.GetConnectionString("StringConnection") ?? string.Empty;
+
+            services.AddDbContextPool<ApplicationDBContext, PostgreSqlDbContext>(
+                options =>
+                {
+                    options.UseNpgsql(connectionString);
+                });
         } else
         {
             services.AddDbContextPool<ApplicationDBContext>(

@@ -85,7 +85,10 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
         modelBuilder.Entity<Permission>().ToTable("Permissions");
         modelBuilder.Entity<RolePermission>().ToTable("RolePermissions");
 
-        modelBuilder.Entity<ProductCategory>().HasAnnotation("Relational:Collation", "utf8mb4_unicode_ci");
+        if(string.Compare(Database.ProviderName, "Npgsql.EntityFrameworkCore.PostgreSQL") != 0)
+        {
+            modelBuilder.Entity<ProductCategory>().HasAnnotation("Relational:Collation", "utf8mb4_unicode_ci");
+        }
 
         modelBuilder.Entity<RolePermission>().HasKey(rp => new { rp.RoleId, rp.PermissionId });
 
@@ -123,6 +126,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .IsRequired(false);
 
         var isNotSqlServer = string.Compare(Database.ProviderName, "Microsoft.EntityFrameworkCore.SqlServer") != 0;
+        var isPostgres = string.Compare(Database.ProviderName, "Npgsql.EntityFrameworkCore.PostgreSQL") == 0;
 
         if(isNotSqlServer)
         {
@@ -151,7 +155,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
                     var columnType = property.GetColumnType();
 
                     if(columnType is not null &&
-                        (columnType.Contains("nvarchar(MAX)", StringComparison.OrdinalIgnoreCase) ||
+                        (columnType.Contains("nvarchar", StringComparison.OrdinalIgnoreCase) ||
                             columnType.Contains("uniqueidentifier", StringComparison.OrdinalIgnoreCase) ||
                             columnType.Contains("datetimeoffset", StringComparison.OrdinalIgnoreCase) ||
                             columnType.Contains("rowversion", StringComparison.OrdinalIgnoreCase) ||
@@ -160,7 +164,14 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
                         property.SetColumnType(null);
                     }
 
-                    if(property.ClrType == typeof(DateTimeOffset) || property.ClrType == typeof(DateTimeOffset?))
+                    if(isPostgres && (property.ClrType == typeof(DateTimeOffset) || property.ClrType == typeof(DateTimeOffset?)))
+                    {
+                        property.SetValueConverter(new ValueConverter<DateTimeOffset, DateTimeOffset>(
+                            v => v.ToUniversalTime(),
+                            v => v));
+                    }
+
+                    if(!isPostgres && (property.ClrType == typeof(DateTimeOffset) || property.ClrType == typeof(DateTimeOffset?)))
                     {
                         property.SetValueConverter(typeof(DateTimeOffsetToBinaryConverter));
                     }

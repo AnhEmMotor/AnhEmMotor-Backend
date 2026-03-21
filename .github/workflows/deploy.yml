@@ -10,15 +10,13 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     environment: Production
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: "10.0.x"
 
@@ -35,14 +33,14 @@ jobs:
         env:
           AllowedHosts: ${{ secrets.ALLOWED_HOSTS }}
           Cors.AllowedOrigins: ${{ secrets.CORS_ALLOWED_ORIGINS }}
-          ConnectionStrings.StringConnection: ${{ secrets.DB_CONNECTION }}
-          Jwt.Key: ${{ secrets.JWT_KEY }}
+          ConnectionStrings.StringConnection: ${{ secrets.DB_CONNECTION_STRING }}
+          Jwt.Key: ${{ secrets.JWT_SECRET_KEY }}
           Jwt.Issuer: ${{ secrets.JWT_ISSUER }}
           Jwt.Audience: ${{ secrets.JWT_AUDIENCE }}
-          ProtectedAuthorizationEntities.SuperRoles: ${{ secrets.SUPER_ROLES }}
-          ProtectedAuthorizationEntities.ProtectedUsers: ${{ secrets.PROTECTED_USERS }}
-          ProtectedAuthorizationEntities.DefaultRolesForNewUsers: ${{ secrets.DEFAULT_ROLES }}
-          SeedingOptions.RunDataSeedingOnStartup: ${{ secrets.RUN_DATA_SEEDING }}
+          ProtectedAuthorizationEntities.SuperRoles: ${{ secrets.SUPER_ROLES_LIST }}
+          ProtectedAuthorizationEntities.ProtectedUsers: ${{ secrets.PROTECTED_USERS_LIST }}
+          ProtectedAuthorizationEntities.DefaultRolesForNewUsers: ${{ secrets.DEFAULT_ROLES_FOR_NEW_USER_LIST }}
+          SeedingOptions.RunDataSeedingOnStartup: ${{ secrets.ENABLE_DATABASE_SEEDING }}
 
       - name: Restore dependencies
         run: dotnet restore
@@ -53,10 +51,10 @@ jobs:
       - name: Install EF Core Tools
         run: dotnet tool install --global dotnet-ef
 
-      - name: Generate MySQL Migration Bundle
+      - name: Generate PostgreSQL Migration Bundle
         run: |
           cd Infrastructure
-          dotnet ef migrations bundle --self-contained -r linux-x64 --context MySqlDbContext --output ../mysql_bundle
+          dotnet ef migrations bundle --self-contained -r linux-x64 --context PostgreSqlDbContext --output ../postgres_bundle
           cd ..
         continue-on-error: true
 
@@ -68,53 +66,45 @@ jobs:
 
       - name: Move Migration Bundle to Publish Folder
         run: |
-          if [ -f mysql_bundle ]; then
-            mv mysql_bundle ./publish/
+          if [ -f postgres_bundle ]; then
+            mv postgres_bundle ./publish/
           fi
         continue-on-error: true
 
       - name: Clean Remote Directory
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          host: ${{ secrets.PRODUCTION_SERVER_IP }}
+          username: ${{ secrets.PRODUCTION_SERVER_USERNAME }}
+          key: ${{ secrets.SERVER_REMOTE_ACCESS_PRIVATE_KEY }}
           port: 22
           script: |
-            rm -rf /home/anhemmot/projects/anhemmotor-backend/*
+            rm -rf /var/www/anhemmotor/backend/*
 
       - name: Copy Files via SCP
         uses: appleboy/scp-action@master
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          host: ${{ secrets.PRODUCTION_SERVER_IP }}
+          username: ${{ secrets.PRODUCTION_SERVER_USERNAME }}
+          key: ${{ secrets.SERVER_REMOTE_ACCESS_PRIVATE_KEY }}
           port: 22
           source: "./publish/*"
-          target: "/home/anhemmot/projects/anhemmotor-backend"
+          target: "/var/www/anhemmotor/backend"
           strip_components: 1
 
       - name: Execute Remote SSH Commands
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          host: ${{ secrets.PRODUCTION_SERVER_IP }}
+          username: ${{ secrets.PRODUCTION_SERVER_USERNAME }}
+          key: ${{ secrets.SERVER_REMOTE_ACCESS_PRIVATE_KEY }}
           port: 22
           script: |
-            # Run database migration using bundle
-            if [ -f /home/anhemmot/projects/anhemmotor-backend/mysql_bundle ]; then
-              echo "Running database migration..."
-              chmod +x /home/anhemmot/projects/anhemmotor-backend/mysql_bundle
-              /home/anhemmot/projects/anhemmotor-backend/mysql_bundle --connection "${{ secrets.DB_CONNECTION }}"
-              echo "Migration completed successfully"
-
-              # Cleanup bundle
-              rm /home/anhemmot/projects/anhemmotor-backend/mysql_bundle
-              echo "Removed migration bundle"
-            else
-              echo "No migration bundle found, skipping..."
+            if [ -f /var/www/anhemmotor/backend/postgres_bundle ]; then
+              chmod +x /var/www/anhemmotor/backend/postgres_bundle
+              /var/www/anhemmotor/backend/postgres_bundle --connection "${{ secrets.DB_CONNECTION_STRING }}"
+              rm /var/www/anhemmotor/backend/postgres_bundle
             fi
-            sed -i 's/\r$//' /home/anhemmot/scripts/restart_app.sh
-            chmod +x /home/anhemmot/scripts/restart_app.sh
-            bash /home/anhemmot/scripts/restart_app.sh
+            sed -i 's/\r$//' /var/www/anhemmotor/scripts/restart_backend.sh
+            chmod +x /var/www/anhemmotor/scripts/restart_backend.sh
+            bash /var/www/anhemmotor/scripts/restart_backend.sh

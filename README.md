@@ -17,7 +17,7 @@ See the [LICENSE](LICENSE) file for details.
 
 > **🚨 IMPORTANT WARNING FOR BEGINNERS:**
 >
-> **This project requires running SQL Server locally and MySQL on a VPS.**
+> **This project requires running SQL Server locally and PostgreSQL on a VPS.**
 > **When changing the database structure (adding tables, modifying columns, etc.), you MUST create a migration using the method below!**
 >
 > ```powershell
@@ -25,7 +25,7 @@ See the [LICENSE](LICENSE) file for details.
 > .\add-migration.ps1 "MigrationName"
 > ```
 >
-> **If you forget to create a MySQL migration:**
+> **If you forget to create a PostgreSQL migration:**
 >
 > - ✅ New code is deployed to VPS
 > - ❌ Database is NOT updated
@@ -120,7 +120,7 @@ Open the `WebAPI/appsettings.json` file and fill in the following information:
 
 ### 1. Choose Database Provider (MANDATORY)
 
-**The project supports both SQL Server and MySQL.** Choose the appropriate provider for your environment:
+**The project supports both SQL Server, MySQL and PostgreSQL.** Choose the appropriate provider for your environment:
 
 - SQL Server (For Development on Windows):
 
@@ -144,11 +144,22 @@ Open the `WebAPI/appsettings.json` file and fill in the following information:
   }
   ```
 
+- PostgreSQL (For Production or Testing):
+
+  ```json
+  {
+  	"Provider": "PostgreSQL",
+  	"ConnectionStrings": {
+  		"StringConnection": "Server=localhost;Database=anhemmotor;User=root;Password=your_password;"
+  	}
+  }
+  ```
+
 > **⚠️ IMPORTANT NOTE:**
 >
 > - **Local Development:** Use **SQL Server**
-> - **Production/VPS:** Use **MySQL**
-> - **Testing:** Automatically uses MySQL via Docker (no configuration needed, but Docker must be installed)
+> - **Production/VPS:** Use **PostgreSQL**
+> - **Testing:** Automatically uses PostgreSQL via Docker (no configuration needed, but Docker must be installed)
 
 ### 2. Detailed Connection String
 
@@ -314,7 +325,7 @@ Configure initial data seeding:
 
 ## Create Migration (Recommended Way)
 
-### Automatically create both SQL Server and MySQL migrations
+### Automatically create both SQL Server and PostgreSQL migrations
 
 Use a script wrapper to automatically create migrations for BOTH providers:
 
@@ -357,6 +368,12 @@ dotnet ef migrations add MigrationName --project Infrastructure --startup-projec
 dotnet ef migrations add MigrationName --context MySqlDbContext --output-dir MySqlMigrations --project Infrastructure --startup-project WebAPI
 ```
 
+### Create PostgreSQL Migration
+
+```powershell
+dotnet ef migrations add MigrationName --context PostgreSqlDbContext --output-dir PostgreSqlMigrations --project Infrastructure --startup-project WebAPI
+```
+
 > **⚠️ DANGER:**
 >
 > If you only create the SQL Server migration and **forget to create the MySQL migration**, when deploying to VPS:
@@ -377,6 +394,9 @@ dotnet ef migrations list --project Infrastructure --startup-project WebAPI
 
 # MySQL migrations
 dotnet ef migrations list --context MySqlDbContext --project Infrastructure --startup-project WebAPI
+
+# PostgreSQL migrations
+dotnet ef migrations list --context PostgreSqlDbContext --project Infrastructure --startup-project WebAPI
 ```
 
 ### Remove the last migration (if not yet applied)
@@ -387,6 +407,9 @@ dotnet ef migrations remove --project Infrastructure --startup-project WebAPI
 
 # MySQL
 dotnet ef migrations remove --context MySqlDbContext --project Infrastructure --startup-project WebAPI
+
+# PostgreSQL
+dotnet ef migrations remove --context PostgreSqlDbContext --project Infrastructure --startup-project WebAPI
 ```
 
 # 4. Running the application
@@ -438,7 +461,7 @@ The project uses **Testcontainers** to automatically create an isolated MySQL en
 1.  Start Docker.
 2.  Run the command: `dotnet test`
 3.  The system will automatically:
-    - Download the `mysql:8.0` Docker Image.
+    - Download the `postgres:17` Docker Image.
     - Initialize the Container.
     - Run Migrations.
     - Execute Tests.
@@ -452,25 +475,25 @@ The following secrets need to be set up in the GitHub repository:
 
 ### Required Secrets
 
-| Secret Name            | Description                             | Example                                                        |
-| ---------------------- | --------------------------------------- | -------------------------------------------------------------- |
-| `ALLOWED_HOSTS`        | Allowed domains                         | `api.yourdomain.com;yourdomain.com` or `*`                     |
-| `CORS_ALLOWED_ORIGINS` | CORS Allowed Origins                    | `https://yourdomain.com;http://localhost:3000` or `*`          |
-| `DB_CONNECTION`        | MySQL connection string                 | `Server=localhost;Database=anhemmotor;User=root;Password=xxx;` |
-| `JWT_KEY`              | JWT secret key (>= 32 chars)            | `Your-Super-Secret-JWT-Key-32-Chars`                           |
-| `JWT_ISSUER`           | API URL                                 | `https://api.yourdomain.com`                                   |
-| `JWT_AUDIENCE`         | Client URL                              | `https://yourdomain.com`                                       |
-| `HOST`                 | VPS IP or domain, or \*                 | `*`                                                            |
-| `USERNAME`             | SSH username                            | `root` or `youruser`                                           |
-| `SSH_PRIVATE_KEY`      | Private SSH key                         | Content of `~/.ssh/id_rsa`                                     |
-| `RUN_DATA_SEEDING`     | Run data seeding on deploy (true/false) | `false` (production) or `true` (first-time setup)              |
-| `COOKIE_DOMAIN`        | Cookie Domain (for refresh tokens)      | `.yourdomain.com` or empty for IP address                      |
+| Secret Name                        | Description                             | Example                                                                                                  |
+| ---------------------------------- | --------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `ALLOWED_HOSTS`                    | Allowed domains                         | `api.yourdomain.com;yourdomain.com` or `*`                                                               |
+| `CORS_ALLOWED_ORIGINS`             | CORS Allowed Origins                    | `https://yourdomain.com;http://localhost:3000` or `*`                                                    |
+| `DB_CONNECTION_STRING`             | PostgreSQL connection string            | `Host=XXXXX;Port=5432;Database=AnhEmMotorDB;Username=postgres;Password=XXXXX;Include Error Detail=true;` |
+| `JWT_SECRET_KEY`                   | JWT secret key (>= 32 chars)            | `Your-Super-Secret-JWT-Key-32-Chars`                                                                     |
+| `JWT_ISSUER`                       | API URL                                 | `https://api.yourdomain.com`                                                                             |
+| `JWT_AUDIENCE`                     | Client URL                              | `https://yourdomain.com`                                                                                 |
+| `PRODUCTION_SERVER_IP`             | VPS IP or domain, or \*                 | `*`                                                                                                      |
+| `PRODUCTION_SERVER_USERNAME`       | SSH username                            | `root` or `youruser`                                                                                     |
+| `SERVER_REMOTE_ACCESS_PRIVATE_KEY` | Private SSH key                         | Content of `~/.ssh/id_rsa`                                                                               |
+| `ENABLE_DATABASE_SEEDING`          | Run data seeding on deploy (true/false) | `false` (production) or `true` (first-time setup)                                                        |
+| `COOKIE_DOMAIN`                    | Cookie Domain (for refresh tokens)      | `.yourdomain.com` or empty for IP address                                                                |
 
 ### Array Secrets (SuperRoles, ProtectedUsers, DefaultRoles)
 
 **Important:** GitHub Secrets support JSON array format!
 
-#### SUPER_ROLES
+#### SUPER_ROLES_LIST
 
 **Single value:**
 
@@ -484,7 +507,7 @@ The following secrets need to be set up in the GitHub repository:
 ["Admin", "SuperAdmin", "Manager"]
 ```
 
-#### PROTECTED_USERS
+#### PROTECTED_USERS_LIST
 
 **Single user:**
 
@@ -502,7 +525,7 @@ The following secrets need to be set up in the GitHub repository:
 ]
 ```
 
-#### DEFAULT_ROLES
+#### DEFAULT_ROLES_FOR_NEW_USER_LIST
 
 **Single role:**
 
@@ -596,7 +619,7 @@ Xem tệp [LICENSE](LICENSE) để biết chi tiết.
 
 > **🚨 CẢNH BÁO QUAN TRỌNG CHO NGƯỜI MỚI:**
 >
-> **Dự án này sẽ cần chạy SQL Server trên máy local và MySQL trên VPS.**
+> **Dự án này sẽ cần chạy SQL Server trên máy local và PostgreSQL trên VPS.**
 > **Khi thay đổi cấu trúc database (thêm bảng, sửa cột, etc.), BẮT BUỘC phải tạo migration theo cách thức dưới đây!**
 >
 > ```powershell
@@ -604,7 +627,7 @@ Xem tệp [LICENSE](LICENSE) để biết chi tiết.
 > .\add-migration.ps1 "TenMigration"
 > ```
 >
-> **Nếu quên tạo MySQL migration:**
+> **Nếu quên tạo PostgreSQL migration:**
 >
 > - ✅ Code mới được deploy lên VPS
 > - ❌ Database KHÔNG được update
@@ -698,7 +721,7 @@ Mở file `WebAPI/appsettings.json` và điền các thông tin sau:
 
 ### 1. Chọn Database Provider (BẮT BUỘC)
 
-**Dự án hỗ trợ cả SQL Server và MySQL.** Chọn provider phù hợp với môi trường:
+**Dự án hỗ trợ cả SQL Server, MySQL và PostgreSQL.** Chọn provider phù hợp với môi trường:
 
 - SQL Server (Dành cho Development trên Windows):
 
@@ -722,11 +745,22 @@ Mở file `WebAPI/appsettings.json` và điền các thông tin sau:
   }
   ```
 
+- PostgreSQL (Dành cho Production hoặc Testing):
+
+  ```json
+  {
+  	"Provider": "PostgreSql",
+  	"ConnectionStrings": {
+  		"StringConnection": "Server=localhost;Database=anhemmotor;User=root;Password=your_password;"
+  	}
+  }
+  ```
+
 > **⚠️ LƯU Ý QUAN TRỌNG:**
 >
 > - **Local Development:** Dùng **SQL Server**
-> - **Production/VPS:** sử dụng **MySQL**
-> - **Testing:** Tự động dùng MySQL qua Docker (không cần cấu hình, nhưng cần phải cài đặt Docker)
+> - **Production/VPS:** sử dụng **PostgreSql**
+> - **Testing:** Tự động dùng PostgreSql qua Docker (không cần cấu hình, nhưng cần phải cài đặt Docker)
 
 ### 2. Connection String Chi Tiết
 
@@ -892,7 +926,7 @@ Cấu hình seeding dữ liệu ban đầu:
 
 ## Tạo Migration (Recommended Way)
 
-### Tự động tạo cả SQL Server và MySQL migrations
+### Tự động tạo cả SQL Server và PostgreSql migrations
 
 Sử dụng script wrapper để tự động tạo migrations cho CẢ 2 providers:
 
@@ -910,7 +944,7 @@ Sử dụng script wrapper để tự động tạo migrations cho CẢ 2 provid
 Script sẽ tự động:
 
 - Tạo SQL Server migration (cho local development)
-- Tạo MySQL migration (cho production deployment)
+- Tạo PostgreSql migration (cho production deployment)
 - Báo lỗi rõ ràng nếu có vấn đề
 
 ### Update Local Database
@@ -935,9 +969,15 @@ dotnet ef migrations add TenMigration --project Infrastructure --startup-project
 dotnet ef migrations add TenMigration --context MySqlDbContext --output-dir MySqlMigrations --project Infrastructure --startup-project WebAPI
 ```
 
+### Tạo PostgreSql Migration
+
+```powershell
+dotnet ef migrations add TenMigration --context PostgreSqlDbContext --output-dir PostgreSqlMigrations --project Infrastructure --startup-project WebAPI
+```
+
 > **⚠️ NGUY HIỂM:**
 >
-> Nếu chỉ tạo SQL Server migration mà **quên tạo MySQL migration**, khi deploy lên VPS:
+> Nếu chỉ tạo SQL Server migration mà **quên tạo PostgreSql migration**, khi deploy lên VPS:
 >
 > - ✅ Code mới được deploy
 > - ❌ Database KHÔNG được update
@@ -955,6 +995,9 @@ dotnet ef migrations list --project Infrastructure --startup-project WebAPI
 
 # MySQL migrations
 dotnet ef migrations list --context MySqlDbContext --project Infrastructure --startup-project WebAPI
+
+# PostgreSql migrations
+dotnet ef migrations list --context PostgreSqlDbContext --project Infrastructure --startup-project WebAPI
 ```
 
 ### Xóa migration cuối cùng (nếu chưa apply)
@@ -965,6 +1008,9 @@ dotnet ef migrations remove --project Infrastructure --startup-project WebAPI
 
 # MySQL
 dotnet ef migrations remove --context MySqlDbContext --project Infrastructure --startup-project WebAPI
+
+# PostgreSql
+dotnet ef migrations remove --context PostgreSqlDbContext --project Infrastructure --startup-project WebAPI
 ```
 
 # 4. Chạy ứng dụng
@@ -1007,7 +1053,7 @@ https://localhost:7001/swagger
 
 # 5. Cấu hình Môi trường Test (Yêu cầu)
 
-Dự án sử dụng **Testcontainers** để tự động tạo môi trường MySQL cô lập khi chạy Test.
+Dự án sử dụng **Testcontainers** để tự động tạo môi trường PostgreSQL cô lập khi chạy Test.
 
 **Yêu cầu duy nhất:** Máy tính phải cài đặt và đang chạy **Docker Desktop** (hoặc Docker Engine).
 
@@ -1016,7 +1062,7 @@ Dự án sử dụng **Testcontainers** để tự động tạo môi trường 
 1.  Bật Docker.
 2.  Chạy lệnh: `dotnet test`
 3.  Hệ thống sẽ tự động:
-    - Tải Docker Image `mysql:8.0`.
+    - Tải Docker Image `postgres:17.9`.
     - Khởi tạo Container.
     - Chạy Migrations.
     - Thực thi Test.
@@ -1030,25 +1076,25 @@ Cần setup các secrets sau trong GitHub repository:
 
 ### Required Secrets
 
-| Secret Name            | Mô Tả                                     | Ví Dụ                                                                  |
-| ---------------------- | ----------------------------------------- | ---------------------------------------------------------------------- |
-| `ALLOWED_HOSTS`        | Domains được phép                         | `api.yourdomain.com;yourdomain.com` hoặc `*`                           |
-| `CORS_ALLOWED_ORIGINS` | CORS Allowed Origins                      | `https://yourdomain.com;http://localhost:3000` hoặc `*`                |
-| `DB_CONNECTION`        | MySQL connection string                   | `Server=localhost;Database=anhemmotor;User=root;Password=xxx;`         |
-| `JWT_KEY`              | JWT secret key (>= 32 chars)              | `Your-Super-Secret-JWT-Key-32-Chars`                                   |
-| `JWT_ISSUER`           | API URL                                   | `https://api.yourdomain.com`                                           |
-| `JWT_AUDIENCE`         | Client URL                                | `https://yourdomain.com`                                               |
-| `HOST`                 | VPS IP hoặc domain, hoặc dấu \*           | `*`                                                                    |
-| `USERNAME`             | SSH username                              | `root` hoặc `youruser`                                                 |
-| `SSH_PRIVATE_KEY`      | Private SSH key                           | Nội dung file `~/.ssh/id_rsa`                                          |
-| `RUN_DATA_SEEDING`     | Chạy data seeding khi deploy (true/false) | `false` (production) hoặc `true` (lần đầu setup)                       |
-| `COOKIE_DOMAIN`        | Cookie Domain (for refresh tokens)        | `.yourdomain.com` hoặc để trống nếu đang chạy trên Localhost (Your IP) |
+| Secret Name                        | Mô Tả                                     | Ví Dụ                                                                                                    |
+| ---------------------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `ALLOWED_HOSTS`                    | Domains được phép                         | `api.yourdomain.com;yourdomain.com` hoặc `*`                                                             |
+| `CORS_ALLOWED_ORIGINS`             | CORS Allowed Origins                      | `https://yourdomain.com;http://localhost:3000` hoặc `*`                                                  |
+| `DB_CONNECTION_STRING`             | PostgreSQL connection string              | `Host=XXXXX;Port=5432;Database=AnhEmMotorDB;Username=postgres;Password=XXXXX;Include Error Detail=true;` |
+| `JWT_SECRET_KEY`                   | JWT secret key (>= 32 chars)              | `Your-Super-Secret-JWT-Key-32-Chars`                                                                     |
+| `JWT_ISSUER`                       | API URL                                   | `https://api.yourdomain.com`                                                                             |
+| `JWT_AUDIENCE`                     | Client URL                                | `https://yourdomain.com`                                                                                 |
+| `PRODUCTION_SERVER_IP`             | VPS IP hoặc domain, hoặc dấu \*           | `*`                                                                                                      |
+| `PRODUCTION_SERVER_USERNAME`       | SSH username                              | `root` hoặc `youruser`                                                                                   |
+| `SERVER_REMOTE_ACCESS_PRIVATE_KEY` | Private SSH key                           | Nội dung file `~/.ssh/id_rsa`                                                                            |
+| `ENABLE_DATABASE_SEEDING`          | Chạy data seeding khi deploy (true/false) | `false` (production) hoặc `true` (lần đầu setup)                                                         |
+| `COOKIE_DOMAIN`                    | Cookie Domain (for refresh tokens)        | `.yourdomain.com` hoặc để trống nếu đang chạy trên Localhost (Your IP)                                   |
 
 ### Array Secrets (SuperRoles, ProtectedUsers, DefaultRoles)
 
 **Quan trọng:** GitHub Secrets hỗ trợ JSON array format!
 
-#### SUPER_ROLES
+#### SUPER_ROLES_LIST
 
 **Single value:**
 
@@ -1062,7 +1108,7 @@ Cần setup các secrets sau trong GitHub repository:
 ["Admin", "SuperAdmin", "Manager"]
 ```
 
-#### PROTECTED_USERS
+#### PROTECTED_USERS_LIST
 
 **Single user:**
 
@@ -1080,7 +1126,7 @@ Cần setup các secrets sau trong GitHub repository:
 ]
 ```
 
-#### DEFAULT_ROLES
+#### DEFAULT_ROLES_FOR_NEW_USER_LIST
 
 **Single role:**
 

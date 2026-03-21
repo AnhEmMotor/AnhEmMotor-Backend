@@ -950,12 +950,12 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             await db.Database
                 .ExecuteSqlRawAsync(
-                    "INSERT IGNORE INTO SupplierStatus (`Key`) VALUES ({0})",
+                    "INSERT INTO \"SupplierStatus\" (\"Key\") VALUES ({0}) ON CONFLICT (\"Key\") DO NOTHING",
                     Domain.Constants.SupplierStatus.Active)
                 .ConfigureAwait(true);
             await db.Database
                 .ExecuteSqlRawAsync(
-                    "INSERT IGNORE INTO InputStatus (`Key`) VALUES ({0})",
+                    "INSERT INTO \"InputStatus\" (\"Key\") VALUES ({0}) ON CONFLICT (\"Key\") DO NOTHING",
                     Domain.Constants.Input.InputStatus.Finish)
                 .ConfigureAwait(true);
 
@@ -1049,7 +1049,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             await db.Database
                 .ExecuteSqlRawAsync(
-                    "INSERT IGNORE INTO SupplierStatus (`Key`) VALUES ({0})",
+                    "INSERT INTO \"SupplierStatus\" (\"Key\") VALUES ({0}) ON CONFLICT (\"Key\") DO NOTHING",
                     Domain.Constants.SupplierStatus.Active)
                 .ConfigureAwait(true);
 
@@ -1061,7 +1061,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             })
             {
                 await db.Database
-                    .ExecuteSqlRawAsync("INSERT IGNORE INTO InputStatus (`Key`) VALUES ({0})", status)
+                    .ExecuteSqlRawAsync("INSERT INTO \"InputStatus\" (\"Key\") VALUES ({0}) ON CONFLICT (\"Key\") DO NOTHING", status)
                     .ConfigureAwait(true);
             }
 
@@ -1156,7 +1156,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
 
             await db.Database
                 .ExecuteSqlRawAsync(
-                    "INSERT IGNORE INTO SupplierStatus (`Key`) VALUES ({0})",
+                    "INSERT INTO \"SupplierStatus\" (\"Key\") VALUES ({0}) ON CONFLICT (\"Key\") DO NOTHING",
                     Domain.Constants.SupplierStatus.Active)
                 .ConfigureAwait(true);
 
@@ -1168,7 +1168,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             })
             {
                 await db.Database
-                    .ExecuteSqlRawAsync("INSERT IGNORE INTO InputStatus (`Key`) VALUES ({0})", status)
+                    .ExecuteSqlRawAsync("INSERT INTO \"InputStatus\" (\"Key\") VALUES ({0}) ON CONFLICT (\"Key\") DO NOTHING", status)
                     .ConfigureAwait(true);
             }
 

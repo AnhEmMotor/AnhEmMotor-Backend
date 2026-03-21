@@ -18,21 +18,20 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
-using MySqlConnector;
+using Npgsql;
 using Respawn;
 using System.Data.Common;
-using Testcontainers.MySql;
+using Testcontainers.PostgreSql;
 
 namespace IntegrationTests.SetupClass;
 
 public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
-    private static readonly MySqlContainer _mySqlContainer = new MySqlBuilder("mysql:8.0")
+    private static readonly PostgreSqlContainer _postgreSqlContainer = new PostgreSqlBuilder("postgres:17.9")
         .WithLogger(NullLogger.Instance)
-        .WithUsername("root")
-        .WithPassword("root")
+        .WithUsername("postgres")
+        .WithPassword("postgres")
         .WithReuse(true)
-        .WithCommand("--innodb_flush_log_at_trx_commit=2", "--sync_binlog=0", "--innodb_use_native_aio=0")
         .Build();
 
     private string _dbName = default!;
@@ -45,33 +44,31 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
 #pragma warning disable CRR0039
     public async ValueTask InitializeAsync()
     {
-        await _mySqlContainer.StartAsync().ConfigureAwait(false);
+        await _postgreSqlContainer.StartAsync().ConfigureAwait(false);
 
         _dbName = $"Test_{Guid.NewGuid():N}";
-        var baseConn = _mySqlContainer.GetConnectionString();
-        var builder = new MySqlConnectionStringBuilder(baseConn) 
+        var baseConn = _postgreSqlContainer.GetConnectionString();
+        var builder = new NpgsqlConnectionStringBuilder(baseConn) 
         { 
-            Database = string.Empty,
-            AllowPublicKeyRetrieval = true 
+            Database = "postgres"
         };
 
-        using(var masterConn = new MySqlConnection(builder.ConnectionString))
+        using(var masterConn = new NpgsqlConnection(builder.ConnectionString))
         {
             await masterConn.OpenAsync().ConfigureAwait(false);
             using var cmd = masterConn.CreateCommand();
-            cmd.CommandText = $"CREATE DATABASE `{_dbName}`;";
+            cmd.CommandText = $"CREATE DATABASE \"{_dbName}\";";
             await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
         }
 
         builder.Database = _dbName;
         _fullConnectionString = builder.ConnectionString;
 
-        _connection = new MySqlConnection(_fullConnectionString);
+        _connection = new NpgsqlConnection(_fullConnectionString);
         await _connection.OpenAsync().ConfigureAwait(false);
 
-        var serverVersion = ServerVersion.AutoDetect(_fullConnectionString);
         var options = new DbContextOptionsBuilder<ApplicationDBContext>()
-            .UseMySql(_fullConnectionString, serverVersion)
+            .UseNpgsql(_fullConnectionString)
             .Options;
 
         using var context = new ApplicationDBContext(options);
@@ -81,8 +78,8 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
             _connection,
             new RespawnerOptions
             {
-                DbAdapter = DbAdapter.MySql,
-                SchemasToInclude = [ _dbName ],
+                DbAdapter = DbAdapter.Postgres,
+                SchemasToInclude = [ "public" ],
                 TablesToIgnore = [ "__EFMigrationsHistory" ]
             })
             .ConfigureAwait(false);
@@ -118,6 +115,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                             ["Jwt:AccessTokenExpiryInMinutes"] = "15",
                             ["Jwt:RefreshTokenExpiryInDays"] = "7",
                             ["Cors:AllowedOrigins"] = "http://localhost:3000",
+                            ["Provider"] = "PostgreSql",
                             ["ConnectionStrings:StringConnection"] = _fullConnectionString,
                             ["ProtectedAuthorizationEntities:SuperRoles:0"] = "Administrator",
                             ["Logging:LogLevel:Default"] = "Warning",
@@ -132,27 +130,22 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
         builder.ConfigureServices(
             services =>
             {
-                var dbConnectionDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbConnection));
-                if(dbConnectionDescriptor != null)
-                    services.Remove(dbConnectionDescriptor);
-
                 var dbContextDescriptor = services.SingleOrDefault(
                     d => d.ServiceType == typeof(DbContextOptions<ApplicationDBContext>));
                 if(dbContextDescriptor != null)
                     services.Remove(dbContextDescriptor);
 
-                services.AddDbContext<ApplicationDBContext>(
+                services.AddDbContext<ApplicationDBContext, PostgreSqlDbContext>(
                     (container, options) =>
                     {
                         var config = container.GetRequiredService<IConfiguration>();
                         var connectionString = config.GetConnectionString("StringConnection");
 
-                        options.UseMySql(
+                        options.UseNpgsql(
                             connectionString,
-                            new MySqlServerVersion(new Version(8, 0, 0)),
-                            mySqlOptions =>
+                            npgsqlOptions =>
                             {
-                                mySqlOptions.EnableRetryOnFailure();
+                                npgsqlOptions.EnableRetryOnFailure();
                             });
                     });
 
@@ -183,7 +176,6 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
 
                 services.AddSingleton<IUserStreamService, UserStreamService>();
 
-
                 services.AddScoped<ITokenManagerService, TokenManagerService>();
                 services.AddScoped<IHttpTokenAccessorService, HttpTokenAccessorService>();
                 services.AddScoped<IIdentityService, IdentityService>();
@@ -195,10 +187,10 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
 
                 services.Scan(
                     scan => scan
-                .FromAssembliesOf(typeof(UnitOfWork))
-                            .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Repository")))
-                            .AsImplementedInterfaces()
-                            .WithScopedLifetime());
+                        .FromAssemblies(typeof(Infrastructure.DependencyInjection).Assembly)
+                        .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Repository")))
+                        .AsImplementedInterfaces()
+                        .WithScopedLifetime());
             });
     }
 }
