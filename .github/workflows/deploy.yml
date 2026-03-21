@@ -31,6 +31,7 @@ jobs:
         with:
           files: "appsettings.Production.json"
         env:
+          Provider: PostgreSql
           AllowedHosts: ${{ secrets.ALLOWED_HOSTS }}
           Cors.AllowedOrigins: ${{ secrets.CORS_ALLOWED_ORIGINS }}
           ConnectionStrings.StringConnection: ${{ secrets.DB_CONNECTION_STRING }}
@@ -41,6 +42,8 @@ jobs:
           ProtectedAuthorizationEntities.ProtectedUsers: ${{ secrets.PROTECTED_USERS_LIST }}
           ProtectedAuthorizationEntities.DefaultRolesForNewUsers: ${{ secrets.DEFAULT_ROLES_FOR_NEW_USER_LIST }}
           SeedingOptions.RunDataSeedingOnStartup: ${{ secrets.ENABLE_DATABASE_SEEDING }}
+          CookieDomain: ${{ secrets.COOKIE_DOMAIN }}
+          OpenTelemetry.OtlpEndpoint: ${{ secrets.OTLP_ENDPOINT }}
 
       - name: Restore dependencies
         run: dotnet restore

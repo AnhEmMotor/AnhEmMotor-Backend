@@ -475,19 +475,23 @@ The following secrets need to be set up in the GitHub repository:
 
 ### Required Secrets
 
-| Secret Name                        | Description                             | Example                                                                                                  |
-| ---------------------------------- | --------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `ALLOWED_HOSTS`                    | Allowed domains                         | `api.yourdomain.com;yourdomain.com` or `*`                                                               |
-| `CORS_ALLOWED_ORIGINS`             | CORS Allowed Origins                    | `https://yourdomain.com;http://localhost:3000` or `*`                                                    |
-| `DB_CONNECTION_STRING`             | PostgreSQL connection string            | `Host=XXXXX;Port=5432;Database=AnhEmMotorDB;Username=postgres;Password=XXXXX;Include Error Detail=true;` |
-| `JWT_SECRET_KEY`                   | JWT secret key (>= 32 chars)            | `Your-Super-Secret-JWT-Key-32-Chars`                                                                     |
-| `JWT_ISSUER`                       | API URL                                 | `https://api.yourdomain.com`                                                                             |
-| `JWT_AUDIENCE`                     | Client URL                              | `https://yourdomain.com`                                                                                 |
-| `PRODUCTION_SERVER_IP`             | VPS IP or domain, or \*                 | `*`                                                                                                      |
-| `PRODUCTION_SERVER_USERNAME`       | SSH username                            | `root` or `youruser`                                                                                     |
-| `SERVER_REMOTE_ACCESS_PRIVATE_KEY` | Private SSH key                         | Content of `~/.ssh/id_rsa`                                                                               |
-| `ENABLE_DATABASE_SEEDING`          | Run data seeding on deploy (true/false) | `false` (production) or `true` (first-time setup)                                                        |
-| `COOKIE_DOMAIN`                    | Cookie Domain (for refresh tokens)      | `.yourdomain.com` or empty for IP address                                                                |
+| Secret Name                        | Description                              | Example                                                                                                  |
+| ---------------------------------- | ---------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `ALLOWED_HOSTS`                    | Allowed domains                          | `api.yourdomain.com;yourdomain.com` or `*`                                                               |
+| `CORS_ALLOWED_ORIGINS`             | CORS Allowed Origins                     | `https://anhemmotor.online;https://admin.anhemmotor.online;http://localhost:5002`                        |
+| `DB_CONNECTION_STRING`             | PostgreSQL connection string             | `Host=XXXXX;Port=5432;Database=AnhEmMotorDB;Username=postgres;Password=XXXXX;Include Error Detail=true;` |
+| `JWT_SECRET_KEY`                   | JWT secret key (>= 32 chars)             | `Your-Super-Secret-JWT-Key-32-Chars`                                                                     |
+| `JWT_ISSUER`                       | API URL                                  | `https://api.yourdomain.com`                                                                             |
+| `JWT_AUDIENCE`                     | Client URL                               | `https://yourdomain.com`                                                                                 |
+| `PRODUCTION_SERVER_IP`             | VPS IP or domain                         | `*`                                                                                                      |
+| `PRODUCTION_SERVER_USERNAME`       | SSH username                             | `root` or `youruser`                                                                                     |
+| `SERVER_REMOTE_ACCESS_PRIVATE_KEY` | Private SSH key                          | Content of `~/.ssh/id_rsa`                                                                               |
+| `ENABLE_DATABASE_SEEDING`          | Run data seeding on deploy (true/false)  | `false` (production) or `true` (first-time setup)                                                        |
+| `COOKIE_DOMAIN`                    | Cookie Domain (for refresh tokens)       | `.yourdomain.com` or empty for IP address                                                                |
+| `SUPER_ROLES_LIST`                 | Admin/SuperAdmin roles (JSON Array)      | `["Admin", "SuperAdmin"]`                                                                                |
+| `PROTECTED_USERS_LIST`             | Un-deletable users (JSON Array)          | `["admin@anhem.com:Admin@123456"]`                                                                       |
+| `DEFAULT_ROLES_FOR_NEW_USER_LIST`  | Default roles for new users (JSON Array) | `["User"]`                                                                                               |
+| `OTLP_ENDPOINT`                    | OpenTelemetry OTLP Endpoint              | `http://your-otel-collector:4317`                                                                        |
 
 ### Array Secrets (SuperRoles, ProtectedUsers, DefaultRoles)
 
@@ -1079,16 +1083,20 @@ Cần setup các secrets sau trong GitHub repository:
 | Secret Name                        | Mô Tả                                     | Ví Dụ                                                                                                    |
 | ---------------------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | `ALLOWED_HOSTS`                    | Domains được phép                         | `api.yourdomain.com;yourdomain.com` hoặc `*`                                                             |
-| `CORS_ALLOWED_ORIGINS`             | CORS Allowed Origins                      | `https://yourdomain.com;http://localhost:3000` hoặc `*`                                                  |
+| `CORS_ALLOWED_ORIGINS`             | CORS Allowed Origins                      | `https://anhemmotor.online;https://admin.anhemmotor.online;http://localhost:5002`                        |
 | `DB_CONNECTION_STRING`             | PostgreSQL connection string              | `Host=XXXXX;Port=5432;Database=AnhEmMotorDB;Username=postgres;Password=XXXXX;Include Error Detail=true;` |
 | `JWT_SECRET_KEY`                   | JWT secret key (>= 32 chars)              | `Your-Super-Secret-JWT-Key-32-Chars`                                                                     |
 | `JWT_ISSUER`                       | API URL                                   | `https://api.yourdomain.com`                                                                             |
 | `JWT_AUDIENCE`                     | Client URL                                | `https://yourdomain.com`                                                                                 |
-| `PRODUCTION_SERVER_IP`             | VPS IP hoặc domain, hoặc dấu \*           | `*`                                                                                                      |
+| `PRODUCTION_SERVER_IP`             | VPS IP hoặc domain                        | `*`                                                                                                      |
 | `PRODUCTION_SERVER_USERNAME`       | SSH username                              | `root` hoặc `youruser`                                                                                   |
 | `SERVER_REMOTE_ACCESS_PRIVATE_KEY` | Private SSH key                           | Nội dung file `~/.ssh/id_rsa`                                                                            |
 | `ENABLE_DATABASE_SEEDING`          | Chạy data seeding khi deploy (true/false) | `false` (production) hoặc `true` (lần đầu setup)                                                         |
 | `COOKIE_DOMAIN`                    | Cookie Domain (for refresh tokens)        | `.yourdomain.com` hoặc để trống nếu đang chạy trên Localhost (Your IP)                                   |
+| `SUPER_ROLES_LIST`                 | Danh sách Roles Admin (JSON Array)        | `["Admin", "SuperAdmin"]`                                                                                |
+| `PROTECTED_USERS_LIST`             | Người dùng không thể xóa (JSON Array)     | `["admin@anhem.com:Admin@123456"]`                                                                       |
+| `DEFAULT_ROLES_FOR_NEW_USER_LIST`  | Roles mặc định cho user mới (JSON Array)  | `["User"]`                                                                                               |
+| `OTLP_ENDPOINT`                    | Địa chỉ OpenTelemetry OTLP                | `http://your-otel-collector:4317`                                                                        |
 
 ### Array Secrets (SuperRoles, ProtectedUsers, DefaultRoles)
 
