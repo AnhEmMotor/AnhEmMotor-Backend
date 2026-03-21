@@ -29,8 +29,8 @@ namespace Infrastructure.Persistence
             var connectionString = configuration.GetConnectionString("StringConnection");
 
             if(string.IsNullOrEmpty(connectionString) ||
-               connectionString.Contains("Server") is false ||
-               connectionString.Contains("Port") is false)
+                connectionString.Contains("Server") is false ||
+                connectionString.Contains("Port") is false)
             {
                 connectionString = "Host=localhost;Port=5432;Database=anhemmotor;Username=postgres;Password=postgres;";
             }

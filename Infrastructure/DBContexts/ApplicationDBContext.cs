@@ -164,14 +164,15 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
                         property.SetColumnType(null);
                     }
 
-                    if(isPostgres && (property.ClrType == typeof(DateTimeOffset) || property.ClrType == typeof(DateTimeOffset?)))
+                    if(isPostgres &&
+                        (property.ClrType == typeof(DateTimeOffset) || property.ClrType == typeof(DateTimeOffset?)))
                     {
-                        property.SetValueConverter(new ValueConverter<DateTimeOffset, DateTimeOffset>(
-                            v => v.ToUniversalTime(),
-                            v => v));
+                        property.SetValueConverter(
+                            new ValueConverter<DateTimeOffset, DateTimeOffset>(v => v.ToUniversalTime(), v => v));
                     }
 
-                    if(!isPostgres && (property.ClrType == typeof(DateTimeOffset) || property.ClrType == typeof(DateTimeOffset?)))
+                    if(!isPostgres &&
+                        (property.ClrType == typeof(DateTimeOffset) || property.ClrType == typeof(DateTimeOffset?)))
                     {
                         property.SetValueConverter(typeof(DateTimeOffsetToBinaryConverter));
                     }

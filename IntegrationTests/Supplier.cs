@@ -1061,7 +1061,9 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             })
             {
                 await db.Database
-                    .ExecuteSqlRawAsync("INSERT INTO \"InputStatus\" (\"Key\") VALUES ({0}) ON CONFLICT (\"Key\") DO NOTHING", status)
+                    .ExecuteSqlRawAsync(
+                        "INSERT INTO \"InputStatus\" (\"Key\") VALUES ({0}) ON CONFLICT (\"Key\") DO NOTHING",
+                        status)
                     .ConfigureAwait(true);
             }
 
@@ -1168,7 +1170,9 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             })
             {
                 await db.Database
-                    .ExecuteSqlRawAsync("INSERT INTO \"InputStatus\" (\"Key\") VALUES ({0}) ON CONFLICT (\"Key\") DO NOTHING", status)
+                    .ExecuteSqlRawAsync(
+                        "INSERT INTO \"InputStatus\" (\"Key\") VALUES ({0}) ON CONFLICT (\"Key\") DO NOTHING",
+                        status)
                     .ConfigureAwait(true);
             }
 

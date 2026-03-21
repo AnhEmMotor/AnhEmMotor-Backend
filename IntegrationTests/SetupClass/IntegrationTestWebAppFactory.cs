@@ -2,6 +2,7 @@
 using Application.Interfaces.Repositories.LocalFile;
 using Application.Interfaces.Services;
 using Domain.Entities;
+using Infrastructure;
 using Infrastructure.Authorization;
 using Infrastructure.Authorization.Hander;
 using Infrastructure.DBContexts;
@@ -48,10 +49,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
 
         _dbName = $"Test_{Guid.NewGuid():N}";
         var baseConn = _postgreSqlContainer.GetConnectionString();
-        var builder = new NpgsqlConnectionStringBuilder(baseConn) 
-        { 
-            Database = "postgres"
-        };
+        var builder = new NpgsqlConnectionStringBuilder(baseConn) { Database = "postgres" };
 
         using(var masterConn = new NpgsqlConnection(builder.ConnectionString))
         {
@@ -87,13 +85,15 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
 
     public async Task ResetDatabaseAsync(CancellationToken cancellationToken = default)
     {
-        if (cancellationToken.IsCancellationRequested) return;
+        if(cancellationToken.IsCancellationRequested)
+            return;
         await _respawner.ResetAsync(_connection).ConfigureAwait(false);
     }
 
-    public new async Task DisposeAsync() 
-    { 
-        if (_connection != null) await _connection.DisposeAsync().ConfigureAwait(false); 
+    public new async Task DisposeAsync()
+    {
+        if(_connection != null)
+            await _connection.DisposeAsync().ConfigureAwait(false);
     }
 
 #pragma warning restore CRR0039
@@ -104,9 +104,10 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
     {
         builder.UseEnvironment("Test");
 
-        builder.ConfigureAppConfiguration((context, config) =>
-        {
-            config.AddInMemoryCollection(
+        builder.ConfigureAppConfiguration(
+            (context, config) =>
+            {
+                config.AddInMemoryCollection(
                     new Dictionary<string, string?>
                         {
                             ["Jwt:Key"] = "ThisIsMySuperSecretAndLongEnoughKeyForJWTGenerationHehehe!@$#@#",
@@ -124,8 +125,8 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                             ["Logging:LogLevel:Microsoft.AspNetCore"] = "Warning",
                             ["Logging:LogLevel:LuckyPennySoftware.MediatR.License"] = "None"
                         });
-            config.AddEnvironmentVariables();
-        });
+                config.AddEnvironmentVariables();
+            });
 
         builder.ConfigureServices(
             services =>
@@ -187,10 +188,10 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
 
                 services.Scan(
                     scan => scan
-                        .FromAssemblies(typeof(Infrastructure.DependencyInjection).Assembly)
-                        .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Repository")))
-                        .AsImplementedInterfaces()
-                        .WithScopedLifetime());
+                        .FromAssemblies(typeof(DependencyInjection).Assembly)
+                            .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Repository")))
+                            .AsImplementedInterfaces()
+                            .WithScopedLifetime());
             });
     }
 }
