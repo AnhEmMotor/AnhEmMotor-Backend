@@ -14,7 +14,7 @@ namespace Infrastructure.MySqlMigrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.4")
+                .HasAnnotation("ProductVersion", "10.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
@@ -127,7 +127,7 @@ namespace Infrastructure.MySqlMigrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Brand");
+                    b.ToTable("Brand", (string)null);
                 });
 
             modelBuilder.Entity(
@@ -170,7 +170,7 @@ namespace Infrastructure.MySqlMigrations
 
                     b.HasIndex("SupplierId");
 
-                    b.ToTable("Input");
+                    b.ToTable("Input", (string)null);
                 });
 
             modelBuilder.Entity(
@@ -207,7 +207,7 @@ namespace Infrastructure.MySqlMigrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("InputInfo");
+                    b.ToTable("InputInfo", (string)null);
                 });
 
             modelBuilder.Entity(
@@ -224,7 +224,7 @@ namespace Infrastructure.MySqlMigrations
 
                     b.HasKey("Key");
 
-                    b.ToTable("InputStatus");
+                    b.ToTable("InputStatus", (string)null);
                 });
 
             modelBuilder.Entity(
@@ -255,7 +255,7 @@ namespace Infrastructure.MySqlMigrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MediaFiles");
+                    b.ToTable("MediaFiles", (string)null);
                 });
 
             modelBuilder.Entity(
@@ -278,7 +278,7 @@ namespace Infrastructure.MySqlMigrations
 
                     b.HasIndex("Name");
 
-                    b.ToTable("Option");
+                    b.ToTable("Option", (string)null);
                 });
 
             modelBuilder.Entity(
@@ -303,7 +303,7 @@ namespace Infrastructure.MySqlMigrations
 
                     b.HasIndex("OptionId");
 
-                    b.ToTable("OptionValue");
+                    b.ToTable("OptionValue", (string)null);
                 });
 
             modelBuilder.Entity(
@@ -350,7 +350,7 @@ namespace Infrastructure.MySqlMigrations
 
                     b.HasIndex("StatusId");
 
-                    b.ToTable("Output");
+                    b.ToTable("Output", (string)null);
                 });
 
             modelBuilder.Entity(
@@ -383,7 +383,7 @@ namespace Infrastructure.MySqlMigrations
 
                     b.HasIndex("ProductVarientId");
 
-                    b.ToTable("OutputInfo");
+                    b.ToTable("OutputInfo", (string)null);
                 });
 
             modelBuilder.Entity(
@@ -400,7 +400,7 @@ namespace Infrastructure.MySqlMigrations
 
                     b.HasKey("Key");
 
-                    b.ToTable("OutputStatus");
+                    b.ToTable("OutputStatus", (string)null);
                 });
 
             modelBuilder.Entity(
@@ -440,7 +440,7 @@ namespace Infrastructure.MySqlMigrations
 
                     b.HasIndex("Key").IsUnique();
 
-                    b.ToTable("PredefinedOption");
+                    b.ToTable("PredefinedOption", (string)null);
                 });
 
             modelBuilder.Entity(
@@ -529,7 +529,7 @@ namespace Infrastructure.MySqlMigrations
 
                     b.HasIndex("StatusId");
 
-                    b.ToTable("Product");
+                    b.ToTable("Product", (string)null);
                 });
 
             modelBuilder.Entity(
@@ -552,7 +552,7 @@ namespace Infrastructure.MySqlMigrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ProductCategory");
+                    b.ToTable("ProductCategory", (string)null);
 
                     MySqlEntityTypeBuilderExtensions.UseCollation(b, "utf8mb4_unicode_ci");
                 });
@@ -573,7 +573,7 @@ namespace Infrastructure.MySqlMigrations
 
                     b.HasIndex("ProductVariantId");
 
-                    b.ToTable("ProductCollectionPhoto");
+                    b.ToTable("ProductCollectionPhoto", (string)null);
                 });
 
             modelBuilder.Entity(
@@ -590,7 +590,7 @@ namespace Infrastructure.MySqlMigrations
 
                     b.HasKey("Key");
 
-                    b.ToTable("ProductStatus");
+                    b.ToTable("ProductStatus", (string)null);
                 });
 
             modelBuilder.Entity(
@@ -619,7 +619,7 @@ namespace Infrastructure.MySqlMigrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductVariant");
+                    b.ToTable("ProductVariant", (string)null);
                 });
 
             modelBuilder.Entity(
@@ -653,7 +653,7 @@ namespace Infrastructure.MySqlMigrations
 
                     b.HasKey("Key");
 
-                    b.ToTable("Setting");
+                    b.ToTable("Setting", (string)null);
                 });
 
             modelBuilder.Entity(
@@ -690,7 +690,7 @@ namespace Infrastructure.MySqlMigrations
 
                     b.HasIndex("StatusId");
 
-                    b.ToTable("Supplier");
+                    b.ToTable("Supplier", (string)null);
                 });
 
             modelBuilder.Entity(
@@ -721,7 +721,7 @@ namespace Infrastructure.MySqlMigrations
 
                     b.HasIndex("SupplierId");
 
-                    b.ToTable("SupplierContact");
+                    b.ToTable("SupplierContact", (string)null);
                 });
 
             modelBuilder.Entity(
@@ -738,7 +738,7 @@ namespace Infrastructure.MySqlMigrations
 
                     b.HasKey("Key");
 
-                    b.ToTable("SupplierStatus");
+                    b.ToTable("SupplierStatus", (string)null);
                 });
 
             modelBuilder.Entity(
@@ -759,7 +759,7 @@ namespace Infrastructure.MySqlMigrations
 
                     b.HasIndex("VariantId");
 
-                    b.ToTable("VariantOptionValue");
+                    b.ToTable("VariantOptionValue", (string)null);
                 });
 
             modelBuilder.Entity(

@@ -66,25 +66,25 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
 
             await db.Database
                 .ExecuteSqlRawAsync(
-                    "INSERT INTO Setting (`Key`, `Value`) VALUES ({0}, {1}) ON DUPLICATE KEY UPDATE `Value`=VALUES(`Value`), `DeletedAt`=NULL",
+                    "INSERT INTO \"Setting\" (\"Key\", \"Value\") VALUES ({0}, {1}) ON CONFLICT (\"Key\") DO UPDATE SET \"Value\"=EXCLUDED.\"Value\", \"DeletedAt\"=NULL",
                     "Deposit_ratio",
                     "50.5")
                 .ConfigureAwait(true);
             await db.Database
                 .ExecuteSqlRawAsync(
-                    "INSERT INTO Setting (`Key`, `Value`) VALUES ({0}, {1}) ON DUPLICATE KEY UPDATE `Value`=VALUES(`Value`), `DeletedAt`=NULL",
+                    "INSERT INTO \"Setting\" (\"Key\", \"Value\") VALUES ({0}, {1}) ON CONFLICT (\"Key\") DO UPDATE SET \"Value\"=EXCLUDED.\"Value\", \"DeletedAt\"=NULL",
                     "Inventory_alert_level",
                     "10")
                 .ConfigureAwait(true);
             await db.Database
                 .ExecuteSqlRawAsync(
-                    "INSERT INTO Setting (`Key`, `Value`) VALUES ({0}, {1}) ON DUPLICATE KEY UPDATE `Value`=VALUES(`Value`), `DeletedAt`=NULL",
+                    "INSERT INTO \"Setting\" (\"Key\", \"Value\") VALUES ({0}, {1}) ON CONFLICT (\"Key\") DO UPDATE SET \"Value\"=EXCLUDED.\"Value\", \"DeletedAt\"=NULL",
                     "Order_value_exceeds",
                     "50000000")
                 .ConfigureAwait(true);
             await db.Database
                 .ExecuteSqlRawAsync(
-                    "INSERT INTO Setting (`Key`, `Value`) VALUES ({0}, {1}) ON DUPLICATE KEY UPDATE `Value`=VALUES(`Value`), `DeletedAt`=NULL",
+                    "INSERT INTO \"Setting\" (\"Key\", \"Value\") VALUES ({0}, {1}) ON CONFLICT (\"Key\") DO UPDATE SET \"Value\"=EXCLUDED.\"Value\", \"DeletedAt\"=NULL",
                     "Z-bike_threshold_for_meeting",
                     "5")
                 .ConfigureAwait(true);
@@ -133,7 +133,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
 
             await db.Database
                 .ExecuteSqlRawAsync(
-                    "INSERT INTO Setting (`Key`, `Value`) VALUES ({0}, {1}) ON DUPLICATE KEY UPDATE `Value`=VALUES(`Value`), `DeletedAt`=NULL",
+                    "INSERT INTO \"Setting\" (\"Key\", \"Value\") VALUES ({0}, {1}) ON CONFLICT (\"Key\") DO UPDATE SET \"Value\"=EXCLUDED.\"Value\", \"DeletedAt\"=NULL",
                     "Deposit_ratio",
                     "50")
                 .ConfigureAwait(true);
@@ -154,7 +154,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             await db.Database
                 .ExecuteSqlRawAsync(
-                    "INSERT INTO Setting (`Key`, `Value`) VALUES ({0}, {1}) ON DUPLICATE KEY UPDATE `Value`=VALUES(`Value`), `DeletedAt`=NULL",
+                    "INSERT INTO \"Setting\" (\"Key\", \"Value\") VALUES ({0}, {1}) ON CONFLICT (\"Key\") DO UPDATE SET \"Value\"=EXCLUDED.\"Value\", \"DeletedAt\"=NULL",
                     "Deposit_ratio",
                     "50")
                 .ConfigureAwait(true);
@@ -231,25 +231,25 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
 
             await db.Database
                 .ExecuteSqlRawAsync(
-                    "INSERT INTO Setting (`Key`, `Value`) VALUES ({0}, {1}) ON DUPLICATE KEY UPDATE `Value`=VALUES(`Value`), `DeletedAt`=NULL",
+                    "INSERT INTO \"Setting\" (\"Key\", \"Value\") VALUES ({0}, {1}) ON CONFLICT (\"Key\") DO UPDATE SET \"Value\"=EXCLUDED.\"Value\", \"DeletedAt\"=NULL",
                     "Deposit_ratio",
                     "30")
                 .ConfigureAwait(true);
             await db.Database
                 .ExecuteSqlRawAsync(
-                    "INSERT INTO Setting (`Key`, `Value`) VALUES ({0}, {1}) ON DUPLICATE KEY UPDATE `Value`=VALUES(`Value`), `DeletedAt`=NULL",
+                    "INSERT INTO \"Setting\" (\"Key\", \"Value\") VALUES ({0}, {1}) ON CONFLICT (\"Key\") DO UPDATE SET \"Value\"=EXCLUDED.\"Value\", \"DeletedAt\"=NULL",
                     "Inventory_alert_level",
                     "5")
                 .ConfigureAwait(true);
             await db.Database
                 .ExecuteSqlRawAsync(
-                    "INSERT INTO Setting (`Key`, `Value`) VALUES ({0}, {1}) ON DUPLICATE KEY UPDATE `Value`=VALUES(`Value`), `DeletedAt`=NULL",
+                    "INSERT INTO \"Setting\" (\"Key\", \"Value\") VALUES ({0}, {1}) ON CONFLICT (\"Key\") DO UPDATE SET \"Value\"=EXCLUDED.\"Value\", \"DeletedAt\"=NULL",
                     "Order_value_exceeds",
                     "30000000")
                 .ConfigureAwait(true);
             await db.Database
                 .ExecuteSqlRawAsync(
-                    "INSERT INTO Setting (`Key`, `Value`) VALUES ({0}, {1}) ON DUPLICATE KEY UPDATE `Value`=VALUES(`Value`), `DeletedAt`=NULL",
+                    "INSERT INTO \"Setting\" (\"Key\", \"Value\") VALUES ({0}, {1}) ON CONFLICT (\"Key\") DO UPDATE SET \"Value\"=EXCLUDED.\"Value\", \"DeletedAt\"=NULL",
                     "Z-bike_threshold_for_meeting",
                     "3")
                 .ConfigureAwait(true);
@@ -313,13 +313,13 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
 
             await db.Database
                 .ExecuteSqlRawAsync(
-                    "INSERT INTO Setting (`Key`, `Value`) VALUES ({0}, {1}) ON DUPLICATE KEY UPDATE `Value`=VALUES(`Value`), `DeletedAt`=NULL",
+                    "INSERT INTO \"Setting\" (\"Key\", \"Value\") VALUES ({0}, {1}) ON CONFLICT (\"Key\") DO UPDATE SET \"Value\"=EXCLUDED.\"Value\", \"DeletedAt\"=NULL",
                     "Deposit_ratio",
                     "30")
                 .ConfigureAwait(true);
             await db.Database
                 .ExecuteSqlRawAsync(
-                    "INSERT INTO Setting (`Key`, `Value`) VALUES ({0}, {1}) ON DUPLICATE KEY UPDATE `Value`=VALUES(`Value`), `DeletedAt`=NULL",
+                    "INSERT INTO \"Setting\" (\"Key\", \"Value\") VALUES ({0}, {1}) ON CONFLICT (\"Key\") DO UPDATE SET \"Value\"=EXCLUDED.\"Value\", \"DeletedAt\"=NULL",
                     "Inventory_alert_level",
                     "5")
                 .ConfigureAwait(true);
@@ -368,7 +368,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             await db.Database
                 .ExecuteSqlRawAsync(
-                    "INSERT INTO Setting (`Key`, `Value`) VALUES ({0}, {1}) ON DUPLICATE KEY UPDATE `Value`=VALUES(`Value`), `DeletedAt`=NULL",
+                    "INSERT INTO \"Setting\" (\"Key\", \"Value\") VALUES ({0}, {1}) ON CONFLICT (\"Key\") DO UPDATE SET \"Value\"=EXCLUDED.\"Value\", \"DeletedAt\"=NULL",
                     "Deposit_ratio",
                     "50")
                 .ConfigureAwait(true);
@@ -398,7 +398,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             await db.Database
                 .ExecuteSqlRawAsync(
-                    "INSERT INTO Setting (`Key`, `Value`) VALUES ({0}, {1}) ON DUPLICATE KEY UPDATE `Value`=VALUES(`Value`), `DeletedAt`=NULL",
+                    "INSERT INTO \"Setting\" (\"Key\", \"Value\") VALUES ({0}, {1}) ON CONFLICT (\"Key\") DO UPDATE SET \"Value\"=EXCLUDED.\"Value\", \"DeletedAt\"=NULL",
                     "Deposit_ratio",
                     "50")
                 .ConfigureAwait(true);
@@ -439,7 +439,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             await db.Database
                 .ExecuteSqlRawAsync(
-                    "INSERT INTO Setting (`Key`, `Value`) VALUES ({0}, {1}) ON DUPLICATE KEY UPDATE `Value`=VALUES(`Value`), `DeletedAt`=NULL",
+                    "INSERT INTO \"Setting\" (\"Key\", \"Value\") VALUES ({0}, {1}) ON CONFLICT (\"Key\") DO UPDATE SET \"Value\"=EXCLUDED.\"Value\", \"DeletedAt\"=NULL",
                     "Deposit_ratio",
                     "50")
                 .ConfigureAwait(true);
@@ -492,7 +492,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             await db.Database
                 .ExecuteSqlRawAsync(
-                    "INSERT INTO Setting (`Key`, `Value`) VALUES ({0}, {1}) ON DUPLICATE KEY UPDATE `Value`=VALUES(`Value`), `DeletedAt`=NULL",
+                    "INSERT INTO \"Setting\" (\"Key\", \"Value\") VALUES ({0}, {1}) ON CONFLICT (\"Key\") DO UPDATE SET \"Value\"=EXCLUDED.\"Value\", \"DeletedAt\"=NULL",
                     "Deposit_ratio",
                     "50")
                 .ConfigureAwait(true);
@@ -545,7 +545,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             await db.Database
                 .ExecuteSqlRawAsync(
-                    "INSERT INTO Setting (`Key`, `Value`) VALUES ({0}, {1}) ON DUPLICATE KEY UPDATE `Value`=VALUES(`Value`), `DeletedAt`=NULL",
+                    "INSERT INTO \"Setting\" (\"Key\", \"Value\") VALUES ({0}, {1}) ON CONFLICT (\"Key\") DO UPDATE SET \"Value\"=EXCLUDED.\"Value\", \"DeletedAt\"=NULL",
                     "Deposit_ratio",
                     "50")
                 .ConfigureAwait(true);
@@ -591,7 +591,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             await db.Database
                 .ExecuteSqlRawAsync(
-                    "INSERT INTO Setting (`Key`, `Value`) VALUES ({0}, {1}) ON DUPLICATE KEY UPDATE `Value`=VALUES(`Value`), `DeletedAt`=NULL",
+                    "INSERT INTO \"Setting\" (\"Key\", \"Value\") VALUES ({0}, {1}) ON CONFLICT (\"Key\") DO UPDATE SET \"Value\"=EXCLUDED.\"Value\", \"DeletedAt\"=NULL",
                     "Deposit_ratio",
                     "50")
                 .ConfigureAwait(true);

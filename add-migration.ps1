@@ -30,21 +30,34 @@ if ($LASTEXITCODE -ne 0)
 Write-Host "SUCCESS: SQL Server migration created" -ForegroundColor Green
 Write-Host ""
 
-Write-Host "[2/2] Creating MySQL Migration (production)..." -ForegroundColor Cyan
+Write-Host "[2/3] Creating MySQL Migration (production legacy)..." -ForegroundColor Cyan
 dotnet ef migrations add $MigrationName --context MySqlDbContext --output-dir MySqlMigrations --project Infrastructure --startup-project WebAPI
 
 if ($LASTEXITCODE -ne 0)
 {
     Write-Host ""
     Write-Host "ERROR: Failed to create MySQL migration!" -ForegroundColor Red
-    Write-Host ""
-    Write-Host "SQL Server migration was created, but MySQL migration failed." -ForegroundColor Yellow
-    Write-Host "You can try to create MySQL migration manually:" -ForegroundColor Yellow
-    Write-Host "  dotnet ef migrations add $MigrationName --context MySqlDbContext --output-dir MySqlMigrations --project Infrastructure --startup-project WebAPI" -ForegroundColor White
     exit 1
 }
 
 Write-Host "SUCCESS: MySQL migration created" -ForegroundColor Green
+Write-Host ""
+
+Write-Host "[3/3] Creating PostgreSql Migration (production)..." -ForegroundColor Cyan
+dotnet ef migrations add $MigrationName --context PostgreSqlDbContext --output-dir PostgreSqlMigrations --project Infrastructure --startup-project WebAPI
+
+if ($LASTEXITCODE -ne 0)
+{
+    Write-Host ""
+    Write-Host "ERROR: Failed to create PostgreSql migration!" -ForegroundColor Red
+    Write-Host ""
+    Write-Host "Other migrations were created, but PostgreSql migration failed." -ForegroundColor Yellow
+    Write-Host "You can try to create PostgreSql migration manually:" -ForegroundColor Yellow
+    Write-Host "  dotnet ef migrations add $MigrationName --context PostgreSqlDbContext --output-dir PostgreSqlMigrations --project Infrastructure --startup-project WebAPI" -ForegroundColor White
+    exit 1
+}
+
+Write-Host "SUCCESS: PostgreSql migration created" -ForegroundColor Green
 Write-Host ""
 
 Write-Host "==================================" -ForegroundColor Green
@@ -54,6 +67,7 @@ Write-Host ""
 Write-Host "Created migrations:" -ForegroundColor Cyan
 Write-Host "  - SQL Server: Infrastructure/Migrations/$MigrationName..." -ForegroundColor White
 Write-Host "  - MySQL:      Infrastructure/MySqlMigrations/$MigrationName..." -ForegroundColor White
+Write-Host "  - PostgreSql: Infrastructure/PostgreSqlMigrations/$MigrationName..." -ForegroundColor White
 Write-Host ""
 Write-Host "Next steps:" -ForegroundColor Cyan
 Write-Host "  1. Review the migrations you just created" -ForegroundColor White

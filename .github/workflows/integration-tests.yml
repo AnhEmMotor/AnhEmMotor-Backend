@@ -7,14 +7,11 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 10.0.x
 
@@ -24,8 +21,8 @@ jobs:
       - name: Build
         run: dotnet build --no-restore
 
-      - name: Run Integration Tests
-        run: dotnet test IntegrationTests/IntegrationTests.csproj --no-build --verbosity minimal --logger "console;verbosity=minimal"
+      - name: Run Unit Tests
+        run: dotnet test UnitTests/UnitTests.csproj --no-build --verbosity minimal --logger "console;verbosity=minimal"
         env:
           Logging__LogLevel__Default: "Warning"
           Logging__LogLevel__Microsoft.EntityFrameworkCore.Database.Command: "None"
@@ -36,8 +33,8 @@ jobs:
           Logging__LogLevel__Default: "Warning"
           Logging__LogLevel__Microsoft.EntityFrameworkCore.Database.Command: "None"
 
-      - name: Run Unit Tests
-        run: dotnet test UnitTests/UnitTests.csproj --no-build --verbosity minimal --logger "console;verbosity=minimal"
+      - name: Run Integration Tests
+        run: dotnet test IntegrationTests/IntegrationTests.csproj --no-build --verbosity minimal --logger "console;verbosity=minimal"
         env:
           Logging__LogLevel__Default: "Warning"
           Logging__LogLevel__Microsoft.EntityFrameworkCore.Database.Command: "None"

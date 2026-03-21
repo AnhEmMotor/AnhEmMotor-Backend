@@ -64,6 +64,22 @@
 ./add-migration.ps1 -MigrationName "TenMigrationCuaBan"
 ```
 
+# Quy tắc khi thêm 1 biến môi trường vào trong appsetting.json hoặc appsettings.Development.json
+
+Khi thêm 1 biến môi trường vào trong appsetting.json hoặc appsettings.Development.json:
+
+- Phải thêm vào trong appsettings.Template.Development.json và appsettings.Template.json, bao gồm cả chú thích cho biến môi trường mới đó.
+- Trong file .github\workflows\deploy.yml, nếu cần thêm vào trong việc deploy dự án trên Hosting thì thêm biến đó vào trong Secret của dự án.
+- Phải thêm vào trong file README.md:
+
+* Nếu cần thiết chỉnh sửa hoặc ghi chú, phải ghi vào phần "Application Configuration" (tiếng Anh) và "Cấu hình ứng dụng" (tiếng Việt)
+* Nếu có thêm biến cần cấu hình trong Github Secret thì cần ghi thêm vào trong bảng "GitHub Secrets Configuration" cả bản tiếng Anh và tiếng Việt, bao gồm cả mô tả và ví dụ rõ ràng.
+
+Lưu ý:
+
+- Tuyệt đối không lưu giá trị nhạy cảm (Password, Secret Key, Connection String) vào các file Template.
+- Tên Secret trên GitHub phải khớp 100% với tên biến trong cấu hình ASP.NET Core (Sử dụng dấu \_\_ thay cho dấu : nếu cần).
+
 # Cấu trúc Response cho Tanstack Query (Frontend Support)
 
 - Để hỗ trợ quy trình CRUD chuẩn ở Frontend, Backend phải tuân thủ:

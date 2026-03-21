@@ -700,6 +700,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         var input1 = new InputEntity
         {
             InputDate = DateTimeOffset.UtcNow.AddDays(-3),
+            CreatedAt = DateTimeOffset.UtcNow.AddDays(-3),
             StatusId = inputStatusId,
             SupplierId = supplier.Id,
             CreatedBy = user.Id
@@ -707,6 +708,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         var input2 = new InputEntity
         {
             InputDate = DateTimeOffset.UtcNow.AddDays(-1),
+            CreatedAt = DateTimeOffset.UtcNow.AddDays(-1),
             StatusId = inputStatusId,
             SupplierId = supplier.Id,
             CreatedBy = user.Id
@@ -714,6 +716,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         var input3 = new InputEntity
         {
             InputDate = DateTimeOffset.UtcNow.AddDays(-2),
+            CreatedAt = DateTimeOffset.UtcNow.AddDays(-2),
             StatusId = inputStatusId,
             SupplierId = supplier.Id,
             CreatedBy = user.Id
