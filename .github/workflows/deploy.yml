@@ -40,6 +40,7 @@ jobs:
           ENABLE_DATABASE_SEEDING: ${{ secrets.ENABLE_DATABASE_SEEDING || 'false' }}
           COOKIE_DOMAIN: ${{ secrets.COOKIE_DOMAIN }}
           OTLP_ENDPOINT: ${{ secrets.OTLP_ENDPOINT }}
+          LOKI_ENDPOINT: ${{ secrets.LOKI_ENDPOINT }}
         run: |
           jq '
             .Provider = "PostgreSql" |
@@ -54,7 +55,8 @@ jobs:
             .ProtectedAuthorizationEntities.DefaultRolesForNewUsers = (env.DEFAULT_ROLES_FOR_NEW_USER_LIST | fromjson) |
             .SeedingOptions.RunDataSeedingOnStartup = (env.ENABLE_DATABASE_SEEDING | fromjson) |
             .CookieDomain = env.COOKIE_DOMAIN |
-            .OpenTelemetry.OtlpEndpoint = env.OTLP_ENDPOINT
+            .OpenTelemetry.OtlpEndpoint = env.OTLP_ENDPOINT |
+            .OpenTelemetry.LokiEndpoint = env.LOKI_ENDPOINT
           ' appsettings.Production.json > tmp.json && mv tmp.json appsettings.Production.json
 
       - name: Restore dependencies
