@@ -1,31 +1,25 @@
 name: AnhEmMotor Backend - Deploy
-
 on:
   push:
     branches:
       - master
       - main
-
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     environment: Production
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: "10.0.x"
-
+          dotnet-version: 10.0.x
       - name: Prepare AppSettings
         run: |
           cp WebAPI/appsettings.Template.json appsettings.Production.json
           sed -i '/^[[:blank:]]*\/\//d' appsettings.Production.json
           sed -i 's|[[:blank:]]\+//.*||g' appsettings.Production.json
-
       - name: Inject Secrets
         env:
           ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
@@ -41,7 +35,7 @@ jobs:
           COOKIE_DOMAIN: ${{ secrets.COOKIE_DOMAIN }}
           OTLP_ENDPOINT: ${{ secrets.OTLP_ENDPOINT }}
           LOKI_ENDPOINT: ${{ secrets.LOKI_ENDPOINT }}
-        run: |
+        run: >
           jq '
             .Provider = "PostgreSql" |
             .AllowedHosts = env.ALLOWED_HOSTS |
@@ -58,36 +52,32 @@ jobs:
             .OpenTelemetry.OtlpEndpoint = env.OTLP_ENDPOINT |
             .OpenTelemetry.LokiEndpoint = env.LOKI_ENDPOINT
           ' appsettings.Production.json > tmp.json && mv tmp.json appsettings.Production.json
-
       - name: Restore dependencies
         run: dotnet restore
-
       - name: Build
         run: dotnet build WebAPI/WebAPI.csproj --configuration Release --no-restore
-
       - name: Install EF Core Tools
         run: dotnet tool install --global dotnet-ef
-
       - name: Generate PostgreSQL Migration Bundle
-        run: |
+        run: >
           cd Infrastructure
+
           dotnet ef migrations bundle --self-contained -r linux-x64 --context PostgreSqlDbContext --output ../postgres_bundle
+
           cd ..
         continue-on-error: true
-
       - name: Publish
-        run: dotnet publish WebAPI/WebAPI.csproj --configuration Release --no-build --output ./publish
-
+        run:
+          dotnet publish WebAPI/WebAPI.csproj --configuration Release --no-build
+          --output ./publish
       - name: Move AppSettings to Publish Folder
         run: cp appsettings.Production.json ./publish/
-
       - name: Move Migration Bundle to Publish Folder
         run: |
           if [ -f postgres_bundle ]; then
             mv postgres_bundle ./publish/
           fi
         continue-on-error: true
-
       - name: Clean Remote Directory
         uses: appleboy/ssh-action@master
         with:
@@ -97,7 +87,6 @@ jobs:
           port: 22
           script: |
             rm -rf /var/www/anhemmotor/backend/*
-
       - name: Copy Files via SCP
         uses: appleboy/scp-action@master
         with:
@@ -105,10 +94,9 @@ jobs:
           username: ${{ secrets.PRODUCTION_SERVER_USERNAME }}
           key: ${{ secrets.SERVER_REMOTE_ACCESS_PRIVATE_KEY }}
           port: 22
-          source: "./publish/*"
-          target: "/var/www/anhemmotor/backend"
+          source: ./publish/*
+          target: /var/www/anhemmotor/backend
           strip_components: 1
-
       - name: Execute Remote SSH Commands
         uses: appleboy/ssh-action@master
         with:
@@ -116,12 +104,11 @@ jobs:
           username: ${{ secrets.PRODUCTION_SERVER_USERNAME }}
           key: ${{ secrets.SERVER_REMOTE_ACCESS_PRIVATE_KEY }}
           port: 22
-          script: |
+          script: >
             if [ -f /var/www/anhemmotor/backend/postgres_bundle ]; then
               chmod +x /var/www/anhemmotor/backend/postgres_bundle
               /var/www/anhemmotor/backend/postgres_bundle --connection "${{ secrets.DB_CONNECTION_STRING }}"
               rm /var/www/anhemmotor/backend/postgres_bundle
             fi
-            sed -i 's/\r$//' /var/www/anhemmotor/scripts/restart-backend.sh
-            chmod +x /var/www/anhemmotor/scripts/restart-backend.sh
-            bash /var/www/anhemmotor/scripts/restart-backend.sh
+
+            sudo systemctl restart anhemmotor.service
