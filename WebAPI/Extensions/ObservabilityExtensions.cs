@@ -2,6 +2,8 @@
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Serilog;
+using Serilog.Sinks.Grafana.Loki;
 
 namespace WebAPI.Extensions;
 
@@ -17,6 +19,39 @@ namespace WebAPI.Extensions;
 /// </remarks>
 public static class ObservabilityExtensions
 {
+    /// <summary>
+    /// Adds custom logging using Serilog and Grafana Loki to the service collection.
+    /// </summary>
+    /// <param name="services">The service collection to which logging services will be added.</param>
+    /// <param name="configuration">The application configuration used to retrieve Loki settings.</param>
+    /// <param name="serviceName">The name of the service to be used for logging identification.</param>
+    /// <returns>The same service collection instance with Serilog configured.</returns>
+    /// <exception cref="ArgumentNullException">Thrown if services or configuration is null.</exception>
+    public static IServiceCollection AddCustomLogging(this IServiceCollection services, IConfiguration configuration, string serviceName)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(configuration);
+
+        var lokiUrl = configuration.GetValue<string>("OpenTelemetry:LokiEndpoint") ?? "http://localhost:3100";
+
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Information()
+            .Enrich.FromLogContext()
+            .Enrich.WithProcessId()
+            .Enrich.WithThreadId()
+            .WriteTo.GrafanaLoki(
+                lokiUrl,
+                new[]
+                {
+                    new LokiLabel { Key = "app", Value = serviceName },
+                    new LokiLabel { Key = "env", Value = configuration.GetValue<string>("ASPNETCORE_ENVIRONMENT") ?? "Production" }
+                })
+            .WriteTo.Console()
+            .CreateLogger();
+
+        return services;
+    }
+
     /// <summary>
     /// Adds OpenTelemetry tracing and metrics to the service collection using the specified configuration, service
     /// name, and service version.

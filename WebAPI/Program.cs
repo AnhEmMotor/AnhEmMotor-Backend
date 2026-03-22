@@ -1,12 +1,14 @@
 ﻿using Application;
 using Asp.Versioning.ApiExplorer;
 using Infrastructure;
+using Serilog;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using WebAPI.Extensions;
 using WebAPI.StartupExtensions;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Host.UseSerilog();
 var configuration = builder.Configuration;
 var environment = builder.Environment;
 
@@ -17,6 +19,7 @@ if(!environment.IsEnvironment("Test"))
 }
 
 builder.Services
+    .AddCustomLogging(configuration, "AnhEmMotor API")
     .AddCustomMvc()
     .AddCors(
         options =>
