@@ -28,7 +28,10 @@ public static class ObservabilityExtensions
     /// <param name="serviceName">The name of the service to be used for logging identification.</param>
     /// <returns>The same service collection instance with Serilog configured.</returns>
     /// <exception cref="ArgumentNullException">Thrown if services or configuration is null.</exception>
-    public static IServiceCollection AddCustomLogging(this IServiceCollection services, IConfiguration configuration, string serviceName)
+    public static IServiceCollection AddCustomLogging(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        string serviceName)
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(configuration);
@@ -36,28 +39,42 @@ public static class ObservabilityExtensions
         var otelUrl = configuration.GetValue<string>("OpenTelemetry:OtlpEndpoint") ?? "http://localhost:4317";
 
         Log.Logger = new LoggerConfiguration()
-            .ReadFrom.Configuration(configuration)
-            .Enrich.FromLogContext()
-            .Enrich.WithProcessId()
-            .Enrich.WithThreadId()
-            .WriteTo.Logger(lc => lc
-                .Filter.ByIncludingOnly(le => 
-                    le.Level >= LogEventLevel.Warning || 
-                    le.Properties.ContainsKey("StatusCode") || 
-                    le.MessageTemplate.Text.Contains("OpenTelemetry"))
-                .WriteTo.OpenTelemetry(options =>
-                {
-                    options.Endpoint = otelUrl;
-                    options.Protocol = OtlpProtocol.Grpc;
-                    options.ResourceAttributes = new Dictionary<string, object>
-                    {
-                        ["service.name"] = "Anh Em Motor",
-                        ["deployment.environment"] = configuration.GetValue<string>("ASPNETCORE_ENVIRONMENT") ?? "Production"
-                    };
-                }))
-            .WriteTo.Logger(lc => lc
-                .Filter.ByIncludingOnly(le => !le.Properties.ContainsKey("StatusCode"))
-                .WriteTo.Console())
+            .ReadFrom
+            .Configuration(configuration)
+            .Enrich
+            .FromLogContext()
+            .Enrich
+            .WithProcessId()
+            .Enrich
+            .WithThreadId()
+            .WriteTo
+            .Logger(
+                lc => lc
+                .Filter
+                    .ByIncludingOnly(
+                        le => le.Level >= LogEventLevel.Warning ||
+                                le.Properties.ContainsKey("StatusCode") ||
+                                le.MessageTemplate.Text.Contains("OpenTelemetry"))
+                    .WriteTo
+                    .OpenTelemetry(
+                        options =>
+                        {
+                            options.Endpoint = otelUrl;
+                            options.Protocol = OtlpProtocol.Grpc;
+                            options.ResourceAttributes = new Dictionary<string, object>
+                            {
+                                ["service.name"] = "Anh Em Motor",
+                                ["deployment.environment"] =
+                                    configuration.GetValue<string>("ASPNETCORE_ENVIRONMENT") ?? "Production"
+                            };
+                        }))
+            .WriteTo
+            .Logger(
+                lc => lc
+                .Filter
+                    .ByIncludingOnly(le => !le.Properties.ContainsKey("StatusCode"))
+                    .WriteTo
+                    .Console())
             .CreateLogger();
 
         return services;

@@ -5,8 +5,8 @@ using Serilog;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using WebAPI.Extensions;
-using WebAPI.StartupExtensions;
 using WebAPI.Middleware;
+using WebAPI.StartupExtensions;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog();
@@ -62,13 +62,14 @@ builder.Services.ConfigureOptions<ConfigureSwaggerOptions>();
 
 var app = builder.Build();
 app.UseMiddleware<LogContextMiddleware>();
-app.UseSerilogRequestLogging(options =>
-{
-    options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
+app.UseSerilogRequestLogging(
+    options =>
     {
-        diagnosticContext.Set("ClientIP", httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown");
-    };
-});
+        options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
+        {
+            diagnosticContext.Set("ClientIP", httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown");
+        };
+    });
 
 app.UseExceptionHandler();
 

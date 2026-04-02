@@ -6,8 +6,8 @@ namespace WebAPI.Middleware;
 /// Middleware để đẩy các thông tin bổ sung (như Client IP) vào Serilog LogContext cho mỗi request.
 /// </summary>
 /// <remarks>
-/// Điều này giúp tất cả các log được sinh ra trong quá trình xử lý request (Warning, Error, Business Log)
-/// đều tự động có thuộc tính ClientIP mà không cần truyền thủ công.
+/// Điều này giúp tất cả các log được sinh ra trong quá trình xử lý request (Warning, Error, Business Log) đều tự động
+/// có thuộc tính ClientIP mà không cần truyền thủ công.
 /// </remarks>
 public class LogContextMiddleware(RequestDelegate next)
 {
@@ -21,11 +21,11 @@ public class LogContextMiddleware(RequestDelegate next)
         var method = context.Request.Method;
         var path = context.Request.Path.Value ?? "unknown";
 
-        using (LogContext.PushProperty("ClientIP", clientIp))
-        using (LogContext.PushProperty("RequestMethod", method))
-        using (LogContext.PushProperty("RequestPath", path))
-        {
-            await next(context);
-        }
+        using(LogContext.PushProperty("ClientIP", clientIp))
+            using(LogContext.PushProperty("RequestMethod", method))
+                using(LogContext.PushProperty("RequestPath", path))
+                {
+                    await next(context).ConfigureAwait(true);
+                }
     }
 }

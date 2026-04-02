@@ -1263,8 +1263,8 @@
             Middleware để đẩy các thông tin bổ sung (như Client IP) vào Serilog LogContext cho mỗi request.
             </summary>
             <remarks>
-            Điều này giúp tất cả các log được sinh ra trong quá trình xử lý request (Warning, Error, Business Log)
-            đều tự động có thuộc tính ClientIP mà không cần truyền thủ công.
+            Điều này giúp tất cả các log được sinh ra trong quá trình xử lý request (Warning, Error, Business Log) đều tự động
+            có thuộc tính ClientIP mà không cần truyền thủ công.
             </remarks>
         </member>
         <member name="M:WebAPI.Middleware.LogContextMiddleware.#ctor(Microsoft.AspNetCore.Http.RequestDelegate)">
@@ -1272,8 +1272,8 @@
             Middleware để đẩy các thông tin bổ sung (như Client IP) vào Serilog LogContext cho mỗi request.
             </summary>
             <remarks>
-            Điều này giúp tất cả các log được sinh ra trong quá trình xử lý request (Warning, Error, Business Log)
-            đều tự động có thuộc tính ClientIP mà không cần truyền thủ công.
+            Điều này giúp tất cả các log được sinh ra trong quá trình xử lý request (Warning, Error, Business Log) đều tự động
+            có thuộc tính ClientIP mà không cần truyền thủ công.
             </remarks>
         </member>
         <member name="M:WebAPI.Middleware.LogContextMiddleware.InvokeAsync(Microsoft.AspNetCore.Http.HttpContext)">
