@@ -2,7 +2,6 @@
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Input;
-
 using Domain.Constants;
 using Domain.Constants.Input;
 using Mapster;
@@ -52,6 +51,7 @@ public sealed class UpdateInputStatusCommandHandler(
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         var updated = await readRepository.GetByIdWithDetailsAsync(input.Id, cancellationToken).ConfigureAwait(false);
+        ArgumentNullException.ThrowIfNull(updated);
 
         return updated.Adapt<InputDetailResponse>();
     }

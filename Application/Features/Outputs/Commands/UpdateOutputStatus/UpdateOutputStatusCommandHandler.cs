@@ -83,6 +83,7 @@ public sealed class UpdateOutputStatusCommandHandler(
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         var updated = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
+        ArgumentNullException.ThrowIfNull(updated);
 
         return updated.Adapt<OrderDetailResponse>();
     }

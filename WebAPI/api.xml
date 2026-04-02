@@ -1258,6 +1258,30 @@
             langword="true"/>.
             </returns>
         </member>
+        <member name="T:WebAPI.Middleware.LogContextMiddleware">
+            <summary>
+            Middleware để đẩy các thông tin bổ sung (như Client IP) vào Serilog LogContext cho mỗi request.
+            </summary>
+            <remarks>
+            Điều này giúp tất cả các log được sinh ra trong quá trình xử lý request (Warning, Error, Business Log) đều tự động
+            có thuộc tính ClientIP mà không cần truyền thủ công.
+            </remarks>
+        </member>
+        <member name="M:WebAPI.Middleware.LogContextMiddleware.#ctor(Microsoft.AspNetCore.Http.RequestDelegate)">
+            <summary>
+            Middleware để đẩy các thông tin bổ sung (như Client IP) vào Serilog LogContext cho mỗi request.
+            </summary>
+            <remarks>
+            Điều này giúp tất cả các log được sinh ra trong quá trình xử lý request (Warning, Error, Business Log) đều tự động
+            có thuộc tính ClientIP mà không cần truyền thủ công.
+            </remarks>
+        </member>
+        <member name="M:WebAPI.Middleware.LogContextMiddleware.InvokeAsync(Microsoft.AspNetCore.Http.HttpContext)">
+            <summary>
+            Thực thi middleware để đẩy ClientIP vào LogContext.
+            </summary>
+            <param name="context">Httpcontext của request hiện tại.</param>
+        </member>
         <member name="T:WebAPI.StartupExtensions.ConfigureSwaggerOptions">
             <summary>
             Cấu hình các tài liệu Swagger cho từng phiên bản API.

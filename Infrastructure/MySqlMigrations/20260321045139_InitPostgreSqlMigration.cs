@@ -4,10 +4,10 @@
 
 namespace Infrastructure.MySqlMigrations
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public partial class InitPostgreSqlMigration : Migration
     {
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<string>(
@@ -383,7 +383,7 @@ namespace Infrastructure.MySqlMigrations
                 .Annotation("MySql:CharSet", "utf8mb4");
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<string>(

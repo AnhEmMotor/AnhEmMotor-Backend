@@ -5,6 +5,7 @@ using Serilog;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using WebAPI.Extensions;
+using WebAPI.Middleware;
 using WebAPI.StartupExtensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,7 +20,7 @@ if(!environment.IsEnvironment("Test"))
 }
 
 builder.Services
-    .AddCustomLogging(configuration, "AnhEmMotor API")
+    .AddCustomLogging(configuration, "Anh Em Motor")
     .AddCustomMvc()
     .AddCors(
         options =>
@@ -49,7 +50,7 @@ builder.Services
     .AddJwtAuthentication(configuration)
     .AddAuthorization()
     .AddCustomSwagger(environment)
-    .AddCustomOpenTelemetry(configuration, "AnhEmMotor API", "1.0.0");
+    .AddCustomOpenTelemetry(configuration, "Anh Em Motor");
 
 if(!builder.Environment.IsEnvironment("Test"))
 {
@@ -60,9 +61,17 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.ConfigureOptions<ConfigureSwaggerOptions>();
 
 var app = builder.Build();
+app.UseMiddleware<LogContextMiddleware>();
+app.UseSerilogRequestLogging(
+    options =>
+    {
+        options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
+        {
+            diagnosticContext.Set("ClientIP", httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown");
+        };
+    });
 
 app.UseExceptionHandler();
-app.UseOpenTelemetryPrometheusScrapingEndpoint();
 
 if(app.Environment.IsDevelopment())
 {

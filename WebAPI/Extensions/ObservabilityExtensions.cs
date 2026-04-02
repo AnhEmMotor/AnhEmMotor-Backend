@@ -3,7 +3,8 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Serilog;
-using Serilog.Sinks.Grafana.Loki;
+using Serilog.Events;
+using Serilog.Sinks.OpenTelemetry;
 
 namespace WebAPI.Extensions;
 
@@ -27,26 +28,53 @@ public static class ObservabilityExtensions
     /// <param name="serviceName">The name of the service to be used for logging identification.</param>
     /// <returns>The same service collection instance with Serilog configured.</returns>
     /// <exception cref="ArgumentNullException">Thrown if services or configuration is null.</exception>
-    public static IServiceCollection AddCustomLogging(this IServiceCollection services, IConfiguration configuration, string serviceName)
+    public static IServiceCollection AddCustomLogging(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        string serviceName)
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(configuration);
 
-        var lokiUrl = configuration.GetValue<string>("OpenTelemetry:LokiEndpoint") ?? "http://localhost:3100";
+        var otelUrl = configuration.GetValue<string>("OpenTelemetry:OtlpEndpoint") ?? "http://localhost:4317";
 
         Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Information()
-            .Enrich.FromLogContext()
-            .Enrich.WithProcessId()
-            .Enrich.WithThreadId()
-            .WriteTo.GrafanaLoki(
-                lokiUrl,
-                new[]
-                {
-                    new LokiLabel { Key = "app", Value = serviceName },
-                    new LokiLabel { Key = "env", Value = configuration.GetValue<string>("ASPNETCORE_ENVIRONMENT") ?? "Production" }
-                })
-            .WriteTo.Console()
+            .ReadFrom
+            .Configuration(configuration)
+            .Enrich
+            .FromLogContext()
+            .Enrich
+            .WithProcessId()
+            .Enrich
+            .WithThreadId()
+            .WriteTo
+            .Logger(
+                lc => lc
+                .Filter
+                    .ByIncludingOnly(
+                        le => le.Level >= LogEventLevel.Warning ||
+                                le.Properties.ContainsKey("StatusCode") ||
+                                le.MessageTemplate.Text.Contains("OpenTelemetry"))
+                    .WriteTo
+                    .OpenTelemetry(
+                        options =>
+                        {
+                            options.Endpoint = otelUrl;
+                            options.Protocol = OtlpProtocol.Grpc;
+                            options.ResourceAttributes = new Dictionary<string, object>
+                            {
+                                ["service.name"] = "Anh Em Motor",
+                                ["deployment.environment"] =
+                                    configuration.GetValue<string>("ASPNETCORE_ENVIRONMENT") ?? "Production"
+                            };
+                        }))
+            .WriteTo
+            .Logger(
+                lc => lc
+                .Filter
+                    .ByIncludingOnly(le => !le.Properties.ContainsKey("StatusCode"))
+                    .WriteTo
+                    .Console())
             .CreateLogger();
 
         return services;
@@ -71,7 +99,7 @@ public static class ObservabilityExtensions
         this IServiceCollection services,
         IConfiguration configuration,
         string serviceName,
-        string serviceVersion)
+        string? serviceVersion = null)
     {
         var otlpEndpoint = configuration.GetValue<string>("OpenTelemetry:OtlpEndpoint") ?? "http://localhost:4317";
         var resourceBuilder = ResourceBuilder.CreateDefault().AddService(serviceName, serviceVersion);
@@ -100,7 +128,13 @@ public static class ObservabilityExtensions
                         .AddAspNetCoreInstrumentation()
                         .AddHttpClientInstrumentation()
                         .AddRuntimeInstrumentation()
-                        .AddPrometheusExporter();
+                        .AddOtlpExporter(
+                            (otlpOptions, metricReaderOptions) =>
+                            {
+                                otlpOptions.Endpoint = new Uri(otlpEndpoint);
+                                otlpOptions.Protocol = OtlpExportProtocol.Grpc;
+                                metricReaderOptions.PeriodicExportingMetricReaderOptions.ExportIntervalMilliseconds = 5000;
+                            });
                 });
 
         return services;

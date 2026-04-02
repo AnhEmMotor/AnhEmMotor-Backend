@@ -171,6 +171,7 @@ public sealed class UpdateOutputForManagerCommandHandler(
         }
 
         var updated = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
+        ArgumentNullException.ThrowIfNull(updated);
 
         return updated.Adapt<OrderDetailResponse>();
     }
