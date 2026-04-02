@@ -286,8 +286,7 @@ Configure initial data seeding:
 
   ```json
   "OpenTelemetry": {
-    "OtlpEndpoint": "http://localhost:4317",
-    "LokiEndpoint": "http://localhost:3100"
+    "OtlpEndpoint": "http://localhost:4317"
   },
   ```
 
@@ -493,7 +492,6 @@ The following secrets need to be set up in the GitHub repository:
 | `PROTECTED_USERS_LIST`             | Un-deletable users (JSON Array)          | `["admin@anhem.com:Admin@123456"]`                                                                       |
 | `DEFAULT_ROLES_FOR_NEW_USER_LIST`  | Default roles for new users (JSON Array) | `["User"]`                                                                                               |
 | `OTLP_ENDPOINT`                    | OpenTelemetry OTLP Endpoint              | `http://your-otel-collector:4317`                                                                        |
-| `LOKI_ENDPOINT`                    | Grafana Loki Endpoint                    | `http://your-loki-server:3100`                                                                           |
 
 ### Array Secrets (SuperRoles, ProtectedUsers, DefaultRoles)
 
@@ -893,8 +891,7 @@ Cấu hình seeding dữ liệu ban đầu:
 
   ```json
   "OpenTelemetry": {
-    "OtlpEndpoint": "http://localhost:4317",
-    "LokiEndpoint": "http://localhost:3100"
+    "OtlpEndpoint": "http://localhost:4317"
   },
   ```
 
@@ -1100,7 +1097,6 @@ Cần setup các secrets sau trong GitHub repository:
 | `PROTECTED_USERS_LIST`             | Người dùng không thể xóa (JSON Array)     | `["admin@anhem.com:Admin@123456"]`                                                                       |
 | `DEFAULT_ROLES_FOR_NEW_USER_LIST`  | Roles mặc định cho user mới (JSON Array)  | `["User"]`                                                                                               |
 | `OTLP_ENDPOINT`                    | Địa chỉ OpenTelemetry OTLP                | `http://your-otel-collector:4317`                                                                        |
-| `LOKI_ENDPOINT`                    | Địa chỉ Grafana Loki                      | `http://your-loki-server:3100`                                                                           |
 
 ### Array Secrets (SuperRoles, ProtectedUsers, DefaultRoles)
 

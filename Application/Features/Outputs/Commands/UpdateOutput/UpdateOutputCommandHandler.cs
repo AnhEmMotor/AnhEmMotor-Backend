@@ -3,7 +3,6 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Domain.Constants;
-
 using Domain.Constants.Order;
 using Mapster;
 using MediatR;
@@ -69,6 +68,7 @@ public sealed class UpdateOutputCommandHandler(
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         var updated = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
+        ArgumentNullException.ThrowIfNull(updated);
 
         return updated.Adapt<OrderDetailResponse>();
     }

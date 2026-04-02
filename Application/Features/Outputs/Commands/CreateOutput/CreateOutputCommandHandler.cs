@@ -73,6 +73,7 @@ public sealed class CreateOutputCommandHandler(
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         var created = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
+        ArgumentNullException.ThrowIfNull(created);
 
         return created.Adapt<OrderDetailResponse>();
     }

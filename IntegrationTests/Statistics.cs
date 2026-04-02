@@ -1063,7 +1063,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         {
             UserName = $"u1_{uniqueId}",
             Email = $"u1_{uniqueId}@test.com",
-            CreatedAt = DateTime.UtcNow.AddMonths(-1).AddDays(1)
+            CreatedAt = new DateTimeOffset(DateTime.UtcNow.AddMonths(-1).Year, DateTime.UtcNow.AddMonths(-1).Month, 15, 0, 0, 0, TimeSpan.Zero)
         };
         var u2 = new ApplicationUser
         {
