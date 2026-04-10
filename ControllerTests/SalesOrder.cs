@@ -11,6 +11,7 @@ using Application.Features.Outputs.Commands.UpdateOutput;
 using Application.Features.Outputs.Commands.UpdateOutputForManager;
 using Application.Features.Outputs.Commands.UpdateOutputStatus;
 using Application.Features.Outputs.Queries.GetDeletedOutputsList;
+using Application.Features.Outputs.Queries.GetOrderLockedStatuses;
 using Application.Features.Outputs.Queries.GetOutputById;
 using Application.Features.Outputs.Queries.GetOutputsByUserId;
 using Application.Features.Outputs.Queries.GetOutputsList;
@@ -256,20 +257,32 @@ public class SalesOrder
     }
 
     [Fact(DisplayName = "SO_110 - GetLockedStatuses - Lấy danh sách trạng thái bị khóa")]
-    public void GetLockedStatuses_ReturnsValidList()
+    public async Task GetLockedStatuses_ReturnsValidList()
     {
-        var result = _controller.GetLockedStatuses() as OkObjectResult;
+        var expectedResponse = new OrderLockStatusResponse
+        {
+            BuyerAndProducts = [ OrderStatus.Completed ],
+            DeliveryInfo = [ OrderStatus.Completed ],
+            Notes = [ OrderStatus.Completed ]
+        };
+        _mediatorMock.Setup(m => m.Send(It.IsAny<GetOrderLockedStatusesQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<OrderLockStatusResponse>.Success(expectedResponse));
 
-        result.Should().NotBeNull();
-        result!.StatusCode.Should().Be(200);
-        var value = result.Value as OrderLockStatusResponse;
+        _controller.Should().NotBeNull();
+
+        var result = await _controller!.GetLockedStatusesAsync(CancellationToken.None).ConfigureAwait(true);
+
+        var okResult = result as OkObjectResult;
+        okResult.Should().NotBeNull();
+        okResult!.StatusCode.Should().Be(200);
+        var value = okResult.Value as OrderLockStatusResponse;
         value.Should().NotBeNull();
         value!.BuyerAndProducts.Should().Contain(OrderStatus.Completed);
         value.DeliveryInfo.Should().Contain(OrderStatus.Completed);
         value.Notes.Should().Contain(OrderStatus.Completed);
     }
 
-    [Fact(DisplayName = "SO_093 - DeleteManyOutputs - Xa nhi?u don hng")]
+    [Fact(DisplayName = "SO_093 - DeleteManyOutputs - Xoá nhiều đơn hàng")]
     public async Task DeleteManyOutputs_ValidRequest_DeletesMultipleOrders()
     {
         var request = new DeleteManyOutputsCommand { Ids = [ 1, 2, 3 ] };

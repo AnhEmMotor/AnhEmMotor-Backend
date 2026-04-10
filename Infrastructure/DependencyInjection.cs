@@ -81,8 +81,11 @@ public static class DependencyInjection
         services.AddScoped<IProtectedEntityManagerService, ProtectedEntityManagerService>();
         services.AddScoped<IProtectedProductCategoryService, ProtectedProductCategoryService>();
         services.AddScoped<IFileStorageService, LocalFileStorageService>();
+        services.AddScoped<IExternalAuthService, ExternalAuthService>();
         services.AddScoped<ISievePaginator, SievePaginator>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+        services.AddHttpClient();
 
         services.Scan(
             scan => scan

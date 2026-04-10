@@ -14,6 +14,8 @@ namespace Application.ApiContracts.Auth.Responses
 
         public string? FullName { get; set; }
 
+        public string? AvatarUrl { get; set; }
+
         public string? Status { get; set; }
 
         public IEnumerable<string>? AuthMethods { get; set; }

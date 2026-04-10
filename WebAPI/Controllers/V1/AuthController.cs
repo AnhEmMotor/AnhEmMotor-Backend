@@ -1,11 +1,13 @@
 ﻿using Application.ApiContracts.Auth.Responses;
 using Application.Common.Models;
+using Application.Features.Auth.Commands.FacebookLogin;
 using Application.Features.Auth.Commands.GoogleLogin;
 using Application.Features.Auth.Commands.Login;
 using Application.Features.Auth.Commands.LoginForManager;
 using Application.Features.Auth.Commands.Logout;
 using Application.Features.Auth.Commands.RefreshToken;
 using Application.Features.Auth.Commands.Register;
+using Application.Features.Auth.Queries.GetExternalAuthConfig;
 using Application.Interfaces.Services;
 using Asp.Versioning;
 using Infrastructure.Authorization.Attribute;
@@ -99,12 +101,13 @@ public class AuthController(IMediator mediator, IHttpTokenAccessorService httpTo
     }
 
     /// <summary>
-    /// Đăng nhập bằng Google (placeholder - cần cấu hình Google OAuth)
+    /// Đăng nhập bằng Google
     /// </summary>
     [HttpPost("google")]
     [AnonymousOnly]
     [EnableRateLimiting("public_api")]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status501NotImplemented)]
+    [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GoogleLoginAsync(
         [FromBody] GoogleLoginCommand command,
         CancellationToken cancellationToken)
@@ -114,17 +117,19 @@ public class AuthController(IMediator mediator, IHttpTokenAccessorService httpTo
     }
 
     /// <summary>
-    /// Đăng nhập bằng Facebook (placeholder - cần cấu hình Facebook OAuth)
+    /// Đăng nhập bằng Facebook
     /// </summary>
     [HttpPost("facebook")]
     [AnonymousOnly]
     [EnableRateLimiting("public_api")]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status501NotImplemented)]
-    public IActionResult FacebookLoginAsync()
+    [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> FacebookLoginAsync(
+        [FromBody] FacebookLoginCommand command,
+        CancellationToken cancellationToken)
     {
-        return StatusCode(
-            501,
-            new ErrorResponse() { Errors = [ new ErrorDetail() { Message = "Facebook login not implemented yet." } ] });
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
     }
 
     /// <summary>
@@ -145,6 +150,19 @@ public class AuthController(IMediator mediator, IHttpTokenAccessorService httpTo
     {
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
 
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy cấu hình các dịch vụ xác thực bên ngoài
+    /// </summary>
+    [HttpGet("external-config")]
+    [AllowAnonymous]
+    [SwaggerOperation(Summary = "Lấy cấu hình Social Login", Description = "Lấy Google Client ID và Facebook App ID")]
+    [ProducesResponseType(typeof(ExternalAuthConfigResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetExternalAuthConfigAsync(CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new GetExternalAuthConfigQuery(), cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 }

@@ -85,7 +85,7 @@ public sealed class UpdateOutputForManagerCommandHandler(
             }
         }
 
-        if(OrderLockStatus.LockedStatuses.Contains(output.StatusId ?? string.Empty))
+        if(OrderLockStatus.BuyerAndProductsLockedStatuses.Contains(output.StatusId ?? string.Empty))
         {
             if(request.OutputInfos.Count != output.OutputInfos.Count ||
                 request.OutputInfos.Any(ri => !output.OutputInfos.Any(oi => oi.Id == ri.Id)))

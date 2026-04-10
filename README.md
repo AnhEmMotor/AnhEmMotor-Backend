@@ -264,7 +264,24 @@ Configure default roles and users:
 - **DefaultRolesForNewUsers**: Roles automatically assigned to newly registered users
   - Can have multiple default roles: `["User", "Customer", "Member"]`
 
-### 7. Seeding Options (Optional)
+### 7. External Authentication (Google & Facebook)
+
+Configure Google and Facebook Client IDs and Secrets for Social Login:
+
+```json
+"Authentication": {
+  "Google": {
+    "ClientId": "your-google-client-id",
+    "ClientSecret": "your-google-client-secret"
+  },
+  "Facebook": {
+    "AppId": "your-facebook-app-id",
+    "AppSecret": "your-facebook-app-secret"
+  }
+}
+```
+
+### 8. Seeding Options (Optional)
 
 Configure initial data seeding:
 
@@ -444,11 +461,50 @@ https://localhost:7001/swagger
    - **HTTPS:** `https://localhost:7001`
    - **HTTP:** `http://localhost:5000`
 
-After running the application, access the Swagger UI to view the API documentation:
+## 5. Social Login Configuration Guide
 
-```
-https://localhost:7001/swagger
-```
+If you don't have Social Login credentials yet, follow these steps to create your own Client ID and Client Secret:
+
+### 1. Google Social Login (Google Cloud Console)
+
+1.  Go to [Google Cloud Console](https://console.cloud.google.com/).
+2.  **Create a Project**: Click the project dropdown top-left -> **"New Project"** -> Enter name -> **"Create"**.
+3.  **Configure OAuth Consent Screen**:
+    - Search for **"APIs & Services"** > **"OAuth consent screen"**.
+    - User Type: Select **External** -> **"Create"**.
+    - **App information**: Fill in App name, User support email, and Developer contact information. Click **"Save and Continue"**.
+    - **Scopes**: Click **"Add or Remove Scopes"** -> Search and select `.../auth/userinfo.email` and `.../auth/userinfo.profile` -> **"Update"** -> **"Save and Continue"**.
+    - **Test users**: Add your email to test before publishing.
+4.  **Create Credentials**:
+    - Go to **"Credentials"** > **"Create Credentials"** > **"OAuth client ID"**.
+    - Application type: Select **Web application**.
+    - Name: Enter your app name (e.g., "AnhEmMotor Web").
+    - **Authorized JavaScript origins**:
+      - `https://localhost:5173` (Management UI)
+      - `http://localhost:3000` (Store UI)
+    - **Authorized redirect URIs**:
+      - `https://localhost:7001/signin-google` (Backend API)
+5.  **Get Credentials**: A dialog will appear with your **Client ID** and **Client Secret**. Copy them to your `appsettings.json`.
+
+### 2. Facebook Social Login (Meta for Developers)
+
+1.  Go to [Meta for Developers](https://developers.facebook.com/).
+2.  **Create an App**:
+    - Click **"My Apps"** -> **"Create App"**.
+    - Select **"Authenticate and request data from users with Facebook Login"** -> **"Next"**.
+    - Fill in App Name and Contact Email -> **"Create app"**.
+3.  **Configure Facebook Login**:
+    - In the App Dashboard, find **"Facebook Login"** product -> click **"Set up"**.
+    - Select **"Web"**. You can skip the Quickstart steps.
+4.  **Get Credentials**:
+    - Go to **"App settings"** > **"Basic"**.
+    - Copy your **App ID** and **App Secret**.
+    - Fill in **Privacy Policy URL** (e.g., `https://yourdomain.com/privacy`).
+5.  **Configure Redirect URIs**:
+    - Go to **"Facebook Login"** > **"Settings"**.
+    - Under **"Client OAuth settings"**, add your redirect URIs to **"Valid OAuth Redirect URIs"**:
+      - `https://localhost:7001/signin-facebook`
+    - Ensure **"Embedded Browser OAuth Login"** is turned on.
 
 # 5. Test Environment Configuration (Required)
 
@@ -492,6 +548,10 @@ The following secrets need to be set up in the GitHub repository:
 | `PROTECTED_USERS_LIST`             | Un-deletable users (JSON Array)          | `["admin@anhem.com:Admin@123456"]`                                                                       |
 | `DEFAULT_ROLES_FOR_NEW_USER_LIST`  | Default roles for new users (JSON Array) | `["User"]`                                                                                               |
 | `OTLP_ENDPOINT`                    | OpenTelemetry OTLP Endpoint              | `http://your-otel-collector:4317`                                                                        |
+| `GOOGLE_CLIENT_ID`                 | Google OAuth Client ID                   | `your-google-client-id.apps.googleusercontent.com`                                                       |
+| `GOOGLE_CLIENT_SECRET`             | Google OAuth Client Secret               | `GOCSPX-your-google-secret`                                                                              |
+| `FACEBOOK_APP_ID`                  | Facebook App ID                          | `your-facebook-app-id`                                                                                   |
+| `FACEBOOK_APP_SECRET`              | Facebook App Secret                      | `your-facebook-app-secret`                                                                               |
 
 ### Array Secrets (SuperRoles, ProtectedUsers, DefaultRoles)
 
@@ -866,10 +926,27 @@ Cấu hình roles và users mặc định:
     	"support@anhem.com:Support@2024"
     ]
     ```
-- **DefaultRolesForNewUsers**: Roles được gán tự động cho user mới đăng ký
-  - Có thể có nhiều default roles: `["User", "Customer", "Member"]`
+- **DefaultRolesForNewUsers**: Các Role mặc định được gán cho người dùng mới đăng ký
+  - Có thể gán nhiều role: `["User", "Customer", "Member"]`
 
-### 7. Seeding Options (Tùy chọn)
+### 7. Cấu hình Đăng nhập mạng xã hội (Google & Facebook)
+
+Cấu hình Client ID và Secret cho Google và Facebook:
+
+```json
+"Authentication": {
+  "Google": {
+    "ClientId": "your-google-client-id",
+    "ClientSecret": "your-google-client-secret"
+  },
+  "Facebook": {
+    "AppId": "your-facebook-app-id",
+    "AppSecret": "your-facebook-app-secret"
+  }
+}
+```
+
+### 8. Seeding Options (Tùy chọn)
 
 Cấu hình seeding dữ liệu ban đầu:
 
@@ -1072,7 +1149,52 @@ Dự án sử dụng **Testcontainers** để tự động tạo môi trường 
     - Thực thi Test.
     - Tự động dọn dẹp sau khi xong.
 
-# 6. GitHub Secrets Configuration (Cho Production Deploy)
+# 6. Hướng dẫn Cấu hình Đăng nhập Mạng xã hội
+
+Nếu bạn chưa có thông tin xác thực Social Login, hãy làm theo các bước sau để tự tạo Client ID và Client Secret:
+
+### 1. Đăng nhập Google (Google Cloud Console)
+
+1.  Truy cập [Google Cloud Console](https://console.cloud.google.com/).
+2.  **Tạo Project**: Click vào Project dropdown ở góc trên bên trái -> **"New Project"** -> Nhập tên dự án -> **"Create"**.
+3.  **Cấu hình Màn hình ID OAuth**:
+    - Tìm kiếm **"APIs & Services"** > **"OAuth consent screen"**.
+    - User Type: Chọn **External** -> **"Create"**.
+    - **Thông tin ứng dụng**: Điền tên App, User support email, và Developer contact information. Nhấn **"Save and Continue"**.
+    - **Phạm vi (Scopes)**: Nhấn **"Add or Remove Scopes"** -> Tìm và chọn `.../auth/userinfo.email` và `.../auth/userinfo.profile` -> **"Update"** -> **"Save and Continue"**.
+    - **Test users**: Thêm email của bạn để test trước khi publish.
+4.  **Tạo Credentials**:
+    - Vào mục **"Credentials"** > **"Create Credentials"** > **"OAuth client ID"**.
+    - Application type: Chọn **Web application**.
+    - Name: Nhập tên ứng dụng của bạn (ví dụ: "AnhEmMotor Web").
+    - **Authorized JavaScript origins**:
+      - `https://localhost:5173` (Giao diện Quản lý)
+      - `http://localhost:3000` (Giao diện Cửa hàng)
+    - **Authorized redirect URIs**:
+      - `https://localhost:7001/signin-google` (Đầu API Backend)
+5.  **Lấy thông tin**: Một hộp thoại sẽ hiện ra chứa **Client ID** và **Client Secret**. Hãy copy chúng vào file `appsettings.json` của bạn.
+
+### 2. Đăng nhập Facebook (Meta for Developers)
+
+1.  Truy cập [Meta for Developers](https://developers.facebook.com/).
+2.  **Tạo Ứng dụng**:
+    - Click **"My Apps"** -> **"Create App"**.
+    - Chọn **"Authenticate and request data from users with Facebook Login"** -> **"Next"**.
+    - Điền App Name và Contact Email -> **"Create app"**.
+3.  **Cấu hình Facebook Login**:
+    - Trong App Dashboard, tìm sản phẩm **"Facebook Login"** -> nhấn **"Set up"**.
+    - Chọn **"Web"**. Bạn có thể bỏ qua các bước Quickstart.
+4.  **Lấy thông tin**:
+    - Vào mục **"App settings"** > **"Basic"**.
+    - Sao chép **App ID** và **App Secret**.
+    - Điền **Privacy Policy URL** (ví dụ: `https://yourdomain.com/privacy`).
+5.  **Cấu hình Redirect URIs**:
+    - Vào mục **"Facebook Login"** > **"Settings"**.
+    - Tại phần **"Client OAuth settings"**, thêm redirect URIs vào mục **"Valid OAuth Redirect URIs"**:
+      - `https://localhost:7001/signin-facebook`
+    - Đảm bảo **"Embedded Browser OAuth Login"** đang được bật (ON).
+
+# 7. GitHub Secrets Configuration (Cho Production Deploy)
 
 Cần setup các secrets sau trong GitHub repository:
 
@@ -1097,6 +1219,10 @@ Cần setup các secrets sau trong GitHub repository:
 | `PROTECTED_USERS_LIST`             | Người dùng không thể xóa (JSON Array)     | `["admin@anhem.com:Admin@123456"]`                                                                       |
 | `DEFAULT_ROLES_FOR_NEW_USER_LIST`  | Roles mặc định cho user mới (JSON Array)  | `["User"]`                                                                                               |
 | `OTLP_ENDPOINT`                    | Địa chỉ OpenTelemetry OTLP                | `http://your-otel-collector:4317`                                                                        |
+| `GOOGLE_CLIENT_ID`                 | Google OAuth Client ID                    | `your-google-client-id.apps.googleusercontent.com`                                                       |
+| `GOOGLE_CLIENT_SECRET`             | Google OAuth Client Secret                | `GOCSPX-your-google-secret`                                                                              |
+| `FACEBOOK_APP_ID`                  | Facebook App ID                           | `your-facebook-app-id`                                                                                   |
+| `FACEBOOK_APP_SECRET`              | Facebook App Secret                       | `your-facebook-app-secret`                                                                               |
 
 ### Array Secrets (SuperRoles, ProtectedUsers, DefaultRoles)
 
