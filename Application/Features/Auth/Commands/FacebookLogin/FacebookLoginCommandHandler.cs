@@ -4,14 +4,14 @@ using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Services;
 using MediatR;
 
-namespace Application.Features.Auth.Commands.GoogleLogin;
+namespace Application.Features.Auth.Commands.FacebookLogin;
 
-public class GoogleLoginCommandHandler(
+public class FacebookLoginCommandHandler(
     IExternalAuthService externalAuthService,
     IIdentityService identityService,
     ITokenManagerService tokenManagerService,
     IHttpTokenAccessorService httpTokenAccessorService,
-    IUserUpdateRepository userUpdateRepository) : IRequestHandler<GoogleLoginCommand, Result<LoginResponse>>
+    IUserUpdateRepository userUpdateRepository) : IRequestHandler<FacebookLoginCommand, Result<LoginResponse>>
 {
     private readonly IExternalAuthService externalAuthService = externalAuthService ??
         throw new ArgumentNullException(nameof(externalAuthService));
@@ -24,9 +24,11 @@ public class GoogleLoginCommandHandler(
     private readonly IUserUpdateRepository userUpdateRepository = userUpdateRepository ??
         throw new ArgumentNullException(nameof(userUpdateRepository));
 
-    public async Task<Result<LoginResponse>> Handle(GoogleLoginCommand request, CancellationToken cancellationToken)
+    public async Task<Result<LoginResponse>> Handle(FacebookLoginCommand request, CancellationToken cancellationToken)
     {
-        var externalUserResult = await externalAuthService.ValidateGoogleTokenAsync(request.IdToken, cancellationToken)
+        var externalUserResult = await externalAuthService.ValidateFacebookTokenAsync(
+            request.AccessToken,
+            cancellationToken)
             .ConfigureAwait(false);
 
         if(externalUserResult.IsFailure || externalUserResult.Value is null)

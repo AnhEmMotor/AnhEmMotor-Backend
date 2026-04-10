@@ -123,6 +123,22 @@ public class Auth
         result.Should().BeOfType<OkObjectResult>();
         _mediatorMock.Verify(m => m.Send(It.IsAny<LogoutCommand>(), It.IsAny<CancellationToken>()), Times.Once);
     }
+
+    [Fact(DisplayName = "AUTH_022 - Google Login API - Thành công (200)")]
+    public async Task AUTH_022_GoogleLogin_Api_Success()
+    {
+        var command = new GoogleLoginCommand { IdToken = "valid_token" };
+        var loginResponse = new LoginResponse { AccessToken = "abc", ExpiresAt = DateTimeOffset.UtcNow.AddMinutes(5) };
+
+        _mediatorMock.Setup(m => m.Send(It.IsAny<GoogleLoginCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<LoginResponse>.Success(loginResponse));
+
+        var result = await _controller.GoogleLoginAsync(command, CancellationToken.None).ConfigureAwait(true);
+
+        result.Should().BeOfType<OkObjectResult>();
+        var okResult = result as OkObjectResult;
+        okResult!.Value.Should().BeEquivalentTo(loginResponse);
+    }
 #pragma warning restore CRR0035
 #pragma warning restore IDE0079
 }

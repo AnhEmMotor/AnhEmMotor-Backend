@@ -34,6 +34,10 @@ jobs:
           ENABLE_DATABASE_SEEDING: ${{ secrets.ENABLE_DATABASE_SEEDING || 'false' }}
           COOKIE_DOMAIN: ${{ secrets.COOKIE_DOMAIN }}
           OTLP_ENDPOINT: ${{ secrets.OTLP_ENDPOINT }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          FACEBOOK_APP_ID: ${{ secrets.FACEBOOK_APP_ID }}
+          FACEBOOK_APP_SECRET: ${{ secrets.FACEBOOK_APP_SECRET }}
         run: >
           jq '
             .Provider = "PostgreSql" |
@@ -49,7 +53,10 @@ jobs:
             .SeedingOptions.RunDataSeedingOnStartup = (env.ENABLE_DATABASE_SEEDING | fromjson) |
             .CookieDomain = env.COOKIE_DOMAIN |
             .OpenTelemetry.OtlpEndpoint = env.OTLP_ENDPOINT |
-            .OpenTelemetry.OtlpEndpoint = env.OTLP_ENDPOINT
+            .Authentication.Google.ClientId = env.GOOGLE_CLIENT_ID |
+            .Authentication.Google.ClientSecret = env.GOOGLE_CLIENT_SECRET |
+            .Authentication.Facebook.AppId = env.FACEBOOK_APP_ID |
+            .Authentication.Facebook.AppSecret = env.FACEBOOK_APP_SECRET
           ' appsettings.Production.json > tmp.json && mv tmp.json appsettings.Production.json
       - name: Restore dependencies
         run: dotnet restore
