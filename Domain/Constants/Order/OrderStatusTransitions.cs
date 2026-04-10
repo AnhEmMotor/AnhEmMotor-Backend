@@ -7,7 +7,12 @@ public static class OrderStatusTransitions
     {
         {
             OrderStatus.Pending,
-            [ OrderStatus.ConfirmedCod, OrderStatus.PaidProcessing, OrderStatus.WaitingDeposit, OrderStatus.Cancelled ]
+            [ OrderStatus.ConfirmedCod, OrderStatus.PaidProcessing, OrderStatus.WaitingDeposit, OrderStatus.WaitingInstallment, OrderStatus.Cancelled ]
+        },
+        { OrderStatus.WaitingInstallment, [ OrderStatus.InstallmentApproved, OrderStatus.Cancelled ] },
+        {
+            OrderStatus.InstallmentApproved,
+            [ OrderStatus.Delivering, OrderStatus.WaitingPickup, OrderStatus.Completed, OrderStatus.Refunding ]
         },
         {
             OrderStatus.ConfirmedCod,
@@ -23,24 +28,20 @@ public static class OrderStatusTransitions
             [ OrderStatus.Delivering, OrderStatus.WaitingPickup, OrderStatus.Completed, OrderStatus.Refunding ]
         },
         { OrderStatus.Delivering, [ OrderStatus.Completed, OrderStatus.Refunding ] },
-        { OrderStatus.WaitingPickup, [ OrderStatus.Completed, OrderStatus.Refunding ] },
-        { OrderStatus.Cancelled, [] },
+        { OrderStatus.WaitingPickup, [ OrderStatus.Completed, OrderStatus.Refunding, OrderStatus.Cancelled ] },
+        { OrderStatus.Completed, [] },
         { OrderStatus.Refunding, [ OrderStatus.Refunded ] },
-        { OrderStatus.Refunded, [] },
-        { OrderStatus.Completed, [] }
+        { OrderStatus.Cancelled, [] },
+        { OrderStatus.Refunded, [] }
     };
 
     public static bool IsTransitionAllowed(string? currentStatus, string? newStatus)
     {
         if(string.IsNullOrWhiteSpace(currentStatus) || string.IsNullOrWhiteSpace(newStatus))
-        {
             return false;
-        }
 
         if(!AllowedTransitions.TryGetValue(currentStatus, out var allowedStatuses))
-        {
             return false;
-        }
 
         return allowedStatuses.Contains(newStatus);
     }
@@ -50,9 +51,7 @@ public static class OrderStatusTransitions
     public static HashSet<string> GetAllowedTransitions(string? currentStatus)
     {
         if(string.IsNullOrWhiteSpace(currentStatus))
-        {
             return [];
-        }
 
         return AllowedTransitions.TryGetValue(currentStatus, out var allowed) ? allowed : [];
     }

@@ -616,22 +616,22 @@
             Lấy danh sách trạng thái đơn hàng.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetStatusMap">
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetStatusMap(System.Threading.CancellationToken)">
             <summary>
             Lấy bản đồ tên hiển thị nội bộ của trạng thái đơn hàng (Tiếng Việt).
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetTransitionMap">
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetTransitionMap(System.Threading.CancellationToken)">
             <summary>
             Lấy sơ đồ chuyển đổi trạng thái đơn hàng.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetLockedStatuses">
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetLockedStatuses(System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách trạng thái đơn hàng bị khóa không cho phép sửa thông tin chi tiết.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetCancellableStatuses">
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetCancellableStatuses(System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách các mã trạng thái có thể hủy đơn hàng trực tiếp.
             </summary>

@@ -13,12 +13,14 @@
         public const string WaitingDeposit = "waiting_deposit";
         public const string WaitingPickup = "waiting_pickup";
         public const string Cancelled = "cancelled";
+        public const string WaitingInstallment = "waiting_installment";
+        public const string InstallmentApproved = "installment_approved";
 
-        public static readonly HashSet<string> All = [ Completed, ConfirmedCod, Delivering, DepositPaid, PaidProcessing, Pending, Refunded, Refunding, WaitingDeposit, WaitingPickup, Cancelled ];
+        public static readonly HashSet<string> All = [ Completed, ConfirmedCod, Delivering, DepositPaid, PaidProcessing, Pending, Refunded, Refunding, WaitingDeposit, WaitingPickup, Cancelled, WaitingInstallment, InstallmentApproved ];
 
-        public static readonly HashSet<string> BookingPhases = [ ConfirmedCod, Delivering, DepositPaid, PaidProcessing, Pending, Refunded, Refunding, WaitingDeposit, WaitingPickup ];
+        public static readonly HashSet<string> BookingPhases = [ ConfirmedCod, Delivering, DepositPaid, PaidProcessing, Pending, Refunded, Refunding, WaitingDeposit, WaitingPickup, WaitingInstallment, InstallmentApproved ];
 
-        public static readonly HashSet<string> NotDeletedPhases = [ Completed, Refunded ];
+        public static readonly HashSet<string> NotDeletedPhases = [ Completed, Refunded, Cancelled ];
 
         public static bool IsValid(string? value)
         {
@@ -48,6 +50,8 @@
             PaidProcessing => "Đã thanh toán (Chờ xử lý)",
             WaitingDeposit => "Chờ đặt cọc",
             DepositPaid => "Đã đặt cọc (Chờ xử lý)",
+            WaitingInstallment => "Chờ duyệt trả góp",
+            InstallmentApproved => "Đã duyệt trả góp (Chờ xử lý)",
             Delivering => "Đang giao hàng",
             WaitingPickup => "Chờ lấy hàng tại cửa hàng",
             Completed => "Đã hoàn thành",

@@ -14,6 +14,10 @@ using Application.Features.Outputs.Queries.GetDeletedOutputsList;
 using Application.Features.Outputs.Queries.GetOutputById;
 using Application.Features.Outputs.Queries.GetOutputsByUserId;
 using Application.Features.Outputs.Queries.GetOutputsList;
+using Application.Features.Outputs.Queries.GetOrderCancellableStatuses;
+using Application.Features.Outputs.Queries.GetOrderLockedStatuses;
+using Application.Features.Outputs.Queries.GetOrderStatusMap;
+using Application.Features.Outputs.Queries.GetOrderStatusTransitionMap;
 using Application.Features.Outputs.Queries.GetOutputStatusList;
 using Domain.Constants.Order;
 using Domain.Primitives;
@@ -256,13 +260,23 @@ public class SalesOrder
     }
 
     [Fact(DisplayName = "SO_110 - GetLockedStatuses - Lấy danh sách trạng thái bị khóa")]
-    public void GetLockedStatuses_ReturnsValidList()
+    public async Task GetLockedStatuses_ReturnsValidList()
     {
-        var result = _controller.GetLockedStatuses() as OkObjectResult;
+        var expectedResponse = new OrderLockStatusResponse
+        {
+            BuyerAndProducts = [ OrderStatus.Completed ],
+            DeliveryInfo = [ OrderStatus.Completed ],
+            Notes = [ OrderStatus.Completed ]
+        };
+        _mediatorMock.Setup(m => m.Send(It.IsAny<GetOrderLockedStatusesQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<OrderLockStatusResponse>.Success(expectedResponse));
 
-        result.Should().NotBeNull();
-        result!.StatusCode.Should().Be(200);
-        var value = result.Value as OrderLockStatusResponse;
+        var result = await _controller.GetLockedStatuses(CancellationToken.None).ConfigureAwait(true);
+
+        var okResult = result as OkObjectResult;
+        okResult.Should().NotBeNull();
+        okResult!.StatusCode.Should().Be(200);
+        var value = okResult.Value as OrderLockStatusResponse;
         value.Should().NotBeNull();
         value!.BuyerAndProducts.Should().Contain(OrderStatus.Completed);
         value.DeliveryInfo.Should().Contain(OrderStatus.Completed);
