@@ -1,4 +1,6 @@
-﻿using Application.Common.Models;
+﻿using Application.ApiContracts.Auth.Responses;
+using Application.Common.Models;
+using Application.Features.Auth.Commands.GoogleLogin;
 using Application.Features.Auth.Commands.Login;
 using Application.Features.Auth.Commands.LoginForManager;
 using Application.Features.Auth.Commands.Logout;
