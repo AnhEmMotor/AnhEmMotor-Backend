@@ -11,9 +11,9 @@ public sealed class GetOrderStatusTransitionMapQueryHandler : IRequestHandler<Ge
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        
+
         var result = OrderStatusTransitions.GetAllowedTransitionsMap();
-        
+
         return Task.FromResult(Result<Dictionary<string, HashSet<string>>>.Success(result));
     }
 }

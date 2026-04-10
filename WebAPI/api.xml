@@ -87,7 +87,7 @@
             Đăng nhập bằng Username/Email và Password - Dành cho quản lý
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.AuthController.GetExternalAuthConfig(System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.AuthController.GetExternalAuthConfigAsync(System.Threading.CancellationToken)">
             <summary>
             Lấy cấu hình các dịch vụ xác thực bên ngoài
             </summary>
@@ -616,22 +616,22 @@
             Lấy danh sách trạng thái đơn hàng.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetStatusMap(System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetStatusMapAsync(System.Threading.CancellationToken)">
             <summary>
             Lấy bản đồ tên hiển thị nội bộ của trạng thái đơn hàng (Tiếng Việt).
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetTransitionMap(System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetTransitionMapAsync(System.Threading.CancellationToken)">
             <summary>
             Lấy sơ đồ chuyển đổi trạng thái đơn hàng.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetLockedStatuses(System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetLockedStatusesAsync(System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách trạng thái đơn hàng bị khóa không cho phép sửa thông tin chi tiết.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetCancellableStatuses(System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.SalesOrdersController.GetCancellableStatusesAsync(System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách các mã trạng thái có thể hủy đơn hàng trực tiếp.
             </summary>

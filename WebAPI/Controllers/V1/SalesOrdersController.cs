@@ -12,6 +12,10 @@ using Application.Features.Outputs.Commands.UpdateOutput;
 using Application.Features.Outputs.Commands.UpdateOutputForManager;
 using Application.Features.Outputs.Commands.UpdateOutputStatus;
 using Application.Features.Outputs.Queries.GetDeletedOutputsList;
+using Application.Features.Outputs.Queries.GetOrderCancellableStatuses;
+using Application.Features.Outputs.Queries.GetOrderLockedStatuses;
+using Application.Features.Outputs.Queries.GetOrderStatusMap;
+using Application.Features.Outputs.Queries.GetOrderStatusTransitionMap;
 using Application.Features.Outputs.Queries.GetOutputById;
 using Application.Features.Outputs.Queries.GetOutputsByUserId;
 using Application.Features.Outputs.Queries.GetOutputsList;
@@ -20,10 +24,6 @@ using Asp.Versioning;
 using Domain.Constants;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
-using Application.Features.Outputs.Queries.GetOrderStatusMap;
-using Application.Features.Outputs.Queries.GetOrderStatusTransitionMap;
-using Application.Features.Outputs.Queries.GetOrderLockedStatuses;
-using Application.Features.Outputs.Queries.GetOrderCancellableStatuses;
 using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -141,7 +141,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     [HttpGet("status-map")]
     [Authorize]
     [ProducesResponseType(typeof(IEnumerable<object>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetStatusMap(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetStatusMapAsync(CancellationToken cancellationToken)
     {
         var query = new GetOrderStatusMapQuery();
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
@@ -154,7 +154,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     [HttpGet("transition-map")]
     [RequiresAnyPermissions(Outputs.Create, Outputs.Edit)]
     [ProducesResponseType(typeof(Dictionary<string, IEnumerable<string>>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetTransitionMap(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetTransitionMapAsync(CancellationToken cancellationToken)
     {
         var query = new GetOrderStatusTransitionMapQuery();
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
@@ -167,7 +167,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     [HttpGet("locked-statuses")]
     [Authorize]
     [ProducesResponseType(typeof(OrderLockStatusResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetLockedStatuses(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetLockedStatusesAsync(CancellationToken cancellationToken)
     {
         var query = new GetOrderLockedStatusesQuery();
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
@@ -180,7 +180,7 @@ public class SalesOrdersController(IMediator mediator) : ApiController
     [HttpGet("cancellable-statuses")]
     [Authorize]
     [ProducesResponseType(typeof(IEnumerable<string>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetCancellableStatuses(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetCancellableStatusesAsync(CancellationToken cancellationToken)
     {
         var query = new GetOrderCancellableStatusesQuery();
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);

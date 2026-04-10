@@ -160,10 +160,9 @@ public class AuthController(IMediator mediator, IHttpTokenAccessorService httpTo
     [AllowAnonymous]
     [SwaggerOperation(Summary = "Lấy cấu hình Social Login", Description = "Lấy Google Client ID và Facebook App ID")]
     [ProducesResponseType(typeof(ExternalAuthConfigResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetExternalAuthConfig(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetExternalAuthConfigAsync(CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetExternalAuthConfigQuery(), cancellationToken).ConfigureAwait(true);
-
         return HandleResult(result);
     }
 }

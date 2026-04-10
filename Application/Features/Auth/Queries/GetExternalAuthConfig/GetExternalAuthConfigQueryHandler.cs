@@ -12,6 +12,7 @@ public class GetExternalAuthConfigQueryHandler(IConfiguration configuration) : I
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
+        cancellationToken.ThrowIfCancellationRequested();
 
         var response = new ExternalAuthConfigResponse
         {

@@ -11,13 +11,10 @@ using Application.Features.Outputs.Commands.UpdateOutput;
 using Application.Features.Outputs.Commands.UpdateOutputForManager;
 using Application.Features.Outputs.Commands.UpdateOutputStatus;
 using Application.Features.Outputs.Queries.GetDeletedOutputsList;
+using Application.Features.Outputs.Queries.GetOrderLockedStatuses;
 using Application.Features.Outputs.Queries.GetOutputById;
 using Application.Features.Outputs.Queries.GetOutputsByUserId;
 using Application.Features.Outputs.Queries.GetOutputsList;
-using Application.Features.Outputs.Queries.GetOrderCancellableStatuses;
-using Application.Features.Outputs.Queries.GetOrderLockedStatuses;
-using Application.Features.Outputs.Queries.GetOrderStatusMap;
-using Application.Features.Outputs.Queries.GetOrderStatusTransitionMap;
 using Application.Features.Outputs.Queries.GetOutputStatusList;
 using Domain.Constants.Order;
 using Domain.Primitives;
@@ -271,7 +268,9 @@ public class SalesOrder
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetOrderLockedStatusesQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<OrderLockStatusResponse>.Success(expectedResponse));
 
-        var result = await _controller.GetLockedStatuses(CancellationToken.None).ConfigureAwait(true);
+        _controller.Should().NotBeNull();
+
+        var result = await _controller!.GetLockedStatusesAsync(CancellationToken.None).ConfigureAwait(true);
 
         var okResult = result as OkObjectResult;
         okResult.Should().NotBeNull();
@@ -283,7 +282,7 @@ public class SalesOrder
         value.Notes.Should().Contain(OrderStatus.Completed);
     }
 
-    [Fact(DisplayName = "SO_093 - DeleteManyOutputs - Xa nhi?u don hng")]
+    [Fact(DisplayName = "SO_093 - DeleteManyOutputs - Xoá nhiều đơn hàng")]
     public async Task DeleteManyOutputs_ValidRequest_DeletesMultipleOrders()
     {
         var request = new DeleteManyOutputsCommand { Ids = [ 1, 2, 3 ] };
