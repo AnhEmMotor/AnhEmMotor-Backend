@@ -22,9 +22,9 @@ namespace Application.Features.Products.Commands.CreateProduct
                 .WithMessage("Price must be greater than 0.");
 
             RuleFor(x => x.CoverImageUrl)
-                .MaximumLength(100)
+                .MaximumLength(150)
                 .When(x => !string.IsNullOrWhiteSpace(x.CoverImageUrl))
-                .WithMessage("Cover image URL must not exceed 100 characters.");
+                .WithMessage("Cover image URL must not exceed 150 characters.");
 
             RuleFor(x => x.OptionValueIds).NotNull().WithMessage("Option values must be specified (can be empty list).");
         }
