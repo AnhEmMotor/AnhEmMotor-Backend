@@ -1,4 +1,4 @@
-﻿using Domain.Entities;
+using Domain.Entities;
 using Infrastructure.DBContexts;
 using Infrastructure.Seeders;
 using Microsoft.AspNetCore.Identity;
@@ -52,8 +52,12 @@ public static class MigrationExtensions
                 await OutputStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
                 await SupplierStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
                 await PredefinedOptionSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
+                await BrandSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
+                await ProductOptionSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
                 await ProductStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
+                await ProductDataSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
                 await SettingsSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
+
                 await PermissionDataSeeder.SeedPermissionsAsync(dbContext, cancellationToken).ConfigureAwait(true);
                 await ProtectedEntitiesSeeder.SeedProtectedEntitiesAsync(
                     dbContext,

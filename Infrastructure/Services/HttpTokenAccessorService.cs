@@ -1,4 +1,4 @@
-﻿using Application.Interfaces.Services;
+using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -14,12 +14,13 @@ namespace Infrastructure.Services
         {
             var cookieDomain = configuration["CookieDomain"];
 
+            var isHttps = httpContextAccessor.HttpContext?.Request.IsHttps ?? false;
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
                 Expires = expiresAt,
-                Secure = true,
-                SameSite = SameSiteMode.None,
+                Secure = isHttps,
+                SameSite = isHttps ? SameSiteMode.None : SameSiteMode.Lax,
                 Path = "/"
             };
 
@@ -35,11 +36,12 @@ namespace Infrastructure.Services
         {
             var cookieDomain = configuration["CookieDomain"];
 
+            var isHttps = httpContextAccessor.HttpContext?.Request.IsHttps ?? false;
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.None,
+                Secure = isHttps,
+                SameSite = isHttps ? SameSiteMode.None : SameSiteMode.Lax,
                 Path = "/"
             };
 

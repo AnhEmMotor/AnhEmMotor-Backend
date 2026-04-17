@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities
@@ -16,6 +16,9 @@ namespace Domain.Entities
 
         [Column("Name", TypeName = "nvarchar(100)")]
         public string? Name { get; set; }
+
+        [Column("ColorCode", TypeName = "nvarchar(20)")]
+        public string? ColorCode { get; set; }
 
         public Option? Option { get; set; }
 

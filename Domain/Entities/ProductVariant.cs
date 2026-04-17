@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities
@@ -22,6 +22,18 @@ namespace Domain.Entities
 
         [Column("CoverImageUrl", TypeName = "nvarchar(150)")]
         public string? CoverImageUrl { get; set; }
+
+        [Column("VersionName", TypeName = "nvarchar(100)")]
+        public string? VersionName { get; set; }
+
+        [Column("ColorName", TypeName = "nvarchar(100)")]
+        public string? ColorName { get; set; }
+
+        [Column("ColorCode", TypeName = "nvarchar(20)")]
+        public string? ColorCode { get; set; }
+
+        [Column("SKU", TypeName = "nvarchar(50)")]
+        public string? SKU { get; set; }
 
         public Product? Product { get; set; }
 
