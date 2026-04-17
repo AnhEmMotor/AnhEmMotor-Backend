@@ -1,9 +1,11 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace Application.Features.Auth.Commands.RefreshToken;
 
 public sealed class RefreshTokenCommandValidator : AbstractValidator<RefreshTokenCommand>
 {
     public RefreshTokenCommandValidator()
-    { RuleFor(x => x.RefreshToken).NotEmpty().WithMessage("Refresh token is missing."); }
+    { 
+        // Allow empty RefreshToken; the Handler will return 401 Unauthorized if it's missing.
+    }
 }

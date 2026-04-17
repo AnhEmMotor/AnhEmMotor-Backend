@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace Application.ApiContracts.Statistical.Responses
 {
@@ -7,5 +7,9 @@ namespace Application.ApiContracts.Statistical.Responses
         public string? BrandName { get; set; }
 
         public decimal Revenue { get; set; }
+
+        public decimal TotalRevenue { get; set; }
+
+        public int QuantitySold { get; set; }
     }
 }
