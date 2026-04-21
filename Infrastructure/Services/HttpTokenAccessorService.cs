@@ -55,5 +55,11 @@ namespace Infrastructure.Services
 
         public string? GetAuthorizationValueFromHeader()
         { return httpContextAccessor.HttpContext?.Request.Headers.Authorization; }
+
+        public string? GetUserId()
+        {
+            return httpContextAccessor.HttpContext?.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value 
+                   ?? httpContextAccessor.HttpContext?.User?.FindFirst("sub")?.Value;
+        }
     }
 }

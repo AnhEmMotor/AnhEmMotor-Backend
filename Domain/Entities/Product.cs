@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities
@@ -41,7 +41,7 @@ namespace Domain.Entities
         public string? Dimensions { get; set; }
 
         [Column("Wheelbase", TypeName = "nvarchar(20)")]
-        public string? Wheelbase { get; set; }
+        public decimal? Wheelbase { get; set; }
 
         [Column("SeatHeight", TypeName = "nvarchar(20)")]
         public decimal? SeatHeight { get; set; }
@@ -94,7 +94,13 @@ namespace Domain.Entities
         [Column("Description", TypeName = "nvarchar(MAX)")]
         public string? Description { get; set; }
 
+        [Column("Highlights", TypeName = "nvarchar(MAX)")]
+        public string? Highlights { get; set; }
+
         public Brand? Brand { get; set; }
+
+        public ICollection<ProductTechnology> ProductTechnologies { get; set; } = [];
+
 
         public ProductCategory? ProductCategory { get; set; }
 

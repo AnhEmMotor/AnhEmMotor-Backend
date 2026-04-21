@@ -237,6 +237,21 @@
             Khôi phục nhiều phiếu nhập đã bị xóa cùng lúc.
             </summary>
         </member>
+        <member name="T:WebAPI.Controllers.V1.LeadController">
+            <summary>
+            Quản lý Khách hàng tiềm năng (Leads)
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.LeadController.#ctor(MediatR.IMediator)">
+            <summary>
+            Quản lý Khách hàng tiềm năng (Leads)
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.LeadController.GetLeadsAsync(System.Threading.CancellationToken)">
+            <summary>
+            Lấy danh sách Leads
+            </summary>
+        </member>
         <member name="T:WebAPI.Controllers.V1.MediaFileController">
             <summary>
             Quản lý tệp media (ảnh, video, tài liệu).
@@ -295,6 +310,21 @@
         <member name="M:WebAPI.Controllers.V1.MediaFileController.ViewImageWithResizeAsync(System.String,System.Nullable{System.Int32},System.Threading.CancellationToken)">
             <summary>
             Xem ảnh với khả năng resize theo kích thước mong muốn.
+            </summary>
+        </member>
+        <member name="T:WebAPI.Controllers.V1.NotificationController">
+            <summary>
+            Quản lý thông báo thời gian thực (SSE)
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.NotificationController.#ctor(Application.Interfaces.Services.INotificationService)">
+            <summary>
+            Quản lý thông báo thời gian thực (SSE)
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.NotificationController.GetNotificationStreamAsync(System.Threading.CancellationToken)">
+            <summary>
+            Đăng ký nhận thông báo thời gian thực cho Admin/Sale
             </summary>
         </member>
         <member name="T:WebAPI.Controllers.V1.OptionController">
@@ -442,7 +472,7 @@
             Quản lý sản phẩm.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.GetProductsAsync(Application.Features.Products.Queries.GetProductsList.GetProductsRequest,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetProductsAsync(Application.Features.Products.Queries.GetProductsList.GetProductsRequest,System.Nullable{System.Decimal},System.Nullable{System.Decimal},System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách sản phẩm đầy đủ dành cho khách hàng (có phân trang, lọc, tìm kiếm).
             </summary>
@@ -484,6 +514,11 @@
             <summary>
             Lấy danh sách các thuộc tính được định nghĩa sẵn dưới dạng từ điển key-value. Chỉ người dùng có quyền tạo hoặc
             chỉnh sửa sản phẩm mới có thể truy cập.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetOptionsAsync(System.Threading.CancellationToken)">
+            <summary>
+            Lấy danh sách toàn bộ các thuộc tính (Options) và các giá trị của chúng (OptionValues).
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.ProductController.GetInventoryStatuses">

@@ -12,6 +12,7 @@ public static class PredefinedOptionSeeder
         { "Displacement", "Phân khối" },
         { "Condition", "Tình trạng" },
         { "Color", "Màu sắc" },
+        { "Version", "Phiên bản" },
         { "ManufactureYear", "Năm sản xuất" },
         { "BrakeSystem", "Hệ thống phanh" },
         { "Size", "Kích cỡ" },

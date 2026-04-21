@@ -1,4 +1,5 @@
-﻿using Application.ApiContracts.Supplier.Responses;
+using Application.ApiContracts.Permission.Responses;
+using Application.ApiContracts.Supplier.Responses;
 using Domain.Entities;
 using Microsoft.Extensions.Options;
 using Sieve.Models;
@@ -76,6 +77,12 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<ApplicationUser>(p => p.PhoneNumber).CanSort().CanFilter();
         mapper.Property<ApplicationUser>(p => p.Status).CanSort().CanFilter();
         mapper.Property<ApplicationUser>(p => p.DeletedAt).CanSort().CanFilter();
+
+        mapper.Property<ApplicationRole>(p => p.Id).CanSort().CanFilter();
+        mapper.Property<ApplicationRole>(p => p.Name).CanSort().CanFilter();
+
+        mapper.Property<RoleSelectResponse>(p => p.ID).CanSort().CanFilter();
+        mapper.Property<RoleSelectResponse>(p => p.Name).CanSort().CanFilter();
 
         return mapper;
     }

@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Product.Common;
+using Application.ApiContracts.Product.Common;
 using Application.ApiContracts.Product.Responses;
 using Domain.Constants;
 using Domain.Constants.Input;
@@ -43,17 +43,19 @@ public class ProductMappingConfig : IRegister
                     .ToList())
             .Map(
                 dest => dest.Stock,
-                src => src.InputInfos
-                        .Where(ii => ii.InputReceipt != null && InputStatus.IsFinished(ii.InputReceipt.StatusId))
-                        .Sum(ii => ii.RemainingCount) ??
-                    0)
+                src => src.InputInfos != null 
+                        ? src.InputInfos
+                            .Where(ii => ii.InputReceipt != null && InputStatus.IsFinished(ii.InputReceipt.StatusId))
+                            .Sum(ii => ii.RemainingCount) ?? 0
+                        : 0)
 
             .Map(
                 dest => dest.HasBeenBooked,
-                src => src.OutputInfos
-                        .Where(oi => oi.OutputOrder != null && OrderStatus.IsBookingStatus(oi.OutputOrder.StatusId))
-                        .Sum(oi => (long?)oi.Count) ??
-                    0);
+                src => src.OutputInfos != null
+                        ? src.OutputInfos
+                            .Where(oi => oi.OutputOrder != null && OrderStatus.IsBookingStatus(oi.OutputOrder.StatusId))
+                            .Sum(oi => (long?)oi.Count) ?? 0
+                        : 0);
 
         config.NewConfig<VariantRow, ProductVariantDetailForManagerResponse>()
             .Map(
@@ -129,6 +131,10 @@ public class ProductMappingConfig : IRegister
                         PhotoCollection = row.Photos,
                         Stock = row.Stock,
                         HasBeenBooked = row.HasBeenBooked,
+                        VersionName = row.VersionName,
+                        ColorName = row.ColorName,
+                        ColorCode = row.ColorCode,
+                        SKU = row.SKU,
                         StatusStockId = GetStockStatus(available),
                         InventoryStatus = inventoryStatus
                     };
@@ -174,8 +180,25 @@ public class ProductMappingConfig : IRegister
             CompressionRatio = product.CompressionRatio,
             ShortDescription = product.ShortDescription,
             MetaTitle = product.MetaTitle,
-            MetaDescription = product.MetaDescription,
             StatusId = product.StatusId,
+            Highlights = product.ProductTechnologies?.Count > 0 ? System.Text.Json.JsonSerializer.Serialize(
+                product.ProductTechnologies.OrderBy(t => t.DisplayOrder).Select(t => new
+                {
+                    technologyId = t.TechnologyId,
+                    customTitle = t.CustomTitle,
+                    customDescription = t.CustomDescription,
+                    customImageUrl = t.CustomImageUrl,
+                    // Backward compatibility fields for UI rendering
+                    title = t.CustomTitle ?? t.Technology?.DefaultTitle ?? t.Technology?.Name,
+                    tag = t.Technology?.Category?.Name ?? "TECHNOLOGY",
+                    description = t.CustomDescription ?? t.Technology?.DefaultDescription,
+                    image = t.CustomImageUrl ?? t.Technology?.DefaultImageUrl,
+                    // Extra metadata for the form
+                    _defaultTitle = t.Technology?.DefaultTitle,
+                    _defaultDescription = t.Technology?.DefaultDescription,
+                    _defaultImageUrl = t.Technology?.DefaultImageUrl,
+                    _categoryName = t.Technology?.Category?.Name
+                })) : product.Highlights,
             CoverImageUrl = variantResponses.FirstOrDefault()?.CoverImageUrl,
             Stock = (int)totalStock,
             HasBeenBooked = totalBooked,
@@ -226,6 +249,18 @@ public class ProductMappingConfig : IRegister
             ShortDescription = product.ShortDescription,
             MetaTitle = product.MetaTitle,
             MetaDescription = product.MetaDescription,
+            Highlights = product.ProductTechnologies?.Count > 0 ? System.Text.Json.JsonSerializer.Serialize(
+                product.ProductTechnologies.OrderBy(t => t.DisplayOrder).Select(t => new
+                {
+                    technologyId = t.TechnologyId,
+                    customTitle = t.CustomTitle,
+                    customDescription = t.CustomDescription,
+                    customImageUrl = t.CustomImageUrl,
+                    title = t.CustomTitle ?? t.Technology?.DefaultTitle ?? t.Technology?.Name,
+                    tag = t.Technology?.Category?.Name ?? "TECHNOLOGY",
+                    description = t.CustomDescription ?? t.Technology?.DefaultDescription,
+                    image = t.CustomImageUrl ?? t.Technology?.DefaultImageUrl
+                })) : product.Highlights,
             CoverImageUrl = variantResponses.FirstOrDefault()?.CoverImageUrl,
             Variants = variantResponses
         };
@@ -359,7 +394,8 @@ public class ProductMappingConfig : IRegister
     private static long CalculateTotalStock(ProductEntity product)
     {
         return product.ProductVariants
-            .SelectMany(variant => variant.InputInfos)
+            .Where(v => v.InputInfos != null)
+            .SelectMany(variant => variant.InputInfos!)
             .Where(ii => ii.InputReceipt != null && InputStatus.IsFinished(ii.InputReceipt.StatusId))
             .Sum(info => info.RemainingCount ?? 0);
     }
@@ -367,7 +403,8 @@ public class ProductMappingConfig : IRegister
     private static long CalculateTotalBooked(ProductEntity product)
     {
         return product.ProductVariants
-            .SelectMany(variant => variant.OutputInfos)
+            .Where(v => v.OutputInfos != null)
+            .SelectMany(variant => variant.OutputInfos!)
             .Where(info => info.OutputOrder != null && OrderStatus.IsBookingStatus(info.OutputOrder.StatusId))
             .Sum(info => (long)(info.Count ?? 0));
     }

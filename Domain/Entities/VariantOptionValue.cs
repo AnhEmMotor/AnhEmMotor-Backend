@@ -1,10 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities
 {
     [Table("VariantOptionValue")]
-    public class VariantOptionValue
+    public class VariantOptionValue : BaseEntity
     {
         [Key]
         [Column("Id")]

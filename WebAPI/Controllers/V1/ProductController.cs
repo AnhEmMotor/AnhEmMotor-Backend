@@ -1,4 +1,5 @@
-﻿using Application.ApiContracts.Product.Responses;
+using Application.ApiContracts.Product.Responses;
+using Application.ApiContracts.Option.Responses;
 using Application.Common.Models;
 using Application.Features.PredefinedOptions.Queries.GetPredefinedOptionsList;
 using Application.Features.Products.Commands.CreateProduct;
@@ -26,6 +27,10 @@ using Application.Features.Products.Queries.GetProductsListForPriceManagement;
 using Application.Features.Products.Queries.GetProductStoreDetailBySlug;
 using Application.Features.Products.Queries.GetVariantCartDetailsBatch;
 using Application.Features.Products.Queries.GetVariantLiteByProductId;
+using Application.Features.Options.Queries.GetOptionsList;
+using Application.Features.OptionValues.Commands.CreateOptionValue;
+using Application.Features.OptionValues.Commands.UpdateOptionValue;
+using Application.Features.OptionValues.Commands.DeleteOptionValue;
 using Asp.Versioning;
 using Domain.Constants;
 using Domain.Primitives;
@@ -56,9 +61,11 @@ public class ProductController(ISender sender) : ApiController
     [ProducesResponseType(typeof(PagedResult<ProductListStoreResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetProductsAsync(
         [FromQuery] GetProductsRequest request,
+        [FromQuery] decimal? minPrice,
+        [FromQuery] decimal? maxPrice,
         CancellationToken cancellationToken)
     {
-        var query = GetProductsListQuery.FromRequest(request);
+        var query = GetProductsListQuery.FromRequest(request, minPrice, maxPrice);
         var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -172,6 +179,19 @@ public class ProductController(ISender sender) : ApiController
         var query = new GetPredefinedOptionsListQuery();
         var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
 
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy danh sách toàn bộ các thuộc tính (Options) và các giá trị của chúng (OptionValues).
+    /// </summary>
+    [HttpGet("all-options")]
+    [RequiresAnyPermissions(Products.View, Products.Create, Products.Edit, Products.Delete)]
+    [ProducesResponseType(typeof(List<OptionResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetOptionsAsync(CancellationToken cancellationToken)
+    {
+        var query = new GetOptionsListQuery();
+        var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -485,6 +505,41 @@ public class ProductController(ISender sender) : ApiController
             new GetVariantCartDetailsBatchQuery { VariantIds = variantIds },
             cancellationToken)
             .ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    [HttpPost("option-values")]
+    [HasPermission(Products.Create)]
+    [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+    public async Task<IActionResult> CreateOptionValueAsync(
+        [FromBody] CreateOptionValueCommand request,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(request, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    [HttpPut("option-values/{id:int}")]
+    [HasPermission(Products.Edit)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> UpdateOptionValueAsync(
+        int id,
+        [FromBody] UpdateOptionValueCommand request,
+        CancellationToken cancellationToken)
+    {
+        var command = request with { Id = id };
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    [HttpDelete("option-values/{id:int}")]
+    [HasPermission(Products.Delete)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> DeleteOptionValueAsync(
+        int id,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new DeleteOptionValueCommand(id), cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 }

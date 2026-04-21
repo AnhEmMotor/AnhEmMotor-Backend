@@ -26,7 +26,7 @@ public class ProductDetailForManagerResponse
 
     public string? Dimensions { get; set; }
 
-    public string? Wheelbase { get; set; }
+    public decimal? Wheelbase { get; set; }
 
     [JsonPropertyName("seat_height")]
     public decimal? SeatHeight { get; set; }
@@ -100,6 +100,8 @@ public class ProductDetailForManagerResponse
 
     [JsonPropertyName("inventory_status")]
     public string InventoryStatus { get; set; } = Domain.Constants.InventoryStatus.InStock;
+
+    public string? Highlights { get; set; }
 
     public List<ProductVariantDetailForManagerResponse> Variants { get; set; } = [];
 }

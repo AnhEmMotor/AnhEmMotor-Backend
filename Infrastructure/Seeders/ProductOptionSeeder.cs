@@ -9,13 +9,14 @@ public static class ProductOptionSeeder
     public static async Task SeedAsync(ApplicationDBContext context, CancellationToken cancellationToken)
     {
         // 1. Seed Colors
-        var colorOption = await context.Set<Option>().FirstOrDefaultAsync(o => o.Name == "Color", cancellationToken);
+        var colorOption = await context.Set<Option>().FirstOrDefaultAsync(o => o.Name == "Color" || o.Name == "Màu sắc", cancellationToken);
         if (colorOption == null)
         {
             colorOption = new Option { Name = "Color" };
             await context.Set<Option>().AddAsync(colorOption, cancellationToken);
             await context.SaveChangesAsync(cancellationToken);
         }
+        // DO NOT rename to "Màu sắc" because Name is a FK to PredefinedOption.Key
 
         var colors = new Dictionary<string, string>
         {
@@ -41,13 +42,14 @@ public static class ProductOptionSeeder
         }
 
         // 2. Seed Vehicle Types
-        var typeOption = await context.Set<Option>().FirstOrDefaultAsync(o => o.Name == "VehicleType", cancellationToken);
+        var typeOption = await context.Set<Option>().FirstOrDefaultAsync(o => o.Name == "VehicleType" || o.Name == "Loại xe", cancellationToken);
         if (typeOption == null)
         {
             typeOption = new Option { Name = "VehicleType" };
             await context.Set<Option>().AddAsync(typeOption, cancellationToken);
             await context.SaveChangesAsync(cancellationToken);
         }
+        // DO NOT rename to "Loại xe" because Name is a FK to PredefinedOption.Key
 
         var types = new[] { "Xe ga", "Xe số", "Tay côn", "Xe điện" };
         foreach (var type in types)

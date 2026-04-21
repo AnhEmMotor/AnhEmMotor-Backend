@@ -1,4 +1,4 @@
-﻿using Application.Interfaces.Repositories.OptionValue;
+using Application.Interfaces.Repositories.OptionValue;
 using Domain.Constants;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +14,13 @@ namespace Infrastructure.Repositories.OptionValue
                 .Include(ov => ov.Option)
                 .Where(ov => optionValueIds.Contains(ov.Id))
                 .ToListAsync(cancellationToken);
+        }
+
+        public Task<OptionValueEntity?> GetByIdAsync(int id, CancellationToken cancellationToken)
+        {
+            return context.OptionValues
+                .Include(ov => ov.Option)
+                .FirstOrDefaultAsync(ov => ov.Id == id, cancellationToken);
         }
 
         public Task<OptionValueEntity?> GetByIdAndNameAsync(

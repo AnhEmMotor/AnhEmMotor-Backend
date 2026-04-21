@@ -27,7 +27,7 @@ public sealed record GetProductsListForManagerQuery : IRequest<Result<PagedResul
 
     public static GetProductsListForManagerQuery FromRequest(SieveModel request)
     {
-        var search = ExtractFilterValue(request.Filters, "name");
+        var search = ExtractFilterValue(request.Filters, "search");
         var statusIds = ExtractFilterValue(request.Filters, "statusIds")?.Split(
                 ',',
                 StringSplitOptions.RemoveEmptyEntries)

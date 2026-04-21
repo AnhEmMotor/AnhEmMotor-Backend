@@ -1,4 +1,4 @@
-﻿using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.LocalFile;
 using Application.Interfaces.Services;
 using Domain.Entities;
@@ -51,7 +51,9 @@ public static class DependencyInjection
                 {
                     options.UseSqlServer(
                         configuration.GetConnectionString("StringConnection"),
-                        b => b.MigrationsAssembly(typeof(ApplicationDBContext).Assembly.FullName).CommandTimeout(30));
+                        b => b.MigrationsAssembly(typeof(ApplicationDBContext).Assembly.FullName)
+                              .CommandTimeout(30)
+                              .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
                 });
         }
 
@@ -70,6 +72,7 @@ public static class DependencyInjection
 
         services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
         services.AddSingleton<IUserStreamService, UserStreamService>();
+        services.AddSingleton<INotificationService, NotificationService>();
 
         services.AddScoped<IAuthorizationHandler, PermissionHandler>();
         services.AddScoped<IAuthorizationHandler, AllPermissionsHandler>();
@@ -83,6 +86,7 @@ public static class DependencyInjection
         services.AddScoped<IFileStorageService, LocalFileStorageService>();
         services.AddScoped<IExternalAuthService, ExternalAuthService>();
         services.AddScoped<ISievePaginator, SievePaginator>();
+        services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         services.AddHttpClient();

@@ -1,4 +1,4 @@
-﻿using Domain.Constants.Permission;
+using Domain.Constants.Permission;
 using FluentValidation;
 using System.Reflection;
 
@@ -20,8 +20,8 @@ public class CreateRoleCommandValidator : AbstractValidator<CreateRoleCommand>
             .NotEmpty()
             .WithMessage("Role name is required.")
             .MaximumLength(100)
-            .Matches(@"^[a-zA-Z0-9\s_\-]*$")
-            .WithMessage("Role name cannot contain special characters.");
+            .Matches(@"^[\p{L}0-9\s_\-]*$")
+            .WithMessage("Role name can only contain letters, numbers, spaces, underscores, and hyphens.");
 
         RuleFor(x => x.Permissions)
             .NotEmpty()

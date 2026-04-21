@@ -1,10 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities
 {
     [Table("ProductCollectionPhoto")]
-    public class ProductCollectionPhoto
+    public class ProductCollectionPhoto : BaseEntity
     {
         [Key]
         [Column("Id")]

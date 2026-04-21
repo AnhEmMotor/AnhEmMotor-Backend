@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Product.Responses;
+using Application.ApiContracts.Product.Responses;
 using Application.Common.Models;
 using Domain.Primitives;
 using MediatR;
@@ -21,9 +21,15 @@ public sealed record GetProductsListQuery : IRequest<Result<PagedResult<ProductL
 
     public List<int> CategoryIds { get; init; } = [];
 
+    public List<int> BrandIds { get; init; } = [];
+
     public List<int> OptionValueIds { get; init; } = [];
 
-    public static GetProductsListQuery FromRequest(GetProductsRequest request)
+    public decimal? MinPrice { get; init; }
+
+    public decimal? MaxPrice { get; init; }
+
+    public static GetProductsListQuery FromRequest(GetProductsRequest request, decimal? minPriceParam = null, decimal? maxPriceParam = null)
     {
         var search = ExtractFilterValue(request.Filters, "search");
         var statusIds = ExtractFilterValue(request.Filters, "statusIds")?.Split(
@@ -37,10 +43,18 @@ public sealed record GetProductsListQuery : IRequest<Result<PagedResult<ProductL
                 .ToList() ??
             [];
 
+        var brandIds = request.BrandIds?.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(int.Parse)
+                .ToList() ??
+            [];
+
         var optionValueIds = request.OptionValueIds?.Split(',', StringSplitOptions.RemoveEmptyEntries)
                 .Select(int.Parse)
                 .ToList() ??
             [];
+
+        var minPrice = minPriceParam ?? request.MinPrice ?? (decimal.TryParse(ExtractFilterValue(request.Filters, "price", ">="), out var min) ? min : (decimal?)null);
+        var maxPrice = maxPriceParam ?? request.MaxPrice ?? (decimal.TryParse(ExtractFilterValue(request.Filters, "price", "<="), out var max) ? max : (decimal?)null);
 
         var filters = request.Filters;
         if(!string.IsNullOrWhiteSpace(filters))
@@ -51,7 +65,8 @@ public sealed record GetProductsListQuery : IRequest<Result<PagedResult<ProductL
                     {
                         var trimmed = f.Trim();
                         return !trimmed.StartsWith("search", StringComparison.OrdinalIgnoreCase) &&
-                            !trimmed.StartsWith("statusIds", StringComparison.OrdinalIgnoreCase);
+                            !trimmed.StartsWith("statusIds", StringComparison.OrdinalIgnoreCase) &&
+                            !trimmed.StartsWith("price", StringComparison.OrdinalIgnoreCase);
                     })
                 .ToList();
             filters = filterParts.Count > 0 ? string.Join(",", filterParts) : null;
@@ -64,13 +79,16 @@ public sealed record GetProductsListQuery : IRequest<Result<PagedResult<ProductL
             Search = search,
             StatusIds = statusIds,
             CategoryIds = categoryIds,
+            BrandIds = brandIds,
             OptionValueIds = optionValueIds,
+            MinPrice = minPrice,
+            MaxPrice = maxPrice,
             Sorts = request.Sorts,
             Filters = filters
         };
     }
 
-    private static string? ExtractFilterValue(string? filters, string key)
+    private static string? ExtractFilterValue(string? filters, string key, string op = "")
     {
         if(string.IsNullOrWhiteSpace(filters))
         {
@@ -80,10 +98,21 @@ public sealed record GetProductsListQuery : IRequest<Result<PagedResult<ProductL
         var parts = filters.Split(',');
         foreach(var part in parts)
         {
-            var keyValue = part.Split([ '=', '@', '!' ], 2);
-            if(keyValue.Length == 2 && keyValue[0].Trim().Equals(key, StringComparison.OrdinalIgnoreCase))
+            var trimmedPart = part.Trim();
+            if(!trimmedPart.StartsWith(key, StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            // Simple split by operators
+            var operators = new[] { "<=", ">=", "<", ">", "==", "!", "@", "=" };
+            var foundOp = operators.FirstOrDefault(o => trimmedPart.Substring(key.Length).Trim().StartsWith(o));
+            
+            if (foundOp != null)
             {
-                return keyValue[1].Trim().TrimStart('=', '@', '!', '<', '>');
+                if (!string.IsNullOrEmpty(op) && foundOp != op)
+                    continue;
+
+                var value = trimmedPart.Substring(key.Length).Trim().Substring(foundOp.Length).Trim();
+                return value;
             }
         }
 

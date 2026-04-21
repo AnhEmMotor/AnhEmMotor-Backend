@@ -2,6 +2,7 @@ using Domain.Entities;
 using Infrastructure.DBContexts;
 using Infrastructure.Seeders;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace WebAPI.Extensions;
 
@@ -40,6 +41,9 @@ public static class MigrationExtensions
         try
         {
             var dbContext = services.GetRequiredService<ApplicationDBContext>();
+            
+            // Tự động chạy Migration để tạo/cập nhật Database khi khởi động
+            await dbContext.Database.MigrateAsync(cancellationToken).ConfigureAwait(true);
 
             var shouldSeed = configuration.GetValue<bool>("SeedingOptions:RunDataSeedingOnStartup");
             if(shouldSeed)
@@ -57,6 +61,10 @@ public static class MigrationExtensions
                 await ProductStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
                 await ProductDataSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
                 await SettingsSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
+                await NewsSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
+                await TechnologySeeder.SeedAsync(dbContext).ConfigureAwait(true);
+
+                await TechnologyDataMigrationSeeder.MigrateExistingHighlightsAsync(dbContext).ConfigureAwait(true);
 
                 await PermissionDataSeeder.SeedPermissionsAsync(dbContext, cancellationToken).ConfigureAwait(true);
                 await ProtectedEntitiesSeeder.SeedProtectedEntitiesAsync(

@@ -14,7 +14,8 @@ public sealed class GetProductStoreDetailBySlugQueryHandler(IProductReadReposito
         GetProductStoreDetailBySlugQuery request,
         CancellationToken cancellationToken)
     {
-        var variant = await productReadRepository.GetByVariantSlugWithDetailsAsync(request.Slug, cancellationToken)
+        var decodedSlug = System.Net.WebUtility.UrlDecode(request.Slug);
+        var variant = await productReadRepository.GetByVariantSlugWithDetailsAsync(decodedSlug, cancellationToken)
             .ConfigureAwait(false);
 
         if(variant is null || variant.Product is null)
@@ -34,6 +35,14 @@ public sealed class GetProductStoreDetailBySlugQueryHandler(IProductReadReposito
             ShortDescription = product.ShortDescription,
             MetaTitle = product.MetaTitle,
             MetaDescription = product.MetaDescription,
+            Highlights = product.ProductTechnologies?.Count > 0 ? System.Text.Json.JsonSerializer.Serialize(
+                product.ProductTechnologies.OrderBy(t => t.DisplayOrder).Select(t => new
+                {
+                    title = t.CustomTitle ?? t.Technology?.DefaultTitle ?? t.Technology?.Name,
+                    tag = t.Technology?.Category?.Name ?? "TECHNOLOGY",
+                    description = t.CustomDescription ?? t.Technology?.DefaultDescription,
+                    image = t.CustomImageUrl ?? t.Technology?.DefaultImageUrl
+                })) : null,
             Specifications = []
         };
 
@@ -60,33 +69,39 @@ public sealed class GetProductStoreDetailBySlugQueryHandler(IProductReadReposito
             ? currentPhotos.FirstOrDefault()
             : variant.CoverImageUrl;
 
+        var currentDisplayName = !string.IsNullOrWhiteSpace(variant.VersionName) && !string.IsNullOrWhiteSpace(variant.ColorName)
+            ? $"{variant.VersionName} - {variant.ColorName}"
+            : (!string.IsNullOrWhiteSpace(variant.VersionName) ? variant.VersionName : (variant.ColorName ?? "Tiêu chuẩn"));
+
         var currentVariantResponse = new CurrentVariantStoreResponse
         {
             Id = variant.Id,
-            DisplayName =
-                string.Join(
-                    " - ",
-                    variant.VariantOptionValues
-                        .Where(vov => vov.OptionValue != null)
-                        .Select(vov => vov.OptionValue!.Name)),
+            DisplayName = currentDisplayName,
+            UrlSlug = variant.UrlSlug,
             Price = variant.Price,
             CoverImageUrl = currentCoverImage,
+            ColorName = variant.ColorName,
+            ColorCode = variant.ColorCode,
             PhotoCollection = currentPhotos
         };
 
         var otherVariants = product.ProductVariants
             .Where(v => v.Id != variant.Id)
             .Select(
-                v => new OtherVariantStoreResponse
-                {
-                    DisplayName =
-                        string.Join(
-                                " - ",
-                                v.VariantOptionValues
-                                    .Where(vov => vov.OptionValue != null)
-                                    .Select(vov => vov.OptionValue!.Name)),
-                    Slug = v.UrlSlug,
-                    Price = v.Price
+                v => {
+                    var displayName = !string.IsNullOrWhiteSpace(v.VersionName) && !string.IsNullOrWhiteSpace(v.ColorName)
+                        ? $"{v.VersionName} - {v.ColorName}"
+                        : (!string.IsNullOrWhiteSpace(v.VersionName) ? v.VersionName : (v.ColorName ?? "Tiêu chuẩn"));
+
+                    return new OtherVariantStoreResponse
+                    {
+                        DisplayName = displayName,
+                        UrlSlug = v.UrlSlug,
+                        Price = v.Price,
+                        CoverImageUrl = v.CoverImageUrl,
+                        ColorName = v.ColorName,
+                        ColorCode = v.ColorCode
+                    };
                 })
             .ToList();
 

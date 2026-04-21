@@ -38,11 +38,14 @@ public interface IProductReadRepository
         string? sorts,
         CancellationToken cancellationToken);
 
-    public Task<(List<ProductEntity> Items, int TotalCount, List<List<int>> GroupedOptionValueIds)> GetPagedProductsAsync(
+    public Task<(List<ProductEntity> Items, int TotalCount, List<Application.Common.Models.FilterGroup> GroupedOptionFilters)> GetPagedProductsAsync(
         string? search,
         List<string> statusIds,
         List<int> categoryIds,
+        List<int> brandIds,
         List<int> optionValueIds,
+        decimal? minPrice,
+        decimal? maxPrice,
         int page,
         int pageSize,
         string? filters,

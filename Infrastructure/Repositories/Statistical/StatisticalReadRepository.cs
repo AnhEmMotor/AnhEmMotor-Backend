@@ -427,6 +427,8 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             MonthlyRevenue = monthStats.Rev,
             TodayProfit = todayStats.Prof,
             MonthlyProfit = monthStats.Prof,
+            LastMonthRevenue = lastMonthStats.Rev,
+            LastMonthProfit = lastMonthStats.Prof,
             Total7dRevenue = total7dRev,
             Total7dProfit = total7dProf,
             BestDayRevenue = bestDay?.Revenue ?? 0,

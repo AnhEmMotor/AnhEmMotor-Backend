@@ -8,6 +8,8 @@ namespace Application.ApiContracts.Statistical.Responses
         public decimal MonthlyRevenue { get; set; }
         public decimal TodayProfit { get; set; }
         public decimal MonthlyProfit { get; set; }
+        public decimal LastMonthRevenue { get; set; }
+        public decimal LastMonthProfit { get; set; }
 
         // 7-Day Insights for Chart
         public decimal Total7dRevenue { get; set; }

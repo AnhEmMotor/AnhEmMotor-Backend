@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Application.ApiContracts.Product.Responses
 {
@@ -23,7 +23,7 @@ namespace Application.ApiContracts.Product.Responses
 
         public string? Dimensions { get; set; }
 
-        public string? Wheelbase { get; set; }
+        public decimal? Wheelbase { get; set; }
 
         [JsonPropertyName("seat_height")]
         public decimal? SeatHeight { get; set; }
@@ -83,6 +83,9 @@ namespace Application.ApiContracts.Product.Responses
 
         [JsonPropertyName("cover_image_url")]
         public string? CoverImageUrl { get; set; }
+
+        [JsonPropertyName("highlights")]
+        public string? Highlights { get; set; }
 
         public List<ProductVariantDetailResponse> Variants { get; set; } = [];
     }

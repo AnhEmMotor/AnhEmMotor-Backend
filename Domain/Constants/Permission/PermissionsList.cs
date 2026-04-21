@@ -92,6 +92,45 @@ public static class PermissionsList
         public const string ChangePassword = "Permissions.Users.ChangePassword";
     }
 
+    public static class News
+    {
+        public const string View = "Permissions.News.View";
+        public const string Create = "Permissions.News.Create";
+        public const string Edit = "Permissions.News.Edit";
+        public const string Delete = "Permissions.News.Delete";
+    }
+
+    public static class Banners
+    {
+        public const string View = "Permissions.Banners.View";
+        public const string Create = "Permissions.Banners.Create";
+        public const string Edit = "Permissions.Banners.Edit";
+        public const string Delete = "Permissions.Banners.Delete";
+    }
+
+    public static class Contacts
+    {
+        public const string View = "Permissions.Contacts.View";
+        public const string Reply = "Permissions.Contacts.Reply";
+        public const string EditNote = "Permissions.Contacts.EditNote";
+        public const string Delete = "Permissions.Contacts.Delete";
+    }
+
+    public static class Bookings
+    {
+        public const string View = "Permissions.Bookings.View";
+        public const string Confirm = "Permissions.Bookings.Confirm";
+        public const string Delete = "Permissions.Bookings.Delete";
+    }
+
+    public static class Leads
+    {
+        public const string View = "Permissions.Leads.View";
+        public const string Create = "Permissions.Leads.Create";
+        public const string Edit = "Permissions.Leads.Edit";
+        public const string Delete = "Permissions.Leads.Delete";
+    }
+
     private static readonly Dictionary<string, PermissionMetadata> PermissionMetadataMap = new()
     {
         { Brands.View, new PermissionMetadata("View Brands", "Xem danh sách thương hiệu") },
@@ -155,6 +194,30 @@ public static class PermissionsList
         { Users.Delete, new PermissionMetadata("Delete User", "Xóa người dùng") },
         { Users.AssignRoles, new PermissionMetadata("Assign Roles", "Gán vai trò cho người dùng") },
         { Users.ChangePassword, new PermissionMetadata("Change Password", "Đổi mật khẩu người dùng") },
+
+        { News.View, new PermissionMetadata("View News", "Xem danh sách tin tức") },
+        { News.Create, new PermissionMetadata("Create News", "Tạo tin tức mới") },
+        { News.Edit, new PermissionMetadata("Edit News", "Chỉnh sửa tin tức") },
+        { News.Delete, new PermissionMetadata("Delete News", "Xóa tin tức") },
+
+        { Banners.View, new PermissionMetadata("View Banners", "Xem danh sách banner") },
+        { Banners.Create, new PermissionMetadata("Create Banner", "Thêm banner mới") },
+        { Banners.Edit, new PermissionMetadata("Edit Banner", "Chỉnh sửa banner") },
+        { Banners.Delete, new PermissionMetadata("Delete Banner", "Xóa banner") },
+
+        { Contacts.View, new PermissionMetadata("View Contacts", "Xem danh sách liên hệ khách hàng") },
+        { Contacts.Reply, new PermissionMetadata("Reply to Contact", "Phản hồi liên hệ khách hàng") },
+        { Contacts.EditNote, new PermissionMetadata("Edit Internal Note", "Chỉnh sửa ghi chú nội bộ khách hàng") },
+        { Contacts.Delete, new PermissionMetadata("Delete Contact", "Xóa liên hệ khách hàng") },
+
+        { Bookings.View, new PermissionMetadata("View Bookings", "Xem danh sách đặt lịch lái thử") },
+        { Bookings.Confirm, new PermissionMetadata("Confirm Booking", "Xác nhận lịch hẹn lái thử") },
+        { Bookings.Delete, new PermissionMetadata("Delete Booking", "Xóa lịch hẹn lái thử") },
+
+        { Leads.View, new PermissionMetadata("View Leads", "Xem danh sách khách hàng tiềm năng") },
+        { Leads.Create, new PermissionMetadata("Create Lead", "Tạo khách hàng tiềm năng") },
+        { Leads.Edit, new PermissionMetadata("Edit Lead", "Chỉnh sửa khách hàng tiềm năng") },
+        { Leads.Delete, new PermissionMetadata("Delete Lead", "Xóa khách hàng tiềm năng") },
     };
 
     public static PermissionMetadata? GetMetadata(string permissionName)
@@ -191,6 +254,9 @@ public static class PermissionsList
             "Người dùng",
             [ Users.View, Users.Create, Users.Edit, Users.Delete, Users.AssignRoles, Users.ChangePassword ]
         },
+        { "Tin tức", [ News.View, News.Create, News.Edit, News.Delete ] },
+        { "Banner", [ Banners.View, Banners.Create, Banners.Edit, Banners.Delete ] },
+        { "CRM & Connect", [ Contacts.View, Contacts.Reply, Contacts.EditNote, Contacts.Delete, Bookings.View, Bookings.Confirm, Bookings.Delete, Leads.View, Leads.Create, Leads.Edit, Leads.Delete ] },
     };
 
     public static readonly Dictionary<string, List<string>> Conflicts = new() { };
@@ -241,6 +307,25 @@ public static class PermissionsList
         { Users.Delete, [ Users.View ] },
         { Users.AssignRoles, [ Users.View, Roles.View ] },
         { Users.ChangePassword, [ Users.View ] },
+
+        { News.Create, [ News.View ] },
+        { News.Edit, [ News.View ] },
+        { News.Delete, [ News.View ] },
+
+        { Banners.Create, [ Banners.View ] },
+        { Banners.Edit, [ Banners.View ] },
+        { Banners.Delete, [ Banners.View ] },
+
+        { Contacts.Reply, [ Contacts.View ] },
+        { Contacts.EditNote, [ Contacts.View ] },
+        { Contacts.Delete, [ Contacts.View ] },
+
+        { Bookings.Confirm, [ Bookings.View ] },
+        { Bookings.Delete, [ Bookings.View ] },
+
+        { Leads.Create, [ Leads.View ] },
+        { Leads.Edit, [ Leads.View ] },
+        { Leads.Delete, [ Leads.View ] },
     };
 
     public static (bool IsValid, string? ErrorMessage) ValidateRules(IEnumerable<string> permissions)

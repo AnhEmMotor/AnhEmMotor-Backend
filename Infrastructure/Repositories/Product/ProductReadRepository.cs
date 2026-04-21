@@ -1,4 +1,4 @@
-﻿using Application.Interfaces.Repositories.Product;
+using Application.Interfaces.Repositories.Product;
 using Domain.Constants;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +11,7 @@ namespace Infrastructure.Repositories.Product;
 public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor sieveProcessor) : IProductReadRepository
 {
     public IQueryable<ProductEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
-    { return context.GetQuery<ProductEntity>(mode).Include(p => p.ProductCategory).Include(p => p.Brand); }
+    { return context.GetQuery<ProductEntity>(mode).Include(p => p.ProductCategory).Include(p => p.Brand).Include(p => p.ProductTechnologies).ThenInclude(pt => pt.Technology).ThenInclude(t => t!.Category); }
 
     public Task<IEnumerable<ProductEntity>> GetAllAsync(
         CancellationToken cancellationToken,
@@ -27,7 +27,10 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        IQueryable<ProductEntity> query = context.Products.IgnoreQueryFilters();
+        IQueryable<ProductEntity> query = context.Products;
+
+        if (mode != DataFetchMode.ActiveOnly)
+            query = query.IgnoreQueryFilters();
 
         if(mode == DataFetchMode.ActiveOnly)
         {
@@ -40,6 +43,9 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
         return query
             .Include(p => p.ProductCategory)
             .Include(p => p.Brand)
+            .Include(p => p.ProductTechnologies)
+                .ThenInclude(pt => pt.Technology)
+                .ThenInclude(t => t!.Category)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.VariantOptionValues)
             .ThenInclude(vov => vov.OptionValue)
@@ -67,25 +73,28 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             .ToListAsync(cancellationToken)
             .ContinueWith<IEnumerable<ProductEntity>>(t => t.Result, cancellationToken);
     }
-
-    public Task<ProductEntity?> GetByIdWithDetailsAsync(
-        int id,
-        CancellationToken cancellationToken,
-        DataFetchMode mode = DataFetchMode.ActiveOnly)
+    public async Task<ProductEntity?> GetByIdWithDetailsAsync(int id, CancellationToken cancellationToken, DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        IQueryable<ProductEntity> query = context.Products.IgnoreQueryFilters();
+        IQueryable<ProductEntity> query = context.Products;
+
+        if (mode != DataFetchMode.ActiveOnly)
+            query = query.IgnoreQueryFilters();
 
         if(mode == DataFetchMode.ActiveOnly)
         {
             query = query.Where(p => p.DeletedAt == null);
-        } else if(mode == DataFetchMode.DeletedOnly)
+        }
+        else if (mode == DataFetchMode.DeletedOnly)
         {
             query = query.Where(p => p.DeletedAt != null);
         }
 
-        return query
+        return await query
             .Include(p => p.ProductCategory)
             .Include(p => p.Brand)
+            .Include(p => p.ProductTechnologies)
+                .ThenInclude(pt => pt.Technology)
+                .ThenInclude(t => t!.Category)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.VariantOptionValues)
             .ThenInclude(vov => vov.OptionValue)
@@ -99,8 +108,7 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             .ThenInclude(v => v.OutputInfos)
             .ThenInclude(oi => oi.OutputOrder)
             .AsSplitQuery()
-            .FirstOrDefaultAsync(p => p.Id == id, cancellationToken)
-            .ContinueWith(t => t.Result, cancellationToken);
+            .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
     }
 
     public Task<IEnumerable<ProductEntity>> GetByIdWithVariantsAsync(
@@ -147,13 +155,7 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             .ThenInclude(vov => vov.OptionValue)
             .ThenInclude(ov => ov!.Option)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
-            .ThenInclude(v => v.ProductCollectionPhotos)
-            .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
-            .ThenInclude(v => v.InputInfos)
-            .ThenInclude(ii => ii.InputReceipt)
-            .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
-            .ThenInclude(v => v.OutputInfos)
-            .ThenInclude(oi => oi.OutputOrder);
+            .ThenInclude(v => v.ProductCollectionPhotos);
 
         if(string.IsNullOrWhiteSpace(sorts))
         {
@@ -170,11 +172,14 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
         return (items, totalCount);
     }
 
-    public async Task<(List<ProductEntity> Items, int TotalCount, List<List<int>> GroupedOptionValueIds)> GetPagedProductsAsync(
+    public async Task<(List<ProductEntity> Items, int TotalCount, List<Application.Common.Models.FilterGroup> GroupedOptionFilters)> GetPagedProductsAsync(
         string? search,
         List<string> statusIds,
         List<int> categoryIds,
+        List<int> brandIds,
         List<int> optionValueIds,
+        decimal? minPrice,
+        decimal? maxPrice,
         int page,
         int pageSize,
         string? filters,
@@ -185,7 +190,7 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
         var normalizedPageSize = Math.Max(pageSize, 1);
         var searchPattern = string.IsNullOrWhiteSpace(search) ? null : $"%{search.Trim()}%";
 
-        var query = context.Products.IgnoreQueryFilters().Where(p => p.DeletedAt == null).AsNoTracking();
+        var query = context.Products.AsNoTracking();
 
         if(searchPattern != null)
         {
@@ -205,99 +210,69 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             query = query.Where(p => p.CategoryId != null && categoryIds.Contains(p.CategoryId.Value));
         }
 
-        var groupedByOption = new List<List<int>>();
+        if(brandIds != null && brandIds.Count > 0)
+        {
+            query = query.Where(p => p.BrandId != null && brandIds.Contains(p.BrandId.Value));
+        }
+
+        if(minPrice.HasValue || maxPrice.HasValue)
+        {
+            query = query.Where(p => p.ProductVariants.Any(v => 
+                v.DeletedAt == null && 
+                (!minPrice.HasValue || v.Price >= minPrice.Value) &&
+                (!maxPrice.HasValue || v.Price <= maxPrice.Value)
+            ));
+        }
+
+        var groupedOptionFilters = new List<Application.Common.Models.FilterGroup>();
 
         if(optionValueIds != null && optionValueIds.Count > 0)
         {
-            var valueToOptionMapping = await context.OptionValues
+            var valuesWithOption = await context.OptionValues
                 .Where(ov => optionValueIds.Contains(ov.Id))
-                .Select(ov => new { ov.Id, ov.OptionId })
+                .Select(ov => new { ov.Id, ov.OptionId, ov.Name })
                 .ToListAsync(cancellationToken)
                 .ConfigureAwait(false);
 
-            if(valueToOptionMapping.Count == 0)
+            if(valuesWithOption.Count == 0)
             {
                 query = query.Where(p => false);
             } else
             {
-                groupedByOption = valueToOptionMapping
-                    .GroupBy(x => x.OptionId)
-                    .Select(g => g.Select(x => x.Id).ToList())
+                var groups = valuesWithOption.GroupBy(v => v.OptionId)
+                    .Select(g => new { 
+                        Ids = g.Select(x => x.Id).ToList(),
+                        Names = g.Select(x => x.Name?.ToLower() ?? "").ToList() 
+                    })
                     .ToList();
 
-                if(groupedByOption.Count == 1)
+                // Assign to groupedOptionFilters for the handler to use
+                groupedOptionFilters = groups.Select(g => new Application.Common.Models.FilterGroup { Ids = g.Ids, Names = g.Names }).ToList();
+                
+                // Coordination: at least one variant must match ALL groups AND price range
+                var variantSubquery = context.ProductVariants.Where(v => v.DeletedAt == null);
+                
+                if(minPrice.HasValue || maxPrice.HasValue)
                 {
-                    var g1 = groupedByOption[0];
-                    query = query.Where(
-                        p => p.ProductVariants
-                            .Any(
-                                v => v.DeletedAt == null &&
-                                        v.VariantOptionValues
-                                            .Any(
-                                                vov => vov.OptionValueId != null && g1.Contains(vov.OptionValueId.Value))));
-                } else if(groupedByOption.Count == 2)
-                {
-                    var g1 = groupedByOption[0];
-                    var g2 = groupedByOption[1];
-                    query = query.Where(
-                        p => p.ProductVariants
-                            .Any(
-                                v => v.DeletedAt == null &&
-                                        v.VariantOptionValues
-                                            .Any(
-                                                vov => vov.OptionValueId != null && g1.Contains(vov.OptionValueId.Value)) &&
-                                        v.VariantOptionValues
-                                            .Any(
-                                                vov => vov.OptionValueId != null && g2.Contains(vov.OptionValueId.Value))));
-                } else if(groupedByOption.Count >= 3)
-                {
-                    var g1 = groupedByOption[0];
-                    var g2 = groupedByOption[1];
-                    var g3 = groupedByOption[2];
-
-                    if(groupedByOption.Count == 3)
-                    {
-                        query = query.Where(
-                            p => p.ProductVariants
-                                .Any(
-                                    v => v.DeletedAt == null &&
-                                            v.VariantOptionValues
-                                                .Any(
-                                                    vov => vov.OptionValueId != null &&
-                                                                    g1.Contains(vov.OptionValueId.Value)) &&
-                                            v.VariantOptionValues
-                                                .Any(
-                                                    vov => vov.OptionValueId != null &&
-                                                                    g2.Contains(vov.OptionValueId.Value)) &&
-                                            v.VariantOptionValues
-                                                .Any(
-                                                    vov => vov.OptionValueId != null &&
-                                                                    g3.Contains(vov.OptionValueId.Value))));
-                    } else
-                    {
-                        var g4 = groupedByOption[3];
-                        query = query.Where(
-                            p => p.ProductVariants
-                                .Any(
-                                    v => v.DeletedAt == null &&
-                                            v.VariantOptionValues
-                                                .Any(
-                                                    vov => vov.OptionValueId != null &&
-                                                                    g1.Contains(vov.OptionValueId.Value)) &&
-                                            v.VariantOptionValues
-                                                .Any(
-                                                    vov => vov.OptionValueId != null &&
-                                                                    g2.Contains(vov.OptionValueId.Value)) &&
-                                            v.VariantOptionValues
-                                                .Any(
-                                                    vov => vov.OptionValueId != null &&
-                                                                    g3.Contains(vov.OptionValueId.Value)) &&
-                                            v.VariantOptionValues
-                                                .Any(
-                                                    vov => vov.OptionValueId != null &&
-                                                                    g4.Contains(vov.OptionValueId.Value))));
-                    }
+                    variantSubquery = variantSubquery.Where(v => 
+                        (!minPrice.HasValue || v.Price >= minPrice.Value) &&
+                        (!maxPrice.HasValue || v.Price <= maxPrice.Value)
+                    );
                 }
+
+                foreach (var group in groups)
+                {
+                    var ids = group.Ids;
+                    var names = group.Names;
+                    variantSubquery = variantSubquery.Where(v => 
+                        v.VariantOptionValues.Any(vov => vov.OptionValueId != null && ids.Contains(vov.OptionValueId.Value)) ||
+                        (v.ColorName != null && names.Any(n => v.ColorName.ToLower().Contains(n))) ||
+                        (v.VersionName != null && names.Any(n => v.VersionName.ToLower().Contains(n)))
+                    );
+                }
+
+                var matchingProductIds = variantSubquery.Select(v => v.ProductId);
+                query = query.Where(p => matchingProductIds.Contains(p.Id));
             }
         }
 
@@ -317,12 +292,6 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             .Include(p => p.ProductCategory)
             .Include(p => p.Brand)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
-            .ThenInclude(v => v.InputInfos.Where(ii => ii.DeletedAt == null && ii.InputReceipt!.DeletedAt == null))
-            .ThenInclude(ii => ii.InputReceipt)
-            .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
-            .ThenInclude(v => v.OutputInfos.Where(oi => oi.DeletedAt == null && oi.OutputOrder!.DeletedAt == null))
-            .ThenInclude(oi => oi.OutputOrder)
-            .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.ProductCollectionPhotos)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.VariantOptionValues)
@@ -341,7 +310,7 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
 
-        return (entities, totalCount, groupedByOption);
+        return (entities, totalCount, groupedOptionFilters);
     }
 
     public async Task<(List<ProductEntity> Items, int TotalCount)> GetPagedProductsForPriceManagementAsync(
@@ -387,7 +356,10 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        IQueryable<Domain.Entities.ProductVariant> query = context.ProductVariants.IgnoreQueryFilters();
+        IQueryable<Domain.Entities.ProductVariant> query = context.ProductVariants;
+
+        if (mode != DataFetchMode.ActiveOnly)
+            query = query.IgnoreQueryFilters();
 
         if(mode == DataFetchMode.ActiveOnly)
         {
@@ -403,6 +375,10 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             .Include(v => v.Product)
             .ThenInclude(p => p!.Brand)
             .Include(v => v.Product)
+            .ThenInclude(p => p!.ProductTechnologies)
+            .ThenInclude(pt => pt.Technology)
+            .ThenInclude(t => t!.Category)
+            .Include(v => v.Product)
             .ThenInclude(p => p!.ProductVariants.Where(pv => pv.DeletedAt == null))
             .ThenInclude(pv => pv.VariantOptionValues)
             .ThenInclude(vov => vov.OptionValue)
@@ -415,6 +391,6 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             .Include(v => v.OutputInfos.Where(oi => oi.DeletedAt == null))
             .ThenInclude(oi => oi.OutputOrder)
             .AsSplitQuery()
-            .FirstOrDefaultAsync(v => string.Compare(v.UrlSlug, slug) == 0, cancellationToken);
+            .FirstOrDefaultAsync(v => v.UrlSlug == slug, cancellationToken);
     }
 }

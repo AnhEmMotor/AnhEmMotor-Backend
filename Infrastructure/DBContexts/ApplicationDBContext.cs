@@ -1,4 +1,4 @@
-﻿using Domain.Constants;
+using Domain.Constants;
 using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -70,6 +70,21 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<RolePermission> RolePermissions { get; set; }
 
+    public virtual DbSet<TechnologyCategory> TechnologyCategories { get; set; }
+    public virtual DbSet<Technology> Technologies { get; set; }
+    public virtual DbSet<TechnologyImage> TechnologyImages { get; set; }
+    public virtual DbSet<ProductTechnology> ProductTechnologies { get; set; }
+    public virtual DbSet<News> News { get; set; }
+    public virtual DbSet<Banner> Banners { get; set; }
+    public virtual DbSet<Contact> Contacts { get; set; }
+    public virtual DbSet<ContactReply> ContactReplies { get; set; }
+    public virtual DbSet<Booking> Bookings { get; set; }
+    public virtual DbSet<Lead> Leads { get; set; }
+    public virtual DbSet<LeadActivity> LeadActivities { get; set; }
+    public virtual DbSet<Vehicle> Vehicles { get; set; }
+    public virtual DbSet<VehicleDocument> VehicleDocuments { get; set; }
+    public virtual DbSet<MaintenanceHistory> MaintenanceHistories { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -117,13 +132,27 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .HasOne(p => p.ProductVariant)
             .WithMany(v => v.ProductCollectionPhotos)
             .HasForeignKey(p => p.ProductVariantId)
-            .IsRequired(false);
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<VariantOptionValue>()
             .HasOne(v => v.ProductVariant)
             .WithMany(pv => pv.VariantOptionValues)
             .HasForeignKey(v => v.VariantId)
-            .IsRequired(false);
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ProductTechnology>().HasKey(pt => new { pt.ProductId, pt.TechnologyId });
+        
+        modelBuilder.Entity<ProductTechnology>()
+            .HasOne(pt => pt.Product)
+            .WithMany(p => p.ProductTechnologies)
+            .HasForeignKey(pt => pt.ProductId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ProductTechnology>()
+            .HasOne(pt => pt.Technology)
+            .WithMany(t => t.ProductTechnologies)
+            .HasForeignKey(pt => pt.TechnologyId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         var isNotSqlServer = string.Compare(Database.ProviderName, "Microsoft.EntityFrameworkCore.SqlServer") != 0;
         var isPostgres = string.Compare(Database.ProviderName, "Npgsql.EntityFrameworkCore.PostgreSQL") == 0;
