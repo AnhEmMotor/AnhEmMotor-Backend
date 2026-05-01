@@ -17,7 +17,7 @@ namespace Infrastructure.PostgreSqlMigrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.5")
+                .HasAnnotation("ProductVersion", "10.0.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -461,6 +461,10 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int?>("DepositRatio")
+                        .HasColumnType("integer")
+                        .HasColumnName("DepositRatio");
+
                     b.Property<Guid?>("FinishedBy")
                         .HasColumnType("uuid")
                         .HasColumnName("FinishedBy");
@@ -768,6 +772,10 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Property<string>("Description")
                         .HasColumnType("text")
                         .HasColumnName("Description");
+
+                    b.Property<int?>("MaxPurchaseQuantity")
+                        .HasColumnType("integer")
+                        .HasColumnName("MaxPurchaseQuantity");
 
                     b.Property<string>("Name")
                         .HasColumnType("text")

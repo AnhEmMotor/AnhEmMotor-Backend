@@ -17,7 +17,7 @@ namespace Infrastructure.MySqlMigrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.5")
+                .HasAnnotation("ProductVersion", "10.0.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
@@ -461,6 +461,10 @@ namespace Infrastructure.MySqlMigrations
                     b.Property<long?>("DeletedAt")
                         .HasColumnType("bigint");
 
+                    b.Property<int?>("DepositRatio")
+                        .HasColumnType("int")
+                        .HasColumnName("DepositRatio");
+
                     b.Property<Guid?>("FinishedBy")
                         .HasColumnType("char(36)")
                         .HasColumnName("FinishedBy");
@@ -768,6 +772,10 @@ namespace Infrastructure.MySqlMigrations
                     b.Property<string>("Description")
                         .HasColumnType("longtext")
                         .HasColumnName("Description");
+
+                    b.Property<int?>("MaxPurchaseQuantity")
+                        .HasColumnType("int")
+                        .HasColumnName("MaxPurchaseQuantity");
 
                     b.Property<string>("Name")
                         .HasColumnType("longtext")
