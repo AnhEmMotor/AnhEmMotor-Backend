@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities
@@ -40,6 +40,9 @@ namespace Domain.Entities
 
         [Column("Notes", TypeName = "nvarchar(MAX)")]
         public string? Notes { get; set; }
+
+        [Column("DepositRatio")]
+        public int? DepositRatio { get; set; }
 
         public ApplicationUser? Buyer { get; set; }
 

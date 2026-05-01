@@ -1,4 +1,5 @@
-﻿using Application.ApiContracts.Output.Responses;
+using Application.ApiContracts.Output.Responses;
+using Application.Common.Models;
 using Application.Features.Outputs.Commands.DeleteManyOutputs;
 using Application.Features.Outputs.Commands.RestoreManyOutputs;
 using Application.Features.Outputs.Commands.UpdateManyOutputStatus;
@@ -1594,6 +1595,97 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
 
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
+
+    
+    [Fact(DisplayName = "SO_071 - Tạo đơn hàng vượt quá giới hạn số lượng của thể loại sản phẩm")]
+    public async Task CreateOutput_ExceedCategoryLimit_ReturnsBadRequest()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [ PermissionsList.Outputs.Create ],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+            
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+            
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        int variantId;
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+
+            // Ensure statuses exist
+            if (!await db.ProductStatuses.AnyAsync(x => x.Key == "for-sale").ConfigureAwait(true))
+            {
+                db.ProductStatuses.Add(new ProductStatus { Key = "for-sale" });
+            }
+            if (!await db.OutputStatuses.AnyAsync(x => x.Key == OrderStatus.Pending).ConfigureAwait(true))
+            {
+                db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Pending });
+            }
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+            
+            var brand = new BrandEntity { Name = $"Brand_{uniqueId}" };
+            db.Brands.Add(brand);
+            
+            // Set limit to 2
+            var category = new ProductCategoryEntity 
+            { 
+                Name = $"LimitedCat_{uniqueId}",
+                MaxPurchaseQuantity = 2 
+            };
+            db.ProductCategories.Add(category);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+            var product = new ProductEntity
+            {
+                Name = $"LimitedProd_{uniqueId}",
+                BrandId = brand.Id,
+                CategoryId = category.Id,
+                StatusId = "for-sale"
+            };
+            db.Products.Add(product);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+
+            var variant = new ProductVariant { ProductId = product.Id, Price = 100000, UrlSlug = $"slug-{uniqueId}" };
+            db.ProductVariants.Add(variant);
+            await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+            variantId = variant.Id;
+        }
+
+        // Try to order 3 items (limit is 2)
+        var jsonContent = JsonSerializer.Serialize(new
+        {
+            customerName = "Khách hàng Test",
+            customerPhone = "0987654321",
+            customerAddress = "Hà Nội",
+            products = new[] { new { productId = variantId, count = 3 } }
+        });
+        
+        var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+        var response = await _client.PostAsync("/api/v1/SalesOrders", httpContent, CancellationToken.None)
+            .ConfigureAwait(true);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var error = await response.Content.ReadFromJsonAsync<ErrorResponse>().ConfigureAwait(true);
+        var firstError = error!.Errors?.FirstOrDefault();
+        firstError?.Message.Should().Contain("Số lượng mua tối đa cho sản phẩm");
+        firstError?.Field.Should().Be("products[0]");
 #pragma warning restore CRR0035
 #pragma warning restore IDE0079
+    }
 }

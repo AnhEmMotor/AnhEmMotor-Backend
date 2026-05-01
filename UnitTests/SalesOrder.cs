@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Auth.Responses;
+using Application.ApiContracts.Auth.Responses;
 using Application.ApiContracts.Output.Responses;
 using Application.Features.Outputs.Commands.CreateOutput;
 using Application.Features.Outputs.Commands.CreateOutputByManager;
@@ -19,6 +19,7 @@ using Application.Features.Outputs.Queries.GetOutputsList;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.ProductVariant;
+using Application.Interfaces.Repositories.Setting;
 using Application.Interfaces.Repositories.User;
 using Domain.Constants;
 using Domain.Constants.Order;
@@ -30,6 +31,7 @@ using Mapster;
 using Moq;
 using Sieve.Models;
 using ProductEntity = Domain.Entities.Product;
+using SettingEntity = Domain.Entities.Setting;
 using ProductStatus = Domain.Constants.Product.ProductStatus;
 
 namespace UnitTests;
@@ -42,6 +44,7 @@ public class SalesOrder
     private readonly Mock<IOutputReadRepository> _readRepoMock;
     private readonly Mock<IProductVariantReadRepository> _variantRepoMock;
     private readonly Mock<IUserReadRepository> _userRepoMock;
+    private readonly Mock<ISettingRepository> _settingRepoMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<ISievePaginator> _paginatorMock;
 
@@ -53,6 +56,7 @@ public class SalesOrder
         _readRepoMock = new Mock<IOutputReadRepository>();
         _variantRepoMock = new Mock<IProductVariantReadRepository>();
         _userRepoMock = new Mock<IUserReadRepository>();
+        _settingRepoMock = new Mock<ISettingRepository>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _paginatorMock = new Mock<ISievePaginator>();
 
@@ -85,6 +89,7 @@ public class SalesOrder
             _readRepoMock.Object,
             _insertRepoMock.Object,
             _variantRepoMock.Object,
+            _settingRepoMock.Object,
             _unitOfWorkMock.Object);
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -118,6 +123,7 @@ public class SalesOrder
             _readRepoMock.Object,
             _insertRepoMock.Object,
             _variantRepoMock.Object,
+            _settingRepoMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new CreateOutputCommand
@@ -162,6 +168,7 @@ public class SalesOrder
             _readRepoMock.Object,
             _insertRepoMock.Object,
             _variantRepoMock.Object,
+            _settingRepoMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new CreateOutputCommand
@@ -207,6 +214,7 @@ public class SalesOrder
             _readRepoMock.Object,
             _insertRepoMock.Object,
             _variantRepoMock.Object,
+            _settingRepoMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new CreateOutputCommand
@@ -260,6 +268,7 @@ public class SalesOrder
             _readRepoMock.Object,
             _insertRepoMock.Object,
             _variantRepoMock.Object,
+            _settingRepoMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new CreateOutputCommand
@@ -564,6 +573,7 @@ public class SalesOrder
             _updateRepoMock.Object,
             _variantRepoMock.Object,
             _userRepoMock.Object,
+            _settingRepoMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new CreateOutputByManagerCommand
@@ -607,6 +617,7 @@ public class SalesOrder
             _updateRepoMock.Object,
             _variantRepoMock.Object,
             _userRepoMock.Object,
+            _settingRepoMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new CreateOutputByManagerCommand
@@ -958,7 +969,7 @@ public class SalesOrder
     [Fact(DisplayName = "SO_027 - GetOutputById trả về đơn hàng")]
     public async Task GetOutputById_WithValidId_ShouldReturnOrder()
     {
-        var handler = new GetOutputByIdQueryHandler(_readRepoMock.Object);
+        var handler = new GetOutputByIdQueryHandler(_readRepoMock.Object, _settingRepoMock.Object);
         var orderId = 1;
         var expectedOrder = new Output { Id = orderId, BuyerId = Guid.NewGuid() };
 
@@ -977,7 +988,7 @@ public class SalesOrder
     [Fact(DisplayName = "SO_028 - GetOutputsByUserId chỉ lấy đơn của user")]
     public async Task GetOutputsByUserId_ShouldReturnOnlyUserOrders()
     {
-        var handler = new GetOutputsByUserIdQueryHandler(_readRepoMock.Object, _paginatorMock.Object);
+        var handler = new GetOutputsByUserIdQueryHandler(_readRepoMock.Object, _paginatorMock.Object, _settingRepoMock.Object);
 
         var userId = Guid.NewGuid();
         var query = new GetOutputsByUserIdQuery() { BuyerId = userId, SieveModel = new SieveModel() };
@@ -1145,6 +1156,7 @@ public class SalesOrder
             _readRepoMock.Object,
             _insertRepoMock.Object,
             _variantRepoMock.Object,
+            _settingRepoMock.Object,
             _unitOfWorkMock.Object);
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -1202,6 +1214,7 @@ public class SalesOrder
             _readRepoMock.Object,
             _insertRepoMock.Object,
             _variantRepoMock.Object,
+            _settingRepoMock.Object,
             _unitOfWorkMock.Object);
 
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -1218,6 +1231,7 @@ public class SalesOrder
             _readRepoMock.Object,
             _insertRepoMock.Object,
             _variantRepoMock.Object,
+            _settingRepoMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new CreateOutputCommand
@@ -1238,6 +1252,7 @@ public class SalesOrder
             _readRepoMock.Object,
             _insertRepoMock.Object,
             _variantRepoMock.Object,
+            _settingRepoMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new CreateOutputCommand
@@ -1383,6 +1398,7 @@ public class SalesOrder
             _readRepoMock.Object,
             _insertRepoMock.Object,
             _variantRepoMock.Object,
+            _settingRepoMock.Object,
             _unitOfWorkMock.Object);
 
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -1396,7 +1412,7 @@ public class SalesOrder
     [Fact(DisplayName = "SO_043 - GetOutputById không trả về đơn đã xóa")]
     public async Task GetOutputById_DeletedOrder_ShouldReturnNull()
     {
-        var handler = new GetOutputByIdQueryHandler(_readRepoMock.Object);
+        var handler = new GetOutputByIdQueryHandler(_readRepoMock.Object, _settingRepoMock.Object);
         var orderId = 1;
 
         _readRepoMock.Setup(
@@ -1434,6 +1450,7 @@ public class SalesOrder
             _readRepoMock.Object,
             _insertRepoMock.Object,
             _variantRepoMock.Object,
+            _settingRepoMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new CreateOutputCommand
@@ -1536,7 +1553,7 @@ public class SalesOrder
     [Fact(DisplayName = "SO_052 - GetOutputsByUserId với pagination")]
     public async Task GetOutputsByUserId_ShouldSupportPagination()
     {
-        var handler = new GetOutputsByUserIdQueryHandler(_readRepoMock.Object, _paginatorMock.Object);
+        var handler = new GetOutputsByUserIdQueryHandler(_readRepoMock.Object, _paginatorMock.Object, _settingRepoMock.Object);
 
         var userId = Guid.NewGuid();
         var query = new GetOutputsByUserIdQuery()
@@ -1623,6 +1640,7 @@ public class SalesOrder
             _readRepoMock.Object,
             _insertRepoMock.Object,
             _variantRepoMock.Object,
+            _settingRepoMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new CreateOutputCommand
@@ -1705,6 +1723,7 @@ public class SalesOrder
             _readRepoMock.Object,
             _insertRepoMock.Object,
             _variantRepoMock.Object,
+            _settingRepoMock.Object,
             _unitOfWorkMock.Object);
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -1863,5 +1882,125 @@ public class SalesOrder
         unitCost.Should().Be(117);
         batches[0].RemainingCount.Should().Be(0);
         batches[1].RemainingCount.Should().Be(15);
+    }
+
+    [Fact(DisplayName = "SO_111 - CreateOutput - Tổng tiền dưới ngưỡng -> Pending")]
+    public async Task CreateOutput_TotalPriceBelowThreshold_ShouldSetStatusToPending()
+    {
+        // Arrange
+        var productId = 1;
+        var command = new CreateOutputCommand { OutputInfos = [ new() { ProductId = productId, Count = 1 } ] };
+
+        _variantRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync([ new ProductVariant { Id = productId, Price = 50000000, Product = new ProductEntity { StatusId = ProductStatus.ForSale } } ]);
+
+        _settingRepoMock.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([ new SettingEntity { Key = SettingKeys.OrderValueExceeds, Value = "100000000" } ]);
+
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Output { Id = 1, StatusId = OrderStatus.Pending });
+
+        var handler = new CreateOutputCommandHandler(_readRepoMock.Object, _insertRepoMock.Object, _variantRepoMock.Object, _settingRepoMock.Object, _unitOfWorkMock.Object);
+
+        // Act
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        _insertRepoMock.Verify(x => x.Add(It.Is<Output>(o => o.StatusId == OrderStatus.Pending)), Times.Once);
+    }
+
+    [Fact(DisplayName = "SO_112 - CreateOutput - Tổng tiền vượt ngưỡng -> WaitingDeposit")]
+    public async Task CreateOutput_TotalPriceAboveThreshold_ShouldSetStatusToWaitingDeposit()
+    {
+        // Arrange
+        var productId = 1;
+        var command = new CreateOutputCommand { OutputInfos = [ new() { ProductId = productId, Count = 1 } ] };
+
+        _variantRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync([ new ProductVariant { Id = productId, Price = 150000000, Product = new ProductEntity { StatusId = ProductStatus.ForSale } } ]);
+
+        _settingRepoMock.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([ new SettingEntity { Key = SettingKeys.OrderValueExceeds, Value = "100000000" } ]);
+
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Output { Id = 1, StatusId = OrderStatus.WaitingDeposit });
+
+        var handler = new CreateOutputCommandHandler(_readRepoMock.Object, _insertRepoMock.Object, _variantRepoMock.Object, _settingRepoMock.Object, _unitOfWorkMock.Object);
+
+        // Act
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        _insertRepoMock.Verify(x => x.Add(It.Is<Output>(o => o.StatusId == OrderStatus.WaitingDeposit)), Times.Once);
+    }
+
+    [Fact(DisplayName = "SO_113 - CreateOutput - Không có cấu hình ngưỡng -> Mặc định 100tr")]
+    public async Task CreateOutput_NoThresholdConfig_ShouldUseDefault100M()
+    {
+        // Arrange
+        var productId = 1;
+        var command = new CreateOutputCommand { OutputInfos = [ new() { ProductId = productId, Count = 1 } ] };
+
+        _variantRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync([ new ProductVariant { Id = productId, Price = 120000000, Product = new ProductEntity { StatusId = ProductStatus.ForSale } } ]);
+
+        _settingRepoMock.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]); // Trả về danh sách trống
+
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Output { Id = 1, StatusId = OrderStatus.WaitingDeposit });
+
+        var handler = new CreateOutputCommandHandler(_readRepoMock.Object, _insertRepoMock.Object, _variantRepoMock.Object, _settingRepoMock.Object, _unitOfWorkMock.Object);
+
+        // Act
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        _insertRepoMock.Verify(x => x.Add(It.Is<Output>(o => o.StatusId == OrderStatus.WaitingDeposit)), Times.Once);
+    }
+
+    [Fact(DisplayName = "SO_114 - CreateOutputByManager - Tự động chuyển WaitingDeposit")]
+    public async Task CreateOutputByManager_TotalPriceAboveThreshold_ShouldSetStatusToWaitingDeposit()
+    {
+        // Arrange
+        var productId = 1;
+        var buyerId = Guid.NewGuid();
+        var command = new CreateOutputByManagerCommand 
+        { 
+            BuyerId = buyerId,
+            OutputInfos = [ new() { ProductId = productId, Count = 1 } ] 
+            // Không set StatusId
+        };
+
+        _userRepoMock.Setup(x => x.GetUserByIDAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new UserAuth());
+
+        _variantRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync([ new ProductVariant { Id = productId, Price = 200000000, Product = new ProductEntity { StatusId = ProductStatus.ForSale } } ]);
+
+        _settingRepoMock.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([ new SettingEntity { Key = SettingKeys.OrderValueExceeds, Value = "100000000" } ]);
+
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Output { Id = 1, StatusId = OrderStatus.WaitingDeposit });
+
+        var handler = new CreateOutputByManagerCommandHandler(
+            _readRepoMock.Object, 
+            _insertRepoMock.Object, 
+            _updateRepoMock.Object, 
+            _variantRepoMock.Object, 
+            _userRepoMock.Object, 
+            _settingRepoMock.Object, 
+            _unitOfWorkMock.Object);
+
+        // Act
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        _insertRepoMock.Verify(x => x.Add(It.Is<Output>(o => o.StatusId == OrderStatus.WaitingDeposit)), Times.Once);
     }
 }

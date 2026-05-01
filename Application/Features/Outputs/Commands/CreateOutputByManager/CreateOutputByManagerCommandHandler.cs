@@ -3,6 +3,7 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.ProductVariant;
+using Application.Interfaces.Repositories.Setting;
 using Application.Interfaces.Repositories.User;
 
 using Domain.Constants;
@@ -19,6 +20,7 @@ public sealed class CreateOutputByManagerCommandHandler(
     IOutputUpdateRepository updateRepository,
     IProductVariantReadRepository variantRepository,
     IUserReadRepository userReadRepository,
+    ISettingRepository settingRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateOutputByManagerCommand, Result<OrderDetailResponse>>
 {
     public async Task<Result<OrderDetailResponse>> Handle(
@@ -63,6 +65,7 @@ public sealed class CreateOutputByManagerCommandHandler(
                     "Products");
             }
         }
+
         var output = request.Adapt<Output>();
 
         foreach(var info in output.OutputInfos)
@@ -74,9 +77,26 @@ public sealed class CreateOutputByManagerCommandHandler(
             }
         }
 
+        var settings = await settingRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
+        
+        var ratioSetting = settings.FirstOrDefault(s => string.Equals(s.Key, SettingKeys.DepositRatio, StringComparison.OrdinalIgnoreCase));
+        if (ratioSetting != null && int.TryParse(ratioSetting.Value, out var parsedRatio))
+        {
+            output.DepositRatio = parsedRatio;
+        }
+
         if(string.IsNullOrWhiteSpace(output.StatusId))
         {
-            output.StatusId = OrderStatus.Pending;
+            var totalPrice = output.OutputInfos.Sum(i => (i.Price ?? 0) * (i.Count ?? 0));
+            var thresholdSetting = settings.FirstOrDefault(s => string.Equals(s.Key, SettingKeys.OrderValueExceeds, StringComparison.OrdinalIgnoreCase));
+
+            decimal threshold = 100000000;
+            if(thresholdSetting != null && decimal.TryParse(thresholdSetting.Value, out var parsedThreshold))
+            {
+                threshold = parsedThreshold;
+            }
+
+            output.StatusId = totalPrice >= threshold ? OrderStatus.WaitingDeposit : OrderStatus.Pending;
         }
 
         insertRepository.Add(output);
@@ -91,8 +111,9 @@ public sealed class CreateOutputByManagerCommandHandler(
         }
 
         var created = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
+        ArgumentNullException.ThrowIfNull(created);
 
-        return created!.Adapt<OrderDetailResponse>();
+        return created.Adapt<OrderDetailResponse>();
     }
 }
 

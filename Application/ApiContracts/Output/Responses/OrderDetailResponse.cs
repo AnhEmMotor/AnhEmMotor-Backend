@@ -28,6 +28,9 @@ public class OrderDetailResponse
     public string? CompletedByUserName { get; set; }
 
     public decimal? Total { get; set; }
+    public int? DepositRatio { get; set; }
+    public decimal? DepositAmount { get; set; }
+    public decimal? RemainingAmount { get; set; }
 
     public List<OutputInfoResponse> Products { get; set; } = [];
 }
