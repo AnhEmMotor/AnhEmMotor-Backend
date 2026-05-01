@@ -1,4 +1,4 @@
-﻿using Application.Interfaces.Repositories.ProductVariant;
+using Application.Interfaces.Repositories.ProductVariant;
 using Domain.Constants;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
@@ -62,6 +62,7 @@ namespace Infrastructure.Repositories.ProductVariant
             return context.GetQuery<ProductVariantEntity>(mode)
                 .Where(v => ids.Contains(v.Id))
                 .Include(v => v.Product)
+                    .ThenInclude(p => p!.ProductCategory)
                 .Include(v => v.ProductCollectionPhotos)
                 .Include(v => v.VariantOptionValues)
                 .ThenInclude(vov => vov.OptionValue)

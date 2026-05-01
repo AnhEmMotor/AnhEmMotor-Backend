@@ -30,6 +30,7 @@ public sealed class GetProductStoreDetailBySlugQueryHandler(IProductReadReposito
             Name = product.Name,
             Brand = product.Brand?.Name,
             Category = product.ProductCategory?.Name,
+            ProductLimit = product.ProductCategory?.MaxPurchaseQuantity,
             Description = product.Description,
             ShortDescription = product.ShortDescription,
             MetaTitle = product.MetaTitle,

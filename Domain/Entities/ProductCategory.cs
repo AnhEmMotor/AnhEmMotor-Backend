@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities
@@ -15,6 +15,9 @@ namespace Domain.Entities
 
         [Column("Description")]
         public string? Description { get; set; }
+
+        [Column("MaxPurchaseQuantity")]
+        public int? MaxPurchaseQuantity { get; set; }
 
         public ICollection<Product> Products { get; set; } = [];
     }

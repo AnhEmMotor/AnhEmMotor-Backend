@@ -724,6 +724,13 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
+        <member name="M:WebAPI.Controllers.V1.SettingController.GetStoreSettingsAsync(System.Threading.CancellationToken)">
+            <summary>
+            Lấy các thông số cài đặt công khai cho Store
+            </summary>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
         <member name="T:WebAPI.Controllers.V1.StatisticsController">
             <summary>
             Thống kê và báo cáo.

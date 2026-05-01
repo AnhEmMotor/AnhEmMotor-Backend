@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.ProductCategory.Responses;
+using Application.ApiContracts.ProductCategory.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductCategory;
@@ -49,6 +49,8 @@ public sealed class UpdateProductCategoryCommandHandler(
         {
             category.Description = request.Description.Trim();
         }
+
+        category.MaxPurchaseQuantity = request.MaxPurchaseQuantity;
 
         updateRepository.Update(category);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
