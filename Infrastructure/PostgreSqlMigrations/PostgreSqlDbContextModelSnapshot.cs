@@ -739,8 +739,8 @@ namespace Infrastructure.PostgreSqlMigrations
                         .HasColumnType("numeric")
                         .HasColumnName("Weight");
 
-                    b.Property<string>("Wheelbase")
-                        .HasColumnType("text")
+                    b.Property<decimal?>("Wheelbase")
+                        .HasColumnType("numeric")
                         .HasColumnName("Wheelbase");
 
                     b.HasKey("Id");
