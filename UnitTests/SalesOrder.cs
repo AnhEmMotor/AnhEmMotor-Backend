@@ -1013,7 +1013,7 @@ public class SalesOrder
     [Fact(DisplayName = "SO_029 - GetOutputsList hỗ trợ phân trang")]
     public async Task GetOutputsList_ShouldSupportPagination()
     {
-        var handler = new GetOutputsListQueryHandler(_readRepoMock.Object, _paginatorMock.Object);
+        var handler = new GetOutputsListQueryHandler(_readRepoMock.Object, _paginatorMock.Object, _settingRepoMock.Object);
 
         var query = new GetOutputsListQuery() { SieveModel = new SieveModel { Page = 1, PageSize = 10 } };
 
@@ -1036,7 +1036,7 @@ public class SalesOrder
     [Fact(DisplayName = "SO_030 - GetOutputsList filter theo status")]
     public async Task GetOutputsList_ShouldFilterByStatus()
     {
-        var handler = new GetOutputsListQueryHandler(_readRepoMock.Object, _paginatorMock.Object);
+        var handler = new GetOutputsListQueryHandler(_readRepoMock.Object, _paginatorMock.Object, _settingRepoMock.Object);
 
         var query = new GetOutputsListQuery() { SieveModel = new SieveModel { Filters = "StatusId==pending" } };
 
@@ -1063,7 +1063,7 @@ public class SalesOrder
     [Fact(DisplayName = "SO_031 - GetOutputsList sort theo CreatedAt")]
     public async Task GetOutputsList_ShouldSortByCreatedAt()
     {
-        var handler = new GetOutputsListQueryHandler(_readRepoMock.Object, _paginatorMock.Object);
+        var handler = new GetOutputsListQueryHandler(_readRepoMock.Object, _paginatorMock.Object, _settingRepoMock.Object);
 
         var query = new GetOutputsListQuery() { SieveModel = new SieveModel { Sorts = "-CreatedAt" } };
 
@@ -1428,7 +1428,7 @@ public class SalesOrder
     [Fact(DisplayName = "SO_044 - GetOutputsList exclude soft deleted")]
     public async Task GetOutputsList_ShouldExcludeSoftDeleted()
     {
-        var handler = new GetOutputsListQueryHandler(_readRepoMock.Object, _paginatorMock.Object);
+        var handler = new GetOutputsListQueryHandler(_readRepoMock.Object, _paginatorMock.Object, _settingRepoMock.Object);
 
         var query = new GetOutputsListQuery() { SieveModel = new SieveModel() };
 
@@ -1786,7 +1786,7 @@ public class SalesOrder
     [Fact(DisplayName = "SO_059 - GetOutputsList search theo CustomerName")]
     public async Task GetOutputsList_ShouldSearchByCustomerName()
     {
-        var handler = new GetOutputsListQueryHandler(_readRepoMock.Object, _paginatorMock.Object);
+        var handler = new GetOutputsListQueryHandler(_readRepoMock.Object, _paginatorMock.Object, _settingRepoMock.Object);
 
         var query = new GetOutputsListQuery() { SieveModel = new SieveModel { Filters = "CustomerName@=Nguyen" } };
 
@@ -1813,7 +1813,7 @@ public class SalesOrder
     [Fact(DisplayName = "SO_060 - GetOutputsList filter theo date range")]
     public async Task GetOutputsList_ShouldFilterByDateRange()
     {
-        var handler = new GetOutputsListQueryHandler(_readRepoMock.Object, _paginatorMock.Object);
+        var handler = new GetOutputsListQueryHandler(_readRepoMock.Object, _paginatorMock.Object, _settingRepoMock.Object);
 
         var query = new GetOutputsListQuery()
         {

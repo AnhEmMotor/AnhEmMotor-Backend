@@ -16,8 +16,9 @@ public sealed class UpdateProductCommandValidator : AbstractValidator<UpdateProd
             .WithMessage("Product name must not exceed 255 characters.");
 
         RuleFor(x => x.BrandId)
+            .NotNull()
+            .WithMessage("Brand Id is required.")
             .GreaterThan(0)
-            .When(x => x.BrandId.HasValue)
             .WithMessage("Brand Id must be greater than 0.");
 
         RuleFor(x => x.CategoryId)

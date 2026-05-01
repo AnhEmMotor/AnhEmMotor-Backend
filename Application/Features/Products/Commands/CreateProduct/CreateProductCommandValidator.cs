@@ -19,9 +19,10 @@ public sealed class CreateProductCommandValidator : AbstractValidator<CreateProd
             .WithMessage("Category ID must be greater than 0.");
 
         RuleFor(x => x.BrandId)
+            .NotNull()
+            .WithMessage("Brand ID is required.")
             .GreaterThan(0)
-            .When(x => x.BrandId.HasValue)
-            .WithMessage("Brand ID must be greater than 0 when provided.");
+            .WithMessage("Brand ID must be greater than 0.");
 
         RuleFor(x => x.Description)
             .MaximumLength(2000)

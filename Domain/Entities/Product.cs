@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities
@@ -41,7 +41,7 @@ namespace Domain.Entities
         public string? Dimensions { get; set; }
 
         [Column("Wheelbase", TypeName = "nvarchar(20)")]
-        public string? Wheelbase { get; set; }
+        public decimal? Wheelbase { get; set; }
 
         [Column("SeatHeight", TypeName = "nvarchar(20)")]
         public decimal? SeatHeight { get; set; }

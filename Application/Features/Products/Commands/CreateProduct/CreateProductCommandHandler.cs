@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Product.Responses;
+using Application.ApiContracts.Product.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
@@ -235,7 +235,7 @@ public sealed class CreateProductCommandHandler(
             Description = request.Description?.Trim(),
             Weight = request.Weight,
             Dimensions = request.Dimensions?.Trim(),
-            Wheelbase = request.Wheelbase?.Trim(),
+            Wheelbase = request.Wheelbase,
             SeatHeight = request.SeatHeight,
             GroundClearance = request.GroundClearance,
             FuelCapacity = request.FuelCapacity,

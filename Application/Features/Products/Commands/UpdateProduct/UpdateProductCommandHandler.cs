@@ -114,7 +114,7 @@ public sealed class UpdateProductCommandHandler(
         product.Description = command.Description?.Trim();
         product.Weight = command.Weight;
         product.Dimensions = command.Dimensions?.Trim();
-        product.Wheelbase = command.Wheelbase?.Trim();
+        product.Wheelbase = command.Wheelbase;
         product.SeatHeight = command.SeatHeight;
         product.GroundClearance = command.GroundClearance;
         product.FuelCapacity = command.FuelCapacity;
