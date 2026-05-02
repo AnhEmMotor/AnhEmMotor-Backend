@@ -477,9 +477,29 @@ namespace Infrastructure.PostgreSqlMigrations
                         .HasColumnType("text")
                         .HasColumnName("Notes");
 
+                    b.Property<decimal?>("PaidAmount")
+                        .HasColumnType("decimal(18, 2)")
+                        .HasColumnName("PaidAmount");
+
+                    b.Property<DateTimeOffset?>("PaidAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("PaidAt");
+
+                    b.Property<string>("PaymentMethod")
+                        .HasColumnType("text")
+                        .HasColumnName("PaymentMethod");
+
+                    b.Property<string>("PaymentStatus")
+                        .HasColumnType("text")
+                        .HasColumnName("PaymentStatus");
+
                     b.Property<string>("StatusId")
                         .HasColumnType("text")
                         .HasColumnName("StatusId");
+
+                    b.Property<string>("TransactionId")
+                        .HasColumnType("text")
+                        .HasColumnName("TransactionId");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");

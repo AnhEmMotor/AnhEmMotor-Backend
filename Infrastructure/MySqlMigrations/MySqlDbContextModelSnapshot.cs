@@ -477,9 +477,29 @@ namespace Infrastructure.MySqlMigrations
                         .HasColumnType("longtext")
                         .HasColumnName("Notes");
 
+                    b.Property<decimal?>("PaidAmount")
+                        .HasColumnType("decimal(18, 2)")
+                        .HasColumnName("PaidAmount");
+
+                    b.Property<long?>("PaidAt")
+                        .HasColumnType("bigint")
+                        .HasColumnName("PaidAt");
+
+                    b.Property<string>("PaymentMethod")
+                        .HasColumnType("longtext")
+                        .HasColumnName("PaymentMethod");
+
+                    b.Property<string>("PaymentStatus")
+                        .HasColumnType("longtext")
+                        .HasColumnName("PaymentStatus");
+
                     b.Property<string>("StatusId")
                         .HasColumnType("varchar(255)")
                         .HasColumnName("StatusId");
+
+                    b.Property<string>("TransactionId")
+                        .HasColumnType("longtext")
+                        .HasColumnName("TransactionId");
 
                     b.Property<long?>("UpdatedAt")
                         .HasColumnType("bigint");
