@@ -8,6 +8,7 @@ public sealed class ChangeMultipleUsersStatusCommandValidator : AbstractValidato
     public ChangeMultipleUsersStatusCommandValidator()
     {
         RuleFor(x => x.UserIds)
+            .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .WithMessage("User list cannot be empty.")
             .Must(ids => ids!.Count <= 50)

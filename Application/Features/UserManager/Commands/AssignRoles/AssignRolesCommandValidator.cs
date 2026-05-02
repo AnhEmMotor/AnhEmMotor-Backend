@@ -9,6 +9,7 @@ public sealed class AssignRolesCommandValidator : AbstractValidator<AssignRolesC
         RuleFor(x => x.UserId).NotEmpty().WithMessage("UserId is required.");
 
         RuleFor(x => x.RoleIds)
+            .Cascade(CascadeMode.Stop)
             .NotNull()
             .WithMessage("Role list cannot be null.")
             .Must(ids => ids!.Count == ids.Distinct().Count())

@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace Application.Features.Products.Commands.DeleteManyProducts;
 
@@ -7,6 +7,7 @@ public sealed class DeleteManyProductsCommandValidator : AbstractValidator<Delet
     public DeleteManyProductsCommandValidator()
     {
         RuleFor(x => x.Ids)
+            .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .WithMessage("Bạn chưa truyền danh sách Product ID để xoá.")
             .Must(ids => ids!.Count <= 50)
