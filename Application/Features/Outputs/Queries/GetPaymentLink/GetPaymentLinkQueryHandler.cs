@@ -47,8 +47,15 @@ namespace Application.Features.Outputs.Queries.GetPaymentLink
             {
                 paymentMethod = PaymentMethod.PayOS;
                 order.PaymentMethod = paymentMethod;
-                updateRepository.Update(order);
-                await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+
+            // Check for existing valid payment link
+            if(!string.IsNullOrEmpty(order.PaymentUrl) &&
+                order.PaymentExpiredAt.HasValue &&
+                order.PaymentExpiredAt.Value > DateTimeOffset.Now &&
+                string.Compare(order.PaymentMethod, paymentMethod) == 0)
+            {
+                return order.PaymentUrl;
             }
 
             if(string.Compare(paymentMethod, PaymentMethod.VNPay) == 0)
@@ -61,25 +68,21 @@ namespace Application.Features.Outputs.Queries.GetPaymentLink
                     Description = $"Thanh toan don hang {order.Id}",
                     CreatedDate = DateTime.Now
                 };
-                return vnpayService.CreatePaymentUrl(context, vnpayRequest);
+                var paymentUrl = vnpayService.CreatePaymentUrl(context, vnpayRequest);
+
+                // Update order with new payment link
+                order.PaymentUrl = paymentUrl;
+                order.PaymentCode = order.Id.ToString();
+                order.PaymentExpiredAt = DateTimeOffset.Now.AddMinutes(15); // VNPay default timeout
+
+                updateRepository.Update(order);
+                await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                return paymentUrl;
             }
 
             if(string.Compare(paymentMethod, PaymentMethod.PayOS) == 0)
             {
-                try
-                {
-                    var existingPayment = await payosService.GetPaymentDetailsAsync(order.Id, cancellationToken)
-                        .ConfigureAwait(false);
-                    if(existingPayment != null &&
-                        string.Compare(existingPayment.Status, PayOSStatus.Pending) == 0 &&
-                        !string.IsNullOrEmpty(existingPayment.CheckoutUrl))
-                    {
-                        return existingPayment.CheckoutUrl;
-                    }
-                } catch
-                {
-                }
-
                 long orderCode = (long)order.Id * 100000 + (int)(DateTimeOffset.UtcNow.ToUnixTimeSeconds() % 100000);
 
                 var payosRequest = new PayOSPaymentRequest
@@ -91,8 +94,17 @@ namespace Application.Features.Outputs.Queries.GetPaymentLink
                 };
                 var response = await payosService.CreatePaymentAsync(payosRequest, cancellationToken)
                     .ConfigureAwait(false);
+
                 if(response.ErrorCode == 0)
                 {
+                    // Update order with new payment link
+                    order.PaymentUrl = response.CheckoutUrl;
+                    order.PaymentCode = orderCode.ToString();
+                    order.PaymentExpiredAt = DateTimeOffset.Now.AddDays(1); // PayOS default timeout or enough for session
+
+                    updateRepository.Update(order);
+                    await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
                     return response.CheckoutUrl;
                 }
                 return Error.Failure($"Lỗi PayOS: {response.Message}", "PayOS");

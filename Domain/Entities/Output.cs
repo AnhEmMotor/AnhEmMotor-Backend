@@ -60,6 +60,15 @@ namespace Domain.Entities
         [Column("DepositRatio")]
         public int? DepositRatio { get; set; }
 
+        [Column("PaymentUrl", TypeName = "nvarchar(MAX)")]
+        public string? PaymentUrl { get; set; }
+
+        [Column("PaymentCode")]
+        public string? PaymentCode { get; set; }
+
+        [Column("PaymentExpiredAt")]
+        public DateTimeOffset? PaymentExpiredAt { get; set; }
+
         public ApplicationUser? Buyer { get; set; }
 
         public ApplicationUser? CreatedByUser { get; set; }
