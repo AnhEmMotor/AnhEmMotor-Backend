@@ -5,20 +5,18 @@ using System;
 
 namespace Infrastructure.Migrations
 {
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public partial class ReplaceIsActiveWithStatusAndAddDeletedAt : Migration
     {
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(name: "IsActive", table: "Users");
-
             migrationBuilder.AddColumn<DateTimeOffset>(
                 name: "DeletedAt",
                 table: "Users",
                 type: "datetimeoffset",
                 nullable: true);
-
             migrationBuilder.AddColumn<int>(
                 name: "Status",
                 table: "Users",
@@ -27,13 +25,11 @@ namespace Infrastructure.Migrations
                 defaultValue: 0);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(name: "DeletedAt", table: "Users");
-
             migrationBuilder.DropColumn(name: "Status", table: "Users");
-
             migrationBuilder.AddColumn<bool>(name: "IsActive", table: "Users", type: "bit", nullable: true);
         }
     }

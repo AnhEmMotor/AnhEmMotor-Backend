@@ -12,7 +12,6 @@ public sealed class RestoreManySuppliersCommandValidator : AbstractValidator<Res
             .WithMessage("Bạn chưa truyền danh sách Supplier ID để phục hồi.")
             .Must(ids => ids.Count <= 20)
             .WithMessage("Để đảm bảo an toàn dữ liệu, chỉ được phục hồi tối đa 20 nhà cung cấp một lần.");
-
         RuleForEach(x => x.Ids).NotEmpty();
     }
 }

@@ -13,18 +13,15 @@ public sealed class GetFileByIdQueryHandler(IMediaFileReadRepository repository,
     public async Task<Result<MediaFileResponse?>> Handle(GetFileByIdQuery request, CancellationToken cancellationToken)
     {
         var file = await repository.GetByIdAsync(request.Id!.Value, cancellationToken).ConfigureAwait(false);
-
-        if(file == null)
+        if (file == null)
         {
             return Error.NotFound($"File with Id {request.Id} not found.");
         }
-
         var response = file.Adapt<MediaFileResponse>();
-        if(!string.IsNullOrEmpty(file.StoragePath))
+        if (!string.IsNullOrEmpty(file.StoragePath))
         {
             response.PublicUrl = fileStorageService.GetPublicUrl(file.StoragePath);
         }
-
         return response;
     }
 }

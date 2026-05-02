@@ -107,7 +107,6 @@ public class SupplierController(IMediator mediator) : ApiController
     {
         var query = new GetSupplierPurchaseHistoryQuery() { SupplierId = id, SieveModel = sieveModel };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-
         return HandleResult(result);
     }
 

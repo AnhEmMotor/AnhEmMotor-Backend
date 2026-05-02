@@ -19,31 +19,26 @@ namespace UnitTests;
 
 public class MediaFile
 {
-#pragma warning disable IDE0079 
-#pragma warning disable CRR0035
+    #pragma warning disable IDE0079 
+    #pragma warning disable CRR0035
     [Fact(DisplayName = "MF_001 - Tải lên ảnh thành công với định dạng WEBP hợp lệ")]
     public async Task UploadImage_ValidWebp_Success()
     {
         var fileStorageServiceMock = new Mock<IFileStorageService>();
         var insertRepositoryMock = new Mock<IMediaFileInsertRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
-
         var expectedStoragePath = "test-guid-123.webp";
         var expectedFileExtension = ".webp";
         fileStorageServiceMock
             .Setup(x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>(), It.IsAny<string>()))
             .ReturnsAsync(Result<FileUpload>.Success(new FileUpload(expectedStoragePath, expectedFileExtension, 1024)));
-
         var handler = new UploadProductImageCommandHandler(
             fileStorageServiceMock.Object,
             insertRepositoryMock.Object,
             unitOfWorkMock.Object);
-
         var stream = new MemoryStream(new byte[102400]);
         var command = new UploadProductImageCommand { FileContent = stream, FileName = "test.webp" };
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
         result.Value.StoragePath.Should().Be(expectedStoragePath);
         result.Value.OriginalFileName.Should().Be("test.webp");
@@ -60,31 +55,23 @@ public class MediaFile
         var fileStorageServiceMock = new Mock<IFileStorageService>();
         var insertRepositoryMock = new Mock<IMediaFileInsertRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
-
         fileStorageServiceMock
             .Setup(x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>(), It.IsAny<string>()))
             .ReturnsAsync(Result<FileUpload>.Failure("Unsupported file format"));
-
         var handler = new UploadProductImageCommandHandler(
             fileStorageServiceMock.Object,
             insertRepositoryMock.Object,
             unitOfWorkMock.Object);
-
         var pdfStream = new MemoryStream(new byte[1024]);
         var pdfCommand = new UploadProductImageCommand { FileContent = pdfStream, FileName = "document.pdf" };
-
         var result = await handler.Handle(pdfCommand, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
-
         var txtStream = new MemoryStream(new byte[512]);
         var txtCommand = new UploadProductImageCommand { FileContent = txtStream, FileName = "text.txt" };
-
         result = await handler.Handle(txtCommand, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
-
         var fakeWebpStream = new MemoryStream(new byte[1024]);
         var fakeWebpCommand = new UploadProductImageCommand { FileContent = fakeWebpStream, FileName = "fake.webp" };
-
         result = await handler.Handle(fakeWebpCommand, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
@@ -95,15 +82,12 @@ public class MediaFile
         var fileStorageServiceMock = new Mock<IFileStorageService>();
         var insertRepositoryMock = new Mock<IMediaFileInsertRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
-
         var handler = new UploadProductImageCommandHandler(
             fileStorageServiceMock.Object,
             insertRepositoryMock.Object,
             unitOfWorkMock.Object);
-
         var largeStream = new MemoryStream(new byte[52428800]);
         var command = new UploadProductImageCommand { FileContent = largeStream, FileName = "large.webp" };
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
@@ -114,24 +98,19 @@ public class MediaFile
         var fileStorageServiceMock = new Mock<IFileStorageService>();
         var insertRepositoryMock = new Mock<IMediaFileInsertRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
-
         var handler = new UploadManyProductImagesCommandHandler(
             fileStorageServiceMock.Object,
             insertRepositoryMock.Object,
             unitOfWorkMock.Object);
-
         var files = new List<(Stream FileContent, string FileName)>
         {
             new(new MemoryStream(new byte[51200]), "valid1.webp"),
             new(new MemoryStream(new byte[102400]), "invalid.pdf"),
             new(new MemoryStream(new byte[61440]), "valid2.jpg")
         };
-
         var command = new UploadManyProductImagesCommand { Files = files };
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
-
         fileStorageServiceMock.Verify(
             x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>(), It.IsAny<string>()),
             Times.Never());
@@ -144,25 +123,20 @@ public class MediaFile
         var deleteRepositoryMock = new Mock<IMediaFileDeleteRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
         var fileStorageServiceMock = new Mock<IFileStorageService>();
-
         readRepositoryMock.Setup(
             x => x.GetByStoragePathAsync(
                 "nonexistent-file.webp",
                 It.IsAny<CancellationToken>(),
                 DataFetchMode.ActiveOnly))
             .ReturnsAsync((MediaFileEntity?)null);
-
         var handler = new DeleteProductImageCommandHandler(
             readRepositoryMock.Object,
             deleteRepositoryMock.Object,
             unitOfWorkMock.Object,
             fileStorageServiceMock.Object);
-
         var command = new DeleteProductImageCommand { StoragePath = "nonexistent-file.webp" };
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
-
         deleteRepositoryMock.Verify(x => x.Delete(It.IsAny<MediaFileEntity>()), Times.Never());
     }
 
@@ -173,25 +147,20 @@ public class MediaFile
         var deleteRepositoryMock = new Mock<IMediaFileDeleteRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
         var fileStorageServiceMock = new Mock<IFileStorageService>();
-
         readRepositoryMock.Setup(
             x => x.GetByStoragePathAsync(
                 "already-deleted.webp",
                 It.IsAny<CancellationToken>(),
                 DataFetchMode.ActiveOnly))
             .ReturnsAsync((MediaFileEntity?)null);
-
         var handler = new DeleteProductImageCommandHandler(
             readRepositoryMock.Object,
             deleteRepositoryMock.Object,
             unitOfWorkMock.Object,
             fileStorageServiceMock.Object);
-
         var command = new DeleteProductImageCommand { StoragePath = "already-deleted.webp" };
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
-
         deleteRepositoryMock.Verify(x => x.Delete(It.IsAny<MediaFileEntity>()), Times.Never());
     }
 
@@ -201,30 +170,24 @@ public class MediaFile
         var readRepositoryMock = new Mock<IMediaFileReadRepository>();
         var deleteRepositoryMock = new Mock<IMediaFileDeleteRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
-
         var existingFiles = new List<MediaFileEntity>
         {
             new() { StoragePath = "exist1.webp", DeletedAt = null },
             new() { StoragePath = "exist2.webp", DeletedAt = null }
         };
-
         readRepositoryMock.Setup(
             x => x.GetByStoragePathsAsync(
                 It.IsAny<IEnumerable<string>>(),
                 It.IsAny<CancellationToken>(),
                 DataFetchMode.ActiveOnly))
             .ReturnsAsync(existingFiles);
-
         var handler = new DeleteManyFilesCommandHandler(
             readRepositoryMock.Object,
             deleteRepositoryMock.Object,
             unitOfWorkMock.Object);
-
-        var command = new DeleteManyFilesCommand { StoragePaths = [ "exist1.webp", "nonexistent.jpg", "exist2.webp" ] };
-
+        var command = new DeleteManyFilesCommand { StoragePaths = ["exist1.webp", "nonexistent.jpg", "exist2.webp"] };
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
-
         deleteRepositoryMock.Verify(x => x.Delete(It.IsAny<IEnumerable<MediaFileEntity>>()), Times.Never());
     }
 
@@ -235,25 +198,20 @@ public class MediaFile
         var updateRepositoryMock = new Mock<IMediaFileUpdateRepository>();
         var fileStorageServiceMock = new Mock<IFileStorageService>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
-
         readRepositoryMock.Setup(
             x => x.GetByStoragePathAsync(
                 "nonexistent-file.webp",
                 It.IsAny<CancellationToken>(),
                 DataFetchMode.DeletedOnly))
             .ReturnsAsync((MediaFileEntity?)null);
-
         var handler = new RestoreFileCommandHandler(
             readRepositoryMock.Object,
             updateRepositoryMock.Object,
             fileStorageServiceMock.Object,
             unitOfWorkMock.Object);
-
         var command = new RestoreFileCommand { StoragePath = "nonexistent-file.webp" };
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
-
         updateRepositoryMock.Verify(x => x.Update(It.IsAny<MediaFileEntity>()), Times.Never());
     }
 
@@ -264,22 +222,17 @@ public class MediaFile
         var updateRepositoryMock = new Mock<IMediaFileUpdateRepository>();
         var fileStorageServiceMock = new Mock<IFileStorageService>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
-
         readRepositoryMock.Setup(
             x => x.GetByStoragePathAsync("active-file.webp", It.IsAny<CancellationToken>(), DataFetchMode.DeletedOnly))
             .ReturnsAsync((MediaFileEntity?)null);
-
         var handler = new RestoreFileCommandHandler(
             readRepositoryMock.Object,
             updateRepositoryMock.Object,
             fileStorageServiceMock.Object,
             unitOfWorkMock.Object);
-
         var command = new RestoreFileCommand { StoragePath = "active-file.webp" };
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
-
         updateRepositoryMock.Verify(x => x.Update(It.IsAny<MediaFileEntity>()), Times.Never());
     }
 
@@ -290,34 +243,28 @@ public class MediaFile
         var updateRepositoryMock = new Mock<IMediaFileUpdateRepository>();
         var fileStorageServiceMock = new Mock<IFileStorageService>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
-
         var deletedFiles = new List<MediaFileEntity>
         {
             new() { StoragePath = "deleted1.webp", DeletedAt = DateTimeOffset.Parse("2025-01-01T00:00:00Z") },
             new() { StoragePath = "deleted2.webp", DeletedAt = DateTimeOffset.Parse("2025-01-01T00:00:00Z") }
         };
-
         readRepositoryMock.Setup(
             x => x.GetByStoragePathsAsync(
                 It.IsAny<IEnumerable<string>>(),
                 It.IsAny<CancellationToken>(),
                 DataFetchMode.DeletedOnly))
             .ReturnsAsync(deletedFiles);
-
         var handler = new RestoreManyFilesCommandHandler(
             readRepositoryMock.Object,
             updateRepositoryMock.Object,
             fileStorageServiceMock.Object,
             unitOfWorkMock.Object);
-
         var command = new RestoreManyFilesCommand
         {
-            StoragePaths = [ "deleted1.webp", "nonexistent.jpg", "deleted2.webp" ]
+            StoragePaths = ["deleted1.webp", "nonexistent.jpg", "deleted2.webp"]
         };
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
-
         updateRepositoryMock.Verify(x => x.Restore(It.IsAny<IEnumerable<MediaFileEntity>>()), Times.Never());
     }
 
@@ -325,14 +272,10 @@ public class MediaFile
     public async Task ViewImage_FileNotFound_Fail()
     {
         var fileStorageServiceMock = new Mock<IFileStorageService>();
-
         fileStorageServiceMock.Setup(x => x.GetFileAsync("nonexistent.webp", It.IsAny<CancellationToken>()))
             .ReturnsAsync(((byte[], string)?)null);
-
         var handler = new ViewImageQueryHandler(fileStorageServiceMock.Object);
-
         var query = new ViewImageQuery { StoragePath = "nonexistent.webp" };
-
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
@@ -341,14 +284,10 @@ public class MediaFile
     public async Task ViewImage_FileDeleted_Fail()
     {
         var fileStorageServiceMock = new Mock<IFileStorageService>();
-
         fileStorageServiceMock.Setup(x => x.GetFileAsync("deleted-image.webp", It.IsAny<CancellationToken>()))
             .ReturnsAsync(((byte[], string)?)null);
-
         var handler = new ViewImageQueryHandler(fileStorageServiceMock.Object);
-
         var query = new ViewImageQuery { StoragePath = "deleted-image.webp" };
-
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
@@ -357,11 +296,8 @@ public class MediaFile
     public async Task ViewImage_NegativeWidth_Fail()
     {
         var fileStorageServiceMock = new Mock<IFileStorageService>();
-
         var handler = new ViewImageQueryHandler(fileStorageServiceMock.Object);
-
         var query = new ViewImageQuery { StoragePath = "test.webp", Width = -100 };
-
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
@@ -370,11 +306,8 @@ public class MediaFile
     public async Task ViewImage_WidthExceedsLimit_Fail()
     {
         var fileStorageServiceMock = new Mock<IFileStorageService>();
-
         var handler = new ViewImageQueryHandler(fileStorageServiceMock.Object);
-
         var query = new ViewImageQuery { StoragePath = "test.webp", Width = 50000 };
-
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
@@ -385,23 +318,18 @@ public class MediaFile
         var fileStorageServiceMock = new Mock<IFileStorageService>();
         var insertRepositoryMock = new Mock<IMediaFileInsertRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
-
         var expectedStoragePath = "test-guid-456.webp";
         var expectedFileExtension = ".webp";
         fileStorageServiceMock
             .Setup(x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>(), It.IsAny<string>()))
             .ReturnsAsync(Result<FileUpload>.Success(new FileUpload(expectedStoragePath, expectedFileExtension, 1024)));
-
         var handler = new UploadProductImageCommandHandler(
             fileStorageServiceMock.Object,
             insertRepositoryMock.Object,
             unitOfWorkMock.Object);
-
         var stream = new MemoryStream(new byte[51200]);
         var command = new UploadProductImageCommand { FileContent = stream, FileName = "test<>:\"/\\|?*.webp" };
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
         result.Value.StoragePath.Should().NotBeNullOrEmpty();
         fileStorageServiceMock.Verify(
@@ -415,23 +343,18 @@ public class MediaFile
         var fileStorageServiceMock = new Mock<IFileStorageService>();
         var insertRepositoryMock = new Mock<IMediaFileInsertRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
-
         var expectedStoragePath = "test-guid-789.webp";
         var expectedFileExtension = ".webp";
         fileStorageServiceMock
             .Setup(x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>(), It.IsAny<string>()))
             .ReturnsAsync(Result<FileUpload>.Success(new FileUpload(expectedStoragePath, expectedFileExtension, 1024)));
-
         var handler = new UploadProductImageCommandHandler(
             fileStorageServiceMock.Object,
             insertRepositoryMock.Object,
             unitOfWorkMock.Object);
-
         var stream = new MemoryStream(new byte[51200]);
         var command = new UploadProductImageCommand { FileContent = stream, FileName = "  test image.webp  " };
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
         result.Value.StoragePath.Should().NotBeNullOrEmpty();
         fileStorageServiceMock.Verify(
@@ -445,21 +368,16 @@ public class MediaFile
         var fileStorageServiceMock = new Mock<IFileStorageService>();
         var insertRepositoryMock = new Mock<IMediaFileInsertRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
-
         fileStorageServiceMock
             .Setup(x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>(), It.IsAny<string>()))
             .ReturnsAsync(Result<FileUpload>.Failure("Invalid file signature"));
-
         var handler = new UploadProductImageCommandHandler(
             fileStorageServiceMock.Object,
             insertRepositoryMock.Object,
             unitOfWorkMock.Object);
-
         var fakeStream = new MemoryStream(new byte[51200]);
         var command = new UploadProductImageCommand { FileContent = fakeStream, FileName = "fake.webp" };
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         fileStorageServiceMock.Verify(
             x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>(), It.IsAny<string>()),
@@ -473,21 +391,16 @@ public class MediaFile
         var fileStorageServiceMock = new Mock<IFileStorageService>();
         var insertRepositoryMock = new Mock<IMediaFileInsertRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
-
         fileStorageServiceMock
             .Setup(x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>(), It.IsAny<string>()))
             .ReturnsAsync(Result<FileUpload>.Failure("Invalid file signature"));
-
         var handler = new UploadProductImageCommandHandler(
             fileStorageServiceMock.Object,
             insertRepositoryMock.Object,
             unitOfWorkMock.Object);
-
         var fakeStream = new MemoryStream(new byte[51200]);
         var command = new UploadProductImageCommand { FileContent = fakeStream, FileName = "fake.jpg" };
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         fileStorageServiceMock.Verify(
             x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>(), It.IsAny<string>()),
@@ -500,14 +413,10 @@ public class MediaFile
     {
         var readRepositoryMock = new Mock<IMediaFileReadRepository>();
         var fileStorageServiceMock = new Mock<IFileStorageService>();
-
         readRepositoryMock.Setup(x => x.GetByIdAsync(999999, It.IsAny<CancellationToken>(), DataFetchMode.ActiveOnly))
             .ReturnsAsync((MediaFileEntity?)null);
-
         var handler = new GetFileByIdQueryHandler(readRepositoryMock.Object, fileStorageServiceMock.Object);
-
         var query = new GetFileByIdQuery { Id = 999999 };
-
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
@@ -517,14 +426,10 @@ public class MediaFile
     {
         var readRepositoryMock = new Mock<IMediaFileReadRepository>();
         var fileStorageServiceMock = new Mock<IFileStorageService>();
-
         readRepositoryMock.Setup(x => x.GetByIdAsync(456, It.IsAny<CancellationToken>(), DataFetchMode.ActiveOnly))
             .ReturnsAsync((MediaFileEntity?)null);
-
         var handler = new GetFileByIdQueryHandler(readRepositoryMock.Object, fileStorageServiceMock.Object);
-
         var query = new GetFileByIdQuery { Id = 456 };
-
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
@@ -535,23 +440,18 @@ public class MediaFile
         var fileStorageServiceMock = new Mock<IFileStorageService>();
         var insertRepositoryMock = new Mock<IMediaFileInsertRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
-
         var expectedStoragePath = "test-guid-999.webp";
         var expectedFileExtension = ".webp";
         fileStorageServiceMock
             .Setup(x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>(), It.IsAny<string>()))
             .ReturnsAsync(Result<FileUpload>.Success(new FileUpload(expectedStoragePath, expectedFileExtension, 1024)));
-
         var handler = new UploadProductImageCommandHandler(
             fileStorageServiceMock.Object,
             insertRepositoryMock.Object,
             unitOfWorkMock.Object);
-
         var stream = new MemoryStream(new byte[51200]);
         var command = new UploadProductImageCommand { FileContent = stream, FileName = "test.webp" };
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
         result.Value.StoragePath.Should().Be(expectedStoragePath);
         fileStorageServiceMock.Verify(
@@ -565,28 +465,21 @@ public class MediaFile
         var fileStorageServiceMock = new Mock<IFileStorageService>();
         var insertRepositoryMock = new Mock<IMediaFileInsertRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
-
         fileStorageServiceMock
             .Setup(x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>(), It.IsAny<string>()))
             .ReturnsAsync(Result<FileUpload>.Success(new FileUpload("img1.webp", ".webp", 1024)));
-
         var handler = new UploadManyProductImagesCommandHandler(
             fileStorageServiceMock.Object,
             insertRepositoryMock.Object,
             unitOfWorkMock.Object);
-
         var stream1 = new MemoryStream();
         var stream2 = new MemoryStream();
-
         var command = new UploadManyProductImagesCommand
         {
-            Files = [ new(stream1, "test1.jpg"), new(stream2, "test2.png") ]
+            Files = [new(stream1, "test1.jpg"), new(stream2, "test2.png")]
         };
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Value.Should().HaveCount(2);
-
         fileStorageServiceMock.Verify(
             x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>(), It.IsAny<string>()),
             Times.Exactly(2));
@@ -598,27 +491,20 @@ public class MediaFile
         var fileStorageServiceMock = new Mock<IFileStorageService>();
         var insertRepositoryMock = new Mock<IMediaFileInsertRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
-
         var expectedStoragePath = "compressed-image.webp";
         var expectedFileExtension = ".webp";
-
         fileStorageServiceMock
             .Setup(x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>(), It.IsAny<string>()))
             .ReturnsAsync(Result<FileUpload>.Success(new FileUpload(expectedStoragePath, expectedFileExtension, 1024)));
-
         var handler = new UploadProductImageCommandHandler(
             fileStorageServiceMock.Object,
             insertRepositoryMock.Object,
             unitOfWorkMock.Object);
-
         var largeStream = new MemoryStream(new byte[5242880]);
         var command = new UploadProductImageCommand { FileContent = largeStream, FileName = "original.webp" };
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
         result.Value.StoragePath.Should().Be(expectedStoragePath);
-
         fileStorageServiceMock.Verify(
             x => x.SaveFileAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>(), It.IsAny<string>()),
             Times.Once());
@@ -630,16 +516,12 @@ public class MediaFile
         var fileStorageServiceMock = new Mock<IFileStorageService>();
         var insertRepositoryMock = new Mock<IMediaFileInsertRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
-
         var handler = new UploadProductImageCommandHandler(
             fileStorageServiceMock.Object,
             insertRepositoryMock.Object,
             unitOfWorkMock.Object);
-
         var command = new UploadProductImageCommand { FileContent = null, FileName = "test.webp" };
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         result.Error?.Message.Should().Be("File is empty or required");
     }
@@ -650,17 +532,13 @@ public class MediaFile
         var fileStorageServiceMock = new Mock<IFileStorageService>();
         var insertRepositoryMock = new Mock<IMediaFileInsertRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
-
         var handler = new UploadProductImageCommandHandler(
             fileStorageServiceMock.Object,
             insertRepositoryMock.Object,
             unitOfWorkMock.Object);
-
         var emptyStream = new MemoryStream([]);
         var command = new UploadProductImageCommand { FileContent = emptyStream, FileName = "test.webp" };
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         result.Error?.Message.Should().Contain("empty");
     }
@@ -671,20 +549,16 @@ public class MediaFile
         var fileStorageServiceMock = new Mock<IFileStorageService>();
         var insertRepositoryMock = new Mock<IMediaFileInsertRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
-
         var handler = new UploadProductImageCommandHandler(
             fileStorageServiceMock.Object,
             insertRepositoryMock.Object,
             unitOfWorkMock.Object);
-
         var stream = new MemoryStream(new byte[10]);
         var command = new UploadProductImageCommand { FileContent = stream, FileName = string.Empty };
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         result.Error?.Message.Should().Contain("Filename");
     }
-#pragma warning restore CRR0035
-#pragma warning restore IDE0079
+    #pragma warning restore CRR0035
+    #pragma warning restore IDE0079
 }

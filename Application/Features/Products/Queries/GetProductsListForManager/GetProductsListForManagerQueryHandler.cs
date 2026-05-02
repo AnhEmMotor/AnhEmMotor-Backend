@@ -21,13 +21,11 @@ public sealed class GetProductsListForManagerQueryHandler(
         var alertLevelStr = settings.FirstOrDefault(
             s => string.Equals(s.Key, SettingKeys.InventoryAlertLevel, StringComparison.OrdinalIgnoreCase))?.Value;
         long.TryParse(alertLevelStr, out var alertLevel);
-
         var normalizedStatusIds = request.StatusIds
             .Where(s => !string.IsNullOrWhiteSpace(s))
             .Select(s => s.Trim())
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
-
         var (entities, totalCount, _) = await readRepository.GetPagedProductsAsync(
             request.Search,
             normalizedStatusIds,
@@ -42,11 +40,9 @@ public sealed class GetProductsListForManagerQueryHandler(
         var allItems = entities
             .Select(e => ProductMappingConfig.MapProductToDetailForManagerResponseWithAlertLevel(e, alertLevel))
             .ToList();
-
         var filtered = string.IsNullOrWhiteSpace(request.InventoryStatusFilter)
             ? allItems
-            : [ .. allItems.Where(i => string.Compare(i.InventoryStatus, request.InventoryStatusFilter) == 0) ];
-
+            : [.. allItems.Where(i => string.Compare(i.InventoryStatus, request.InventoryStatusFilter) == 0)];
         var sortedItems = request.SortByInventoryStatus switch
         {
             SortDirection.Ascending => filtered.OrderBy(i => InventoryStatus.GetSeverity(i.InventoryStatus)).ToList(),
@@ -54,7 +50,6 @@ public sealed class GetProductsListForManagerQueryHandler(
                 .ToList(),
             _ => filtered
         };
-
         return new PagedResult<ProductDetailForManagerResponse>(sortedItems, totalCount, request.Page, request.PageSize);
     }
 }

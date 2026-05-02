@@ -6,5 +6,8 @@ namespace Infrastructure.Repositories.Supplier;
 
 public class SupplierInsertRepository(ApplicationDBContext context) : ISupplierInsertRepository
 {
-    public void Add(SupplierEntity supplier) { context.Suppliers.Add(supplier); }
+    public void Add(SupplierEntity supplier)
+    {
+        context.Suppliers.Add(supplier);
+    }
 }

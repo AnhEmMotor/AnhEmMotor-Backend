@@ -1099,19 +1099,19 @@
             Reads a JSON string value from the specified reader and returns it as a .NET string.
             </summary>
             <param name="reader">
-            A reference to the <see cref="T:System.Text.Json.Utf8JsonReader"/> positioned at the JSON value to read. The reader must be at a
+            A reference to the <see cref="T:System.Text.Json.Utf8JsonReader" /> positioned at the JSON value to read. The reader must be at a
             string token.
             </param>
             <param name="typeToConvert">The type of the value to convert. This parameter is ignored for string values.</param>
             <param name="options">Options to control the behavior of the JSON serializer. This parameter is not used for string values.</param>
-            <returns>The string value read from the JSON input. Returns <see langword="string.Empty"/> if the JSON value is null.</returns>
+            <returns>The string value read from the JSON input. Returns <see langword="string.Empty" /> if the JSON value is null.</returns>
         </member>
         <member name="M:WebAPI.Converters.EmptyStringConverter.Write(System.Text.Json.Utf8JsonWriter,System.String,System.Text.Json.JsonSerializerOptions)">
             <summary>
             Writes the specified string value to the JSON output using the provided writer, if the value is not null or
             empty.
             </summary>
-            <param name="writer">The <see cref="T:System.Text.Json.Utf8JsonWriter"/> instance used to write the JSON value.</param>
+            <param name="writer">The <see cref="T:System.Text.Json.Utf8JsonWriter" /> instance used to write the JSON value.</param>
             <param name="value">The string value to write. If null or empty, no value is written.</param>
             <param name="options">Options to control JSON serialization behavior. This parameter can be used to customize serialization features.</param>
         </member>
@@ -1136,7 +1136,7 @@
             </remarks>
             <param name="services">The service collection to which authentication services will be added.</param>
             <param name="configuration">The application configuration containing JWT settings such as issuer, audience, and signing key.</param>
-            <returns>The same <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> instance so that additional calls can be chained.</returns>
+            <returns>The same <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection" /> instance so that additional calls can be chained.</returns>
             <exception cref="T:System.InvalidOperationException">Thrown if the required JWT signing key ('Jwt:Key') is missing from the configuration.</exception>
         </member>
         <member name="T:WebAPI.Extensions.MigrationExtensions">
@@ -1158,10 +1158,10 @@
             </summary>
             <remarks>
             Data seeding is performed only if the configuration value 'SeedingOptions:RunDataSeedingOnStartup' is set to
-            <see langword="true"/>. This method should be called during application startup to ensure the database schema is
-            up to date and required data is present.
+            <see langword="true" />. This method should be called during application startup to ensure the database schema
+            is up to date and required data is present.
             </remarks>
-            <param name="app">The current <see cref="T:Microsoft.AspNetCore.Builder.WebApplication"/> instance to which migrations and seeding will be applied.</param>
+            <param name="app">The current <see cref="T:Microsoft.AspNetCore.Builder.WebApplication" /> instance to which migrations and seeding will be applied.</param>
             <param name="cancellationToken">A cancellation token that can be used to cancel the migration and seeding operations.</param>
             <returns>A task that represents the asynchronous operation.</returns>
         </member>
@@ -1189,8 +1189,8 @@
             serialization options. It is intended to be called during application startup to standardize API behavior across
             the application.
             </remarks>
-            <param name="services">The <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> to which the MVC and related services will be added. Cannot be null.</param>
-            <returns>The same <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> instance so that additional calls can be chained.</returns>
+            <param name="services">The <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection" /> to which the MVC and related services will be added. Cannot be null.</param>
+            <returns>The same <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection" /> instance so that additional calls can be chained.</returns>
         </member>
         <member name="T:WebAPI.Extensions.ObservabilityExtensions">
             <summary>
@@ -1238,11 +1238,11 @@
         </member>
         <member name="M:WebAPI.Extensions.RateLimitingExtensions.AddRateLimitingServices(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
             <summary>
-            Adds rate limiting services to the specified <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/>. Loopback (localhost) requests are
-            excluded from rate limiting.
+            Adds rate limiting services to the specified <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection" />. Loopback (localhost) requests
+            are excluded from rate limiting.
             </summary>
             <param name="services">The service collection to add rate limiting to.</param>
-            <returns>The same <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> for chaining.</returns>
+            <returns>The same <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection" /> for chaining.</returns>
         </member>
         <member name="T:WebAPI.Extensions.SwaggerExtensions">
             <summary>
@@ -1313,7 +1313,7 @@
             <param name="cancellationToken">A cancellation token that can be used to cancel the asynchronous operation.</param>
             <returns>
             A value indicating whether the exception was handled and an error response was written. Always returns <see
-            langword="true"/>.
+            langword="true" />.
             </returns>
         </member>
         <member name="T:WebAPI.Middleware.LogContextMiddleware">

@@ -14,12 +14,10 @@ public sealed class GetInputByIdQueryHandler(IInputReadRepository repository) : 
         CancellationToken cancellationToken)
     {
         var input = await repository.GetByIdWithDetailsAsync(request.Id, cancellationToken).ConfigureAwait(false);
-
-        if(input is null)
+        if (input is null)
         {
             return Error.NotFound($"Không tìm thấy phiếu nhập có ID {request.Id}.");
         }
-
         return input.Adapt<InputDetailResponse>();
     }
 }

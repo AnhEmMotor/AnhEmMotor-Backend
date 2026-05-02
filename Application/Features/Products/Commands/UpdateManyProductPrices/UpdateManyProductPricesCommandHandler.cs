@@ -16,37 +16,30 @@ public sealed class UpdateManyProductPricesCommandHandler(
         CancellationToken cancellationToken)
     {
         var productIds = command.Ids!.Distinct().ToList();
-
         var products = await readRepository.GetByIdWithVariantsAsync(productIds, cancellationToken)
             .ConfigureAwait(false);
         var productList = products.ToList();
-
-        if(productList.Count != productIds.Count)
+        if (productList.Count != productIds.Count)
         {
             var foundIds = productList.Select(p => p.Id).ToHashSet();
             var missingErrors = productIds
                 .Where(id => !foundIds.Contains(id))
                 .Select(id => Error.NotFound($"Sản phẩm với Id {id} không tồn tại."))
                 .ToList();
-
             return missingErrors;
         }
-
-        foreach(var product in productList)
+        foreach (var product in productList)
         {
-            if(product.ProductVariants != null)
+            if (product.ProductVariants != null)
             {
-                foreach(var variant in product.ProductVariants)
+                foreach (var variant in product.ProductVariants)
                 {
                     variant.Price = command.Price;
                 }
             }
-
             updateRepository.Update(product);
         }
-
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         return Result<List<int>?>.Success(productIds);
     }
 }

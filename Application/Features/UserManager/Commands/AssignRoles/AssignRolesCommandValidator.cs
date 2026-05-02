@@ -7,14 +7,12 @@ public sealed class AssignRolesCommandValidator : AbstractValidator<AssignRolesC
     public AssignRolesCommandValidator()
     {
         RuleFor(x => x.UserId).NotEmpty().WithMessage("UserId is required.");
-
         RuleFor(x => x.RoleIds)
             .Cascade(CascadeMode.Stop)
             .NotNull()
             .WithMessage("Role list cannot be null.")
             .Must(ids => ids!.Count == ids.Distinct().Count())
             .WithMessage("Duplicate roles found in request.");
-
         RuleForEach(x => x.RoleIds).NotEmpty().WithMessage("Role ID cannot be empty.");
     }
 }

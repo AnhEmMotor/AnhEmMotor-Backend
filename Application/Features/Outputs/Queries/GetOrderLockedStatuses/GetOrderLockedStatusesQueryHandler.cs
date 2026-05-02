@@ -12,7 +12,6 @@ public sealed class GetOrderLockedStatusesQueryHandler : IRequestHandler<GetOrde
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-
         var result = new OrderLockStatusResponse
         {
             BuyerAndProducts = OrderLockStatus.BuyerAndProductsLockedStatuses,
@@ -21,7 +20,6 @@ public sealed class GetOrderLockedStatusesQueryHandler : IRequestHandler<GetOrde
             DepositRatio = OrderLockStatus.DepositRatioLockedStatuses,
             PaymentLink = OrderLockStatus.PaymentLinkAvailableStatuses
         };
-
         return Task.FromResult(Result<OrderLockStatusResponse>.Success(result));
     }
 }

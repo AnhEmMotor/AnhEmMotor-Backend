@@ -27,7 +27,6 @@ public class GetAllPermissionsQueryHandler : IRequestHandler<GetAllPermissionsQu
                 })
             .Where(p => p.Permission is not null)
             .ToList();
-
         var result = permissionDefinitions
             .GroupBy(p => p.Category)
             .ToDictionary(
@@ -44,7 +43,6 @@ public class GetAllPermissionsQueryHandler : IRequestHandler<GetAllPermissionsQu
                         };
                     })
                     .ToList());
-
         return Task.FromResult<Result<Dictionary<string, List<PermissionResponse>>>>(result);
     }
 }

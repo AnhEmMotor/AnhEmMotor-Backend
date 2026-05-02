@@ -41,8 +41,8 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         GC.SuppressFinalize(this);
     }
 
-#pragma warning disable IDE0079
-#pragma warning disable CRR0035
+    #pragma warning disable IDE0079
+    #pragma warning disable CRR0035
     [Fact(DisplayName = "USER_021 - Khôi phục tài khoản thành công")]
     public async Task RestoreAccount_Success_DeletedAtSetToNull()
     {
@@ -50,8 +50,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@test.com";
         var password = "ThisIsStrongPassword1@";
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             var user = new ApplicationUser
@@ -65,14 +64,13 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             };
             await userManager.CreateAsync(user, password).ConfigureAwait(true);
         }
-
         var adminUniqueId = Guid.NewGuid().ToString("N")[..8];
         var adminUsername = $"admin_{adminUniqueId}";
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
             _factory.Services,
             adminUsername,
             "AdminPass123!",
-            [ PermissionsList.Users.Edit, PermissionsList.Users.Delete ],
+            [PermissionsList.Users.Edit, PermissionsList.Users.Delete],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -82,9 +80,8 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         string userId;
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var u = await db.Users
@@ -92,22 +89,19 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
                 .ConfigureAwait(true);
             userId = u!.Id.ToString();
         }
-
         var response = await _client.PostAsync($"/api/v1/User/{userId}/restore", null, CancellationToken.None)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
             .ReadFromJsonAsync<RestoreUserResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Message.Should().Be("User account has been restored successfully.");
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var updatedUser = await db.Users
-                .FindAsync([ Guid.Parse(userId) ], TestContext.Current.CancellationToken)
+                .FindAsync([Guid.Parse(userId)], TestContext.Current.CancellationToken)
                 .ConfigureAwait(true);
             updatedUser!.DeletedAt.Should().BeNull();
         }
@@ -119,12 +113,11 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueId}";
         var password = "ThisIsStrongPassword1@";
-
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Users.Edit ],
+            [PermissionsList.Users.Edit],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -134,7 +127,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         var targetId = Guid.NewGuid().ToString("N")[..8];
         var targetUser = await IntegrationTestAuthHelper.CreateUserAsync(
             _factory.Services,
@@ -142,10 +134,8 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             "Pass123!",
             CancellationToken.None)
             .ConfigureAwait(true);
-
         var response = await _client.PostAsync($"/api/v1/User/{targetUser.Id}/restore", null, CancellationToken.None)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var content = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
         content.Should().Contain("User account is not deleted.");
@@ -161,7 +151,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Users.Edit ],
+            [PermissionsList.Users.Edit],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -171,7 +161,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         var targetId = Guid.NewGuid().ToString("N")[..8];
         var targetUser = await IntegrationTestAuthHelper.CreateUserAsync(
             _factory.Services,
@@ -179,21 +168,18 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             "Pass123!",
             CancellationToken.None)
             .ConfigureAwait(true);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var u = await db.Users
-                .FindAsync([ targetUser.Id ], TestContext.Current.CancellationToken)
+                .FindAsync([targetUser.Id], TestContext.Current.CancellationToken)
                 .ConfigureAwait(true);
             u!.Status = UserStatus.Banned;
             u.DeletedAt = DateTimeOffset.UtcNow.AddDays(-1);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
-
         var response = await _client.PostAsync($"/api/v1/User/{targetUser.Id}/restore", null, CancellationToken.None)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var content = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
         content.Should().Contain($"Cannot restore user with status '{UserStatus.Banned}'. User status must be Active.");
@@ -209,7 +195,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Users.Edit ],
+            [PermissionsList.Users.Edit],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -219,14 +205,12 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         var nonExistentUserId = Guid.NewGuid();
         var response = await _client.PostAsync(
             $"/api/v1/User/{nonExistentUserId}/restore",
             null,
             CancellationToken.None)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
@@ -237,7 +221,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@test.com";
         var password = "ThisIsStrongPassword1@";
-
         await IntegrationTestAuthHelper.CreateUserAsync(
             _factory.Services,
             username,
@@ -252,9 +235,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         var response = await _client.GetAsync("/api/v1/User/me", CancellationToken.None).ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
             .ReadFromJsonAsync<UserResponse>(CancellationToken.None)
@@ -278,7 +259,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueId}";
         var password = "ThisIsStrongPassword1@";
-
         await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, username, password, CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -288,18 +268,14 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         var updateRequest = new UpdateUserCommand
         {
             FullName = "Updated Name",
             Gender = GenderStatus.Female,
             PhoneNumber = "0999888777"
         };
-
         var response = await _client.PutAsJsonAsync("/api/v1/User/me", updateRequest).ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var user = await db.Users
@@ -316,7 +292,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueId}";
         var password = "ThisIsStrongPassword1@";
-
         await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, username, password, CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -326,16 +301,13 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         var updateRequest = new UpdateUserCommand
         {
             FullName = "Test User",
             Gender = GenderStatus.Male,
             PhoneNumber = "invalid-phone"
         };
-
         var response = await _client.PutAsJsonAsync("/api/v1/User/me", updateRequest).ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var content = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
         content.Should().Contain("Invalid phone number format");
@@ -348,7 +320,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var username = $"user_{uniqueId}";
         var oldPassword = "OldPass123!";
         var newPassword = "NewPass456!";
-
         await IntegrationTestAuthHelper.CreateUserAsync(
             _factory.Services,
             username,
@@ -362,18 +333,14 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         var changePasswordRequest = new ChangePasswordByManagerCommand
         {
             CurrentPassword = oldPassword,
             NewPassword = newPassword
         };
-
         var response = await _client.PostAsJsonAsync("/api/v1/User/change-password", changePasswordRequest)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-
         var newLoginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
             _client,
             username,
@@ -381,7 +348,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             CancellationToken.None)
             .ConfigureAwait(true);
         newLoginResponse.AccessToken.Should().NotBeNullOrEmpty();
-
         var oldTokenResponse = await _client.GetAsync("/api/v1/User/me", CancellationToken.None).ConfigureAwait(true);
         oldTokenResponse.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
@@ -392,7 +358,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueId}";
         var oldPassword = "OldPass123!";
-
         await IntegrationTestAuthHelper.CreateUserAsync(
             _factory.Services,
             username,
@@ -406,16 +371,13 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         var changePasswordRequest = new ChangePasswordByManagerCommand
         {
             CurrentPassword = "WrongPassword",
             NewPassword = "NewPass456!"
         };
-
         var response = await _client.PostAsJsonAsync("/api/v1/User/change-password", changePasswordRequest)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var errorContent = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
         errorContent.Should().Contain("Incorrect password.");
@@ -427,7 +389,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueId}";
         var password = "ThisIsStrongPassword1@";
-
         await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, username, password, CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -437,13 +398,10 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         var response = await _client.PostAsync("/api/v1/User/delete-account", null, CancellationToken.None)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var user = await db.Users
@@ -451,7 +409,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
                 .ConfigureAwait(true);
             user!.DeletedAt.Should().NotBeNull();
         }
-
         var tokenTestResponse = await _client.GetAsync("/api/v1/User/me", CancellationToken.None).ConfigureAwait(true);
         tokenTestResponse.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
@@ -462,7 +419,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueId}";
         var password = "ThisIsStrongPassword1@";
-
         var user = await IntegrationTestAuthHelper.CreateUserAsync(
             _factory.Services,
             username,
@@ -476,15 +432,13 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var u = await db.Users.FindAsync([ user.Id ], CancellationToken.None).ConfigureAwait(true);
+            var u = await db.Users.FindAsync([user.Id], CancellationToken.None).ConfigureAwait(true);
             u!.Status = UserStatus.Banned;
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
-
         var response = await _client.PostAsync("/api/v1/User/delete-account", null, CancellationToken.None)
             .ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
@@ -497,7 +451,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var username = $"user_{uniqueId}";
         var password = "Pass123!";
         var newPassword = "NewPass456!";
-
         await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, username, password, CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -507,7 +460,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         var changePasswordRequest = new ChangePasswordByManagerCommand
         {
             CurrentPassword = password,
@@ -516,7 +468,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var changeResponse = await _client.PostAsJsonAsync("/api/v1/User/change-password", changePasswordRequest)
             .ConfigureAwait(true);
         changeResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-
         var testResponse = await _client.GetAsync("/api/v1/User/me", CancellationToken.None).ConfigureAwait(true);
         testResponse.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
@@ -527,7 +478,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueId}";
         var password = "Pass123!";
-
         var user = await IntegrationTestAuthHelper.CreateUserAsync(
             _factory.Services,
             username,
@@ -541,15 +491,13 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var u = await db.Users.FindAsync([ user.Id ], TestContext.Current.CancellationToken).ConfigureAwait(true);
+            var u = await db.Users.FindAsync([user.Id], TestContext.Current.CancellationToken).ConfigureAwait(true);
             u!.DeletedAt = DateTimeOffset.UtcNow;
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
-
         var response = await _client.GetAsync("/api/v1/User/me", CancellationToken.None).ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
@@ -560,7 +508,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueId}";
         var password = "Pass123!";
-
         var user = await IntegrationTestAuthHelper.CreateUserAsync(
             _factory.Services,
             username,
@@ -574,25 +521,20 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var u = await db.Users.FindAsync([ user.Id ], TestContext.Current.CancellationToken).ConfigureAwait(true);
+            var u = await db.Users.FindAsync([user.Id], TestContext.Current.CancellationToken).ConfigureAwait(true);
             u!.Status = UserStatus.Banned;
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
-
         var response = await _client.GetAsync("/api/v1/User/me", CancellationToken.None).ConfigureAwait(true);
-
-        if(response.StatusCode != HttpStatusCode.OK)
+        if (response.StatusCode != HttpStatusCode.OK)
         {
             var errorContent = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
             throw new Exception($"API returned not OK. Response Body: {errorContent}");
         }
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-
         var content = await response.Content
             .ReadFromJsonAsync<UserResponse>(CancellationToken.None)
             .ConfigureAwait(true);
@@ -606,15 +548,13 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueId}";
         var password = "Pass123!";
-
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Users.View ],
+            [PermissionsList.Users.View],
             CancellationToken.None)
             .ConfigureAwait(true);
-
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
             _client,
             username,
@@ -622,10 +562,8 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         var response = await _client.GetAsync("/api/v1/User/me", CancellationToken.None).ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-
         var content = await response.Content
             .ReadFromJsonAsync<UserResponse>(CancellationToken.None)
             .ConfigureAwait(true);
@@ -640,7 +578,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueId}";
         var password = "Pass123!";
-
         await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, username, password, CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -650,10 +587,8 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         var response = await _client.GetAsync("/api/v1/User/me", CancellationToken.None).ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-
         var content = await response.Content
             .ReadFromJsonAsync<UserResponse>(CancellationToken.None)
             .ConfigureAwait(true);
@@ -666,7 +601,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueId}";
         var password = "Pass123!";
-
         await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, username, password, CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -675,13 +609,10 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             password,
             CancellationToken.None)
             .ConfigureAwait(true);
-
         var request = new HttpRequestMessage(HttpMethod.Get, "/api/v1/User/me");
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
         var response = await _client.SendAsync(request, CancellationToken.None).ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         response.Content.Headers.ContentType?.MediaType.Should().Be("application/json");
     }
@@ -692,7 +623,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueId}";
         var password = "Pass123!";
-
         await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, username, password, CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -701,17 +631,14 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             password,
             CancellationToken.None)
             .ConfigureAwait(true);
-
         var request = new HttpRequestMessage(HttpMethod.Get, "/api/v1/User/me");
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
-
         var response = await _client.SendAsync(
             request,
             HttpCompletionOption.ResponseHeadersRead,
             CancellationToken.None)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         response.Content.Headers.ContentType?.MediaType.Should().Be("text/event-stream");
     }
@@ -722,7 +649,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueId}";
         var password = "Pass123!";
-
         await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, username, password, CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -731,11 +657,9 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             password,
             CancellationToken.None)
             .ConfigureAwait(true);
-
         var request = new HttpRequestMessage(HttpMethod.Get, "/api/v1/User/me");
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
-
         var response = await _client.SendAsync(
             request,
             HttpCompletionOption.ResponseHeadersRead,
@@ -743,14 +667,12 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             .ConfigureAwait(true);
         var stream = await response.Content.ReadAsStreamAsync(CancellationToken.None).ConfigureAwait(true);
         using var reader = new StreamReader(stream);
-
         string? line;
         bool dataFound = false;
         var timeoutToken = new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token;
-
-        while((line = await reader.ReadLineAsync(timeoutToken).ConfigureAwait(true)) != null)
+        while ((line = await reader.ReadLineAsync(timeoutToken).ConfigureAwait(true)) != null)
         {
-            if(line.StartsWith("data:"))
+            if (line.StartsWith("data:"))
             {
                 dataFound = true;
                 line.Should().Contain(username);
@@ -766,7 +688,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueId}";
         var password = "Pass123!";
-
         await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, username, password, CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -775,11 +696,9 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             password,
             CancellationToken.None)
             .ConfigureAwait(true);
-
         var sseRequest = new HttpRequestMessage(HttpMethod.Get, "/api/v1/User/me");
         sseRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         sseRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
-
         var sseResponse = await _client.SendAsync(
             sseRequest,
             HttpCompletionOption.ResponseHeadersRead,
@@ -787,9 +706,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             .ConfigureAwait(true);
         var stream = await sseResponse.Content.ReadAsStreamAsync(CancellationToken.None).ConfigureAwait(true);
         var reader = new StreamReader(stream);
-
         await ReadEventAsync(reader).ConfigureAwait(true);
-
         var updateClient = _factory.CreateClient();
         updateClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
             "Bearer",
@@ -802,26 +719,22 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         };
         var updateResponse = await updateClient.PutAsJsonAsync("/api/v1/User/me", updateRequest).ConfigureAwait(true);
         updateResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-
         var updateTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token;
         string foundData = string.Empty;
-
-        while(!updateTimeout.IsCancellationRequested)
+        while (!updateTimeout.IsCancellationRequested)
         {
             try
             {
                 var eventData = await ReadEventAsync(reader).ConfigureAwait(true);
-
-                if(eventData.Contains("New Name SSE"))
+                if (eventData.Contains("New Name SSE"))
                 {
                     foundData = eventData;
                     break;
                 }
-            } catch(Exception)
+            } catch (Exception)
             {
             }
         }
-
         foundData.Should().Contain("New Name SSE");
     }
 
@@ -843,7 +756,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             password,
             CancellationToken.None)
             .ConfigureAwait(true);
-
         var sseRequest = new HttpRequestMessage(HttpMethod.Get, "/api/v1/User/me");
         sseRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         sseRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
@@ -854,26 +766,21 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             .ConfigureAwait(true);
         var reader = new StreamReader(
             await sseResponse.Content.ReadAsStreamAsync(CancellationToken.None).ConfigureAwait(true));
-
         await ReadEventAsync(reader).ConfigureAwait(true);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var staffRole = db.Roles.FirstOrDefault(r => r.Name == "Staff");
-            if(staffRole == null)
+            if (staffRole == null)
             {
                 staffRole = new ApplicationRole { Name = "Staff", NormalizedName = "STAFF" };
                 db.Roles.Add(staffRole);
                 await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             }
-
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-            var command = new AssignRolesCommand { UserId = user.Id, RoleIds = [ staffRole.Id ] };
-
+            var command = new AssignRolesCommand { UserId = user.Id, RoleIds = [staffRole.Id] };
             await mediator.Send(command, CancellationToken.None).ConfigureAwait(true);
         }
-
         var eventData = await ReadEventAsync(reader).ConfigureAwait(true);
         eventData.Should().Contain(username);
         eventData.Should().NotBeNullOrEmpty();
@@ -897,7 +804,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             password,
             CancellationToken.None)
             .ConfigureAwait(true);
-
         var sseRequest = new HttpRequestMessage(HttpMethod.Get, "/api/v1/User/me");
         sseRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         sseRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
@@ -908,16 +814,13 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             .ConfigureAwait(true);
         var reader = new StreamReader(
             await sseResponse.Content.ReadAsStreamAsync(CancellationToken.None).ConfigureAwait(true));
-
         await ReadEventAsync(reader).ConfigureAwait(true);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
             var command = new ChangeUserStatusCommand { UserId = user.Id, Status = UserStatus.Banned };
             await mediator.Send(command, CancellationToken.None).ConfigureAwait(true);
         }
-
         var eventData = await ReadEventAsync(reader).ConfigureAwait(true);
         eventData.Should().Contain(UserStatus.Banned);
     }
@@ -928,7 +831,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueId}";
         var password = "Pass123!";
-
         var user = await IntegrationTestAuthHelper.CreateUserAsync(
             _factory.Services,
             username,
@@ -941,19 +843,16 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             password,
             CancellationToken.None)
             .ConfigureAwait(true);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var u = await db.Users.FindAsync([ user.Id ], TestContext.Current.CancellationToken).ConfigureAwait(true);
+            var u = await db.Users.FindAsync([user.Id], TestContext.Current.CancellationToken).ConfigureAwait(true);
             u!.Status = UserStatus.Banned;
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
-
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         var response = await _client.GetAsync("/api/v1/User/me", CancellationToken.None).ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-
         var content = await response.Content
             .ReadFromJsonAsync<UserResponse>(CancellationToken.None)
             .ConfigureAwait(true);
@@ -974,7 +873,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             password,
             CancellationToken.None)
             .ConfigureAwait(true)).AccessToken;
-
         var req1 = new HttpRequestMessage(HttpMethod.Get, "/api/v1/User/me");
         req1.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         req1.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
@@ -983,9 +881,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var reader1 = new StreamReader(
             await resp1.Content.ReadAsStreamAsync(CancellationToken.None).ConfigureAwait(true));
         await ReadEventAsync(reader1).ConfigureAwait(true);
-
         reader1.Dispose();
-
         var req2 = new HttpRequestMessage(HttpMethod.Get, "/api/v1/User/me");
         req2.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         req2.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
@@ -993,7 +889,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             .ConfigureAwait(true);
         var reader2 = new StreamReader(
             await resp2.Content.ReadAsStreamAsync(CancellationToken.None).ConfigureAwait(true));
-
         var data = await ReadEventAsync(reader2).ConfigureAwait(true);
         data.Should().Contain(username);
     }
@@ -1012,7 +907,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             password,
             CancellationToken.None)
             .ConfigureAwait(true)).AccessToken;
-
         var req1 = new HttpRequestMessage(HttpMethod.Get, "/api/v1/User/me");
         req1.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         req1.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
@@ -1021,7 +915,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var reader1 = new StreamReader(
             await resp1.Content.ReadAsStreamAsync(CancellationToken.None).ConfigureAwait(true));
         await ReadEventAsync(reader1).ConfigureAwait(true);
-
         var req2 = new HttpRequestMessage(HttpMethod.Get, "/api/v1/User/me");
         req2.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         req2.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
@@ -1030,9 +923,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var reader2 = new StreamReader(
             await resp2.Content.ReadAsStreamAsync(CancellationToken.None).ConfigureAwait(true));
         await ReadEventAsync(reader2).ConfigureAwait(true);
-
         reader1.Dispose();
-
         var updateClient = _factory.CreateClient();
         updateClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         var updateResp = await updateClient.PutAsJsonAsync(
@@ -1040,7 +931,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             new UpdateUserCommand { FullName = "Tab Test", Gender = GenderStatus.Male, PhoneNumber = "0987654321" })
             .ConfigureAwait(true);
         updateResp.StatusCode.Should().Be(HttpStatusCode.OK);
-
         var data = await ReadEventAsync(reader2).ConfigureAwait(true);
         data.Should().Contain("Tab Test");
     }
@@ -1061,7 +951,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             "Pass123!",
             CancellationToken.None)
             .ConfigureAwait(true)).AccessToken;
-
         var usernameB = $"userB_{Guid.NewGuid().ToString("N")[..8]}";
         var userB = await IntegrationTestAuthHelper.CreateUserAsync(
             _factory.Services,
@@ -1069,7 +958,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             "Pass123!",
             CancellationToken.None)
             .ConfigureAwait(true);
-
         var reqA = new HttpRequestMessage(HttpMethod.Get, "/api/v1/User/me");
         reqA.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenA);
         reqA.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
@@ -1078,8 +966,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var readerA = new StreamReader(
             await respA.Content.ReadAsStreamAsync(CancellationToken.None).ConfigureAwait(true));
         await ReadEventAsync(readerA).ConfigureAwait(true);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
             await mediator.Send(
@@ -1087,16 +974,15 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
                 CancellationToken.None)
                 .ConfigureAwait(true);
         }
-
         var tcs = new CancellationTokenSource(TimeSpan.FromSeconds(2));
         try
         {
             var line = await readerA.ReadLineAsync(tcs.Token).ConfigureAwait(true);
-            if(line != null && line.StartsWith("data:"))
+            if (line != null && line.StartsWith("data:"))
             {
                 Assert.Fail($"User A received data about User B: {line}");
             }
-        } catch(OperationCanceledException)
+        } catch (OperationCanceledException)
         {
         }
     }
@@ -1117,7 +1003,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             "Pass123!",
             CancellationToken.None)
             .ConfigureAwait(true)).AccessToken;
-
         var usernameB = $"userB_{Guid.NewGuid().ToString("N")[..8]}";
         await IntegrationTestAuthHelper.CreateUserAsync(
             _factory.Services,
@@ -1131,7 +1016,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             "Pass123!",
             CancellationToken.None)
             .ConfigureAwait(true)).AccessToken;
-
         var reqA = new HttpRequestMessage(HttpMethod.Get, "/api/v1/User/me");
         reqA.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenA);
         reqA.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
@@ -1140,23 +1024,21 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var readerA = new StreamReader(
             await respA.Content.ReadAsStreamAsync(CancellationToken.None).ConfigureAwait(true));
         await ReadEventAsync(readerA).ConfigureAwait(true);
-
         var updateClientB = _factory.CreateClient();
         updateClientB.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", tokenB);
         await updateClientB.PutAsJsonAsync(
             "/api/v1/User/me",
             new UpdateUserCommand { FullName = "Reviewer B", Gender = GenderStatus.Female, PhoneNumber = "1112223333" })
             .ConfigureAwait(true);
-
         var tcs = new CancellationTokenSource(TimeSpan.FromSeconds(2));
         try
         {
             var line = await readerA.ReadLineAsync(tcs.Token).ConfigureAwait(true);
-            if(line != null && line.StartsWith("data:"))
+            if (line != null && line.StartsWith("data:"))
             {
                 Assert.Fail($"User A received update from User B action: {line}");
             }
-        } catch(OperationCanceledException)
+        } catch (OperationCanceledException)
         {
         }
     }
@@ -1179,7 +1061,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             password,
             CancellationToken.None)
             .ConfigureAwait(true)).AccessToken;
-
         var req = new HttpRequestMessage(HttpMethod.Get, "/api/v1/User/me");
         req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
@@ -1187,24 +1068,21 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             .ConfigureAwait(true);
         var reader = new StreamReader(await resp.Content.ReadAsStreamAsync(CancellationToken.None).ConfigureAwait(true));
         await ReadEventAsync(reader).ConfigureAwait(true);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var u = await db.Users.FindAsync([ user.Id ], TestContext.Current.CancellationToken).ConfigureAwait(true);
+            var u = await db.Users.FindAsync([user.Id], TestContext.Current.CancellationToken).ConfigureAwait(true);
             u!.DeletedAt = DateTime.UtcNow;
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
             var userStream = scope.ServiceProvider.GetRequiredService<IUserStreamService>();
             userStream.NotifyUserUpdate(user.Id);
         }
-
         var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token;
         string? line;
         bool errorReceived = false;
-        while((line = await reader.ReadLineAsync(timeout).ConfigureAwait(true)) != null)
+        while ((line = await reader.ReadLineAsync(timeout).ConfigureAwait(true)) != null)
         {
-            if(line.StartsWith("event: error"))
+            if (line.StartsWith("event: error"))
             {
                 errorReceived = true;
                 break;
@@ -1227,15 +1105,12 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             password,
             CancellationToken.None)
             .ConfigureAwait(true)).AccessToken;
-
         var req = new HttpRequestMessage(HttpMethod.Get, "/api/v1/User/me");
         req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
-
         var resp = await _client.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, CancellationToken.None)
             .ConfigureAwait(true);
         resp.StatusCode.Should().Be(HttpStatusCode.OK);
-
         resp.Dispose();
     }
 
@@ -1243,7 +1118,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
     public async Task UpdateUserA_DoesNotNotifyUserB()
     {
         var usernameA = $"userA_{Guid.NewGuid().ToString("N")[..8]}";
-
         await IntegrationTestAuthHelper.CreateUserAsync(
             _factory.Services,
             usernameA,
@@ -1256,7 +1130,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             "Pass123!",
             CancellationToken.None)
             .ConfigureAwait(true)).AccessToken;
-
         var usernameB = $"userB_{Guid.NewGuid().ToString("N")[..8]}";
         await IntegrationTestAuthHelper.CreateUserAsync(
             _factory.Services,
@@ -1270,7 +1143,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             "Pass123!",
             CancellationToken.None)
             .ConfigureAwait(true)).AccessToken;
-
         var requestB = new HttpRequestMessage(HttpMethod.Get, "/api/v1/User/me");
         requestB.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenB);
         requestB.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
@@ -1281,25 +1153,22 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             .ConfigureAwait(true);
         var readerB = new StreamReader(
             await responseB.Content.ReadAsStreamAsync(CancellationToken.None).ConfigureAwait(true));
-
         await ReadEventAsync(readerB).ConfigureAwait(true);
-
         var updateClientA = _factory.CreateClient();
         updateClientA.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", tokenA);
         await updateClientA.PutAsJsonAsync(
             "/api/v1/User/me",
             new UpdateUserCommand { FullName = "A Updated", Gender = GenderStatus.Male, PhoneNumber = "0123456789" })
             .ConfigureAwait(true);
-
         var tcs = new CancellationTokenSource(TimeSpan.FromSeconds(2));
         try
         {
             var line = await readerB.ReadLineAsync(tcs.Token).ConfigureAwait(true);
-            if(line != null && line.StartsWith("data:"))
+            if (line != null && line.StartsWith("data:"))
             {
                 Assert.Fail($"User B received data meant for User A or irrelevant update: {line}");
             }
-        } catch(OperationCanceledException)
+        } catch (OperationCanceledException)
         {
         }
     }
@@ -1318,7 +1187,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             password,
             CancellationToken.None)
             .ConfigureAwait(true)).AccessToken;
-
         var req1 = new HttpRequestMessage(HttpMethod.Get, "/api/v1/User/me");
         req1.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         req1.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
@@ -1327,7 +1195,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var reader1 = new StreamReader(
             await resp1.Content.ReadAsStreamAsync(CancellationToken.None).ConfigureAwait(true));
         await ReadEventAsync(reader1).ConfigureAwait(true);
-
         var req2 = new HttpRequestMessage(HttpMethod.Get, "/api/v1/User/me");
         req2.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         req2.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
@@ -1336,7 +1203,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var reader2 = new StreamReader(
             await resp2.Content.ReadAsStreamAsync(CancellationToken.None).ConfigureAwait(true));
         await ReadEventAsync(reader2).ConfigureAwait(true);
-
         var updateClient = _factory.CreateClient();
         updateClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         await updateClient.PutAsJsonAsync(
@@ -1348,10 +1214,8 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
                 PhoneNumber = "0987654321"
             })
             .ConfigureAwait(true);
-
         var data1 = await ReadEventAsync(reader1).ConfigureAwait(true);
         data1.Should().Contain("MultiTab Update");
-
         var data2 = await ReadEventAsync(reader2).ConfigureAwait(true);
         data2.Should().Contain("MultiTab Update");
     }
@@ -1362,7 +1226,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueId}";
         var password = "StrongPassword1@";
-
         await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, username, password, CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -1372,17 +1235,14 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         var content = new MultipartFormDataContent();
-        byte[] gifData = [ 0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x01, 0x00, 0x01, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x21, 0xF9, 0x04, 0x01, 0x00, 0x00, 0x00, 0x00, 0x2C, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x02, 0x01, 0x44, 0x00, 0x3B ];
+        byte[] gifData = [0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x01, 0x00, 0x01, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x21, 0xF9, 0x04, 0x01, 0x00, 0x00, 0x00, 0x00, 0x2C, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x02, 0x01, 0x44, 0x00, 0x3B];
         var fileContent = new ByteArrayContent(gifData);
         fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/gif");
         content.Add(fileContent, "file", "avatar.gif");
-
         var response = await _client.PostAsync("/api/v1/User/avatar", content, TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-
-        if(response.StatusCode != HttpStatusCode.OK)
+        if (response.StatusCode != HttpStatusCode.OK)
         {
             var errorContent = await response.Content
                 .ReadAsStringAsync(TestContext.Current.CancellationToken)
@@ -1395,7 +1255,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             .ConfigureAwait(true);
         avatarUrl.Should().NotBeNullOrEmpty();
         avatarUrl.Should().Contain("avatars/");
-
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var user = await db.Users
@@ -1410,12 +1269,11 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var adminUniqueId = Guid.NewGuid().ToString("N")[..8];
         var adminUsername = $"admin_{adminUniqueId}";
         var password = "StrongPassword1@";
-
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
             _factory.Services,
             adminUsername,
             password,
-            [ PermissionsList.Users.Edit ],
+            [PermissionsList.Users.Edit],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -1425,7 +1283,6 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         var targetUniqueId = Guid.NewGuid().ToString("N")[..8];
         var targetUser = await IntegrationTestAuthHelper.CreateUserAsync(
             _factory.Services,
@@ -1433,20 +1290,17 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             "Pass123!",
             CancellationToken.None)
             .ConfigureAwait(true);
-
         var content = new MultipartFormDataContent();
-        byte[] gifData = [ 0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x01, 0x00, 0x01, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x21, 0xF9, 0x04, 0x01, 0x00, 0x00, 0x00, 0x00, 0x2C, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x02, 0x01, 0x44, 0x00, 0x3B ];
+        byte[] gifData = [0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x01, 0x00, 0x01, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x21, 0xF9, 0x04, 0x01, 0x00, 0x00, 0x00, 0x00, 0x2C, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x02, 0x01, 0x44, 0x00, 0x3B];
         var fileContent = new ByteArrayContent(gifData);
         fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/gif");
         content.Add(fileContent, "file", "avatar.gif");
-
         var response = await _client.PostAsync(
             $"/api/v1/UserManager/{targetUser.Id}/avatar",
             content,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-
-        if(response.StatusCode != HttpStatusCode.OK)
+        if (response.StatusCode != HttpStatusCode.OK)
         {
             var errorContent = await response.Content
                 .ReadAsStringAsync(TestContext.Current.CancellationToken)
@@ -1458,11 +1312,10 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             .ReadAsStringAsync(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         avatarUrl.Should().NotBeNullOrEmpty();
-
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var updatedUser = await db.Users
-            .FindAsync([ targetUser.Id ], TestContext.Current.CancellationToken)
+            .FindAsync([targetUser.Id], TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         updatedUser!.AvatarUrl.Should().Be(avatarUrl.Trim('\"'));
     }
@@ -1471,9 +1324,9 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
     {
         var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token;
         string? line;
-        while((line = await reader.ReadLineAsync(timeout).ConfigureAwait(true)) != null)
+        while ((line = await reader.ReadLineAsync(timeout).ConfigureAwait(true)) != null)
         {
-            if(line.StartsWith("data:"))
+            if (line.StartsWith("data:"))
             {
                 return line[5..].Trim();
             }
@@ -1483,5 +1336,4 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
 }
 #pragma warning restore CRR0035
 #pragma warning restore IDE0079
-
 

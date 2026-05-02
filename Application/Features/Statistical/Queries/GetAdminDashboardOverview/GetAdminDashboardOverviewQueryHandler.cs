@@ -16,7 +16,6 @@ public sealed class GetAdminDashboardOverviewQueryHandler(IStatisticalReadReposi
         var statusCounts = await repository.GetOrderStatusCountsAsync(cancellationToken).ConfigureAwait(false);
         var dailyRevenue = await repository.GetDailyRevenueAsync(7, cancellationToken).ConfigureAwait(false);
         var recentOrders = await repository.GetRecentOrdersAsync(5, cancellationToken).ConfigureAwait(false);
-
         return new AdminDashboardOverviewResponse
         {
             Summary = summary,

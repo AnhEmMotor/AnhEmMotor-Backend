@@ -11,7 +11,7 @@ public class VnPayLibrary
 
     public void AddRequestData(string key, string value)
     {
-        if(!string.IsNullOrEmpty(value))
+        if (!string.IsNullOrEmpty(value))
         {
             _requestData.Add(key, value);
         }
@@ -19,38 +19,36 @@ public class VnPayLibrary
 
     public void AddResponseData(string key, string value)
     {
-        if(!string.IsNullOrEmpty(value))
+        if (!string.IsNullOrEmpty(value))
         {
             _responseData.Add(key, value);
         }
     }
 
     public string GetResponseData(string key)
-    { return _responseData.TryGetValue(key, out var ret) ? ret : string.Empty; }
+    {
+        return _responseData.TryGetValue(key, out var ret) ? ret : string.Empty;
+    }
 
     public string CreateRequestUrl(string baseUrl, string vnp_HashSecret)
     {
         var data = new StringBuilder();
-        foreach(var kv in _requestData)
+        foreach (var kv in _requestData)
         {
-            if(!string.IsNullOrEmpty(kv.Value))
+            if (!string.IsNullOrEmpty(kv.Value))
             {
                 data.Append($"{WebUtility.UrlEncode(kv.Key)}={WebUtility.UrlEncode(kv.Value)}&");
             }
         }
-
         var queryString = data.ToString();
-
         baseUrl = $"{baseUrl}?{queryString}";
         var signData = queryString;
-        if(signData.Length > 0)
+        if (signData.Length > 0)
         {
             signData = signData.Remove(data.Length - 1);
         }
-
         var vnp_SecureHash = VNPayUtils.HmacSHA512(vnp_HashSecret, signData);
         baseUrl = $"{baseUrl}vnp_SecureHash={vnp_SecureHash}";
-
         return baseUrl;
     }
 
@@ -64,29 +62,25 @@ public class VnPayLibrary
     private string GetResponseRaw()
     {
         var data = new StringBuilder();
-        if(_responseData.ContainsKey("vnp_SecureHashType"))
+        if (_responseData.ContainsKey("vnp_SecureHashType"))
         {
             _responseData.Remove("vnp_SecureHashType");
         }
-
-        if(_responseData.ContainsKey("vnp_SecureHash"))
+        if (_responseData.ContainsKey("vnp_SecureHash"))
         {
             _responseData.Remove("vnp_SecureHash");
         }
-
-        foreach(var kv in _responseData)
+        foreach (var kv in _responseData)
         {
-            if(!string.IsNullOrEmpty(kv.Value))
+            if (!string.IsNullOrEmpty(kv.Value))
             {
                 data.Append($"{WebUtility.UrlEncode(kv.Key)}={WebUtility.UrlEncode(kv.Value)}&");
             }
         }
-
-        if(data.Length > 0)
+        if (data.Length > 0)
         {
             data.Remove(data.Length - 1, 1);
         }
-
         return data.ToString();
     }
 }

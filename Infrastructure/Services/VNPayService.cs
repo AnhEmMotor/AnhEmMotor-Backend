@@ -16,7 +16,6 @@ public class VNPayService(IConfiguration configuration) : IVNPayService
         var vnp_HashSecret = configuration["VNPay:HashSecret"];
         var vnp_BaseUrl = configuration["VNPay:BaseUrl"];
         var vnp_ReturnUrl = configuration["VNPay:CallbackUrl"];
-
         vnpay.AddRequestData("vnp_Version", VnPayLibrary.VERSION);
         vnpay.AddRequestData("vnp_Command", "pay");
         vnpay.AddRequestData("vnp_TmnCode", vnp_TmnCode!);
@@ -29,9 +28,7 @@ public class VNPayService(IConfiguration configuration) : IVNPayService
         vnpay.AddRequestData("vnp_OrderType", "other");
         vnpay.AddRequestData("vnp_ReturnUrl", vnp_ReturnUrl!);
         vnpay.AddRequestData("vnp_TxnRef", model.OrderCode);
-
         var paymentUrl = vnpay.CreateRequestUrl(vnp_BaseUrl!, vnp_HashSecret!);
-
         return paymentUrl;
     }
 
@@ -40,12 +37,11 @@ public class VNPayService(IConfiguration configuration) : IVNPayService
         var vnpay = new VnPayLibrary();
         foreach (var (key, value) in collections)
         {
-            if(!string.IsNullOrEmpty(key) && key.StartsWith("vnp_"))
+            if (!string.IsNullOrEmpty(key) && key.StartsWith("vnp_"))
             {
                 vnpay.AddResponseData(key, value!);
             }
         }
-
         var vnp_orderId = vnpay.GetResponseData("vnp_TxnRef");
         var vnp_TransactionId = vnpay.GetResponseData("vnp_TransactionNo");
         var vnp_ResponseCode = vnpay.GetResponseData("vnp_ResponseCode");
@@ -54,13 +50,11 @@ public class VNPayService(IConfiguration configuration) : IVNPayService
             .Value;
         var vnp_OrderInfo = vnpay.GetResponseData("vnp_OrderInfo");
         var vnp_Amount = vnpay.GetResponseData("vnp_Amount");
-
         bool checkSignature = vnpay.ValidateSignature(vnp_SecureHash!, configuration["VNPay:HashSecret"]!);
-        if(!checkSignature)
+        if (!checkSignature)
         {
             return new VNPayPaymentResponse { Success = false };
         }
-
         return new VNPayPaymentResponse
         {
             Success = true,

@@ -24,13 +24,12 @@ public class Statistics
     {
         _mediatorMock = new Mock<IMediator>();
         _controller = new StatisticsController(_mediatorMock.Object);
-
         var httpContext = new DefaultHttpContext();
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
     }
 
-#pragma warning disable IDE0079 
-#pragma warning disable CRR0035
+    #pragma warning disable IDE0079 
+    #pragma warning disable CRR0035
     [Fact(DisplayName = "STAT_001 - Lấy doanh thu theo ngày - Happy Path với 7 ngày")]
     public async Task GetDailyRevenue_ValidDays7_ReturnsRevenueData()
     {
@@ -45,12 +44,9 @@ public class Statistics
             new() { ReportDay = DateOnly.FromDateTime(DateTime.Now.AddDays(-1)), TotalRevenue = 0 },
             new() { ReportDay = DateOnly.FromDateTime(DateTime.Now), TotalRevenue = 3500000 }
         };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetDailyRevenueQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedRevenue);
-
         var result = await _controller.GetDailyRevenueAsync(days, CancellationToken.None).ConfigureAwait(true);
-
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
         var actualRevenue = okResult.Value.Should().BeAssignableTo<IEnumerable<DailyRevenueResponse>>().Subject;
         actualRevenue.Should().HaveCount(7);
@@ -63,7 +59,6 @@ public class Statistics
         var days = 7;
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetDailyRevenueQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException("Không có quyền truy cập"));
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.GetDailyRevenueAsync(days, CancellationToken.None))
             .ConfigureAwait(true);
@@ -75,7 +70,6 @@ public class Statistics
         var days = 7;
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetDailyRevenueQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException("Yêu cầu đăng nhập"));
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.GetDailyRevenueAsync(days, CancellationToken.None))
             .ConfigureAwait(true);
@@ -87,7 +81,6 @@ public class Statistics
         var days = -5;
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetDailyRevenueQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new ValidationException("days phải lớn hơn 0"));
-
         await Assert.ThrowsAsync<ValidationException>(
             () => _controller.GetDailyRevenueAsync(days, CancellationToken.None))
             .ConfigureAwait(true);
@@ -99,7 +92,6 @@ public class Statistics
         var days = 0;
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetDailyRevenueQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new ValidationException("days phải lớn hơn 0"));
-
         await Assert.ThrowsAsync<ValidationException>(
             () => _controller.GetDailyRevenueAsync(days, CancellationToken.None))
             .ConfigureAwait(true);
@@ -111,7 +103,6 @@ public class Statistics
         var days = 366;
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetDailyRevenueQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new ValidationException("days không được vượt quá 365"));
-
         await Assert.ThrowsAsync<ValidationException>(
             () => _controller.GetDailyRevenueAsync(days, CancellationToken.None))
             .ConfigureAwait(true);
@@ -127,12 +118,9 @@ public class Statistics
             PendingOrdersCount = 5,
             NewCustomersCount = 10
         };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetDashboardStatsQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedStats);
-
         var result = await _controller.GetDashboardStatsAsync(CancellationToken.None).ConfigureAwait(true);
-
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
         var actualStats = okResult.Value.Should().BeAssignableTo<DashboardStatsResponse>().Subject;
         actualStats.LastMonthRevenue.Should().Be(50000000);
@@ -146,7 +134,6 @@ public class Statistics
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetDashboardStatsQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException("Không có quyền"));
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.GetDashboardStatsAsync(CancellationToken.None))
             .ConfigureAwait(true);
@@ -157,7 +144,7 @@ public class Statistics
     {
         var months = 12;
         var expectedData = new List<MonthlyRevenueProfitResponse>();
-        for(int i = 0; i < 12; i++)
+        for (int i = 0; i < 12; i++)
         {
             expectedData.Add(
                 new MonthlyRevenueProfitResponse
@@ -167,12 +154,9 @@ public class Statistics
                     TotalProfit = (i + 1) * 300000
                 });
         }
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetMonthlyRevenueProfitQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedData);
-
         var result = await _controller.GetMonthlyRevenueProfitAsync(months, CancellationToken.None).ConfigureAwait(true);
-
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
         var actualData = okResult.Value.Should().BeAssignableTo<IEnumerable<MonthlyRevenueProfitResponse>>().Subject;
         actualData.Should().HaveCount(12);
@@ -184,7 +168,6 @@ public class Statistics
         var months = -3;
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetMonthlyRevenueProfitQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new ValidationException("months phải lớn hơn 0"));
-
         await Assert.ThrowsAsync<ValidationException>(
             () => _controller.GetMonthlyRevenueProfitAsync(months, CancellationToken.None))
             .ConfigureAwait(true);
@@ -196,7 +179,6 @@ public class Statistics
         var months = 0;
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetMonthlyRevenueProfitQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new ValidationException("months phải lớn hơn 0"));
-
         await Assert.ThrowsAsync<ValidationException>(
             () => _controller.GetMonthlyRevenueProfitAsync(months, CancellationToken.None))
             .ConfigureAwait(true);
@@ -208,7 +190,6 @@ public class Statistics
         var months = 25;
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetMonthlyRevenueProfitQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new ValidationException("months không được vượt quá 24"));
-
         await Assert.ThrowsAsync<ValidationException>(
             () => _controller.GetMonthlyRevenueProfitAsync(months, CancellationToken.None))
             .ConfigureAwait(true);
@@ -224,12 +205,9 @@ public class Statistics
             new() { StatusName = "completed", OrderCount = 15 },
             new() { StatusName = "cancelled", OrderCount = 2 }
         };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetOrderStatusCountsQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedCounts);
-
         var result = await _controller.GetOrderStatusCountsAsync(CancellationToken.None).ConfigureAwait(true);
-
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
         var actualCounts = okResult.Value.Should().BeAssignableTo<IEnumerable<OrderStatusCountResponse>>().Subject;
         actualCounts.Should().HaveCount(4);
@@ -242,7 +220,6 @@ public class Statistics
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetOrderStatusCountsQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException("Không có quyền"));
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.GetOrderStatusCountsAsync(CancellationToken.None))
             .ConfigureAwait(true);
@@ -257,12 +234,9 @@ public class Statistics
             new() { ProductName = "Sản phẩm B", VariantId = 2, SoldLastMonth = 30, StockQuantity = 200 },
             new() { ProductName = "Sản phẩm C", VariantId = 3, SoldLastMonth = 0, StockQuantity = 150 }
         };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetProductReportLastMonthQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedReport);
-
         var result = await _controller.GetProductReportLastMonthAsync(CancellationToken.None).ConfigureAwait(true);
-
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
         var actualReport = okResult.Value.Should().BeAssignableTo<IEnumerable<ProductReportResponse>>().Subject;
         actualReport.Should().HaveCount(3);
@@ -275,7 +249,6 @@ public class Statistics
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetProductReportLastMonthQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException("Không có quyền"));
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.GetProductReportLastMonthAsync(CancellationToken.None))
             .ConfigureAwait(true);
@@ -286,13 +259,10 @@ public class Statistics
     {
         var variantId = 10;
         var expectedResponse = new ProductStockPriceResponse { UnitPrice = 2500000, StockQuantity = 50 };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetProductStockAndPriceQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
-
         var result = await _controller.GetProductStockAndPriceAsync(variantId, CancellationToken.None)
             .ConfigureAwait(true);
-
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
         var actualResponse = okResult.Value.Should().BeAssignableTo<ProductStockPriceResponse>().Subject;
         actualResponse.UnitPrice.Should().Be(2500000);
@@ -305,7 +275,6 @@ public class Statistics
         var variantId = 999;
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetProductStockAndPriceQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new KeyNotFoundException("Không tìm thấy sản phẩm"));
-
         await Assert.ThrowsAsync<KeyNotFoundException>(
             () => _controller.GetProductStockAndPriceAsync(variantId, CancellationToken.None))
             .ConfigureAwait(true);
@@ -317,7 +286,6 @@ public class Statistics
         var variantId = -5;
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetProductStockAndPriceQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new ValidationException("variantId không hợp lệ"));
-
         await Assert.ThrowsAsync<ValidationException>(
             () => _controller.GetProductStockAndPriceAsync(variantId, CancellationToken.None))
             .ConfigureAwait(true);
@@ -328,18 +296,15 @@ public class Statistics
     {
         var variantId = 15;
         var expectedResponse = new ProductStockPriceResponse { UnitPrice = 500000, StockQuantity = 0 };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetProductStockAndPriceQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
-
         var result = await _controller.GetProductStockAndPriceAsync(variantId, CancellationToken.None)
             .ConfigureAwait(true);
-
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
         var actualResponse = okResult.Value.Should().BeAssignableTo<ProductStockPriceResponse>().Subject;
         actualResponse.UnitPrice.Should().Be(500000);
         actualResponse.StockQuantity.Should().Be(0);
     }
-#pragma warning restore CRR0035
-#pragma warning restore IDE0079
+    #pragma warning restore CRR0035
+    #pragma warning restore IDE0079
 }

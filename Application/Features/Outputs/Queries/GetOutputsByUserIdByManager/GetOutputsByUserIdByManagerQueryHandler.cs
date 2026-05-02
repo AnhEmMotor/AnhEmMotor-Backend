@@ -15,13 +15,11 @@ public sealed class GetOutputsByUserIdByManagerQueryHandler(IOutputReadRepositor
         CancellationToken cancellationToken)
     {
         var query = repository.GetQueryable().Where(x => x.BuyerId == request.BuyerId);
-
         var result = await paginator.ApplyAsync<OutputEntity, OutputItemResponse>(
             query,
             request.SieveModel!,
             cancellationToken: cancellationToken)
             .ConfigureAwait(false);
-
         return result;
     }
 }

@@ -23,36 +23,28 @@ public sealed class UpdateInputStatusCommandHandler(
             cancellationToken,
             DataFetchMode.ActiveOnly)
             .ConfigureAwait(false);
-
-        if(input is null)
+        if (input is null)
         {
             return Error.NotFound($"Không tìm thấy phiếu nhập có ID {request.Id}.", "Id");
         }
-
-        if(InputStatus.IsCannotEdit(input.StatusId))
+        if (InputStatus.IsCannotEdit(input.StatusId))
         {
             return Error.BadRequest("Không thể sửa trạng thái phiếu nhập đã hoàn thành hoặc đã hủy.", "StatusId");
         }
-
-        if(!InputStatus.IsValid(request.StatusId))
+        if (!InputStatus.IsValid(request.StatusId))
         {
             return Error.BadRequest($"Trạng thái '{request.StatusId}' không hợp lệ.", "StatusId");
         }
-
         input.StatusId = request.StatusId;
-
-        if(string.Equals(request.StatusId, InputStatus.Finish, StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(request.StatusId, InputStatus.Finish, StringComparison.OrdinalIgnoreCase))
         {
             input.InputDate = DateTimeOffset.UtcNow;
             input.ConfirmedBy = request.CurrentUserId;
         }
-
         updateRepository.Update(input);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         var updated = await readRepository.GetByIdWithDetailsAsync(input.Id, cancellationToken).ConfigureAwait(false);
         ArgumentNullException.ThrowIfNull(updated);
-
         return updated.Adapt<InputDetailResponse>();
     }
 }

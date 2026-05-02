@@ -27,13 +27,12 @@ public class Auth
         _mediatorMock = new Mock<IMediator>();
         _httpTokenAccessorServiceMock = new Mock<IHttpTokenAccessorService>();
         _controller = new AuthController(_mediatorMock.Object, _httpTokenAccessorServiceMock.Object);
-
         var httpContext = new DefaultHttpContext();
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
     }
 
-#pragma warning disable IDE0079 
-#pragma warning disable CRR0035
+    #pragma warning disable IDE0079 
+    #pragma warning disable CRR0035
     [Fact(DisplayName = "AUTH_REG_002 - Đăng ký thất bại (Validation) - TH1: Thiếu Password")]
     public async Task AUTH_REG_002_1_Register_MissingPassword()
     {
@@ -44,10 +43,8 @@ public class Auth
             Password = string.Empty,
             FullName = "Test User"
         };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<RegisterCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new ValidationException("Validation failed: Password is required"));
-
         await Assert.ThrowsAsync<ValidationException>(() => _controller.RegisterAsync(request, CancellationToken.None))
             .ConfigureAwait(true);
     }
@@ -62,10 +59,8 @@ public class Auth
             Password = "Password123!",
             FullName = "Test User"
         };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<RegisterCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new ValidationException("Validation failed: Email and Username are required"));
-
         await Assert.ThrowsAsync<ValidationException>(() => _controller.RegisterAsync(request, CancellationToken.None))
             .ConfigureAwait(true);
     }
@@ -80,10 +75,8 @@ public class Auth
             Password = "Password123!",
             FullName = string.Empty
         };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<RegisterCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new ValidationException("Validation failed: FullName is required"));
-
         await Assert.ThrowsAsync<ValidationException>(() => _controller.RegisterAsync(request, CancellationToken.None))
             .ConfigureAwait(true);
     }
@@ -92,10 +85,8 @@ public class Auth
     public async Task AUTH_LOG_002_Login_Fail_WrongCreds()
     {
         var request = new LoginCommand { UsernameOrEmail = "user", Password = "wrong" };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<LoginCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException("Invalid credentials"));
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.LoginAsync(request, CancellationToken.None))
             .ConfigureAwait(true);
@@ -105,10 +96,8 @@ public class Auth
     public async Task AUTH_MGR_002_Login_Manager_Fail_Forbidden()
     {
         var request = new LoginForManagerCommand { UsernameOrEmail = "staff", Password = "123" };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<LoginForManagerCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException("Forbidden"));
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.LoginForManagerAsync(request, CancellationToken.None))
             .ConfigureAwait(true);
@@ -119,9 +108,7 @@ public class Auth
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<LogoutCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success());
-
         var result = await _controller.LogoutAsync(CancellationToken.None).ConfigureAwait(true);
-
         result.Should().BeOfType<OkObjectResult>();
         _mediatorMock.Verify(m => m.Send(It.IsAny<LogoutCommand>(), It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -131,16 +118,13 @@ public class Auth
     {
         var command = new GoogleLoginCommand { IdToken = "valid_token" };
         var loginResponse = new LoginResponse { AccessToken = "abc", ExpiresAt = DateTimeOffset.UtcNow.AddMinutes(5) };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<GoogleLoginCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<LoginResponse>.Success(loginResponse));
-
         var result = await _controller.GoogleLoginAsync(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().BeOfType<OkObjectResult>();
         var okResult = result as OkObjectResult;
         okResult!.Value.Should().BeEquivalentTo(loginResponse);
     }
-#pragma warning restore CRR0035
-#pragma warning restore IDE0079
+    #pragma warning restore CRR0035
+    #pragma warning restore IDE0079
 }

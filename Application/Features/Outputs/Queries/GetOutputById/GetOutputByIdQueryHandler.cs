@@ -16,18 +16,16 @@ public sealed class GetOutputByIdQueryHandler(IOutputReadRepository repository, 
         CancellationToken cancellationToken)
     {
         var output = await repository.GetByIdWithDetailsAsync(request.Id, cancellationToken).ConfigureAwait(false);
-
-        if(output is null)
+        if (output is null)
         {
             return Error.NotFound($"Output with Id {request.Id} not found.", nameof(request.Id));
         }
-
-        if(output.DepositRatio == null)
+        if (output.DepositRatio == null)
         {
             var settings = await settingRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
             var ratioSetting = settings.FirstOrDefault(
                 s => string.Equals(s.Key, SettingKeys.DepositRatio, StringComparison.OrdinalIgnoreCase));
-            if(ratioSetting != null && int.TryParse(ratioSetting.Value, out var parsedRatio))
+            if (ratioSetting != null && int.TryParse(ratioSetting.Value, out var parsedRatio))
             {
                 output.DepositRatio = parsedRatio;
             } else
@@ -35,7 +33,6 @@ public sealed class GetOutputByIdQueryHandler(IOutputReadRepository repository, 
                 output.DepositRatio = 50;
             }
         }
-
         return output.Adapt<OrderDetailResponse>();
     }
 }

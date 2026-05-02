@@ -40,8 +40,8 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
         GC.SuppressFinalize(this);
     }
 
-#pragma warning disable IDE0079
-#pragma warning disable CRR0035
+    #pragma warning disable IDE0079
+    #pragma warning disable CRR0035
     [Fact(DisplayName = "SUP_031 - Lấy danh sách Supplier với phân trang mặc định")]
     public async Task GetSuppliers_DefaultPagination_ReturnsPagedResult()
     {
@@ -52,7 +52,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Suppliers.View ],
+            [PermissionsList.Suppliers.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -62,12 +62,11 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var suppliers = new List<SupplierEntity>();
-            for(int i = 1; i <= 15; i++)
+            for (int i = 1; i <= 15; i++)
             {
                 suppliers.Add(
                     new SupplierEntity
@@ -82,31 +81,26 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
                     });
             }
             await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
-
-            if(!await db.SupplierStatuses
+            if (!await db.SupplierStatuses
                 .AnyAsync(
                     s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0,
                     CancellationToken.None)
                 .ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
-            if(!await db.SupplierStatuses
+            if (!await db.SupplierStatuses
                 .AnyAsync(
                     s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Inactive) == 0,
                     CancellationToken.None)
                 .ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Inactive });
-
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
-
         var response = await _client.GetAsync($"/api/v1/Supplier?Page=1&PageSize=10", CancellationToken.None)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
             .ReadFromJsonAsync<PagedResult<SupplierResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-
         content.Should().NotBeNull();
         content!.Items.Should().HaveCount(10);
         content.Items.Should().OnlyContain(s => s.Name!.Contains(uniqueId));
@@ -122,7 +116,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Suppliers.View ],
+            [PermissionsList.Suppliers.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -132,20 +126,17 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-
-            if(!await db.SupplierStatuses
+            if (!await db.SupplierStatuses
                 .AnyAsync(
                     s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0,
                     CancellationToken.None)
                 .ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
-
             var suppliers = new List<SupplierEntity>();
-            for(int i = 1; i <= 15; i++)
+            for (int i = 1; i <= 15; i++)
             {
                 suppliers.Add(
                     new SupplierEntity
@@ -159,15 +150,12 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
-
         var response = await _client.GetAsync($"/api/v1/Supplier?Page=2&PageSize=5", CancellationToken.None)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
             .ReadFromJsonAsync<PagedResult<SupplierResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-
         content.Should().NotBeNull();
         content!.Items.Should().HaveCount(5);
         content.PageNumber.Should().Be(2);
@@ -183,7 +171,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Suppliers.View ],
+            [PermissionsList.Suppliers.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -193,17 +181,15 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            if(!await db.SupplierStatuses
+            if (!await db.SupplierStatuses
                 .AnyAsync(
                     s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0,
                     CancellationToken.None)
                 .ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
-
             var suppliers = new List<SupplierEntity>
             {
                 new()
@@ -231,15 +217,12 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
-
         var response = await _client.GetAsync($"/api/v1/Supplier?Filters=Name@=Test_{uniqueId}", CancellationToken.None)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
             .ReadFromJsonAsync<PagedResult<SupplierResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-
         content.Should().NotBeNull();
         content!.Items.Should().HaveCount(2);
         content.Items.Should().OnlyContain(s => s.Name!.Contains($"Test_{uniqueId}"));
@@ -255,7 +238,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Suppliers.View ],
+            [PermissionsList.Suppliers.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -265,17 +248,15 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            if(!await db.SupplierStatuses
+            if (!await db.SupplierStatuses
                 .AnyAsync(
                     s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0,
                     CancellationToken.None)
                 .ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
-
             var suppliers = new List<SupplierEntity>
             {
                 new()
@@ -303,17 +284,14 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
-
         var response = await _client.GetAsync(
             $"/api/v1/Supplier?Sorts=Name&Filters=Name@={uniqueId}",
             CancellationToken.None)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
             .ReadFromJsonAsync<PagedResult<SupplierResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-
         content.Should().NotBeNull();
         content!.Items.Should().HaveCount(3);
         content.Items![0].Name.Should().Be($"Alpha_{uniqueId}");
@@ -331,7 +309,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Suppliers.View ],
+            [PermissionsList.Suppliers.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -341,24 +319,21 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-
-            if(!await db.SupplierStatuses
+            if (!await db.SupplierStatuses
                 .AnyAsync(
                     s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0,
                     CancellationToken.None)
                 .ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
-            if(!await db.SupplierStatuses
+            if (!await db.SupplierStatuses
                 .AnyAsync(
                     s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Inactive) == 0,
                     CancellationToken.None)
                 .ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Inactive });
-
             var suppliers = new List<SupplierEntity>
             {
                 new()
@@ -389,15 +364,12 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
-
         var response = await _client.GetAsync($"/api/v1/Supplier?Filters=Id@={uniqueId}", CancellationToken.None)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
             .ReadFromJsonAsync<PagedResult<SupplierResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-
         content.Should().NotBeNull();
         content!.Items.Should().Contain(s => string.Compare(s.Name, $"Active_{uniqueId}") == 0);
         content.Items.Should().Contain(s => string.Compare(s.Name, $"Inactive_{uniqueId}") == 0);
@@ -414,7 +386,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Suppliers.View ],
+            [PermissionsList.Suppliers.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -424,17 +396,15 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            if(!await db.SupplierStatuses
+            if (!await db.SupplierStatuses
                 .AnyAsync(
                     s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0,
                     CancellationToken.None)
                 .ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
-
             var suppliers = new List<SupplierEntity>
             {
                 new()
@@ -457,17 +427,14 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
-
         var response = await _client.GetAsync(
             $"/api/v1/Supplier/deleted?Filters=Id@={uniqueId}",
             CancellationToken.None)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
             .ReadFromJsonAsync<PagedResult<SupplierResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-
         content.Should().NotBeNull();
         content!.Items.Should().Contain(s => string.Compare(s.Name, $"Deleted_{uniqueId}") == 0);
         content.Items.Should().NotContain(s => string.Compare(s.Name, $"Active_{uniqueId}") == 0);
@@ -483,7 +450,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Suppliers.View ],
+            [PermissionsList.Suppliers.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -493,18 +460,16 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         int supplierId;
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            if(!await db.SupplierStatuses
+            if (!await db.SupplierStatuses
                 .AnyAsync(
                     s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0,
                     CancellationToken.None)
                 .ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
-
             var supplier = new SupplierEntity
             {
                 Name = $"Full Info {uniqueId}",
@@ -519,15 +484,12 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             supplierId = supplier.Id;
         }
-
         var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}", CancellationToken.None)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
             .ReadFromJsonAsync<SupplierResponse>(CancellationToken.None)
             .ConfigureAwait(true);
-
         content.Should().NotBeNull();
         content!.Id.Should().Be(supplierId);
         content.Name.Should().Be($"Full Info {uniqueId}");
@@ -544,7 +506,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Suppliers.View ],
+            [PermissionsList.Suppliers.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -554,18 +516,16 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         int supplierId;
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            if(!await db.SupplierStatuses
+            if (!await db.SupplierStatuses
                 .AnyAsync(
                     s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0,
                     CancellationToken.None)
                 .ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
-
             var supplier = new SupplierEntity
             {
                 Name = $"Deleted {uniqueId}",
@@ -578,10 +538,8 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             supplierId = supplier.Id;
         }
-
         var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}", CancellationToken.None)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
@@ -595,7 +553,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Suppliers.View ],
+            [PermissionsList.Suppliers.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -605,9 +563,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         var response = await _client.GetAsync("/api/v1/Supplier/999999", CancellationToken.None).ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
@@ -621,7 +577,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Suppliers.Delete ],
+            [PermissionsList.Suppliers.Delete],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -631,18 +587,16 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         List<int> supplierIds;
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            if(!await db.SupplierStatuses
+            if (!await db.SupplierStatuses
                 .AnyAsync(
                     s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0,
                     CancellationToken.None)
                 .ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
-
             var suppliers = new List<SupplierEntity>
             {
                 new()
@@ -662,20 +616,16 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             };
             await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-            supplierIds = [ .. suppliers.Select(s => s.Id) ];
+            supplierIds = [.. suppliers.Select(s => s.Id)];
         }
-
         var request = new DeleteManySuppliersCommand { Ids = supplierIds };
         var requestMessage = new HttpRequestMessage(HttpMethod.Delete, "/api/v1/Supplier/delete-many")
         {
             Content = JsonContent.Create(request)
         };
-
         var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var deletedSuppliers = db.Suppliers.Where(s => supplierIds.Contains(s.Id)).ToList();
@@ -693,7 +643,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Suppliers.Delete ],
+            [PermissionsList.Suppliers.Delete],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -703,24 +653,22 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         List<int> supplierIds;
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            if(!await db.SupplierStatuses
+            if (!await db.SupplierStatuses
                 .AnyAsync(
                     s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0,
                     CancellationToken.None)
                 .ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
-            if(!await db.InputStatuses
+            if (!await db.InputStatuses
                 .AnyAsync(
                     s => string.Compare(s.Key, Domain.Constants.Input.InputStatus.Working) == 0,
                     CancellationToken.None)
                 .ConfigureAwait(true))
                 db.InputStatuses.Add(new InputStatus { Key = Domain.Constants.Input.InputStatus.Working });
-
             var supplier1 = new SupplierEntity
             {
                 Name = $"S1_{uniqueId}",
@@ -735,14 +683,12 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
                 Address = "A",
                 StatusId = Domain.Constants.SupplierStatus.Active
             };
-            await db.Suppliers.AddRangeAsync([ supplier1, supplier2 ], CancellationToken.None).ConfigureAwait(true);
+            await db.Suppliers.AddRangeAsync([supplier1, supplier2], CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
             var user = await db.Users
                 .FirstOrDefaultAsync(u => string.Compare(u.UserName, username) == 0, CancellationToken.None)
                 .ConfigureAwait(true);
             var userId = user?.Id ?? Guid.NewGuid();
-
             var input = new Input
             {
                 SupplierId = supplier2.Id,
@@ -751,21 +697,16 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             };
             await db.InputReceipts.AddAsync(input, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
-            supplierIds = [ supplier1.Id, supplier2.Id ];
+            supplierIds = [supplier1.Id, supplier2.Id];
         }
-
         var request = new DeleteManySuppliersCommand { Ids = supplierIds };
         var requestMessage = new HttpRequestMessage(HttpMethod.Delete, "/api/v1/Supplier/delete-many")
         {
             Content = JsonContent.Create(request)
         };
-
         var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var suppliers = db.Suppliers.Where(s => supplierIds.Contains(s.Id)).ToList();
@@ -783,7 +724,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Suppliers.Delete ],
+            [PermissionsList.Suppliers.Delete],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -793,18 +734,16 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         List<int> supplierIds;
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            if(!await db.SupplierStatuses
+            if (!await db.SupplierStatuses
                 .AnyAsync(
                     s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0,
                     CancellationToken.None)
                 .ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
-
             var suppliers = new List<SupplierEntity>
             {
                 new()
@@ -826,15 +765,12 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             };
             await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-            supplierIds = [ .. suppliers.Select(s => s.Id) ];
+            supplierIds = [.. suppliers.Select(s => s.Id)];
         }
-
         var request = new RestoreManySuppliersCommand { Ids = supplierIds };
         var response = await _client.PostAsJsonAsync("/api/v1/Supplier/restore-many", request).ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var restored = db.Suppliers.Where(s => supplierIds.Contains(s.Id)).ToList();
@@ -852,7 +788,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Suppliers.Edit ],
+            [PermissionsList.Suppliers.Edit],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -862,24 +798,22 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         List<int> supplierIds;
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            if(!await db.SupplierStatuses
+            if (!await db.SupplierStatuses
                 .AnyAsync(
                     s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0,
                     CancellationToken.None)
                 .ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
-            if(!await db.SupplierStatuses
+            if (!await db.SupplierStatuses
                 .AnyAsync(
                     s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Inactive) == 0,
                     CancellationToken.None)
                 .ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Inactive });
-
             var suppliers = new List<SupplierEntity>
             {
                 new()
@@ -899,9 +833,8 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             };
             await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-            supplierIds = [ .. suppliers.Select(s => s.Id) ];
+            supplierIds = [.. suppliers.Select(s => s.Id)];
         }
-
         var request = new UpdateManySupplierStatusCommand
         {
             Ids = supplierIds,
@@ -912,10 +845,8 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             request,
             CancellationToken.None)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var updated = db.Suppliers.Where(s => supplierIds.Contains(s.Id)).ToList();
@@ -933,7 +864,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Suppliers.View ],
+            [PermissionsList.Suppliers.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -943,9 +874,8 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         int supplierId;
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             await db.Database
@@ -958,7 +888,6 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
                     "INSERT INTO \"InputStatus\" (\"Key\") VALUES ({0}) ON CONFLICT (\"Key\") DO NOTHING",
                     Domain.Constants.Input.InputStatus.Finish)
                 .ConfigureAwait(true);
-
             var supplier = new SupplierEntity
             {
                 Name = $"S_{uniqueId}",
@@ -966,16 +895,13 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
                 Address = "A",
                 StatusId = Domain.Constants.SupplierStatus.Active
             };
-
             await db.Suppliers.AddAsync(supplier, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             supplierId = supplier.Id;
-
             var user = await db.Users
                 .FirstOrDefaultAsync(u => string.Compare(u.UserName, username) == 0, CancellationToken.None)
                 .ConfigureAwait(true);
             var userId = user?.Id ?? Guid.NewGuid();
-
             var inputs = new List<Input>
             {
                 new()
@@ -999,7 +925,6 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             };
             await db.InputReceipts.AddRangeAsync(inputs, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
             var inputInfos = new List<InputInfo>
             {
                 new() { InputId = inputs[0].Id, InputPrice = 1000m, Count = 10 },
@@ -1009,15 +934,12 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             await db.InputInfos.AddRangeAsync(inputInfos, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
-
         var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}", CancellationToken.None)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
             .ReadFromJsonAsync<SupplierResponse>(CancellationToken.None)
             .ConfigureAwait(true);
-
         content.Should().NotBeNull();
         content!.TotalInput.Should().Be(65000);
     }
@@ -1032,7 +954,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Suppliers.View ],
+            [PermissionsList.Suppliers.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -1042,9 +964,8 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         int supplierId;
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             await db.Database
@@ -1052,8 +973,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
                     "INSERT INTO \"SupplierStatus\" (\"Key\") VALUES ({0}) ON CONFLICT (\"Key\") DO NOTHING",
                     Domain.Constants.SupplierStatus.Active)
                 .ConfigureAwait(true);
-
-            foreach(var status in new[]
+            foreach (var status in new[]
             {
                 Domain.Constants.Input.InputStatus.Finish,
                 Domain.Constants.Input.InputStatus.Working,
@@ -1066,7 +986,6 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
                         status)
                     .ConfigureAwait(true);
             }
-
             var supplier = new SupplierEntity
             {
                 Name = $"S_{uniqueId}",
@@ -1074,16 +993,13 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
                 Address = "A",
                 StatusId = Domain.Constants.SupplierStatus.Active
             };
-
             await db.Suppliers.AddAsync(supplier, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             supplierId = supplier.Id;
-
             var user = await db.Users
                 .FirstOrDefaultAsync(u => string.Compare(u.UserName, username) == 0, CancellationToken.None)
                 .ConfigureAwait(true);
             var userId = user?.Id ?? Guid.NewGuid();
-
             var inputs = new List<Input>
             {
                 new()
@@ -1107,7 +1023,6 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             };
             await db.InputReceipts.AddRangeAsync(inputs, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
             var inputInfos = new List<InputInfo>
             {
                 new() { InputId = inputs[0].Id, InputPrice = 100m, Count = 100 },
@@ -1117,15 +1032,12 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             await db.InputInfos.AddRangeAsync(inputInfos, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
-
         var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}", CancellationToken.None)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
             .ReadFromJsonAsync<SupplierResponse>(CancellationToken.None)
             .ConfigureAwait(true);
-
         content.Should().NotBeNull();
         content!.TotalInput.Should().Be(10000);
     }
@@ -1140,7 +1052,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Suppliers.View ],
+            [PermissionsList.Suppliers.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -1150,19 +1062,16 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         int supplierId;
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-
             await db.Database
                 .ExecuteSqlRawAsync(
                     "INSERT INTO \"SupplierStatus\" (\"Key\") VALUES ({0}) ON CONFLICT (\"Key\") DO NOTHING",
                     Domain.Constants.SupplierStatus.Active)
                 .ConfigureAwait(true);
-
-            foreach(var status in new[]
+            foreach (var status in new[]
             {
                 Domain.Constants.Input.InputStatus.Finish,
                 Domain.Constants.Input.InputStatus.Working,
@@ -1175,7 +1084,6 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
                         status)
                     .ConfigureAwait(true);
             }
-
             var supplier = new SupplierEntity
             {
                 Name = $"Supplier_{uniqueId}",
@@ -1186,13 +1094,11 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             await db.Suppliers.AddAsync(supplier, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             supplierId = supplier.Id;
-
             var user = await db.Users
                 .FirstOrDefaultAsync(u => string.Compare(u.UserName, username) == 0, CancellationToken.None)
                 .ConfigureAwait(true);
             var userId = user?.Id ?? Guid.NewGuid();
-
-            for(int i = 1; i <= 5; i++)
+            for (int i = 1; i <= 5; i++)
             {
                 var input = new Input
                 {
@@ -1202,21 +1108,17 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
                 };
                 await db.InputReceipts.AddAsync(input, CancellationToken.None).ConfigureAwait(true);
                 await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
                 var inputInfo = new InputInfo { InputId = input.Id, InputPrice = 1000m * i, Count = i };
                 await db.InputInfos.AddAsync(inputInfo, CancellationToken.None).ConfigureAwait(true);
                 await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             }
         }
-
         var response = await _client.GetAsync($"/api/v1/Supplier/{supplierId}/purchase-history", CancellationToken.None)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
             .ReadFromJsonAsync<PagedResult<SupplierPurchaseHistoryResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-
         content.Should().NotBeNull();
         content!.Items.Should().HaveCount(5);
         content.Items.Should().OnlyContain(x => x.TotalItems == 1);

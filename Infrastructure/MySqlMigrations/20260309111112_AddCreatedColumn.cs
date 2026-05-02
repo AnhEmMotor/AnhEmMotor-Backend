@@ -4,29 +4,25 @@
 
 namespace Infrastructure.MySqlMigrations
 {
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public partial class AddCreatedColumn : Migration
     {
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
                 name: "FK_ProductCollectionPhoto_ProductVariant_ProductVariantId",
                 table: "ProductCollectionPhoto");
-
             migrationBuilder.DropForeignKey(
                 name: "FK_VariantOptionValue_ProductVariant_VariantId",
                 table: "VariantOptionValue");
-
             migrationBuilder.AddColumn<long>(name: "CreatedAt", table: "Users", type: "bigint", nullable: true);
-
             migrationBuilder.AddForeignKey(
                 name: "FK_ProductCollectionPhoto_ProductVariant_ProductVariantId",
                 table: "ProductCollectionPhoto",
                 column: "ProductVariantId",
                 principalTable: "ProductVariant",
                 principalColumn: "Id");
-
             migrationBuilder.AddForeignKey(
                 name: "FK_VariantOptionValue_ProductVariant_VariantId",
                 table: "VariantOptionValue",
@@ -35,19 +31,16 @@ namespace Infrastructure.MySqlMigrations
                 principalColumn: "Id");
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
                 name: "FK_ProductCollectionPhoto_ProductVariant_ProductVariantId",
                 table: "ProductCollectionPhoto");
-
             migrationBuilder.DropForeignKey(
                 name: "FK_VariantOptionValue_ProductVariant_VariantId",
                 table: "VariantOptionValue");
-
             migrationBuilder.DropColumn(name: "CreatedAt", table: "Users");
-
             migrationBuilder.AddForeignKey(
                 name: "FK_ProductCollectionPhoto_ProductVariant_ProductVariantId",
                 table: "ProductCollectionPhoto",
@@ -55,7 +48,6 @@ namespace Infrastructure.MySqlMigrations
                 principalTable: "ProductVariant",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
-
             migrationBuilder.AddForeignKey(
                 name: "FK_VariantOptionValue_ProductVariant_VariantId",
                 table: "VariantOptionValue",

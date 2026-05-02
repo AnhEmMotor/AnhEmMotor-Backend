@@ -35,9 +35,7 @@ public static class ObservabilityExtensions
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(configuration);
-
         var otelUrl = configuration.GetValue<string>("OpenTelemetry:OtlpEndpoint") ?? "http://localhost:4317";
-
         Log.Logger = new LoggerConfiguration()
             .ReadFrom
             .Configuration(configuration)
@@ -76,7 +74,6 @@ public static class ObservabilityExtensions
                     .WriteTo
                     .Console())
             .CreateLogger();
-
         return services;
     }
 
@@ -103,7 +100,6 @@ public static class ObservabilityExtensions
     {
         var otlpEndpoint = configuration.GetValue<string>("OpenTelemetry:OtlpEndpoint") ?? "http://localhost:4317";
         var resourceBuilder = ResourceBuilder.CreateDefault().AddService(serviceName, serviceVersion);
-
         services.AddOpenTelemetry()
             .WithTracing(
                 tracerProviderBuilder =>
@@ -136,7 +132,6 @@ public static class ObservabilityExtensions
                                 metricReaderOptions.PeriodicExportingMetricReaderOptions.ExportIntervalMilliseconds = 5000;
                             });
                 });
-
         return services;
     }
 }

@@ -21,34 +21,30 @@ public sealed class GetOutputsListQueryHandler(
         CancellationToken cancellationToken)
     {
         var query = repository.GetQueryable();
-
         var result = await paginator.ApplyAsync<OutputEntity, OutputItemResponse>(
             query,
             request.SieveModel!,
             cancellationToken: cancellationToken)
             .ConfigureAwait(false);
-
-        if(result.Items?.Any(i => i.DepositRatio == null) == true)
+        if (result.Items?.Any(i => i.DepositRatio == null) == true)
         {
             var settings = await settingRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
             var ratioSetting = settings.FirstOrDefault(
                 s => string.Equals(s.Key, SettingKeys.DepositRatio, StringComparison.OrdinalIgnoreCase));
             var defaultRatio = 50;
-            if(ratioSetting != null && int.TryParse(ratioSetting.Value, out var parsedRatio))
+            if (ratioSetting != null && int.TryParse(ratioSetting.Value, out var parsedRatio))
             {
                 defaultRatio = parsedRatio;
             }
-
-            foreach(var item in result.Items.Where(i => i.DepositRatio == null))
+            foreach (var item in result.Items.Where(i => i.DepositRatio == null))
             {
                 item.DepositRatio = defaultRatio;
-                if(item.DepositAmount == null)
+                if (item.DepositAmount == null)
                     item.DepositAmount = item.Total * (defaultRatio / 100m);
-                if(item.RemainingAmount == null)
+                if (item.RemainingAmount == null)
                     item.RemainingAmount = item.Total - (item.DepositAmount ?? 0);
             }
         }
-
         return result;
     }
 }

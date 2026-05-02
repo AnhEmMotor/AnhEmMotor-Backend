@@ -11,4 +11,3 @@ public interface IVNPayService
     public VNPayPaymentResponse PaymentExecute(IQueryCollection collections);
 }
 
-

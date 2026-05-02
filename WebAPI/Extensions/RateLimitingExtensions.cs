@@ -10,11 +10,11 @@ namespace WebAPI.Extensions;
 public static class RateLimitingExtensions
 {
     /// <summary>
-    /// Adds rate limiting services to the specified <see cref="IServiceCollection"/>. Loopback (localhost) requests are
-    /// excluded from rate limiting.
+    /// Adds rate limiting services to the specified <see cref="IServiceCollection" />. Loopback (localhost) requests
+    /// are excluded from rate limiting.
     /// </summary>
     /// <param name="services">The service collection to add rate limiting to.</param>
-    /// <returns>The same <see cref="IServiceCollection"/> for chaining.</returns>
+    /// <returns>The same <see cref="IServiceCollection" /> for chaining.</returns>
     public static IServiceCollection AddRateLimitingServices(this IServiceCollection services)
     {
         services.Configure<ForwardedHeadersOptions>(
@@ -24,7 +24,6 @@ public static class RateLimitingExtensions
                 options.KnownIPNetworks.Clear();
                 options.KnownProxies.Clear();
             });
-
         services.AddRateLimiter(
             options =>
             {
@@ -33,18 +32,15 @@ public static class RateLimitingExtensions
                     context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
                     await context.HttpContext.Response.WriteAsync("Busy", token).ConfigureAwait(true);
                 };
-
                 options.AddPolicy(
                     policyName: "public_api",
                     partitioner: httpContext =>
                     {
-                        if(IsLoopback(httpContext))
+                        if (IsLoopback(httpContext))
                         {
                             return RateLimitPartition.GetNoLimiter(string.Empty);
                         }
-
                         var remoteIp = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
-
                         return RateLimitPartition.GetFixedWindowLimiter(
                             partitionKey: remoteIp,
                             factory: _ => new FixedWindowRateLimiterOptions
@@ -55,18 +51,15 @@ public static class RateLimitingExtensions
                                         AutoReplenishment = true
                                     });
                     });
-
                 options.AddPolicy(
                     policyName: "auth_api",
                     partitioner: httpContext =>
                     {
-                        if(IsLoopback(httpContext))
+                        if (IsLoopback(httpContext))
                         {
                             return RateLimitPartition.GetNoLimiter(string.Empty);
                         }
-
                         var remoteIp = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
-
                         return RateLimitPartition.GetFixedWindowLimiter(
                             partitionKey: remoteIp,
                             factory: _ => new FixedWindowRateLimiterOptions
@@ -76,17 +69,14 @@ public static class RateLimitingExtensions
                                         QueueLimit = 0
                                     });
                     });
-
                 options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(
                     httpContext =>
                     {
-                        if(IsLoopback(httpContext))
+                        if (IsLoopback(httpContext))
                         {
                             return RateLimitPartition.GetNoLimiter(string.Empty);
                         }
-
                         var remoteIp = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
-
                         return RateLimitPartition.GetFixedWindowLimiter(
                             partitionKey: remoteIp,
                             factory: _ => new FixedWindowRateLimiterOptions
@@ -97,14 +87,12 @@ public static class RateLimitingExtensions
                                     });
                     });
             });
-
         return services;
     }
 
     private static bool IsLoopback(HttpContext httpContext)
     {
         var remoteIp = httpContext.Connection.RemoteIpAddress;
-
         return remoteIp is not null && IPAddress.IsLoopback(remoteIp);
     }
 }

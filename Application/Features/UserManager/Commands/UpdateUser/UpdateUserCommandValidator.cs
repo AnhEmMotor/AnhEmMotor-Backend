@@ -10,9 +10,7 @@ public partial class UpdateUserCommandValidator : AbstractValidator<UpdateUserCo
     public UpdateUserCommandValidator()
     {
         RuleFor(x => x.FullName).MaximumLength(255).WithMessage("Full Name must not exceed 255 characters.");
-
         RuleFor(x => x.PhoneNumber).MustBeValidPhoneNumber().When(x => !string.IsNullOrEmpty(x.PhoneNumber));
-
         RuleFor(x => x.Gender)
             .Must(IsValidGender)
             .WithMessage("Invalid gender.")
@@ -21,15 +19,18 @@ public partial class UpdateUserCommandValidator : AbstractValidator<UpdateUserCo
 
     public static bool IsValidEmail(string? email)
     {
-        if(string.IsNullOrWhiteSpace(email))
+        if (string.IsNullOrWhiteSpace(email))
             return false;
         var regex = RegexCheckEmail();
         return regex.IsMatch(email.Trim());
     }
 
-    public static bool IsValidGender(string? gender) { return ValidGenders.Contains(gender?.Trim()); }
+    public static bool IsValidGender(string? gender)
+    {
+        return ValidGenders.Contains(gender?.Trim());
+    }
 
-    public static IReadOnlyList<string> ValidGenders => [ GenderStatus.Male, GenderStatus.Female, GenderStatus.Other ];
+    public static IReadOnlyList<string> ValidGenders => [GenderStatus.Male, GenderStatus.Female, GenderStatus.Other];
 
     [GeneratedRegex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$")]
     private static partial Regex RegexCheckEmail();

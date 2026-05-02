@@ -13,7 +13,6 @@ public partial class RegisterCommandValidator : AbstractValidator<RegisterComman
             .Must(gender => GenderStatus.IsValid(gender))
             .WithMessage("Gender not vaild. Please check again.")
             .When(x => !string.IsNullOrEmpty(x.Gender));
-
         RuleFor(x => x.Username)
             .Matches("^[a-zA-Z0-9]+$")
             .WithMessage("Username must contain only letters and numbers.")
@@ -26,7 +25,6 @@ public partial class RegisterCommandValidator : AbstractValidator<RegisterComman
                 })
             .WithMessage("Username already exists.")
             .When(x => !string.IsNullOrEmpty(x.Username));
-
         RuleFor(x => x.Email)
             .NotEmpty()
             .EmailAddress()
@@ -38,7 +36,6 @@ public partial class RegisterCommandValidator : AbstractValidator<RegisterComman
                     return existingUser is null;
                 })
             .WithMessage("Email already exists.");
-
         RuleFor(x => x.Password)
             .NotEmpty()
             .MinimumLength(8)
@@ -51,7 +48,6 @@ public partial class RegisterCommandValidator : AbstractValidator<RegisterComman
             .WithMessage("Password must contain at least one number.")
             .Matches("[^a-zA-Z0-9]")
             .WithMessage("Password must contain at least one special character.");
-
         RuleFor(x => x.PhoneNumber).MustBeValidPhoneNumber().When(x => !string.IsNullOrEmpty(x.PhoneNumber));
     }
 }

@@ -11,7 +11,6 @@ public sealed class ViewImageQueryValidator : AbstractValidator<ViewImageQuery>
             .WithMessage("Width must be greater than 0.")
             .LessThanOrEqualTo(1200)
             .WithMessage("Width exceeds maximum allowed size of 1200 pixels.");
-
         RuleFor(x => x.StoragePath).NotEmpty().WithMessage("Storage path is required.");
     }
 }

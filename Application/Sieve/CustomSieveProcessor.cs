@@ -14,17 +14,14 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         var entityTypes = typeof(BaseEntity).Assembly
             .GetTypes()
             .Where(t => t.IsClass && !t.IsAbstract && t.IsSubclassOf(typeof(BaseEntity)));
-
         var method = typeof(CustomSieveProcessor).GetMethod(
             nameof(MapBaseProperties),
             BindingFlags.NonPublic | BindingFlags.Static);
-
-        foreach(var type in entityTypes)
+        foreach (var type in entityTypes)
         {
             var genericMethod = method!.MakeGenericMethod(type);
-            genericMethod.Invoke(null, [ mapper ]);
+            genericMethod.Invoke(null, [mapper]);
         }
-
         mapper.Property<Brand>(p => p.Id).CanSort().CanFilter();
         mapper.Property<Input>(p => p.Id).CanSort().CanFilter();
         mapper.Property<Output>(p => p.Id).CanSort().CanFilter();
@@ -35,29 +32,23 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<Product>(p => p.StatusId).CanFilter();
         mapper.Property<ProductVariant>(p => p.Id).CanSort().CanFilter();
         mapper.Property<Supplier>(p => p.Id).CanSort().CanFilter();
-
         mapper.Property<Brand>(b => b.Name).CanSort().CanFilter();
         mapper.Property<Brand>(b => b.Description).CanFilter();
-
         mapper.Property<Input>(i => i.InputDate).CanSort().CanFilter();
         mapper.Property<Input>(i => i.StatusId).CanSort().CanFilter();
         mapper.Property<Input>(i => i.SupplierId).CanSort().CanFilter();
         mapper.Property<Input>(i => i.Supplier!.Name).CanFilter().HasName("SupplierName");
         mapper.Property<Input>(i => i.Notes).CanFilter();
-
         mapper.Property<Output>(o => o.StatusId).CanSort().CanFilter();
         mapper.Property<Output>(o => o.Notes).CanFilter();
-
         mapper.Property<ProductCategory>(c => c.Id).CanSort().CanFilter();
         mapper.Property<ProductCategory>(c => c.Name).CanSort().CanFilter();
         mapper.Property<ProductCategory>(c => c.Description).CanFilter();
-
         mapper.Property<Supplier>(s => s.Name).CanSort().CanFilter();
         mapper.Property<Supplier>(s => s.Phone).CanFilter();
         mapper.Property<Supplier>(s => s.Email).CanFilter();
         mapper.Property<Supplier>(s => s.StatusId).CanSort().CanFilter();
         mapper.Property<Supplier>(s => s.Address).CanFilter();
-
         mapper.Property<SupplierWithTotalInputResponse>(s => s.Id).CanSort().CanFilter();
         mapper.Property<SupplierWithTotalInputResponse>(s => s.Name).CanSort().CanFilter();
         mapper.Property<SupplierWithTotalInputResponse>(s => s.Phone).CanSort().CanFilter();
@@ -68,7 +59,6 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<SupplierWithTotalInputResponse>(s => s.UpdatedAt).CanSort().CanFilter();
         mapper.Property<SupplierWithTotalInputResponse>(s => s.DeletedAt).CanSort().CanFilter();
         mapper.Property<SupplierWithTotalInputResponse>(s => s.TotalInput).CanSort().CanFilter();
-
         mapper.Property<ApplicationUser>(p => p.Id).CanSort().CanFilter();
         mapper.Property<ApplicationUser>(p => p.UserName).CanSort().CanFilter();
         mapper.Property<ApplicationUser>(p => p.FullName).CanSort().CanFilter();
@@ -76,7 +66,6 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<ApplicationUser>(p => p.PhoneNumber).CanSort().CanFilter();
         mapper.Property<ApplicationUser>(p => p.Status).CanSort().CanFilter();
         mapper.Property<ApplicationUser>(p => p.DeletedAt).CanSort().CanFilter();
-
         return mapper;
     }
 

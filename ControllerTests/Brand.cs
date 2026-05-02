@@ -22,19 +22,17 @@ public class Brand
     {
         _mediatorMock = new Mock<IMediator>();
         _controller = new BrandController(_mediatorMock.Object);
-
         var httpContext = new DefaultHttpContext();
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
     }
 
-#pragma warning disable IDE0079 
-#pragma warning disable CRR0035
+    #pragma warning disable IDE0079 
+    #pragma warning disable CRR0035
     [Fact(DisplayName = "BRAND_005 - CreateBrand - Forbidden")]
     public async Task BRAND_005_CreateBrand_Forbidden()
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateBrandCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException());
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.CreateBrandAsync(new CreateBrandCommand(), CancellationToken.None))
             .ConfigureAwait(true);
@@ -45,7 +43,6 @@ public class Brand
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetBrandByIdQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new KeyNotFoundException());
-
         await Assert.ThrowsAsync<KeyNotFoundException>(
             () => _controller.GetBrandByIdAsync(9999, CancellationToken.None))
             .ConfigureAwait(true);
@@ -56,7 +53,6 @@ public class Brand
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateBrandCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new KeyNotFoundException());
-
         await Assert.ThrowsAsync<KeyNotFoundException>(
             () => _controller.UpdateBrandAsync(9999, new UpdateBrandCommand(), CancellationToken.None))
             .ConfigureAwait(true);
@@ -67,7 +63,6 @@ public class Brand
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteBrandCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new KeyNotFoundException());
-
         await Assert.ThrowsAsync<KeyNotFoundException>(() => _controller.DeleteBrandAsync(9999, CancellationToken.None))
             .ConfigureAwait(true);
     }
@@ -76,18 +71,14 @@ public class Brand
     public void BRAND_032_CreateBrand_CheckAuthorize()
     {
         var method = typeof(BrandController).GetMethod("CreateBrandAsync");
-
         method.Should().NotBeNull("Method 'CreateBrandAsync' not found via Reflection");
-
         var attribute = method.GetCustomAttribute<AuthorizeAttribute>();
-
-        if(attribute == null)
+        if (attribute == null)
         {
             var allAttributes = method.GetCustomAttributes(true);
             var attrNames = string.Join(", ", allAttributes.Select(a => a.GetType().FullName));
             attribute.Should().NotBeNull($"Expected AuthorizeAttribute but found: {attrNames}");
         }
-
         attribute.Should().NotBeNull();
     }
 
@@ -152,7 +143,6 @@ public class Brand
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateBrandCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new Exception("Internal Error"));
-
         await Assert.ThrowsAsync<Exception>(
             () => _controller.CreateBrandAsync(new CreateBrandCommand(), CancellationToken.None))
             .ConfigureAwait(true);
@@ -163,7 +153,6 @@ public class Brand
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateBrandCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new Exception("Internal Error"));
-
         await Assert.ThrowsAsync<Exception>(
             () => _controller.UpdateBrandAsync(1, new UpdateBrandCommand(), CancellationToken.None))
             .ConfigureAwait(true);
@@ -174,10 +163,9 @@ public class Brand
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteBrandCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new Exception("Internal Error"));
-
         await Assert.ThrowsAsync<Exception>(() => _controller.DeleteBrandAsync(1, CancellationToken.None))
             .ConfigureAwait(true);
     }
-#pragma warning restore CRR0035
-#pragma warning restore IDE0079
+    #pragma warning restore CRR0035
+    #pragma warning restore IDE0079
 }

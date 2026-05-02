@@ -35,8 +35,8 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         GC.SuppressFinalize(this);
     }
 
-#pragma warning disable IDE0079
-#pragma warning disable CRR0035
+    #pragma warning disable IDE0079
+    #pragma warning disable CRR0035
     [Fact(DisplayName = "SETTING_001 - GetAllSettings - Thành công (Happy Path)")]
     public async Task SETTING_001_GetAllSettings_Success()
     {
@@ -48,7 +48,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Settings.View ],
+            [PermissionsList.Settings.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -59,11 +59,9 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-
             await db.Database
                 .ExecuteSqlRawAsync(
                     "INSERT INTO \"Setting\" (\"Key\", \"Value\") VALUES ({0}, {1}) ON CONFLICT (\"Key\") DO UPDATE SET \"Value\"=EXCLUDED.\"Value\", \"DeletedAt\"=NULL",
@@ -83,9 +81,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
                     "50000000")
                 .ConfigureAwait(true);
         }
-
         var response = await _client.GetAsync("/api/v1/Setting", CancellationToken.None).ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
             .ReadFromJsonAsync<Dictionary<string, string?>>(CancellationToken.None)
@@ -119,11 +115,9 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-
             await db.Database
                 .ExecuteSqlRawAsync(
                     "INSERT INTO \"Setting\" (\"Key\", \"Value\") VALUES ({0}, {1}) ON CONFLICT (\"Key\") DO UPDATE SET \"Value\"=EXCLUDED.\"Value\", \"DeletedAt\"=NULL",
@@ -131,9 +125,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
                     "50")
                 .ConfigureAwait(true);
         }
-
         var response = await _client.GetAsync("/api/v1/Setting", CancellationToken.None).ConfigureAwait(true);
-
         response.StatusCode.Should().BeOneOf(HttpStatusCode.Unauthorized, HttpStatusCode.Forbidden);
     }
 
@@ -141,8 +133,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
     public async Task SETTING_003_GetAllSettings_Unauthorized()
     {
         _client.DefaultRequestHeaders.Authorization = null;
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             await db.Database
@@ -151,12 +142,9 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
                     "Deposit_ratio",
                     "50")
                 .ConfigureAwait(true);
-
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
-
         var response = await _client.GetAsync("/api/v1/Setting", CancellationToken.None).ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
@@ -171,7 +159,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Settings.View ],
+            [PermissionsList.Settings.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -182,16 +170,13 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             db.Settings.RemoveRange(db.Settings);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
-
         var response = await _client.GetAsync("/api/v1/Setting", CancellationToken.None).ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
@@ -206,7 +191,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Settings.Edit ],
+            [PermissionsList.Settings.Edit],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -217,11 +202,9 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-
             await db.Database
                 .ExecuteSqlRawAsync(
                     "INSERT INTO \"Setting\" (\"Key\", \"Value\") VALUES ({0}, {1}) ON CONFLICT (\"Key\") DO UPDATE SET \"Value\"=EXCLUDED.\"Value\", \"DeletedAt\"=NULL",
@@ -241,12 +224,9 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
                     "30000000")
                 .ConfigureAwait(true);
         }
-
         var request = new Dictionary<string, string?>
         { { "Deposit_ratio", "50" }, { "Inventory_alert_level", "10" }, { "Order_value_exceeds", "50000000" } };
-
         var response = await _client.PutAsJsonAsync("/api/v1/Setting", request).ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         var content = await response.Content
             .ReadFromJsonAsync<Dictionary<string, string?>>(CancellationToken.None)
@@ -255,8 +235,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         content.Should().HaveCount(3);
         content!["Deposit_ratio"].Should().Be("50");
         content["Inventory_alert_level"].Should().Be("10");
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var savedSettings = db.Settings.ToList();
@@ -277,7 +256,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Settings.Edit ],
+            [PermissionsList.Settings.Edit],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -288,11 +267,9 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-
             await db.Database
                 .ExecuteSqlRawAsync(
                     "INSERT INTO \"Setting\" (\"Key\", \"Value\") VALUES ({0}, {1}) ON CONFLICT (\"Key\") DO UPDATE SET \"Value\"=EXCLUDED.\"Value\", \"DeletedAt\"=NULL",
@@ -306,14 +283,10 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
                     "5")
                 .ConfigureAwait(true);
         }
-
         var request = new Dictionary<string, string?> { { "Deposit_ratio", "25" } };
-
         var response = await _client.PutAsJsonAsync("/api/v1/Setting", request).ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.Created);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var savedSettings = db.Settings.ToList();
@@ -333,7 +306,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Settings.View ],
+            [PermissionsList.Settings.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -344,8 +317,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             await db.Database
@@ -355,14 +327,10 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
                     "50")
                 .ConfigureAwait(true);
         }
-
         var request = new Dictionary<string, string?> { { "Deposit_ratio", "25" } };
-
         var response = await _client.PutAsJsonAsync("/api/v1/Setting", request).ConfigureAwait(true);
-
         response.StatusCode.Should().BeOneOf(HttpStatusCode.Unauthorized, HttpStatusCode.Forbidden);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var setting = db.Settings.First(s => s.Key == "Deposit_ratio");
@@ -374,8 +342,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
     public async Task SETTING_008_SetSettings_Unauthorized()
     {
         _client.DefaultRequestHeaders.Authorization = null;
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             await db.Database
@@ -385,11 +352,8 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
                     "50")
                 .ConfigureAwait(true);
         }
-
         var request = new Dictionary<string, string?> { { "Deposit_ratio", "25" } };
-
         var response = await _client.PutAsJsonAsync("/api/v1/Setting", request).ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
@@ -404,7 +368,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Settings.Edit ],
+            [PermissionsList.Settings.Edit],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -415,8 +379,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             await db.Database
@@ -426,19 +389,15 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
                     "50")
                 .ConfigureAwait(true);
         }
-
         var request = new Dictionary<string, string?> { { "Deposit_ratio", "0" } };
-
         var response = await _client.PutAsJsonAsync("/api/v1/Setting", request).ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var content = await response.Content
             .ReadFromJsonAsync<ErrorResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Errors.Should().Contain(e => e.Message != null && e.Message.Contains("between 1.0 and 99.0"));
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var setting = db.Settings.First(s => s.Key == "Deposit_ratio");
@@ -457,7 +416,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Settings.Edit ],
+            [PermissionsList.Settings.Edit],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -468,8 +427,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             await db.Database
@@ -479,19 +437,15 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
                     "50")
                 .ConfigureAwait(true);
         }
-
         var request = new Dictionary<string, string?> { { "Deposit_ratio", "100" } };
-
         var response = await _client.PutAsJsonAsync("/api/v1/Setting", request).ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var content = await response.Content
             .ReadFromJsonAsync<ErrorResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Errors.Should().Contain(e => e.Message != null && e.Message.Contains("between 1.0 and 99.0"));
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var setting = db.Settings.First(s => s.Key == "Deposit_ratio");
@@ -510,7 +464,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Settings.Edit ],
+            [PermissionsList.Settings.Edit],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -521,8 +475,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             await db.Database
@@ -532,11 +485,8 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
                     "50")
                 .ConfigureAwait(true);
         }
-
         var request = new Dictionary<string, string?> { { "Deposit_ratio", "50.55" } };
-
         var response = await _client.PutAsJsonAsync("/api/v1/Setting", request).ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var content = await response.Content
             .ReadFromJsonAsync<ErrorResponse>(CancellationToken.None)
@@ -556,7 +506,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Settings.Edit ],
+            [PermissionsList.Settings.Edit],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -567,8 +517,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             await db.Database
@@ -578,11 +527,8 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
                     "50")
                 .ConfigureAwait(true);
         }
-
         var request = new Dictionary<string, string?>();
-
         var response = await _client.PutAsJsonAsync("/api/v1/Setting", request).ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var content = await response.Content
             .ReadFromJsonAsync<ErrorResponse>(CancellationToken.None)
@@ -590,6 +536,6 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         content.Should().NotBeNull();
         content!.Errors.Should().Contain(e => e.Message != null && e.Message.Contains("cannot be empty"));
     }
-#pragma warning restore CRR0035
-#pragma warning restore IDE0079
+    #pragma warning restore CRR0035
+    #pragma warning restore IDE0079
 }

@@ -14,7 +14,7 @@ namespace Infrastructure.Repositories.User
         {
             cancellationToken.ThrowIfCancellationRequested();
             var user = await userManager.FindByIdAsync(userId.ToString()).ConfigureAwait(false);
-            if(user is not null)
+            if (user is not null)
             {
                 user.RefreshToken = refreshToken;
                 user.RefreshTokenExpiryTime = expiryTime;
@@ -27,7 +27,6 @@ namespace Infrastructure.Repositories.User
             CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-
             var result = await userManager.UpdateAsync(user).ConfigureAwait(false);
             return (result.Succeeded, result.Errors.Select(e => e.Description).AsEnumerable());
         }
@@ -39,7 +38,6 @@ namespace Infrastructure.Repositories.User
             CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-
             var result = await userManager.ChangePasswordAsync(user, currentPassword, newPassword).ConfigureAwait(false);
             return (result.Succeeded, result.Errors.Select(e => e.Description).AsEnumerable());
         }
@@ -50,7 +48,6 @@ namespace Infrastructure.Repositories.User
             CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-
             var resetToken = await userManager.GeneratePasswordResetTokenAsync(user).ConfigureAwait(false);
             var result = await userManager.ResetPasswordAsync(user, resetToken, newPassword).ConfigureAwait(false);
             return (result.Succeeded, result.Errors.Select(e => e.Description).AsEnumerable());
@@ -59,9 +56,8 @@ namespace Infrastructure.Repositories.User
         public async Task ClearRefreshTokenAsync(Guid userId, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-
             var user = await userManager.FindByIdAsync(userId.ToString()).ConfigureAwait(false);
-            if(user is not null)
+            if (user is not null)
             {
                 user.RefreshToken = null;
                 user.RefreshTokenExpiryTime = DateTimeOffset.MinValue;
@@ -75,9 +71,7 @@ namespace Infrastructure.Repositories.User
             CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-
             var result = await userManager.RemoveFromRolesAsync(user, roleNames).ConfigureAwait(false);
-
             return (result.Succeeded, result.Errors.Select(e => e.Description).AsEnumerable());
         }
     }

@@ -41,8 +41,8 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
         GC.SuppressFinalize(this);
     }
 
-#pragma warning disable IDE0079
-#pragma warning disable CRR0035
+    #pragma warning disable IDE0079
+    #pragma warning disable CRR0035
     [Fact(DisplayName = "PC_025 - Lấy danh sách danh mục sản phẩm thành công (cho mọi người dùng)")]
     public async Task GetProductCategories_WithPagination_ShouldReturnCorrectData()
     {
@@ -54,7 +54,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [ PermissionsList.ProductCategories.View ],
+            [PermissionsList.ProductCategories.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -65,12 +65,11 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var categories = new List<ProductCategoryEntity>();
-            for(int i = 1; i <= 15; i++)
+            for (int i = 1; i <= 15; i++)
             {
                 categories.Add(
                     new ProductCategoryEntity
@@ -83,12 +82,10 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             await db.ProductCategories.AddRangeAsync(categories, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
-
         var response = await _client.GetAsync(
             $"/api/v1/ProductCategory?Page=1&PageSize=10&Filters=Name@={uniqueId}",
             CancellationToken.None)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
             .ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>(CancellationToken.None)
@@ -110,7 +107,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [ PermissionsList.ProductCategories.View ],
+            [PermissionsList.ProductCategories.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -121,12 +118,11 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var categories = new List<ProductCategoryEntity>();
-            for(int i = 1; i <= 12; i++)
+            for (int i = 1; i <= 12; i++)
             {
                 categories.Add(
                     new ProductCategoryEntity
@@ -139,12 +135,10 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             await db.ProductCategories.AddRangeAsync(categories, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
-
         var response = await _client.GetAsync(
             $"/api/v1/ProductCategory?Page=2&PageSize=5&Filters=Name@={uniqueId}",
             CancellationToken.None)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
             .ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>(CancellationToken.None)
@@ -166,7 +160,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [ PermissionsList.ProductCategories.View ],
+            [PermissionsList.ProductCategories.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -177,8 +171,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             await db.ProductCategories
@@ -199,20 +192,16 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
                 .ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
-
         var response = await _client.GetAsync(
             $"/api/v1/ProductCategory?Filters=Name@=Phone,Name@={uniqueId}",
             CancellationToken.None)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
             .ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         content.Should().NotBeNull();
-
         var items = content.Items?.Where(x => x.Name!.Contains(uniqueId)).ToList();
-
         items.Should().Contain(c => c.Name!.Contains("SmartPhone"));
         items.Should().Contain(c => c.Name!.Contains("Phone Case"));
         items.Should().NotContain(c => c.Name!.Contains("Laptop"));
@@ -229,7 +218,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [ PermissionsList.ProductCategories.View ],
+            [PermissionsList.ProductCategories.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -240,8 +229,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             await db.ProductCategories
@@ -252,12 +240,10 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
                 .ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
-
         var response = await _client.GetAsync(
             $"/api/v1/ProductCategory?Sorts=Name&Filters=Name@={uniqueId}",
             CancellationToken.None)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
             .ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>(CancellationToken.None)
@@ -280,7 +266,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [ PermissionsList.ProductCategories.View ],
+            [PermissionsList.ProductCategories.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -291,12 +277,10 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         var response = await _client.GetAsync(
             $"/api/v1/ProductCategory?Filters=Name@=NonExist{uniqueId}",
             CancellationToken.None)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
             .ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>(CancellationToken.None)
@@ -317,7 +301,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [ PermissionsList.ProductCategories.View ],
+            [PermissionsList.ProductCategories.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -328,12 +312,11 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var categories = new List<ProductCategoryEntity>();
-            for(int i = 1; i <= 5; i++)
+            for (int i = 1; i <= 5; i++)
             {
                 categories.Add(
                     new ProductCategoryEntity
@@ -346,12 +329,10 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             await db.ProductCategories.AddRangeAsync(categories, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
-
         var response = await _client.GetAsync(
             $"/api/v1/ProductCategory/for-manager?Page=1&PageSize=10&Filters=Name@={uniqueId}",
             CancellationToken.None)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
             .ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>(CancellationToken.None)
@@ -372,7 +353,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [ PermissionsList.ProductCategories.View ],
+            [PermissionsList.ProductCategories.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -383,12 +364,11 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var categories = new List<ProductCategoryEntity>();
-            for(int i = 1; i <= 5; i++)
+            for (int i = 1; i <= 5; i++)
             {
                 categories.Add(
                     new ProductCategoryEntity
@@ -400,16 +380,13 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             }
             categories.Add(
                 new ProductCategoryEntity { Name = $"Active_{uniqueId}", Description = "Desc", DeletedAt = null });
-
             await db.ProductCategories.AddRangeAsync(categories, CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
-
         var response = await _client.GetAsync(
             $"/api/v1/ProductCategory/deleted?Page=1&PageSize=10&Filters=Name@={uniqueId}",
             CancellationToken.None)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
             .ReadFromJsonAsync<PagedResult<ProductCategoryResponse>>(CancellationToken.None)
@@ -431,7 +408,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [ PermissionsList.ProductCategories.View ],
+            [PermissionsList.ProductCategories.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -442,9 +419,8 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         int categoryId;
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var category = new ProductCategoryEntity
@@ -457,10 +433,8 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             categoryId = category.Id;
         }
-
         var response = await _client.GetAsync($"/api/v1/ProductCategory/{categoryId}", CancellationToken.None)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
             .ReadFromJsonAsync<ProductCategoryResponse>(CancellationToken.None)
@@ -481,7 +455,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [ PermissionsList.ProductCategories.View ],
+            [PermissionsList.ProductCategories.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -492,10 +466,8 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         var response = await _client.GetAsync("/api/v1/ProductCategory/99999", CancellationToken.None)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
@@ -510,7 +482,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [ PermissionsList.ProductCategories.View ],
+            [PermissionsList.ProductCategories.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -521,9 +493,8 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         int categoryId;
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var category = new ProductCategoryEntity
@@ -536,10 +507,8 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             categoryId = category.Id;
         }
-
         var response = await _client.GetAsync($"/api/v1/ProductCategory/{categoryId}", CancellationToken.None)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
@@ -554,7 +523,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [ PermissionsList.ProductCategories.Create ],
+            [PermissionsList.ProductCategories.Create],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -565,15 +534,12 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         var request = new CreateProductCategoryCommand
         {
             Name = $"API_Test_{uniqueId}",
             Description = "Integration test"
         };
-
         var response = await _client.PostAsJsonAsync("/api/v1/ProductCategory", request).ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         var content = await response.Content
             .ReadFromJsonAsync<ProductCategoryResponse>(CancellationToken.None)
@@ -594,7 +560,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [ PermissionsList.ProductCategories.Edit ],
+            [PermissionsList.ProductCategories.Edit],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -605,9 +571,8 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         int categoryId;
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var category = new ProductCategoryEntity
@@ -620,12 +585,9 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             categoryId = category.Id;
         }
-
         var request = new UpdateProductCategoryCommand { Name = $"Updated_{uniqueId}" };
-
         var response = await _client.PutAsJsonAsync($"/api/v1/ProductCategory/{categoryId}", request)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
             .ReadFromJsonAsync<ProductCategoryResponse>(CancellationToken.None)
@@ -645,7 +607,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [ PermissionsList.ProductCategories.Delete ],
+            [PermissionsList.ProductCategories.Delete],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -656,9 +618,8 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         int categoryId;
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var category = new ProductCategoryEntity
@@ -671,13 +632,10 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             categoryId = category.Id;
         }
-
         var response = await _client.DeleteAsync($"/api/v1/ProductCategory/{categoryId}", CancellationToken.None)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var category = await db.ProductCategories
@@ -700,7 +658,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [ PermissionsList.ProductCategories.Delete ],
+            [PermissionsList.ProductCategories.Delete],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -711,12 +669,11 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         int[] categoryIds = new int[3];
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            for(int i = 0; i < 3; i++)
+            for (int i = 0; i < 3; i++)
             {
                 var category = new ProductCategoryEntity
                 {
@@ -729,21 +686,17 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
                 categoryIds[i] = category.Id;
             }
         }
-
-        var request = new DeleteManyProductCategoriesCommand { Ids = [ .. categoryIds ] };
-
+        var request = new DeleteManyProductCategoriesCommand { Ids = [.. categoryIds] };
         var httpRequest = new HttpRequestMessage(HttpMethod.Delete, "/api/v1/ProductCategory/delete-many")
         {
             Content = JsonContent.Create(request)
         };
         var response = await _client.SendAsync(httpRequest, CancellationToken.None).ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            foreach(var id in categoryIds)
+            foreach (var id in categoryIds)
             {
                 var category = await db.ProductCategories
                     .IgnoreQueryFilters()
@@ -766,7 +719,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [ PermissionsList.ProductCategories.Delete ],
+            [PermissionsList.ProductCategories.Delete],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -777,12 +730,11 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         int[] validIds = new int[2];
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            for(int i = 0; i < 2; i++)
+            for (int i = 0; i < 2; i++)
             {
                 var category = new ProductCategoryEntity
                 {
@@ -795,24 +747,20 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
                 validIds[i] = category.Id;
             }
         }
-
-        var request = new DeleteManyProductCategoriesCommand { Ids = [ validIds[0], 99999, validIds[1] ] };
-
+        var request = new DeleteManyProductCategoriesCommand { Ids = [validIds[0], 99999, validIds[1]] };
         var httpRequest = new HttpRequestMessage(HttpMethod.Delete, "/api/v1/ProductCategory/delete-many")
         {
             Content = JsonContent.Create(request)
         };
         var response = await _client.SendAsync(httpRequest, CancellationToken.None).ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            foreach(var id in validIds)
+            foreach (var id in validIds)
             {
                 var category = await db.ProductCategories
-                    .FindAsync([ id ], TestContext.Current.CancellationToken)
+                    .FindAsync([id], TestContext.Current.CancellationToken)
                     .ConfigureAwait(true);
                 category!.DeletedAt.Should().BeNull();
             }
@@ -830,7 +778,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [ PermissionsList.ProductCategories.Delete ],
+            [PermissionsList.ProductCategories.Delete],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -841,15 +789,12 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         int[] categoryIds = new int[2];
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-
             var cat1 = new ProductCategoryEntity { Name = $"Active_{uniqueId}", Description = "Desc", DeletedAt = null };
             await db.ProductCategories.AddAsync(cat1, CancellationToken.None).ConfigureAwait(true);
-
             var cat2 = new ProductCategoryEntity
             {
                 Name = $"AlreadyDel_{uniqueId}",
@@ -857,27 +802,22 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
                 DeletedAt = DateTime.UtcNow
             };
             await db.ProductCategories.AddAsync(cat2, CancellationToken.None).ConfigureAwait(true);
-
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             categoryIds[0] = cat1.Id;
             categoryIds[1] = cat2.Id;
         }
-
-        var request = new DeleteManyProductCategoriesCommand { Ids = [ .. categoryIds ] };
-
+        var request = new DeleteManyProductCategoriesCommand { Ids = [.. categoryIds] };
         var httpRequest = new HttpRequestMessage(HttpMethod.Delete, "/api/v1/ProductCategory/delete-many")
         {
             Content = JsonContent.Create(request)
         };
         var response = await _client.SendAsync(httpRequest, CancellationToken.None).ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var category = await db.ProductCategories
-                .FindAsync([ categoryIds[0] ], TestContext.Current.CancellationToken)
+                .FindAsync([categoryIds[0]], TestContext.Current.CancellationToken)
                 .ConfigureAwait(true);
             category!.DeletedAt.Should().BeNull();
         }
@@ -894,7 +834,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [ PermissionsList.ProductCategories.Delete ],
+            [PermissionsList.ProductCategories.Delete],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -905,12 +845,11 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         int[] categoryIds = new int[3];
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            for(int i = 0; i < 3; i++)
+            for (int i = 0; i < 3; i++)
             {
                 var category = new ProductCategoryEntity
                 {
@@ -923,21 +862,17 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
                 categoryIds[i] = category.Id;
             }
         }
-
-        var request = new RestoreManyProductCategoriesCommand { Ids = [ .. categoryIds ] };
-
+        var request = new RestoreManyProductCategoriesCommand { Ids = [.. categoryIds] };
         var response = await _client.PostAsJsonAsync("/api/v1/ProductCategory/restore-many", request)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            foreach(var id in categoryIds)
+            foreach (var id in categoryIds)
             {
                 var category = await db.ProductCategories
-                    .FindAsync([ id ], TestContext.Current.CancellationToken)
+                    .FindAsync([id], TestContext.Current.CancellationToken)
                     .ConfigureAwait(true);
                 category!.DeletedAt.Should().BeNull();
             }
@@ -955,7 +890,7 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             _factory.Services,
             username,
             password,
-            [ PermissionsList.ProductCategories.Delete ],
+            [PermissionsList.ProductCategories.Delete],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -966,12 +901,10 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         int[] categoryIds = new int[2];
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-
             var cat1 = new ProductCategoryEntity
             {
                 Name = $"Deleted_{uniqueId}",
@@ -979,23 +912,17 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
                 DeletedAt = DateTime.UtcNow
             };
             await db.ProductCategories.AddAsync(cat1, CancellationToken.None).ConfigureAwait(true);
-
             var cat2 = new ProductCategoryEntity { Name = $"Active_{uniqueId}", Description = "Desc", DeletedAt = null };
             await db.ProductCategories.AddAsync(cat2, CancellationToken.None).ConfigureAwait(true);
-
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             categoryIds[0] = cat1.Id;
             categoryIds[1] = cat2.Id;
         }
-
-        var request = new RestoreManyProductCategoriesCommand { Ids = [ .. categoryIds ] };
-
+        var request = new RestoreManyProductCategoriesCommand { Ids = [.. categoryIds] };
         var response = await _client.PostAsJsonAsync("/api/v1/ProductCategory/restore-many", request)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var category = await db.ProductCategories
@@ -1006,5 +933,5 @@ public class ProductCategory : IClassFixture<IntegrationTestWebAppFactory>, IAsy
             category!.DeletedAt.Should().NotBeNull();
         }
     }
-#pragma warning restore CRR0035
+    #pragma warning restore CRR0035
 }

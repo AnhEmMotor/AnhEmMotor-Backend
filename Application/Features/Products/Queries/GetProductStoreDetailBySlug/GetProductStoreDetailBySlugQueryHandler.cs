@@ -16,15 +16,12 @@ public sealed class GetProductStoreDetailBySlugQueryHandler(IProductReadReposito
     {
         var variant = await productReadRepository.GetByVariantSlugWithDetailsAsync(request.Slug, cancellationToken)
             .ConfigureAwait(false);
-
-        if(variant is null || variant.Product is null)
+        if (variant is null || variant.Product is null)
         {
             return Result<ProductStoreDetailResponse>.Failure(
                 new Error("ProductDetail.NotFound", "Không tìm thấy sản phẩm."));
         }
-
         var product = variant.Product;
-
         var productResponse = new ProductInfoStoreResponse
         {
             Name = product.Name,
@@ -37,22 +34,19 @@ public sealed class GetProductStoreDetailBySlugQueryHandler(IProductReadReposito
             MetaDescription = product.MetaDescription,
             Specifications = []
         };
-
         var specProperties = typeof(Product)
             .GetProperties(BindingFlags.Public | BindingFlags.Instance)
             .Where(p => !ProductAttributeLabels.IsInternalProperty(p.Name));
-
-        foreach(var prop in specProperties)
+        foreach (var prop in specProperties)
         {
             var value = prop.GetValue(product);
-            if(value is not null)
+            if (value is not null)
             {
-                if(value is decimal d && d == 0)
+                if (value is decimal d && d == 0)
                     continue;
                 productResponse.Specifications[prop.Name] = value;
             }
         }
-
         var currentPhotos = variant.ProductCollectionPhotos
             .Where(p => !string.IsNullOrEmpty(p.ImageUrl))
             .Select(p => p.ImageUrl!)
@@ -60,7 +54,6 @@ public sealed class GetProductStoreDetailBySlugQueryHandler(IProductReadReposito
         var currentCoverImage = string.IsNullOrWhiteSpace(variant.CoverImageUrl)
             ? currentPhotos.FirstOrDefault()
             : variant.CoverImageUrl;
-
         var currentVariantResponse = new CurrentVariantStoreResponse
         {
             Id = variant.Id,
@@ -74,7 +67,6 @@ public sealed class GetProductStoreDetailBySlugQueryHandler(IProductReadReposito
             CoverImageUrl = currentCoverImage,
             PhotoCollection = currentPhotos
         };
-
         var otherVariants = product.ProductVariants
             .Where(v => v.Id != variant.Id)
             .Select(
@@ -90,7 +82,6 @@ public sealed class GetProductStoreDetailBySlugQueryHandler(IProductReadReposito
                     Price = v.Price
                 })
             .ToList();
-
         return Result<ProductStoreDetailResponse>.Success(
             new ProductStoreDetailResponse
             {

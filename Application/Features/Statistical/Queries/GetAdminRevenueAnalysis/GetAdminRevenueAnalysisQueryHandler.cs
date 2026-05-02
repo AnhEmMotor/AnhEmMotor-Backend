@@ -18,13 +18,11 @@ public sealed class GetAdminRevenueAnalysisQueryHandler(IStatisticalReadReposito
         var topProducts = await repository.GetTopProductsByRevenueAsync(5, cancellationToken).ConfigureAwait(false);
         var brandDistribution = await repository.GetBrandRevenueDistributionAsync(cancellationToken)
             .ConfigureAwait(false);
-
         var paymentMethods = new List<PaymentMethodDistributionResponse>
         {
             new PaymentMethodDistributionResponse { MethodName = "Tiền mặt", Value = 65 },
             new PaymentMethodDistributionResponse { MethodName = "Chuyển khoản", Value = 35 }
         };
-
         return new AdminRevenueAnalysisResponse
         {
             Summary = summary,

@@ -27,7 +27,6 @@ public class PayOSService(IConfiguration configuration, IHttpClientFactory httpC
         var baseUrl = _configuration["PayOS:BaseUrl"]?.TrimEnd('/');
         var returnUrl = _configuration["PayOS:ReturnUrl"];
         var cancelUrl = _configuration["PayOS:CancelUrl"];
-
         var payload = new
         {
             orderCode = request.OrderCode,
@@ -37,10 +36,8 @@ public class PayOSService(IConfiguration configuration, IHttpClientFactory httpC
             returnUrl,
             signature = string.Empty
         };
-
         var signatureData = $"amount={payload.amount}&cancelUrl={payload.cancelUrl}&description={payload.description}&orderCode={payload.orderCode}&returnUrl={payload.returnUrl}";
         var signature = CreateSignature(signatureData, checksumKey!);
-
         var finalPayload = new
         {
             payload.orderCode,
@@ -50,18 +47,14 @@ public class PayOSService(IConfiguration configuration, IHttpClientFactory httpC
             payload.returnUrl,
             signature
         };
-
         var client = _httpClientFactory.CreateClient();
         client.DefaultRequestHeaders.Add("x-client-id", clientId);
         client.DefaultRequestHeaders.Add("x-api-key", apiKey);
-
         var response = await client.PostAsJsonAsync($"{baseUrl}/v2/payment-requests", finalPayload, cancellationToken)
             .ConfigureAwait(false);
         var content = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-
         var payosResponse = JsonSerializer.Deserialize<PayOSApiResponse>(content, _jsonOptions);
-
-        if(payosResponse != null &&
+        if (payosResponse != null &&
             string.Compare(payosResponse.Code, PayOSStatus.SuccessCode) == 0 &&
             payosResponse.Data != null)
         {
@@ -72,7 +65,6 @@ public class PayOSService(IConfiguration configuration, IHttpClientFactory httpC
                 PaymentLinkId = payosResponse.Data.PaymentLinkId
             };
         }
-
         return new PayOSPaymentResponse { ErrorCode = 1, Message = payosResponse?.Desc ?? "Error calling PayOS" };
     }
 
@@ -81,7 +73,6 @@ public class PayOSService(IConfiguration configuration, IHttpClientFactory httpC
         var checksumKey = _configuration["PayOS:ChecksumKey"];
         var signatureData = $"amount={data.Amount}&description={data.Description}&orderCode={data.OrderCode}&transactionId={data.TransactionId}";
         var expectedSignature = CreateSignature(signatureData, checksumKey!);
-
         return string.Compare(expectedSignature, data.Signature) == 0;
     }
 
@@ -90,20 +81,16 @@ public class PayOSService(IConfiguration configuration, IHttpClientFactory httpC
         var clientId = _configuration["PayOS:ClientId"];
         var apiKey = _configuration["PayOS:ApiKey"];
         var baseUrl = _configuration["PayOS:BaseUrl"]?.TrimEnd('/');
-
         var client = _httpClientFactory.CreateClient();
         client.DefaultRequestHeaders.Add("x-client-id", clientId);
         client.DefaultRequestHeaders.Add("x-api-key", apiKey);
-
         var response = await client.GetAsync($"{baseUrl}/v2/payment-requests/{orderCode}", cancellationToken)
             .ConfigureAwait(false);
-        if(!response.IsSuccessStatusCode)
+        if (!response.IsSuccessStatusCode)
             return null;
-
         var content = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
         var payosResponse = JsonSerializer.Deserialize<PayOSApiResponse>(content, _jsonOptions);
-
-        if(payosResponse != null &&
+        if (payosResponse != null &&
             string.Compare(payosResponse.Code, PayOSStatus.SuccessCode) == 0 &&
             payosResponse.Data != null)
         {
@@ -117,7 +104,6 @@ public class PayOSService(IConfiguration configuration, IHttpClientFactory httpC
                 PaymentLinkId = payosResponse.Data.PaymentLinkId
             };
         }
-
         return null;
     }
 

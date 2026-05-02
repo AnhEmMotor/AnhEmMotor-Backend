@@ -20,15 +20,12 @@ public sealed class RestoreInputCommandHandler(
     {
         var input = await readRepository.GetByIdAsync(request.Id!.Value, cancellationToken, DataFetchMode.DeletedOnly)
             .ConfigureAwait(false);
-
-        if(input is null)
+        if (input is null)
         {
             return Error.NotFound($"Không tìm thấy phiếu nhập đã xóa có ID {request.Id}.", "Id");
         }
-
         updateRepository.Restore(input);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         return input.Adapt<InputDetailResponse>();
     }
 }

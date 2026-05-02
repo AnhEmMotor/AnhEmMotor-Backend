@@ -13,17 +13,14 @@ public sealed class ViewImageQueryHandler(IFileStorageService fileStorageService
     {
         var fileResult = await fileStorageService.GetFileAsync(request.StoragePath, cancellationToken)
             .ConfigureAwait(false);
-        if(fileResult == null)
+        if (fileResult == null)
         {
             return Error.NotFound("Image not found.");
         }
-
         var (fileBytes, _) = fileResult.Value;
-
         using var inputStream = new MemoryStream(fileBytes);
         var processedStream = await fileStorageService.ReadImageAsync(inputStream, request.Width, cancellationToken)
             .ConfigureAwait(false);
-
         return (processedStream, "image/webp");
     }
 }

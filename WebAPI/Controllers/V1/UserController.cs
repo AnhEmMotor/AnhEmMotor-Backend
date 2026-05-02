@@ -45,32 +45,27 @@ public class UserController(IMediator mediator, IUserStreamService userStreamSer
     public async Task<IActionResult> GetCurrentUserAsync(CancellationToken cancellationToken)
     {
         var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if(string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out var userId))
+        if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out var userId))
         {
             return Unauthorized(Error.Validation("Invalid User ID", "UserId"));
         }
-
         bool isSse = Request.Headers.Accept.ToString().Contains("text/event-stream");
-
-        if(isSse)
+        if (isSse)
         {
             Response.Headers.Append("Content-Type", "text/event-stream");
             Response.Headers.Append("Cache-Control", "no-cache");
             Response.Headers.Append("X-Accel-Buffering", "no");
-
             try
             {
                 await SendUserDataAsync(mediator, userIdString, cancellationToken).ConfigureAwait(false);
-
-                while(!cancellationToken.IsCancellationRequested)
+                while (!cancellationToken.IsCancellationRequested)
                 {
                     await userStreamService.WaitForUpdateAsync(userId, cancellationToken).ConfigureAwait(true);
-
                     using var scope = serviceProvider.CreateScope();
                     var scopedMediator = scope.ServiceProvider.GetRequiredService<IMediator>();
                     await SendUserDataAsync(scopedMediator, userIdString, cancellationToken).ConfigureAwait(false);
                 }
-            } catch(OperationCanceledException)
+            } catch (OperationCanceledException)
             {
             }
             return new EmptyResult();
@@ -78,7 +73,6 @@ public class UserController(IMediator mediator, IUserStreamService userStreamSer
         {
             var result = await mediator.Send(new GetCurrentUserQuery() { UserId = userIdString }, cancellationToken)
                 .ConfigureAwait(false);
-
             return HandleResult(result);
         }
     }
@@ -87,8 +81,7 @@ public class UserController(IMediator mediator, IUserStreamService userStreamSer
     {
         var result = await mediatorToUse.Send(new GetCurrentUserQuery() { UserId = userId }, cancellationToken)
             .ConfigureAwait(false);
-
-        if(result.IsSuccess)
+        if (result.IsSuccess)
         {
             var json = JsonSerializer.Serialize(result.Value, _jsonSerializerOptions);
             await Response.WriteAsync($"data: {json}\n\n", cancellationToken).ConfigureAwait(true);
@@ -100,7 +93,6 @@ public class UserController(IMediator mediator, IUserStreamService userStreamSer
             await Response.Body.FlushAsync(cancellationToken).ConfigureAwait(true);
         }
     }
-
 
     /// <summary>
     /// Đổi thông tin người dùng hiện tại từ JWT
@@ -204,7 +196,6 @@ public class UserController(IMediator mediator, IUserStreamService userStreamSer
             new { key = nameof(GenderStatus.Female), label = "Nữ" },
             new { key = nameof(GenderStatus.Other), label = "Khác" }
         };
-
         return Ok(options);
     }
 }

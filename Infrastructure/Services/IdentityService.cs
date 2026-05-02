@@ -17,44 +17,35 @@ public class IdentityService(UserManager<ApplicationUser> userManager, IConfigur
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-
         ApplicationUser? user;
-
-        if(usernameOrEmail.Contains('@'))
+        if (usernameOrEmail.Contains('@'))
         {
             user = await userManager.FindByEmailAsync(usernameOrEmail).ConfigureAwait(false);
         } else
         {
             user = await userManager.FindByNameAsync(usernameOrEmail).ConfigureAwait(false);
         }
-
-        if(user == null)
+        if (user == null)
         {
             return Error.Unauthorized("Wrong username/email or password.");
         }
-
         var isPasswordValid = await userManager.CheckPasswordAsync(user, password).ConfigureAwait(false);
-
-        if(!isPasswordValid)
+        if (!isPasswordValid)
         {
             return Error.Unauthorized("Wrong username/email or password.");
         }
-
-        if(string.Compare(user.Status, UserStatus.Banned) == 0)
+        if (string.Compare(user.Status, UserStatus.Banned) == 0)
         {
             return Error.Forbidden("User is banned.");
         }
-
         cancellationToken.ThrowIfCancellationRequested();
-
         var roles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
-
         return new UserAuth
         {
             Id = user.Id,
             UserName = user.UserName,
-            Roles = [ .. roles ],
-            AuthMethods = [ "amr" ],
+            Roles = [.. roles],
+            AuthMethods = ["amr"],
             Email = user.Email,
             FullName = user.FullName,
             AvatarUrl = user.AvatarUrl,
@@ -68,12 +59,9 @@ public class IdentityService(UserManager<ApplicationUser> userManager, IConfigur
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(externalUser);
-
         cancellationToken.ThrowIfCancellationRequested();
-
         var user = await userManager.FindByEmailAsync(externalUser.Email).ConfigureAwait(false);
-
-        if(user is null)
+        if (user is null)
         {
             user = new ApplicationUser
             {
@@ -86,44 +74,38 @@ public class IdentityService(UserManager<ApplicationUser> userManager, IConfigur
                 EmailConfirmed = true,
                 CreatedAt = DateTimeOffset.UtcNow
             };
-
             var createResult = await userManager.CreateAsync(user).ConfigureAwait(false);
-            if(!createResult.Succeeded)
+            if (!createResult.Succeeded)
             {
                 var errors = createResult.Errors.Select(e => Error.Failure(e.Description)).ToList();
                 return Result<UserAuth>.Failure(errors);
             }
-
             var defaultRoles = configuration.GetSection("ProtectedAuthorizationEntities:DefaultRolesForNewUsers")
                 .Get<string[]>();
-            if(defaultRoles is not null && defaultRoles.Length > 0)
+            if (defaultRoles is not null && defaultRoles.Length > 0)
             {
                 await userManager.AddToRolesAsync(user, defaultRoles).ConfigureAwait(false);
             }
         } else
         {
-            if(string.IsNullOrEmpty(user.AvatarUrl) && !string.IsNullOrEmpty(externalUser.Picture))
+            if (string.IsNullOrEmpty(user.AvatarUrl) && !string.IsNullOrEmpty(externalUser.Picture))
             {
                 user.AvatarUrl = externalUser.Picture;
                 await userManager.UpdateAsync(user).ConfigureAwait(false);
             }
         }
-
-        if(string.Compare(user.Status, UserStatus.Banned) == 0)
+        if (string.Compare(user.Status, UserStatus.Banned) == 0)
         {
             return Error.Forbidden("User is banned.");
         }
-
         cancellationToken.ThrowIfCancellationRequested();
-
         var roles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
-
         return new UserAuth
         {
             Id = user.Id,
             UserName = user.UserName,
-            Roles = [ .. roles ],
-            AuthMethods = [ externalUser.Provider.ToLower() ],
+            Roles = [.. roles],
+            AuthMethods = [externalUser.Provider.ToLower()],
             Email = user.Email,
             FullName = user.FullName,
             AvatarUrl = user.AvatarUrl,

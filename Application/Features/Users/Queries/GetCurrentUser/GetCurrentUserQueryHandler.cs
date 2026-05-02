@@ -10,33 +10,27 @@ public class GetCurrentUserQueryHandler(IUserReadRepository userReadRepository, 
 {
     public async Task<Result<UserResponse>> Handle(GetCurrentUserQuery request, CancellationToken cancellationToken)
     {
-        if(string.IsNullOrEmpty(request.UserId) || !Guid.TryParse(request.UserId, out var userId))
+        if (string.IsNullOrEmpty(request.UserId) || !Guid.TryParse(request.UserId, out var userId))
         {
             return Error.BadRequest("Invalid user ID.");
         }
-
         var user = await userReadRepository.FindUserByIdAsync(userId, cancellationToken).ConfigureAwait(false);
-        if(user is null)
+        if (user is null)
         {
             return Error.NotFound("User not found.");
         }
-
-        if(user.DeletedAt is not null)
+        if (user.DeletedAt is not null)
         {
             return Error.Forbidden("User account is deleted.");
         }
-
         var userRoles = await userReadRepository.GetRolesOfUserAsync(user, cancellationToken).ConfigureAwait(false);
         var roleEntities = await roleReadRepository.GetRolesByNameAsync(userRoles, cancellationToken)
             .ConfigureAwait(false);
-
         var roleIds = roleEntities.Select(r => r.Id).ToList();
         var userPermissionNames = await roleReadRepository.GetPermissionsNameByRoleIdAsync(roleIds, cancellationToken)
                 .ConfigureAwait(false) ??
             new List<string>();
-
         List<string>? userPermissions = userPermissionNames.Count > 0 ? userPermissionNames : null;
-
         return new UserResponse()
         {
             Id = user.Id,

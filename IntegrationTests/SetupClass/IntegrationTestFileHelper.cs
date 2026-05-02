@@ -21,7 +21,6 @@ namespace IntegrationTests.SetupClass
             byte[]? bytes = null)
         {
             bytes ??= GetValidJpgBytes();
-
             var content = new MultipartFormDataContent();
             var fileContent = new ByteArrayContent(bytes);
             fileContent.Headers.ContentType = new MediaTypeHeaderValue(contentType);
@@ -33,7 +32,7 @@ namespace IntegrationTests.SetupClass
             params (string Field, string FileName, string ContentType, byte[] Bytes)[] files)
         {
             var content = new MultipartFormDataContent();
-            foreach(var f in files)
+            foreach (var f in files)
             {
                 var fileContent = new ByteArrayContent(f.Bytes);
                 fileContent.Headers.ContentType = new MediaTypeHeaderValue(f.ContentType);

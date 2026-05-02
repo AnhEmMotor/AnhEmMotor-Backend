@@ -4,10 +4,10 @@
 
 namespace Infrastructure.MySqlMigrations
 {
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public partial class AddMaxPurchaseQuantityToCategory : Migration
     {
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<int>(
@@ -17,8 +17,10 @@ namespace Infrastructure.MySqlMigrations
                 nullable: true);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
-        { migrationBuilder.DropColumn(name: "MaxPurchaseQuantity", table: "ProductCategory"); }
+        {
+            migrationBuilder.DropColumn(name: "MaxPurchaseQuantity", table: "ProductCategory");
+        }
     }
 }

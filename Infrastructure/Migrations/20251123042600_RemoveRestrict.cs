@@ -4,18 +4,16 @@
 
 namespace Infrastructure.Migrations
 {
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public partial class RemoveRestrict : Migration
     {
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(name: "FK_ProductVariant_Product_ProductId", table: "ProductVariant");
-
             migrationBuilder.DropForeignKey(
                 name: "FK_VariantOptionValue_ProductVariant_VariantId",
                 table: "VariantOptionValue");
-
             migrationBuilder.AddForeignKey(
                 name: "FK_ProductVariant_Product_ProductId",
                 table: "ProductVariant",
@@ -23,7 +21,6 @@ namespace Infrastructure.Migrations
                 principalTable: "Product",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
-
             migrationBuilder.AddForeignKey(
                 name: "FK_VariantOptionValue_ProductVariant_VariantId",
                 table: "VariantOptionValue",
@@ -33,15 +30,13 @@ namespace Infrastructure.Migrations
                 onDelete: ReferentialAction.Cascade);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(name: "FK_ProductVariant_Product_ProductId", table: "ProductVariant");
-
             migrationBuilder.DropForeignKey(
                 name: "FK_VariantOptionValue_ProductVariant_VariantId",
                 table: "VariantOptionValue");
-
             migrationBuilder.AddForeignKey(
                 name: "FK_ProductVariant_Product_ProductId",
                 table: "ProductVariant",
@@ -49,7 +44,6 @@ namespace Infrastructure.Migrations
                 principalTable: "Product",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Restrict);
-
             migrationBuilder.AddForeignKey(
                 name: "FK_VariantOptionValue_ProductVariant_VariantId",
                 table: "VariantOptionValue",

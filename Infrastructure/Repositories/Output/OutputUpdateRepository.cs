@@ -9,11 +9,20 @@ namespace Infrastructure.Repositories.Output;
 
 public class OutputUpdateRepository(ApplicationDBContext context) : IOutputUpdateRepository
 {
-    public void Update(OutputEntity output) { context.OutputOrders.Update(output); }
+    public void Update(OutputEntity output)
+    {
+        context.OutputOrders.Update(output);
+    }
 
-    public void Restore(OutputEntity output) { context.Restore(output); }
+    public void Restore(OutputEntity output)
+    {
+        context.Restore(output);
+    }
 
-    public void Restore(IEnumerable<OutputEntity> outputs) { context.RestoreDeleteUsingSetColumnRange(outputs); }
+    public void Restore(IEnumerable<OutputEntity> outputs)
+    {
+        context.RestoreDeleteUsingSetColumnRange(outputs);
+    }
 
     public async Task ProcessCOGSForCompletedOrderAsync(int outputId, CancellationToken cancellationToken)
     {
@@ -21,20 +30,16 @@ public class OutputUpdateRepository(ApplicationDBContext context) : IOutputUpdat
             .Where(oi => oi.OutputId == outputId)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-
-        foreach(var outputInfo in outputInfos)
+        foreach (var outputInfo in outputInfos)
         {
-            if(outputInfo.ProductVarientId is null || outputInfo.Count is null)
+            if (outputInfo.ProductVarientId is null || outputInfo.Count is null)
             {
                 continue;
             }
-
             var batches = await GetAvailableBatchesAsync(outputInfo.ProductVarientId.Value, cancellationToken)
                 .ConfigureAwait(false);
-
             var unitCost = InventoryValuationService
                 .CalculateUnitCostAndDeductInventory(batches, outputInfo.Count.Value);
-
             outputInfo.CostPrice = unitCost;
         }
     }
@@ -42,7 +47,6 @@ public class OutputUpdateRepository(ApplicationDBContext context) : IOutputUpdat
     private Task<List<InputInfo>> GetAvailableBatchesAsync(int productId, CancellationToken cancellationToken)
     {
         var finishedStatuses = Domain.Constants.Input.InputStatus.FinishInputValues;
-
         return context.InputInfos
             .Include(ii => ii.InputReceipt)
             .Where(

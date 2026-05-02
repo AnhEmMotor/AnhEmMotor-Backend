@@ -12,12 +12,10 @@ public sealed class GetAllSettingsQueryHandler(ISettingRepository settingReposit
         CancellationToken cancellationToken)
     {
         var settingsList = await settingRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
-
-        if(settingsList == null || !settingsList.Any())
+        if (settingsList == null || !settingsList.Any())
         {
             return Error.BadRequest("Không có thông số cài đặt nào trong hệ thống (hệ thống chắc chắn sẽ gặp lỗi!)");
         }
-
         return settingsList
             .Where(s => s.Key != null && SettingKeys.IsValidKey(s.Key))
             .ToDictionary(s => s.Key!, s => s.Value);

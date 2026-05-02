@@ -7,4 +7,3 @@ namespace Application.Features.Payments.Commands.ProcessVNPayIPN;
 
 public sealed record ProcessVNPayIPNCommand(IQueryCollection Query) : IRequest<Result<VNPayPaymentResponse>>;
 
-

@@ -1,5 +1,5 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 #nullable disable
 
@@ -11,39 +11,21 @@ namespace Infrastructure.PostgreSqlMigrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "PaymentCode",
-                table: "Output",
-                type: "text",
-                nullable: true);
-
+            migrationBuilder.AddColumn<string>(name: "PaymentCode", table: "Output", type: "text", nullable: true);
             migrationBuilder.AddColumn<DateTimeOffset>(
                 name: "PaymentExpiredAt",
                 table: "Output",
                 type: "timestamp with time zone",
                 nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "PaymentUrl",
-                table: "Output",
-                type: "text",
-                nullable: true);
+            migrationBuilder.AddColumn<string>(name: "PaymentUrl", table: "Output", type: "text", nullable: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "PaymentCode",
-                table: "Output");
-
-            migrationBuilder.DropColumn(
-                name: "PaymentExpiredAt",
-                table: "Output");
-
-            migrationBuilder.DropColumn(
-                name: "PaymentUrl",
-                table: "Output");
+            migrationBuilder.DropColumn(name: "PaymentCode", table: "Output");
+            migrationBuilder.DropColumn(name: "PaymentExpiredAt", table: "Output");
+            migrationBuilder.DropColumn(name: "PaymentUrl", table: "Output");
         }
     }
 }

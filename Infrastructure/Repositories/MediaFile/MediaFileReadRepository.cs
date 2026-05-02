@@ -63,5 +63,7 @@ public class MediaFileReadRepository(ApplicationDBContext context) : IMediaFileR
     }
 
     public IQueryable<MediaFileEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
-    { return context.GetQuery<MediaFileEntity>(mode); }
+    {
+        return context.GetQuery<MediaFileEntity>(mode);
+    }
 }

@@ -17,13 +17,11 @@ public sealed class GetSuppliersListForInputManagerQueryHandler(
         CancellationToken cancellationToken)
     {
         var query = repository.GetQueryableWithTotalInput();
-
         var result = await paginator.ApplyAsync<SupplierWithTotalInputResponse, SupplierForInputManagerResponse>(
             query,
             request.SieveModel!,
             cancellationToken: cancellationToken)
             .ConfigureAwait(false);
-
         return result;
     }
 }

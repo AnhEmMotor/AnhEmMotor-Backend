@@ -11,12 +11,10 @@ public sealed class GetBrandByIdQueryHandler(IBrandReadRepository repository) : 
     public async Task<Result<BrandResponse>> Handle(GetBrandByIdQuery request, CancellationToken cancellationToken)
     {
         var brand = await repository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
-
-        if(brand == null)
+        if (brand == null)
         {
             return Error.NotFound($"Brand with Id {request.Id} not found.", "Id");
         }
-
         return brand.Adapt<BrandResponse>();
     }
 }

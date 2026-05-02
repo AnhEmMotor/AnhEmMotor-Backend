@@ -40,9 +40,8 @@ public class PaymentController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetPaymentLink(int orderId, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetPaymentLinkQuery(orderId), cancellationToken).ConfigureAwait(true);
-        if(result.IsSuccess)
+        if (result.IsSuccess)
             return Ok(result.Value);
-
         var firstError = result.Errors?.FirstOrDefault() ?? result.Error;
         return BadRequest(
             new { success = false, message = firstError?.Message ?? "Lỗi không xác định", code = firstError?.Code });
@@ -58,12 +57,10 @@ public class PaymentController(IMediator mediator) : ControllerBase
     {
         var result = await mediator.Send(new ProcessVNPayIPNCommand(Request.Query), cancellationToken)
             .ConfigureAwait(true);
-
         var orderId = result.Value?.OrderId;
         var status = result.IsSuccess && string.Compare(result.Value?.VnPayResponseCode, "00") == 0
             ? "success"
             : "failed";
-
         return Redirect($"http://localhost:3000/payment-processing?id={orderId}&status={status}&method=VNPay");
     }
 
@@ -75,19 +72,16 @@ public class PaymentController(IMediator mediator) : ControllerBase
     [HttpGet("payos-callback")]
     public async Task<IActionResult> PayOSCallback(CancellationToken cancellationToken)
     {
-        if(!long.TryParse(Request.Query["orderCode"], out var orderCode))
+        if (!long.TryParse(Request.Query["orderCode"], out var orderCode))
         {
             return Redirect("http://localhost:3000/orders?payment=failed");
         }
-
         var result = await mediator.Send(new ProcessPayOSCallbackCommand(orderCode), cancellationToken)
             .ConfigureAwait(true);
         var status = result.IsSuccess ? "success" : "failed";
-
         var orderId = (int)(orderCode / 100000);
-        if(orderId == 0)
+        if (orderId == 0)
             orderId = (int)orderCode;
-
         return Redirect($"http://localhost:3000/payment-processing?id={orderId}&status={status}&method=PayOS");
     }
 }

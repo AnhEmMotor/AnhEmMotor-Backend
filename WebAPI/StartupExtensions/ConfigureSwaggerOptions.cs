@@ -17,7 +17,7 @@ namespace WebAPI.StartupExtensions
         /// <param name="options">Các tùy chọn cho SwaggerGen.</param>
         public void Configure(SwaggerGenOptions options)
         {
-            foreach(var description in provider.ApiVersionDescriptions)
+            foreach (var description in provider.ApiVersionDescriptions)
             {
                 options.SwaggerDoc(
                     description.GroupName,

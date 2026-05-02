@@ -5,10 +5,10 @@ using System;
 
 namespace Infrastructure.Migrations
 {
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public partial class FirstMigration : Migration
     {
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
@@ -26,7 +26,6 @@ namespace Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_Brand", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "InputStatus",
                 columns: table => new
@@ -40,7 +39,6 @@ namespace Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_InputStatus", x => x.Key);
                 });
-
             migrationBuilder.CreateTable(
                 name: "MediaFile",
                 columns: table => new
@@ -59,7 +57,6 @@ namespace Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_MediaFile", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "Option",
                 columns: table => new
@@ -74,7 +71,6 @@ namespace Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_Option", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "OutputStatus",
                 columns: table => new
@@ -88,7 +84,6 @@ namespace Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_OutputStatus", x => x.Key);
                 });
-
             migrationBuilder.CreateTable(
                 name: "ProductCategory",
                 columns: table => new
@@ -104,7 +99,6 @@ namespace Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_ProductCategory", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "ProductStatus",
                 columns: table => new
@@ -118,7 +112,6 @@ namespace Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_ProductStatus", x => x.Key);
                 });
-
             migrationBuilder.CreateTable(
                 name: "Setting",
                 columns: table => new
@@ -133,7 +126,6 @@ namespace Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_Setting", x => x.Key);
                 });
-
             migrationBuilder.CreateTable(
                 name: "SupplierStatus",
                 columns: table => new
@@ -147,7 +139,6 @@ namespace Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_SupplierStatus", x => x.Key);
                 });
-
             migrationBuilder.CreateTable(
                 name: "OptionValue",
                 columns: table => new
@@ -168,7 +159,6 @@ namespace Infrastructure.Migrations
                         principalTable: "Option",
                         principalColumn: "Id");
                 });
-
             migrationBuilder.CreateTable(
                 name: "Output",
                 columns: table => new
@@ -191,7 +181,6 @@ namespace Infrastructure.Migrations
                         principalTable: "OutputStatus",
                         principalColumn: "Key");
                 });
-
             migrationBuilder.CreateTable(
                 name: "Product",
                 columns: table => new
@@ -244,7 +233,6 @@ namespace Infrastructure.Migrations
                         principalTable: "ProductStatus",
                         principalColumn: "Key");
                 });
-
             migrationBuilder.CreateTable(
                 name: "Supplier",
                 columns: table => new
@@ -269,7 +257,6 @@ namespace Infrastructure.Migrations
                         principalTable: "SupplierStatus",
                         principalColumn: "Key");
                 });
-
             migrationBuilder.CreateTable(
                 name: "ProductVariant",
                 columns: table => new
@@ -293,7 +280,6 @@ namespace Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
-
             migrationBuilder.CreateTable(
                 name: "Input",
                 columns: table => new
@@ -321,7 +307,6 @@ namespace Infrastructure.Migrations
                         principalTable: "Supplier",
                         principalColumn: "Id");
                 });
-
             migrationBuilder.CreateTable(
                 name: "OutputInfo",
                 columns: table => new
@@ -350,7 +335,6 @@ namespace Infrastructure.Migrations
                         principalTable: "ProductVariant",
                         principalColumn: "Id");
                 });
-
             migrationBuilder.CreateTable(
                 name: "ProductCollectionPhoto",
                 columns: table => new
@@ -371,7 +355,6 @@ namespace Infrastructure.Migrations
                         principalTable: "ProductVariant",
                         principalColumn: "Id");
                 });
-
             migrationBuilder.CreateTable(
                 name: "VariantOptionValue",
                 columns: table => new
@@ -398,7 +381,6 @@ namespace Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
-
             migrationBuilder.CreateTable(
                 name: "InputInfo",
                 columns: table => new
@@ -427,91 +409,57 @@ namespace Infrastructure.Migrations
                         principalTable: "ProductVariant",
                         principalColumn: "Id");
                 });
-
             migrationBuilder.CreateIndex(name: "IX_Input_StatusId", table: "Input", column: "StatusId");
-
             migrationBuilder.CreateIndex(name: "IX_Input_SupplierId", table: "Input", column: "SupplierId");
-
             migrationBuilder.CreateIndex(name: "IX_InputInfo_InputId", table: "InputInfo", column: "InputId");
-
             migrationBuilder.CreateIndex(name: "IX_InputInfo_ProductId", table: "InputInfo", column: "ProductId");
-
             migrationBuilder.CreateIndex(name: "IX_OptionValue_OptionId", table: "OptionValue", column: "OptionId");
-
             migrationBuilder.CreateIndex(name: "IX_Output_StatusId", table: "Output", column: "StatusId");
-
             migrationBuilder.CreateIndex(name: "IX_OutputInfo_OutputId", table: "OutputInfo", column: "OutputId");
-
             migrationBuilder.CreateIndex(name: "IX_OutputInfo_ProductId", table: "OutputInfo", column: "ProductId");
-
             migrationBuilder.CreateIndex(name: "IX_Product_BrandId", table: "Product", column: "BrandId");
-
             migrationBuilder.CreateIndex(name: "IX_Product_CategoryId", table: "Product", column: "CategoryId");
-
             migrationBuilder.CreateIndex(name: "IX_Product_StatusId", table: "Product", column: "StatusId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ProductCollectionPhoto_ProductVariantId",
                 table: "ProductCollectionPhoto",
                 column: "ProductVariantId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ProductVariant_ProductId",
                 table: "ProductVariant",
                 column: "ProductId");
-
             migrationBuilder.CreateIndex(name: "IX_Supplier_StatusId", table: "Supplier", column: "StatusId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_VariantOptionValue_OptionValueId",
                 table: "VariantOptionValue",
                 column: "OptionValueId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_VariantOptionValue_VariantId",
                 table: "VariantOptionValue",
                 column: "VariantId");
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(name: "InputInfo");
-
             migrationBuilder.DropTable(name: "MediaFile");
-
             migrationBuilder.DropTable(name: "OutputInfo");
-
             migrationBuilder.DropTable(name: "ProductCollectionPhoto");
-
             migrationBuilder.DropTable(name: "Setting");
-
             migrationBuilder.DropTable(name: "VariantOptionValue");
-
             migrationBuilder.DropTable(name: "Input");
-
             migrationBuilder.DropTable(name: "Output");
-
             migrationBuilder.DropTable(name: "OptionValue");
-
             migrationBuilder.DropTable(name: "ProductVariant");
-
             migrationBuilder.DropTable(name: "InputStatus");
-
             migrationBuilder.DropTable(name: "Supplier");
-
             migrationBuilder.DropTable(name: "OutputStatus");
-
             migrationBuilder.DropTable(name: "Option");
-
             migrationBuilder.DropTable(name: "Product");
-
             migrationBuilder.DropTable(name: "SupplierStatus");
-
             migrationBuilder.DropTable(name: "Brand");
-
             migrationBuilder.DropTable(name: "ProductCategory");
-
             migrationBuilder.DropTable(name: "ProductStatus");
         }
     }

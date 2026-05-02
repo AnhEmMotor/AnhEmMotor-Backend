@@ -5,10 +5,10 @@ using System;
 
 namespace Infrastructure.MySqlMigrations
 {
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public partial class UpdateCoverImageUrlLength : Migration
     {
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<DateTime>(
@@ -16,7 +16,6 @@ namespace Infrastructure.MySqlMigrations
                 table: "Users",
                 type: "datetime(6)",
                 nullable: true);
-
             migrationBuilder.AlterColumn<string>(
                 name: "CoverImageUrl",
                 table: "ProductVariant",
@@ -27,11 +26,10 @@ namespace Infrastructure.MySqlMigrations
                 oldNullable: true);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(name: "DateOfBirth", table: "Users");
-
             migrationBuilder.AlterColumn<string>(
                 name: "CoverImageUrl",
                 table: "ProductVariant",

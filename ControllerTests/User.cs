@@ -38,13 +38,12 @@ public class User
             _mediatorMock.Object,
             _userStreamServiceMock.Object,
             _serviceProviderMock.Object);
-
         var httpContext = new DefaultHttpContext();
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
     }
 
-#pragma warning disable IDE0079 
-#pragma warning disable CRR0035
+    #pragma warning disable IDE0079 
+    #pragma warning disable CRR0035
     [Fact(DisplayName = "USER_036 - Controller - GET /api/v1/User/me gọi đúng Query")]
     public async Task GetCurrentUser_CallsCorrectQuery_ReturnsOk()
     {
@@ -57,21 +56,16 @@ public class User
             Gender = GenderStatus.Male,
             PhoneNumber = "0123456789"
         };
-
         var claims = new List<Claim> { new(ClaimTypes.NameIdentifier, expectedResponse.Id.ToString() ?? string.Empty) };
         var identity = new ClaimsIdentity(claims, "TestAuthType");
         var claimsPrincipal = new ClaimsPrincipal(identity);
-
         _controller.ControllerContext = new ControllerContext
         {
             HttpContext = new DefaultHttpContext { User = claimsPrincipal }
         };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetCurrentUserQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<UserResponse>.Success(expectedResponse));
-
         var result = await _controller.GetCurrentUserAsync(CancellationToken.None).ConfigureAwait(true);
-
         result.Should().BeOfType<OkObjectResult>();
         var okResult = result as OkObjectResult;
         okResult!.Value.Should().BeEquivalentTo(expectedResponse);
@@ -85,15 +79,12 @@ public class User
         var claims = new List<Claim> { new(ClaimTypes.NameIdentifier, userId.ToString()) };
         var identity = new ClaimsIdentity(claims, "TestAuthType");
         var claimsPrincipal = new ClaimsPrincipal(identity);
-
         _controller.ControllerContext = new ControllerContext
         {
             HttpContext = new DefaultHttpContext { User = claimsPrincipal }
         };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetCurrentUserQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException("Invalid JWT"));
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.GetCurrentUserAsync(CancellationToken.None))
             .ConfigureAwait(true);
@@ -104,32 +95,25 @@ public class User
     {
         var userId = Guid.NewGuid();
         var request = new UpdateCurrentUserCommand { FullName = "Test", Gender = GenderStatus.Male };
-
         var claims = new List<Claim> { new(ClaimTypes.NameIdentifier, userId.ToString()) };
         var identity = new ClaimsIdentity(claims, "TestAuthType");
         var claimsPrincipal = new ClaimsPrincipal(identity);
-
         _controller.ControllerContext = new ControllerContext
         {
             HttpContext = new DefaultHttpContext { User = claimsPrincipal }
         };
-
         var expectedResponse = new UserDTOForManagerResponse
         {
             Id = userId,
             FullName = "Test",
             Gender = GenderStatus.Male
         };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateCurrentUserCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<UserDTOForManagerResponse>.Success(expectedResponse));
-
         var result = await _controller.UpdateCurrentUserAsync(request, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().BeOfType<OkObjectResult>();
         var okResult = result as OkObjectResult;
         okResult!.Value.Should().BeEquivalentTo(expectedResponse);
-
         _mediatorMock.Verify(
             m => m.Send(
                 It.Is<UpdateCurrentUserCommand>(c => string.Compare(c.UserId, userId.ToString()) == 0),
@@ -141,14 +125,10 @@ public class User
     public async Task UpdateCurrentUser_EmptyBody_CallsMediator()
     {
         var request = new UpdateCurrentUserCommand();
-
         var expectedResponse = new UserDTOForManagerResponse { Id = Guid.NewGuid() };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateCurrentUserCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
-
         var result = await _controller.UpdateCurrentUserAsync(request, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().BeOfType<OkObjectResult>();
         _mediatorMock.Verify(
             m => m.Send(It.IsAny<UpdateCurrentUserCommand>(), It.IsAny<CancellationToken>()),
@@ -159,12 +139,9 @@ public class User
     public async Task UpdateCurrentUser_ValidationException_ThrowsValidationException()
     {
         var request = new UpdateCurrentUserCommand { PhoneNumber = "invalid" };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateCurrentUserCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<UserDTOForManagerResponse>.Failure(Error.BadRequest("Invalid phone number format")));
-
         var result = await _controller.UpdateCurrentUserAsync(request, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().BeOfType<BadRequestObjectResult>();
     }
 
@@ -174,24 +151,19 @@ public class User
         var userId = Guid.NewGuid();
         var request = new ChangePasswordCommand { CurrentPassword = "Old", NewPassword = "New" };
         var expectedResponse = new ChangePasswordByUserResponse { Message = "Password changed successfully" };
-
         var claims = new List<Claim> { new(ClaimTypes.NameIdentifier, userId.ToString()) };
         var identity = new ClaimsIdentity(claims, "TestAuthType");
         _controller.ControllerContext = new ControllerContext
         {
             HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(identity) }
         };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<ChangePasswordCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<ChangePasswordByUserResponse>.Success(expectedResponse));
-
         var result = await _controller.ChangePasswordCurrentUserAsync(request, CancellationToken.None)
             .ConfigureAwait(true);
-
         result.Should().BeOfType<OkObjectResult>();
         var okResult = result as OkObjectResult;
         okResult!.Value.Should().BeEquivalentTo(expectedResponse);
-
         _mediatorMock.Verify(
             m => m.Send(
                 It.Is<ChangePasswordCommand>(
@@ -206,13 +178,10 @@ public class User
     public async Task ChangePassword_MissingField_ThrowsValidationException()
     {
         var request = new ChangePasswordCommand { CurrentPassword = "Old", NewPassword = string.Empty };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<ChangePasswordCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<ChangePasswordByUserResponse>.Failure(Error.BadRequest("NewPassword is required")));
-
         var result = await _controller.ChangePasswordCurrentUserAsync(request, CancellationToken.None)
             .ConfigureAwait(true);
-
         result.Should().BeOfType<BadRequestObjectResult>();
     }
 
@@ -220,10 +189,8 @@ public class User
     public async Task ChangePassword_UnauthorizedException_ThrowsUnauthorizedException()
     {
         var request = new ChangePasswordCommand { CurrentPassword = "Wrong", NewPassword = "New" };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<ChangePasswordCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException("Current password is incorrect"));
-
         await   Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.ChangePasswordCurrentUserAsync(request, CancellationToken.None))
             .ConfigureAwait(true);
@@ -233,12 +200,9 @@ public class User
     public async Task DeleteAccount_CallsCorrectCommand_ReturnsOk()
     {
         var expectedResponse = new DeleteAccountByUserReponse { Message = "Account deleted successfully" };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteCurrentUserAccountCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
-
         var result = await _controller.DeleteCurrentUserAccountAsync(CancellationToken.None).ConfigureAwait(true);
-
         result.Should().BeOfType<OkObjectResult>();
         var okResult = result as OkObjectResult;
         okResult!.Value.Should().BeEquivalentTo(expectedResponse);
@@ -252,9 +216,7 @@ public class User
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteCurrentUserAccountCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<DeleteAccountByUserReponse>.Failure(Error.Forbidden("Cannot delete banned account")));
-
         var result = await _controller.DeleteCurrentUserAccountAsync(CancellationToken.None).ConfigureAwait(true);
-
         var objectResult = result.Should().BeOfType<ObjectResult>().Subject;
         objectResult.StatusCode.Should().Be(StatusCodes.Status403Forbidden);
     }
@@ -264,12 +226,9 @@ public class User
     {
         var userId = Guid.NewGuid();
         var expectedResponse = new RestoreUserResponse { Message = "Account restored successfully" };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<RestoreUserAccountCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
-
         var result = await _controller.RestoreUserAccountAsync(userId, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().BeOfType<OkObjectResult>();
         var okResult = result as OkObjectResult;
         okResult!.Value.Should().BeEquivalentTo(expectedResponse);
@@ -282,12 +241,9 @@ public class User
     public async Task RestoreAccount_InvalidGuid_ModelBindingFail()
     {
         var userId = Guid.Empty;
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<RestoreUserAccountCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<RestoreUserResponse>.Failure(Error.BadRequest("Invalid user ID")));
-
         var result = await _controller.RestoreUserAccountAsync(userId, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().BeOfType<BadRequestObjectResult>();
     }
 
@@ -295,12 +251,9 @@ public class User
     public async Task RestoreAccount_NotFoundException_ThrowsNotFoundException()
     {
         var userId = Guid.NewGuid();
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<RestoreUserAccountCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<RestoreUserResponse>.Failure(Error.NotFound("User not found")));
-
         var result = await _controller.RestoreUserAccountAsync(userId, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().BeOfType<NotFoundObjectResult>();
     }
 
@@ -308,12 +261,9 @@ public class User
     public async Task RestoreAccount_BadRequestException_ThrowsBadRequestException()
     {
         var userId = Guid.NewGuid();
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<RestoreUserAccountCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<RestoreUserResponse>.Failure(Error.BadRequest("Account is not deleted")));
-
         var result = await _controller.RestoreUserAccountAsync(userId, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().BeOfType<BadRequestObjectResult>();
     }
 
@@ -321,24 +271,17 @@ public class User
     public void Controller_HasAuthorizeAttribute_AllEndpointsProtected()
     {
         var controllerType = typeof(UserController);
-
         var controllerAttributes = controllerType.GetCustomAttributes(typeof(AuthorizeAttribute), true);
-
         var methods = controllerType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
-
         var hasControllerLevelAuthorize = controllerAttributes.Length > 0;
-
-        if(!hasControllerLevelAuthorize)
+        if (!hasControllerLevelAuthorize)
         {
-            foreach(var method in methods)
+            foreach (var method in methods)
             {
                 var allowAnonymous = method.GetCustomAttributes(typeof(AllowAnonymousAttribute), true);
-
-                if(allowAnonymous.Length > 0)
+                if (allowAnonymous.Length > 0)
                     continue;
-
                 var methodAttributes = method.GetCustomAttributes(typeof(AuthorizeAttribute), true);
-
                 methodAttributes.Should()
                     .NotBeEmpty($"Method {method.Name} should be secured or explicitly AllowAnonymous");
             }
@@ -347,6 +290,6 @@ public class User
             hasControllerLevelAuthorize.Should().BeTrue();
         }
     }
-#pragma warning restore CRR0035
-#pragma warning restore IDE0079
+    #pragma warning restore CRR0035
+    #pragma warning restore IDE0079
 }

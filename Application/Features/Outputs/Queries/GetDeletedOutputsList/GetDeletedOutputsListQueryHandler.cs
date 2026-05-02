@@ -16,13 +16,11 @@ public sealed class GetDeletedOutputsListQueryHandler(IOutputReadRepository repo
         CancellationToken cancellationToken)
     {
         var query = repository.GetQueryable(DataFetchMode.DeletedOnly);
-
         var result = await paginator.ApplyAsync<OutputEntity, OutputItemResponse>(
             query,
             request.SieveModel!,
             cancellationToken: cancellationToken)
             .ConfigureAwait(false);
-
         return result;
     }
 }

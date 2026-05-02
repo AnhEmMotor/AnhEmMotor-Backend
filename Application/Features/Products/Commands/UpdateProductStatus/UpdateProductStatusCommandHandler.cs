@@ -18,16 +18,13 @@ public sealed class UpdateProductStatusCommandHandler(
         CancellationToken cancellationToken)
     {
         var product = await readRepository.GetByIdWithDetailsAsync(command.Id, cancellationToken).ConfigureAwait(false);
-        if(product == null)
+        if (product == null)
         {
             return Error.NotFound($"Sản phẩm với Id {command.Id} không tồn tại.");
         }
-
         product.StatusId = command.StatusId;
-
         updateRepository.Update(product);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         var response = product.Adapt<ProductDetailForManagerResponse>();
         return response;
     }

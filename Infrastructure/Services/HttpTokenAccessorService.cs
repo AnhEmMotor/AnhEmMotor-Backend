@@ -8,12 +8,13 @@ namespace Infrastructure.Services
     public class HttpTokenAccessorService(IHttpContextAccessor httpContextAccessor, IConfiguration configuration) : IHttpTokenAccessorService
     {
         public string? GetRefreshTokenFromCookie()
-        { return httpContextAccessor.HttpContext?.Request.Cookies["refreshToken"]; }
+        {
+            return httpContextAccessor.HttpContext?.Request.Cookies["refreshToken"];
+        }
 
         public void SetRefreshTokenToCookie(string token, DateTimeOffset expiresAt)
         {
             var cookieDomain = configuration["CookieDomain"];
-
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
@@ -22,19 +23,16 @@ namespace Infrastructure.Services
                 SameSite = SameSiteMode.None,
                 Path = "/"
             };
-
-            if(!string.IsNullOrEmpty(cookieDomain))
+            if (!string.IsNullOrEmpty(cookieDomain))
             {
                 cookieOptions.Domain = cookieDomain;
             }
-
             httpContextAccessor.HttpContext?.Response.Cookies.Append("refreshToken", token, cookieOptions);
         }
 
         public void DeleteRefreshTokenFromCookie()
         {
             var cookieDomain = configuration["CookieDomain"];
-
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
@@ -42,16 +40,16 @@ namespace Infrastructure.Services
                 SameSite = SameSiteMode.None,
                 Path = "/"
             };
-
-            if(!string.IsNullOrEmpty(cookieDomain))
+            if (!string.IsNullOrEmpty(cookieDomain))
             {
                 cookieOptions.Domain = cookieDomain;
             }
-
             httpContextAccessor.HttpContext?.Response.Cookies.Delete("refreshToken", cookieOptions);
         }
 
         public string? GetAuthorizationValueFromHeader()
-        { return httpContextAccessor.HttpContext?.Request.Headers.Authorization; }
+        {
+            return httpContextAccessor.HttpContext?.Request.Headers.Authorization;
+        }
     }
 }

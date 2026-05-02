@@ -12,7 +12,6 @@ public sealed class GetSitemapSlugsQueryHandler(IProductVariantReadRepository pr
         CancellationToken cancellationToken)
     {
         var productSlugs = await productVariantReadRepository.GetUrlSlugsAsync(cancellationToken).ConfigureAwait(false);
-
         return Result<SitemapSlugsResponse>.Success(new SitemapSlugsResponse { ProductSlugs = productSlugs });
     }
 }
