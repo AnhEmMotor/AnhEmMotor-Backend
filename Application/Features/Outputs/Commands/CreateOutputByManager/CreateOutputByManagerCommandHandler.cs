@@ -79,10 +79,17 @@ public sealed class CreateOutputByManagerCommandHandler(
 
         var settings = await settingRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
         
-        var ratioSetting = settings.FirstOrDefault(s => string.Equals(s.Key, SettingKeys.DepositRatio, StringComparison.OrdinalIgnoreCase));
-        if (ratioSetting != null && int.TryParse(ratioSetting.Value, out var parsedRatio))
+        if (request.DepositRatio.HasValue)
         {
-            output.DepositRatio = parsedRatio;
+            output.DepositRatio = request.DepositRatio.Value;
+        }
+        else
+        {
+            var ratioSetting = settings.FirstOrDefault(s => string.Equals(s.Key, SettingKeys.DepositRatio, StringComparison.OrdinalIgnoreCase));
+            if (ratioSetting != null && int.TryParse(ratioSetting.Value, out var parsedRatio))
+            {
+                output.DepositRatio = parsedRatio;
+            }
         }
 
         if(string.IsNullOrWhiteSpace(output.StatusId))

@@ -8,4 +8,6 @@ public class OrderLockStatusResponse
     public HashSet<string> DeliveryInfo { get; set; } = [];
 
     public HashSet<string> Notes { get; set; } = [];
+    public HashSet<string> DepositRatio { get; set; } = [];
+    public HashSet<string> PaymentLink { get; set; } = [];
 }

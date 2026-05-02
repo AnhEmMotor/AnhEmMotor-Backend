@@ -17,7 +17,9 @@ public sealed class GetOrderLockedStatusesQueryHandler : IRequestHandler<GetOrde
         {
             BuyerAndProducts = OrderLockStatus.BuyerAndProductsLockedStatuses,
             DeliveryInfo = OrderLockStatus.DeliveryInfoLockedStatuses,
-            Notes = OrderLockStatus.NotesLockedStatuses
+            Notes = OrderLockStatus.NotesLockedStatuses,
+            DepositRatio = OrderLockStatus.DepositRatioLockedStatuses,
+            PaymentLink = OrderLockStatus.PaymentLinkAvailableStatuses
         };
 
         return Task.FromResult(Result<OrderLockStatusResponse>.Success(result));

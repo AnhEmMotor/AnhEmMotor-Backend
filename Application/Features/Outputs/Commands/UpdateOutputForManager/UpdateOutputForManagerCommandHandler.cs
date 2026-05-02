@@ -115,6 +115,10 @@ public sealed class UpdateOutputForManagerCommandHandler(
         }
 
         request.Adapt(output);
+        if (request.DepositRatio.HasValue)
+        {
+            output.DepositRatio = request.DepositRatio.Value;
+        }
 
         var existingInfoDict = output.OutputInfos.ToDictionary(oi => oi.Id);
 
