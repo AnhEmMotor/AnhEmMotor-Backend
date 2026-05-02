@@ -7,6 +7,8 @@ public class OrderDetailResponse
 
     public string? StatusId { get; set; }
 
+    public string? PaymentMethod { get; set; }
+
     public string? Notes { get; set; }
 
     public Guid? BuyerId { get; set; }

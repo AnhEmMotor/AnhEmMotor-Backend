@@ -1,4 +1,4 @@
-﻿using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.LocalFile;
 using Application.Interfaces.Services;
 using Domain.Entities;
@@ -82,8 +82,12 @@ public static class DependencyInjection
         services.AddScoped<IProtectedProductCategoryService, ProtectedProductCategoryService>();
         services.AddScoped<IFileStorageService, LocalFileStorageService>();
         services.AddScoped<IExternalAuthService, ExternalAuthService>();
+        services.AddScoped<IVNPayService, VNPayService>();
+        services.AddScoped<IPayOSService, PayOSService>();
         services.AddScoped<ISievePaginator, SievePaginator>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+        services.AddHostedService<OrderCleanupService>();
 
         services.AddHttpClient();
 

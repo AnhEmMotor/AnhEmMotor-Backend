@@ -120,6 +120,8 @@ public sealed class CreateOutputCommandHandler(
 
         output.BuyerId = request.BuyerId;
         output.CreatedBy = request.BuyerId;
+        output.PaymentMethod = request.PaymentMethod ?? Domain.Constants.Order.PaymentMethod.COD;
+        output.PaymentStatus = "Pending";
 
         insertRepository.Add(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

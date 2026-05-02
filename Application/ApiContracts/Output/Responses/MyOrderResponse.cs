@@ -15,7 +15,7 @@ public class MyOrderResponse
     public DateTimeOffset? CreatedAt { get; set; }
 
     public string? StatusId { get; init; }
-
+    public string? PaymentMethod { get; set; }
     public string? Notes { get; init; }
 
     public decimal Total { get; init; }

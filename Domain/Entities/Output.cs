@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 
 namespace Domain.Entities
 {
@@ -38,6 +39,21 @@ namespace Domain.Entities
         [ForeignKey("OutputStatus")]
         public string? StatusId { get; set; }
 
+        [Column("PaymentMethod")]
+        public string? PaymentMethod { get; set; }
+
+        [Column("TransactionId")]
+        public string? TransactionId { get; set; }
+
+        [Column("PaymentStatus")]
+        public string? PaymentStatus { get; set; }
+
+        [Column("PaidAmount", TypeName = "decimal(18, 2)")]
+        public decimal? PaidAmount { get; set; }
+
+        [Column("PaidAt")]
+        public DateTimeOffset? PaidAt { get; set; }
+
         [Column("Notes", TypeName = "nvarchar(MAX)")]
         public string? Notes { get; set; }
 
@@ -56,5 +72,11 @@ namespace Domain.Entities
 
         [InverseProperty("Output")]
         public ICollection<Input> Returns { get; set; } = [];
+
+        [NotMapped]
+        public decimal Total => OutputInfos?.Sum(x => (x.Price ?? 0) * (x.Count ?? 0)) ?? 0;
+
+        [NotMapped]
+        public decimal DepositAmount => Total * (DepositRatio ?? 0) / 100;
     }
 }
