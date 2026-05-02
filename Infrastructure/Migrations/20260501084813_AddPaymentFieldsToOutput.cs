@@ -1,14 +1,14 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 #nullable disable
 
 namespace Infrastructure.Migrations
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public partial class AddPaymentFieldsToOutput : Migration
     {
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<decimal>(
@@ -42,28 +42,18 @@ namespace Infrastructure.Migrations
                 nullable: true);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "PaidAmount",
-                table: "Output");
+            migrationBuilder.DropColumn(name: "PaidAmount", table: "Output");
 
-            migrationBuilder.DropColumn(
-                name: "PaidAt",
-                table: "Output");
+            migrationBuilder.DropColumn(name: "PaidAt", table: "Output");
 
-            migrationBuilder.DropColumn(
-                name: "PaymentMethod",
-                table: "Output");
+            migrationBuilder.DropColumn(name: "PaymentMethod", table: "Output");
 
-            migrationBuilder.DropColumn(
-                name: "PaymentStatus",
-                table: "Output");
+            migrationBuilder.DropColumn(name: "PaymentStatus", table: "Output");
 
-            migrationBuilder.DropColumn(
-                name: "TransactionId",
-                table: "Output");
+            migrationBuilder.DropColumn(name: "TransactionId", table: "Output");
         }
     }
 }

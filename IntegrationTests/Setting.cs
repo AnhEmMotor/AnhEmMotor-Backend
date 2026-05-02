@@ -243,11 +243,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         }
 
         var request = new Dictionary<string, string?>
-        {
-            { "Deposit_ratio", "50" },
-            { "Inventory_alert_level", "10" },
-            { "Order_value_exceeds", "50000000" }
-        };
+        { { "Deposit_ratio", "50" }, { "Inventory_alert_level", "10" }, { "Order_value_exceeds", "50000000" } };
 
         var response = await _client.PutAsJsonAsync("/api/v1/Setting", request).ConfigureAwait(true);
 

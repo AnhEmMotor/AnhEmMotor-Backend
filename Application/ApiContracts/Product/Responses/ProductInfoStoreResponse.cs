@@ -10,7 +10,7 @@ namespace Application.ApiContracts.Product.Responses
         public string? Brand { get; set; }
 
         public string? Category { get; set; }
-        
+
         [JsonPropertyName("product_limit")]
         public int? ProductLimit { get; set; }
 

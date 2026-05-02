@@ -53,14 +53,13 @@ public sealed class CreateOutputCommandHandler(
             }
         }
 
-        // Check category limits
         var errors = new List<Error>();
-        for (int i = 0; i < request.OutputInfos.Count; i++)
+        for(int i = 0; i < request.OutputInfos.Count; i++)
         {
             var info = request.OutputInfos[i];
             var variant = variantsList.FirstOrDefault(v => v.Id == info.ProductId);
 
-            if (variant?.Product?.ProductCategory != null && variant.Product.ProductCategory.MaxPurchaseQuantity.HasValue)
+            if(variant?.Product?.ProductCategory != null && variant.Product.ProductCategory.MaxPurchaseQuantity.HasValue)
             {
                 var category = variant.Product.ProductCategory;
                 var maxAllowed = category.MaxPurchaseQuantity.Value;
@@ -69,16 +68,17 @@ public sealed class CreateOutputCommandHandler(
                     .Where(oi => oi.ProductId == info.ProductId)
                     .Sum(oi => oi.Count ?? 0);
 
-                if (totalCountForProduct > maxAllowed)
+                if(totalCountForProduct > maxAllowed)
                 {
-                    errors.Add(Error.BadRequest(
-                        $"Số lượng mua tối đa cho sản phẩm '{variant.Product.Name}' là {maxAllowed} sản phẩm.",
-                        $"products[{i}]"));
+                    errors.Add(
+                        Error.BadRequest(
+                            $"Số lượng mua tối đa cho sản phẩm '{variant.Product.Name}' là {maxAllowed} sản phẩm.",
+                            $"products[{i}]"));
                 }
             }
         }
 
-        if (errors.Count > 0)
+        if(errors.Count > 0)
         {
             return Result<OrderDetailResponse>.Failure(errors);
         }
@@ -97,7 +97,8 @@ public sealed class CreateOutputCommandHandler(
         if(string.IsNullOrWhiteSpace(output.StatusId))
         {
             var totalPrice = output.OutputInfos.Sum(i => (i.Price ?? 0) * (i.Count ?? 0));
-            var thresholdSetting = settings.FirstOrDefault(s => string.Equals(s.Key, SettingKeys.OrderValueExceeds, StringComparison.OrdinalIgnoreCase));
+            var thresholdSetting = settings.FirstOrDefault(
+                s => string.Equals(s.Key, SettingKeys.OrderValueExceeds, StringComparison.OrdinalIgnoreCase));
 
             decimal threshold = 100000000;
             if(thresholdSetting != null && decimal.TryParse(thresholdSetting.Value, out var parsedThreshold))
@@ -108,19 +109,19 @@ public sealed class CreateOutputCommandHandler(
             output.StatusId = totalPrice >= threshold ? OrderStatus.WaitingDeposit : OrderStatus.Pending;
         }
 
-        var ratioSetting = settings.FirstOrDefault(s => string.Equals(s.Key, SettingKeys.DepositRatio, StringComparison.OrdinalIgnoreCase));
-        if (ratioSetting != null && int.TryParse(ratioSetting.Value, out var parsedRatio))
+        var ratioSetting = settings.FirstOrDefault(
+            s => string.Equals(s.Key, SettingKeys.DepositRatio, StringComparison.OrdinalIgnoreCase));
+        if(ratioSetting != null && int.TryParse(ratioSetting.Value, out var parsedRatio))
         {
             output.DepositRatio = parsedRatio;
-        }
-        else
+        } else
         {
             output.DepositRatio = 50;
         }
 
         output.BuyerId = request.BuyerId;
         output.CreatedBy = request.BuyerId;
-        output.PaymentMethod = request.PaymentMethod ?? Domain.Constants.Order.PaymentMethod.COD;
+        output.PaymentMethod = request.PaymentMethod ?? PaymentMethod.COD;
         output.PaymentStatus = "Pending";
 
         insertRepository.Add(output);

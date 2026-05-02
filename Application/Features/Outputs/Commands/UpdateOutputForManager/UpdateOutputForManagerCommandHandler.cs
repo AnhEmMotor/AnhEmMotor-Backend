@@ -115,7 +115,7 @@ public sealed class UpdateOutputForManagerCommandHandler(
         }
 
         request.Adapt(output);
-        if (request.DepositRatio.HasValue)
+        if(request.DepositRatio.HasValue)
         {
             output.DepositRatio = request.DepositRatio.Value;
         }

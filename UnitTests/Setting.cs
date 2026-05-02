@@ -237,14 +237,15 @@ public class Setting
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    [Fact(DisplayName = "SETTING_040 - Handler GetStoreSettings - Chỉ trả về các key công khai (OrderValueExceeds, DepositRatio)")]
+    [Fact(
+        DisplayName = "SETTING_040 - Handler GetStoreSettings - Chỉ trả về các key công khai (OrderValueExceeds, DepositRatio)")]
     public async Task SETTING_028_Handler_GetStoreSettings_ReturnsOnlyPublicKeys()
     {
         var allSettings = new List<SettingEntity>
         {
             new() { Key = SettingKeys.DepositRatio, Value = "50" },
             new() { Key = SettingKeys.OrderValueExceeds, Value = "100000000" },
-            new() { Key = SettingKeys.InventoryAlertLevel, Value = "5" } // Key nhạy cảm/không cần cho Store
+            new() { Key = SettingKeys.InventoryAlertLevel, Value = "5" }
         };
 
         _settingRepoMock.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync(allSettings);

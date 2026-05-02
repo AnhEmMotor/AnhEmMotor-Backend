@@ -4,10 +4,10 @@
 
 namespace Infrastructure.PostgreSqlMigrations
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public partial class FixWhellbaseVarTypeError : Migration
     {
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<decimal>(
@@ -20,7 +20,7 @@ namespace Infrastructure.PostgreSqlMigrations
                 oldNullable: true);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<string>(

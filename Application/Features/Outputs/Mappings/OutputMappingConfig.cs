@@ -72,13 +72,12 @@ public sealed class OutputMappingConfig : IRegister
     }
 
     private static decimal CalculateTotal(Output src)
-    {
-        return src.OutputInfos != null ? src.OutputInfos.Sum(oi => (oi.Count ?? 0) * (oi.Price ?? 0)) : 0;
-    }
+    { return src.OutputInfos != null ? src.OutputInfos.Sum(oi => (oi.Count ?? 0) * (oi.Price ?? 0)) : 0; }
 
     private static decimal? CalculateDeposit(Output src)
     {
-        if (src.DepositRatio == null || src.DepositRatio == 0) return null;
+        if(src.DepositRatio == null || src.DepositRatio == 0)
+            return null;
         var total = CalculateTotal(src);
         return total * (src.DepositRatio.Value / 100m);
     }
@@ -87,7 +86,8 @@ public sealed class OutputMappingConfig : IRegister
     {
         var total = CalculateTotal(src);
         var deposit = CalculateDeposit(src);
-        if (deposit == null) return total;
+        if(deposit == null)
+            return total;
         return total - deposit.Value;
     }
 

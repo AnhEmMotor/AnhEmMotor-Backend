@@ -4,25 +4,15 @@
 
 namespace Infrastructure.Migrations
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public partial class AddDepositRatioToOutputV2 : Migration
     {
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.AddColumn<int>(
-                name: "DepositRatio",
-                table: "Output",
-                type: "int",
-                nullable: true);
-        }
+        { migrationBuilder.AddColumn<int>(name: "DepositRatio", table: "Output", type: "int", nullable: true); }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropColumn(
-                name: "DepositRatio",
-                table: "Output");
-        }
+        { migrationBuilder.DropColumn(name: "DepositRatio", table: "Output"); }
     }
 }

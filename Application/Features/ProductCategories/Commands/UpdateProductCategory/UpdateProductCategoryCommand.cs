@@ -11,5 +11,6 @@ public sealed record UpdateProductCategoryCommand : IRequest<Result<ProductCateg
     public string? Name { get; init; }
 
     public string? Description { get; init; }
+
     public int? MaxPurchaseQuantity { get; init; }
 }

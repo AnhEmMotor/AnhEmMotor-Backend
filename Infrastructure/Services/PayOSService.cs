@@ -1,10 +1,13 @@
+using Application.ApiContracts.Payment.Requests;
+using Application.ApiContracts.Payment.Responses;
 using Application.Interfaces.Services;
+using Domain.Constants.Order;
+using Infrastructure.Integrations.Payment.PayOS;
 using Microsoft.Extensions.Configuration;
 using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace Infrastructure.Services;
 
@@ -12,8 +15,11 @@ public class PayOSService(IConfiguration configuration, IHttpClientFactory httpC
 {
     private readonly IConfiguration _configuration = configuration;
     private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
+    private static readonly JsonSerializerOptions _jsonOptions = new() { PropertyNameCaseInsensitive = true };
 
-    public async Task<PayOSPaymentResponse> CreatePaymentAsync(PayOSPaymentRequest request)
+    public async Task<PayOSPaymentResponse> CreatePaymentAsync(
+        PayOSPaymentRequest request,
+        CancellationToken cancellationToken)
     {
         var clientId = _configuration["PayOS:ClientId"];
         var apiKey = _configuration["PayOS:ApiKey"];
@@ -27,13 +33,11 @@ public class PayOSService(IConfiguration configuration, IHttpClientFactory httpC
             orderCode = request.OrderCode,
             amount = (long)request.Amount,
             description = request.Description,
-            cancelUrl = cancelUrl,
-            returnUrl = returnUrl,
-            signature = ""
+            cancelUrl,
+            returnUrl,
+            signature = string.Empty
         };
 
-        // Create signature
-        // amount=...&cancelUrl=...&description=...&orderCode=...&returnUrl=...
         var signatureData = $"amount={payload.amount}&cancelUrl={payload.cancelUrl}&description={payload.description}&orderCode={payload.orderCode}&returnUrl={payload.returnUrl}";
         var signature = CreateSignature(signatureData, checksumKey!);
 
@@ -44,19 +48,22 @@ public class PayOSService(IConfiguration configuration, IHttpClientFactory httpC
             payload.description,
             payload.cancelUrl,
             payload.returnUrl,
-            signature = signature
+            signature
         };
 
         var client = _httpClientFactory.CreateClient();
         client.DefaultRequestHeaders.Add("x-client-id", clientId);
         client.DefaultRequestHeaders.Add("x-api-key", apiKey);
 
-        var response = await client.PostAsJsonAsync($"{baseUrl}/v2/payment-requests", finalPayload);
-        var content = await response.Content.ReadAsStringAsync();
-        
-        var payosResponse = JsonSerializer.Deserialize<PayOSApiResponse>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        var response = await client.PostAsJsonAsync($"{baseUrl}/v2/payment-requests", finalPayload, cancellationToken)
+            .ConfigureAwait(false);
+        var content = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
-        if (payosResponse?.Code == "00")
+        var payosResponse = JsonSerializer.Deserialize<PayOSApiResponse>(content, _jsonOptions);
+
+        if(payosResponse != null &&
+            string.Compare(payosResponse.Code, PayOSStatus.SuccessCode) == 0 &&
+            payosResponse.Data != null)
         {
             return new PayOSPaymentResponse
             {
@@ -66,26 +73,19 @@ public class PayOSService(IConfiguration configuration, IHttpClientFactory httpC
             };
         }
 
-        return new PayOSPaymentResponse
-        {
-            ErrorCode = 1,
-            Message = payosResponse?.Desc ?? "Error calling PayOS"
-        };
+        return new PayOSPaymentResponse { ErrorCode = 1, Message = payosResponse?.Desc ?? "Error calling PayOS" };
     }
 
     public bool VerifyWebhook(PayOSWebhookData data)
     {
-        // For simplicity, we can trust the signature if we verify it correctly.
-        // PayOS webhook signature verification:
-        // amount=...&description=...&orderCode=...&transactionId=...
         var checksumKey = _configuration["PayOS:ChecksumKey"];
         var signatureData = $"amount={data.Amount}&description={data.Description}&orderCode={data.OrderCode}&transactionId={data.TransactionId}";
         var expectedSignature = CreateSignature(signatureData, checksumKey!);
-        
-        return expectedSignature == data.Signature;
+
+        return string.Compare(expectedSignature, data.Signature) == 0;
     }
 
-    public async Task<Application.Interfaces.Services.PayOSData?> GetPaymentDetailsAsync(long orderCode)
+    public async Task<PayOSData?> GetPaymentDetailsAsync(long orderCode, CancellationToken cancellationToken)
     {
         var clientId = _configuration["PayOS:ClientId"];
         var apiKey = _configuration["PayOS:ApiKey"];
@@ -95,15 +95,19 @@ public class PayOSService(IConfiguration configuration, IHttpClientFactory httpC
         client.DefaultRequestHeaders.Add("x-client-id", clientId);
         client.DefaultRequestHeaders.Add("x-api-key", apiKey);
 
-        var response = await client.GetAsync($"{baseUrl}/v2/payment-requests/{orderCode}");
-        if (!response.IsSuccessStatusCode) return null;
+        var response = await client.GetAsync($"{baseUrl}/v2/payment-requests/{orderCode}", cancellationToken)
+            .ConfigureAwait(false);
+        if(!response.IsSuccessStatusCode)
+            return null;
 
-        var content = await response.Content.ReadAsStringAsync();
-        var payosResponse = JsonSerializer.Deserialize<PayOSApiResponse>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        var content = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+        var payosResponse = JsonSerializer.Deserialize<PayOSApiResponse>(content, _jsonOptions);
 
-        if (payosResponse?.Code == "00" && payosResponse.Data != null)
+        if(payosResponse != null &&
+            string.Compare(payosResponse.Code, PayOSStatus.SuccessCode) == 0 &&
+            payosResponse.Data != null)
         {
-            return new Application.Interfaces.Services.PayOSData
+            return new PayOSData
             {
                 OrderCode = payosResponse.Data.OrderCode,
                 Amount = payosResponse.Data.Amount,
@@ -117,45 +121,12 @@ public class PayOSService(IConfiguration configuration, IHttpClientFactory httpC
         return null;
     }
 
-    private string CreateSignature(string data, string key)
+    private static string CreateSignature(string data, string key)
     {
         var keyBytes = Encoding.UTF8.GetBytes(key);
         var dataBytes = Encoding.UTF8.GetBytes(data);
         using var hmac = new HMACSHA256(keyBytes);
         var hashBytes = hmac.ComputeHash(dataBytes);
-        return BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
+        return Convert.ToHexStringLower(hashBytes);
     }
-}
-
-public class PayOSApiResponse
-{
-    public string Code { get; set; } = string.Empty;
-    public string Desc { get; set; } = string.Empty;
-    public PayOSInternalData Data { get; set; } = new();
-}
-
-public class PayOSInternalData
-{
-    [JsonPropertyName("bin")]
-    public string Bin { get; set; } = string.Empty;
-    [JsonPropertyName("accountNumber")]
-    public string AccountNumber { get; set; } = string.Empty;
-    [JsonPropertyName("accountName")]
-    public string AccountName { get; set; } = string.Empty;
-    [JsonPropertyName("amount")]
-    public long Amount { get; set; }
-    [JsonPropertyName("description")]
-    public string Description { get; set; } = string.Empty;
-    [JsonPropertyName("orderCode")]
-    public long OrderCode { get; set; }
-    [JsonPropertyName("currency")]
-    public string Currency { get; set; } = string.Empty;
-    [JsonPropertyName("paymentLinkId")]
-    public string PaymentLinkId { get; set; } = string.Empty;
-    [JsonPropertyName("status")]
-    public string Status { get; set; } = string.Empty;
-    [JsonPropertyName("checkoutUrl")]
-    public string CheckoutUrl { get; set; } = string.Empty;
-    [JsonPropertyName("qrCode")]
-    public string QrCode { get; set; } = string.Empty;
 }

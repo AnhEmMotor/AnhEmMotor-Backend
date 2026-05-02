@@ -78,15 +78,15 @@ public sealed class CreateOutputByManagerCommandHandler(
         }
 
         var settings = await settingRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
-        
-        if (request.DepositRatio.HasValue)
+
+        if(request.DepositRatio.HasValue)
         {
             output.DepositRatio = request.DepositRatio.Value;
-        }
-        else
+        } else
         {
-            var ratioSetting = settings.FirstOrDefault(s => string.Equals(s.Key, SettingKeys.DepositRatio, StringComparison.OrdinalIgnoreCase));
-            if (ratioSetting != null && int.TryParse(ratioSetting.Value, out var parsedRatio))
+            var ratioSetting = settings.FirstOrDefault(
+                s => string.Equals(s.Key, SettingKeys.DepositRatio, StringComparison.OrdinalIgnoreCase));
+            if(ratioSetting != null && int.TryParse(ratioSetting.Value, out var parsedRatio))
             {
                 output.DepositRatio = parsedRatio;
             }
@@ -95,7 +95,8 @@ public sealed class CreateOutputByManagerCommandHandler(
         if(string.IsNullOrWhiteSpace(output.StatusId))
         {
             var totalPrice = output.OutputInfos.Sum(i => (i.Price ?? 0) * (i.Count ?? 0));
-            var thresholdSetting = settings.FirstOrDefault(s => string.Equals(s.Key, SettingKeys.OrderValueExceeds, StringComparison.OrdinalIgnoreCase));
+            var thresholdSetting = settings.FirstOrDefault(
+                s => string.Equals(s.Key, SettingKeys.OrderValueExceeds, StringComparison.OrdinalIgnoreCase));
 
             decimal threshold = 100000000;
             if(thresholdSetting != null && decimal.TryParse(thresholdSetting.Value, out var parsedThreshold))

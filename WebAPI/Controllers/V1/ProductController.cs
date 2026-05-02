@@ -1,4 +1,3 @@
-using System.Net;
 using Application.ApiContracts.Product.Responses;
 using Application.Common.Models;
 using Application.Features.PredefinedOptions.Queries.GetPredefinedOptionsList;
@@ -37,6 +36,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Net;
 using WebAPI.Controllers.Base;
 using static Domain.Constants.Permission.PermissionsList;
 
@@ -52,8 +52,8 @@ namespace WebAPI.Controllers.V1;
 public class ProductController(ISender sender) : ApiController
 {
     /// <summary>
-    /// Lấy danh sách toàn bộ Slug của sản phẩm phục vụ cho việc tạo Sitemap.
-    /// Chỉ cho phép gọi từ Localhost để đảm bảo bảo mật.
+    /// Lấy danh sách toàn bộ Slug của sản phẩm phục vụ cho việc tạo Sitemap. Chỉ cho phép gọi từ Localhost để đảm bảo
+    /// bảo mật.
     /// </summary>
     [HttpGet("sitemap-slugs")]
     [ProducesResponseType(typeof(SitemapSlugsResponse), StatusCodes.Status200OK)]
@@ -61,9 +61,8 @@ public class ProductController(ISender sender) : ApiController
     public async Task<IActionResult> GetSitemapSlugsAsync(CancellationToken cancellationToken)
     {
         var remoteIp = HttpContext.Connection.RemoteIpAddress;
-        
-        // Kiểm tra nếu không phải Localhost
-        if (remoteIp != null && !IPAddress.IsLoopback(remoteIp))
+
+        if(remoteIp != null && !IPAddress.IsLoopback(remoteIp))
         {
             return StatusCode(StatusCodes.Status403Forbidden);
         }
@@ -71,6 +70,7 @@ public class ProductController(ISender sender) : ApiController
         var result = await sender.Send(new GetSitemapSlugsQuery(), cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
+
     /// <summary>
     /// Lấy danh sách sản phẩm đầy đủ dành cho khách hàng (có phân trang, lọc, tìm kiếm).
     /// </summary>

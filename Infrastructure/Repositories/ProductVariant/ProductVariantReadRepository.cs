@@ -62,7 +62,7 @@ namespace Infrastructure.Repositories.ProductVariant
             return context.GetQuery<ProductVariantEntity>(mode)
                 .Where(v => ids.Contains(v.Id))
                 .Include(v => v.Product)
-                    .ThenInclude(p => p!.ProductCategory)
+                .ThenInclude(p => p!.ProductCategory)
                 .Include(v => v.ProductCollectionPhotos)
                 .Include(v => v.VariantOptionValues)
                 .ThenInclude(vov => vov.OptionValue)
@@ -153,7 +153,7 @@ namespace Infrastructure.Repositories.ProductVariant
         public Task<List<string>> GetUrlSlugsAsync(CancellationToken cancellationToken)
         {
             return context.GetQuery<ProductVariantEntity>(DataFetchMode.ActiveOnly)
-                .Where(v => v.UrlSlug != null && v.UrlSlug != "")
+                .Where(v => !string.IsNullOrEmpty(v.UrlSlug))
                 .Select(v => v.UrlSlug!)
                 .Distinct()
                 .ToListAsync(cancellationToken);
