@@ -149,5 +149,14 @@ namespace Infrastructure.Repositories.ProductVariant
 
             return (items, totalCount);
         }
+
+        public Task<List<string>> GetUrlSlugsAsync(CancellationToken cancellationToken)
+        {
+            return context.GetQuery<ProductVariantEntity>(DataFetchMode.ActiveOnly)
+                .Where(v => v.UrlSlug != null && v.UrlSlug != "")
+                .Select(v => v.UrlSlug!)
+                .Distinct()
+                .ToListAsync(cancellationToken);
+        }
     }
 }

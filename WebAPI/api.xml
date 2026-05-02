@@ -442,6 +442,12 @@
             Quản lý sản phẩm.
             </summary>
         </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetSitemapSlugsAsync(System.Threading.CancellationToken)">
+            <summary>
+            Lấy danh sách toàn bộ Slug của sản phẩm phục vụ cho việc tạo Sitemap.
+            Chỉ cho phép gọi từ Localhost để đảm bảo bảo mật.
+            </summary>
+        </member>
         <member name="M:WebAPI.Controllers.V1.ProductController.GetProductsAsync(Application.Features.Products.Queries.GetProductsList.GetProductsRequest,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách sản phẩm đầy đủ dành cho khách hàng (có phân trang, lọc, tìm kiếm).
