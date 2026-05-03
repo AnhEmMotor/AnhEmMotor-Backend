@@ -145,21 +145,21 @@ public sealed class UpdateOutputForManagerCommandHandler(
             string.IsNullOrEmpty(output.FinishedBy?.ToString()))
         {
             output.FinishedBy = request.CurrentUserId;
-            var result = await updateRepository.HandleInventoryTransactionAsync(output.Id, true, cancellationToken).ConfigureAwait(false);
+            var result = await updateRepository.HandleInventoryTransactionAsync(output.Id, true, cancellationToken)
+                .ConfigureAwait(false);
             if (result.IsFailure)
             {
                 return Result<OrderDetailResponse>.Failure(result.Errors!);
             }
-        }
-        else if (string.Compare(output.StatusId, OrderStatus.Delivering) == 0)
+        } else if (string.Compare(output.StatusId, OrderStatus.Delivering) == 0)
         {
-            var result = await updateRepository.HandleInventoryTransactionAsync(output.Id, false, cancellationToken).ConfigureAwait(false);
+            var result = await updateRepository.HandleInventoryTransactionAsync(output.Id, false, cancellationToken)
+                .ConfigureAwait(false);
             if (result.IsFailure)
             {
                 return Result<OrderDetailResponse>.Failure(result.Errors!);
             }
         }
-
         updateRepository.Update(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         var updated = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);

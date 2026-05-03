@@ -68,7 +68,7 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             .ContinueWith<IEnumerable<ProductEntity>>(t => t.Result, cancellationToken);
     }
 
-    public async Task<ProductEntity?> GetByIdWithDetailsAsync(
+    public Task<ProductEntity?> GetByIdWithDetailsAsync(
         int id,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
@@ -81,24 +81,23 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
         {
             query = query.Where(p => p.DeletedAt != null);
         }
-        return await query
+        return query
             .Include(p => p.ProductCategory)
             .Include(p => p.Brand)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
-                .ThenInclude(v => v.VariantOptionValues)
-                .ThenInclude(vov => vov.OptionValue)
-                .ThenInclude(ov => ov!.Option)
+            .ThenInclude(v => v.VariantOptionValues)
+            .ThenInclude(vov => vov.OptionValue)
+            .ThenInclude(ov => ov!.Option)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
-                .ThenInclude(v => v.ProductCollectionPhotos)
+            .ThenInclude(v => v.ProductCollectionPhotos)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
-                .ThenInclude(v => v.InputInfos)
-                .ThenInclude(ii => ii.InputReceipt)
+            .ThenInclude(v => v.InputInfos)
+            .ThenInclude(ii => ii.InputReceipt)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
-                .ThenInclude(v => v.OutputInfos)
-                .ThenInclude(oi => oi.OutputOrder)
+            .ThenInclude(v => v.OutputInfos)
+            .ThenInclude(oi => oi.OutputOrder)
             .AsSplitQuery()
-            .FirstOrDefaultAsync(p => p.Id == id, cancellationToken)
-            .ConfigureAwait(false);
+            .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
     }
 
     public Task<IEnumerable<ProductEntity>> GetByIdWithVariantsAsync(
@@ -203,10 +202,9 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
                 query = query.Where(p => false);
             } else
             {
-                groupedByOption = valueToOptionMapping
+                groupedByOption = [.. valueToOptionMapping
                     .GroupBy(x => x.OptionId)
-                    .Select(g => g.Select(x => x.Id).ToList())
-                    .ToList();
+                    .Select(g => g.Select(x => x.Id).ToList())];
                 if (groupedByOption.Count == 1)
                 {
                     var g1 = groupedByOption[0];

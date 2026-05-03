@@ -100,16 +100,17 @@ public sealed class CreateOutputByManagerCommandHandler(
         {
             output.FinishedBy = request.CurrentUserId;
             updateRepository.Update(output);
-            var result = await updateRepository.HandleInventoryTransactionAsync(output.Id, true, cancellationToken).ConfigureAwait(false);
+            var result = await updateRepository.HandleInventoryTransactionAsync(output.Id, true, cancellationToken)
+                .ConfigureAwait(false);
             if (result.IsFailure)
             {
                 return Result<OrderDetailResponse>.Failure(result.Errors!);
             }
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        }
-        else if (string.Compare(output.StatusId, OrderStatus.Delivering) == 0)
+        } else if (string.Compare(output.StatusId, OrderStatus.Delivering) == 0)
         {
-            var result = await updateRepository.HandleInventoryTransactionAsync(output.Id, false, cancellationToken).ConfigureAwait(false);
+            var result = await updateRepository.HandleInventoryTransactionAsync(output.Id, false, cancellationToken)
+                .ConfigureAwait(false);
             if (result.IsFailure)
             {
                 return Result<OrderDetailResponse>.Failure(result.Errors!);

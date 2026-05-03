@@ -14,6 +14,7 @@ public sealed record UpdateProductCommand : IRequest<Result<ProductDetailForMana
     public string? Name { get; init; }
 
     public int? CategoryId { get; init; }
+
     public int? BrandId { get; init; }
 
     public string? Description { get; init; }

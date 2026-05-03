@@ -11,5 +11,8 @@ public interface IOutputUpdateRepository
 
     public void Restore(IEnumerable<OutputEntity> outputs);
 
-    public Task<Result<bool>> HandleInventoryTransactionAsync(int outputId, bool commitDeduction, CancellationToken cancellationToken);
+    public Task<Result<bool>> HandleInventoryTransactionAsync(
+        int outputId,
+        bool commitDeduction,
+        CancellationToken cancellationToken);
 }

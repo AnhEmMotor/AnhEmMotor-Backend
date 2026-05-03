@@ -3,7 +3,6 @@ using Application.Interfaces.Repositories.Output;
 using Domain.Constants.Order;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Services;
 
@@ -24,18 +23,16 @@ public class OrderCleanupService(IServiceProvider serviceProvider) : BackgroundS
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
         var readRepository = scope.ServiceProvider.GetRequiredService<IOutputReadRepository>();
         var updateRepository = scope.ServiceProvider.GetRequiredService<IOutputUpdateRepository>();
-
         var expirationThreshold = DateTimeOffset.UtcNow.AddMinutes(-15);
-
         var expiredOrders = readRepository.GetQueryable()
-            .Where(o => (o.StatusId == OrderStatus.Pending || o.StatusId == OrderStatus.WaitingDeposit) &&
-                        !string.IsNullOrEmpty(o.PaymentMethod) &&
-                        o.PaymentMethod != PaymentMethod.COD &&
-                        (o.PaymentExpiredAt.HasValue
-                            ? o.PaymentExpiredAt.Value < DateTimeOffset.Now
-                            : o.CreatedAt < expirationThreshold))
+            .Where(
+                o => (o.StatusId == OrderStatus.Pending || o.StatusId == OrderStatus.WaitingDeposit) &&
+                    !string.IsNullOrEmpty(o.PaymentMethod) &&
+                    o.PaymentMethod != PaymentMethod.COD &&
+                    (o.PaymentExpiredAt.HasValue
+                        ? o.PaymentExpiredAt.Value < DateTimeOffset.Now
+                        : o.CreatedAt < expirationThreshold))
             .ToList();
-
         if (expiredOrders.Count > 0)
         {
             foreach (var order in expiredOrders)
@@ -43,7 +40,6 @@ public class OrderCleanupService(IServiceProvider serviceProvider) : BackgroundS
                 order.StatusId = OrderStatus.Cancelled;
                 updateRepository.Update(order);
             }
-
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
     }

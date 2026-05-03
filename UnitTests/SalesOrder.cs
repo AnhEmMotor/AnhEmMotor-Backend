@@ -1,5 +1,6 @@
 using Application.ApiContracts.Auth.Responses;
 using Application.ApiContracts.Output.Responses;
+using Application.Common.Models;
 using Application.Features.Outputs.Commands.CreateOutput;
 using Application.Features.Outputs.Commands.CreateOutputByManager;
 using Application.Features.Outputs.Commands.DeleteManyOutputs;
@@ -16,8 +17,6 @@ using Application.Features.Outputs.Queries.GetOutputById;
 using Application.Features.Outputs.Queries.GetOutputsByUserId;
 using Application.Features.Outputs.Queries.GetOutputsByUserIdByManager;
 using Application.Features.Outputs.Queries.GetOutputsList;
-using Domain.Primitives;
-using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.ProductVariant;
@@ -26,6 +25,7 @@ using Application.Interfaces.Repositories.User;
 using Domain.Constants;
 using Domain.Constants.Order;
 using Domain.Entities;
+using Domain.Primitives;
 using FluentAssertions;
 using FluentValidation.TestHelper;
 using Mapster;
@@ -75,10 +75,7 @@ public class SalesOrder
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(new PagedResult<MyOrderResponse>([], 0, 1, 10));
         _updateRepoMock.Setup(
-            x => x.HandleInventoryTransactionAsync(
-                It.IsAny<int>(),
-                It.IsAny<bool>(),
-                It.IsAny<CancellationToken>()))
+            x => x.HandleInventoryTransactionAsync(It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<bool>.Success(true));
         new OutputMappingConfig().Register(TypeAdapterConfig.GlobalSettings);
     }
@@ -1172,7 +1169,8 @@ public class SalesOrder
         var existingOutput = new Output { Id = 1, StatusId = "delivering" };
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);
-        _updateRepoMock.Setup(x => x.HandleInventoryTransactionAsync(It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+        _updateRepoMock.Setup(
+            x => x.HandleInventoryTransactionAsync(It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         existingOutput.FinishedBy.Should().Be(finishedBy);
@@ -1237,11 +1235,12 @@ public class SalesOrder
         var outputs = new List<Output> { new() { Id = 1, DeletedAt = null }, new() { Id = 2, DeletedAt = null } }.AsQueryable(
             );
         _readRepoMock.Setup(x => x.GetQueryable(DataFetchMode.ActiveOnly)).Returns(outputs);
-        _paginatorMock.Setup(x => x.ApplyAsync<Output, OutputItemResponse>(
-            It.IsAny<IQueryable<Output>>(),
-            It.IsAny<SieveModel>(),
-            It.IsAny<DataFetchMode?>(),
-            It.IsAny<CancellationToken>()))
+        _paginatorMock.Setup(
+            x => x.ApplyAsync<Output, OutputItemResponse>(
+                It.IsAny<IQueryable<Output>>(),
+                It.IsAny<SieveModel>(),
+                It.IsAny<DataFetchMode?>(),
+                It.IsAny<CancellationToken>()))
             .ReturnsAsync(new PagedResult<OutputItemResponse>([], 0, 1, 10));
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
@@ -1444,7 +1443,8 @@ public class SalesOrder
         _readRepoMock.Setup(
             x => x.GetByIdWithDetailsAsync(outputId, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);
-        _updateRepoMock.Setup(x => x.HandleInventoryTransactionAsync(It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+        _updateRepoMock.Setup(
+            x => x.HandleInventoryTransactionAsync(It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
         var handlerResult = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         handlerResult.IsSuccess.Should().BeTrue();

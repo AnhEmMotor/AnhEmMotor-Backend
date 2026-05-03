@@ -24,7 +24,10 @@ public class OutputUpdateRepository(ApplicationDBContext context) : IOutputUpdat
         context.RestoreDeleteUsingSetColumnRange(outputs);
     }
 
-    public async Task<Result<bool>> HandleInventoryTransactionAsync(int outputId, bool commitDeduction, CancellationToken cancellationToken)
+    public async Task<Result<bool>> HandleInventoryTransactionAsync(
+        int outputId,
+        bool commitDeduction,
+        CancellationToken cancellationToken)
     {
         var outputInfos = await context.OutputInfos
             .Include(oi => oi.ProductVariant)
@@ -32,37 +35,33 @@ public class OutputUpdateRepository(ApplicationDBContext context) : IOutputUpdat
             .Where(oi => oi.OutputId == outputId && oi.DeletedAt == null)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-
         var errors = new List<Error>();
         var transactions = new List<(OutputInfo Info, List<InputInfo> Batches, int Quantity)>();
-
         foreach (var outputInfo in outputInfos)
         {
             if (outputInfo.ProductVarientId is null || outputInfo.Count is null || outputInfo.Count <= 0)
             {
                 continue;
             }
-
             var batches = await GetAvailableBatchesAsync(outputInfo.ProductVarientId.Value, cancellationToken)
                 .ConfigureAwait(false);
-
             var totalAvailable = batches.Sum(b => b.RemainingCount ?? 0);
             if (totalAvailable < outputInfo.Count.Value)
             {
                 var productName = outputInfo.ProductVariant?.Product?.Name ?? $"ID {outputInfo.ProductVarientId}";
-                errors.Add(Error.BadRequest($"Sản phẩm '{productName}' không đủ tồn kho. Hiện có: {totalAvailable}, cần: {outputInfo.Count.Value}", "StatusId"));
-            }
-            else if (commitDeduction)
+                errors.Add(
+                    Error.BadRequest(
+                        $"Sản phẩm '{productName}' không đủ tồn kho. Hiện có: {totalAvailable}, cần: {outputInfo.Count.Value}",
+                        "StatusId"));
+            } else if (commitDeduction)
             {
                 transactions.Add((outputInfo, batches, outputInfo.Count.Value));
             }
         }
-
         if (errors.Count > 0)
         {
             return Result<bool>.Failure(errors);
         }
-
         if (commitDeduction)
         {
             foreach (var (info, batches, quantityNeeded) in transactions)
@@ -71,17 +70,16 @@ public class OutputUpdateRepository(ApplicationDBContext context) : IOutputUpdat
                 var remainingToDeduct = quantityNeeded;
                 foreach (var batch in batches)
                 {
-                    if (remainingToDeduct <= 0) break;
+                    if (remainingToDeduct <= 0)
+                        break;
                     var batchRemaining = batch.RemainingCount ?? 0;
                     var batchPrice = batch.InputPrice ?? 0;
-
                     if (batchRemaining >= remainingToDeduct)
                     {
                         totalCost += remainingToDeduct * batchPrice;
                         batch.RemainingCount = batchRemaining - remainingToDeduct;
                         remainingToDeduct = 0;
-                    }
-                    else
+                    } else
                     {
                         totalCost += batchRemaining * batchPrice;
                         remainingToDeduct -= batchRemaining;
@@ -91,7 +89,6 @@ public class OutputUpdateRepository(ApplicationDBContext context) : IOutputUpdat
                 info.CostPrice = Math.Round(totalCost / quantityNeeded, 2);
             }
         }
-
         return true;
     }
 

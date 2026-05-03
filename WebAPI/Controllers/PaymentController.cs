@@ -42,7 +42,8 @@ public class PaymentController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> GetPaymentLink(int orderId, CancellationToken cancellationToken)
     {
         var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var result = await mediator.Send(new GetPaymentLinkQuery(orderId, currentUserId), cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(new GetPaymentLinkQuery(orderId, currentUserId), cancellationToken)
+            .ConfigureAwait(true);
         if (result.IsSuccess)
             return Ok(result.Value);
         var firstError = result.Errors?.FirstOrDefault() ?? result.Error;

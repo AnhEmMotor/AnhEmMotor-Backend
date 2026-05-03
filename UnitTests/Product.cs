@@ -814,7 +814,7 @@ public class Product
             _variantReadRepoMock.Object,
             _productCategoryReadRepoMock.Object,
             _brandReadRepoMock.Object,
-            _predefinedOptionReadRepoMock.Object, 
+            _predefinedOptionReadRepoMock.Object,
             _optionReadRepoMock.Object,
             _optionValueReadRepoMock.Object,
             _variantInsertRepoMock.Object,

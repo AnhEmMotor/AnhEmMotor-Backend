@@ -42,7 +42,10 @@ public sealed class UpdateOutputStatusCommandHandler(
         {
             case OrderStatus.Completed:
                 output.FinishedBy = request.CurrentUserId;
-                var deductionResult = await updateRepository.HandleInventoryTransactionAsync(output.Id, true, cancellationToken)
+                var deductionResult = await updateRepository.HandleInventoryTransactionAsync(
+                    output.Id,
+                    true,
+                    cancellationToken)
                     .ConfigureAwait(false);
                 if (deductionResult.IsFailure)
                 {
@@ -50,7 +53,10 @@ public sealed class UpdateOutputStatusCommandHandler(
                 }
                 break;
             case OrderStatus.Delivering:
-                var checkResult = await updateRepository.HandleInventoryTransactionAsync(output.Id, false, cancellationToken)
+                var checkResult = await updateRepository.HandleInventoryTransactionAsync(
+                    output.Id,
+                    false,
+                    cancellationToken)
                     .ConfigureAwait(false);
                 if (checkResult.IsFailure)
                 {

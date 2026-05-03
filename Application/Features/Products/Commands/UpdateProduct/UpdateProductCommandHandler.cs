@@ -286,7 +286,6 @@ public sealed class UpdateProductCommandHandler(
                 variantOptionValueDeleteRepository.Delete(link);
             }
             variantEntity.VariantOptionValues.Clear();
-
             if (variantReq.OptionValues?.Count > 0)
             {
                 foreach (var kvp in variantReq.OptionValues)

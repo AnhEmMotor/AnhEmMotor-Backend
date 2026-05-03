@@ -43,28 +43,24 @@ public sealed class UpdateManyOutputStatusCommandHandler(
         {
             return errors;
         }
-
-        // Thực hiện cập nhật trạng thái và kiểm tra tồn kho trong 1 transaction duy nhất
-        // Để đảm bảo tính Atomic (Tất cả thành công hoặc không gì thay đổi)
         foreach (var output in outputsList)
         {
             if (string.Compare(request.StatusId, OrderStatus.Completed) == 0)
             {
                 var result = await updateRepository.HandleInventoryTransactionAsync(output.Id, true, cancellationToken)
                     .ConfigureAwait(false);
-                if (result.IsFailure) return result.Errors!;
-            }
-            else if (string.Compare(request.StatusId, OrderStatus.Delivering) == 0)
+                if (result.IsFailure)
+                    return result.Errors!;
+            } else if (string.Compare(request.StatusId, OrderStatus.Delivering) == 0)
             {
                 var result = await updateRepository.HandleInventoryTransactionAsync(output.Id, false, cancellationToken)
                     .ConfigureAwait(false);
-                if (result.IsFailure) return result.Errors!;
+                if (result.IsFailure)
+                    return result.Errors!;
             }
-
             output.StatusId = request.StatusId;
             updateRepository.Update(output);
         }
-
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return outputsList.Adapt<List<OutputItemResponse>>();
     }

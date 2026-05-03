@@ -13,10 +13,7 @@ namespace Application.Features.Outputs.Commands.CreateOutput
                 .Must(HaveUniqueProducts)
                 .WithMessage("Product ID cannot be duplicated in a single output.");
             RuleForEach(x => x.OutputInfos).SetValidator(new CreateOutputProductCommandValidator());
-            RuleFor(x => x.BuyerId)
-                .NotEmpty()
-                .When(x => x.BuyerId.HasValue)
-                .WithMessage("Buyer Id cannot be empty.");
+            RuleFor(x => x.BuyerId).NotEmpty().When(x => x.BuyerId.HasValue).WithMessage("Buyer Id cannot be empty.");
             RuleFor(x => x.CustomerName).NotEmpty().WithMessage("Customer name is required.");
             RuleFor(x => x.CustomerAddress).NotEmpty().WithMessage("Customer address is required.");
             RuleFor(x => x.CustomerPhone)
