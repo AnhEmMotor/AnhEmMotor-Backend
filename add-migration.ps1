@@ -48,7 +48,6 @@ if ($uniqueMigrations) { $migrationCount = $uniqueMigrations.Count }
         Write-Host ""
         Write-Host "Details of migrations found in this branch (grouped by provider):" -ForegroundColor Yellow
 
-        # Group files by their parent directory and list them
         $groups = $newMigrationsFiles | Group-Object { Split-Path $_.ToString() -Parent }
         foreach ($group in $groups) {
             $folderName = Split-Path $group.Name -Leaf
