@@ -19,9 +19,23 @@ jobs:
         shell: bash
         run: |
           git fetch origin ${{ github.base_ref }} --depth=1
-          NEW_MIGRATIONS=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep 'Migrations/' | grep '\.cs$' | grep -v '\.Designer\.cs' | grep -v 'ModelSnapshot\.cs' | wc -l)
-          if [ "$NEW_MIGRATIONS" -gt 1 ]; then
-            echo "Error: Only 1 migration per PR is allowed. You have $NEW_MIGRATIONS."
+          FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E 'Infrastructure/(Migrations|MySqlMigrations|PostgreSqlMigrations)/' | grep '\.cs$' | grep -v '\.Designer\.cs' | grep -v 'ModelSnapshot\.cs' || true)
+          if [ -z "$FILES" ]; then
+            echo "No new migrations found. Check passed."
+            exit 0
+          fi
+          echo "Checking migrations per provider..."
+          FAILED=0
+          for DIR in $(echo "$FILES" | xargs -n1 dirname | sort -u); do
+            COUNT=$(echo "$FILES" | grep "^$DIR/" | sed 's/.*\///' | sed -E 's/^[0-9]+_(.*)\.cs$/\1/' | sort -u | wc -l)
+            if [ "$COUNT" -gt 1 ]; then
+              echo "::error::Provider '$DIR' has $COUNT unique migrations. Only 1 is allowed per PR."
+              FAILED=1
+            else
+              echo "  - $DIR: $COUNT migration(s) [OK]"
+            fi
+          done
+          if [ "$FAILED" -eq 1 ]; then
             exit 1
           fi
 
