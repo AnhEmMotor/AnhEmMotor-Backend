@@ -18,21 +18,17 @@ Write-Host "Migration Name: $MigrationName" -ForegroundColor Yellow
 Write-Host ""
 
 Write-Host "[0/3] Checking for existing migrations in this branch..." -ForegroundColor Cyan
-# Detect base branch (main or master)
 $baseBranch = "origin/main"
 $null = git rev-parse --verify $baseBranch 2>$null
 if ($LASTEXITCODE -ne 0) {
     $baseBranch = "origin/master"
 }
 
-# Get merge base to avoid syntax issues with "..." and ensure correct diff
 $mergeBase = git merge-base "$baseBranch" HEAD 2>$null
 if ($LASTEXITCODE -eq 0)
 {
-# Scan all 3 provider folders for added migration files
 $newMigrationsFiles = @(git diff --name-only --diff-filter=A "$baseBranch" HEAD | Select-String "Migrations/" | Select-String "\.cs$" | Select-String -NotMatch "\.Designer\.cs" | Select-String -NotMatch "ModelSnapshot\.cs")
 
-# Extract unique migration names (ignoring timestamps) to group all 3 providers into one count
 $uniqueMigrations = $newMigrationsFiles | ForEach-Object {
     $fileName = Split-Path $_.ToString() -Leaf
     if ($fileName -match "^\d+_(.+)\.cs$") { $Matches[1] }
@@ -58,7 +54,18 @@ if ($uniqueMigrations) { $migrationCount = $uniqueMigrations.Count }
         }
 
         Write-Host ""
-        Write-Host "Please combine your changes into a single migration if you need to add more changes." -ForegroundColor Red
+        Write-Host "MIGRATION CONFLICT / SQUASH GUIDE:" -ForegroundColor Magenta
+        Write-Host "----------------------------------" -ForegroundColor Magenta
+        Write-Host "If you have multiple migrations in this branch, you must combine them into one:" -ForegroundColor Gray
+        Write-Host "  1. Undo the locally created migrations (repeat for each migration):" -ForegroundColor White
+        Write-Host "     - dotnet ef migrations remove --context ApplicationDBContext --project Infrastructure --startup-project WebAPI" -ForegroundColor Gray
+        Write-Host "     - dotnet ef migrations remove --context MySqlDbContext --project Infrastructure --startup-project WebAPI" -ForegroundColor Gray
+        Write-Host "     - dotnet ef migrations remove --context PostgreSqlDbContext --project Infrastructure --startup-project WebAPI" -ForegroundColor Gray
+        Write-Host "  2. Pull/Merge latest code from the base branch ($baseBranch)." -ForegroundColor White
+        Write-Host "  3. After resolving any code conflicts, rerun this script: .\add-migration.ps1 -MigrationName <New_Name>" -ForegroundColor White
+        Write-Host "  4. Ensure ModelSnapshot is clean before creating new migrations." -ForegroundColor White
+        Write-Host ""
+        Write-Host "Please combine your changes into a single migration before proceeding." -ForegroundColor Red
         exit 1
     }
     Write-Host "SUCCESS: No existing migrations found in this branch. Proceeding..." -ForegroundColor Green
