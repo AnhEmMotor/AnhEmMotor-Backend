@@ -100,8 +100,20 @@ public sealed class CreateOutputByManagerCommandHandler(
         {
             output.FinishedBy = request.CurrentUserId;
             updateRepository.Update(output);
-            await updateRepository.ProcessCOGSForCompletedOrderAsync(output.Id, cancellationToken).ConfigureAwait(false);
+            var result = await updateRepository.HandleInventoryTransactionAsync(output.Id, true, cancellationToken).ConfigureAwait(false);
+            if (result.IsFailure)
+            {
+                return Result<OrderDetailResponse>.Failure(result.Errors!);
+            }
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
+        else if (string.Compare(output.StatusId, OrderStatus.Delivering) == 0)
+        {
+            var result = await updateRepository.HandleInventoryTransactionAsync(output.Id, false, cancellationToken).ConfigureAwait(false);
+            if (result.IsFailure)
+            {
+                return Result<OrderDetailResponse>.Failure(result.Errors!);
+            }
         }
         var created = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
         ArgumentNullException.ThrowIfNull(created);

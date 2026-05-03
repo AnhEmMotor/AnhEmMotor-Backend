@@ -14,6 +14,7 @@ namespace Application.Features.Outputs.Commands.CreateOutput;
 
 public sealed class CreateOutputCommandHandler(
     IOutputReadRepository readRepository,
+    IOutputUpdateRepository updateRepository,
     IOutputInsertRepository insertRepository,
     IProductVariantReadRepository variantRepository,
     ISettingRepository settingRepository,
@@ -111,6 +112,7 @@ public sealed class CreateOutputCommandHandler(
         output.PaymentStatus = "Pending";
         insertRepository.Add(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
         var created = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
         ArgumentNullException.ThrowIfNull(created);
         return created.Adapt<OrderDetailResponse>();

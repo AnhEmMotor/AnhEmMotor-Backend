@@ -141,16 +141,27 @@ public sealed class UpdateOutputForManagerCommandHandler(
                 output.OutputInfos.Add(newInfo);
             }
         }
-        updateRepository.Update(output);
-        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         if (string.Compare(output.StatusId, OrderStatus.Completed) == 0 &&
             string.IsNullOrEmpty(output.FinishedBy?.ToString()))
         {
             output.FinishedBy = request.CurrentUserId;
-            updateRepository.Update(output);
-            await updateRepository.ProcessCOGSForCompletedOrderAsync(output.Id, cancellationToken).ConfigureAwait(false);
-            await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            var result = await updateRepository.HandleInventoryTransactionAsync(output.Id, true, cancellationToken).ConfigureAwait(false);
+            if (result.IsFailure)
+            {
+                return Result<OrderDetailResponse>.Failure(result.Errors!);
+            }
         }
+        else if (string.Compare(output.StatusId, OrderStatus.Delivering) == 0)
+        {
+            var result = await updateRepository.HandleInventoryTransactionAsync(output.Id, false, cancellationToken).ConfigureAwait(false);
+            if (result.IsFailure)
+            {
+                return Result<OrderDetailResponse>.Failure(result.Errors!);
+            }
+        }
+
+        updateRepository.Update(output);
+        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         var updated = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
         ArgumentNullException.ThrowIfNull(updated);
         return updated.Adapt<OrderDetailResponse>();

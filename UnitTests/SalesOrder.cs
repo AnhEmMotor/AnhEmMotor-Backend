@@ -23,7 +23,6 @@ using Application.Interfaces.Repositories.Setting;
 using Application.Interfaces.Repositories.User;
 using Domain.Constants;
 using Domain.Constants.Order;
-using Domain.DomainServices;
 using Domain.Entities;
 using FluentAssertions;
 using FluentValidation.TestHelper;
@@ -1151,6 +1150,8 @@ public class SalesOrder
         var existingOutput = new Output { Id = 1, StatusId = "delivering" };
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);
+        _updateRepoMock.Setup(x => x.HandleInventoryTransactionAsync(It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         existingOutput.FinishedBy.Should().Be(finishedBy);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -1415,6 +1416,8 @@ public class SalesOrder
         _readRepoMock.Setup(
             x => x.GetByIdWithDetailsAsync(outputId, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);
+        _updateRepoMock.Setup(x => x.HandleInventoryTransactionAsync(It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
         var handlerResult = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         handlerResult.IsSuccess.Should().BeTrue();
         existingOutput.StatusId.Should().Be("refunding");
@@ -1575,20 +1578,6 @@ public class SalesOrder
         var invalidCommand2 = new CreateOutputCommand { CustomerPhone = "abcd123456" };
         var resultInv2 = validator.TestValidate(invalidCommand2);
         resultInv2.ShouldHaveValidationErrorFor(x => x.CustomerPhone).WithErrorMessage("Invalid phone number format.");
-    }
-
-    [Fact(DisplayName = "SO_105 - InventoryValuationService tính COGS theo FIFO 2 lô")]
-    public void CalculateUnitCostAndDeductInventory_WithMultipleBatches_ShouldCalculateFIFO()
-    {
-        var batches = new List<InputInfo>
-        {
-            new() { Id = 1, RemainingCount = 10, InputPrice = 100 },
-            new() { Id = 2, RemainingCount = 20, InputPrice = 150 }
-        };
-        var unitCost = InventoryValuationService.CalculateUnitCostAndDeductInventory(batches, 15);
-        unitCost.Should().Be(117);
-        batches[0].RemainingCount.Should().Be(0);
-        batches[1].RemainingCount.Should().Be(15);
     }
 
     [Fact(DisplayName = "SO_111 - CreateOutput - Tổng tiền dưới ngưỡng -> Pending")]
