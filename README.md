@@ -351,6 +351,13 @@ Use a script wrapper to automatically create migrations for BOTH providers:
 .\add-migration.ps1 "MigrationName"
 ```
 
+> **⚠️ RULE: ONE BRANCH = ONE MIGRATION**
+>
+> To keep the migration history clean and avoid deployment conflicts, **each branch/Pull Request is only allowed to have EXACTLY ONE migration**.
+>
+> - If you need to make more changes to the database, **remove the previous migration** and create a new one, or combine your changes.
+> - The `add-migration.ps1` script and GitHub Actions will block you if you try to include more than one migration.
+
 **Example:**
 
 ```powershell
@@ -1048,6 +1055,13 @@ Sử dụng script wrapper để tự động tạo migrations cho CẢ 2 provid
 # Từ thư mục gốc của dự án
 .\add-migration.ps1 "TenMigration"
 ```
+
+> **⚠️ QUY ĐỊNH: 1 NHÁNH = 1 MIGRATION**
+>
+> Để giữ lịch sử migration sạch sẽ và tránh xung đột khi deploy, **mỗi nhánh (branch) hoặc Pull Request chỉ được phép có DUY NHẤT 1 migration**.
+>
+> - Nếu bạn cần thay đổi thêm database, hãy **xóa migration cũ** và tạo lại cái mới, hoặc gộp các thay đổi lại.
+> - Script `add-migration.ps1` và GitHub Actions sẽ chặn nếu bạn cố tình tạo nhiều hơn 1 migration trong cùng 1 PR.
 
 **Ví dụ:**
 

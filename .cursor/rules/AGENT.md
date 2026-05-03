@@ -66,6 +66,8 @@
 ./add-migration.ps1 -MigrationName "TenMigrationCuaBan"
 ```
 
+- **Quy định quan trọng:** Mỗi nhánh (branch) hoặc Pull Request chỉ được phép có **duy nhất 1 migration**. Nếu cần thay đổi thêm, hãy xóa migration cũ và tạo lại.
+
 # Quy tắc khi thêm 1 biến môi trường vào trong appsetting.json hoặc appsettings.Development.json
 
 Khi thêm 1 biến môi trường vào trong appsetting.json hoặc appsettings.Development.json:

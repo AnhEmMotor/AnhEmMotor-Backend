@@ -17,6 +17,59 @@ if ([string]::IsNullOrWhiteSpace($MigrationName))
 Write-Host "Migration Name: $MigrationName" -ForegroundColor Yellow
 Write-Host ""
 
+Write-Host "[0/3] Checking for existing migrations in this branch..." -ForegroundColor Cyan
+# Detect base branch (main or master)
+$baseBranch = "origin/main"
+$null = git rev-parse --verify $baseBranch 2>$null
+if ($LASTEXITCODE -ne 0) {
+    $baseBranch = "origin/master"
+}
+
+# Get merge base to avoid syntax issues with "..." and ensure correct diff
+$mergeBase = git merge-base "$baseBranch" HEAD 2>$null
+if ($LASTEXITCODE -eq 0)
+{
+# Scan all 3 provider folders for added migration files
+$newMigrationsFiles = @(git diff --name-only --diff-filter=A "$baseBranch" HEAD | Select-String "Migrations/" | Select-String "\.cs$" | Select-String -NotMatch "\.Designer\.cs" | Select-String -NotMatch "ModelSnapshot\.cs")
+
+# Extract unique migration names (ignoring timestamps) to group all 3 providers into one count
+$uniqueMigrations = $newMigrationsFiles | ForEach-Object {
+    $fileName = Split-Path $_.ToString() -Leaf
+    if ($fileName -match "^\d+_(.+)\.cs$") { $Matches[1] }
+} | Select-Object -Unique
+
+$migrationCount = 0
+if ($uniqueMigrations) { $migrationCount = $uniqueMigrations.Count }
+
+    if ($migrationCount -ge 1)
+    {
+        Write-Host "ERROR: Only 1 migration per branch is allowed!" -ForegroundColor Red
+        Write-Host "You already have $migrationCount migration(s) in this branch relative to $baseBranch." -ForegroundColor Red
+        Write-Host ""
+        Write-Host "Details of migrations found in this branch (grouped by provider):" -ForegroundColor Yellow
+
+        # Group files by their parent directory and list them
+        $groups = $newMigrationsFiles | Group-Object { Split-Path $_.ToString() -Parent }
+        foreach ($group in $groups) {
+            $folderName = Split-Path $group.Name -Leaf
+            Write-Host "  Provider: $folderName" -ForegroundColor Cyan
+            foreach ($file in $group.Group) {
+                Write-Host "    - $(Split-Path $file.ToString() -Leaf)" -ForegroundColor Gray
+            }
+        }
+
+        Write-Host ""
+        Write-Host "Please combine your changes into a single migration if you need to add more changes." -ForegroundColor Red
+        exit 1
+    }
+    Write-Host "SUCCESS: No existing migrations found in this branch. Proceeding..." -ForegroundColor Green
+}
+else
+{
+    Write-Host "WARNING: Could not find base branch ($baseBranch). Skipping migration count check." -ForegroundColor Yellow
+}
+Write-Host ""
+
 Write-Host "[1/2] Creating SQL Server Migration (local)..." -ForegroundColor Cyan
 dotnet ef migrations add $MigrationName --context ApplicationDBContext --project Infrastructure --startup-project WebAPI
 
