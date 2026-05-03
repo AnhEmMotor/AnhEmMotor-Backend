@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Option.Responses;
+using Application.ApiContracts.Option.Responses;
 using Application.ApiContracts.Product.Requests;
 using Application.ApiContracts.Product.Responses;
 using Application.Features.Products.Commands.CreateProduct;

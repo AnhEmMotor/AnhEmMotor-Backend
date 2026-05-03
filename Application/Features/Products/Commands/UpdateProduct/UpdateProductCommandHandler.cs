@@ -20,16 +20,15 @@ namespace Application.Features.Products.Commands.UpdateProduct;
 
 public sealed class UpdateProductCommandHandler(
     IProductReadRepository productReadRepository,
-    IBrandReadRepository brandReadRepository,
-    IProductCategoryReadRepository productCategoryReadRepository,
     IProductVariantReadRepository productVariantReadRepository,
-    IOptionReadRepository optionReadRepository,
+    IProductCategoryReadRepository productCategoryReadRepository,
+    IBrandReadRepository brandReadRepository,
     IPredefinedOptionReadRepository predefinedOptionReadRepository,
+    IOptionReadRepository optionReadRepository,
     IOptionValueReadRepository optionValueReadRepository,
-    IOptionValueInsertRepository optionValueInsertRepository,
     IProductVariantInsertRepository productVariantInsertRepository,
+    IOptionValueInsertRepository optionValueInsertRepository,
     IVariantOptionValueDeleteRepository variantOptionValueDeleteRepository,
-    IProductUpdateRepository updateRepository,
     IProductVarientDeleteRepository productVarientDeleteRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateProductCommand, Result<ProductDetailForManagerResponse?>>
 {
@@ -152,8 +151,7 @@ public sealed class UpdateProductCommandHandler(
             {
                 var allowedKeys = await predefinedOptionReadRepository.GetAllKeysAsync(cancellationToken)
                     .ConfigureAwait(false);
-                var allowedKeysSet = new HashSet<string>(allowedKeys, StringComparer.OrdinalIgnoreCase);
-                var invalidOptions = potentialOptionNames.Where(n => !allowedKeysSet.Contains(n)).ToList();
+                var invalidOptions = potentialOptionNames.Except(allowedKeys, StringComparer.OrdinalIgnoreCase).ToList();
                 if (invalidOptions.Count > 0)
                 {
                     return Result<ProductDetailForManagerResponse?>.Failure(
@@ -286,8 +284,9 @@ public sealed class UpdateProductCommandHandler(
             foreach (var link in currentLinks)
             {
                 variantOptionValueDeleteRepository.Delete(link);
-                variantEntity.VariantOptionValues.Remove(link);
             }
+            variantEntity.VariantOptionValues.Clear();
+
             if (variantReq.OptionValues?.Count > 0)
             {
                 foreach (var kvp in variantReq.OptionValues)
@@ -317,7 +316,6 @@ public sealed class UpdateProductCommandHandler(
                 }
             }
         }
-        updateRepository.Update(product);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         var response = product.Adapt<ProductDetailForManagerResponse>();
         return response;

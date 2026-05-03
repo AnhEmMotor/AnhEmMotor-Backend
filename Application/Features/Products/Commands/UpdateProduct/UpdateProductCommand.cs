@@ -13,10 +13,7 @@ public sealed record UpdateProductCommand : IRequest<Result<ProductDetailForMana
 
     public string? Name { get; init; }
 
-    [JsonPropertyName("category_id")]
     public int? CategoryId { get; init; }
-
-    [JsonPropertyName("brand_id")]
     public int? BrandId { get; init; }
 
     public string? Description { get; init; }

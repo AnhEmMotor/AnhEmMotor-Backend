@@ -7,7 +7,6 @@ public sealed class UpdateProductCommandValidator : AbstractValidator<UpdateProd
 {
     public UpdateProductCommandValidator()
     {
-        RuleFor(x => x.Id).GreaterThan(0).WithMessage("Product Id must be greater than 0.");
         RuleFor(x => x.Name)
             .NotEmpty()
             .WithMessage("Product name is required.")

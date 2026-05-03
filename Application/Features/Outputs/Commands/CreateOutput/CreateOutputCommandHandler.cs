@@ -14,7 +14,6 @@ namespace Application.Features.Outputs.Commands.CreateOutput;
 
 public sealed class CreateOutputCommandHandler(
     IOutputReadRepository readRepository,
-    IOutputUpdateRepository updateRepository,
     IOutputInsertRepository insertRepository,
     IProductVariantReadRepository variantRepository,
     ISettingRepository settingRepository,

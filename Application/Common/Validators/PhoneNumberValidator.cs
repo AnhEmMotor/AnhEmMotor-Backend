@@ -9,7 +9,7 @@ public static class PhoneNumberValidator
     {
         return ruleBuilder
             .Must(IsValidPhoneNumber)
-            .WithMessage("Định dạng số điện thoại không hợp lệ.");
+            .WithMessage("Invalid phone number format.");
     }
 
     private static bool IsValidPhoneNumber(string? phoneNumber)

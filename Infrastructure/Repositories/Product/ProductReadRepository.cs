@@ -1,4 +1,4 @@
-﻿using Application.Interfaces.Repositories.Product;
+using Application.Interfaces.Repositories.Product;
 using Domain.Constants;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
@@ -68,7 +68,7 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             .ContinueWith<IEnumerable<ProductEntity>>(t => t.Result, cancellationToken);
     }
 
-    public Task<ProductEntity?> GetByIdWithDetailsAsync(
+    public async Task<ProductEntity?> GetByIdWithDetailsAsync(
         int id,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
@@ -81,24 +81,24 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
         {
             query = query.Where(p => p.DeletedAt != null);
         }
-        return query
+        return await query
             .Include(p => p.ProductCategory)
             .Include(p => p.Brand)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
-            .ThenInclude(v => v.VariantOptionValues)
-            .ThenInclude(vov => vov.OptionValue)
-            .ThenInclude(ov => ov!.Option)
+                .ThenInclude(v => v.VariantOptionValues)
+                .ThenInclude(vov => vov.OptionValue)
+                .ThenInclude(ov => ov!.Option)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
-            .ThenInclude(v => v.ProductCollectionPhotos)
+                .ThenInclude(v => v.ProductCollectionPhotos)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
-            .ThenInclude(v => v.InputInfos)
-            .ThenInclude(ii => ii.InputReceipt)
+                .ThenInclude(v => v.InputInfos)
+                .ThenInclude(ii => ii.InputReceipt)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
-            .ThenInclude(v => v.OutputInfos)
-            .ThenInclude(oi => oi.OutputOrder)
+                .ThenInclude(v => v.OutputInfos)
+                .ThenInclude(oi => oi.OutputOrder)
             .AsSplitQuery()
             .FirstOrDefaultAsync(p => p.Id == id, cancellationToken)
-            .ContinueWith(t => t.Result, cancellationToken);
+            .ConfigureAwait(false);
     }
 
     public Task<IEnumerable<ProductEntity>> GetByIdWithVariantsAsync(

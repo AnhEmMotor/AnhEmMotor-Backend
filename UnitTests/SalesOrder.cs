@@ -16,6 +16,8 @@ using Application.Features.Outputs.Queries.GetOutputById;
 using Application.Features.Outputs.Queries.GetOutputsByUserId;
 using Application.Features.Outputs.Queries.GetOutputsByUserIdByManager;
 using Application.Features.Outputs.Queries.GetOutputsList;
+using Domain.Primitives;
+using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.ProductVariant;
@@ -58,6 +60,26 @@ public class SalesOrder
         _settingRepoMock = new Mock<ISettingRepository>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _paginatorMock = new Mock<ISievePaginator>();
+        _paginatorMock.Setup(
+            x => x.ApplyAsync<Output, OutputItemResponse>(
+                It.IsAny<IQueryable<Output>>(),
+                It.IsAny<SieveModel>(),
+                It.IsAny<DataFetchMode?>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new PagedResult<OutputItemResponse>([], 0, 1, 10));
+        _paginatorMock.Setup(
+            x => x.ApplyAsync<Output, MyOrderResponse>(
+                It.IsAny<IQueryable<Output>>(),
+                It.IsAny<SieveModel>(),
+                It.IsAny<DataFetchMode?>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new PagedResult<MyOrderResponse>([], 0, 1, 10));
+        _updateRepoMock.Setup(
+            x => x.HandleInventoryTransactionAsync(
+                It.IsAny<int>(),
+                It.IsAny<bool>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<bool>.Success(true));
         new OutputMappingConfig().Register(TypeAdapterConfig.GlobalSettings);
     }
 
@@ -1215,6 +1237,12 @@ public class SalesOrder
         var outputs = new List<Output> { new() { Id = 1, DeletedAt = null }, new() { Id = 2, DeletedAt = null } }.AsQueryable(
             );
         _readRepoMock.Setup(x => x.GetQueryable(DataFetchMode.ActiveOnly)).Returns(outputs);
+        _paginatorMock.Setup(x => x.ApplyAsync<Output, OutputItemResponse>(
+            It.IsAny<IQueryable<Output>>(),
+            It.IsAny<SieveModel>(),
+            It.IsAny<DataFetchMode?>(),
+            It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new PagedResult<OutputItemResponse>([], 0, 1, 10));
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
         _readRepoMock.Verify(x => x.GetQueryable(DataFetchMode.ActiveOnly), Times.Once);

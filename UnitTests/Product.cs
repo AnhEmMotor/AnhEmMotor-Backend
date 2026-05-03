@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Product.Requests;
+using Application.ApiContracts.Product.Requests;
 using Application.ApiContracts.Product.Responses;
 using Application.Features.Products.Commands.CreateProduct;
 using Application.Features.Products.Commands.DeleteManyProducts;
@@ -634,16 +634,15 @@ public class Product
             .ReturnsAsync(new Domain.Entities.Brand { Id = 1, DeletedAt = null });
         var handler = new UpdateProductCommandHandler(
             _productReadRepoMock.Object,
-            _brandReadRepoMock.Object,
-            _productCategoryReadRepoMock.Object,
             _variantReadRepoMock.Object,
-            _optionReadRepoMock.Object,
+            _productCategoryReadRepoMock.Object,
+            _brandReadRepoMock.Object,
             _predefinedOptionReadRepoMock.Object,
+            _optionReadRepoMock.Object,
             _optionValueReadRepoMock.Object,
-            _optionValueInsertRepoMock.Object,
             _variantInsertRepoMock.Object,
+            _optionValueInsertRepoMock.Object,
             _variantOptionValueDeleteRepoMock.Object,
-            _productUpdateRepoMock.Object,
             _variantDeleteRepoMock.Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -658,16 +657,15 @@ public class Product
             .ReturnsAsync((ProductEntity?)null);
         var handler = new UpdateProductCommandHandler(
             _productReadRepoMock.Object,
-            _brandReadRepoMock.Object,
-            _productCategoryReadRepoMock.Object,
             _variantReadRepoMock.Object,
-            _optionReadRepoMock.Object,
+            _productCategoryReadRepoMock.Object,
+            _brandReadRepoMock.Object,
             _predefinedOptionReadRepoMock.Object,
+            _optionReadRepoMock.Object,
             _optionValueReadRepoMock.Object,
-            _optionValueInsertRepoMock.Object,
             _variantInsertRepoMock.Object,
+            _optionValueInsertRepoMock.Object,
             _variantOptionValueDeleteRepoMock.Object,
-            _productUpdateRepoMock.Object,
             _variantDeleteRepoMock.Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -682,16 +680,15 @@ public class Product
             .ReturnsAsync(new ProductEntity { Id = 1, StatusId = "for-sale", DeletedAt = DateTime.UtcNow });
         var handler = new UpdateProductCommandHandler(
             _productReadRepoMock.Object,
-            _brandReadRepoMock.Object,
-            _productCategoryReadRepoMock.Object,
             _variantReadRepoMock.Object,
-            _optionReadRepoMock.Object,
+            _productCategoryReadRepoMock.Object,
+            _brandReadRepoMock.Object,
             _predefinedOptionReadRepoMock.Object,
+            _optionReadRepoMock.Object,
             _optionValueReadRepoMock.Object,
-            _optionValueInsertRepoMock.Object,
             _variantInsertRepoMock.Object,
+            _optionValueInsertRepoMock.Object,
             _variantOptionValueDeleteRepoMock.Object,
-            _productUpdateRepoMock.Object,
             _variantDeleteRepoMock.Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -717,16 +714,15 @@ public class Product
             .ReturnsAsync((Domain.Entities.ProductCategory?)null);
         var handler = new UpdateProductCommandHandler(
             _productReadRepoMock.Object,
-            _brandReadRepoMock.Object,
-            _productCategoryReadRepoMock.Object,
             _variantReadRepoMock.Object,
-            _optionReadRepoMock.Object,
+            _productCategoryReadRepoMock.Object,
+            _brandReadRepoMock.Object,
             _predefinedOptionReadRepoMock.Object,
+            _optionReadRepoMock.Object,
             _optionValueReadRepoMock.Object,
-            _optionValueInsertRepoMock.Object,
             _variantInsertRepoMock.Object,
+            _optionValueInsertRepoMock.Object,
             _variantOptionValueDeleteRepoMock.Object,
-            _productUpdateRepoMock.Object,
             _variantDeleteRepoMock.Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -743,16 +739,15 @@ public class Product
             .ReturnsAsync(new Domain.Entities.ProductCategory { Id = 1, DeletedAt = DateTime.UtcNow });
         var handler = new UpdateProductCommandHandler(
             _productReadRepoMock.Object,
-            _brandReadRepoMock.Object,
-            _productCategoryReadRepoMock.Object,
             _variantReadRepoMock.Object,
-            _optionReadRepoMock.Object,
+            _productCategoryReadRepoMock.Object,
+            _brandReadRepoMock.Object,
             _predefinedOptionReadRepoMock.Object,
+            _optionReadRepoMock.Object,
             _optionValueReadRepoMock.Object,
-            _optionValueInsertRepoMock.Object,
             _variantInsertRepoMock.Object,
+            _optionValueInsertRepoMock.Object,
             _variantOptionValueDeleteRepoMock.Object,
-            _productUpdateRepoMock.Object,
             _variantDeleteRepoMock.Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -780,16 +775,15 @@ public class Product
             .ReturnsAsync((ProductVariant?)null);
         var handler = new UpdateProductCommandHandler(
             _productReadRepoMock.Object,
-            _brandReadRepoMock.Object,
-            _productCategoryReadRepoMock.Object,
             _variantReadRepoMock.Object,
-            _optionReadRepoMock.Object,
+            _productCategoryReadRepoMock.Object,
+            _brandReadRepoMock.Object,
             _predefinedOptionReadRepoMock.Object,
+            _optionReadRepoMock.Object,
             _optionValueReadRepoMock.Object,
-            _optionValueInsertRepoMock.Object,
             _variantInsertRepoMock.Object,
+            _optionValueInsertRepoMock.Object,
             _variantOptionValueDeleteRepoMock.Object,
-            _productUpdateRepoMock.Object,
             _variantDeleteRepoMock.Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -817,16 +811,15 @@ public class Product
             .ReturnsAsync(new ProductVariant { Id = 1, ProductId = 1, DeletedAt = null });
         var handler = new UpdateProductCommandHandler(
             _productReadRepoMock.Object,
-            _brandReadRepoMock.Object,
-            _productCategoryReadRepoMock.Object,
             _variantReadRepoMock.Object,
+            _productCategoryReadRepoMock.Object,
+            _brandReadRepoMock.Object,
+            _predefinedOptionReadRepoMock.Object, 
             _optionReadRepoMock.Object,
-            _predefinedOptionReadRepoMock.Object,
             _optionValueReadRepoMock.Object,
-            _optionValueInsertRepoMock.Object,
             _variantInsertRepoMock.Object,
+            _optionValueInsertRepoMock.Object,
             _variantOptionValueDeleteRepoMock.Object,
-            _productUpdateRepoMock.Object,
             _variantDeleteRepoMock.Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -854,16 +847,15 @@ public class Product
             .ReturnsAsync([new() { Id = 1, ProductId = 1, DeletedAt = null }]);
         var handler = new UpdateProductCommandHandler(
             _productReadRepoMock.Object,
-            _brandReadRepoMock.Object,
-            _productCategoryReadRepoMock.Object,
             _variantReadRepoMock.Object,
-            _optionReadRepoMock.Object,
+            _productCategoryReadRepoMock.Object,
+            _brandReadRepoMock.Object,
             _predefinedOptionReadRepoMock.Object,
+            _optionReadRepoMock.Object,
             _optionValueReadRepoMock.Object,
-            _optionValueInsertRepoMock.Object,
             _variantInsertRepoMock.Object,
+            _optionValueInsertRepoMock.Object,
             _variantOptionValueDeleteRepoMock.Object,
-            _productUpdateRepoMock.Object,
             _variantDeleteRepoMock.Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
