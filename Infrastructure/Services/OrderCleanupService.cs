@@ -7,19 +7,13 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Services;
 
-public class OrderCleanupService(IServiceProvider serviceProvider, ILogger<OrderCleanupService> logger) : BackgroundService
+public class OrderCleanupService(IServiceProvider serviceProvider) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            try
-            {
-                await CancelExpiredOrdersAsync(stoppingToken).ConfigureAwait(false);
-            } catch (Exception ex)
-            {
-                logger.LogError(ex, "Error occurred during order cleanup");
-            }
+            await CancelExpiredOrdersAsync(stoppingToken).ConfigureAwait(false);
             await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken).ConfigureAwait(false);
         }
     }
@@ -30,21 +24,26 @@ public class OrderCleanupService(IServiceProvider serviceProvider, ILogger<Order
         var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
         var readRepository = scope.ServiceProvider.GetRequiredService<IOutputReadRepository>();
         var updateRepository = scope.ServiceProvider.GetRequiredService<IOutputUpdateRepository>();
-        var expirationTime = DateTimeOffset.UtcNow.AddMinutes(-15);
+
+        var expirationThreshold = DateTimeOffset.UtcNow.AddMinutes(-15);
+
         var expiredOrders = readRepository.GetQueryable()
-            .Where(
-                o => (o.StatusId == OrderStatus.Pending || o.StatusId == OrderStatus.WaitingDeposit) &&
-                    !string.IsNullOrEmpty(o.PaymentMethod) &&
-                    o.PaymentMethod != PaymentMethod.COD &&
-                    o.CreatedAt < expirationTime)
+            .Where(o => (o.StatusId == OrderStatus.Pending || o.StatusId == OrderStatus.WaitingDeposit) &&
+                        !string.IsNullOrEmpty(o.PaymentMethod) &&
+                        o.PaymentMethod != PaymentMethod.COD &&
+                        (o.PaymentExpiredAt.HasValue
+                            ? o.PaymentExpiredAt.Value < DateTimeOffset.Now
+                            : o.CreatedAt < expirationThreshold))
             .ToList();
-        if (expiredOrders.Count == 0)
+
+        if (expiredOrders.Count > 0)
         {
             foreach (var order in expiredOrders)
             {
                 order.StatusId = OrderStatus.Cancelled;
                 updateRepository.Update(order);
             }
+
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
     }

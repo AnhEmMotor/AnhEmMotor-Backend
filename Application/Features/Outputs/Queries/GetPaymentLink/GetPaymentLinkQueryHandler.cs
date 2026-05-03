@@ -2,6 +2,8 @@ using Application.ApiContracts.Payment.Requests;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
+using Application.Interfaces.Repositories.Role;
+using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Services;
 using Domain.Constants.Order;
 using MediatR;
@@ -15,15 +17,47 @@ namespace Application.Features.Outputs.Queries.GetPaymentLink
         IUnitOfWork unitOfWork,
         IVNPayService vnpayService,
         IPayOSService payosService,
+        IUserReadRepository userReadRepository,
+        IRoleReadRepository roleReadRepository,
         IHttpContextAccessor httpContextAccessor) : IRequestHandler<GetPaymentLinkQuery, Result<string>>
     {
         public async Task<Result<string>> Handle(GetPaymentLinkQuery request, CancellationToken cancellationToken)
         {
+            if (string.IsNullOrEmpty(request.CurrentUserId) || !Guid.TryParse(request.CurrentUserId, out var currentUserId))
+            {
+                return Error.Unauthorized("Bạn cần đăng nhập để thực hiện thao tác này.");
+            }
+
             var order = await readRepository.GetByIdWithDetailsAsync(request.OrderId, cancellationToken)
                 .ConfigureAwait(false);
             if (order is null)
             {
                 return Error.NotFound("Không tìm thấy đơn hàng", "Order");
+            }
+
+            bool isOwner = order.BuyerId == currentUserId;
+            bool hasEditPermission = false;
+
+            if (!isOwner)
+            {
+                var user = await userReadRepository.FindUserByIdAsync(currentUserId, cancellationToken).ConfigureAwait(false);
+                if (user != null)
+                {
+                    var userRoles = await userReadRepository.GetRolesOfUserAsync(user, cancellationToken).ConfigureAwait(false);
+                    var roleEntities = await roleReadRepository.GetRolesByNameAsync(userRoles, cancellationToken).ConfigureAwait(false);
+                    var roleIds = roleEntities.Select(r => r.Id).ToList();
+                    var userPermissions = await roleReadRepository.GetPermissionsNameByRoleIdAsync(roleIds, cancellationToken).ConfigureAwait(false);
+                    
+                    if (userPermissions != null && userPermissions.Contains(Domain.Constants.Permission.PermissionsList.Outputs.Edit))
+                    {
+                        hasEditPermission = true;
+                    }
+                }
+            }
+
+            if (!isOwner && !hasEditPermission)
+            {
+                return Error.Forbidden("Bạn không có quyền lấy link thanh toán cho đơn hàng này.");
             }
             if (string.Compare(order.StatusId, OrderStatus.WaitingDeposit) != 0 &&
                 string.Compare(order.StatusId, OrderStatus.Pending) != 0)

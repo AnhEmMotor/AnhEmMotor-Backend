@@ -6,6 +6,7 @@ using Application.Features.Payments.Commands.ProcessVNPayIPN;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace WebAPI.Controllers;
 
@@ -37,9 +38,11 @@ public class PaymentController(IMediator mediator) : ControllerBase
     /// <param name="cancellationToken">Cancellation Token</param>
     /// <returns>The payment link data.</returns>
     [HttpGet("link/{orderId}")]
+    [Authorize]
     public async Task<IActionResult> GetPaymentLink(int orderId, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetPaymentLinkQuery(orderId), cancellationToken).ConfigureAwait(true);
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var result = await mediator.Send(new GetPaymentLinkQuery(orderId, currentUserId), cancellationToken).ConfigureAwait(true);
         if (result.IsSuccess)
             return Ok(result.Value);
         var firstError = result.Errors?.FirstOrDefault() ?? result.Error;
