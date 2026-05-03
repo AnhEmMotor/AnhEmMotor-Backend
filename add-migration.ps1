@@ -27,12 +27,15 @@ if ($LASTEXITCODE -ne 0) {
 $mergeBase = git merge-base "$baseBranch" HEAD 2>$null
 if ($LASTEXITCODE -eq 0)
 {
-$newMigrationsFiles = @(git diff --name-only --diff-filter=A "$baseBranch" HEAD | Select-String "Migrations/" | Select-String "\.cs$" | Select-String -NotMatch "\.Designer\.cs" | Select-String -NotMatch "ModelSnapshot\.cs")
+    $trackedFiles = git diff --name-only --diff-filter=A "$baseBranch" 2>$null
+    $untrackedFiles = git ls-files --others --exclude-standard 2>$null
+    $newMigrationsFiles = @($trackedFiles) + @($untrackedFiles) | Select-String "Migrations/" | Select-String "\.cs$" | Select-String -NotMatch "\.Designer\.cs" | Select-String -NotMatch "ModelSnapshot\.cs"
 
-$uniqueMigrations = $newMigrationsFiles | ForEach-Object {
-    $fileName = Split-Path $_.ToString() -Leaf
-    if ($fileName -match "^\d+_(.+)\.cs$") { $Matches[1] }
-} | Select-Object -Unique
+
+    $uniqueMigrations = $newMigrationsFiles | ForEach-Object {
+        $fileName = Split-Path $_.ToString() -Leaf
+        if ($fileName -match "^\d+_(.+)\.cs$") { $Matches[1] }
+    } | Select-Object -Unique
 
 $migrationCount = 0
 if ($uniqueMigrations) { $migrationCount = $uniqueMigrations.Count }
@@ -40,14 +43,13 @@ if ($uniqueMigrations) { $migrationCount = $uniqueMigrations.Count }
     if ($migrationCount -ge 1)
     {
         Write-Host "ERROR: Only 1 migration per branch is allowed!" -ForegroundColor Red
-        Write-Host "You already have $migrationCount migration(s) in this branch relative to $baseBranch." -ForegroundColor Red
         Write-Host ""
         Write-Host "Details of migrations found in this branch (grouped by provider):" -ForegroundColor Yellow
 
         $groups = $newMigrationsFiles | Group-Object { Split-Path $_.ToString() -Parent }
         foreach ($group in $groups) {
             $folderName = Split-Path $group.Name -Leaf
-            Write-Host "  Provider: $folderName" -ForegroundColor Cyan
+            Write-Host "  Provider: $folderName ($($group.Count) migration(s))" -ForegroundColor Cyan
             foreach ($file in $group.Group) {
                 Write-Host "    - $(Split-Path $file.ToString() -Leaf)" -ForegroundColor Gray
             }
