@@ -12,4 +12,3 @@ public class AdminProductReportResponse
     public IEnumerable<ProductPerformanceTableResponse> ProductPerformanceTable { get; set; } = [];
 }
 
-

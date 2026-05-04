@@ -6,13 +6,13 @@ namespace Application.Features.Permissions.Commands.CreateRole;
 
 public class CreateRoleCommandValidator : AbstractValidator<CreateRoleCommand>
 {
-    private static readonly HashSet<string> ValidPermissions = [ .. typeof(PermissionsList)
+    private static readonly HashSet<string> ValidPermissions = [.. typeof(PermissionsList)
         .GetNestedTypes()
         .SelectMany(type => type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy))
         .Where(fieldInfo => fieldInfo.IsLiteral && !fieldInfo.IsInitOnly)
         .Select(fieldInfo => fieldInfo.GetRawConstantValue() as string)
         .Where(permission => permission is not null)
-        .Cast<string>() ];
+        .Cast<string>()];
 
     public CreateRoleCommandValidator()
     {
@@ -22,7 +22,6 @@ public class CreateRoleCommandValidator : AbstractValidator<CreateRoleCommand>
             .MaximumLength(100)
             .Matches(@"^[a-zA-Z0-9\s_\-]*$")
             .WithMessage("Role name cannot contain special characters.");
-
         RuleFor(x => x.Permissions)
             .NotEmpty()
             .WithMessage("At least one permission must be assigned.")
@@ -31,10 +30,10 @@ public class CreateRoleCommandValidator : AbstractValidator<CreateRoleCommand>
             .Custom(
                 (permissions, context) =>
                 {
-                    if(permissions == null)
+                    if (permissions == null)
                         return;
                     var (isValid, errorMessage) = PermissionsList.ValidateRules(permissions);
-                    if(!isValid)
+                    if (!isValid)
                     {
                         context.AddFailure(errorMessage);
                     }

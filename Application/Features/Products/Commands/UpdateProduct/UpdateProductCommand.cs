@@ -13,10 +13,8 @@ public sealed record UpdateProductCommand : IRequest<Result<ProductDetailForMana
 
     public string? Name { get; init; }
 
-    [JsonPropertyName("category_id")]
     public int? CategoryId { get; init; }
 
-    [JsonPropertyName("brand_id")]
     public int? BrandId { get; init; }
 
     public string? Description { get; init; }
@@ -26,7 +24,8 @@ public sealed record UpdateProductCommand : IRequest<Result<ProductDetailForMana
 
     public string? Dimensions { get; init; }
 
-    public string? Wheelbase { get; init; }
+    [JsonConverter(typeof(NullableDecimalConverter))]
+    public decimal? Wheelbase { get; init; }
 
     [JsonPropertyName("seat_height")]
     [JsonConverter(typeof(NullableDecimalConverter))]

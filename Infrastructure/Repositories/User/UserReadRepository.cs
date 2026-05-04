@@ -25,23 +25,18 @@ namespace Infrastructure.Repositories.User
         {
             var query = userManager.Users.AsNoTracking();
             SieveHelper.ApplyDefaultSorting(sieveModel);
-
             var countQuery = sieveProcessor.Apply(sieveModel, query, applyPagination: false);
             var totalCount = await countQuery.CountAsync(cancellationToken).ConfigureAwait(false);
-
             var pagedQuery = sieveProcessor.Apply(sieveModel, query);
             var entities = await pagedQuery.ToListAsync(cancellationToken).ConfigureAwait(false);
-
             var userResponses = new List<UserDTOForManagerResponse>();
-
-            foreach(var user in entities)
+            foreach (var user in entities)
             {
                 var roles = await context.UserRoles
                     .Where(ur => ur.UserId == user.Id)
                     .Select(ur => ur.RoleId.ToString())
                     .ToListAsync(cancellationToken)
                     .ConfigureAwait(false);
-
                 var response = new UserDTOForManagerResponse
                 {
                     Id = user.Id,
@@ -55,10 +50,8 @@ namespace Infrastructure.Repositories.User
                     DeletedAt = user.DeletedAt,
                     Roles = roles
                 };
-
                 userResponses.Add(response);
             }
-
             return new PagedResult<UserDTOForManagerResponse>(
                 userResponses,
                 totalCount,
@@ -72,16 +65,12 @@ namespace Infrastructure.Repositories.User
         {
             var query = userManager.Users.AsNoTracking();
             SieveHelper.ApplyDefaultSorting(sieveModel);
-
             var countQuery = sieveProcessor.Apply(sieveModel, query, applyPagination: false);
             var totalCount = await countQuery.CountAsync(cancellationToken).ConfigureAwait(false);
-
             var pagedQuery = sieveProcessor.Apply(sieveModel, query);
             var entities = await pagedQuery.ToListAsync(cancellationToken).ConfigureAwait(false);
-
             var userResponses = new List<UserDTOForOutputResponse>();
-
-            foreach(var user in entities)
+            foreach (var user in entities)
             {
                 var response = new UserDTOForOutputResponse
                 {
@@ -90,10 +79,8 @@ namespace Infrastructure.Repositories.User
                     Email = user.Email ?? string.Empty,
                     PhoneNumber = user.PhoneNumber ?? string.Empty,
                 };
-
                 userResponses.Add(response);
             }
-
             return new PagedResult<UserDTOForOutputResponse>(
                 userResponses,
                 totalCount,
@@ -118,13 +105,11 @@ namespace Infrastructure.Repositories.User
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => string.Compare(u.RefreshToken, refreshToken) == 0, cancellationToken)
                 .ConfigureAwait(false);
-
             var roles = await context.UserRoles
                 .Where(ur => ur.UserId == user!.Id)
                 .Select(ur => ur.RoleId.ToString())
                 .ToListAsync(cancellationToken)
                 .ConfigureAwait(false);
-
             var UserAuth = new UserAuth
             {
                 Id = user!.Id,
@@ -133,29 +118,27 @@ namespace Infrastructure.Repositories.User
                 Email = user.Email,
                 FullName = user.FullName,
                 Status = user.Status,
-                AuthMethods = [ "pwd" ]
+                AuthMethods = ["pwd"]
             };
-
             return UserAuth;
         }
 
         public async Task<UserAuth?> GetUserByIDAsync(Guid? idUser, CancellationToken cancellationToken)
         {
-            if(idUser == null)
+            if (idUser == null)
                 return null;
             var user = await userManager.Users
                 .FirstOrDefaultAsync(
                     u => u.Id == idUser && string.Compare(u.Status, UserStatus.Active) == 0 && u.DeletedAt == null,
                     cancellationToken)
                 .ConfigureAwait(false);
-            if(user == null)
+            if (user == null)
                 return null;
             var roles = await context.UserRoles
                 .Where(ur => ur.UserId == user.Id)
                 .Select(ur => ur.RoleId.ToString())
                 .ToListAsync(cancellationToken)
                 .ConfigureAwait(false);
-
             return new UserAuth()
             {
                 Id = user.Id,

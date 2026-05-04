@@ -42,8 +42,12 @@ public class BrandReadRepository(ApplicationDBContext context) : IBrandReadRepos
         string name,
         CancellationToken cancellationToken,
         DataFetchMode dataFetchMode = DataFetchMode.ActiveOnly)
-    { return context.GetQuery<BrandEntity>(dataFetchMode).Where(b => b.Name == name).ToListAsync(cancellationToken); }
+    {
+        return context.GetQuery<BrandEntity>(dataFetchMode).Where(b => b.Name == name).ToListAsync(cancellationToken);
+    }
 
     public IQueryable<BrandEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
-    { return context.GetQuery<BrandEntity>(mode); }
+    {
+        return context.GetQuery<BrandEntity>(mode);
+    }
 }

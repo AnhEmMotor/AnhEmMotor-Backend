@@ -7,5 +7,7 @@ namespace Application.ApiContracts.ProductCategory.Responses
         public string? Name { get; set; }
 
         public string? Description { get; set; }
+
+        public int? MaxPurchaseQuantity { get; set; }
     }
 }

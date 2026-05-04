@@ -12,7 +12,9 @@ namespace Infrastructure.Repositories.Permission
         public Task<List<PermissionEntity>> GetPermissionsByNamesAsync(
             IEnumerable<string> names,
             CancellationToken cancellationToken = default)
-        { return context.Permissions.Where(p => names.Contains(p.Name)).ToListAsync(cancellationToken); }
+        {
+            return context.Permissions.Where(p => names.Contains(p.Name)).ToListAsync(cancellationToken);
+        }
 
         public Task<List<RolePermission>> GetRolePermissionsByPermissionIdsAsync(
             IEnumerable<int> permissionIds,

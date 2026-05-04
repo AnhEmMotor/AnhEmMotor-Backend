@@ -19,41 +19,37 @@ public sealed class CreateSupplierCommandHandler(
     {
         var isDuplicate = await supplierReadRepository.IsNameExistsAsync(request.Name!, null, cancellationToken)
             .ConfigureAwait(false);
-        if(isDuplicate)
+        if (isDuplicate)
         {
             return Result<SupplierResponse>.Failure("Supplier name already exists.");
         }
-
-        if(!string.IsNullOrWhiteSpace(request.Phone))
+        if (!string.IsNullOrWhiteSpace(request.Phone))
         {
             var isPhoneDuplicate = await supplierReadRepository.IsPhoneExistsAsync(
                 request.Phone,
                 null,
                 cancellationToken)
                 .ConfigureAwait(false);
-            if(isPhoneDuplicate)
+            if (isPhoneDuplicate)
             {
                 return Result<SupplierResponse>.Failure("Supplier phone already exists.");
             }
         }
-
-        if(!string.IsNullOrWhiteSpace(request.TaxIdentificationNumber))
+        if (!string.IsNullOrWhiteSpace(request.TaxIdentificationNumber))
         {
             var isTaxIdDuplicate = await supplierReadRepository.IsTaxIdExistsAsync(
                 request.TaxIdentificationNumber,
                 null,
                 cancellationToken)
                 .ConfigureAwait(false);
-            if(isTaxIdDuplicate)
+            if (isTaxIdDuplicate)
             {
                 return Result<SupplierResponse>.Failure("Tax Identification Number already exists.");
             }
         }
-
         var supplier = request.Adapt<Supplier>();
         supplierInsertRepository.Add(supplier);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         return supplier.Adapt<SupplierResponse>();
     }
 }

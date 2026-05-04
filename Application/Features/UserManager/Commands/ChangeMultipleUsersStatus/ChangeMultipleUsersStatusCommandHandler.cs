@@ -20,49 +20,42 @@ public class ChangeMultipleUsersStatusCommandHandler(
         var protectedUsers = protectedEntityManagerService.GetProtectedUsers() ?? [];
         var protectedEmails = protectedUsers.Select(entry => entry.Split(':')[0].Trim()).ToList();
         var superRoles = protectedEntityManagerService.GetSuperRoles() ?? [];
-
         var usersToUpdate = new List<ApplicationUser>();
         var errorMessages = new List<Error>();
-
-        foreach(var userId in request.UserIds!)
+        foreach (var userId in request.UserIds!)
         {
             var user = await userReadRepository.FindUserByIdAsync(userId, cancellationToken).ConfigureAwait(false);
-            if(user is null)
+            if (user is null)
             {
                 errorMessages.Add(Error.Validation($"User {userId} not found.", "UserIds"));
                 continue;
             }
-
-            if(!string.IsNullOrEmpty(request.CurrentUserId) &&
+            if (!string.IsNullOrEmpty(request.CurrentUserId) &&
                 string.Compare(user.Id.ToString(), request.CurrentUserId) == 0)
             {
                 errorMessages.Add(Error.Validation($"Cannot change status of your own account.", "UserIds"));
                 continue;
             }
-
-            if(string.Compare(request.Status, UserStatus.Banned) == 0)
+            if (string.Compare(request.Status, UserStatus.Banned) == 0)
             {
-                if(!string.IsNullOrEmpty(user.Email) && protectedEmails.Contains(user.Email))
+                if (!string.IsNullOrEmpty(user.Email) && protectedEmails.Contains(user.Email))
                 {
                     errorMessages.Add(
                         Error.Validation($"User {user.Email} is protected and cannot be deactivated.", "UserIds"));
                     continue;
                 }
-
                 var userRoles = await userReadRepository.GetUserRolesAsync(user, cancellationToken)
                     .ConfigureAwait(false);
                 var isLastActiveInSuperRole = false;
-
-                foreach(var userRole in userRoles)
+                foreach (var userRole in userRoles)
                 {
-                    if(superRoles.Contains(userRole))
+                    if (superRoles.Contains(userRole))
                     {
                         var usersInRole = await userReadRepository.GetUsersInRoleAsync(userRole, cancellationToken)
                             .ConfigureAwait(false);
                         var activeUsersInRole = usersInRole.Where(u => string.Compare(u.Status, UserStatus.Active) == 0)
                             .ToList();
-
-                        if(activeUsersInRole.Count == 1 && activeUsersInRole[0].Id == userId)
+                        if (activeUsersInRole.Count == 1 && activeUsersInRole[0].Id == userId)
                         {
                             errorMessages.Add(
                                 Error.Validation(
@@ -73,42 +66,34 @@ public class ChangeMultipleUsersStatusCommandHandler(
                         }
                     }
                 }
-
-                if(isLastActiveInSuperRole)
+                if (isLastActiveInSuperRole)
                 {
                     continue;
                 }
             }
-
             usersToUpdate.Add(user);
         }
-
-        if(errorMessages.Count > 0)
+        if (errorMessages.Count > 0)
         {
             return Result<ChangeStatusMultiUserByManagerResponse>.Failure(errorMessages);
         }
-
-        if(usersToUpdate.Count == 0)
+        if (usersToUpdate.Count == 0)
         {
             return Error.Validation("No valid users to update.", "UserIds");
         }
-
         var updatedCount = 0;
         var failedUpdates = new List<Error>();
         var originalStatuses = new Dictionary<Guid, string>();
-
-        foreach(var user in usersToUpdate)
+        foreach (var user in usersToUpdate)
         {
             originalStatuses[user.Id] = user.Status;
         }
-
-        foreach(var user in usersToUpdate)
+        foreach (var user in usersToUpdate)
         {
             user.Status = request.Status!;
             var (succeeded, errors) = await userUpdateRepository.UpdateUserAsync(user, cancellationToken)
                 .ConfigureAwait(false);
-
-            if(!succeeded)
+            if (!succeeded)
             {
                 failedUpdates.Add(Error.Validation($"User {user.UserName}: {string.Join(", ", errors)}", "UserIds"));
             } else
@@ -116,18 +101,15 @@ public class ChangeMultipleUsersStatusCommandHandler(
                 updatedCount++;
             }
         }
-
-        if(failedUpdates.Count > 0)
+        if (failedUpdates.Count > 0)
         {
-            foreach(var user in usersToUpdate.Take(updatedCount))
+            foreach (var user in usersToUpdate.Take(updatedCount))
             {
                 user.Status = originalStatuses[user.Id];
                 await userUpdateRepository.UpdateUserAsync(user, cancellationToken).ConfigureAwait(false);
             }
-
             return Result<ChangeStatusMultiUserByManagerResponse>.Failure(failedUpdates);
         }
-
         return new ChangeStatusMultiUserByManagerResponse()
         {
             Message = $"{updatedCount} user(s) status changed to {request.Status} successfully.",

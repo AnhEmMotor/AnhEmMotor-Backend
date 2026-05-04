@@ -20,17 +20,18 @@ namespace Application.Common.Models
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public ErrorResponse? InnerException { get; set; }
 
-        public static ErrorResponse CreateProductionError(string message) { return new ErrorResponse(message); }
+        public static ErrorResponse CreateProductionError(string message)
+        {
+            return new ErrorResponse(message);
+        }
 
         public static ErrorResponse CreateDevelopmentError(Exception ex)
         {
             var response = new ErrorResponse(ex.Message) { Type = ex.GetType().FullName, Details = ex.ToString() };
-
-            if(ex.InnerException != null)
+            if (ex.InnerException != null)
             {
                 response.InnerException = CreateDevelopmentError(ex.InnerException);
             }
-
             return response;
         }
 
@@ -38,8 +39,7 @@ namespace Application.Common.Models
         {
             return new ErrorResponse(null)
             {
-                Errors =
-                    [ .. failures.Select(f => new ErrorDetail { Field = f.PropertyName, Message = f.ErrorMessage }) ]
+                Errors = [.. failures.Select(f => new ErrorDetail { Field = f.PropertyName, Message = f.ErrorMessage })]
             };
         }
 
@@ -50,9 +50,7 @@ namespace Application.Common.Models
             {
                 Type = error.Code,
                 Errors =
-                    hasErrors
-                        ? [ new ErrorDetail { Field = error.Field, Message = error.Message, Id = error.Id } ]
-                        : null
+                    hasErrors ? [new ErrorDetail { Field = error.Field, Message = error.Message, Id = error.Id }] : null
             };
         }
 
@@ -62,7 +60,7 @@ namespace Application.Common.Models
             return new ErrorResponse(null)
             {
                 Type = firstError?.Code,
-                Errors = [ .. errors.Select(e => new ErrorDetail { Field = e.Field, Message = e.Message, Id = e.Id }) ]
+                Errors = [.. errors.Select(e => new ErrorDetail { Field = e.Field, Message = e.Message, Id = e.Id })]
             };
         }
     }

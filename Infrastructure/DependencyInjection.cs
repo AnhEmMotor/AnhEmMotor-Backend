@@ -1,4 +1,4 @@
-﻿using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.LocalFile;
 using Application.Interfaces.Services;
 using Domain.Entities;
@@ -24,21 +24,18 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         var provider = configuration.GetValue("Provider", "SqlServer");
-
-        if(string.Compare(provider, "MySql") == 0)
+        if (string.Compare(provider, "MySql") == 0)
         {
             var connectionString = configuration.GetConnectionString("StringConnection") ?? string.Empty;
             var serverVersion = new MariaDbServerVersion(new Version(10, 6, 23));
-
             services.AddDbContextPool<ApplicationDBContext, MySqlDbContext>(
                 options =>
                 {
                     options.UseMySql(connectionString, serverVersion);
                 });
-        } else if(string.Compare(provider, "PostgreSql") == 0)
+        } else if (string.Compare(provider, "PostgreSql") == 0)
         {
             var connectionString = configuration.GetConnectionString("StringConnection") ?? string.Empty;
-
             services.AddDbContextPool<ApplicationDBContext, PostgreSqlDbContext>(
                 options =>
                 {
@@ -54,7 +51,6 @@ public static class DependencyInjection
                         b => b.MigrationsAssembly(typeof(ApplicationDBContext).Assembly.FullName).CommandTimeout(30));
                 });
         }
-
         services.AddIdentity<ApplicationUser, ApplicationRole>(
             options =>
             {
@@ -67,14 +63,11 @@ public static class DependencyInjection
             })
             .AddEntityFrameworkStores<ApplicationDBContext>()
             .AddDefaultTokenProviders();
-
         services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
         services.AddSingleton<IUserStreamService, UserStreamService>();
-
         services.AddScoped<IAuthorizationHandler, PermissionHandler>();
         services.AddScoped<IAuthorizationHandler, AllPermissionsHandler>();
         services.AddScoped<IAuthorizationHandler, AnyPermissionsHandler>();
-
         services.AddScoped<ITokenManagerService, TokenManagerService>();
         services.AddScoped<IHttpTokenAccessorService, HttpTokenAccessorService>();
         services.AddScoped<IIdentityService, IdentityService>();
@@ -82,18 +75,18 @@ public static class DependencyInjection
         services.AddScoped<IProtectedProductCategoryService, ProtectedProductCategoryService>();
         services.AddScoped<IFileStorageService, LocalFileStorageService>();
         services.AddScoped<IExternalAuthService, ExternalAuthService>();
+        services.AddScoped<IVNPayService, VNPayService>();
+        services.AddScoped<IPayOSService, PayOSService>();
         services.AddScoped<ISievePaginator, SievePaginator>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
-
+        services.AddHostedService<OrderCleanupService>();
         services.AddHttpClient();
-
         services.Scan(
             scan => scan
             .FromAssemblies(Assembly.GetExecutingAssembly())
                 .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Repository")))
                 .AsImplementedInterfaces()
                 .WithScopedLifetime());
-
         return services;
     }
 }

@@ -11,9 +11,7 @@ public sealed class ChangePasswordCommandValidator : AbstractValidator<ChangePas
             .WithMessage("User ID is missing.")
             .Must(id => Guid.TryParse(id, out _))
             .WithMessage("Invalid User ID format.");
-
         RuleFor(x => x.CurrentPassword).NotEmpty().WithMessage("Current password is required.");
-
         RuleFor(x => x.NewPassword)
             .NotEmpty()
             .WithMessage("New password is required.")

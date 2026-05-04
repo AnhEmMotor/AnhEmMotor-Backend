@@ -30,8 +30,8 @@ public static class MvcExtensions
     /// serialization options. It is intended to be called during application startup to standardize API behavior across
     /// the application.
     /// </remarks>
-    /// <param name="services">The <see cref="IServiceCollection"/> to which the MVC and related services will be added. Cannot be null.</param>
-    /// <returns>The same <see cref="IServiceCollection"/> instance so that additional calls can be chained.</returns>
+    /// <param name="services">The <see cref="IServiceCollection" /> to which the MVC and related services will be added. Cannot be null.</param>
+    /// <returns>The same <see cref="IServiceCollection" /> instance so that additional calls can be chained.</returns>
     public static IServiceCollection AddCustomMvc(this IServiceCollection services)
     {
         services.Configure<RouteOptions>(
@@ -40,7 +40,6 @@ public static class MvcExtensions
                 options.LowercaseUrls = true;
                 options.LowercaseQueryStrings = true;
             });
-
         services.AddApiVersioning(
             config =>
             {
@@ -55,10 +54,8 @@ public static class MvcExtensions
                     options.GroupNameFormat = "'v'VVV";
                     options.SubstituteApiVersionInUrl = true;
                 });
-
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();
-
         services.Configure<JsonOptions>(
             options =>
             {
@@ -66,8 +63,6 @@ public static class MvcExtensions
                 options.SerializerOptions.Converters.Add(new EmptyStringConverter());
                 options.SerializerOptions.Converters.Add(new NullableDecimalConverter());
             });
-
-
         return services;
     }
 }

@@ -19,16 +19,14 @@ namespace UnitTests;
 
 public class InventoryReceipts
 {
-#pragma warning disable IDE0079 
-#pragma warning disable CRR0035
+    #pragma warning disable IDE0079 
+    #pragma warning disable CRR0035
     [Fact(DisplayName = "INPUT_007 - Tạo phiếu nhập với Quantity là số âm")]
     public void CreateInputProductValidator_NegativeQuantity_ReturnsValidationError()
     {
         var validator = new CreateInputInfoCommandValidator();
         var command = new CreateInputInfoRequest { ProductId = 1, Count = -5, InputPrice = 100000 };
-
         var result = validator.TestValidate(command);
-
         result.ShouldHaveValidationErrorFor(x => x.Count);
     }
 
@@ -37,9 +35,7 @@ public class InventoryReceipts
     {
         var validator = new CreateInputInfoCommandValidator();
         var command = new CreateInputInfoRequest { ProductId = 1, Count = 0, InputPrice = 100000 };
-
         var result = validator.TestValidate(command);
-
         result.ShouldHaveValidationErrorFor(x => x.Count);
     }
 
@@ -48,9 +44,7 @@ public class InventoryReceipts
     {
         var validator = new CreateInputInfoCommandValidator();
         var command = new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = -100000 };
-
         var result = validator.TestValidate(command);
-
         result.ShouldHaveValidationErrorFor(x => x.InputPrice);
     }
 
@@ -59,9 +53,7 @@ public class InventoryReceipts
     {
         var validator = new CreateInputInfoCommandValidator();
         var command = new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 10000012.3456m };
-
         var result = validator.TestValidate(command);
-
         result.ShouldHaveValidationErrorFor(x => x.InputPrice);
     }
 
@@ -70,9 +62,7 @@ public class InventoryReceipts
     {
         var validator = new CreateInputCommandValidator();
         var command = new CreateInputCommand { Notes = "Test", SupplierId = 1, Products = [] };
-
         var result = validator.TestValidate(command);
-
         result.ShouldHaveValidationErrorFor(x => x.Products);
     }
 
@@ -84,11 +74,9 @@ public class InventoryReceipts
         {
             Notes = "Test",
             SupplierId = null,
-            Products = [ new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 } ]
+            Products = [new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }]
         };
-
         var result = validator.TestValidate(command);
-
         result.ShouldHaveValidationErrorFor(x => x.SupplierId);
     }
 
@@ -97,9 +85,7 @@ public class InventoryReceipts
     {
         var currentStatus = Domain.Constants.Input.InputStatus.Finish;
         var newStatus = Domain.Constants.Input.InputStatus.Working;
-
         bool isAllowed = InputStatusTransitions.IsTransitionAllowed(currentStatus, newStatus);
-
         isAllowed.Should().BeFalse();
     }
 
@@ -112,11 +98,9 @@ public class InventoryReceipts
         {
             Notes = longNotes,
             SupplierId = 1,
-            Products = [ new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 } ]
+            Products = [new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }]
         };
-
         var result = validator.TestValidate(command);
-
         result.ShouldHaveValidationErrorFor(x => x.Notes);
     }
 
@@ -125,9 +109,7 @@ public class InventoryReceipts
     {
         var validator = new CreateInputInfoCommandValidator();
         var command = new CreateInputInfoRequest { ProductId = null, Count = 10, InputPrice = 100000 };
-
         var result = validator.TestValidate(command);
-
         result.ShouldHaveValidationErrorFor(x => x.ProductId);
     }
 
@@ -136,9 +118,7 @@ public class InventoryReceipts
     {
         var validator = new UpdateInputInfoCommandValidator();
         var command = new UpdateInputInfoRequest { ProductId = 1, Count = -10, InputPrice = 100000 };
-
         var result = validator.TestValidate(command);
-
         result.ShouldHaveValidationErrorFor(x => x.Count);
     }
 
@@ -146,9 +126,7 @@ public class InventoryReceipts
     public void UpdateInputStatusValidator_InvalidStatusId_ReturnsValidationError()
     {
         var statusId = "invalid_status";
-
         bool isValid = Domain.Constants.Input.InputStatus.IsValid(statusId);
-
         isValid.Should().BeFalse();
     }
 
@@ -157,9 +135,7 @@ public class InventoryReceipts
     {
         var mockInsertRepo = new Mock<IInputInsertRepository>();
         var mockReadRepo = new Mock<IInputReadRepository>();
-
         mockInsertRepo.Setup(x => x.Add(It.IsAny<Input>())).Throws(new Exception("DB Connection Failed"));
-
         var handler = new CreateInputCommandHandler(
             mockInsertRepo.Object,
             mockReadRepo.Object,
@@ -170,9 +146,8 @@ public class InventoryReceipts
         {
             Notes = "Test",
             SupplierId = 1,
-            Products = [ new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 } ]
+            Products = [new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }]
         };
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
@@ -181,11 +156,9 @@ public class InventoryReceipts
     public async Task UpdateInputHandler_InputNotFound_ThrowsException()
     {
         var mockReadRepo = new Mock<IInputReadRepository>();
-
         mockReadRepo.Setup(
             x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync((Input?)null);
-
         var handler = new UpdateInputCommandHandler(
             mockReadRepo.Object,
             Mock.Of<IInputUpdateRepository>(),
@@ -193,13 +166,9 @@ public class InventoryReceipts
             Mock.Of<ISupplierReadRepository>(),
             Mock.Of<IProductVariantReadRepository>(),
             Mock.Of<IUnitOfWork>());
-
         var command = new UpdateInputCommand { Id = 9999, Notes = "Updated", SupplierId = 2, Products = [] };
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
-
         result.Error?.Code.Should().Be("NotFound");
     }
 
@@ -208,9 +177,7 @@ public class InventoryReceipts
     {
         var currentStatus = Domain.Constants.Input.InputStatus.Working;
         var newStatus = Domain.Constants.Input.InputStatus.Finish;
-
         bool isAllowed = InputStatusTransitions.IsTransitionAllowed(currentStatus, newStatus);
-
         isAllowed.Should().BeTrue();
     }
 
@@ -218,9 +185,7 @@ public class InventoryReceipts
     public void InputStatus_FinishedInput_CannotDelete()
     {
         var statusId = Domain.Constants.Input.InputStatus.Finish;
-
         bool cannotDelete = Domain.Constants.Input.InputStatus.IsCannotDelete(statusId);
-
         cannotDelete.Should().BeTrue();
     }
 
@@ -236,9 +201,7 @@ public class InventoryReceipts
     public void InputStatus_InvalidStatus_ReturnsFalse()
     {
         var invalidStatus = "invalid";
-
         bool isValid = Domain.Constants.Input.InputStatus.IsValid(invalidStatus);
-
         isValid.Should().BeFalse();
     }
 
@@ -246,9 +209,7 @@ public class InventoryReceipts
     public void InputStatus_WorkingStatus_CanEdit()
     {
         var statusId = Domain.Constants.Input.InputStatus.Working;
-
         bool canEdit = Domain.Constants.Input.InputStatus.IsCanEdit(statusId);
-
         canEdit.Should().BeTrue();
     }
 
@@ -256,9 +217,7 @@ public class InventoryReceipts
     public void InputStatus_FinishedStatus_CannotEdit()
     {
         var statusId = Domain.Constants.Input.InputStatus.Finish;
-
         bool canEdit = Domain.Constants.Input.InputStatus.IsCanEdit(statusId);
-
         canEdit.Should().BeFalse();
     }
 
@@ -266,9 +225,7 @@ public class InventoryReceipts
     public void InputStatus_FinishedStatus_CannotDelete()
     {
         var statusId = Domain.Constants.Input.InputStatus.Finish;
-
         bool cannotDelete = Domain.Constants.Input.InputStatus.IsCannotDelete(statusId);
-
         cannotDelete.Should().BeTrue();
     }
 
@@ -280,11 +237,9 @@ public class InventoryReceipts
         {
             Notes = "Test",
             SupplierId = -1,
-            Products = [ new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 } ]
+            Products = [new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }]
         };
-
         var result = validator.TestValidate(command);
-
         result.ShouldHaveValidationErrorFor(x => x.SupplierId);
     }
 
@@ -298,16 +253,14 @@ public class InventoryReceipts
             Notes = "Test",
             SupplierId = 1,
             Products =
-                [ new UpdateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100 }, new UpdateInputInfoRequest
+                [new UpdateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100 }, new UpdateInputInfoRequest
                 {
                     ProductId = 1,
                     Count = 5,
                     InputPrice = 200
-                } ]
+                }]
         };
-
         var result = validator.TestValidate(command);
-
         result.ShouldHaveValidationErrorFor(x => x.Products);
     }
 
@@ -316,22 +269,19 @@ public class InventoryReceipts
     {
         var config = new TypeAdapterConfig();
         new InputMappingConfig().Register(config);
-
         var input = new Input
         {
             Id = 1,
             InputInfos =
-                [ new InputInfo { Count = 2, InputPrice = 150000 }, new InputInfo { Count = 3, InputPrice = 50000 }, new InputInfo
+                [new InputInfo { Count = 2, InputPrice = 150000 }, new InputInfo { Count = 3, InputPrice = 50000 }, new InputInfo
                 {
                     Count = null,
                     InputPrice = 20000
-                }, new InputInfo { Count = 1, InputPrice = null } ]
+                }, new InputInfo { Count = 1, InputPrice = null }]
         };
-
         var response = input.Adapt<InputDetailResponse>(config);
-
         response.TotalPayable.Should().Be((2 * 150000) + (3 * 50000) + 0 + 0);
     }
-#pragma warning restore CRR0035
-#pragma warning restore IDE0079
+    #pragma warning restore CRR0035
+    #pragma warning restore IDE0079
 }

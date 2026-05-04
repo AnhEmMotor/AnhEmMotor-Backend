@@ -14,7 +14,6 @@ public sealed class GetProductsListForPriceManagementQueryHandler(IProductReadRe
         CancellationToken cancellationToken)
     {
         var sieveModel = request.SieveModel ?? new SieveModel();
-
         var pagedResult = await repository.GetPagedProductsForPriceManagementAsync(
             sieveModel.Page ?? 1,
             sieveModel.PageSize ?? 10,
@@ -22,17 +21,15 @@ public sealed class GetProductsListForPriceManagementQueryHandler(IProductReadRe
             sieveModel.Sorts,
             cancellationToken)
             .ConfigureAwait(false);
-
         var productsEntities = pagedResult.Items;
         var totalCount = pagedResult.TotalCount;
-
         var products = productsEntities.Select(
             p => new ProductPriceLiteResponse
             {
                 Id = p.Id,
                 Name = p.Name,
                 Variants =
-                    [ .. p.ProductVariants
+                    [.. p.ProductVariants
                             .Select(
                                 v => new ProductVariantPriceLiteResponse
                             {
@@ -46,10 +43,9 @@ public sealed class GetProductsListForPriceManagementQueryHandler(IProductReadRe
                                                             .Where(n => !string.IsNullOrEmpty(n)))
                                                     : "Mặc định",
                                 Price = v.Price ?? 0
-                            }) ]
+                            })]
             })
             .ToList();
-
         return Result<PagedResult<ProductPriceLiteResponse>>.Success(
             new PagedResult<ProductPriceLiteResponse>(
                 products,

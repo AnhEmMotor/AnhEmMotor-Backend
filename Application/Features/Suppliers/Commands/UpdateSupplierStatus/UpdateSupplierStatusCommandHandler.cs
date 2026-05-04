@@ -18,17 +18,13 @@ public sealed class UpdateSupplierStatusCommandHandler(
         CancellationToken cancellationToken)
     {
         var supplier = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
-
-        if(supplier == null)
+        if (supplier == null)
         {
             return Error.NotFound($"Supplier with Id {request.Id} not found.");
         }
-
         request.Adapt(supplier);
-
         updateRepository.Update(supplier);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         return supplier.Adapt<SupplierResponse>();
     }
 }

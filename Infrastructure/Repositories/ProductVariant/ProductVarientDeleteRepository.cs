@@ -6,6 +6,9 @@ namespace Infrastructure.Repositories.ProductVariant
 {
     public class ProductVarientDeleteRepository(ApplicationDBContext context) : IProductVarientDeleteRepository
     {
-        public void Delete(ProductVariantEntity variant) { context.ProductVariants.Remove(variant); }
+        public void Delete(ProductVariantEntity variant)
+        {
+            context.ProductVariants.Remove(variant);
+        }
     }
 }

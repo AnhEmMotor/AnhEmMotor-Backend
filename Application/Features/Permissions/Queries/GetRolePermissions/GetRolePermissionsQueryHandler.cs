@@ -8,19 +8,16 @@ public class GetRolePermissionsQueryHandler(IRoleReadRepository rolePermissionRe
 {
     public async Task<Result<List<string>>> Handle(GetRolePermissionsQuery request, CancellationToken cancellationToken)
     {
-        var roles = await rolePermissionRepository.GetRolesByIdsAsync([ request.RoleId ], cancellationToken)
+        var roles = await rolePermissionRepository.GetRolesByIdsAsync([request.RoleId], cancellationToken)
             .ConfigureAwait(false);
         var role = roles.FirstOrDefault();
-
-        if(role is null)
+        if (role is null)
         {
             return Error.NotFound("Role not found.");
         }
-
         var permissions = await rolePermissionRepository.GetPermissionsNameByRoleIdAsync(role.Id, cancellationToken)
                 .ConfigureAwait(false) ??
             [];
-
         return permissions.ToList();
     }
 }

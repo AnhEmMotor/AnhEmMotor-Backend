@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace Application.Features.ProductCategories.Commands.DeleteManyProductCategories;
 
@@ -7,11 +7,11 @@ public sealed class DeleteManyProductCategoriesCommandValidator : AbstractValida
     public DeleteManyProductCategoriesCommandValidator()
     {
         RuleFor(x => x.Ids)
+            .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .WithMessage("Bạn chưa truyền danh sách Product Category ID để xoá.")
             .Must(ids => ids.Count <= 50)
             .WithMessage("Không được xoá quá 50 danh mục một lần.");
-
         RuleForEach(x => x.Ids).NotEmpty();
     }
 }

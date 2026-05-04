@@ -13,9 +13,7 @@ public sealed class GetOptionsListQueryHandler(IOptionReadRepository readReposit
         CancellationToken cancellationToken)
     {
         var options = await readRepository.GetAllWithOptionsAsync(cancellationToken).ConfigureAwait(false);
-
         var response = options.Adapt<List<OptionResponse>>();
-
         return response;
     }
 }

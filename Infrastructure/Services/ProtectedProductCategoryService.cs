@@ -13,29 +13,23 @@ public class ProtectedProductCategoryService(
     public async Task<bool> IsProtectedAsync(int categoryId, CancellationToken cancellationToken)
     {
         var category = await readRepository.GetByIdAsync(categoryId, cancellationToken).ConfigureAwait(false);
-
-        if(category is null || string.IsNullOrWhiteSpace(category.Name))
+        if (category is null || string.IsNullOrWhiteSpace(category.Name))
         {
             return false;
         }
-
         return await IsProtectedByNameAsync(category.Name, cancellationToken).ConfigureAwait(false);
     }
 
     public Task<bool> IsProtectedByNameAsync(string categoryName, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-
-        if(string.IsNullOrWhiteSpace(categoryName))
+        if (string.IsNullOrWhiteSpace(categoryName))
         {
             return Task.FromResult(false);
         }
-
         _cachedProtectedCategories ??= configuration.GetSection("ProtectedProductCategory").Get<List<string>>() ?? [];
-
         var isProtected = _cachedProtectedCategories
             .Any(pc => string.Equals(pc, categoryName, StringComparison.OrdinalIgnoreCase));
-
         return Task.FromResult(isProtected);
     }
 }

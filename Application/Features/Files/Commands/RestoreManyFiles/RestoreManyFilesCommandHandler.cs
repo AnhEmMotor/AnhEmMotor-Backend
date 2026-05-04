@@ -21,7 +21,6 @@ public sealed class RestoreManyFilesCommandHandler(
     {
         var uniquePaths = request.StoragePaths.Distinct().ToList();
         var errorDetails = new List<Error>();
-
         var allFiles = await readRepository.GetByStoragePathsAsync(uniquePaths, cancellationToken, DataFetchMode.All)
             .ConfigureAwait(false);
         var deletedFiles = await readRepository.GetByStoragePathsAsync(
@@ -29,41 +28,35 @@ public sealed class RestoreManyFilesCommandHandler(
             cancellationToken,
             DataFetchMode.DeletedOnly)
             .ConfigureAwait(false);
-
         var allFileMap = allFiles.ToDictionary(f => f.StoragePath!);
         var deletedFileSet = deletedFiles.Select(f => f.StoragePath).ToHashSet();
-
-        foreach(var path in uniquePaths)
+        foreach (var path in uniquePaths)
         {
-            if(!allFileMap.ContainsKey(path))
+            if (!allFileMap.ContainsKey(path))
             {
                 errorDetails.Add(Error.NotFound($"File '{path}' not found.", "StoragePath"));
-            } else if(!deletedFileSet.Contains(path))
+            } else if (!deletedFileSet.Contains(path))
             {
                 errorDetails.Add(Error.BadRequest($"File '{path}' is not deleted.", "StoragePath"));
             }
         }
-
-        if(errorDetails.Count > 0)
+        if (errorDetails.Count > 0)
         {
             return errorDetails;
         }
-
-        if(deletedFiles.ToList().Count > 0)
+        if (deletedFiles.ToList().Count > 0)
         {
             updateRepository.Restore(deletedFiles);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
-
         var responses = deletedFiles.Adapt<List<MediaFileResponse>>();
-        foreach(var response in responses)
+        foreach (var response in responses)
         {
-            if(!string.IsNullOrEmpty(response.StoragePath))
+            if (!string.IsNullOrEmpty(response.StoragePath))
             {
                 response.PublicUrl = fileStorageService.GetPublicUrl(response.StoragePath);
             }
         }
-
         return responses;
     }
 }

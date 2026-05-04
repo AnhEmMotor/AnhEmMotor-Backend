@@ -49,17 +49,16 @@ public static class SwaggerExtensions
                         {
                             [new OpenApiSecuritySchemeReference("bearer", document)] = []
                         });
-                if(environment.IsEnvironment("Test") == false)
+                if (environment.IsEnvironment("Test") == false)
                 {
                     var xmlFilePath = Path.Combine(AppContext.BaseDirectory, "api.xml");
-                    if(File.Exists(xmlFilePath))
+                    if (File.Exists(xmlFilePath))
                     {
                         options.IncludeXmlComments(xmlFilePath);
                     }
                 }
                 options.EnableAnnotations();
             });
-
         return services;
     }
 }

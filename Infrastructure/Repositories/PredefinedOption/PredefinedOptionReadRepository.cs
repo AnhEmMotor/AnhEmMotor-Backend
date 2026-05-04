@@ -19,7 +19,6 @@ public class PredefinedOptionReadRepository(ApplicationDBContext context) : IPre
             .Select(p => p.Key)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-
         return result;
     }
 }

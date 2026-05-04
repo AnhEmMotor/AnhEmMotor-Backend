@@ -15,30 +15,23 @@ public sealed class UpdateBrandCommandHandler(
     public async Task<Result<BrandResponse?>> Handle(UpdateBrandCommand request, CancellationToken cancellationToken)
     {
         var brand = await readRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
-
-        if(brand == null)
+        if (brand == null)
         {
             return Error.NotFound($"Brand with Id {request.Id} not found.", "Id");
         }
-
         string? cleanName = request.Name?.Trim();
         string? cleanDescription = request.Description?.Trim();
-
         var duplicateCandidates = await readRepository.GetByNameAsync(cleanName!, cancellationToken)
             .ConfigureAwait(false);
-
-        if(duplicateCandidates.Any(x => x.Id != request.Id))
+        if (duplicateCandidates.Any(x => x.Id != request.Id))
         {
             return Error.Validation("Brand name already exists.", "Name");
         }
-
         request.Adapt(brand);
         brand.Name = cleanName;
         brand.Description = cleanDescription;
-
         updateRepository.Update(brand);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         return brand.Adapt<BrandResponse>();
     }
 }

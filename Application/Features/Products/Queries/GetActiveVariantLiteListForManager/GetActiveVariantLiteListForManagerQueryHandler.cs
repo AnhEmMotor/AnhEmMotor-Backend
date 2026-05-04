@@ -15,7 +15,6 @@ public sealed class GetActiveVariantLiteListForManagerQueryHandler(IProductVaria
     {
         var page = Math.Max(request.Page, 1);
         var pageSize = Math.Max(request.PageSize, 1);
-
         var (variants, totalCount) = await repository.GetPagedVariantsAsync(
             page,
             pageSize,
@@ -24,9 +23,7 @@ public sealed class GetActiveVariantLiteListForManagerQueryHandler(IProductVaria
             cancellationToken,
             search: request.Search)
             .ConfigureAwait(false);
-
         var responses = variants.Select(v => v.Adapt<ProductVariantLiteResponse>()).ToList();
-
         return new PagedResult<ProductVariantLiteResponse>(responses, totalCount, page, pageSize);
     }
 }

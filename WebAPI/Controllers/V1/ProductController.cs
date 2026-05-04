@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Product.Responses;
+using Application.ApiContracts.Product.Responses;
 using Application.Common.Models;
 using Application.Features.PredefinedOptions.Queries.GetPredefinedOptionsList;
 using Application.Features.Products.Commands.CreateProduct;
@@ -24,6 +24,7 @@ using Application.Features.Products.Queries.GetProductsList;
 using Application.Features.Products.Queries.GetProductsListForManager;
 using Application.Features.Products.Queries.GetProductsListForPriceManagement;
 using Application.Features.Products.Queries.GetProductStoreDetailBySlug;
+using Application.Features.Products.Queries.GetSitemapSlugs;
 using Application.Features.Products.Queries.GetVariantCartDetailsBatch;
 using Application.Features.Products.Queries.GetVariantLiteByProductId;
 using Asp.Versioning;
@@ -35,6 +36,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Net;
 using WebAPI.Controllers.Base;
 using static Domain.Constants.Permission.PermissionsList;
 
@@ -49,6 +51,24 @@ namespace WebAPI.Controllers.V1;
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
 public class ProductController(ISender sender) : ApiController
 {
+    /// <summary>
+    /// Lấy danh sách toàn bộ Slug của sản phẩm phục vụ cho việc tạo Sitemap. Chỉ cho phép gọi từ Localhost để đảm bảo
+    /// bảo mật.
+    /// </summary>
+    [HttpGet("sitemap-slugs")]
+    [ProducesResponseType(typeof(SitemapSlugsResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> GetSitemapSlugsAsync(CancellationToken cancellationToken)
+    {
+        var remoteIp = HttpContext.Connection.RemoteIpAddress;
+        if (remoteIp != null && !IPAddress.IsLoopback(remoteIp))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden);
+        }
+        var result = await sender.Send(new GetSitemapSlugsQuery(), cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
     /// <summary>
     /// Lấy danh sách sản phẩm đầy đủ dành cho khách hàng (có phân trang, lọc, tìm kiếm).
     /// </summary>
@@ -171,7 +191,6 @@ public class ProductController(ISender sender) : ApiController
     {
         var query = new GetPredefinedOptionsListQuery();
         var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
-
         return HandleResult(result);
     }
 

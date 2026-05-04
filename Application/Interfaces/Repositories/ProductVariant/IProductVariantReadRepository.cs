@@ -1,4 +1,4 @@
-﻿using Domain.Constants;
+using Domain.Constants;
 using ProductVariantEntity = Domain.Entities.ProductVariant;
 
 namespace Application.Interfaces.Repositories.ProductVariant
@@ -35,5 +35,7 @@ namespace Application.Interfaces.Repositories.ProductVariant
             CancellationToken cancellationToken,
             DataFetchMode mode = DataFetchMode.ActiveOnly,
             string? search = null);
+
+        public Task<List<string>> GetUrlSlugsAsync(CancellationToken cancellationToken);
     }
 }

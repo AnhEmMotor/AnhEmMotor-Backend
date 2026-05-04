@@ -6,5 +6,8 @@ namespace Infrastructure.Repositories.Input;
 
 public class InputInsertRepository(ApplicationDBContext context) : IInputInsertRepository
 {
-    public void Add(InputEntity input) { context.InputReceipts.Add(input); }
+    public void Add(InputEntity input)
+    {
+        context.InputReceipts.Add(input);
+    }
 }

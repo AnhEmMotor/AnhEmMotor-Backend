@@ -31,19 +31,16 @@ public sealed record GetProductsListQuery : IRequest<Result<PagedResult<ProductL
                 StringSplitOptions.RemoveEmptyEntries)
                 .ToList() ??
             [];
-
         var categoryIds = request.CategoryIds?.Split(',', StringSplitOptions.RemoveEmptyEntries)
                 .Select(int.Parse)
                 .ToList() ??
             [];
-
         var optionValueIds = request.OptionValueIds?.Split(',', StringSplitOptions.RemoveEmptyEntries)
                 .Select(int.Parse)
                 .ToList() ??
             [];
-
         var filters = request.Filters;
-        if(!string.IsNullOrWhiteSpace(filters))
+        if (!string.IsNullOrWhiteSpace(filters))
         {
             var filterParts = filters.Split(',', StringSplitOptions.RemoveEmptyEntries)
                 .Where(
@@ -56,7 +53,6 @@ public sealed record GetProductsListQuery : IRequest<Result<PagedResult<ProductL
                 .ToList();
             filters = filterParts.Count > 0 ? string.Join(",", filterParts) : null;
         }
-
         return new GetProductsListQuery
         {
             Page = request.Page ?? 1,
@@ -72,21 +68,19 @@ public sealed record GetProductsListQuery : IRequest<Result<PagedResult<ProductL
 
     private static string? ExtractFilterValue(string? filters, string key)
     {
-        if(string.IsNullOrWhiteSpace(filters))
+        if (string.IsNullOrWhiteSpace(filters))
         {
             return null;
         }
-
         var parts = filters.Split(',');
-        foreach(var part in parts)
+        foreach (var part in parts)
         {
-            var keyValue = part.Split([ '=', '@', '!' ], 2);
-            if(keyValue.Length == 2 && keyValue[0].Trim().Equals(key, StringComparison.OrdinalIgnoreCase))
+            var keyValue = part.Split(['=', '@', '!'], 2);
+            if (keyValue.Length == 2 && keyValue[0].Trim().Equals(key, StringComparison.OrdinalIgnoreCase))
             {
                 return keyValue[1].Trim().TrimStart('=', '@', '!', '<', '>');
             }
         }
-
         return null;
     }
 }

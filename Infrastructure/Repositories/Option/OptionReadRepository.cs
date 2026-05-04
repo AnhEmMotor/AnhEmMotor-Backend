@@ -9,17 +9,25 @@ namespace Infrastructure.Repositories.Option;
 public class OptionReadRepository(ApplicationDBContext context) : IOptionReadRepository
 {
     public IQueryable<OptionEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
-    { return context.GetQuery<OptionEntity>(mode); }
+    {
+        return context.GetQuery<OptionEntity>(mode);
+    }
 
     public Task<OptionEntity?> GetByIdAsync(int id, CancellationToken cancellationToken)
-    { return context.Options.FirstOrDefaultAsync(o => o.Id == id, cancellationToken); }
+    {
+        return context.Options.FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
+    }
 
     public Task<List<OptionEntity>> GetByNamesAsync(
         IEnumerable<string> names,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
-    { return GetQueryable(mode).Where(o => o.Name != null && names.Contains(o.Name)).ToListAsync(cancellationToken); }
+    {
+        return GetQueryable(mode).Where(o => o.Name != null && names.Contains(o.Name)).ToListAsync(cancellationToken);
+    }
 
     public Task<List<OptionEntity>> GetAllWithOptionsAsync(CancellationToken cancellationToken)
-    { return context.Options.Include(o => o.OptionValues).AsNoTracking().ToListAsync(cancellationToken); }
+    {
+        return context.Options.Include(o => o.OptionValues).AsNoTracking().ToListAsync(cancellationToken);
+    }
 }

@@ -18,14 +18,12 @@ public sealed class GetDeletedProductCategoriesListQueryHandler(
         CancellationToken cancellationToken)
     {
         var query = repository.GetQueryable(DataFetchMode.DeletedOnly);
-
         var result = await paginator.ApplyAsync<ProductCategoryEntity, ProductCategoryResponse>(
             query,
             request.SieveModel!,
             DataFetchMode.DeletedOnly,
             cancellationToken)
             .ConfigureAwait(false);
-
         return result;
     }
 }

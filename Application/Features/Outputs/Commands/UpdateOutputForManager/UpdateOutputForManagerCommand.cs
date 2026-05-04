@@ -24,6 +24,8 @@ public sealed record UpdateOutputForManagerCommand : IRequest<Result<OrderDetail
 
     public string? CustomerPhone { get; init; }
 
+    public int? DepositRatio { get; init; }
+
     [JsonPropertyName("products")]
     public ICollection<UpdateOutputInfoRequest> OutputInfos { get; init; } = [];
 }

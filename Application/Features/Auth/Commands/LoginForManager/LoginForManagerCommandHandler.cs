@@ -25,53 +25,40 @@ public sealed class LoginForManagerCommandHandler(
             request.Password!,
             cancellationToken)
             .ConfigureAwait(false);
-
-        if(authResult.IsFailure)
+        if (authResult.IsFailure)
         {
             return authResult.Error!;
         }
-
         var userDto = authResult.Value;
-
         var user = await userManager.FindByIdAsync(userDto.Id.ToString()).ConfigureAwait(false);
-        if(user is null)
+        if (user is null)
         {
             return Error.Unauthorized("User not found.");
         }
-
         var userRoles = await userManager.GetRolesAsync(user).ConfigureAwait(false);
-
         var roleIds = roleManager.Roles
             .Where(r => r.Name != null && userRoles.Contains(r.Name))
             .Select(r => r.Id)
             .ToList();
-
         var hasAnyPermission = await roleReadRepository.HasAnyPermissionAsync(roleIds, cancellationToken)
             .ConfigureAwait(false);
-
-        if(!hasAnyPermission)
+        if (!hasAnyPermission)
         {
             return Error.Forbidden("Access denied. User does not have the required permissions to access this system.");
         }
-
         var expiryAccessTokenMinutes = tokenManagerService.GetAccessTokenExpiryMinutes();
         var expiryAccessTokenDate = DateTimeOffset.UtcNow.AddMinutes(expiryAccessTokenMinutes);
-
         var accessToken = tokenManagerService.CreateAccessToken(userDto, expiryAccessTokenDate);
-
         var refreshToken = tokenManagerService.CreateRefreshToken();
         var expiryRefreshTokenDays = tokenManagerService.GetRefreshTokenExpiryDays();
         var expiryRefreshTokenDate = DateTimeOffset.UtcNow.AddDays(expiryRefreshTokenDays);
-
         await userUpdateRepository.UpdateRefreshTokenAsync(
             userDto.Id,
             refreshToken,
             expiryRefreshTokenDate,
             cancellationToken)
             .ConfigureAwait(false);
-
         httpTokenAccessorService.SetRefreshTokenToCookie(refreshToken, expiryRefreshTokenDate);
-
         return new LoginResponse { AccessToken = accessToken, ExpiresAt = expiryAccessTokenDate };
     }
 }

@@ -23,25 +23,20 @@ public class RegisterCommandHandler(
             Gender = request.Gender ?? GenderStatus.Male,
             Status = UserStatus.Active
         };
-
         cancellationToken.ThrowIfCancellationRequested();
-
         var (succeeded, errors) = await userCreateRepository.CreateUserAsync(user, request.Password!, cancellationToken)
             .ConfigureAwait(false);
-
-        if(!succeeded)
+        if (!succeeded)
         {
             var validationErrors = errors.Select(e => Error.Validation(e)).ToList();
             return Result<RegisterResponse>.Failure(validationErrors);
         }
-
         var defaultRoles = protectedEntityManagerService.GetDefaultRolesForNewUsers() ?? [];
-        if(defaultRoles.Count > 0)
+        if (defaultRoles.Count > 0)
         {
             var randomRole = defaultRoles[Random.Shared.Next(defaultRoles.Count)];
             await userCreateRepository.AddUserToRoleAsync(user, randomRole, cancellationToken).ConfigureAwait(false);
         }
-
         return new RegisterResponse { UserId = user.Id };
     }
 }

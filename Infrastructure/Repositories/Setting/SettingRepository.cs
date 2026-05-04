@@ -18,14 +18,11 @@ public class SettingRepository(ApplicationDBContext context) : ISettingRepositor
     public void Update(IEnumerable<SettingEntity> settings)
     {
         var settingKeys = settings.Select(s => s.Key).ToList();
-
         var existingSettings = context.Settings.Where(s => settingKeys.Contains(s.Key)).ToList();
-
-        foreach(var setting in settings)
+        foreach (var setting in settings)
         {
             var existingSetting = existingSettings.FirstOrDefault(s => string.Compare(s.Key, setting.Key) == 0);
-
-            if(existingSetting != null)
+            if (existingSetting != null)
             {
                 existingSetting.Value = setting.Value;
                 context.Settings.Update(existingSetting);

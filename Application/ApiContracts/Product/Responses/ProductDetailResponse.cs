@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Application.ApiContracts.Product.Responses
 {
@@ -23,7 +23,7 @@ namespace Application.ApiContracts.Product.Responses
 
         public string? Dimensions { get; set; }
 
-        public string? Wheelbase { get; set; }
+        public decimal? Wheelbase { get; set; }
 
         [JsonPropertyName("seat_height")]
         public decimal? SeatHeight { get; set; }

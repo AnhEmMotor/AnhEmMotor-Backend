@@ -16,29 +16,29 @@
         public const string WaitingInstallment = "waiting_installment";
         public const string InstallmentApproved = "installment_approved";
 
-        public static readonly HashSet<string> All = [ Completed, ConfirmedCod, Delivering, DepositPaid, PaidProcessing, Pending, Refunded, Refunding, WaitingDeposit, WaitingPickup, Cancelled, WaitingInstallment, InstallmentApproved ];
+        public static readonly HashSet<string> All = [Completed, ConfirmedCod, Delivering, DepositPaid, PaidProcessing, Pending, Refunded, Refunding, WaitingDeposit, WaitingPickup, Cancelled, WaitingInstallment, InstallmentApproved];
 
-        public static readonly HashSet<string> BookingPhases = [ ConfirmedCod, Delivering, DepositPaid, PaidProcessing, Pending, Refunded, Refunding, WaitingDeposit, WaitingPickup, WaitingInstallment, InstallmentApproved ];
+        public static readonly HashSet<string> BookingPhases = [ConfirmedCod, Delivering, DepositPaid, PaidProcessing, Pending, Refunded, Refunding, WaitingDeposit, WaitingPickup, WaitingInstallment, InstallmentApproved];
 
-        public static readonly HashSet<string> NotDeletedPhases = [ Completed, Refunded, Cancelled ];
+        public static readonly HashSet<string> NotDeletedPhases = [Completed, Refunded, Cancelled];
 
         public static bool IsValid(string? value)
         {
-            if(string.IsNullOrWhiteSpace(value))
+            if (string.IsNullOrWhiteSpace(value))
                 return false;
             return All.Contains(value, StringComparer.OrdinalIgnoreCase);
         }
 
         public static bool IsBookingStatus(string? value)
         {
-            if(string.IsNullOrWhiteSpace(value))
+            if (string.IsNullOrWhiteSpace(value))
                 return false;
             return BookingPhases.Contains(value, StringComparer.OrdinalIgnoreCase);
         }
 
         public static bool IsCannotDelete(string? value)
         {
-            if(string.IsNullOrWhiteSpace(value))
+            if (string.IsNullOrWhiteSpace(value))
                 return false;
             return NotDeletedPhases.Contains(value, StringComparer.OrdinalIgnoreCase);
         }

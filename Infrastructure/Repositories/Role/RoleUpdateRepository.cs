@@ -10,9 +10,13 @@ namespace Infrastructure.Repositories.Role
         public async Task AddPermissionsToRoleAsync(
             IEnumerable<RolePermission> rolePermissions,
             CancellationToken cancellationToken = default)
-        { await context.RolePermissions.AddRangeAsync(rolePermissions, cancellationToken).ConfigureAwait(false); }
+        {
+            await context.RolePermissions.AddRangeAsync(rolePermissions, cancellationToken).ConfigureAwait(false);
+        }
 
         public void RemovePermissionsFromRole(IEnumerable<RolePermission> rolePermissions)
-        { context.RolePermissions.RemoveRange(rolePermissions); }
+        {
+            context.RolePermissions.RemoveRange(rolePermissions);
+        }
     }
 }

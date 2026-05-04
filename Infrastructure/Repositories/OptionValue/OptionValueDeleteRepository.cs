@@ -8,6 +8,8 @@ namespace Infrastructure.Repositories.OptionValue
     public class OptionValueDeleteRepository(ApplicationDBContext context) : IOptionValueDeleteRepository
     {
         public void Delete(VariantOptionValueEntity variantOptionValue)
-        { context.VariantOptionValues.Remove(variantOptionValue); }
+        {
+            context.VariantOptionValues.Remove(variantOptionValue);
+        }
     }
 }

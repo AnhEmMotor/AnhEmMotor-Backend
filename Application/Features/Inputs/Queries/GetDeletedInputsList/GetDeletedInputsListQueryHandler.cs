@@ -16,13 +16,11 @@ public sealed class GetDeletedInputsListQueryHandler(IInputReadRepository reposi
         CancellationToken cancellationToken)
     {
         var query = repository.GetQueryable(DataFetchMode.DeletedOnly);
-
         var result = await paginator.ApplyAsync<InputEntity, InputListResponse>(
             query,
             request.SieveModel!,
             cancellationToken: cancellationToken)
             .ConfigureAwait(false);
-
         return result;
     }
 }

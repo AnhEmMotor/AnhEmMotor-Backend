@@ -20,15 +20,12 @@ public sealed class RestoreOutputCommandHandler(
     {
         var output = await readRepository.GetByIdAsync(request.Id, cancellationToken, DataFetchMode.DeletedOnly)
             .ConfigureAwait(false);
-
-        if(output is null)
+        if (output is null)
         {
             return Error.NotFound($"Không tìm thấy đơn hàng đã xóa có ID {request.Id}.", "Id");
         }
-
         updateRepository.Restore(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         return output.Adapt<OrderDetailResponse>();
     }
 }

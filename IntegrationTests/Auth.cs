@@ -38,8 +38,8 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         GC.SuppressFinalize(this);
     }
 
-#pragma warning disable IDE0079 
-#pragma warning disable CRR0035
+    #pragma warning disable IDE0079 
+    #pragma warning disable CRR0035
     [Fact(DisplayName = "AUTH_REG_001 - Register Success")]
     public async Task AUTH_REG_001_Register_Success()
     {
@@ -52,23 +52,16 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             PhoneNumber = "0987311641",
             Gender = "Male"
         };
-
         var response = await _client.PostAsJsonAsync("/api/v1/Auth/register", request).ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.Created);
-
         var content = await response.Content
             .ReadFromJsonAsync<RegisterResponse>(CancellationToken.None)
             .ConfigureAwait(true);
-
         content.Should().NotBeNull();
         content!.UserId.Should().NotBeEmpty();
-
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var userFromDb = db.Users.FirstOrDefault(u => u.Email == request.Email);
-
-
         userFromDb.Should().NotBeNull();
         userFromDb!.Status.Should().Be(UserStatus.Active);
     }
@@ -86,7 +79,6 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             Gender = "Male"
         };
         await _client.PostAsJsonAsync("/api/v1/Auth/register", request1).ConfigureAwait(true);
-
         var request2 = new RegisterCommand
         {
             Email = "exist@example.com",
@@ -96,9 +88,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             PhoneNumber = "0987654322",
             Gender = "Male"
         };
-
         var response = await _client.PostAsJsonAsync("/api/v1/Auth/register", request2).ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
@@ -114,10 +104,8 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             PhoneNumber = "0123456789",
             Gender = "Male"
         };
-
         var response = await _client.PostAsJsonAsync("/api/v1/Auth/register", request).ConfigureAwait(true);
-
-        if(response.IsSuccessStatusCode)
+        if (response.IsSuccessStatusCode)
         {
             using var scope = _factory.Services.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
@@ -144,7 +132,6 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             email: email,
             deletedAt: DateTimeOffset.UtcNow)
             .ConfigureAwait(true);
-
         var request = new RegisterCommand
         {
             Email = email,
@@ -154,9 +141,7 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             PhoneNumber = "0123456789",
             Gender = "Male"
         };
-
         var response = await _client.PostAsJsonAsync("/api/v1/Auth/register", request).ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
@@ -173,18 +158,12 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             CancellationToken.None,
             email: email)
             .ConfigureAwait(true);
-
         var request = new LoginCommand { UsernameOrEmail = email, Password = password };
-
         var response = await _client.PostAsJsonAsync("/api/v1/Auth/login", request).ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-
         var setCookieHeaders = response.Headers.GetValues("Set-Cookie").ToList();
         var refreshTokenCookie = setCookieHeaders.FirstOrDefault(c => c.Contains("refreshToken"));
-
         refreshTokenCookie.Should().NotBeNull();
-
         refreshTokenCookie.Should().Contain("httponly", "Vì Refresh Token không được phép để Javascript truy cập");
         refreshTokenCookie.Should().Contain("secure", "Vì Refresh Token chỉ được gửi qua HTTPS");
         refreshTokenCookie.Should().Contain("samesite=none", "Using SameSite=None for cross-origin support");
@@ -204,11 +183,8 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             email: "banned@example.com",
             isLocked: true)
             .ConfigureAwait(true);
-
         var request = new LoginCommand { UsernameOrEmail = username, Password = password };
-
         var response = await _client.PostAsJsonAsync("/api/v1/Auth/login", request).ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
@@ -221,16 +197,13 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Users.View ],
+            [PermissionsList.Users.View],
             CancellationToken.None,
             email: "manager@example.com",
             roleName: "Manager")
             .ConfigureAwait(true);
-
         var request = new LoginCommand { UsernameOrEmail = username, Password = password };
-
         var response = await _client.PostAsJsonAsync("/api/v1/Auth/login/for-manager", request).ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
@@ -240,7 +213,6 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var username = "refresh_user";
         var password = "Password123!";
         string? refreshToken = string.Empty;
-
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
             _factory.Services,
             username,
@@ -249,7 +221,6 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             CancellationToken.None,
             email: "refresh@example.com")
             .ConfigureAwait(true);
-
         var loginRes = await _client.PostAsJsonAsync(
             "/api/v1/Auth/login",
             new LoginCommand { UsernameOrEmail = username, Password = password })
@@ -258,20 +229,17 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             .ReadFromJsonAsync<LoginResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         refreshToken = loginContent!.RefreshToken;
-
         var requestMsg = new HttpRequestMessage(HttpMethod.Post, "/api/v1/Auth/refresh-token");
         requestMsg.Headers.Add("Cookie", $"refreshToken={refreshToken}");
-
         var response = await _client.SendAsync(requestMsg, CancellationToken.None).ConfigureAwait(true);
-
-        if(response.StatusCode == HttpStatusCode.OK)
+        if (response.StatusCode == HttpStatusCode.OK)
         {
             var content = await response.Content
                 .ReadFromJsonAsync<GetAccessTokenFromRefreshTokenResponse>(CancellationToken.None)
                 .ConfigureAwait(true);
             content.Should().NotBeNull();
             content!.AccessToken.Should().NotBeNullOrEmpty();
-            if(response.Headers.TryGetValues("Set-Cookie", out var cookies))
+            if (response.Headers.TryGetValues("Set-Cookie", out var cookies))
             {
                 var cookieList = cookies.ToList();
                 cookieList.Should().Contain(c => c.Contains("refreshToken"));
@@ -292,7 +260,6 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             CancellationToken.None,
             email: "refresh_banned@example.com")
             .ConfigureAwait(true);
-
         var loginRes = await _client.PostAsJsonAsync(
             "/api/v1/Auth/login",
             new LoginCommand { UsernameOrEmail = username, Password = password })
@@ -301,23 +268,19 @@ public class Auth : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             .ReadFromJsonAsync<LoginResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         string? refreshToken = loginContent!.RefreshToken;
-
-        using(var scope = _factory.Services.CreateScope())
+        using (var scope = _factory.Services.CreateScope())
         {
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             var user = await userManager.FindByNameAsync(username).ConfigureAwait(true);
             user!.Status = UserStatus.Banned;
             await userManager.UpdateAsync(user).ConfigureAwait(true);
         }
-
         var requestMsg = new HttpRequestMessage(HttpMethod.Post, "/api/v1/Auth/refresh-token");
         requestMsg.Headers.Add("Cookie", $"refreshToken={refreshToken}");
-
         var response = await _client.SendAsync(requestMsg, CancellationToken.None).ConfigureAwait(true);
-
         response.StatusCode
             .Should()
             .BeOneOf(HttpStatusCode.Forbidden, HttpStatusCode.Unauthorized, HttpStatusCode.BadRequest);
     }
-#pragma warning restore CRR0035
+    #pragma warning restore CRR0035
 }

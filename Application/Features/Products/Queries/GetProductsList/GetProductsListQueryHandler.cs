@@ -17,7 +17,6 @@ public sealed class GetProductsListQueryHandler(IProductReadRepository readRepos
             .Select(s => s.Trim())
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
-
         var (entities, totalCount, groupedOptionValueIds) = await readRepository.GetPagedProductsAsync(
             request.Search,
             normalizedStatusIds,
@@ -29,14 +28,13 @@ public sealed class GetProductsListQueryHandler(IProductReadRepository readRepos
             request.Sorts,
             cancellationToken)
             .ConfigureAwait(false);
-
         var items = entities.Select(
             e => new ProductListStoreResponse
             {
                 Id = e.Id,
                 Name = e.Name,
                 Variants =
-                    [ .. e.ProductVariants
+                    [.. e.ProductVariants
                             .Where(
                                 v => request.OptionValueIds.Count == 0 ||
                                             (groupedOptionValueIds?.Count > 0 &&
@@ -56,7 +54,6 @@ public sealed class GetProductsListQueryHandler(IProductReadRepository readRepos
                                     var coverImage = string.IsNullOrWhiteSpace(v.CoverImageUrl)
                                         ? photos.FirstOrDefault()
                                         : v.CoverImageUrl;
-
                                     return new ProductVariantListStoreResponse
                             {
                                 Id = v.Id,
@@ -70,10 +67,9 @@ public sealed class GetProductsListQueryHandler(IProductReadRepository readRepos
                                                         .Where(vov => vov.OptionValue != null)
                                                         .Select(vov => vov.OptionValue!.Name))
                             };
-                                }) ]
+                                })]
             })
             .ToList();
-
         return new PagedResult<ProductListStoreResponse>(items, totalCount, request.Page, request.PageSize);
     }
 }

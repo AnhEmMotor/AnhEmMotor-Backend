@@ -10,7 +10,7 @@ namespace Application.Sieve
             DataFetchMode mode = DataFetchMode.ActiveOnly,
             bool isApplyDefaultPageAndPageSize = true)
         {
-            if(isApplyDefaultPageAndPageSize)
+            if (isApplyDefaultPageAndPageSize)
             {
                 sieveModel.Page ??= 1;
                 sieveModel.PageSize ??= 10;
@@ -19,12 +19,10 @@ namespace Application.Sieve
                 sieveModel.Page ??= 1;
                 sieveModel.PageSize ??= int.MaxValue;
             }
-
-            if(!string.IsNullOrWhiteSpace(sieveModel.Sorts))
+            if (!string.IsNullOrWhiteSpace(sieveModel.Sorts))
             {
                 return;
             }
-
             sieveModel.Sorts = mode switch
             {
                 DataFetchMode.DeletedOnly => "-id",

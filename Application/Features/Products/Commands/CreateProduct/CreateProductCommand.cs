@@ -24,7 +24,8 @@ public sealed record CreateProductCommand : IRequest<Result<ProductDetailForMana
 
     public string? Dimensions { get; init; }
 
-    public string? Wheelbase { get; init; }
+    [JsonConverter(typeof(NullableDecimalConverter))]
+    public decimal? Wheelbase { get; init; }
 
     [JsonConverter(typeof(NullableDecimalConverter))]
     public decimal? SeatHeight { get; init; }

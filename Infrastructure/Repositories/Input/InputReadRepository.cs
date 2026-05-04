@@ -11,15 +11,13 @@ public class InputReadRepository(ApplicationDBContext context) : IInputReadRepos
     public IQueryable<InputEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         var query = context.InputReceipts.IgnoreQueryFilters();
-
-        if(mode == DataFetchMode.ActiveOnly)
+        if (mode == DataFetchMode.ActiveOnly)
         {
             query = query.Where(x => x.DeletedAt == null);
-        } else if(mode == DataFetchMode.DeletedOnly)
+        } else if (mode == DataFetchMode.DeletedOnly)
         {
             query = query.Where(x => x.DeletedAt != null);
         }
-
         return query
             .Include(x => x.InputInfos.Where(y => y.DeletedAt == null))
             .ThenInclude(x => x.ProductVariant)
@@ -40,7 +38,6 @@ public class InputReadRepository(ApplicationDBContext context) : IInputReadRepos
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         var query = GetQueryable(mode);
-
         return query
             .ToListAsync(cancellationToken)
             .ContinueWith<IEnumerable<InputEntity>>(t => t.Result, cancellationToken);
@@ -52,7 +49,6 @@ public class InputReadRepository(ApplicationDBContext context) : IInputReadRepos
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         var query = GetQueryable(mode);
-
         return query
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
             .ContinueWith(t => t.Result, cancellationToken);
@@ -64,7 +60,6 @@ public class InputReadRepository(ApplicationDBContext context) : IInputReadRepos
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         var query = GetQueryable(mode);
-
         return query
             .Where(x => ids.Contains(x.Id))
             .ToListAsync(cancellationToken)
@@ -77,7 +72,6 @@ public class InputReadRepository(ApplicationDBContext context) : IInputReadRepos
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         var query = GetQueryable(mode);
-
         return query
             .Include(x => x.InputInfos.Where(y => y.DeletedAt == null))
             .ThenInclude(x => x.ProductVariant)
@@ -100,7 +94,6 @@ public class InputReadRepository(ApplicationDBContext context) : IInputReadRepos
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         var query = GetQueryable(mode);
-
         return query
             .Include(x => x.InputInfos.Where(y => y.DeletedAt == null))
             .ThenInclude(x => x.ProductVariant)
@@ -115,7 +108,6 @@ public class InputReadRepository(ApplicationDBContext context) : IInputReadRepos
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         var query = GetQueryable(mode);
-
         return query
             .Where(x => x.SupplierId != null && supplierIds.Contains(x.SupplierId.Value))
             .ToListAsync(cancellationToken)

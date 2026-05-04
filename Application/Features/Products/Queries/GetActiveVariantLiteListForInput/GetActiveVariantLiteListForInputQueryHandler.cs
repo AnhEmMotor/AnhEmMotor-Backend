@@ -18,11 +18,9 @@ namespace Application.Features.Products.Queries.GetActiveVariantLiteListForInput
         {
             var page = Math.Max(request.Page, 1);
             var pageSize = Math.Max(request.PageSize, 1);
-
             var translations = await predefinedOptionReadRepository
                 .GetAllAsDictionaryAsync(cancellationToken)
                 .ConfigureAwait(false);
-
             var (variants, totalCount) = await repository.GetPagedVariantsAsync(
                 page,
                 pageSize,
@@ -31,11 +29,9 @@ namespace Application.Features.Products.Queries.GetActiveVariantLiteListForInput
                 cancellationToken,
                 search: request.Search)
                 .ConfigureAwait(false);
-
             var responses = variants
                 .Select(v => ProductMappingConfig.BuildVariantLiteResponseForInput(v, translations))
                 .ToList();
-
             return new PagedResult<ProductVariantLiteResponseForInput>(responses, totalCount, page, pageSize);
         }
     }

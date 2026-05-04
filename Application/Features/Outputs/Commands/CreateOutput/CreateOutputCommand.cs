@@ -18,6 +18,8 @@ public sealed record CreateOutputCommand : IRequest<Result<OrderDetailResponse>>
 
     public string? CustomerPhone { get; init; }
 
+    public string? PaymentMethod { get; init; }
+
     [JsonPropertyName("products")]
     public List<CreateOutputInfoRequest> OutputInfos { get; init; } = [];
 }

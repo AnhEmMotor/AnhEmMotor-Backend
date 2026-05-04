@@ -106,17 +106,14 @@ public class MediaFileController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var fileDtos = new List<(Stream FileContent, string FileName)>();
-
-        foreach(var file in files)
+        foreach (var file in files)
         {
-            if(file.Length > 0)
+            if (file.Length > 0)
             {
                 fileDtos.Add((file.OpenReadStream(), file.FileName));
             }
         }
-
         var command = new UploadManyProductImagesCommand { Files = fileDtos };
-
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleCreated(result);
     }
@@ -192,20 +189,16 @@ public class MediaFileController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var query = new ViewImageQuery { StoragePath = storagePath, Width = width };
-
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-
-        if(result.IsFailure)
+        if (result.IsFailure)
         {
             return HandleResult(result);
         }
-
-        if(result.Value is { } imageData)
+        if (result.Value is { } imageData)
         {
             var (fileStream, contentType) = imageData;
             return File(fileStream, contentType);
         }
-
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 }
