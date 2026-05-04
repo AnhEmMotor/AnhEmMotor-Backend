@@ -66,7 +66,10 @@ app.UseSerilogRequestLogging(
     {
         options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
         {
-            diagnosticContext.Set("ClientIP", httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown");
+            var clientIp = httpContext.Request.Headers["CF-Connecting-IP"].FirstOrDefault()
+                           ?? httpContext.Connection.RemoteIpAddress?.ToString()
+                           ?? "unknown";
+            diagnosticContext.Set("ClientIP", clientIp);
         };
     });
 app.UseExceptionHandler();
