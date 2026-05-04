@@ -20,7 +20,7 @@ public abstract class ApiController : ControllerBase
     /// <returns></returns>
     protected IActionResult HandleResult(Result result)
     {
-        if(result.IsSuccess)
+        if (result.IsSuccess)
             return NoContent();
         return MapErrorsToResponse(result);
     }
@@ -35,7 +35,7 @@ public abstract class ApiController : ControllerBase
     /// <returns></returns>
     protected IActionResult HandleCreated<T>(Result<T> result, string actionName, object? routeValues = null)
     {
-        if(result.IsSuccess)
+        if (result.IsSuccess)
         {
             return CreatedAtRoute(actionName, routeValues, result.Value);
         }
@@ -50,7 +50,7 @@ public abstract class ApiController : ControllerBase
     /// <returns></returns>
     protected IActionResult HandleCreated<T>(Result<T> result)
     {
-        if(result.IsSuccess)
+        if (result.IsSuccess)
         {
             return StatusCode(StatusCodes.Status201Created, result.Value);
         }
@@ -65,7 +65,7 @@ public abstract class ApiController : ControllerBase
     /// <returns></returns>
     protected IActionResult HandleResult<T>(Result<T> result)
     {
-        if(result.IsSuccess)
+        if (result.IsSuccess)
             return Ok(result.Value);
         return MapErrorsToResponse(result);
     }
@@ -73,21 +73,17 @@ public abstract class ApiController : ControllerBase
     private IActionResult MapErrorsToResponse(Result result)
     {
         var error = result.Errors?.FirstOrDefault() ?? result.Error;
-
-        if(error is null)
+        if (error is null)
         {
             return StatusCode(500, ErrorResponse.CreateProductionError("Unknown error occurred."));
         }
-
         var errorResponse = result.Errors is not null && result.Errors.Count > 0
             ? ErrorResponse.FromErrors(result.Errors)
             : ErrorResponse.FromError(error);
-
-        if(result.Errors is not null && result.Errors.Count > 1)
+        if (result.Errors is not null && result.Errors.Count > 1)
         {
             return BadRequest(errorResponse);
         }
-
         return error.Code switch
         {
             "NotFound" => NotFound(errorResponse),

@@ -14,54 +14,47 @@ public class ChangePasswordCommandHandler(
         ChangePasswordCommand request,
         CancellationToken cancellationToken)
     {
-        if(string.IsNullOrEmpty(request.UserId) || !Guid.TryParse(request.UserId, out var userId))
+        if (string.IsNullOrEmpty(request.UserId) || !Guid.TryParse(request.UserId, out var userId))
         {
             return Error.BadRequest("Invalid user ID.");
         }
-
         var user = await userReadRepository.FindUserByIdAsync(userId, cancellationToken).ConfigureAwait(false);
-        if(user is null)
+        if (user is null)
         {
             return Error.NotFound("User not found.");
         }
-
-        if(user.DeletedAt is not null)
+        if (user.DeletedAt is not null)
         {
             return Error.Forbidden("User account is deleted.");
         }
-
-        if(string.Compare(user.Status, UserStatus.Banned) == 0)
+        if (string.Compare(user.Status, UserStatus.Banned) == 0)
         {
             return Error.Forbidden("User account is banned.");
         }
-
         var isPasswordCorrect = await userReadRepository.CheckPasswordAsync(
             user,
             request.CurrentPassword!,
             cancellationToken)
             .ConfigureAwait(false);
-        if(!isPasswordCorrect)
+        if (!isPasswordCorrect)
         {
             return Error.Validation("Incorrect password.", "CurrentPassword");
         }
-
         var (succeeded, errors) = await userUpdateRepository.ChangePasswordAsync(
             user,
             request.CurrentPassword!,
             request.NewPassword!,
             cancellationToken)
             .ConfigureAwait(false);
-
-        if(!succeeded)
+        if (!succeeded)
         {
-            if(!errors.Any())
+            if (!errors.Any())
             {
                 return Error.Validation("Failed to change password.", "ChangePasswordFailed");
             }
             var validationErrors = errors.Select(e => Error.Validation(e, "NewPassword")).ToList();
             return Result<ChangePasswordByUserResponse>.Failure(validationErrors);
         }
-
         return new ChangePasswordByUserResponse() { Message = "Password changed successfully." };
     }
 }

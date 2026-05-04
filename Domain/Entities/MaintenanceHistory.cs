@@ -17,7 +17,7 @@ public class MaintenanceHistory : BaseEntity
     public Vehicle Vehicle { get; set; } = null!;
 
     [Column("MaintenanceDate")]
-    public System.DateTimeOffset MaintenanceDate { get; set; }
+    public DateTimeOffset MaintenanceDate { get; set; }
 
     [Column("Mileage")]
     public int Mileage { get; set; } = 0;

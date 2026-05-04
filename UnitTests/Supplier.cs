@@ -32,8 +32,8 @@ public class Supplier
         _unitOfWorkMock = new Mock<IUnitOfWork>();
     }
 
-#pragma warning disable IDE0079 
-#pragma warning disable CRR0035
+    #pragma warning disable IDE0079 
+    #pragma warning disable CRR0035
     [Fact(DisplayName = "SUP_001 - Tạo Supplier thành công với đầy đủ thông tin")]
     public async Task CreateSupplier_WithFullInformation_Success()
     {
@@ -50,15 +50,11 @@ public class Supplier
             TaxIdentificationNumber = "0123456789",
             Notes = "Test notes"
         };
-
         var emptySuppliers = new List<SupplierEntity>().AsQueryable();
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(emptySuppliers);
-
         _insertRepoMock.Setup(x => x.Add(It.IsAny<SupplierEntity>()));
         _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
-
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         _insertRepoMock.Verify(x => x.Add(It.IsAny<SupplierEntity>()), Times.Once);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -71,15 +67,11 @@ public class Supplier
             _insertRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new CreateSupplierCommand { Name = "Supplier B", Phone = "0987654321", Address = "456 Street" };
-
         var emptySuppliers = new List<SupplierEntity>().AsQueryable();
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(emptySuppliers);
-
         _insertRepoMock.Setup(x => x.Add(It.IsAny<SupplierEntity>()));
         _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
-
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         _insertRepoMock.Verify(x => x.Add(It.IsAny<SupplierEntity>()), Times.Once);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -97,15 +89,11 @@ public class Supplier
             Email = "test@example.com",
             Address = "789 Street"
         };
-
         var emptySuppliers = new List<SupplierEntity>().AsQueryable();
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(emptySuppliers);
-
         _insertRepoMock.Setup(x => x.Add(It.IsAny<SupplierEntity>()));
         _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
-
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         _insertRepoMock.Verify(x => x.Add(It.IsAny<SupplierEntity>()), Times.Once);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -120,9 +108,7 @@ public class Supplier
             Email = "test@test.com",
             Address = "123 Street"
         };
-
         var result = validator.TestValidate(command);
-
         result.ShouldHaveValidationErrorFor(x => x.Name);
     }
 
@@ -131,9 +117,7 @@ public class Supplier
     {
         var validator = new CreateSupplierCommandValidator();
         var command = new CreateSupplierCommand { Name = "Supplier D", Address = "123 Street" };
-
         var result = validator.TestValidate(command);
-
         result.Errors.Should().Contain(e => e.ErrorMessage.Contains("Phone") || e.ErrorMessage.Contains("Email"));
     }
 
@@ -142,9 +126,7 @@ public class Supplier
     {
         var validator = new CreateSupplierCommandValidator();
         var command = new CreateSupplierCommand { Name = "Supplier E", Phone = "0123456789" };
-
         var result = validator.TestValidate(command);
-
         result.ShouldHaveValidationErrorFor(x => x.Address);
     }
 
@@ -155,16 +137,11 @@ public class Supplier
             _readRepoMock.Object,
             _insertRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new CreateSupplierCommand { Name = "Supplier Existing", };
-
         _readRepoMock.Setup(x => x.IsNameExistsAsync(command.Name, It.IsAny<int?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
-
         _insertRepoMock.Verify(x => x.Add(It.IsAny<SupplierEntity>()), Times.Never);
     }
 
@@ -175,18 +152,13 @@ public class Supplier
             _readRepoMock.Object,
             _insertRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new CreateSupplierCommand { Name = "Supplier New", Phone = "0123456789", Address = "123 Street" };
-
         _readRepoMock.Setup(x => x.IsPhoneExistsAsync(command.Phone, It.IsAny<int?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
-
         _readRepoMock.Setup(
             x => x.IsNameExistsAsync(It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         _insertRepoMock.Verify(x => x.Add(It.IsAny<SupplierEntity>()), Times.Never);
     }
@@ -198,7 +170,6 @@ public class Supplier
             _readRepoMock.Object,
             _insertRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var command = new CreateSupplierCommand
         {
             Name = "Supplier Tax",
@@ -206,21 +177,16 @@ public class Supplier
             Address = "123 Street",
             TaxIdentificationNumber = "1234567890"
         };
-
         _readRepoMock.Setup(
             x => x.IsTaxIdExistsAsync(command.TaxIdentificationNumber, It.IsAny<int?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
-
         _readRepoMock.Setup(
             x => x.IsNameExistsAsync(It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
-
         _readRepoMock.Setup(
             x => x.IsPhoneExistsAsync(It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         _insertRepoMock.Verify(x => x.Add(It.IsAny<SupplierEntity>()), Times.Never);
     }
@@ -238,12 +204,10 @@ public class Supplier
             Phone = "0123456789",
             TaxIdentificationNumber = "0123456789"
         };
-
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>()))
             .Returns(new List<SupplierEntity>().AsQueryable());
         _insertRepoMock.Setup(x => x.Add(It.IsAny<SupplierEntity>()));
         _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
     }
@@ -258,7 +222,6 @@ public class Supplier
             Phone = "0123456789",
             TaxIdentificationNumber = "TAX123"
         };
-
         var result = validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor(x => x.TaxIdentificationNumber);
     }
@@ -270,7 +233,6 @@ public class Supplier
             _readRepoMock.Object,
             _updateRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var existingSupplier = new SupplierEntity
         {
             Id = 1,
@@ -280,12 +242,9 @@ public class Supplier
         };
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingSupplier);
-
         var command = new UpdateSupplierCommand { Id = 1, Phone = "0987654321" };
-
         _readRepoMock.Setup(x => x.IsPhoneExistsAsync("0987654321", 1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
         result.Value!.Phone.Should().Be("0987654321");
@@ -296,7 +255,6 @@ public class Supplier
     {
         var validator = new UpdateSupplierCommandValidator();
         var command = new UpdateSupplierCommand { Id = 1, Phone = "PHONE123" };
-
         var result = validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor(x => x.Phone);
     }
@@ -308,7 +266,6 @@ public class Supplier
             _readRepoMock.Object,
             _updateRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var existingSupplier = new SupplierEntity
         {
             Id = 1,
@@ -318,12 +275,9 @@ public class Supplier
         };
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingSupplier);
-
         var command = new UpdateSupplierCommand { Id = 1, Email = "update@test.com" };
-
         _readRepoMock.Setup(x => x.IsEmailExistsAsync("update@test.com", 1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
         result.Value!.Email.Should().Be("update@test.com");
@@ -334,7 +288,6 @@ public class Supplier
     {
         var validator = new UpdateSupplierCommandValidator();
         var command = new UpdateSupplierCommand { Id = 1, Email = "invalid-email" };
-
         var result = validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor(x => x.Email);
     }
@@ -347,7 +300,6 @@ public class Supplier
             _updateRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new UpdateSupplierCommand { Id = 1, Email = "existing@test.com" };
-
         var existingSupplier = new SupplierEntity
         {
             Id = 1,
@@ -355,13 +307,10 @@ public class Supplier
             Email = "old@test.com",
             StatusId = "active"
         };
-
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingSupplier);
-
         _readRepoMock.Setup(x => x.IsEmailExistsAsync("existing@test.com", 1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
         result.Error?.Code.Should().Be("Conflict");
@@ -375,7 +324,6 @@ public class Supplier
             _updateRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new UpdateSupplierCommand { Id = 1, Phone = "0912345678" };
-
         var existingSupplier = new SupplierEntity
         {
             Id = 1,
@@ -383,13 +331,10 @@ public class Supplier
             Phone = "0900000000",
             StatusId = "active"
         };
-
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingSupplier);
-
         _readRepoMock.Setup(x => x.IsPhoneExistsAsync("0912345678", 1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
         result.Error?.Code.Should().Be("Conflict");
@@ -403,7 +348,6 @@ public class Supplier
             _updateRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new UpdateSupplierCommand { Id = 1, TaxIdentificationNumber = "0123456789" };
-
         var existingSupplier = new SupplierEntity
         {
             Id = 1,
@@ -411,13 +355,10 @@ public class Supplier
             TaxIdentificationNumber = "0000000000",
             StatusId = "active"
         };
-
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingSupplier);
-
         _readRepoMock.Setup(x => x.IsTaxIdExistsAsync("0123456789", 1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
         result.Error?.Code.Should().Be("Conflict");
@@ -428,11 +369,9 @@ public class Supplier
     {
         var validator = new UpdateSupplierCommandValidator();
         var command = new UpdateSupplierCommand { Id = 1, TaxIdentificationNumber = "TAX123" };
-
         var result = validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor(x => x.TaxIdentificationNumber);
     }
-
 
     [Fact(DisplayName = "SUP_011 - Tạo Supplier với Email không hợp lệ")]
     public void CreateSupplier_InvalidEmail_FailsValidation()
@@ -445,9 +384,7 @@ public class Supplier
             Email = "invalid-email",
             Address = "123 Street"
         };
-
         var result = validator.TestValidate(command);
-
         result.ShouldHaveValidationErrorFor(x => x.Email);
     }
 
@@ -461,9 +398,7 @@ public class Supplier
             Phone = "012-345-6789",
             Address = "123 Street"
         };
-
         var result = validator.TestValidate(command);
-
         result.ShouldHaveValidationErrorFor(x => x.Phone);
     }
 
@@ -477,9 +412,7 @@ public class Supplier
             Phone = "0123456789",
             Address = "123 Street"
         };
-
         var result = validator.TestValidate(command);
-
         result.ShouldHaveValidationErrorFor(x => x.Name);
     }
 
@@ -500,7 +433,6 @@ public class Supplier
             TaxIdentificationNumber = "9876543210",
             Notes = "Updated notes"
         };
-
         var existingSupplier = new SupplierEntity
         {
             Id = 1,
@@ -508,15 +440,11 @@ public class Supplier
             Phone = "0123456789",
             StatusId = "active"
         };
-
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingSupplier);
-
         var emptySuppliers = new List<SupplierEntity>().AsQueryable();
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(emptySuppliers);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Value.Should().NotBeNull();
         result.Value!.Name.Should().Be("Updated Name");
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -530,7 +458,6 @@ public class Supplier
             _updateRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new UpdateSupplierCommand { Id = 1, Name = "Only Name Updated" };
-
         var existingSupplier = new SupplierEntity
         {
             Id = 1,
@@ -539,15 +466,11 @@ public class Supplier
             Email = "original@test.com",
             StatusId = "active"
         };
-
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingSupplier);
-
         var emptySuppliers = new List<SupplierEntity>().AsQueryable();
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(emptySuppliers);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Value.Should().NotBeNull();
         result.Value!.Name.Should().Be("Only Name Updated");
         result.Value.Phone.Should().Be("0123456789");
@@ -560,9 +483,7 @@ public class Supplier
     {
         var command = new UpdateSupplierCommand { Id = 1 };
         var validator = new UpdateSupplierCommandValidator();
-
         var result = validator.Validate(command);
-
         result.IsValid.Should().BeFalse();
         result.Errors.Should().Contain(x => x.ErrorMessage.Contains("At least one field must be provided"));
     }
@@ -575,16 +496,12 @@ public class Supplier
             _updateRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new UpdateSupplierCommand { Id = 1, Name = "Supplier Existing" };
-
         var existingSupplier = new SupplierEntity { Id = 1, Name = "Original", StatusId = "active" };
-
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingSupplier);
-
         _readRepoMock.Setup(
             x => x.IsNameExistsAsync(It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
@@ -597,10 +514,8 @@ public class Supplier
             _updateRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new UpdateSupplierCommand { Id = 1, Name = "Updated Name" };
-
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync((SupplierEntity?)null);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
@@ -613,14 +528,10 @@ public class Supplier
             _updateRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new UpdateSupplierStatusCommand { Id = 1, StatusId = "inactive" };
-
         var existingSupplier = new SupplierEntity { Id = 1, Name = "Supplier", StatusId = "active" };
-
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingSupplier);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -633,14 +544,10 @@ public class Supplier
             _updateRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new UpdateSupplierStatusCommand { Id = 1, StatusId = "active" };
-
         var existingSupplier = new SupplierEntity { Id = 1, Name = "Supplier", StatusId = "inactive" };
-
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingSupplier);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -650,9 +557,7 @@ public class Supplier
     {
         var validator = new UpdateSupplierStatusCommandValidator();
         var command = new UpdateSupplierStatusCommand { Id = 1, StatusId = "invalid_status" };
-
         var result = validator.TestValidate(command);
-
         result.ShouldHaveValidationErrorFor(x => x.StatusId);
     }
 
@@ -664,10 +569,8 @@ public class Supplier
             _updateRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new UpdateSupplierStatusCommand { Id = 1, StatusId = "inactive" };
-
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync((SupplierEntity?)null);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
@@ -680,14 +583,10 @@ public class Supplier
             _deleteRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new DeleteSupplierCommand { Id = 1 };
-
         var existingSupplier = new SupplierEntity { Id = 1, Name = "Supplier", StatusId = "active", InputReceipts = [] };
-
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingSupplier);
-
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -699,18 +598,15 @@ public class Supplier
             _deleteRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new DeleteSupplierCommand { Id = 1 };
-
         var existingSupplier = new SupplierEntity
         {
             Id = 1,
             Name = "Supplier",
             StatusId = "active",
-            InputReceipts = [ new() { StatusId = "working" } ]
+            InputReceipts = [new() { StatusId = "working" }]
         };
-
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingSupplier);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
@@ -723,20 +619,16 @@ public class Supplier
             _deleteRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new DeleteSupplierCommand { Id = 1 };
-
         var existingSupplier = new SupplierEntity
         {
             Id = 1,
             Name = "Supplier",
             StatusId = "active",
-            InputReceipts = [ new() { StatusId = "completed" } ]
+            InputReceipts = [new() { StatusId = "completed" }]
         };
-
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingSupplier);
-
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -748,10 +640,8 @@ public class Supplier
             _deleteRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new DeleteSupplierCommand { Id = 1 };
-
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync((SupplierEntity?)null);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
@@ -764,7 +654,6 @@ public class Supplier
             _updateRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new RestoreSupplierCommand { Id = 1 };
-
         var deletedSupplier = new SupplierEntity
         {
             Id = 1,
@@ -772,12 +661,9 @@ public class Supplier
             StatusId = "active",
             DeletedAt = DateTime.UtcNow
         };
-
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), DataFetchMode.All))
             .ReturnsAsync(deletedSupplier);
-
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -789,18 +675,15 @@ public class Supplier
             _updateRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new RestoreSupplierCommand { Id = 1 };
-
         var activeSupplier = new SupplierEntity { Id = 1, Name = "Supplier", StatusId = "active", DeletedAt = null };
-
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), DataFetchMode.All))
             .ReturnsAsync(activeSupplier);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsFailure.Should().BeTrue();
     }
 
-#pragma warning restore CRR0035
-#pragma warning restore IDE0079
+    #pragma warning restore CRR0035
+    #pragma warning restore IDE0079
 
     public class TestEntity : BaseEntity
     {

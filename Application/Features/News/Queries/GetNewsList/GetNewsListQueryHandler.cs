@@ -8,24 +8,19 @@ using NewsEntity = Domain.Entities.News;
 
 namespace Application.Features.News.Queries.GetNewsList;
 
-public sealed class GetNewsListQueryHandler(INewsReadRepository repository, ISievePaginator paginator) 
-    : IRequestHandler<GetNewsListQuery, Result<PagedResult<NewsResponse>>>
+public sealed class GetNewsListQueryHandler(INewsReadRepository repository, ISievePaginator paginator) : IRequestHandler<GetNewsListQuery, Result<PagedResult<NewsResponse>>>
 {
     public async Task<Result<PagedResult<NewsResponse>>> Handle(
         GetNewsListQuery request,
         CancellationToken cancellationToken)
     {
         var query = repository.GetQueryable();
-
-        // Only show published news for the list
         query = query.Where(n => n.IsPublished);
-
         var pagedResult = await paginator.ApplyAsync<NewsEntity, NewsResponse>(
             query,
             request.SieveModel!,
             cancellationToken: cancellationToken)
             .ConfigureAwait(false);
-
         return pagedResult;
     }
 }

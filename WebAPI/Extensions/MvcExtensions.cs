@@ -30,8 +30,8 @@ public static class MvcExtensions
     /// serialization options. It is intended to be called during application startup to standardize API behavior across
     /// the application.
     /// </remarks>
-    /// <param name="services">The <see cref="IServiceCollection"/> to which the MVC and related services will be added. Cannot be null.</param>
-    /// <returns>The same <see cref="IServiceCollection"/> instance so that additional calls can be chained.</returns>
+    /// <param name="services">The <see cref="IServiceCollection" /> to which the MVC and related services will be added. Cannot be null.</param>
+    /// <returns>The same <see cref="IServiceCollection" /> instance so that additional calls can be chained.</returns>
     public static IServiceCollection AddCustomMvc(this IServiceCollection services)
     {
         services.Configure<RouteOptions>(
@@ -40,7 +40,6 @@ public static class MvcExtensions
                 options.LowercaseUrls = true;
                 options.LowercaseQueryStrings = true;
             });
-
         services.AddApiVersioning(
             config =>
             {
@@ -55,11 +54,9 @@ public static class MvcExtensions
                     options.GroupNameFormat = "'v'VVV";
                     options.SubstituteApiVersionInUrl = true;
                 });
-
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();
-
-        services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(
+        services.Configure<JsonOptions>(
             options =>
             {
                 options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
@@ -67,17 +64,15 @@ public static class MvcExtensions
                 options.SerializerOptions.Converters.Add(new EmptyStringConverter());
                 options.SerializerOptions.Converters.Add(new NullableDecimalConverter());
             });
-
         services.AddControllers()
-            .AddJsonOptions(options =>
-            {
-                options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-                options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-                options.JsonSerializerOptions.Converters.Add(new EmptyStringConverter());
-                options.JsonSerializerOptions.Converters.Add(new NullableDecimalConverter());
-            });
-
-
+            .AddJsonOptions(
+                options =>
+                {
+                    options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+                    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+                    options.JsonSerializerOptions.Converters.Add(new EmptyStringConverter());
+                    options.JsonSerializerOptions.Converters.Add(new NullableDecimalConverter());
+                });
         return services;
     }
 }

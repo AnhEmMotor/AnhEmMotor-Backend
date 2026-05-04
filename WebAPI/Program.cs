@@ -1,6 +1,9 @@
 using Application;
+using Application.ApiContracts.Technology.Responses;
 using Asp.Versioning.ApiExplorer;
 using Infrastructure;
+using Infrastructure.DBContexts;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.SwaggerUI;
@@ -12,13 +15,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog();
 var configuration = builder.Configuration;
 var environment = builder.Environment;
-
 builder.Services.AddApplicationServices();
-if(!environment.IsEnvironment("Test"))
+if (!environment.IsEnvironment("Test"))
 {
     builder.Services.AddInfrastructureServices(configuration);
 }
-
 builder.Services
     .AddCustomLogging(configuration, "Anh Em Motor")
     .AddCustomMvc()
@@ -30,20 +31,16 @@ builder.Services
                 policy =>
                 {
                     var rawOrigins = configuration["Cors:AllowedOrigins"];
-
-                    if(string.IsNullOrWhiteSpace(rawOrigins))
+                    if (string.IsNullOrWhiteSpace(rawOrigins))
                     {
                         throw new InvalidOperationException("CORS AllowedOrigins is missing in appsettings.json.");
                     }
-
                     var allowedOrigins = rawOrigins.Split(';', StringSplitOptions.RemoveEmptyEntries);
-
-                    if(allowedOrigins.Any(origin => string.Compare(origin, "*") == 0))
+                    if (allowedOrigins.Any(origin => string.Compare(origin, "*") == 0))
                     {
                         throw new InvalidOperationException(
                             "Wildcard '*' is not allowed when using AllowCredentials. Please specify exact origins.");
                     }
-
                     policy.WithOrigins(allowedOrigins).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
                 });
         })
@@ -51,15 +48,13 @@ builder.Services
     .AddAuthorization()
     .AddCustomSwagger(environment)
     .AddCustomOpenTelemetry(configuration, "Anh Em Motor");
-
-if(!builder.Environment.IsEnvironment("Test"))
+if (!builder.Environment.IsEnvironment("Test"))
 {
     builder.Services.AddRateLimitingServices();
 }
 builder.Services.Configure<SieveOptions>(configuration.GetSection("Sieve"));
 builder.Services.AddHttpContextAccessor();
 builder.Services.ConfigureOptions<ConfigureSwaggerOptions>();
-
 var app = builder.Build();
 app.UseMiddleware<LogContextMiddleware>();
 app.UseSerilogRequestLogging(
@@ -70,17 +65,15 @@ app.UseSerilogRequestLogging(
             diagnosticContext.Set("ClientIP", httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown");
         };
     });
-
 app.UseExceptionHandler();
-
-if(app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI(
         options =>
         {
             var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
-            foreach(var description in provider.ApiVersionDescriptions)
+            foreach (var description in provider.ApiVersionDescriptions)
             {
                 options.SwaggerEndpoint(
                     $"/swagger/{description.GroupName}/swagger.json",
@@ -95,41 +88,35 @@ if(app.Environment.IsDevelopment())
     Console.WriteLine("=======================================================\n");
     Console.ForegroundColor = originalColor;
 }
-
 app.UseRouting();
-
 app.UseCors("CorsPolicy");
-
-if(!app.Environment.IsEnvironment("Test"))
+if (!app.Environment.IsEnvironment("Test"))
 {
     app.UseForwardedHeaders();
     app.UseRateLimiter();
 }
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
-
-app.MapGet("/api/v1/technology", async (Infrastructure.DBContexts.ApplicationDBContext db) =>
-{
-    var technologies = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync(
-        System.Linq.Queryable.Select(
-            Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.Include(
-                db.Technologies, t => t.Category),
-            t => new Application.ApiContracts.Technology.Responses.TechnologyResponse
-            {
-                Id = t.Id,
-                Name = t.Name,
-                DefaultTitle = t.DefaultTitle,
-                DefaultDescription = t.DefaultDescription,
-                DefaultImageUrl = t.DefaultImageUrl,
-                CategoryId = t.CategoryId,
-                CategoryName = t.Category != null ? t.Category.Name : null
-            }));
-    return Microsoft.AspNetCore.Http.TypedResults.Ok(technologies);
-}).RequireAuthorization();
-
+app.MapGet(
+    "/api/v1/technology",
+    async (ApplicationDBContext db) =>
+    {
+        var technologies = await EntityFrameworkQueryableExtensions.ToListAsync(
+            Queryable.Select(
+                    EntityFrameworkQueryableExtensions.Include(db.Technologies, t => t.Category),
+                    t => new TechnologyResponse
+                    {
+                        Id = t.Id,
+                        Name = t.Name,
+                        DefaultTitle = t.DefaultTitle,
+                        DefaultDescription = t.DefaultDescription,
+                        DefaultImageUrl = t.DefaultImageUrl,
+                        CategoryId = t.CategoryId,
+                        CategoryName = t.Category != null ? t.Category.Name : null
+                    }));
+        return TypedResults.Ok(technologies);
+    })
+    .RequireAuthorization();
 await app.ApplyMigrationsAndSeedAsync(app.Lifetime.ApplicationStopping).ConfigureAwait(true);
-
 app.Run();

@@ -12,15 +12,13 @@ public class OutputReadRepository(ApplicationDBContext context) : IOutputReadRep
     public IQueryable<OutputEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         var query = context.OutputOrders.IgnoreQueryFilters();
-
-        if(mode == DataFetchMode.ActiveOnly)
+        if (mode == DataFetchMode.ActiveOnly)
         {
             query = query.Where(x => x.DeletedAt == null);
-        } else if(mode == DataFetchMode.DeletedOnly)
+        } else if (mode == DataFetchMode.DeletedOnly)
         {
             query = query.Where(x => x.DeletedAt != null);
         }
-
         return query
             .Include(x => x.OutputInfos.Where(y => y.DeletedAt == null))
             .ThenInclude(x => x.ProductVariant)
@@ -50,7 +48,6 @@ public class OutputReadRepository(ApplicationDBContext context) : IOutputReadRep
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         var query = GetQueryable(mode);
-
         return query
             .FirstOrDefaultAsync(o => o.Id == id, cancellationToken)
             .ContinueWith(t => t.Result, cancellationToken);
@@ -96,7 +93,6 @@ public class OutputReadRepository(ApplicationDBContext context) : IOutputReadRep
     public async Task<long> GetStockQuantityByVariantIdAsync(int variantId, CancellationToken cancellationToken)
     {
         var validStatusIds = InputStatus.FinishInputValues;
-
         var currentStock = await context.InputInfos
             .AsNoTracking()
             .Where(ii => ii.ProductId == variantId && ii.DeletedAt == null)
@@ -104,7 +100,6 @@ public class OutputReadRepository(ApplicationDBContext context) : IOutputReadRep
             .Where(x => x.i.DeletedAt == null && validStatusIds.Contains(x.i.StatusId))
             .SumAsync(x => x.ii.RemainingCount ?? 0, cancellationToken)
             .ConfigureAwait(false);
-
         return currentStock;
     }
 }

@@ -25,18 +25,14 @@ public sealed class RestoreFileCommandHandler(
             cancellationToken,
             DataFetchMode.DeletedOnly)
             .ConfigureAwait(false);
-
-        if(mediaFile is null)
+        if (mediaFile is null)
         {
             return Error.NotFound();
         }
-
         updateRepository.Restore(mediaFile);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         var response = mediaFile.Adapt<MediaFileResponse>();
         response.PublicUrl = fileStorageService.GetPublicUrl(mediaFile.StoragePath!);
-
         return response;
     }
 }

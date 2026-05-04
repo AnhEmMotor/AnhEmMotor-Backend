@@ -40,70 +40,62 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
     private DbConnection _connection = default!;
     private string _fullConnectionString = default!;
 
-#pragma warning disable IDE0079 
-#pragma warning disable CRR0035
-#pragma warning disable CRR0039
+    #pragma warning disable IDE0079 
+    #pragma warning disable CRR0035
+    #pragma warning disable CRR0039
     public async ValueTask InitializeAsync()
     {
         await _postgreSqlContainer.StartAsync().ConfigureAwait(false);
-
         _dbName = $"Test_{Guid.NewGuid():N}";
         var baseConn = _postgreSqlContainer.GetConnectionString();
         var builder = new NpgsqlConnectionStringBuilder(baseConn) { Database = "postgres" };
-
-        using(var masterConn = new NpgsqlConnection(builder.ConnectionString))
+        using (var masterConn = new NpgsqlConnection(builder.ConnectionString))
         {
             await masterConn.OpenAsync().ConfigureAwait(false);
             using var cmd = masterConn.CreateCommand();
             cmd.CommandText = $"CREATE DATABASE \"{_dbName}\";";
             await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
         }
-
         builder.Database = _dbName;
         _fullConnectionString = builder.ConnectionString;
-
         _connection = new NpgsqlConnection(_fullConnectionString);
         await _connection.OpenAsync().ConfigureAwait(false);
-
         var options = new DbContextOptionsBuilder<ApplicationDBContext>()
             .UseNpgsql(_fullConnectionString)
             .Options;
-
         using var context = new ApplicationDBContext(options);
         await context.Database.EnsureCreatedAsync().ConfigureAwait(false);
-
         _respawner = await Respawner.CreateAsync(
             _connection,
             new RespawnerOptions
             {
                 DbAdapter = DbAdapter.Postgres,
-                SchemasToInclude = [ "public" ],
-                TablesToIgnore = [ "__EFMigrationsHistory" ]
+                SchemasToInclude = ["public"],
+                TablesToIgnore = ["__EFMigrationsHistory"]
             })
             .ConfigureAwait(false);
     }
 
     public async Task ResetDatabaseAsync(CancellationToken cancellationToken = default)
     {
-        if(cancellationToken.IsCancellationRequested)
+        if (cancellationToken.IsCancellationRequested)
             return;
         await _respawner.ResetAsync(_connection).ConfigureAwait(false);
     }
 
     public new async Task DisposeAsync()
     {
-        if(_connection != null)
+        if (_connection != null)
             await _connection.DisposeAsync().ConfigureAwait(false);
     }
 
-#pragma warning restore CRR0039
-#pragma warning restore CRR0035
-#pragma warning restore IDE0079 
+    #pragma warning restore CRR0039
+    #pragma warning restore CRR0035
+    #pragma warning restore IDE0079 
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Test");
-
         builder.ConfigureAppConfiguration(
             (context, config) =>
             {
@@ -127,21 +119,18 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                         });
                 config.AddEnvironmentVariables();
             });
-
         builder.ConfigureServices(
             services =>
             {
                 var dbContextDescriptor = services.SingleOrDefault(
                     d => d.ServiceType == typeof(DbContextOptions<ApplicationDBContext>));
-                if(dbContextDescriptor != null)
+                if (dbContextDescriptor != null)
                     services.Remove(dbContextDescriptor);
-
                 services.AddDbContext<ApplicationDBContext, PostgreSqlDbContext>(
                     (container, options) =>
                     {
                         var config = container.GetRequiredService<IConfiguration>();
                         var connectionString = config.GetConnectionString("StringConnection");
-
                         options.UseNpgsql(
                             connectionString,
                             npgsqlOptions =>
@@ -149,7 +138,6 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                                 npgsqlOptions.EnableRetryOnFailure();
                             });
                     });
-
                 services.AddIdentity<ApplicationUser, ApplicationRole>(
                     options =>
                     {
@@ -162,21 +150,17 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                     })
                     .AddEntityFrameworkStores<ApplicationDBContext>()
                     .AddDefaultTokenProviders();
-
                 services.Configure<AuthenticationOptions>(
                     options =>
                     {
                         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                         options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                     });
-
                 services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
                 services.AddScoped<IAuthorizationHandler, PermissionHandler>();
                 services.AddScoped<IAuthorizationHandler, AllPermissionsHandler>();
                 services.AddScoped<IAuthorizationHandler, AnyPermissionsHandler>();
-
                 services.AddSingleton<IUserStreamService, UserStreamService>();
-
                 services.AddScoped<ITokenManagerService, TokenManagerService>();
                 services.AddScoped<IHttpTokenAccessorService, HttpTokenAccessorService>();
                 services.AddScoped<IIdentityService, IdentityService>();
@@ -185,7 +169,6 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                 services.AddScoped<IFileStorageService, LocalFileStorageService>();
                 services.AddScoped<ISievePaginator, SievePaginator>();
                 services.AddScoped<IUnitOfWork, UnitOfWork>();
-
                 services.Scan(
                     scan => scan
                         .FromAssemblies(typeof(DependencyInjection).Assembly)

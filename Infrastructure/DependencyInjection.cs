@@ -24,21 +24,18 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         var provider = configuration.GetValue("Provider", "SqlServer");
-
-        if(string.Compare(provider, "MySql") == 0)
+        if (string.Compare(provider, "MySql") == 0)
         {
             var connectionString = configuration.GetConnectionString("StringConnection") ?? string.Empty;
             var serverVersion = new MariaDbServerVersion(new Version(10, 6, 23));
-
             services.AddDbContextPool<ApplicationDBContext, MySqlDbContext>(
                 options =>
                 {
                     options.UseMySql(connectionString, serverVersion);
                 });
-        } else if(string.Compare(provider, "PostgreSql") == 0)
+        } else if (string.Compare(provider, "PostgreSql") == 0)
         {
             var connectionString = configuration.GetConnectionString("StringConnection") ?? string.Empty;
-
             services.AddDbContextPool<ApplicationDBContext, PostgreSqlDbContext>(
                 options =>
                 {
@@ -52,11 +49,10 @@ public static class DependencyInjection
                     options.UseSqlServer(
                         configuration.GetConnectionString("StringConnection"),
                         b => b.MigrationsAssembly(typeof(ApplicationDBContext).Assembly.FullName)
-                              .CommandTimeout(30)
-                              .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
+                                .CommandTimeout(30)
+                                .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
                 });
         }
-
         services.AddIdentity<ApplicationUser, ApplicationRole>(
             options =>
             {
@@ -69,15 +65,12 @@ public static class DependencyInjection
             })
             .AddEntityFrameworkStores<ApplicationDBContext>()
             .AddDefaultTokenProviders();
-
         services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
         services.AddSingleton<IUserStreamService, UserStreamService>();
         services.AddSingleton<INotificationService, NotificationService>();
-
         services.AddScoped<IAuthorizationHandler, PermissionHandler>();
         services.AddScoped<IAuthorizationHandler, AllPermissionsHandler>();
         services.AddScoped<IAuthorizationHandler, AnyPermissionsHandler>();
-
         services.AddScoped<ITokenManagerService, TokenManagerService>();
         services.AddScoped<IHttpTokenAccessorService, HttpTokenAccessorService>();
         services.AddScoped<IIdentityService, IdentityService>();
@@ -88,16 +81,13 @@ public static class DependencyInjection
         services.AddScoped<ISievePaginator, SievePaginator>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
-
         services.AddHttpClient();
-
         services.Scan(
             scan => scan
             .FromAssemblies(Assembly.GetExecutingAssembly())
                 .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Repository")))
                 .AsImplementedInterfaces()
                 .WithScopedLifetime());
-
         return services;
     }
 }

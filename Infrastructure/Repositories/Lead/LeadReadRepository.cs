@@ -1,5 +1,4 @@
 using Application.Interfaces.Repositories.Lead;
-using Domain.Entities;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,12 +8,12 @@ public class LeadReadRepository(ApplicationDBContext context) : ILeadReadReposit
 {
     public async Task<Domain.Entities.Lead?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        return await context.Leads
-            .Include(l => l.Activities)
-            .FirstOrDefaultAsync(l => l.Id == id, cancellationToken);
+        return await context.Leads.Include(l => l.Activities).FirstOrDefaultAsync(l => l.Id == id, cancellationToken);
     }
 
-    public async Task<Domain.Entities.Lead?> GetByPhoneNumberAsync(string phoneNumber, CancellationToken cancellationToken = default)
+    public async Task<Domain.Entities.Lead?> GetByPhoneNumberAsync(
+        string phoneNumber,
+        CancellationToken cancellationToken = default)
     {
         return await context.Leads
             .Include(l => l.Activities)

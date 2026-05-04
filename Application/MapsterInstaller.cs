@@ -11,10 +11,8 @@ public static class MapsterInstaller
     {
         var config = TypeAdapterConfig.GlobalSettings;
         config.Scan(assembly);
-
         services.AddSingleton(config);
         services.AddScoped<IMapper, ServiceMapper>();
-
         return services;
     }
 }

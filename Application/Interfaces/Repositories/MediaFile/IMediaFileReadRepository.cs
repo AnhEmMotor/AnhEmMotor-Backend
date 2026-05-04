@@ -1,7 +1,7 @@
 using Domain.Constants;
 using MediaFileEntity = Domain.Entities.MediaFile;
-namespace Application.Interfaces.Repositories.MediaFile;
 
+namespace Application.Interfaces.Repositories.MediaFile;
 
 public interface IMediaFileReadRepository
 {

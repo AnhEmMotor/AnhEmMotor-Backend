@@ -8,6 +8,7 @@ namespace Application.Interfaces.Repositories.OptionValue
         public IQueryable<OptionValueEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly);
 
         public Task<List<OptionValueEntity>> GetByIdAsync(List<int> optionValueIds, CancellationToken cancellationToken);
+
         public Task<OptionValueEntity?> GetByIdAsync(int id, CancellationToken cancellationToken);
 
         public Task<OptionValueEntity?> GetByIdAndNameAsync(

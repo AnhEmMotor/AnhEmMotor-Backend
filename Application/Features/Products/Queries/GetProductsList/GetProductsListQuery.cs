@@ -29,7 +29,10 @@ public sealed record GetProductsListQuery : IRequest<Result<PagedResult<ProductL
 
     public decimal? MaxPrice { get; init; }
 
-    public static GetProductsListQuery FromRequest(GetProductsRequest request, decimal? minPriceParam = null, decimal? maxPriceParam = null)
+    public static GetProductsListQuery FromRequest(
+        GetProductsRequest request,
+        decimal? minPriceParam = null,
+        decimal? maxPriceParam = null)
     {
         var search = ExtractFilterValue(request.Filters, "search");
         var statusIds = ExtractFilterValue(request.Filters, "statusIds")?.Split(
@@ -37,27 +40,24 @@ public sealed record GetProductsListQuery : IRequest<Result<PagedResult<ProductL
                 StringSplitOptions.RemoveEmptyEntries)
                 .ToList() ??
             [];
-
         var categoryIds = request.CategoryIds?.Split(',', StringSplitOptions.RemoveEmptyEntries)
                 .Select(int.Parse)
                 .ToList() ??
             [];
-
-        var brandIds = request.BrandIds?.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                .Select(int.Parse)
-                .ToList() ??
+        var brandIds = request.BrandIds?.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList() ??
             [];
-
         var optionValueIds = request.OptionValueIds?.Split(',', StringSplitOptions.RemoveEmptyEntries)
                 .Select(int.Parse)
                 .ToList() ??
             [];
-
-        var minPrice = minPriceParam ?? request.MinPrice ?? (decimal.TryParse(ExtractFilterValue(request.Filters, "price", ">="), out var min) ? min : (decimal?)null);
-        var maxPrice = maxPriceParam ?? request.MaxPrice ?? (decimal.TryParse(ExtractFilterValue(request.Filters, "price", "<="), out var max) ? max : (decimal?)null);
-
+        var minPrice = minPriceParam ??
+            request.MinPrice ??
+            (decimal.TryParse(ExtractFilterValue(request.Filters, "price", ">="), out var min) ? min : (decimal?)null);
+        var maxPrice = maxPriceParam ??
+            request.MaxPrice ??
+            (decimal.TryParse(ExtractFilterValue(request.Filters, "price", "<="), out var max) ? max : (decimal?)null);
         var filters = request.Filters;
-        if(!string.IsNullOrWhiteSpace(filters))
+        if (!string.IsNullOrWhiteSpace(filters))
         {
             var filterParts = filters.Split(',', StringSplitOptions.RemoveEmptyEntries)
                 .Where(
@@ -71,7 +71,6 @@ public sealed record GetProductsListQuery : IRequest<Result<PagedResult<ProductL
                 .ToList();
             filters = filterParts.Count > 0 ? string.Join(",", filterParts) : null;
         }
-
         return new GetProductsListQuery
         {
             Page = request.Page ?? 1,
@@ -90,32 +89,26 @@ public sealed record GetProductsListQuery : IRequest<Result<PagedResult<ProductL
 
     private static string? ExtractFilterValue(string? filters, string key, string op = "")
     {
-        if(string.IsNullOrWhiteSpace(filters))
+        if (string.IsNullOrWhiteSpace(filters))
         {
             return null;
         }
-
         var parts = filters.Split(',');
-        foreach(var part in parts)
+        foreach (var part in parts)
         {
             var trimmedPart = part.Trim();
-            if(!trimmedPart.StartsWith(key, StringComparison.OrdinalIgnoreCase))
+            if (!trimmedPart.StartsWith(key, StringComparison.OrdinalIgnoreCase))
                 continue;
-
-            // Simple split by operators
             var operators = new[] { "<=", ">=", "<", ">", "==", "!", "@", "=" };
             var foundOp = operators.FirstOrDefault(o => trimmedPart.Substring(key.Length).Trim().StartsWith(o));
-            
             if (foundOp != null)
             {
                 if (!string.IsNullOrEmpty(op) && foundOp != op)
                     continue;
-
                 var value = trimmedPart.Substring(key.Length).Trim().Substring(foundOp.Length).Trim();
                 return value;
             }
         }
-
         return null;
     }
 }

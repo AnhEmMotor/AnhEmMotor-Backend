@@ -6,14 +6,13 @@ using System;
 
 namespace Infrastructure.MySqlMigrations
 {
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public partial class InitMigrationForMySQLVPS : Migration
     {
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterDatabase().Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "Brand",
                 columns: table => new
@@ -33,7 +32,6 @@ namespace Infrastructure.MySqlMigrations
                     table.PrimaryKey("PK_Brand", x => x.Id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "InputStatus",
                 columns: table => new
@@ -49,7 +47,6 @@ namespace Infrastructure.MySqlMigrations
                     table.PrimaryKey("PK_InputStatus", x => x.Key);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "MediaFiles",
                 columns: table => new
@@ -76,7 +73,6 @@ namespace Infrastructure.MySqlMigrations
                     table.PrimaryKey("PK_MediaFiles", x => x.Id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "Option",
                 columns: table => new
@@ -93,7 +89,6 @@ namespace Infrastructure.MySqlMigrations
                     table.PrimaryKey("PK_Option", x => x.Id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "OutputStatus",
                 columns: table => new
@@ -109,7 +104,6 @@ namespace Infrastructure.MySqlMigrations
                     table.PrimaryKey("PK_OutputStatus", x => x.Key);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "Permissions",
                 columns: table => new
@@ -124,7 +118,6 @@ namespace Infrastructure.MySqlMigrations
                     table.PrimaryKey("PK_Permissions", x => x.Id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "ProductCategory",
                 columns: table => new
@@ -148,7 +141,6 @@ namespace Infrastructure.MySqlMigrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4")
                 .Annotation("Relational:Collation", "utf8mb4_unicode_ci");
-
             migrationBuilder.CreateTable(
                 name: "ProductStatus",
                 columns: table => new
@@ -164,7 +156,6 @@ namespace Infrastructure.MySqlMigrations
                     table.PrimaryKey("PK_ProductStatus", x => x.Key);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "Roles",
                 columns: table => new
@@ -184,7 +175,6 @@ namespace Infrastructure.MySqlMigrations
                     table.PrimaryKey("PK_Roles", x => x.Id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "Setting",
                 columns: table => new
@@ -202,7 +192,6 @@ namespace Infrastructure.MySqlMigrations
                     table.PrimaryKey("PK_Setting", x => x.Key);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "SupplierStatus",
                 columns: table => new
@@ -218,7 +207,6 @@ namespace Infrastructure.MySqlMigrations
                     table.PrimaryKey("PK_SupplierStatus", x => x.Key);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
@@ -262,7 +250,6 @@ namespace Infrastructure.MySqlMigrations
                     table.PrimaryKey("PK_Users", x => x.Id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "OptionValue",
                 columns: table => new
@@ -285,7 +272,6 @@ namespace Infrastructure.MySqlMigrations
                         principalColumn: "Id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "Product",
                 columns: table => new
@@ -345,7 +331,6 @@ namespace Infrastructure.MySqlMigrations
                         principalColumn: "Key");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "RoleClaims",
                 columns: table => new
@@ -369,7 +354,6 @@ namespace Infrastructure.MySqlMigrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "RolePermissions",
                 columns: table => new
@@ -394,7 +378,6 @@ namespace Infrastructure.MySqlMigrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "Supplier",
                 columns: table => new
@@ -425,7 +408,6 @@ namespace Infrastructure.MySqlMigrations
                         principalColumn: "Key");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "Output",
                 columns: table => new
@@ -475,7 +457,6 @@ namespace Infrastructure.MySqlMigrations
                         principalColumn: "Id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "UserClaims",
                 columns: table => new
@@ -499,7 +480,6 @@ namespace Infrastructure.MySqlMigrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "UserLogins",
                 columns: table => new
@@ -523,7 +503,6 @@ namespace Infrastructure.MySqlMigrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "UserRoles",
                 columns: table => new
@@ -557,7 +536,6 @@ namespace Infrastructure.MySqlMigrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "UserTokens",
                 columns: table => new
@@ -581,7 +559,6 @@ namespace Infrastructure.MySqlMigrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "ProductVariant",
                 columns: table => new
@@ -607,7 +584,6 @@ namespace Infrastructure.MySqlMigrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "SupplierContact",
                 columns: table => new
@@ -634,7 +610,6 @@ namespace Infrastructure.MySqlMigrations
                         principalColumn: "Id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "Input",
                 columns: table => new
@@ -684,7 +659,6 @@ namespace Infrastructure.MySqlMigrations
                         principalColumn: "Id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "OutputInfo",
                 columns: table => new
@@ -716,7 +690,6 @@ namespace Infrastructure.MySqlMigrations
                         principalColumn: "Id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "ProductCollectionPhoto",
                 columns: table => new
@@ -740,7 +713,6 @@ namespace Infrastructure.MySqlMigrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "VariantOptionValue",
                 columns: table => new
@@ -769,7 +741,6 @@ namespace Infrastructure.MySqlMigrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateTable(
                 name: "InputInfo",
                 columns: table => new
@@ -807,164 +778,103 @@ namespace Infrastructure.MySqlMigrations
                         principalColumn: "Id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateIndex(name: "IX_Input_ConfirmedBy", table: "Input", column: "ConfirmedBy");
-
             migrationBuilder.CreateIndex(name: "IX_Input_CreatedBy", table: "Input", column: "CreatedBy");
-
             migrationBuilder.CreateIndex(name: "IX_Input_SourceOrderId", table: "Input", column: "SourceOrderId");
-
             migrationBuilder.CreateIndex(name: "IX_Input_StatusId", table: "Input", column: "StatusId");
-
             migrationBuilder.CreateIndex(name: "IX_Input_SupplierId", table: "Input", column: "SupplierId");
-
             migrationBuilder.CreateIndex(name: "IX_InputInfo_InputId", table: "InputInfo", column: "InputId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_InputInfo_ParentOutputInfoId",
                 table: "InputInfo",
                 column: "ParentOutputInfoId");
-
             migrationBuilder.CreateIndex(name: "IX_InputInfo_ProductId", table: "InputInfo", column: "ProductId");
-
             migrationBuilder.CreateIndex(name: "IX_OptionValue_OptionId", table: "OptionValue", column: "OptionId");
-
             migrationBuilder.CreateIndex(name: "IX_Output_BuyerId", table: "Output", column: "BuyerId");
-
             migrationBuilder.CreateIndex(name: "IX_Output_CreatedBy", table: "Output", column: "CreatedBy");
-
             migrationBuilder.CreateIndex(name: "IX_Output_FinishedBy", table: "Output", column: "FinishedBy");
-
             migrationBuilder.CreateIndex(name: "IX_Output_StatusId", table: "Output", column: "StatusId");
-
             migrationBuilder.CreateIndex(name: "IX_OutputInfo_OutputId", table: "OutputInfo", column: "OutputId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_OutputInfo_ProductVarientId",
                 table: "OutputInfo",
                 column: "ProductVarientId");
-
             migrationBuilder.CreateIndex(name: "IX_Product_BrandId", table: "Product", column: "BrandId");
-
             migrationBuilder.CreateIndex(name: "IX_Product_CategoryId", table: "Product", column: "CategoryId");
-
             migrationBuilder.CreateIndex(name: "IX_Product_StatusId", table: "Product", column: "StatusId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ProductCollectionPhoto_ProductVariantId",
                 table: "ProductCollectionPhoto",
                 column: "ProductVariantId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ProductVariant_ProductId",
                 table: "ProductVariant",
                 column: "ProductId");
-
             migrationBuilder.CreateIndex(name: "IX_RoleClaims_RoleId", table: "RoleClaims", column: "RoleId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_RolePermissions_PermissionId",
                 table: "RolePermissions",
                 column: "PermissionId");
-
             migrationBuilder.CreateIndex(name: "RoleNameIndex", table: "Roles", column: "NormalizedName", unique: true);
-
             migrationBuilder.CreateIndex(name: "IX_Supplier_StatusId", table: "Supplier", column: "StatusId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_SupplierContact_SupplierId",
                 table: "SupplierContact",
                 column: "SupplierId");
-
             migrationBuilder.CreateIndex(name: "IX_UserClaims_UserId", table: "UserClaims", column: "UserId");
-
             migrationBuilder.CreateIndex(name: "IX_UserLogins_UserId", table: "UserLogins", column: "UserId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_UserRoles_ApplicationUserId",
                 table: "UserRoles",
                 column: "ApplicationUserId");
-
             migrationBuilder.CreateIndex(name: "IX_UserRoles_RoleId", table: "UserRoles", column: "RoleId");
-
             migrationBuilder.CreateIndex(name: "EmailIndex", table: "Users", column: "NormalizedEmail");
-
             migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
                 table: "Users",
                 column: "NormalizedUserName",
                 unique: true);
-
             migrationBuilder.CreateIndex(
                 name: "IX_VariantOptionValue_OptionValueId",
                 table: "VariantOptionValue",
                 column: "OptionValueId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_VariantOptionValue_VariantId",
                 table: "VariantOptionValue",
                 column: "VariantId");
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(name: "InputInfo");
-
             migrationBuilder.DropTable(name: "MediaFiles");
-
             migrationBuilder.DropTable(name: "ProductCollectionPhoto");
-
             migrationBuilder.DropTable(name: "RoleClaims");
-
             migrationBuilder.DropTable(name: "RolePermissions");
-
             migrationBuilder.DropTable(name: "Setting");
-
             migrationBuilder.DropTable(name: "SupplierContact");
-
             migrationBuilder.DropTable(name: "UserClaims");
-
             migrationBuilder.DropTable(name: "UserLogins");
-
             migrationBuilder.DropTable(name: "UserRoles");
-
             migrationBuilder.DropTable(name: "UserTokens");
-
             migrationBuilder.DropTable(name: "VariantOptionValue");
-
             migrationBuilder.DropTable(name: "Input");
-
             migrationBuilder.DropTable(name: "OutputInfo");
-
             migrationBuilder.DropTable(name: "Permissions");
-
             migrationBuilder.DropTable(name: "Roles");
-
             migrationBuilder.DropTable(name: "OptionValue");
-
             migrationBuilder.DropTable(name: "InputStatus");
-
             migrationBuilder.DropTable(name: "Supplier");
-
             migrationBuilder.DropTable(name: "Output");
-
             migrationBuilder.DropTable(name: "ProductVariant");
-
             migrationBuilder.DropTable(name: "Option");
-
             migrationBuilder.DropTable(name: "SupplierStatus");
-
             migrationBuilder.DropTable(name: "OutputStatus");
-
             migrationBuilder.DropTable(name: "Users");
-
             migrationBuilder.DropTable(name: "Product");
-
             migrationBuilder.DropTable(name: "Brand");
-
             migrationBuilder.DropTable(name: "ProductCategory");
-
             migrationBuilder.DropTable(name: "ProductStatus");
         }
     }

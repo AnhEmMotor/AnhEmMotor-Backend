@@ -9,6 +9,7 @@ namespace Application.Interfaces.Services
         public void DeleteRefreshTokenFromCookie();
 
         public string? GetAuthorizationValueFromHeader();
+
         public string? GetUserId();
     }
 }

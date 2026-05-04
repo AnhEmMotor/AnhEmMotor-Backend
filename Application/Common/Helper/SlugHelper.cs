@@ -1,6 +1,6 @@
+using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Globalization;
 
 namespace Application.Common.Helper;
 
@@ -10,21 +10,11 @@ public static class SlugHelper
     {
         if (string.IsNullOrEmpty(phrase))
             return string.Empty;
-
         string str = phrase.ToLowerInvariant();
-
-        // Remove diacritics
         str = RemoveDiacritics(str);
-
-        // Replace invalid characters with hyphens
-        str = Regex.Replace(str, @"[^a-z0-9\s-]", "");
-        
-        // Convert multiple spaces/hyphens into one hyphen
+        str = Regex.Replace(str, @"[^a-z0-9\s-]", string.Empty);
         str = Regex.Replace(str, @"[\s_-]+", "-").Trim();
-
-        // Cut and trim
         str = str.Substring(0, str.Length <= 255 ? str.Length : 255).Trim('-');
-
         return str;
     }
 
@@ -32,7 +22,6 @@ public static class SlugHelper
     {
         var normalizedString = text.Normalize(NormalizationForm.FormD);
         var stringBuilder = new StringBuilder();
-
         foreach (var c in normalizedString)
         {
             var unicodeCategory = CharGetUnicodeCategory(c);
@@ -41,14 +30,12 @@ public static class SlugHelper
                 if (c == 'đ' || c == 'Đ')
                 {
                     stringBuilder.Append('d');
-                }
-                else
+                } else
                 {
                     stringBuilder.Append(c);
                 }
             }
         }
-
         return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
     }
 

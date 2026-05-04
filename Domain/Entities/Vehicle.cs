@@ -26,8 +26,9 @@ public class Vehicle : BaseEntity
     public string LicensePlate { get; set; } = string.Empty;
 
     [Column("PurchaseDate")]
-    public System.DateTimeOffset PurchaseDate { get; set; }
+    public DateTimeOffset PurchaseDate { get; set; }
 
     public ICollection<VehicleDocument> Documents { get; set; } = new List<VehicleDocument>();
+
     public ICollection<MaintenanceHistory> MaintenanceHistories { get; set; } = new List<MaintenanceHistory>();
 }

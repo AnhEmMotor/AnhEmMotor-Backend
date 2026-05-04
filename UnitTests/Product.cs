@@ -74,16 +74,15 @@ public class Product
         _predefinedOptionReadRepoMock = new Mock<IPredefinedOptionReadRepository>();
         _predefinedOptionReadRepoMock
             .Setup(x => x.GetAllKeysAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync([ "Màu sắc", "Phiên bản", "Kích thước" ]);
+            .ReturnsAsync(["Màu sắc", "Phiên bản", "Kích thước"]);
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _productVariantInsertRepository = new Mock<IProductVariantInsertRepository>();
         _variantOptionValueDeleteRepoMock = new Mock<IVariantOptionValueDeleteRepository>();
-
         new ProductMappingConfig().Register(TypeAdapterConfig.GlobalSettings);
     }
 
-#pragma warning disable IDE0079 
-#pragma warning disable CRR0035
+    #pragma warning disable IDE0079 
+    #pragma warning disable CRR0035
 
     [Fact(DisplayName = "PRODUCT_001 - Tạo sản phẩm thành công với 1 biến thể không có optionValues")]
     public async Task CreateProduct_SingleVariantNoOptions_Success()
@@ -94,22 +93,20 @@ public class Product
             CategoryId = 1,
             BrandId = 1,
             Variants =
-                [ new CreateProductVariantRequest
+                [new CreateProductVariantRequest
                 {
                     UrlSlug = "wave-alpha-2024",
                     Price = 20000000,
                     CoverImageUrl = "image.jpg",
                     OptionValues = []
-                } ]
+                }]
         };
-
         _productCategoryReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.ProductCategory { Id = 1, DeletedAt = null });
         _brandReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.Brand { Id = 1, DeletedAt = null });
         _variantReadRepoMock.Setup(x => x.GetBySlugAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((ProductVariant?)null);
-
         var handler = new CreateProductCommandHandler(
             _productCategoryReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -121,9 +118,7 @@ public class Product
             _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
     }
 
@@ -136,7 +131,7 @@ public class Product
             CategoryId = 1,
             BrandId = 1,
             Variants =
-                [ new CreateProductVariantRequest
+                [new CreateProductVariantRequest
                 {
                     UrlSlug = "sh160i-red",
                     Price = 100000000,
@@ -146,16 +141,14 @@ public class Product
                     UrlSlug = "sh160i-black",
                     Price = 102000000,
                     OptionValues = new Dictionary<string, string> { { "Màu sắc", "Đen" }, { "Phiên bản", "Thường" } }
-                } ]
+                }]
         };
-
         _productCategoryReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.ProductCategory { Id = 1, DeletedAt = null });
         _brandReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.Brand { Id = 1, DeletedAt = null });
         _variantReadRepoMock.Setup(x => x.GetBySlugAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((ProductVariant?)null);
-
         var handler = new CreateProductCommandHandler(
             _productCategoryReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -167,9 +160,7 @@ public class Product
             _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
     }
 
@@ -181,12 +172,10 @@ public class Product
             Name = "Honda Wave",
             CategoryId = 999,
             BrandId = 1,
-            Variants = [ new CreateProductVariantRequest { UrlSlug = "wave-2024", Price = 20000000 } ]
+            Variants = [new CreateProductVariantRequest { UrlSlug = "wave-2024", Price = 20000000 }]
         };
-
         _productCategoryReadRepoMock.Setup(x => x.GetByIdAsync(999, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Domain.Entities.ProductCategory?)null);
-
         var handler = new CreateProductCommandHandler(
             _productCategoryReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -198,9 +187,7 @@ public class Product
             _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
     }
 
@@ -212,14 +199,12 @@ public class Product
             Name = "Honda Wave",
             CategoryId = 1,
             BrandId = 999,
-            Variants = [ new CreateProductVariantRequest { UrlSlug = "wave-2024", Price = 20000000 } ]
+            Variants = [new CreateProductVariantRequest { UrlSlug = "wave-2024", Price = 20000000 }]
         };
-
         _productCategoryReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.ProductCategory { Id = 1, DeletedAt = null });
         _brandReadRepoMock.Setup(x => x.GetByIdAsync(999, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Domain.Entities.Brand?)null);
-
         var handler = new CreateProductCommandHandler(
             _productCategoryReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -231,9 +216,7 @@ public class Product
             _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
     }
 
@@ -245,12 +228,10 @@ public class Product
             Name = "Honda Wave",
             CategoryId = 1,
             BrandId = 1,
-            Variants = [ new CreateProductVariantRequest { UrlSlug = "wave-2024", Price = 20000000 } ]
+            Variants = [new CreateProductVariantRequest { UrlSlug = "wave-2024", Price = 20000000 }]
         };
-
         _productCategoryReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.ProductCategory { Id = 1, DeletedAt = DateTime.UtcNow });
-
         var handler = new CreateProductCommandHandler(
             _productCategoryReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -262,9 +243,7 @@ public class Product
             _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
     }
 
@@ -276,14 +255,12 @@ public class Product
             Name = "Honda Wave",
             CategoryId = 1,
             BrandId = 1,
-            Variants = [ new CreateProductVariantRequest { UrlSlug = "wave-2024", Price = 20000000 } ]
+            Variants = [new CreateProductVariantRequest { UrlSlug = "wave-2024", Price = 20000000 }]
         };
-
         _productCategoryReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.ProductCategory { Id = 1, DeletedAt = null });
         _brandReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.Brand { Id = 1, DeletedAt = DateTime.UtcNow });
-
         var handler = new CreateProductCommandHandler(
             _productCategoryReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -295,9 +272,7 @@ public class Product
             _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
     }
 
@@ -309,16 +284,14 @@ public class Product
             Name = "Honda Wave",
             CategoryId = 1,
             BrandId = 1,
-            Variants = [ new CreateProductVariantRequest { UrlSlug = "wave-alpha-2024", Price = 20000000 } ]
+            Variants = [new CreateProductVariantRequest { UrlSlug = "wave-alpha-2024", Price = 20000000 }]
         };
-
         _productCategoryReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.ProductCategory { Id = 1, DeletedAt = null });
         _brandReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.Brand { Id = 1, DeletedAt = null });
         _variantReadRepoMock.Setup(x => x.GetBySlugAsync("wave-alpha-2024", It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ProductVariant { Id = 999, UrlSlug = "wave-alpha-2024" });
-
         var handler = new CreateProductCommandHandler(
             _productCategoryReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -330,9 +303,7 @@ public class Product
             _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
     }
 
@@ -344,16 +315,14 @@ public class Product
             Name = "Honda Wave",
             CategoryId = 1,
             BrandId = 1,
-            Variants = [ new CreateProductVariantRequest { UrlSlug = "wave-alpha-2024", Price = 20000000 } ]
+            Variants = [new CreateProductVariantRequest { UrlSlug = "wave-alpha-2024", Price = 20000000 }]
         };
-
         _productCategoryReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.ProductCategory { Id = 1, DeletedAt = null });
         _brandReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.Brand { Id = 1, DeletedAt = null });
         _variantReadRepoMock.Setup(x => x.GetBySlugAsync("wave-alpha-2024", It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ProductVariant { Id = 999, UrlSlug = "wave-alpha-2024" });
-
         var handler = new CreateProductCommandHandler(
             _productCategoryReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -365,9 +334,7 @@ public class Product
             _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
     }
 
@@ -379,13 +346,10 @@ public class Product
             Name = "Honda Wave",
             CategoryId = 1,
             BrandId = 1,
-            Variants = [ new CreateProductVariantRequest { UrlSlug = "wave-2024", Price = -100 } ]
+            Variants = [new CreateProductVariantRequest { UrlSlug = "wave-2024", Price = -100 }]
         };
-
         var validator = new CreateProductCommandValidator();
-
         var result = validator.Validate(command);
-
         result.Should().NotBeNull();
     }
 
@@ -397,16 +361,14 @@ public class Product
             Name = "Honda Wave",
             CategoryId = 1,
             BrandId = 1,
-            Variants = [ new CreateProductVariantRequest { UrlSlug = "wave-2024", Price = 0 } ]
+            Variants = [new CreateProductVariantRequest { UrlSlug = "wave-2024", Price = 0 }]
         };
-
         _productCategoryReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.ProductCategory { Id = 1, DeletedAt = null });
         _brandReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.Brand { Id = 1, DeletedAt = null });
         _variantReadRepoMock.Setup(x => x.GetBySlugAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((ProductVariant?)null);
-
         var handler = new CreateProductCommandHandler(
             _productCategoryReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -418,9 +380,7 @@ public class Product
             _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
     }
 
@@ -428,11 +388,8 @@ public class Product
     public void CreateProduct_NoVariants_FailsValidation()
     {
         var command = new CreateProductCommand { Name = "Honda Wave", CategoryId = 1, BrandId = 1, Variants = [] };
-
         var validator = new CreateProductCommandValidator();
-
         var result = validator.Validate(command);
-
         result.Should().NotBeNull();
     }
 
@@ -446,18 +403,15 @@ public class Product
             CategoryId = 1,
             BrandId = 1,
             Variants =
-                [ new CreateProductVariantRequest
+                [new CreateProductVariantRequest
                 {
                     UrlSlug = "sh-red",
                     Price = 100000000,
                     OptionValues = new Dictionary<string, string> { { "Màu sắc", "Đỏ" } }
-                }, new CreateProductVariantRequest { UrlSlug = "sh-black", Price = 100000000, OptionValues = [] } ]
+                }, new CreateProductVariantRequest { UrlSlug = "sh-black", Price = 100000000, OptionValues = [] }]
         };
-
         var validator = new CreateProductCommandValidator();
-
         var result = validator.Validate(command);
-
         result.Should().NotBeNull();
     }
 
@@ -470,7 +424,7 @@ public class Product
             CategoryId = 1,
             BrandId = 1,
             Variants =
-                [ new CreateProductVariantRequest
+                [new CreateProductVariantRequest
                 {
                     UrlSlug = "sh-red-1",
                     Price = 100000000,
@@ -480,13 +434,10 @@ public class Product
                     UrlSlug = "sh-red-2",
                     Price = 100000000,
                     OptionValues = new Dictionary<string, string> { { "Màu sắc", "Đỏ" } }
-                } ]
+                }]
         };
-
         var validator = new CreateProductCommandValidator();
-
         var result = validator.Validate(command);
-
         result.Should().NotBeNull();
     }
 
@@ -499,26 +450,23 @@ public class Product
             CategoryId = 1,
             BrandId = 1,
             Variants =
-                [ new CreateProductVariantRequest
+                [new CreateProductVariantRequest
                 {
                     UrlSlug = "sh-xl",
                     Price = 100000000,
                     OptionValues = new Dictionary<string, string> { { "Kích thước", "XL" } }
-                } ]
+                }]
         };
-
         _productCategoryReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.ProductCategory { Id = 1, DeletedAt = null });
         _brandReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.Brand { Id = 1, DeletedAt = null });
         _variantReadRepoMock.Setup(x => x.GetBySlugAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((ProductVariant?)null);
-
         var specificPredefinedOptionRepoMock = new Mock<IPredefinedOptionReadRepository>();
         specificPredefinedOptionRepoMock
             .Setup(x => x.GetAllKeysAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync([ "Màu sắc", "Phiên bản" ]);
-
+            .ReturnsAsync(["Màu sắc", "Phiên bản"]);
         var handler = new CreateProductCommandHandler(
             _productCategoryReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -530,9 +478,7 @@ public class Product
             _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         result.Errors.Should().NotBeNullOrEmpty();
         result.Errors!.First().Code.Should().Be("BadRequest");
@@ -547,18 +493,15 @@ public class Product
             CategoryId = 1,
             BrandId = 1,
             Variants =
-                [ new CreateProductVariantRequest
+                [new CreateProductVariantRequest
                 {
                     UrlSlug = "sh-variant",
                     Price = 100000000,
                     OptionValues = new Dictionary<string, string> { { "Màu sắc", string.Empty } }
-                } ]
+                }]
         };
-
         var validator = new CreateProductCommandValidator();
-
         var result = validator.Validate(command);
-
         result.Should().NotBeNull();
     }
 
@@ -570,16 +513,14 @@ public class Product
             Name = " Honda Wave ",
             CategoryId = 1,
             BrandId = 1,
-            Variants = [ new CreateProductVariantRequest { UrlSlug = "wave-2024", Price = 20000000 } ]
+            Variants = [new CreateProductVariantRequest { UrlSlug = "wave-2024", Price = 20000000 }]
         };
-
         _productCategoryReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.ProductCategory { Id = 1, DeletedAt = null });
         _brandReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.Brand { Id = 1, DeletedAt = null });
         _variantReadRepoMock.Setup(x => x.GetBySlugAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((ProductVariant?)null);
-
         var handler = new CreateProductCommandHandler(
             _productCategoryReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -591,9 +532,7 @@ public class Product
             _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
     }
 
@@ -606,13 +545,10 @@ public class Product
             CategoryId = 1,
             BrandId = 1,
             Displacement = 124.85m,
-            Variants = [ new CreateProductVariantRequest { UrlSlug = "wave-2024", Price = 20000000 } ]
+            Variants = [new CreateProductVariantRequest { UrlSlug = "wave-2024", Price = 20000000 }]
         };
-
         var validator = new CreateProductCommandValidator();
-
         var result = validator.Validate(command);
-
         result.Should().NotBeNull();
     }
 
@@ -625,13 +561,10 @@ public class Product
             CategoryId = 1,
             BrandId = 1,
             MaxPower = "15.851",
-            Variants = [ new CreateProductVariantRequest { UrlSlug = "wave-2024", Price = 20000000 } ]
+            Variants = [new CreateProductVariantRequest { UrlSlug = "wave-2024", Price = 20000000 }]
         };
-
         var validator = new CreateProductCommandValidator();
-
         var result = validator.Validate(command);
-
         result.Should().NotBeNull();
     }
 
@@ -644,13 +577,10 @@ public class Product
             CategoryId = 1,
             BrandId = 1,
             FuelConsumption = "2.155",
-            Variants = [ new CreateProductVariantRequest { UrlSlug = "wave-2024", Price = 20000000 } ]
+            Variants = [new CreateProductVariantRequest { UrlSlug = "wave-2024", Price = 20000000 }]
         };
-
         var validator = new CreateProductCommandValidator();
-
         var result = validator.Validate(command);
-
         result.Should().NotBeNull();
     }
 
@@ -662,16 +592,14 @@ public class Product
             Name = "Honda<script>alert('test')</script>",
             CategoryId = 1,
             BrandId = 1,
-            Variants = [ new CreateProductVariantRequest { UrlSlug = "honda-2024", Price = 20000000 } ]
+            Variants = [new CreateProductVariantRequest { UrlSlug = "honda-2024", Price = 20000000 }]
         };
-
         _productCategoryReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.ProductCategory { Id = 1, DeletedAt = null });
         _brandReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.Brand { Id = 1, DeletedAt = null });
         _variantReadRepoMock.Setup(x => x.GetBySlugAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((ProductVariant?)null);
-
         var handler = new CreateProductCommandHandler(
             _productCategoryReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -683,9 +611,7 @@ public class Product
             _productVariantInsertRepository.Object,
             _optionValueInsertRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
     }
 
@@ -700,14 +626,12 @@ public class Product
             BrandId = 1,
             Variants = []
         };
-
         _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ProductEntity { Id = 1, StatusId = "for-sale", DeletedAt = null });
         _productCategoryReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.ProductCategory { Id = 1, DeletedAt = null });
         _brandReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.Brand { Id = 1, DeletedAt = null });
-
         var handler = new UpdateProductCommandHandler(
             _productReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -722,9 +646,7 @@ public class Product
             _productUpdateRepoMock.Object,
             _variantDeleteRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
     }
 
@@ -732,10 +654,8 @@ public class Product
     public async Task UpdateProduct_ProductNotExists_ThrowsException()
     {
         var command = new UpdateProductCommand { Id = 999, Name = "Honda Wave Alpha 2025" };
-
         _productReadRepoMock.Setup(x => x.GetByIdAsync(999, It.IsAny<CancellationToken>()))
             .ReturnsAsync((ProductEntity?)null);
-
         var handler = new UpdateProductCommandHandler(
             _productReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -750,9 +670,7 @@ public class Product
             _productUpdateRepoMock.Object,
             _variantDeleteRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
     }
 
@@ -760,10 +678,8 @@ public class Product
     public async Task UpdateProduct_ProductSoftDeleted_ThrowsException()
     {
         var command = new UpdateProductCommand { Id = 1, Name = "Honda Wave Alpha 2025" };
-
         _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ProductEntity { Id = 1, StatusId = "for-sale", DeletedAt = DateTime.UtcNow });
-
         var handler = new UpdateProductCommandHandler(
             _productReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -778,9 +694,7 @@ public class Product
             _productUpdateRepoMock.Object,
             _variantDeleteRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
     }
 
@@ -788,11 +702,8 @@ public class Product
     public async Task UpdateProduct_StatusIdInRequest_ThrowsException()
     {
         var command = new UpdateProductCommand { Id = 1, Name = "Honda Wave" };
-
         var validator = new UpdateProductCommandValidator();
-
         var validationResult = validator.Validate(command);
-
         validationResult.Should().NotBeNull();
     }
 
@@ -800,12 +711,10 @@ public class Product
     public async Task UpdateProduct_NewCategoryNotExists_ThrowsException()
     {
         var command = new UpdateProductCommand { Id = 1, Name = "Honda Wave", CategoryId = 999 };
-
         _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ProductEntity { Id = 1, StatusId = "for-sale", DeletedAt = null });
         _productCategoryReadRepoMock.Setup(x => x.GetByIdAsync(999, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Domain.Entities.ProductCategory?)null);
-
         var handler = new UpdateProductCommandHandler(
             _productReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -820,9 +729,7 @@ public class Product
             _productUpdateRepoMock.Object,
             _variantDeleteRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
     }
 
@@ -830,12 +737,10 @@ public class Product
     public async Task UpdateProduct_NewCategorySoftDeleted_ThrowsException()
     {
         var command = new UpdateProductCommand { Id = 1, Name = "Honda Wave", CategoryId = 1 };
-
         _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ProductEntity { Id = 1, StatusId = "for-sale", DeletedAt = null });
         _productCategoryReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.ProductCategory { Id = 1, DeletedAt = DateTime.UtcNow });
-
         var handler = new UpdateProductCommandHandler(
             _productReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -850,9 +755,7 @@ public class Product
             _productUpdateRepoMock.Object,
             _variantDeleteRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
     }
 
@@ -865,9 +768,8 @@ public class Product
             Name = "Honda Wave",
             CategoryId = 1,
             BrandId = 1,
-            Variants = [ new UpdateProductVariantRequest { UrlSlug = "wave-new-variant", Price = 25000000 } ]
+            Variants = [new UpdateProductVariantRequest { UrlSlug = "wave-new-variant", Price = 25000000 }]
         };
-
         _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ProductEntity { Id = 1, StatusId = "for-sale", DeletedAt = null });
         _productCategoryReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
@@ -876,7 +778,6 @@ public class Product
             .ReturnsAsync(new Domain.Entities.Brand { Id = 1, DeletedAt = null });
         _variantReadRepoMock.Setup(x => x.GetBySlugAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((ProductVariant?)null);
-
         var handler = new UpdateProductCommandHandler(
             _productReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -891,9 +792,7 @@ public class Product
             _productUpdateRepoMock.Object,
             _variantDeleteRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
     }
 
@@ -906,9 +805,8 @@ public class Product
             Name = "Honda Wave",
             CategoryId = 1,
             BrandId = 1,
-            Variants = [ new UpdateProductVariantRequest { Id = 1, UrlSlug = "wave-updated", Price = 22000000 } ]
+            Variants = [new UpdateProductVariantRequest { Id = 1, UrlSlug = "wave-updated", Price = 22000000 }]
         };
-
         _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ProductEntity { Id = 1, StatusId = "for-sale", DeletedAt = null });
         _productCategoryReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
@@ -917,7 +815,6 @@ public class Product
             .ReturnsAsync(new Domain.Entities.Brand { Id = 1, DeletedAt = null });
         _variantReadRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ProductVariant { Id = 1, ProductId = 1, DeletedAt = null });
-
         var handler = new UpdateProductCommandHandler(
             _productReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -932,9 +829,7 @@ public class Product
             _productUpdateRepoMock.Object,
             _variantDeleteRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
     }
 
@@ -949,7 +844,6 @@ public class Product
             BrandId = 1,
             Variants = []
         };
-
         _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ProductEntity { Id = 1, StatusId = "for-sale", DeletedAt = null });
         _productCategoryReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
@@ -957,8 +851,7 @@ public class Product
         _brandReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Domain.Entities.Brand { Id = 1, DeletedAt = null });
         _variantReadRepoMock.Setup(x => x.GetByProductIdAsync(1, It.IsAny<CancellationToken>()))
-            .ReturnsAsync([ new() { Id = 1, ProductId = 1, DeletedAt = null } ]);
-
+            .ReturnsAsync([new() { Id = 1, ProductId = 1, DeletedAt = null }]);
         var handler = new UpdateProductCommandHandler(
             _productReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -973,9 +866,7 @@ public class Product
             _productUpdateRepoMock.Object,
             _variantDeleteRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
     }
 
@@ -983,17 +874,13 @@ public class Product
     public async Task UpdateVariantPrice_ValidData_Success()
     {
         var command = new UpdateVariantPriceCommand { VariantId = 1, Price = 25000000m };
-
         _variantReadRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ProductVariant { Id = 1, ProductId = 1, DeletedAt = null });
-
         var handler = new UpdateVariantPriceCommandHandler(
             _variantReadRepoMock.Object,
             _variantUpdateRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
     }
 
@@ -1001,28 +888,23 @@ public class Product
     public async Task UpdateProductPrice_ValidData_Success()
     {
         var command = new UpdateProductPriceCommand { Id = 1, Price = 30000000m };
-
         _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ProductEntity { Id = 1, DeletedAt = null });
         _variantReadRepoMock.Setup(x => x.GetByProductIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(
-                [ new() { Id = 1, ProductId = 1, DeletedAt = null }, new() { Id = 2, ProductId = 1, DeletedAt = null } ]);
-
+                [new() { Id = 1, ProductId = 1, DeletedAt = null }, new() { Id = 2, ProductId = 1, DeletedAt = null }]);
         var handler = new UpdateProductPriceCommandHandler(
             _productReadRepoMock.Object,
             _productUpdateRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
     }
 
     [Fact(DisplayName = "PRODUCT_032 - Sửa giá nhiều sản phẩm cùng lúc thành công")]
     public async Task UpdateManyProductPrices_ValidData_Success()
     {
-        var command = new UpdateManyProductPricesCommand { Ids = [ 1, 2 ], Price = 25000000m };
-
+        var command = new UpdateManyProductPricesCommand { Ids = [1, 2], Price = 25000000m };
         _productReadRepoMock.Setup(
             x => x.GetByIdWithVariantsAsync(
                 It.IsAny<List<int>>(),
@@ -1031,21 +913,18 @@ public class Product
             .ReturnsAsync(
                 (List<int> ids, CancellationToken ct, DataFetchMode fetchMode) =>
                 {
-                    return[ .. ids.Select(
+                    return[.. ids.Select(
                         id => new ProductEntity
                             {
                                 Id = id,
-                                ProductVariants = [ new ProductVariant { Id = id * 10, Price = 0 } ]
-                            }) ];
+                                ProductVariants = [new ProductVariant { Id = id * 10, Price = 0 }]
+                            })];
                 });
-
         var handler = new UpdateManyProductPricesCommandHandler(
             _productReadRepoMock.Object,
             _productUpdateRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().HaveCount(2);
         _productUpdateRepoMock.Verify(x => x.Update(It.IsAny<ProductEntity>()), Times.Exactly(2));
@@ -1055,65 +934,53 @@ public class Product
     public async Task UpdateProductStatus_ValidData_Success()
     {
         var command = new UpdateProductStatusCommand { Id = 1, StatusId = "out-of-stock" };
-
         _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ProductEntity { Id = 1, StatusId = "for-sale", DeletedAt = null });
-
         var handler = new UpdateProductStatusCommandHandler(
             _productReadRepoMock.Object,
             _productUpdateRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
     }
 
     [Fact(DisplayName = "PRODUCT_034 - Sửa trạng thái nhiều sản phẩm thành công")]
     public async Task UpdateManyProductStatuses_ValidData_Success()
     {
-        var command = new UpdateManyProductStatusesCommand { Ids = [ 1, 2, 3 ], StatusId = "out-of-stock" };
-
+        var command = new UpdateManyProductStatusesCommand { Ids = [1, 2, 3], StatusId = "out-of-stock" };
         _productReadRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(
-                [ new() { Id = 1, StatusId = "for-sale", DeletedAt = null }, new()
+                [new() { Id = 1, StatusId = "for-sale", DeletedAt = null }, new()
                 {
                     Id = 2,
                     StatusId = "for-sale",
                     DeletedAt = null
-                }, new() { Id = 3, StatusId = "for-sale", DeletedAt = null } ]);
-
+                }, new() { Id = 3, StatusId = "for-sale", DeletedAt = null }]);
         var handler = new UpdateManyProductStatusesCommandHandler(
             _productReadRepoMock.Object,
             _productUpdateRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
     }
 
     [Fact(DisplayName = "PRODUCT_035 - Sửa trạng thái nhiều sản phẩm thất bại khi 1 trong số đó đã bị xóa")]
     public async Task UpdateManyProductStatuses_OneDeleted_ThrowsException()
     {
-        var command = new UpdateManyProductStatusesCommand { Ids = [ 1, 2, 3 ], StatusId = "out-of-stock" };
-
+        var command = new UpdateManyProductStatusesCommand { Ids = [1, 2, 3], StatusId = "out-of-stock" };
         _productReadRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(
-                [ new() { Id = 1, StatusId = "for-sale", DeletedAt = null }, new()
+                [new() { Id = 1, StatusId = "for-sale", DeletedAt = null }, new()
                 {
                     Id = 2,
                     StatusId = "for-sale",
                     DeletedAt = DateTime.UtcNow
-                }, new() { Id = 3, StatusId = "for-sale", DeletedAt = null } ]);
-
+                }, new() { Id = 3, StatusId = "for-sale", DeletedAt = null }]);
         var handler = new UpdateManyProductStatusesCommandHandler(
             _productReadRepoMock.Object,
             _productUpdateRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
     }
 
@@ -1122,19 +989,14 @@ public class Product
     {
         var productId = 1;
         var command = new DeleteProductCommand { Id = productId };
-
         var product = new ProductEntity { Id = productId, StatusId = "for-sale", ProductVariants = [] };
-
         _productReadRepoMock.Setup(x => x.GetByIdWithDetailsAsync(productId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(product);
-
         var handler = new DeleteProductCommandHandler(
             _productReadRepoMock.Object,
             _productDeleteRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsSuccess.Should().BeTrue();
         _productDeleteRepoMock.Verify(x => x.Delete(product), Times.Once);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -1144,17 +1006,13 @@ public class Product
     public async Task DeleteProduct_ProductNotExists_ThrowsException()
     {
         var command = new DeleteProductCommand { Id = 999 };
-
         _productReadRepoMock.Setup(x => x.GetByIdAsync(999, It.IsAny<CancellationToken>()))
             .ReturnsAsync((ProductEntity?)null);
-
         var handler = new DeleteProductCommandHandler(
             _productReadRepoMock.Object,
             _productDeleteRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
     }
 
@@ -1162,94 +1020,77 @@ public class Product
     public async Task DeleteProduct_AlreadyDeleted_ThrowsException()
     {
         var command = new DeleteProductCommand { Id = 1 };
-
         _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ProductEntity { Id = 1, StatusId = "for-sale", DeletedAt = DateTime.UtcNow });
-
         var handler = new DeleteProductCommandHandler(
             _productReadRepoMock.Object,
             _productDeleteRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
     }
 
     [Fact(DisplayName = "PRODUCT_039 - Xóa nhiều sản phẩm thành công")]
     public async Task DeleteManyProducts_ValidData_Success()
     {
-        var command = new DeleteManyProductsCommand { Ids = [ 1, 2, 3 ] };
-
+        var command = new DeleteManyProductsCommand { Ids = [1, 2, 3] };
         _productReadRepoMock.Setup(
             x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(
-                [ new() { Id = 1, StatusId = "for-sale", DeletedAt = null }, new()
+                [new() { Id = 1, StatusId = "for-sale", DeletedAt = null }, new()
                 {
                     Id = 2,
                     StatusId = "for-sale",
                     DeletedAt = null
-                }, new() { Id = 3, StatusId = "for-sale", DeletedAt = null } ]);
-
+                }, new() { Id = 3, StatusId = "for-sale", DeletedAt = null }]);
         var handler = new DeleteManyProductsCommandHandler(
             _productReadRepoMock.Object,
             _productDeleteRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsSuccess.Should().BeTrue();
-
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact(DisplayName = "PRODUCT_040 - Xóa nhiều sản phẩm thất bại khi 1 trong số đó không tồn tại")]
     public async Task DeleteManyProducts_OneNotExists_ThrowsException()
     {
-        var command = new DeleteManyProductsCommand { Ids = [ 1, 2, 3 ] };
-
+        var command = new DeleteManyProductsCommand { Ids = [1, 2, 3] };
         _productReadRepoMock.Setup(
             x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(
-                [ new() { Id = 1, StatusId = "for-sale", DeletedAt = null }, new()
+                [new() { Id = 1, StatusId = "for-sale", DeletedAt = null }, new()
                 {
                     Id = 2,
                     StatusId = "for-sale",
                     DeletedAt = null
-                } ]);
-
+                }]);
         var handler = new DeleteManyProductsCommandHandler(
             _productReadRepoMock.Object,
             _productDeleteRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
     }
 
     [Fact(DisplayName = "PRODUCT_041 - Xóa nhiều sản phẩm thất bại khi 1 trong số đó đã bị xóa")]
     public async Task DeleteManyProducts_OneAlreadyDeleted_ThrowsException()
     {
-        var command = new DeleteManyProductsCommand { Ids = [ 1, 2, 3 ] };
-
+        var command = new DeleteManyProductsCommand { Ids = [1, 2, 3] };
         _productReadRepoMock.Setup(
             x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(
-                [ new() { Id = 1, StatusId = "for-sale", DeletedAt = null }, new()
+                [new() { Id = 1, StatusId = "for-sale", DeletedAt = null }, new()
                 {
                     Id = 2,
                     StatusId = "for-sale",
                     DeletedAt = DateTime.UtcNow
-                }, new() { Id = 3, StatusId = "for-sale", DeletedAt = null } ]);
-
+                }, new() { Id = 3, StatusId = "for-sale", DeletedAt = null }]);
         var handler = new DeleteManyProductsCommandHandler(
             _productReadRepoMock.Object,
             _productDeleteRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
     }
 
@@ -1257,17 +1098,13 @@ public class Product
     public async Task RestoreProduct_ValidData_Success()
     {
         var command = new RestoreProductCommand { Id = 1 };
-
         _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ProductEntity { Id = 1, StatusId = "for-sale", DeletedAt = DateTime.UtcNow });
-
         var handler = new RestoreProductCommandHandler(
             _productReadRepoMock.Object,
             _productUpdateRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
     }
 
@@ -1275,24 +1112,20 @@ public class Product
     public async Task RestoreProduct_NotDeleted_ThrowsException()
     {
         var command = new RestoreProductCommand { Id = 1 };
-
         _productReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ProductEntity { Id = 1, StatusId = "for-sale", DeletedAt = null });
-
         var handler = new RestoreProductCommandHandler(
             _productReadRepoMock.Object,
             _productUpdateRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
     }
 
     [Fact(DisplayName = "PRODUCT_044 - Khôi phục nhiều sản phẩm thành công")]
     public async Task RestoreManyProducts_ValidData_Success()
     {
-        var command = new RestoreManyProductsCommand { Ids = [ 1, 2, 3 ] };
+        var command = new RestoreManyProductsCommand { Ids = [1, 2, 3] };
         var deletedTime = DateTime.UtcNow;
         var products = new List<ProductEntity>
         {
@@ -1300,18 +1133,14 @@ public class Product
             new() { Id = 2, Name = "P2", DeletedAt = deletedTime },
             new() { Id = 3, Name = "P3", DeletedAt = deletedTime }
         };
-
         _productReadRepoMock.Setup(
             x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(products);
-
         var handler = new RestoreManyProductsCommandHandler(
             _productReadRepoMock.Object,
             _productUpdateRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().HaveCount(3);
         _productUpdateRepoMock.Verify(x => x.Restore(It.IsAny<List<ProductEntity>>()), Times.Once);
@@ -1320,24 +1149,20 @@ public class Product
     [Fact(DisplayName = "PRODUCT_045 - Khôi phục nhiều sản phẩm thất bại khi 1 trong số đó chưa bị xóa")]
     public async Task RestoreManyProducts_OneNotDeleted_ThrowsException()
     {
-        var command = new RestoreManyProductsCommand { Ids = [ 1, 2, 3 ] };
-
+        var command = new RestoreManyProductsCommand { Ids = [1, 2, 3] };
         _productReadRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(
-                [ new() { Id = 1, StatusId = "for-sale", DeletedAt = DateTime.UtcNow }, new()
+                [new() { Id = 1, StatusId = "for-sale", DeletedAt = DateTime.UtcNow }, new()
                 {
                     Id = 2,
                     StatusId = "for-sale",
                     DeletedAt = null
-                }, new() { Id = 3, StatusId = "for-sale", DeletedAt = DateTime.UtcNow } ]);
-
+                }, new() { Id = 3, StatusId = "for-sale", DeletedAt = DateTime.UtcNow }]);
         var handler = new RestoreManyProductsCommandHandler(
             _productReadRepoMock.Object,
             _productUpdateRepoMock.Object,
             _unitOfWorkMock.Object);
-
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
     }
 
@@ -1345,14 +1170,10 @@ public class Product
     public async Task CheckSlugAvailability_Available_ReturnsTrue()
     {
         var query = new CheckSlugAvailabilityQuery { Slug = "new-product-slug" };
-
         _variantReadRepoMock.Setup(x => x.GetBySlugAsync("new-product-slug", It.IsAny<CancellationToken>()))
             .ReturnsAsync((ProductVariant?)null);
-
         var handler = new CheckSlugAvailabilityQueryHandler(_variantReadRepoMock.Object);
-
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
     }
 
@@ -1360,14 +1181,10 @@ public class Product
     public async Task CheckSlugAvailability_AlreadyExists_ReturnsFalse()
     {
         var query = new CheckSlugAvailabilityQuery { Slug = "existing-product-slug" };
-
         _variantReadRepoMock.Setup(x => x.GetBySlugAsync("existing-product-slug", It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ProductVariant { Id = 1, UrlSlug = "existing-product-slug" });
-
         var handler = new CheckSlugAvailabilityQueryHandler(_variantReadRepoMock.Object);
-
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
     }
 
@@ -1375,14 +1192,10 @@ public class Product
     public async Task CheckSlugAvailability_SoftDeleted_ReturnsFalse()
     {
         var query = new CheckSlugAvailabilityQuery { Slug = "soft-deleted-slug" };
-
         _variantReadRepoMock.Setup(x => x.GetBySlugAsync("soft-deleted-slug", It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ProductVariant { Id = 1, UrlSlug = "soft-deleted-slug", DeletedAt = DateTime.UtcNow });
-
         var handler = new CheckSlugAvailabilityQueryHandler(_variantReadRepoMock.Object);
-
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
     }
 
@@ -1395,16 +1208,14 @@ public class Product
             CategoryId = 1,
             BrandId = 1,
             Variants =
-                [ new CreateProductVariantRequest { UrlSlug = "sh-red", Price = 100000000 }, new CreateProductVariantRequest
+                [new CreateProductVariantRequest { UrlSlug = "sh-red", Price = 100000000 }, new CreateProductVariantRequest
                 {
                     UrlSlug = "sh-red",
                     Price = 100000000
-                } ]
+                }]
         };
-
         var validator = new CreateProductCommandValidator();
         var result = validator.Validate(command);
-
         result.Should().NotBeNull();
         result.IsValid.Should().BeFalse();
     }
@@ -1417,11 +1228,11 @@ public class Product
             Id = 1,
             Name = "Honda Wave",
             ProductVariants =
-                [ new ProductVariant
+                [new ProductVariant
                 {
                     Id = 1,
                     InputInfos =
-                        [ new InputInfo
+                        [new InputInfo
                             {
                                 RemainingCount = 10,
                                 InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
@@ -1429,21 +1240,19 @@ public class Product
                             {
                                 RemainingCount = 5,
                                 InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Working }
-                            } ]
+                            }]
                 }, new ProductVariant
                 {
                     Id = 2,
                     InputInfos =
-                        [ new InputInfo
+                        [new InputInfo
                             {
                                 RemainingCount = 15,
                                 InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
-                            } ]
-                } ]
+                            }]
+                }]
         };
-
         var response = product.Adapt<ProductDetailForManagerResponse>();
-
         response.Stock.Should().Be(25);
     }
 
@@ -1455,11 +1264,11 @@ public class Product
             Id = 1,
             Name = "Yamaha",
             ProductVariants =
-                [ new ProductVariant
+                [new ProductVariant
                 {
                     Id = 1,
                     OutputInfos =
-                        [ new OutputInfo { Count = 3, OutputOrder = new Output { StatusId = OrderStatus.Pending } }, new OutputInfo
+                        [new OutputInfo { Count = 3, OutputOrder = new Output { StatusId = OrderStatus.Pending } }, new OutputInfo
                             {
                                 Count = 2,
                                 OutputOrder = new Output { StatusId = OrderStatus.ConfirmedCod }
@@ -1467,12 +1276,10 @@ public class Product
                             {
                                 Count = 5,
                                 OutputOrder = new Output { StatusId = OrderStatus.Completed }
-                            } ]
-                } ]
+                            }]
+                }]
         };
-
         var response = product.Adapt<ProductDetailForManagerResponse>();
-
         response.HasBeenBooked.Should().Be(5);
     }
 
@@ -1484,25 +1291,22 @@ public class Product
             Id = 1,
             Name = "Suzuki",
             ProductVariants =
-                [ new ProductVariant
+                [new ProductVariant
                 {
                     Id = 1,
                     InputInfos =
-                        [ new InputInfo
+                        [new InputInfo
                             {
                                 RemainingCount = 50,
                                 InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
-                            } ],
+                            }],
                     OutputInfos =
-                        [ new OutputInfo { Count = 10, OutputOrder = new Output { StatusId = OrderStatus.Pending } } ]
-                } ]
+                        [new OutputInfo { Count = 10, OutputOrder = new Output { StatusId = OrderStatus.Pending } }]
+                }]
         };
-
         var response = product.Adapt<ProductDetailForManagerResponse>();
-
         response.Stock.Should().Be(50);
         response.HasBeenBooked.Should().Be(10);
-
         response.StatusStockId.Should().Be("in_stock");
     }
 
@@ -1514,7 +1318,7 @@ public class Product
             Name = "Honda",
             CategoryId = 1,
             BrandId = 1,
-            Variants = [ new CreateProductVariantRequest { UrlSlug = "honda", Price = 100, OptionValues = [] } ]
+            Variants = [new CreateProductVariantRequest { UrlSlug = "honda", Price = 100, OptionValues = [] }]
         };
         var validator = new CreateProductCommandValidator();
         var result = validator.Validate(command);
@@ -1530,12 +1334,12 @@ public class Product
             CategoryId = 1,
             BrandId = 1,
             Variants =
-                [ new CreateProductVariantRequest
+                [new CreateProductVariantRequest
                 {
                     UrlSlug = "honda-1",
                     Price = 100,
                     OptionValues = new Dictionary<string, string> { { "Màu", "Đỏ" } }
-                }, new CreateProductVariantRequest { UrlSlug = "honda-2", Price = 100, OptionValues = [] } ]
+                }, new CreateProductVariantRequest { UrlSlug = "honda-2", Price = 100, OptionValues = [] }]
         };
         var validator = new CreateProductCommandValidator();
         var result = validator.Validate(command);
@@ -1554,7 +1358,7 @@ public class Product
             CategoryId = 1,
             BrandId = 1,
             Variants =
-                [ new CreateProductVariantRequest
+                [new CreateProductVariantRequest
                 {
                     UrlSlug = "honda-1",
                     Price = 100,
@@ -1564,7 +1368,7 @@ public class Product
                     UrlSlug = "honda-2",
                     Price = 100,
                     OptionValues = new Dictionary<string, string> { { "Màu", "Đỏ" } }
-                } ]
+                }]
         };
         var validator = new CreateProductCommandValidator();
         var result = validator.Validate(command);
@@ -1583,12 +1387,12 @@ public class Product
             CategoryId = 1,
             BrandId = 1,
             Variants =
-                [ new UpdateProductVariantRequest { Id = 1, UrlSlug = "honda-1", Price = 100, OptionValues = [] }, new UpdateProductVariantRequest
+                [new UpdateProductVariantRequest { Id = 1, UrlSlug = "honda-1", Price = 100, OptionValues = [] }, new UpdateProductVariantRequest
                 {
                     UrlSlug = "honda-2",
                     Price = 100,
                     OptionValues = new Dictionary<string, string> { { "Màu", "Đỏ" } }
-                } ]
+                }]
         };
         var validator = new UpdateProductCommandValidator();
         var result = validator.Validate(command);
@@ -1608,7 +1412,7 @@ public class Product
             CategoryId = 1,
             BrandId = 1,
             Variants =
-                [ new UpdateProductVariantRequest
+                [new UpdateProductVariantRequest
                 {
                     Id = 1,
                     UrlSlug = "honda-1",
@@ -1619,7 +1423,7 @@ public class Product
                     UrlSlug = "honda-2",
                     Price = 100,
                     OptionValues = new Dictionary<string, string> { { "Màu", "Đỏ" } }
-                } ]
+                }]
         };
         var validator = new UpdateProductCommandValidator();
         var result = validator.Validate(command);
@@ -1637,17 +1441,17 @@ public class Product
                 Id = 1,
                 Name = "Test Product",
                 ProductVariants =
-                    [ new()
+                    [new()
                     {
                         Id = 101,
                         Price = 50000,
                         VariantOptionValues =
-                            [ new VariantOptionValue { OptionValue = new OptionValue { Name = "Red" } }, new VariantOptionValue
+                            [new VariantOptionValue { OptionValue = new OptionValue { Name = "Red" } }, new VariantOptionValue
                                 {
                                     OptionValue = new OptionValue { Name = "XL" }
-                                } ],
+                                }],
                         InputInfos =
-                            [ new InputInfo
+                            [new InputInfo
                                 {
                                     InputPrice = 45000,
                                     InputReceipt = new Input { InputDate = DateTimeOffset.UtcNow.AddDays(-1) }
@@ -1655,11 +1459,10 @@ public class Product
                                 {
                                     InputPrice = 40000,
                                     InputReceipt = new Input { InputDate = DateTimeOffset.UtcNow.AddDays(-2) }
-                                } ]
-                    }, new() { Id = 102, Price = 0, VariantOptionValues = [], InputInfos = [] } ]
+                                }]
+                    }, new() { Id = 102, Price = 0, VariantOptionValues = [], InputInfos = [] }]
             }
         };
-
         _productReadRepoMock.Setup(
             x => x.GetPagedProductsForPriceManagementAsync(
                 It.IsAny<int>(),
@@ -1668,26 +1471,20 @@ public class Product
                 It.IsAny<string?>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync((products, products.Count));
-
         var query = new GetProductsListForPriceManagementQuery
         {
             SieveModel = new SieveModel { Page = 1, PageSize = 10 }
         };
-
         GetProductsListForPriceManagementQueryHandler _handler = new(_productReadRepoMock.Object);
         var result = await _handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
-
         result.IsSuccess.Should().BeTrue();
         result.Value.Items.Should().HaveCount(1);
-
         var productDto = result.Value.Items.First();
         productDto.Name.Should().Be("Test Product");
         productDto.Variants.Should().HaveCount(2);
-
         var v1 = productDto.Variants.First(v => v.Id == 101);
         v1.Name.Should().Be("Red / XL");
         v1.Price.Should().Be(50000);
-
         var v2 = productDto.Variants.First(v => v.Id == 102);
         v2.Name.Should().Be("Mặc định");
         v2.Price.Should().Be(0);
@@ -1698,9 +1495,7 @@ public class Product
     {
         long availableStock = 10;
         long alertLevel = 5;
-
         var result = ProductMappingConfig.CalculateInventoryStatus(availableStock, alertLevel);
-
         result.Should().Be(InventoryStatus.InStock);
     }
 
@@ -1709,9 +1504,7 @@ public class Product
     {
         long availableStock = 3;
         long alertLevel = 5;
-
         var result = ProductMappingConfig.CalculateInventoryStatus(availableStock, alertLevel);
-
         result.Should().Be(InventoryStatus.LowStock);
     }
 
@@ -1720,9 +1513,7 @@ public class Product
     {
         long availableStock = 0;
         long alertLevel = 5;
-
         var result = ProductMappingConfig.CalculateInventoryStatus(availableStock, alertLevel);
-
         result.Should().Be(InventoryStatus.OutOfStock);
     }
 
@@ -1733,38 +1524,36 @@ public class Product
         var product = new ProductEntity
         {
             ProductVariants =
-                [ new ProductVariant
+                [new ProductVariant
                 {
                     InputInfos =
-                        [ new InputInfo
+                        [new InputInfo
                             {
                                 RemainingCount = 10,
                                 InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
-                            } ],
+                            }],
                     OutputInfos = []
                 }, new ProductVariant
                 {
                     InputInfos =
-                        [ new InputInfo
+                        [new InputInfo
                             {
                                 RemainingCount = 3,
                                 InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
-                            } ],
+                            }],
                     OutputInfos = []
                 }, new ProductVariant
                 {
                     InputInfos =
-                        [ new InputInfo
+                        [new InputInfo
                             {
                                 RemainingCount = 0,
                                 InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
-                            } ],
+                            }],
                     OutputInfos = []
-                } ]
+                }]
         };
-
         var result = ProductMappingConfig.CalculateProductInventoryStatus(product, alertLevel);
-
         result.Should().Be(InventoryStatus.OutOfStock);
     }
 
@@ -1773,9 +1562,7 @@ public class Product
     {
         var query = new GetProductAttributeLabelsQuery();
         var handler = new GetProductAttributeLabelsQueryHandler();
-
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
-
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
         result.Value.Should().ContainKey("EngineType");
@@ -1787,7 +1574,6 @@ public class Product
     {
         var slug = "sh160i-red";
         var query = new GetProductStoreDetailBySlugQuery(slug);
-
         var product = new ProductEntity
         {
             Id = 1,
@@ -1797,26 +1583,21 @@ public class Product
             ProductCategory = new Domain.Entities.ProductCategory { Name = "Xe ga" },
             ProductVariants = []
         };
-
         var variant = new ProductVariant
         {
             Id = 10,
             UrlSlug = slug,
             Price = 100000000,
             Product = product,
-            VariantOptionValues = [ new VariantOptionValue { OptionValue = new OptionValue { Name = "Đỏ" } } ],
+            VariantOptionValues = [new VariantOptionValue { OptionValue = new OptionValue { Name = "Đỏ" } }],
             ProductCollectionPhotos = []
         };
         product.ProductVariants.Add(variant);
-
         _productReadRepoMock.Setup(
             x => x.GetByVariantSlugWithDetailsAsync(slug, It.IsAny<CancellationToken>(), DataFetchMode.ActiveOnly))
             .ReturnsAsync(variant);
-
         var handler = new GetProductStoreDetailBySlugQueryHandler(_productReadRepoMock.Object);
-
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
-
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
         result.Value!.Product.Name.Should().Be("Honda SH160i");
@@ -1829,15 +1610,11 @@ public class Product
     {
         var slug = "non-existent-slug";
         var query = new GetProductStoreDetailBySlugQuery(slug);
-
         _productReadRepoMock.Setup(
             x => x.GetByVariantSlugWithDetailsAsync(slug, It.IsAny<CancellationToken>(), DataFetchMode.ActiveOnly))
             .ReturnsAsync((ProductVariant?)null);
-
         var handler = new GetProductStoreDetailBySlugQueryHandler(_productReadRepoMock.Object);
-
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
-
         result.IsFailure.Should().BeTrue();
         result.Error.Should().NotBeNull();
         result.Error!.Code.Should().Be("ProductDetail.NotFound");

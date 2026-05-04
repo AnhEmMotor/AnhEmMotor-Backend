@@ -9,7 +9,7 @@ public class LogoutCommandHandler(IUserUpdateRepository userUpdateRepository) : 
     public async Task<Result> Handle(LogoutCommand request, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        if(request.UserId is not null && Guid.TryParse(request.UserId, out var userId))
+        if (request.UserId is not null && Guid.TryParse(request.UserId, out var userId))
         {
             await userUpdateRepository.ClearRefreshTokenAsync(userId, cancellationToken).ConfigureAwait(false);
         }

@@ -23,49 +23,42 @@ public sealed class UpdateOutputStatusCommandHandler(
             cancellationToken,
             DataFetchMode.ActiveOnly)
             .ConfigureAwait(false);
-
-        if(output is null)
+        if (output is null)
         {
             return Error.NotFound($"Không tìm thấy đơn hàng có ID {request.Id}.", "Id");
         }
-
-        if(!OrderStatus.IsValid(request.StatusId))
+        if (!OrderStatus.IsValid(request.StatusId))
         {
             return Error.BadRequest($"Trạng thái '{request.StatusId}' không hợp lệ.", "StatusId");
         }
-
-        if(!OrderStatusTransitions.IsTransitionAllowed(output.StatusId, request.StatusId))
+        if (!OrderStatusTransitions.IsTransitionAllowed(output.StatusId, request.StatusId))
         {
             var allowed = OrderStatusTransitions.GetAllowedTransitions(output.StatusId);
             return Error.BadRequest(
                 $"Không thể chuyển từ '{output.StatusId}' sang '{request.StatusId}'. Chỉ được chuyển sang: {string.Join(", ", allowed)}",
                 "StatusId");
         }
-
-        switch(request.StatusId)
+        switch (request.StatusId)
         {
             case OrderStatus.Completed:
                 output.FinishedBy = request.CurrentUserId;
                 await updateRepository.ProcessCOGSForCompletedOrderAsync(output.Id, cancellationToken)
                     .ConfigureAwait(false);
                 break;
-
             case OrderStatus.Cancelled:
             case OrderStatus.Refunding:
             case OrderStatus.Refunded:
                 break;
-
             default:
-                foreach(var outputInfo in output.OutputInfos)
+                foreach (var outputInfo in output.OutputInfos)
                 {
-                    if(outputInfo.ProductVarientId.HasValue && outputInfo.Count.HasValue)
+                    if (outputInfo.ProductVarientId.HasValue && outputInfo.Count.HasValue)
                     {
                         var stock = await readRepository.GetStockQuantityByVariantIdAsync(
                             outputInfo.ProductVarientId.Value,
                             cancellationToken)
                             .ConfigureAwait(false);
-
-                        if(stock < outputInfo.Count.Value)
+                        if (stock < outputInfo.Count.Value)
                         {
                             return Error.BadRequest(
                                 $"Sản phẩm ID {outputInfo.ProductVarientId} không đủ tồn kho. Hiện có: {stock}, cần: {outputInfo.Count.Value}",
@@ -75,16 +68,12 @@ public sealed class UpdateOutputStatusCommandHandler(
                 }
                 break;
         }
-
         output.StatusId = request.StatusId;
         output.LastStatusChangedAt = DateTimeOffset.UtcNow;
-
         updateRepository.Update(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         var updated = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
         ArgumentNullException.ThrowIfNull(updated);
-
         return updated.Adapt<OrderDetailResponse>();
     }
 }

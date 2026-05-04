@@ -15,13 +15,11 @@ public sealed class GetSupplierPurchaseHistoryQueryHandler(IInputReadRepository 
         CancellationToken cancellationToken)
     {
         var query = repository.GetBySupplierIdAsync(request.SupplierId, cancellationToken);
-
         var result = await paginator.ApplyAsync<InputEntity, SupplierPurchaseHistoryResponse>(
             query,
             request.SieveModel!,
             cancellationToken: cancellationToken)
             .ConfigureAwait(false);
-
         return result;
     }
 }

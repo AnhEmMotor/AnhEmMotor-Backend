@@ -4,20 +4,16 @@
 
 namespace Infrastructure.Migrations
 {
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public partial class EditMediaFileTable : Migration
     {
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropPrimaryKey(name: "PK_MediaFile", table: "MediaFile");
-
             migrationBuilder.DropColumn(name: "PublicUrl", table: "MediaFile");
-
             migrationBuilder.DropColumn(name: "StoredFileName", table: "MediaFile");
-
             migrationBuilder.RenameTable(name: "MediaFile", newName: "MediaFiles");
-
             migrationBuilder.AlterColumn<string>(
                 name: "OriginalFileName",
                 table: "MediaFiles",
@@ -27,7 +23,6 @@ namespace Infrastructure.Migrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(255)",
                 oldMaxLength: 255);
-
             migrationBuilder.AlterColumn<string>(
                 name: "ContentType",
                 table: "MediaFiles",
@@ -37,21 +32,18 @@ namespace Infrastructure.Migrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(100)",
                 oldMaxLength: 100);
-
             migrationBuilder.AddColumn<string>(
                 name: "FileExtension",
                 table: "MediaFiles",
                 type: "nvarchar(100)",
                 maxLength: 100,
                 nullable: true);
-
             migrationBuilder.AddColumn<string>(
                 name: "StoragePath",
                 table: "MediaFiles",
                 type: "nvarchar(500)",
                 maxLength: 500,
                 nullable: true);
-
             migrationBuilder.AddColumn<string>(
                 name: "StorageType",
                 table: "MediaFiles",
@@ -59,23 +51,17 @@ namespace Infrastructure.Migrations
                 maxLength: 50,
                 nullable: false,
                 defaultValue: string.Empty);
-
             migrationBuilder.AddPrimaryKey(name: "PK_MediaFiles", table: "MediaFiles", column: "Id");
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropPrimaryKey(name: "PK_MediaFiles", table: "MediaFiles");
-
             migrationBuilder.DropColumn(name: "FileExtension", table: "MediaFiles");
-
             migrationBuilder.DropColumn(name: "StoragePath", table: "MediaFiles");
-
             migrationBuilder.DropColumn(name: "StorageType", table: "MediaFiles");
-
             migrationBuilder.RenameTable(name: "MediaFiles", newName: "MediaFile");
-
             migrationBuilder.AlterColumn<string>(
                 name: "OriginalFileName",
                 table: "MediaFile",
@@ -87,7 +73,6 @@ namespace Infrastructure.Migrations
                 oldType: "nvarchar(255)",
                 oldMaxLength: 255,
                 oldNullable: true);
-
             migrationBuilder.AlterColumn<string>(
                 name: "ContentType",
                 table: "MediaFile",
@@ -99,14 +84,12 @@ namespace Infrastructure.Migrations
                 oldType: "nvarchar(100)",
                 oldMaxLength: 100,
                 oldNullable: true);
-
             migrationBuilder.AddColumn<string>(
                 name: "PublicUrl",
                 table: "MediaFile",
                 type: "nvarchar(1024)",
                 maxLength: 1024,
                 nullable: true);
-
             migrationBuilder.AddColumn<string>(
                 name: "StoredFileName",
                 table: "MediaFile",
@@ -114,7 +97,6 @@ namespace Infrastructure.Migrations
                 maxLength: 255,
                 nullable: false,
                 defaultValue: string.Empty);
-
             migrationBuilder.AddPrimaryKey(name: "PK_MediaFile", table: "MediaFile", column: "Id");
         }
     }

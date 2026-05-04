@@ -10,11 +10,20 @@ using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1;
 
+/// <summary>
+/// Controller quản lý đặt lịch lái thử.
+/// </summary>
+/// <param name="sender"></param>
 [ApiVersion("1.0")]
 [SwaggerTag("Quản lý đặt lịch lái thử (Booking)")]
 [Route("api/v{version:apiVersion}/[controller]")]
 public class BookingsController(ISender sender) : ApiController
 {
+    /// <summary>
+    /// Tạo yêu cầu đặt lịch lái thử mới.
+    /// </summary>
+    /// <param name="command"></param>
+    /// <returns></returns>
     [HttpPost]
     [AllowAnonymous]
     public async Task<IActionResult> Create(CreateBookingCommand command)
@@ -23,6 +32,10 @@ public class BookingsController(ISender sender) : ApiController
         return HandleResult(result);
     }
 
+    /// <summary>
+    /// Lấy danh sách yêu cầu đặt lịch lái thử.
+    /// </summary>
+    /// <returns></returns>
     [HttpGet]
     [Authorize]
     public async Task<IActionResult> GetAll()
@@ -31,6 +44,11 @@ public class BookingsController(ISender sender) : ApiController
         return HandleResult(result);
     }
 
+    /// <summary>
+    /// Xác nhận yêu cầu đặt lịch lái thử.
+    /// </summary>
+    /// <param name="command"></param>
+    /// <returns></returns>
     [HttpPost("confirm")]
     [Authorize]
     public async Task<IActionResult> Confirm(ConfirmBookingCommand command)

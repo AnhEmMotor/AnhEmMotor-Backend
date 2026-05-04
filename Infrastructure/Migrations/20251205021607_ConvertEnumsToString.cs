@@ -4,10 +4,10 @@
 
 namespace Infrastructure.Migrations
 {
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public partial class ConvertEnumsToString : Migration
     {
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<string>(
@@ -17,7 +17,6 @@ namespace Infrastructure.Migrations
                 nullable: false,
                 oldClrType: typeof(int),
                 oldType: "int");
-
             migrationBuilder.AlterColumn<string>(
                 name: "Gender",
                 table: "Users",
@@ -27,7 +26,7 @@ namespace Infrastructure.Migrations
                 oldType: "int");
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<int>(
@@ -37,7 +36,6 @@ namespace Infrastructure.Migrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(max)");
-
             migrationBuilder.AlterColumn<int>(
                 name: "Gender",
                 table: "Users",

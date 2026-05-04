@@ -6,5 +6,8 @@ namespace Infrastructure.Repositories.Brand;
 
 public class BrandInsertRepository(ApplicationDBContext context) : IBrandInsertRepository
 {
-    public void Add(BrandEntity brand) { context.Brands.Add(brand); }
+    public void Add(BrandEntity brand)
+    {
+        context.Brands.Add(brand);
+    }
 }

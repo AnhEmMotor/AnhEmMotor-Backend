@@ -21,52 +21,45 @@ public class DeleteMultipleRolesCommandHandler(
         var superRoles = protectedEntityManagerService.GetSuperRoles() ?? [];
         var skippedRoles = new List<string>();
         var deletedCount = 0;
-
-        foreach(var roleName in roleNames!)
+        foreach (var roleName in roleNames!)
         {
-            if(superRoles.Contains(roleName))
+            if (superRoles.Contains(roleName))
             {
                 skippedRoles.Add($"{roleName} (SuperRole)");
                 continue;
             }
-
             var role = await roleReadRepository.GetRoleByNameAsync(roleName, cancellationToken).ConfigureAwait(false);
-            if(role is null)
+            if (role is null)
             {
                 skippedRoles.Add($"{roleName} (Not found)");
                 continue;
             }
-
             var usersWithRole = await userReadRepository.GetUsersInRoleAsync(roleName, cancellationToken)
                 .ConfigureAwait(false);
-            if(usersWithRole.Count > 0)
+            if (usersWithRole.Count > 0)
             {
                 skippedRoles.Add($"{roleName} ({usersWithRole.Count} user(s) assigned)");
                 continue;
             }
         }
-
-        if(skippedRoles.Count > 0)
+        if (skippedRoles.Count > 0)
         {
             return Error.BadRequest(
                 $"Cannot delete some roles due to validation errors: {string.Join(',', skippedRoles)}");
         }
-
         cancellationToken.ThrowIfCancellationRequested();
-
-        foreach(var roleName in roleNames)
+        foreach (var roleName in roleNames)
         {
             var role = await roleReadRepository.GetRoleByNameAsync(roleName, cancellationToken).ConfigureAwait(false);
-            if(role is not null)
+            if (role is not null)
             {
                 var result = await roleDeleteRepository.DeleteAsync(role, cancellationToken).ConfigureAwait(false);
-                if(result.Succeeded)
+                if (result.Succeeded)
                 {
                     deletedCount++;
                 }
             }
         }
-
         return new RoleDeleteResponse() { Message = $"Deleted {deletedCount} role(s) successfully." };
     }
 }

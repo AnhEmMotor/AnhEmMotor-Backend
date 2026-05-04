@@ -1,8 +1,6 @@
 using Application.ApiContracts.News.Responses;
 using Application.Common.Models;
-using Domain.Primitives;
 using MediatR;
-
 
 namespace Application.Features.News.Queries.GetNewsBySlug;
 

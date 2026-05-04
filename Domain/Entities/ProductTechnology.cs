@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities
@@ -6,6 +5,7 @@ namespace Domain.Entities
     public class ProductTechnology : BaseEntity
     {
         public int ProductId { get; set; }
+
         public int TechnologyId { get; set; }
 
         public int DisplayOrder { get; set; } = 0;
@@ -20,6 +20,7 @@ namespace Domain.Entities
         public string? CustomImageUrl { get; set; }
 
         public Product? Product { get; set; }
+
         public Technology? Technology { get; set; }
     }
 }

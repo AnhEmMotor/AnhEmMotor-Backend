@@ -14,7 +14,7 @@
 
         private static int? CalculateTotalPages(long? totalCount, int? pageSize)
         {
-            if(totalCount == null || pageSize == null || pageSize.Value <= 0)
+            if (totalCount == null || pageSize == null || pageSize.Value <= 0)
             {
                 return null;
             }

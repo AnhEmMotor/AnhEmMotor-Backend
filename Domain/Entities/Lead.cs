@@ -23,7 +23,7 @@ public class Lead : BaseEntity
     public int Score { get; set; } = 0;
 
     [Column("Status", TypeName = "nvarchar(20)")]
-    public string Status { get; set; } = "New"; // New, Consulting, TestDriving, Negotiating, Closed
+    public string Status { get; set; } = "New";
 
     [Column("Source", TypeName = "nvarchar(50)")]
     public string Source { get; set; } = "WebStore";

@@ -26,66 +26,55 @@ public sealed class CreateInputCommandHandler(
         CreateInputCommand request,
         CancellationToken cancellationToken)
     {
-        if(request.SupplierId.HasValue)
+        if (request.SupplierId.HasValue)
         {
             var supplier = await supplierRepository.GetByIdAsync(
                 request.SupplierId.Value,
                 cancellationToken,
                 DataFetchMode.ActiveOnly)
                 .ConfigureAwait(false);
-
-            if(supplier is null)
+            if (supplier is null)
             {
                 return Error.NotFound($"Nhà cung cấp {request.SupplierId} không tồn tại hoặc đã bị xóa.", "SupplierId");
             }
-
-            if(string.Compare(supplier.StatusId, SupplierStatus.Active) != 0)
+            if (string.Compare(supplier.StatusId, SupplierStatus.Active) != 0)
             {
                 return Error.BadRequest($"Nhà cung cấp {supplier.Name} không ở trạng thái 'active'.", "SupplierId");
             }
         }
-
-        foreach(var product in request.Products)
+        foreach (var product in request.Products)
         {
-            if(product.ProductId.HasValue)
+            if (product.ProductId.HasValue)
             {
                 var variants = await variantRepository.GetByIdAsync(
-                    [ product.ProductId.Value ],
+                    [product.ProductId.Value],
                     cancellationToken,
                     DataFetchMode.ActiveOnly)
                     .ConfigureAwait(false);
-
                 var variant = variants.FirstOrDefault();
-
-                if(variant is null)
+                if (variant is null)
                 {
                     return Error.BadRequest($"Sản phẩm {product.ProductId} không tồn tại hoặc đã bị xóa.", "Products");
                 }
             }
         }
-
         var input = request.Adapt<InputEntity>();
-
-        if(!string.IsNullOrEmpty(input.Notes))
+        if (!string.IsNullOrEmpty(input.Notes))
         {
             input.Notes = Regex.Replace(input.Notes, "<.*?>", string.Empty);
         }
-
         input.StatusId = InputStatus.Working;
-        input.InputInfos = [ .. request.Products
+        input.InputInfos = [.. request.Products
             .Select(
                 p =>
                 {
                     var inputInfo = p.Adapt<InputInfoEntity>();
                     inputInfo.RemainingCount = p.Count ?? 0;
                     return inputInfo;
-                }) ];
-
+                })];
         insertRepository.Add(input);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         var created = await readRepository.GetByIdWithDetailsAsync(input.Id, cancellationToken).ConfigureAwait(false);
-
         return created!.Adapt<InputDetailResponse>();
     }
 }

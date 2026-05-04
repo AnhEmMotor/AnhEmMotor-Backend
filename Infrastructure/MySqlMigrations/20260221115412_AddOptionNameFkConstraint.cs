@@ -5,10 +5,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Infrastructure.MySqlMigrations
 {
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public partial class AddOptionNameFkConstraint : Migration
     {
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
@@ -29,15 +29,12 @@ namespace Infrastructure.MySqlMigrations
                     table.UniqueConstraint("AK_PredefinedOption_Key", x => x.Key);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateIndex(name: "IX_Option_Name", table: "Option", column: "Name");
-
             migrationBuilder.CreateIndex(
                 name: "IX_PredefinedOption_Key",
                 table: "PredefinedOption",
                 column: "Key",
                 unique: true);
-
             migrationBuilder.AddForeignKey(
                 name: "FK_Option_PredefinedOption_Name",
                 table: "Option",
@@ -47,13 +44,11 @@ namespace Infrastructure.MySqlMigrations
                 onDelete: ReferentialAction.Restrict);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(name: "FK_Option_PredefinedOption_Name", table: "Option");
-
             migrationBuilder.DropTable(name: "PredefinedOption");
-
             migrationBuilder.DropIndex(name: "IX_Option_Name", table: "Option");
         }
     }

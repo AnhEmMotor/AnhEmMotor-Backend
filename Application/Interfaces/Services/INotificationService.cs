@@ -1,7 +1,9 @@
+
 namespace Application.Interfaces.Services;
 
 public interface INotificationService
 {
-    Task<string> WaitForNotificationAsync(CancellationToken cancellationToken);
-    void NotifyNewBooking(string message);
+    public Task<string> WaitForNotificationAsync(CancellationToken cancellationToken);
+
+    public void NotifyNewBooking(string message);
 }

@@ -1,5 +1,5 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 #nullable disable
 
@@ -15,8 +15,7 @@ namespace Infrastructure.Migrations
                 name: "Banner",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     Title = table.Column<string>(type: "nvarchar(255)", nullable: false),
                     ImageUrl = table.Column<string>(type: "nvarchar(500)", nullable: false),
                     LinkUrl = table.Column<string>(type: "nvarchar(500)", nullable: true),
@@ -33,13 +32,11 @@ namespace Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_Banner", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "News",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     Title = table.Column<string>(type: "nvarchar(255)", nullable: false),
                     Slug = table.Column<string>(type: "varchar(255)", nullable: false),
                     Content = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -63,11 +60,8 @@ namespace Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "Banner");
-
-            migrationBuilder.DropTable(
-                name: "News");
+            migrationBuilder.DropTable(name: "Banner");
+            migrationBuilder.DropTable(name: "News");
         }
     }
 }

@@ -13,12 +13,10 @@ namespace Infrastructure.Repositories.ProductVariant
             {
                 context.VariantOptionValues.RemoveRange(variant.VariantOptionValues);
             }
-
             if (variant.ProductCollectionPhotos != null && variant.ProductCollectionPhotos.Any())
             {
                 context.ProductCollectionPhotos.RemoveRange(variant.ProductCollectionPhotos);
             }
-
             context.ProductVariants.Remove(variant);
         }
     }

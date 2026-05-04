@@ -34,7 +34,7 @@ public partial class GlobalExceptionHandler(IWebHostEnvironment environment, ILo
     /// <param name="cancellationToken">A cancellation token that can be used to cancel the asynchronous operation.</param>
     /// <returns>
     /// A value indicating whether the exception was handled and an error response was written. Always returns <see
-    /// langword="true"/>.
+    /// langword="true" />.
     /// </returns>
     public async ValueTask<bool> TryHandleAsync(
         HttpContext httpContext,
@@ -42,17 +42,12 @@ public partial class GlobalExceptionHandler(IWebHostEnvironment environment, ILo
         CancellationToken cancellationToken)
     {
         LogUnhandledException(exception, httpContext.TraceIdentifier);
-
         var errorResponse = environment.IsDevelopment() || environment.IsEnvironment("Test")
             ? ErrorResponse.CreateDevelopmentError(exception)
             : ErrorResponse.CreateProductionError("An unexpected system error occurred. Please contact support.");
-
         httpContext.Response.ContentType = "application/json";
-
         httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
-
         await httpContext.Response.WriteAsJsonAsync(errorResponse, cancellationToken).ConfigureAwait(false);
-
         return true;
     }
 }

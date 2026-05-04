@@ -7,6 +7,9 @@ namespace Infrastructure.Repositories.OptionValue
 {
     public class OptionValueInsertRepository(ApplicationDBContext context) : IOptionValueInsertRepository
     {
-        public void Add(OptionValueEntity optionValue) { context.OptionValues.Add(optionValue); }
+        public void Add(OptionValueEntity optionValue)
+        {
+            context.OptionValues.Add(optionValue);
+        }
     }
 }

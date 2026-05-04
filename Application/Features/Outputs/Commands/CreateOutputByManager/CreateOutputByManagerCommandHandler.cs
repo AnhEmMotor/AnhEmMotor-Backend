@@ -27,25 +27,21 @@ public sealed class CreateOutputByManagerCommandHandler(
     {
         var userData = await userReadRepository.GetUserByIDAsync(request.BuyerId!.Value, cancellationToken)
             .ConfigureAwait(false);
-        if(userData == null)
+        if (userData == null)
         {
             return Error.Forbidden(
                 "ID này là 1 tài khoản không tồn tại/đã bị xoá/đã bị cấm. Vui lòng kiểm tra lại.",
                 "BuyerId");
         }
-
         var variantIds = request.OutputInfos
             .Where(p => p.ProductId.HasValue)
             .Select(p => p.ProductId!.Value)
             .Distinct()
             .ToList();
-
         var variants = await variantRepository.GetByIdAsync(variantIds, cancellationToken, DataFetchMode.ActiveOnly)
             .ConfigureAwait(false);
-
         var variantsList = variants.ToList();
-
-        if(variantsList.Count != variantIds.Count)
+        if (variantsList.Count != variantIds.Count)
         {
             var foundIds = variantsList.Select(v => v.Id).ToList();
             var missingIds = variantIds.Except(foundIds).ToList();
@@ -53,10 +49,9 @@ public sealed class CreateOutputByManagerCommandHandler(
                 $"Không tìm thấy {missingIds.Count} sản phẩm: {string.Join(", ", missingIds)}",
                 "Products");
         }
-
-        foreach(var variant in variantsList)
+        foreach (var variant in variantsList)
         {
-            if(string.Compare(variant.Product?.StatusId, Domain.Constants.Product.ProductStatus.ForSale) != 0)
+            if (string.Compare(variant.Product?.StatusId, Domain.Constants.Product.ProductStatus.ForSale) != 0)
             {
                 return Error.BadRequest(
                     $"Sản phẩm '{variant.Product?.Name ?? variant.Id.ToString()}' không còn được bán.",
@@ -64,34 +59,28 @@ public sealed class CreateOutputByManagerCommandHandler(
             }
         }
         var output = request.Adapt<Output>();
-
-        foreach(var info in output.OutputInfos)
+        foreach (var info in output.OutputInfos)
         {
             var matchingVariant = variantsList.FirstOrDefault(v => v.Id == info.ProductVarientId);
-            if(matchingVariant != null)
+            if (matchingVariant != null)
             {
                 info.Price = matchingVariant.Price;
             }
         }
-
-        if(string.IsNullOrWhiteSpace(output.StatusId))
+        if (string.IsNullOrWhiteSpace(output.StatusId))
         {
             output.StatusId = OrderStatus.Pending;
         }
-
         insertRepository.Add(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-        if(string.Compare(output.StatusId, OrderStatus.Completed) == 0)
+        if (string.Compare(output.StatusId, OrderStatus.Completed) == 0)
         {
             output.FinishedBy = request.CurrentUserId;
             updateRepository.Update(output);
             await updateRepository.ProcessCOGSForCompletedOrderAsync(output.Id, cancellationToken).ConfigureAwait(false);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
-
         var created = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
-
         return created!.Adapt<OrderDetailResponse>();
     }
 }

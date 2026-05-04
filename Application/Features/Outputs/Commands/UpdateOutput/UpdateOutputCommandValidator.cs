@@ -8,9 +8,7 @@ public sealed class UpdateOutputCommandValidator : AbstractValidator<UpdateOutpu
     public UpdateOutputCommandValidator()
     {
         RuleFor(x => x.CustomerName).NotEmpty().WithMessage("Tên người nhận không được để trống.");
-
         RuleFor(x => x.CustomerAddress).NotEmpty().WithMessage("Địa chỉ giao hàng không được để trống.");
-
         RuleFor(x => x.CustomerPhone)
             .NotEmpty()
             .WithMessage("Số điện thoại không được để trống.")

@@ -16,7 +16,7 @@ namespace Domain.Entities
         public string ImageUrl { get; set; } = string.Empty;
 
         [Column("Type", TypeName = "nvarchar(50)")]
-        public string Type { get; set; } = "detail"; // cover, detail, lifestyle
+        public string Type { get; set; } = "detail";
 
         public Technology? Technology { get; set; }
     }

@@ -13,39 +13,33 @@ public class DeleteRoleCommandHandler(
 {
     public async Task<Result<RoleDeleteResponse>> Handle(DeleteRoleCommand request, CancellationToken cancellationToken)
     {
-        var roles = await roleReadRepository.GetRolesByIdsAsync([ request.RoleId ], cancellationToken)
+        var roles = await roleReadRepository.GetRolesByIdsAsync([request.RoleId], cancellationToken)
             .ConfigureAwait(false);
         var role = roles.FirstOrDefault();
-        if(role is null)
+        if (role is null)
         {
             return Error.BadRequest("Role not found.");
         }
-
         var roleName = role.Name!;
-
         var superRoles = protectedEntityManagerService.GetSuperRoles() ?? [];
-        if(superRoles.Contains(roleName))
+        if (superRoles.Contains(roleName))
         {
             return Error.BadRequest("Cannot delete SuperRole.");
         }
-
         var usersWithRole = await roleReadRepository.GetUsersInRoleAsync(roleName!, cancellationToken)
             .ConfigureAwait(false);
-        if(usersWithRole.Count > 0)
+        if (usersWithRole.Count > 0)
         {
             return Error.BadRequest(
                 $"Cannot delete role '{roleName}' because {usersWithRole.Count} user(s) have this role.");
         }
-
         cancellationToken.ThrowIfCancellationRequested();
-
         var result = await roleDeleteRepository.DeleteAsync(role, cancellationToken).ConfigureAwait(false);
-        if(!result.Succeeded)
+        if (!result.Succeeded)
         {
             var errors = string.Join(", ", result.Errors.Select(e => e.Description));
             return Error.BadRequest(errors);
         }
-
         return new RoleDeleteResponse() { Message = $"Role '{roleName}' deleted successfully." };
     }
 }

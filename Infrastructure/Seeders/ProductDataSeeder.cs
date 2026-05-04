@@ -1,31 +1,35 @@
 using Domain.Entities;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
-using Domain.Constants.Product;
 
 namespace Infrastructure.Seeders;
 
 public static class ProductDataSeeder
 {
-    public static async Task SeedAsync(
-        ApplicationDBContext context,
-        CancellationToken cancellationToken)
+    public static async Task SeedAsync(ApplicationDBContext context, CancellationToken cancellationToken)
     {
         var bikeCategory = await context.ProductCategories
             .FirstOrDefaultAsync(c => c.Name == "Xe máy", cancellationToken)
             .ConfigureAwait(false);
-
-        if (bikeCategory == null) return;
-
-        var honda = await context.Brands.FirstOrDefaultAsync(b => b.Name == "Honda", cancellationToken).ConfigureAwait(false);
-        var yamaha = await context.Brands.FirstOrDefaultAsync(b => b.Name == "Yamaha", cancellationToken).ConfigureAwait(false);
-
+        if (bikeCategory == null)
+            return;
+        var honda = await context.Brands
+            .FirstOrDefaultAsync(b => b.Name == "Honda", cancellationToken)
+            .ConfigureAwait(false);
+        var yamaha = await context.Brands
+            .FirstOrDefaultAsync(b => b.Name == "Yamaha", cancellationToken)
+            .ConfigureAwait(false);
         var productsToSeed = new List<Product>();
-
-        var colors = await context.Set<OptionValue>().Include(v => v.Option).ToListAsync(cancellationToken).ConfigureAwait(false);
-        var colorOption = await context.Set<Option>().FirstOrDefaultAsync(o => o.Name == "Color" || o.Name == "Màu sắc", cancellationToken).ConfigureAwait(false);
-        var typeOption = await context.Set<Option>().FirstOrDefaultAsync(o => o.Name == "VehicleType" || o.Name == "Loại xe", cancellationToken).ConfigureAwait(false);
-
+        var colors = await context.Set<OptionValue>()
+            .Include(v => v.Option)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+        var colorOption = await context.Set<Option>()
+            .FirstOrDefaultAsync(o => o.Name == "Color" || o.Name == "Màu sắc", cancellationToken)
+            .ConfigureAwait(false);
+        var typeOption = await context.Set<Option>()
+            .FirstOrDefaultAsync(o => o.Name == "VehicleType" || o.Name == "Loại xe", cancellationToken)
+            .ConfigureAwait(false);
         foreach (var p in productsToSeed)
         {
             var existing = await context.Products
@@ -33,15 +37,12 @@ public static class ProductDataSeeder
                 .ThenInclude(v => v.VariantOptionValues)
                 .FirstOrDefaultAsync(x => x.Name == p.Name, cancellationToken)
                 .ConfigureAwait(false);
-
             if (existing == null)
             {
                 await context.Products.AddAsync(p, cancellationToken).ConfigureAwait(false);
                 await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 existing = p;
             }
-
-            // Assign options to variants
             foreach (var variant in existing.ProductVariants)
             {
                 var pVariant = p.ProductVariants.FirstOrDefault(v => v.UrlSlug == variant.UrlSlug);
@@ -53,25 +54,32 @@ public static class ProductDataSeeder
                     variant.SKU = pVariant.SKU;
                     variant.Price = pVariant.Price;
                 }
-
                 if (!variant.VariantOptionValues.Any())
                 {
-                    // Assign a type
-                    var typeName = (p.Name ?? "").Contains("Vision") || (p.Name ?? "").Contains("SH") ? "Xe ga" : "Tay côn";
+                    var typeName = (p.Name ?? string.Empty).Contains("Vision") ||
+                            (p.Name ?? string.Empty).Contains("SH")
+                        ? "Xe ga"
+                        : "Tay côn";
                     if (typeOption != null)
                     {
-                        var typeVal = await context.Set<OptionValue>().FirstOrDefaultAsync(v => v.OptionId == typeOption.Id && v.Name == typeName, cancellationToken);
+                        var typeVal = await context.Set<OptionValue>()
+                            .FirstOrDefaultAsync(
+                                v => v.OptionId == typeOption.Id && v.Name == typeName,
+                                cancellationToken);
                         if (typeVal != null)
                         {
                             variant.VariantOptionValues.Add(new VariantOptionValue { OptionValueId = typeVal.Id });
                         }
                     }
-
-                    // Assign a color
-                    var colorName = (variant.UrlSlug ?? "").Contains("red") ? "Đỏ" : ((variant.UrlSlug ?? "").Contains("blue") ? "Xanh" : "Trắng");
+                    var colorName = (variant.UrlSlug ?? string.Empty).Contains("red")
+                        ? "Đỏ"
+                        : ((variant.UrlSlug ?? string.Empty).Contains("blue") ? "Xanh" : "Trắng");
                     if (colorOption != null)
                     {
-                        var colorVal = await context.Set<OptionValue>().FirstOrDefaultAsync(v => v.OptionId == colorOption.Id && v.Name == colorName, cancellationToken);
+                        var colorVal = await context.Set<OptionValue>()
+                            .FirstOrDefaultAsync(
+                                v => v.OptionId == colorOption.Id && v.Name == colorName,
+                                cancellationToken);
                         if (colorVal != null)
                         {
                             variant.VariantOptionValues.Add(new VariantOptionValue { OptionValueId = colorVal.Id });
@@ -79,8 +87,6 @@ public static class ProductDataSeeder
                     }
                 }
             }
-            
-            // Update technical specs
             existing.BrandId = p.BrandId;
             existing.ShortDescription = p.ShortDescription;
             existing.Weight = p.Weight;
@@ -104,8 +110,6 @@ public static class ProductDataSeeder
             existing.CompressionRatio = p.CompressionRatio;
             existing.Description = p.Description;
         }
-
         await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
     }
 }

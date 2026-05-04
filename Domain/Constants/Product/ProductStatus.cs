@@ -7,15 +7,14 @@ namespace Domain.Constants.Product
         public const string ForSale = "for-sale";
         public const string OutOfBusiness = "out-of-business";
 
-        public static readonly string[] AllowedValues = [ ForSale, OutOfBusiness ];
+        public static readonly string[] AllowedValues = [ForSale, OutOfBusiness];
 
-        public static readonly List<string> All = [ ForSale, OutOfBusiness ];
+        public static readonly List<string> All = [ForSale, OutOfBusiness];
 
         public static bool IsValid(string? value)
         {
-            if(string.IsNullOrWhiteSpace(value))
+            if (string.IsNullOrWhiteSpace(value))
                 return false;
-
             return AllowedValues.Contains(value, StringComparer.OrdinalIgnoreCase);
         }
     }

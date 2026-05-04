@@ -20,9 +20,7 @@ namespace Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "Highlights",
-                table: "Product");
+            migrationBuilder.DropColumn(name: "Highlights", table: "Product");
         }
     }
 }

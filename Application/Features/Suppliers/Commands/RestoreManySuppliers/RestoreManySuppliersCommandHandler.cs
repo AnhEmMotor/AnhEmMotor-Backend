@@ -20,7 +20,6 @@ public sealed class RestoreManySuppliersCommandHandler(
     {
         var uniqueIds = request.Ids.Distinct().ToList();
         var errorDetails = new List<Error>();
-
         var allSuppliers = await readRepository.GetByIdAsync(uniqueIds, cancellationToken, DataFetchMode.All)
             .ConfigureAwait(false);
         var deletedSuppliers = await readRepository.GetByIdAsync(
@@ -28,32 +27,27 @@ public sealed class RestoreManySuppliersCommandHandler(
             cancellationToken,
             DataFetchMode.DeletedOnly)
             .ConfigureAwait(false);
-
         var allSupplierMap = allSuppliers.ToDictionary(s => s.Id);
         var deletedSupplierSet = deletedSuppliers.Select(s => s.Id).ToHashSet();
-
-        foreach(var id in uniqueIds)
+        foreach (var id in uniqueIds)
         {
-            if(!allSupplierMap.ContainsKey(id))
+            if (!allSupplierMap.ContainsKey(id))
             {
                 errorDetails.Add(Error.NotFound($"Supplier with Id {id} not found."));
-            } else if(!deletedSupplierSet.Contains(id))
+            } else if (!deletedSupplierSet.Contains(id))
             {
                 errorDetails.Add(Error.BadRequest($"Supplier with Id {id} is not deleted."));
             }
         }
-
-        if(errorDetails.Count > 0)
+        if (errorDetails.Count > 0)
         {
             return errorDetails;
         }
-
-        if(deletedSuppliers.ToList().Count > 0)
+        if (deletedSuppliers.ToList().Count > 0)
         {
             updateRepository.Restore(deletedSuppliers);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
-
         return deletedSuppliers.Adapt<List<SupplierResponse>>();
     }
 }

@@ -22,7 +22,7 @@ namespace Domain.Entities
         public string? LinkUrl { get; set; }
 
         [Column("Position", TypeName = "nvarchar(50)")]
-        public string? Position { get; set; } // HomeTop, HomeMiddle, etc.
+        public string? Position { get; set; }
 
         [Column("StartDate")]
         public DateTimeOffset? StartDate { get; set; }

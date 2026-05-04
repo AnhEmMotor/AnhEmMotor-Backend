@@ -1,5 +1,4 @@
 using Application.Interfaces.Repositories.Lead;
-using Domain.Entities;
 using Infrastructure.DBContexts;
 
 namespace Infrastructure.Repositories.Lead;

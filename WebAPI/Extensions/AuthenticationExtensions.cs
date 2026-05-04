@@ -28,7 +28,7 @@ public static class AuthenticationExtensions
     /// </remarks>
     /// <param name="services">The service collection to which authentication services will be added.</param>
     /// <param name="configuration">The application configuration containing JWT settings such as issuer, audience, and signing key.</param>
-    /// <returns>The same <see cref="IServiceCollection"/> instance so that additional calls can be chained.</returns>
+    /// <returns>The same <see cref="IServiceCollection" /> instance so that additional calls can be chained.</returns>
     /// <exception cref="InvalidOperationException">Thrown if the required JWT signing key ('Jwt:Key') is missing from the configuration.</exception>
     public static IServiceCollection AddJwtAuthentication(
         this IServiceCollection services,
@@ -45,7 +45,6 @@ public static class AuthenticationExtensions
                 options =>
                 {
                     var jwtKey = configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key missing");
-
                     options.SaveToken = true;
                     options.RequireHttpsMetadata = false;
                     options.TokenValidationParameters = new TokenValidationParameters
@@ -61,7 +60,6 @@ public static class AuthenticationExtensions
                         RoleClaimType = "role",
                         NameClaimType = JwtRegisteredClaimNames.Name
                     };
-
                     options.Events = new JwtBearerEvents
                     {
                         OnTokenValidated =
@@ -70,30 +68,26 @@ public static class AuthenticationExtensions
                                 var userManager = context.HttpContext.RequestServices
                                     .GetRequiredService<UserManager<ApplicationUser>>();
                                 var userId = context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
-
-                                if(string.IsNullOrEmpty(userId))
+                                if (string.IsNullOrEmpty(userId))
                                 {
                                     context.Fail("Unauthorized");
                                     return;
                                 }
-
                                 var user = await userManager.FindByIdAsync(userId).ConfigureAwait(true);
-                                if(user == null || user.DeletedAt is not null)
+                                if (user == null || user.DeletedAt is not null)
                                 {
                                     context.Fail("Unauthorized");
                                     return;
                                 }
-
                                 var tokenSecurityStamp = context.Principal?.FindFirstValue(
                                     "AspNet.Identity.SecurityStamp");
-                                if(string.Compare(tokenSecurityStamp, user.SecurityStamp) != 0)
+                                if (string.Compare(tokenSecurityStamp, user.SecurityStamp) != 0)
                                 {
                                     context.Fail("Unauthorized");
                                 }
                             }
                     };
                 });
-
         return services;
     }
 }

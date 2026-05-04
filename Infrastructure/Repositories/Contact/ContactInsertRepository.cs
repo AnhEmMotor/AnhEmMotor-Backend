@@ -11,7 +11,7 @@ public class ContactInsertRepository(ApplicationDBContext context) : IContactIns
         context.Contacts.Add(contact);
     }
 
-    public void AddReply(Domain.Entities.ContactReply reply)
+    public void AddReply(ContactReply reply)
     {
         context.ContactReplies.Add(reply);
     }

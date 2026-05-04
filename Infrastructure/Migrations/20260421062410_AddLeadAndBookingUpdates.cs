@@ -1,5 +1,5 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 #nullable disable
 
@@ -16,21 +16,18 @@ namespace Infrastructure.Migrations
                 table: "Booking",
                 type: "nvarchar(20)",
                 nullable: false,
-                defaultValue: "");
-
+                defaultValue: string.Empty);
             migrationBuilder.AddColumn<string>(
                 name: "Location",
                 table: "Booking",
                 type: "nvarchar(200)",
                 nullable: false,
-                defaultValue: "");
-
+                defaultValue: string.Empty);
             migrationBuilder.CreateTable(
                 name: "Lead",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     FullName = table.Column<string>(type: "nvarchar(100)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(100)", nullable: false),
                     PhoneNumber = table.Column<string>(type: "nvarchar(20)", nullable: false),
@@ -45,13 +42,11 @@ namespace Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_Lead", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "LeadActivity",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     LeadId = table.Column<int>(type: "int", nullable: false),
                     ActivityType = table.Column<string>(type: "nvarchar(50)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(MAX)", nullable: false),
@@ -69,29 +64,16 @@ namespace Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_LeadActivity_LeadId",
-                table: "LeadActivity",
-                column: "LeadId");
+            migrationBuilder.CreateIndex(name: "IX_LeadActivity_LeadId", table: "LeadActivity", column: "LeadId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "LeadActivity");
-
-            migrationBuilder.DropTable(
-                name: "Lead");
-
-            migrationBuilder.DropColumn(
-                name: "BookingType",
-                table: "Booking");
-
-            migrationBuilder.DropColumn(
-                name: "Location",
-                table: "Booking");
+            migrationBuilder.DropTable(name: "LeadActivity");
+            migrationBuilder.DropTable(name: "Lead");
+            migrationBuilder.DropColumn(name: "BookingType", table: "Booking");
+            migrationBuilder.DropColumn(name: "Location", table: "Booking");
         }
     }
 }

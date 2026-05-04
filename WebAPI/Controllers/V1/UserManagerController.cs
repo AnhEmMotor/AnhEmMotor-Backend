@@ -165,7 +165,6 @@ public class UserManagerController(IMediator mediator) : ApiController
         return HandleResult(result);
     }
 
-
     /// <summary>
     /// Thay đổi trạng thái của nhiều người dùng
     /// </summary>

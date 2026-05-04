@@ -13,16 +13,14 @@ public sealed class CreateNewsCommandHandler(
 {
     public async Task<Result<int>> Handle(CreateNewsCommand request, CancellationToken cancellationToken)
     {
-        var slug = string.IsNullOrWhiteSpace(request.Slug) 
-            ? SlugHelper.GenerateSlug(request.Title) 
+        var slug = string.IsNullOrWhiteSpace(request.Slug)
+            ? SlugHelper.GenerateSlug(request.Title)
             : SlugHelper.GenerateSlug(request.Slug);
-
         var existing = await newsReadRepository.GetBySlugAsync(slug, cancellationToken);
         if (existing != null)
         {
             return Result<int>.Failure(Error.BadRequest($"Đường dẫn (slug) '{slug}' đã tồn tại.", nameof(request.Slug)));
         }
-
         var news = new Domain.Entities.News
         {
             Title = request.Title.Trim(),
@@ -36,10 +34,8 @@ public sealed class CreateNewsCommandHandler(
             MetaDescription = request.MetaDescription?.Trim(),
             MetaKeywords = request.MetaKeywords?.Trim()
         };
-
         newsInsertRepository.Add(news);
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
         return Result<int>.Success(news.Id);
     }
 }

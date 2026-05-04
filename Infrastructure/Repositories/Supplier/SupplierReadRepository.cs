@@ -10,7 +10,9 @@ namespace Infrastructure.Repositories.Supplier;
 public class SupplierReadRepository(ApplicationDBContext context) : ISupplierReadRepository
 {
     public IQueryable<SupplierEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
-    { return context.GetQuery<SupplierEntity>(mode); }
+    {
+        return context.GetQuery<SupplierEntity>(mode);
+    }
 
     public IQueryable<SupplierWithTotalInputResponse> GetQueryableWithTotalInput(
         DataFetchMode mode = DataFetchMode.ActiveOnly)
@@ -45,24 +47,32 @@ public class SupplierReadRepository(ApplicationDBContext context) : ISupplierRea
         int id,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
-    { return GetQueryableWithTotalInput(mode).FirstOrDefaultAsync(x => x.Id == id, cancellationToken); }
+    {
+        return GetQueryableWithTotalInput(mode).FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+    }
 
     public Task<List<SupplierEntity>> GetAllAsync(
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
-    { return context.GetQuery<SupplierEntity>(mode).ToListAsync(cancellationToken); }
+    {
+        return context.GetQuery<SupplierEntity>(mode).ToListAsync(cancellationToken);
+    }
 
     public Task<SupplierEntity?> GetByIdAsync(
         int id,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
-    { return context.GetQuery<SupplierEntity>(mode).FirstOrDefaultAsync(s => s.Id == id, cancellationToken); }
+    {
+        return context.GetQuery<SupplierEntity>(mode).FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
+    }
 
     public Task<List<SupplierEntity>> GetByIdAsync(
         IEnumerable<int> ids,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
-    { return context.GetQuery<SupplierEntity>(mode).Where(s => ids.Contains(s.Id)).ToListAsync(cancellationToken); }
+    {
+        return context.GetQuery<SupplierEntity>(mode).Where(s => ids.Contains(s.Id)).ToListAsync(cancellationToken);
+    }
 
     public Task<bool> IsNameExistsAsync(
         string name,

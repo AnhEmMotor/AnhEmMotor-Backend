@@ -14,7 +14,6 @@ public sealed class InputMappingConfig : IRegister
     {
         config.NewConfig<CreateInputCommand, Input>();
         config.NewConfig<CreateInputInfoRequest, InputInfo>();
-
         config.NewConfig<Input, InputListResponse>()
             .Map(dest => dest.SupplierName, src => src.Supplier != null ? src.Supplier.Name : null)
             .Map(dest => dest.CreatedAt, src => src.CreatedAt)
@@ -24,7 +23,6 @@ public sealed class InputMappingConfig : IRegister
                     ? src.InputInfos.Sum(ii => (long)(ii.Count ?? 0) * (long)(ii.InputPrice ?? 0))
                     : 0)
             .Map(dest => dest.Products, src => src.InputInfos);
-
         config.NewConfig<Input, InputDetailResponse>()
             .Map(dest => dest.SupplierName, src => src.Supplier != null ? src.Supplier.Name : null)
             .Map(dest => dest.SupplierPhone, src => src.Supplier != null ? src.Supplier.Phone : null)
@@ -36,7 +34,6 @@ public sealed class InputMappingConfig : IRegister
                     ? src.InputInfos.Sum(ii => (long)(ii.Count ?? 0) * (long)(ii.InputPrice ?? 0))
                     : 0)
             .Map(dest => dest.Products, src => src.InputInfos);
-
         config.NewConfig<InputInfo, InputInfoResponse>()
             .Map(dest => dest.Name, src => BuildFullVariantName(src.ProductVariant))
             .Map(dest => dest.Quantity, src => src.Count)
@@ -44,11 +41,8 @@ public sealed class InputMappingConfig : IRegister
             .Map(dest => dest.ImportPrice, src => src.InputPrice)
             .Map(dest => dest.Discount, src => 0)
             .Map(dest => dest.Total, src => (decimal)(src.Count ?? 0) * (src.InputPrice ?? 0));
-
         config.NewConfig<UpdateInputInfoRequest, InputInfo>().IgnoreNullValues(true);
-
         config.NewConfig<UpdateInputCommand, Input>().IgnoreNullValues(true);
-
         config.NewConfig<Input, SupplierPurchaseHistoryResponse>()
             .Map(dest => dest.CreatedAt, src => src.CreatedAt)
             .Map(
@@ -57,24 +51,20 @@ public sealed class InputMappingConfig : IRegister
                     ? src.InputInfos.Sum(ii => (long)(ii.Count ?? 0) * (long)(ii.InputPrice ?? 0))
                     : 0)
             .Map(dest => dest.TotalItems, src => src.InputInfos != null ? src.InputInfos.Count() : 0);
-
         config.NewConfig<InputListResponse, SupplierPurchaseHistoryResponse>();
     }
 
     private static string? BuildFullVariantName(ProductVariant? variant)
     {
-        if(variant is null || variant.Product is null)
+        if (variant is null || variant.Product is null)
         {
             return null;
         }
-
         var productName = variant.Product.Name ?? string.Empty;
-
-        if(variant.VariantOptionValues is null || variant.VariantOptionValues.Count == 0)
+        if (variant.VariantOptionValues is null || variant.VariantOptionValues.Count == 0)
         {
             return productName;
         }
-
         var parts = variant.VariantOptionValues
             .Where(vov => vov.OptionValue is not null && !string.IsNullOrWhiteSpace(vov.OptionValue.Name))
             .Select(
@@ -86,12 +76,10 @@ public sealed class InputMappingConfig : IRegister
                         : $"{optionName}: {vov.OptionValue!.Name}";
                 })
             .ToList();
-
-        if(parts.Count == 0)
+        if (parts.Count == 0)
         {
             return productName;
         }
-
         return $"{productName} ({string.Join(", ", parts)})";
     }
 }

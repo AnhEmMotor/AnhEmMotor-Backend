@@ -1,3 +1,4 @@
+using Application.Common.Models;
 using Domain.Constants;
 using ProductEntity = Domain.Entities.Product;
 
@@ -38,7 +39,7 @@ public interface IProductReadRepository
         string? sorts,
         CancellationToken cancellationToken);
 
-    public Task<(List<ProductEntity> Items, int TotalCount, List<Application.Common.Models.FilterGroup> GroupedOptionFilters)> GetPagedProductsAsync(
+    public Task<(List<ProductEntity> Items, int TotalCount, List<FilterGroup> GroupedOptionFilters)> GetPagedProductsAsync(
         string? search,
         List<string> statusIds,
         List<int> categoryIds,

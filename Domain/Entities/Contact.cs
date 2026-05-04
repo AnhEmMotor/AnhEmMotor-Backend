@@ -26,7 +26,7 @@ public class Contact : BaseEntity
     public string Message { get; set; } = string.Empty;
 
     [Column("Status", TypeName = "nvarchar(20)")]
-    public string Status { get; set; } = "Pending"; // Pending, Processed
+    public string Status { get; set; } = "Pending";
 
     [Column("InternalNote", TypeName = "nvarchar(MAX)")]
     public string? InternalNote { get; set; }

@@ -1,19 +1,10 @@
-using Application.Common.Models;
-using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.Booking;
-using Application.Interfaces.Repositories.Lead;
-using Application.Interfaces.Services;
-using Domain.Entities;
-using MediatR;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
-namespace Application.Features.Bookings.Commands.ConfirmBooking;
-
-public record ConfirmBookingCommand : IRequest<Result<bool>>
+namespace Application.Features.Bookings.Commands.ConfirmBooking
 {
-    public int BookingId { get; init; }
-}
-
-public class ConfirmBookingCommandHandler(
+    public class ConfirmBookingCommandHandler(
     IBookingReadRepository bookingReadRepository,
     IBookingInsertRepository bookingInsertRepository,
     ILeadReadRepository leadReadRepository,
@@ -21,35 +12,35 @@ public class ConfirmBookingCommandHandler(
     ILeadActivityInsertRepository leadActivityInsertRepository,
     IUnitOfWork unitOfWork,
     IEmailService emailService) : IRequestHandler<ConfirmBookingCommand, Result<bool>>
-{
-    public async Task<Result<bool>> Handle(ConfirmBookingCommand request, CancellationToken cancellationToken)
     {
-        var booking = await bookingReadRepository.GetByIdAsync(request.BookingId, cancellationToken).ConfigureAwait(false);
-        if (booking == null)
+        public async Task<Result<bool>> Handle(ConfirmBookingCommand request, CancellationToken cancellationToken)
         {
-            return Result<bool>.Failure(Error.NotFound("Lịch hẹn không tồn tại."));
-        }
-        booking.Status = "Confirmed";
-        bookingInsertRepository.Update(booking);
-        var lead = await leadReadRepository.GetByPhoneNumberAsync(booking.PhoneNumber, cancellationToken).ConfigureAwait(false);
-        if (lead != null)
-        {
-            lead.Status = "TestDriving";
-            leadInsertRepository.Update(lead);
-            leadActivityInsertRepository.Add(
-                new LeadActivity
-                {
-                    LeadId = lead.Id,
-                    ActivityType = "Contact",
-                    Description =
-                        $"Xác nhận lịch hẹn lái thử cho {booking.ProductVariant?.Product?.Name}. Chuyển trạng thái sang Đang lái thử.",
-                    CreatedAt = DateTimeOffset.UtcNow
-                });
-        }
-        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        var googleMapsLink = "https://www.google.com/maps/search/?api=1&query=Showroom+AnhEm+Motor+Biên+Hòa";
-        var subject = "Xác nhận lịch hẹn lái thử | AnhEm Motor";
-        var body = $@"
+            var booking = await bookingReadRepository.GetByIdAsync(request.BookingId, cancellationToken).ConfigureAwait(false);
+            if (booking == null)
+            {
+                return Result<bool>.Failure(Error.NotFound("Lịch hẹn không tồn tại."));
+            }
+            booking.Status = "Confirmed";
+            bookingInsertRepository.Update(booking);
+            var lead = await leadReadRepository.GetByPhoneNumberAsync(booking.PhoneNumber, cancellationToken).ConfigureAwait(false);
+            if (lead != null)
+            {
+                lead.Status = "TestDriving";
+                leadInsertRepository.Update(lead);
+                leadActivityInsertRepository.Add(
+                    new LeadActivity
+                    {
+                        LeadId = lead.Id,
+                        ActivityType = "Contact",
+                        Description =
+                            $"Xác nhận lịch hẹn lái thử cho {booking.ProductVariant?.Product?.Name}. Chuyển trạng thái sang Đang lái thử.",
+                        CreatedAt = DateTimeOffset.UtcNow
+                    });
+            }
+            await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            var googleMapsLink = "https://www.google.com/maps/search/?api=1&query=Showroom+AnhEm+Motor+Biên+Hòa";
+            var subject = "Xác nhận lịch hẹn lái thử | AnhEm Motor";
+            var body = $@"
             <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;'>
                 <h2 style='color: #e31837; text-transform: uppercase;'>Xác nhận lịch hẹn thành công</h2>
                 <p>Chào <strong>{booking.FullName}</strong>,</p>
@@ -73,12 +64,15 @@ public class ConfirmBookingCommandHandler(
                     Hotline: 0909 xxx xxx | Website: anhemmotor.com
                 </p>
             </div>";
-        try
-        {
-            await emailService.SendEmailAsync(booking.Email, subject, body).ConfigureAwait(false);
-        } catch
-        {
+            try
+            {
+                await emailService.SendEmailAsync(booking.Email, subject, body).ConfigureAwait(false);
+            }
+            catch
+            {
+            }
+            return Result<bool>.Success(true);
         }
-        return Result<bool>.Success(true);
     }
+
 }

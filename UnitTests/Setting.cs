@@ -20,16 +20,14 @@ public class Setting
         _unitOfWorkMock = new Mock<IUnitOfWork>();
     }
 
-#pragma warning disable IDE0079 
-#pragma warning disable CRR0035
+    #pragma warning disable IDE0079 
+    #pragma warning disable CRR0035
     [Fact(DisplayName = "SETTING_014 - Validator - Deposit_ratio = 1 (giá trị biên tối thiểu hợp lệ)")]
     public void SETTING_014_Validator_DepositRatio_MinimumBoundary_ShouldPass()
     {
         var validator = new SetSettingsCommandValidator();
         var request = new SetSettingsCommand { Settings = new Dictionary<string, string?> { { "Deposit_ratio", "1" } } };
-
         var result = validator.TestValidate(request);
-
         result.ShouldNotHaveAnyValidationErrors();
     }
 
@@ -41,9 +39,7 @@ public class Setting
         {
             Settings = new Dictionary<string, string?> { { "Deposit_ratio", "99" } }
         };
-
         var result = validator.TestValidate(request);
-
         result.ShouldNotHaveAnyValidationErrors();
     }
 
@@ -55,9 +51,7 @@ public class Setting
         {
             Settings = new Dictionary<string, string?> { { "Deposit_ratio", "50.5" } }
         };
-
         var result = validator.TestValidate(request);
-
         result.ShouldNotHaveAnyValidationErrors();
     }
 
@@ -69,9 +63,7 @@ public class Setting
         {
             Settings = new Dictionary<string, string?> { { "Deposit_ratio", "0.9" } }
         };
-
         var result = validator.TestValidate(request);
-
         result.ShouldHaveValidationErrorFor(x => x.Settings)
             .WithErrorMessage("Deposit ratio must be between 1.0 and 99.0 with max 1 decimal place");
     }
@@ -84,9 +76,7 @@ public class Setting
         {
             Settings = new Dictionary<string, string?> { { "Deposit_ratio", "99.1" } }
         };
-
         var result = validator.TestValidate(request);
-
         result.ShouldHaveValidationErrorFor(x => x.Settings)
             .WithErrorMessage("Deposit ratio must be between 1.0 and 99.0 with max 1 decimal place");
     }
@@ -99,9 +89,7 @@ public class Setting
         {
             Settings = new Dictionary<string, string?> { { "Deposit_ratio", "abc" } }
         };
-
         var result = validator.TestValidate(request);
-
         result.ShouldHaveValidationErrorFor(x => x.Settings)
             .WithErrorMessage("All numeric fields must contain valid numbers");
     }
@@ -114,9 +102,7 @@ public class Setting
         {
             Settings = new Dictionary<string, string?> { { "Inventory_alert_level", "100" } }
         };
-
         var result = validator.TestValidate(request);
-
         result.ShouldNotHaveAnyValidationErrors();
     }
 
@@ -129,9 +115,7 @@ public class Setting
         {
             Settings = new Dictionary<string, string?> { { "Inventory_alert_level", "50.5" } }
         };
-
         var result = validator.TestValidate(request);
-
         result.ShouldHaveValidationErrorFor(x => x.Settings)
             .WithErrorMessage("Integer fields cannot have decimal values");
     }
@@ -144,9 +128,7 @@ public class Setting
         {
             Settings = new Dictionary<string, string?> { { "Order_value_exceeds", "text" } }
         };
-
         var result = validator.TestValidate(request);
-
         result.ShouldHaveValidationErrorFor(x => x.Settings)
             .WithErrorMessage("All numeric fields must contain valid numbers");
     }
@@ -159,9 +141,7 @@ public class Setting
         {
             Settings = new Dictionary<string, string?> { { "Z-bike_threshold_for_meeting", "-5" } }
         };
-
         var result = validator.TestValidate(request);
-
         result.ShouldNotHaveAnyValidationErrors();
     }
 
@@ -170,9 +150,7 @@ public class Setting
     {
         var validator = new SetSettingsCommandValidator();
         var request = new SetSettingsCommand { Settings = [] };
-
         var result = validator.TestValidate(request);
-
         result.ShouldHaveValidationErrorFor(x => x.Settings).WithErrorMessage("Settings cannot be empty");
     }
 
@@ -184,9 +162,7 @@ public class Setting
         {
             Settings = new Dictionary<string, string?> { { "Deposit_ratio", " 50 " } }
         };
-
         var result = validator.TestValidate(request);
-
         result.ShouldNotHaveAnyValidationErrors();
     }
 
@@ -200,14 +176,10 @@ public class Setting
             new() { Key = "Order_value_exceeds", Value = "50000000" },
             new() { Key = "Z-bike_threshold_for_meeting", Value = "5" }
         };
-
         _settingRepoMock.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync(settings);
-
         var handler = new GetAllSettingsQueryHandler(_settingRepoMock.Object);
         var query = new GetAllSettingsQuery();
-
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
         result.Value.Should().HaveCount(4);
         result.Value["Deposit_ratio"].Should().Be("50.5");
@@ -224,17 +196,13 @@ public class Setting
             new() { Key = "Deposit_ratio", Value = "30" },
             new() { Key = "Inventory_alert_level", Value = "5" }
         };
-
         _settingRepoMock.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync(existingSettings);
-
         var handler = new SetSettingsCommandHandler(_settingRepoMock.Object, _unitOfWorkMock.Object);
         var command = new SetSettingsCommand
         {
             Settings = new Dictionary<string, string?> { { "Deposit_ratio", "50" }, { "Inventory_alert_level", "10" } }
         };
-
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
         _settingRepoMock.Verify(
             x => x.Update(
                 It.Is<IEnumerable<SettingEntity>>(
@@ -246,9 +214,8 @@ public class Setting
                             setting => string.Compare(setting.Key, "Inventory_alert_level") == 0 &&
                                 string.Compare(setting.Value, "10") == 0))),
             Times.Once);
-
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
-#pragma warning restore CRR0035
-#pragma warning restore IDE0079
+    #pragma warning restore CRR0035
+    #pragma warning restore IDE0079
 }

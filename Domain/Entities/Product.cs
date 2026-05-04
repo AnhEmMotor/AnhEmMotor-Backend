@@ -101,7 +101,6 @@ namespace Domain.Entities
 
         public ICollection<ProductTechnology> ProductTechnologies { get; set; } = [];
 
-
         public ProductCategory? ProductCategory { get; set; }
 
         public ProductStatus? ProductStatus { get; set; }

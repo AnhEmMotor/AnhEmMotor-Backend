@@ -1,5 +1,4 @@
 using Application.Interfaces.Repositories.Booking;
-using Domain.Entities;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,7 +10,7 @@ public class BookingReadRepository(ApplicationDBContext context) : IBookingReadR
     {
         return await context.Bookings
             .Include(b => b.ProductVariant)
-                .ThenInclude(pv => pv.Product)
+            .ThenInclude(pv => pv.Product)
             .FirstOrDefaultAsync(b => b.Id == id, cancellationToken);
     }
 
@@ -19,7 +18,7 @@ public class BookingReadRepository(ApplicationDBContext context) : IBookingReadR
     {
         return await context.Bookings
             .Include(b => b.ProductVariant)
-                .ThenInclude(pv => pv.Product)
+            .ThenInclude(pv => pv.Product)
             .OrderByDescending(b => b.PreferredDate)
             .ToListAsync(cancellationToken);
     }

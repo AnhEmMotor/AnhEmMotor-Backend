@@ -19,32 +19,24 @@ public sealed class LoginCommandHandler(
             request.Password!,
             cancellationToken)
             .ConfigureAwait(false);
-
-        if(authResult.IsFailure)
+        if (authResult.IsFailure)
         {
             return authResult.Error!;
         }
-
         var userDto = authResult.Value;
-
         var expiryAccessTokenMinutes = tokenManagerService.GetAccessTokenExpiryMinutes();
         var expiryAccessTokenDate = DateTimeOffset.UtcNow.AddMinutes(expiryAccessTokenMinutes);
-
         var accessToken = tokenManagerService.CreateAccessToken(userDto, expiryAccessTokenDate);
-
         var refreshToken = tokenManagerService.CreateRefreshToken();
         var expiryRefreshTokenDays = tokenManagerService.GetRefreshTokenExpiryDays();
         var expiryRefreshTokenDate = DateTimeOffset.UtcNow.AddDays(expiryRefreshTokenDays);
-
         await userUpdateRepository.UpdateRefreshTokenAsync(
             userDto.Id,
             refreshToken,
             expiryRefreshTokenDate,
             cancellationToken)
             .ConfigureAwait(false);
-
         httpTokenAccessorService.SetRefreshTokenToCookie(refreshToken, expiryRefreshTokenDate);
-
         return new LoginResponse { AccessToken = accessToken, ExpiresAt = expiryAccessTokenDate };
     }
 }

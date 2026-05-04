@@ -17,13 +17,11 @@ public sealed class GetProductCategoriesListQueryHandler(
         CancellationToken cancellationToken)
     {
         var query = repository.GetQueryable();
-
         var result = await paginator.ApplyAsync<ProductCategoryEntity, ProductCategoryResponse>(
             query,
             request.SieveModel!,
             cancellationToken: cancellationToken)
             .ConfigureAwait(false);
-
         return result;
     }
 }

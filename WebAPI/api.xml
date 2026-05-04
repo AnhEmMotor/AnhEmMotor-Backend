@@ -92,6 +92,63 @@
             Lấy cấu hình các dịch vụ xác thực bên ngoài
             </summary>
         </member>
+        <member name="T:WebAPI.Controllers.V1.BannerController">
+            <summary>
+            Controller quản lý Banner.
+            </summary>
+            <param name="sender"></param>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.BannerController.#ctor(MediatR.ISender)">
+            <summary>
+            Controller quản lý Banner.
+            </summary>
+            <param name="sender"></param>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.BannerController.Create(Application.Features.Banners.Commands.CreateBanner.CreateBannerCommand)">
+            <summary>
+            Thêm banner mới.
+            </summary>
+            <param name="command"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.BannerController.GetActive">
+            <summary>
+            Lấy danh sách banner đang hoạt động.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:WebAPI.Controllers.V1.BookingsController">
+            <summary>
+            Controller quản lý đặt lịch lái thử.
+            </summary>
+            <param name="sender"></param>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.BookingsController.#ctor(MediatR.ISender)">
+            <summary>
+            Controller quản lý đặt lịch lái thử.
+            </summary>
+            <param name="sender"></param>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.BookingsController.Create(Application.Features.Bookings.Commands.CreateBooking.CreateBookingCommand)">
+            <summary>
+            Tạo yêu cầu đặt lịch lái thử mới.
+            </summary>
+            <param name="command"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.BookingsController.GetAll">
+            <summary>
+            Lấy danh sách yêu cầu đặt lịch lái thử.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.BookingsController.Confirm(Application.Features.Bookings.Commands.ConfirmBooking.ConfirmBookingCommand)">
+            <summary>
+            Xác nhận yêu cầu đặt lịch lái thử.
+            </summary>
+            <param name="command"></param>
+            <returns></returns>
+        </member>
         <member name="T:WebAPI.Controllers.V1.BrandController">
             <summary>
             Quản lý danh sách các thương hiệu sản phẩm (ví dụ: Honda, Yamaha, Suzuki).
@@ -151,6 +208,45 @@
             <summary>
             Khôi phục nhiều thương hiệu đã xoá cùng lúc.
             </summary>
+        </member>
+        <member name="T:WebAPI.Controllers.V1.ContactsController">
+            <summary>
+            Controller quản lý liên hệ khách hàng.
+            </summary>
+            <param name="sender"></param>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ContactsController.#ctor(MediatR.ISender)">
+            <summary>
+            Controller quản lý liên hệ khách hàng.
+            </summary>
+            <param name="sender"></param>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ContactsController.Create(Application.Features.Contacts.Commands.CreateContact.CreateContactCommand)">
+            <summary>
+            Tạo yêu cầu liên hệ mới.
+            </summary>
+            <param name="command"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ContactsController.GetAll">
+            <summary>
+            Lấy danh sách yêu cầu liên hệ.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ContactsController.Reply(Application.Features.Contacts.Commands.CreateContactReply.CreateContactReplyCommand)">
+            <summary>
+            Phản hồi yêu cầu liên hệ.
+            </summary>
+            <param name="command"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ContactsController.UpdateInternalNote(Application.Features.Contacts.Commands.UpdateInternalNote.UpdateInternalNoteCommand)">
+            <summary>
+            Cập nhật ghi chú nội bộ cho yêu cầu liên hệ.
+            </summary>
+            <param name="command"></param>
+            <returns></returns>
         </member>
         <member name="T:WebAPI.Controllers.V1.InventoryReceiptsController">
             <summary>
@@ -311,6 +407,39 @@
             <summary>
             Xem ảnh với khả năng resize theo kích thước mong muốn.
             </summary>
+        </member>
+        <member name="T:WebAPI.Controllers.V1.NewsController">
+            <summary>
+            Controller quản lý bài viết và tin tức.
+            </summary>
+            <param name="mediator"></param>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.NewsController.#ctor(MediatR.IMediator)">
+            <summary>
+            Controller quản lý bài viết và tin tức.
+            </summary>
+            <param name="mediator"></param>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.NewsController.Create(Application.Features.News.Commands.CreateNews.CreateNewsCommand)">
+            <summary>
+            Tạo bài viết mới.
+            </summary>
+            <param name="command"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.NewsController.GetList(Sieve.Models.SieveModel)">
+            <summary>
+            Lấy danh sách bài viết.
+            </summary>
+            <param name="sieveModel"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.NewsController.GetBySlug(System.String)">
+            <summary>
+            Lấy chi tiết bài viết theo Slug.
+            </summary>
+            <param name="slug"></param>
+            <returns></returns>
         </member>
         <member name="T:WebAPI.Controllers.V1.NotificationController">
             <summary>
@@ -615,6 +744,31 @@
             <summary>
             Lấy danh sách thông tin của các mã biến thể được truyền vào để trả ra các thông tin phục vụ cho giỏ hàng
             </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.CreateOptionValueAsync(Application.Features.OptionValues.Commands.CreateOptionValue.CreateOptionValueCommand,System.Threading.CancellationToken)">
+            <summary>
+            Tạo mới giá trị thuộc tính.
+            </summary>
+            <param name="request"></param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateOptionValueAsync(System.Int32,Application.Features.OptionValues.Commands.UpdateOptionValue.UpdateOptionValueCommand,System.Threading.CancellationToken)">
+            <summary>
+            Cập nhật giá trị thuộc tính.
+            </summary>
+            <param name="id"></param>
+            <param name="request"></param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.DeleteOptionValueAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Xoá giá trị thuộc tính.
+            </summary>
+            <param name="id"></param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
         </member>
         <member name="T:WebAPI.Controllers.V1.SalesOrdersController">
             <summary>
@@ -1081,21 +1235,38 @@
             Reads a JSON string value from the specified reader and returns it as a .NET string.
             </summary>
             <param name="reader">
-            A reference to the <see cref="T:System.Text.Json.Utf8JsonReader"/> positioned at the JSON value to read. The reader must be at a
+            A reference to the <see cref="T:System.Text.Json.Utf8JsonReader" /> positioned at the JSON value to read. The reader must be at a
             string token.
             </param>
             <param name="typeToConvert">The type of the value to convert. This parameter is ignored for string values.</param>
             <param name="options">Options to control the behavior of the JSON serializer. This parameter is not used for string values.</param>
-            <returns>The string value read from the JSON input. Returns <see langword="string.Empty"/> if the JSON value is null.</returns>
+            <returns>The string value read from the JSON input. Returns <see langword="string.Empty" /> if the JSON value is null.</returns>
         </member>
         <member name="M:WebAPI.Converters.EmptyStringConverter.Write(System.Text.Json.Utf8JsonWriter,System.String,System.Text.Json.JsonSerializerOptions)">
             <summary>
             Writes the specified string value to the JSON output using the provided writer, if the value is not null or
             empty.
             </summary>
-            <param name="writer">The <see cref="T:System.Text.Json.Utf8JsonWriter"/> instance used to write the JSON value.</param>
+            <param name="writer">The <see cref="T:System.Text.Json.Utf8JsonWriter" /> instance used to write the JSON value.</param>
             <param name="value">The string value to write. If null or empty, no value is written.</param>
             <param name="options">Options to control JSON serialization behavior. This parameter can be used to customize serialization features.</param>
+        </member>
+        <member name="M:WebAPI.Converters.EmptyStringConverter.WriteAsPropertyName(System.Text.Json.Utf8JsonWriter,System.String,System.Text.Json.JsonSerializerOptions)">
+            <summary>
+            Writes the specified string value as a property name to the JSON output.
+            </summary>
+            <param name="writer"></param>
+            <param name="value"></param>
+            <param name="options"></param>
+        </member>
+        <member name="M:WebAPI.Converters.EmptyStringConverter.ReadAsPropertyName(System.Text.Json.Utf8JsonReader@,System.Type,System.Text.Json.JsonSerializerOptions)">
+            <summary>
+            Reads a JSON property name and returns it as a string.
+            </summary>
+            <param name="reader"></param>
+            <param name="typeToConvert"></param>
+            <param name="options"></param>
+            <returns></returns>
         </member>
         <member name="T:WebAPI.Extensions.AuthenticationExtensions">
             <summary>
@@ -1118,7 +1289,7 @@
             </remarks>
             <param name="services">The service collection to which authentication services will be added.</param>
             <param name="configuration">The application configuration containing JWT settings such as issuer, audience, and signing key.</param>
-            <returns>The same <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> instance so that additional calls can be chained.</returns>
+            <returns>The same <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection" /> instance so that additional calls can be chained.</returns>
             <exception cref="T:System.InvalidOperationException">Thrown if the required JWT signing key ('Jwt:Key') is missing from the configuration.</exception>
         </member>
         <member name="T:WebAPI.Extensions.MigrationExtensions">
@@ -1140,10 +1311,10 @@
             </summary>
             <remarks>
             Data seeding is performed only if the configuration value 'SeedingOptions:RunDataSeedingOnStartup' is set to
-            <see langword="true"/>. This method should be called during application startup to ensure the database schema is
-            up to date and required data is present.
+            <see langword="true" />. This method should be called during application startup to ensure the database schema
+            is up to date and required data is present.
             </remarks>
-            <param name="app">The current <see cref="T:Microsoft.AspNetCore.Builder.WebApplication"/> instance to which migrations and seeding will be applied.</param>
+            <param name="app">The current <see cref="T:Microsoft.AspNetCore.Builder.WebApplication" /> instance to which migrations and seeding will be applied.</param>
             <param name="cancellationToken">A cancellation token that can be used to cancel the migration and seeding operations.</param>
             <returns>A task that represents the asynchronous operation.</returns>
         </member>
@@ -1171,8 +1342,8 @@
             serialization options. It is intended to be called during application startup to standardize API behavior across
             the application.
             </remarks>
-            <param name="services">The <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> to which the MVC and related services will be added. Cannot be null.</param>
-            <returns>The same <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> instance so that additional calls can be chained.</returns>
+            <param name="services">The <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection" /> to which the MVC and related services will be added. Cannot be null.</param>
+            <returns>The same <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection" /> instance so that additional calls can be chained.</returns>
         </member>
         <member name="T:WebAPI.Extensions.ObservabilityExtensions">
             <summary>
@@ -1220,11 +1391,11 @@
         </member>
         <member name="M:WebAPI.Extensions.RateLimitingExtensions.AddRateLimitingServices(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
             <summary>
-            Adds rate limiting services to the specified <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/>. Loopback (localhost) requests are
-            excluded from rate limiting.
+            Adds rate limiting services to the specified <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection" />. Loopback (localhost) requests
+            are excluded from rate limiting.
             </summary>
             <param name="services">The service collection to add rate limiting to.</param>
-            <returns>The same <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> for chaining.</returns>
+            <returns>The same <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection" /> for chaining.</returns>
         </member>
         <member name="T:WebAPI.Extensions.SwaggerExtensions">
             <summary>
@@ -1295,7 +1466,7 @@
             <param name="cancellationToken">A cancellation token that can be used to cancel the asynchronous operation.</param>
             <returns>
             A value indicating whether the exception was handled and an error response was written. Always returns <see
-            langword="true"/>.
+            langword="true" />.
             </returns>
         </member>
         <member name="T:WebAPI.Middleware.LogContextMiddleware">

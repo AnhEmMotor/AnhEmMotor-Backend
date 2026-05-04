@@ -32,31 +32,22 @@ public class NotificationController(INotificationService notificationService) : 
         Response.Headers.Append("Content-Type", "text/event-stream");
         Response.Headers.Append("Cache-Control", "no-cache");
         Response.Headers.Append("X-Accel-Buffering", "no");
-
         try
         {
-            // Send initial ping
-            await Response.WriteAsync($"data: {JsonSerializer.Serialize(new { message = "Connected to notification stream" }, _jsonSerializerOptions)}\n\n", cancellationToken);
+            await Response.WriteAsync(
+                $"data: {JsonSerializer.Serialize(new { message = "Connected to notification stream" }, _jsonSerializerOptions)}\n\n",
+                cancellationToken);
             await Response.Body.FlushAsync(cancellationToken);
-
             while (!cancellationToken.IsCancellationRequested)
             {
                 var message = await notificationService.WaitForNotificationAsync(cancellationToken);
-
-                var notification = new { 
-                    type = "NewBooking", 
-                    message = message, 
-                    timestamp = DateTimeOffset.UtcNow 
-                };
-                
+                var notification = new { type = "NewBooking", message = message, timestamp = DateTimeOffset.UtcNow };
                 var json = JsonSerializer.Serialize(notification, _jsonSerializerOptions);
                 await Response.WriteAsync($"data: {json}\n\n", cancellationToken);
                 await Response.Body.FlushAsync(cancellationToken);
             }
-        }
-        catch (OperationCanceledException)
+        } catch (OperationCanceledException)
         {
-            // Client disconnected
         }
     }
 }

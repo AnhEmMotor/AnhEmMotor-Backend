@@ -27,6 +27,7 @@ namespace Domain.Entities
         public TechnologyCategory? Category { get; set; }
 
         public ICollection<TechnologyImage> Images { get; set; } = [];
+
         public ICollection<ProductTechnology> ProductTechnologies { get; set; } = [];
     }
 }

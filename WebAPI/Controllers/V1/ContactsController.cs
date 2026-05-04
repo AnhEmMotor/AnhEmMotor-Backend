@@ -3,7 +3,6 @@ using Application.Features.Contacts.Commands.CreateContactReply;
 using Application.Features.Contacts.Commands.UpdateInternalNote;
 using Application.Features.Contacts.Queries.GetContacts;
 using Asp.Versioning;
-using Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,11 +11,20 @@ using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1;
 
+/// <summary>
+/// Controller quản lý liên hệ khách hàng.
+/// </summary>
+/// <param name="sender"></param>
 [ApiVersion("1.0")]
 [SwaggerTag("Quản lý liên hệ khách hàng (CRM)")]
 [Route("api/v{version:apiVersion}/[controller]")]
 public class ContactsController(ISender sender) : ApiController
 {
+    /// <summary>
+    /// Tạo yêu cầu liên hệ mới.
+    /// </summary>
+    /// <param name="command"></param>
+    /// <returns></returns>
     [HttpPost]
     [AllowAnonymous]
     public async Task<IActionResult> Create(CreateContactCommand command)
@@ -25,6 +33,10 @@ public class ContactsController(ISender sender) : ApiController
         return HandleResult(result);
     }
 
+    /// <summary>
+    /// Lấy danh sách yêu cầu liên hệ.
+    /// </summary>
+    /// <returns></returns>
     [HttpGet]
     [Authorize]
     public async Task<IActionResult> GetAll()
@@ -33,6 +45,11 @@ public class ContactsController(ISender sender) : ApiController
         return HandleResult(result);
     }
 
+    /// <summary>
+    /// Phản hồi yêu cầu liên hệ.
+    /// </summary>
+    /// <param name="command"></param>
+    /// <returns></returns>
     [HttpPost("reply")]
     [Authorize]
     public async Task<IActionResult> Reply(CreateContactReplyCommand command)
@@ -41,6 +58,11 @@ public class ContactsController(ISender sender) : ApiController
         return HandleResult(result);
     }
 
+    /// <summary>
+    /// Cập nhật ghi chú nội bộ cho yêu cầu liên hệ.
+    /// </summary>
+    /// <param name="command"></param>
+    /// <returns></returns>
     [HttpPatch("internal-note")]
     [Authorize]
     public async Task<IActionResult> UpdateInternalNote(UpdateInternalNoteCommand command)
