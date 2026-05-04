@@ -20,22 +20,39 @@ jobs:
       - name: Check Migration Count
         shell: bash
         run: |
-          FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E 'Infrastructure/(Migrations|MySqlMigrations|PostgreSqlMigrations)/' | grep '\.cs$' | grep -v '\.Designer\.cs' | grep -v 'ModelSnapshot\.cs' || true)
+          # Use --diff-filter=A to only catch NEW files added in this PR
+          # Compare directly against origin/base_ref to exclude migrations already in main
+          FILES=$(git diff --name-only --diff-filter=A origin/${{ github.base_ref }} HEAD | grep -E 'Infrastructure/(Migrations|MySqlMigrations|PostgreSqlMigrations)/' | grep '\.cs$' | grep -v '\.Designer\.cs' | grep -v 'ModelSnapshot\.cs' || true)
+          
           if [ -z "$FILES" ]; then
             echo "No new migrations found. Check passed."
             exit 0
           fi
+
+          echo "Detected new migration files:"
+          echo "$FILES"
+          echo "--------------------------------"
+          
           echo "Checking migrations per provider..."
           FAILED=0
-          for DIR in $(echo "$FILES" | xargs -n1 dirname | sort -u); do
-            COUNT=$(echo "$FILES" | grep "^$DIR/" | sed 's/.*\///' | sed -E 's/^[0-9]+_(.*)\.cs$/\1/' | sort -u | wc -l)
+          # Get unique directories
+          DIRS=$(echo "$FILES" | xargs -n1 dirname | sort -u)
+          
+          for DIR in $DIRS; do
+            # Extract unique migration names (ignoring timestamps)
+            UNIQUE_NAMES=$(echo "$FILES" | grep "^$DIR/" | sed 's/.*\///' | sed -E 's/^[0-9]+_(.*)\.cs$/\1/' | sort -u)
+            COUNT=$(echo "$UNIQUE_NAMES" | wc -l)
+            
             if [ "$COUNT" -gt 1 ]; then
               echo "::error::Provider '$DIR' has $COUNT unique migrations. Only 1 is allowed per PR."
+              echo "Migrations found: "
+              echo "$UNIQUE_NAMES"
               FAILED=1
             else
-              echo "  - $DIR: $COUNT migration(s) [OK]"
+              echo "  - $DIR: $COUNT migration(s) [OK] ($UNIQUE_NAMES)"
             fi
           done
+          
           if [ "$FAILED" -eq 1 ]; then
             exit 1
           fi
