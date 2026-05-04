@@ -17,7 +17,9 @@ public class LogContextMiddleware(RequestDelegate next)
     /// <param name="context">Httpcontext của request hiện tại.</param>
     public async Task InvokeAsync(HttpContext context)
     {
-        var clientIp = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        var clientIp = context.Request.Headers["CF-Connecting-IP"].FirstOrDefault()
+                       ?? context.Connection.RemoteIpAddress?.ToString()
+                       ?? "unknown";
         var method = context.Request.Method;
         var path = context.Request.Path.Value ?? "unknown";
         using (LogContext.PushProperty("ClientIP", clientIp))

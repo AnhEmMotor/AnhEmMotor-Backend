@@ -26,7 +26,12 @@ public static class VNPayUtils
 
     public static string GetIpAddress(HttpContext context)
     {
-        var ipAddress = string.Empty;
+        var ipAddress = context.Request.Headers["CF-Connecting-IP"].FirstOrDefault();
+        if (!string.IsNullOrEmpty(ipAddress))
+        {
+            return ipAddress;
+        }
+
         try
         {
             var remoteIpAddress = context.Connection.RemoteIpAddress;
@@ -39,7 +44,7 @@ public static class VNPayUtils
                 }
                 if (remoteIpAddress != null)
                     ipAddress = remoteIpAddress.ToString();
-                return ipAddress;
+                return ipAddress ?? "127.0.0.1";
             }
         } catch
         {

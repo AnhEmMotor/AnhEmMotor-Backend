@@ -40,7 +40,9 @@ public static class RateLimitingExtensions
                         {
                             return RateLimitPartition.GetNoLimiter(string.Empty);
                         }
-                        var remoteIp = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+                        var remoteIp = httpContext.Request.Headers["CF-Connecting-IP"].FirstOrDefault()
+                                       ?? httpContext.Connection.RemoteIpAddress?.ToString()
+                                       ?? "unknown";
                         return RateLimitPartition.GetFixedWindowLimiter(
                             partitionKey: remoteIp,
                             factory: _ => new FixedWindowRateLimiterOptions
@@ -59,7 +61,9 @@ public static class RateLimitingExtensions
                         {
                             return RateLimitPartition.GetNoLimiter(string.Empty);
                         }
-                        var remoteIp = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+                        var remoteIp = httpContext.Request.Headers["CF-Connecting-IP"].FirstOrDefault()
+                                       ?? httpContext.Connection.RemoteIpAddress?.ToString()
+                                       ?? "unknown";
                         return RateLimitPartition.GetFixedWindowLimiter(
                             partitionKey: remoteIp,
                             factory: _ => new FixedWindowRateLimiterOptions
@@ -76,7 +80,9 @@ public static class RateLimitingExtensions
                         {
                             return RateLimitPartition.GetNoLimiter(string.Empty);
                         }
-                        var remoteIp = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+                        var remoteIp = httpContext.Request.Headers["CF-Connecting-IP"].FirstOrDefault()
+                                       ?? httpContext.Connection.RemoteIpAddress?.ToString()
+                                       ?? "unknown";
                         return RateLimitPartition.GetFixedWindowLimiter(
                             partitionKey: remoteIp,
                             factory: _ => new FixedWindowRateLimiterOptions
