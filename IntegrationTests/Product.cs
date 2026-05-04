@@ -2664,21 +2664,21 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             username,
             password,
             [PermissionsList.Products.View, PermissionsList.Products.Edit],
-            CancellationToken.None,
+            TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
             _client,
             username,
             password,
-            CancellationToken.None)
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
-        if (!await db.ProductStatuses.AnyAsync(x => x.Key == productStatusId).ConfigureAwait(true))
+        if (!await db.ProductStatuses.AnyAsync(x => x.Key == productStatusId, TestContext.Current.CancellationToken).ConfigureAwait(true))
         {
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         }
@@ -2686,7 +2686,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var brand = new BrandEntity { Name = $"Brand_{uniqueId}" };
         db.ProductCategories.Add(category);
         db.Brands.Add(brand);
-        await db.SaveChangesAsync().ConfigureAwait(true);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var product = new ProductEntity
         {
@@ -2700,7 +2700,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             ]
         };
         db.Products.Add(product);
-        await db.SaveChangesAsync().ConfigureAwait(true);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         var variantId = product.ProductVariants.First().Id;
 
         // JSON payload with camelCase names as provided in the user's curl
@@ -2720,7 +2720,8 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
 
         var response = await _client.PutAsync(
             $"/api/v1/product/{product.Id}",
-            new StringContent(updatePayload, System.Text.Encoding.UTF8, "application/json"))
+            new StringContent(updatePayload, System.Text.Encoding.UTF8, "application/json"),
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -2731,7 +2732,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var updatedProduct = await db2.Products
             .Include(p => p.ProductVariants)
             .ThenInclude(v => v.ProductCollectionPhotos)
-            .FirstOrDefaultAsync(p => p.Id == product.Id);
+            .FirstOrDefaultAsync(p => p.Id == product.Id, TestContext.Current.CancellationToken);
 
         updatedProduct.Should().NotBeNull();
         updatedProduct!.Name.Should().Be($"Updated_{uniqueId}");
