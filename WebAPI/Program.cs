@@ -1,4 +1,4 @@
-﻿using Application;
+using Application;
 using Asp.Versioning.ApiExplorer;
 using Infrastructure;
 using Serilog;
@@ -12,6 +12,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog();
 var configuration = builder.Configuration;
 var environment = builder.Environment;
+
+var customUploadPath = configuration["LocalFileStorage:UploadPath"];
+if (string.IsNullOrWhiteSpace(customUploadPath))
+{
+    throw new InvalidOperationException("Configuration 'LocalFileStorage:UploadPath' is missing. Please set it in appsettings.json or as an environment variable (UPLOAD_PATH).");
+}
+environment.WebRootPath = customUploadPath;
 builder.Services.AddApplicationServices();
 if (!environment.IsEnvironment("Test"))
 {

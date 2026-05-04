@@ -569,6 +569,7 @@ The following secrets need to be set up in the GitHub repository:
 | `PAYOS__BASE_URL`                  | PayOS Base URL                           | `https://api-merchant.payos.vn`                                                                          |
 | `PAYOS__RETURN_URL`                | PayOS Return URL                         | `https://anhemmotor.online/payment-processing`                                                           |
 | `PAYOS__CANCEL_URL`                | PayOS Cancel URL                         | `https://anhemmotor.online/payment-processing`                                                           |
+| `UPLOAD_PATH`                      | Persistent image storage path             | `/var/www/anhemmotor/uploads`                                                                            |
 
 ### Array Secrets (SuperRoles, ProtectedUsers, DefaultRoles)
 
@@ -1280,6 +1281,7 @@ Cần setup các secrets sau trong GitHub repository:
 | `PAYOS__BASE_URL`                  | PayOS Base URL                            | `https://api-merchant.payos.vn`                                                                          |
 | `PAYOS__RETURN_URL`                | PayOS Return URL                          | `https://yourdomain.online/payment-processing`                                                           |
 | `PAYOS__CANCEL_URL`                | PayOS Cancel URL                          | `https://yourdomain.online/payment-processing`                                                           |
+| `UPLOAD_PATH`                      | Đường dẫn lưu trữ ảnh vĩnh viễn            | `/var/www/anhemmotor/uploads`                                                                            |
 
 ### Array Secrets (SuperRoles, ProtectedUsers, DefaultRoles)
 

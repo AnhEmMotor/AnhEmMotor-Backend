@@ -27,56 +27,57 @@ public sealed record UpdateProductCommand : IRequest<Result<ProductDetailForMana
     [JsonConverter(typeof(FlexibleStringConverter))]
     public string? Wheelbase { get; init; }
 
-    [JsonPropertyName("seat_height")]
+    [JsonPropertyName("seatHeight")]
     [JsonConverter(typeof(NullableDecimalConverter))]
     public decimal? SeatHeight { get; init; }
 
-    [JsonPropertyName("ground_clearance")]
+    [JsonPropertyName("groundClearance")]
     [JsonConverter(typeof(NullableDecimalConverter))]
     public decimal? GroundClearance { get; init; }
 
-    [JsonPropertyName("fuel_capacity")]
+    [JsonPropertyName("fuelCapacity")]
     [JsonConverter(typeof(NullableDecimalConverter))]
     public decimal? FuelCapacity { get; init; }
 
-    [JsonPropertyName("tire_size")]
+    [JsonPropertyName("tireSize")]
     public string? TireSize { get; init; }
 
-    [JsonPropertyName("front_suspension")]
+    [JsonPropertyName("frontSuspension")]
     public string? FrontSuspension { get; init; }
 
-    [JsonPropertyName("rear_suspension")]
+    [JsonPropertyName("rearSuspension")]
     public string? RearSuspension { get; init; }
 
-    [JsonPropertyName("engine_type")]
+    [JsonPropertyName("engineType")]
     public string? EngineType { get; init; }
 
-    [JsonPropertyName("max_power")]
+    [JsonPropertyName("maxPower")]
     public string? MaxPower { get; init; }
 
-    [JsonPropertyName("oil_capacity")]
+    [JsonPropertyName("oilCapacity")]
     [JsonConverter(typeof(NullableDecimalConverter))]
     public decimal? OilCapacity { get; init; }
 
-    [JsonPropertyName("fuel_consumption")]
+    [JsonPropertyName("fuelConsumption")]
     public string? FuelConsumption { get; init; }
 
-    [JsonPropertyName("transmission_type")]
+    [JsonPropertyName("transmissionType")]
     public string? TransmissionType { get; init; }
 
-    [JsonPropertyName("starter_system")]
+    [JsonPropertyName("starterSystem")]
     public string? StarterSystem { get; init; }
 
-    [JsonPropertyName("max_torque")]
+    [JsonPropertyName("maxTorque")]
     public string? MaxTorque { get; init; }
 
+    [JsonPropertyName("displacement")]
     [JsonConverter(typeof(NullableDecimalConverter))]
     public decimal? Displacement { get; init; }
 
-    [JsonPropertyName("bore_stroke")]
+    [JsonPropertyName("boreStroke")]
     public string? BoreStroke { get; init; }
 
-    [JsonPropertyName("compression_ratio")]
+    [JsonPropertyName("compressionRatio")]
     public string? CompressionRatio { get; init; }
 
     [JsonPropertyName("short_description")]

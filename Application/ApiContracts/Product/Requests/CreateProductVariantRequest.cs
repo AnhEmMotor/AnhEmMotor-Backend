@@ -5,13 +5,17 @@ namespace Application.ApiContracts.Product.Requests;
 
 public class CreateProductVariantRequest
 {
+    [JsonPropertyName("price")]
     [JsonConverter(typeof(NullableDecimalConverter))]
     public decimal? Price { get; set; }
 
+    [JsonPropertyName("urlSlug")]
     public string? UrlSlug { get; set; }
 
+    [JsonPropertyName("coverImageUrl")]
     public string? CoverImageUrl { get; set; }
 
+    [JsonPropertyName("photoCollection")]
     public List<string> PhotoCollection { get; set; } = [];
 
     public Dictionary<string, string> OptionValues { get; set; } = [];
