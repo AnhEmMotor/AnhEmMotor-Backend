@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -15,15 +15,7 @@ namespace Infrastructure.MySqlMigrations
                 table: "ProductCategory",
                 type: "int",
                 nullable: true);
-            migrationBuilder.AlterColumn<decimal>(
-                name: "Wheelbase",
-                table: "Product",
-                type: "decimal(65,30)",
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "longtext",
-                oldNullable: true)
-                .OldAnnotation("MySql:CharSet", "utf8mb4");
+
             migrationBuilder.AddColumn<int>(name: "DepositRatio", table: "Output", type: "int", nullable: true);
             migrationBuilder.AddColumn<decimal>(
                 name: "PaidAmount",
@@ -57,15 +49,7 @@ namespace Infrastructure.MySqlMigrations
             migrationBuilder.DropColumn(name: "PaymentStatus", table: "Output");
             migrationBuilder.DropColumn(name: "PaymentUrl", table: "Output");
             migrationBuilder.DropColumn(name: "TransactionId", table: "Output");
-            migrationBuilder.AlterColumn<string>(
-                name: "Wheelbase",
-                table: "Product",
-                type: "longtext",
-                nullable: true,
-                oldClrType: typeof(decimal),
-                oldType: "decimal(65,30)",
-                oldNullable: true)
-                .Annotation("MySql:CharSet", "utf8mb4");
+
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 using System;
 
 #nullable disable
@@ -16,14 +16,7 @@ namespace Infrastructure.PostgreSqlMigrations
                 table: "ProductCategory",
                 type: "integer",
                 nullable: true);
-            migrationBuilder.AlterColumn<decimal>(
-                name: "Wheelbase",
-                table: "Product",
-                type: "numeric",
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "text",
-                oldNullable: true);
+
             migrationBuilder.AddColumn<int>(name: "DepositRatio", table: "Output", type: "integer", nullable: true);
             migrationBuilder.AddColumn<decimal>(
                 name: "PaidAmount",
@@ -60,14 +53,7 @@ namespace Infrastructure.PostgreSqlMigrations
             migrationBuilder.DropColumn(name: "PaymentStatus", table: "Output");
             migrationBuilder.DropColumn(name: "PaymentUrl", table: "Output");
             migrationBuilder.DropColumn(name: "TransactionId", table: "Output");
-            migrationBuilder.AlterColumn<string>(
-                name: "Wheelbase",
-                table: "Product",
-                type: "text",
-                nullable: true,
-                oldClrType: typeof(decimal),
-                oldType: "numeric",
-                oldNullable: true);
+
         }
     }
 }
