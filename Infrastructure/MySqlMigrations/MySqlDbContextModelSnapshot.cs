@@ -1,4 +1,4 @@
-﻿using Infrastructure.DBContexts;
+using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using System;
@@ -313,7 +313,7 @@ namespace Infrastructure.MySqlMigrations
                     b.Property<string>("TransmissionType").HasColumnType("longtext").HasColumnName("TransmissionType");
                     b.Property<long?>("UpdatedAt").HasColumnType("bigint");
                     b.Property<decimal?>("Weight").HasColumnType("decimal(65,30)").HasColumnName("Weight");
-                    b.Property<decimal?>("Wheelbase").HasColumnType("decimal(65,30)").HasColumnName("Wheelbase");
+                    b.Property<string>("Wheelbase").HasColumnType("longtext").HasColumnName("Wheelbase");
                     b.HasKey("Id");
                     b.HasIndex("BrandId");
                     b.HasIndex("CategoryId");

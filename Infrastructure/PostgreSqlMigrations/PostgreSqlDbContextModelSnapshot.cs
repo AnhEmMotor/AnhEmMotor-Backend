@@ -1,4 +1,4 @@
-﻿using Infrastructure.DBContexts;
+using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using System;
@@ -320,7 +320,7 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Property<string>("TransmissionType").HasColumnType("text").HasColumnName("TransmissionType");
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("timestamp with time zone");
                     b.Property<decimal?>("Weight").HasColumnType("numeric").HasColumnName("Weight");
-                    b.Property<decimal?>("Wheelbase").HasColumnType("numeric").HasColumnName("Wheelbase");
+                    b.Property<string>("Wheelbase").HasColumnType("text").HasColumnName("Wheelbase");
                     b.HasKey("Id");
                     b.HasIndex("BrandId");
                     b.HasIndex("CategoryId");
