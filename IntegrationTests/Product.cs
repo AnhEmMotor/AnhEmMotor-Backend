@@ -2652,5 +2652,97 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         content![0].CoverImageUrl.Should().Be(photo.ImageUrl);
     }
 
+    [Fact(DisplayName = "PRODUCT_143 - Cập nhật sản phẩm sử dụng payload camelCase (đảm bảo binding đúng các trường ảnh và slug)")]
+    public async Task UpdateProduct_WithCamelCaseJson_BindsCorrectly()
+    {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"user_{uniqueId}";
+        var email = $"user_{uniqueId}@gmail.com";
+        var password = "ThisIsStrongPassword1@";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            password,
+            [PermissionsList.Products.View, PermissionsList.Products.Edit],
+            CancellationToken.None,
+            email)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            password,
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        var productStatusId = ProductStatusConstants.ForSale;
+        if (!await db.ProductStatuses.AnyAsync(x => x.Key == productStatusId).ConfigureAwait(true))
+        {
+            db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
+        }
+        var category = new ProductCategoryEntity { Name = $"Cat_{uniqueId}" };
+        var brand = new BrandEntity { Name = $"Brand_{uniqueId}" };
+        db.ProductCategories.Add(category);
+        db.Brands.Add(brand);
+        await db.SaveChangesAsync().ConfigureAwait(true);
+
+        var product = new ProductEntity
+        {
+            Name = $"Original_{uniqueId}",
+            CategoryId = category.Id,
+            BrandId = brand.Id,
+            StatusId = productStatusId,
+            ProductVariants =
+            [
+                new ProductVariant { Price = 100, UrlSlug = $"slug-{uniqueId}", CoverImageUrl = "old.jpg" }
+            ]
+        };
+        db.Products.Add(product);
+        await db.SaveChangesAsync().ConfigureAwait(true);
+        var variantId = product.ProductVariants.First().Id;
+
+        // JSON payload with camelCase names as provided in the user's curl
+        var updatePayload = $@"{{
+            ""name"": ""Updated_{uniqueId}"",
+            ""categoryId"": {category.Id},
+            ""brandId"": {brand.Id},
+            ""short_description"": ""Mô tả ngắn"",
+            ""seatHeight"": 800,
+            ""variants"": [{{
+                ""id"": {variantId},
+                ""urlSlug"": ""updated-slug-{uniqueId}"",
+                ""coverImageUrl"": ""http://example.com/new-cover.jpg"",
+                ""photoCollection"": [""http://example.com/photo1.jpg""]
+            }}]
+        }}";
+
+        var response = await _client.PutAsync(
+            $"/api/v1/product/{product.Id}",
+            new StringContent(updatePayload, System.Text.Encoding.UTF8, "application/json"))
+            .ConfigureAwait(true);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        // Verify in DB
+        using var scope2 = _factory.Services.CreateScope();
+        var db2 = scope2.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        var updatedProduct = await db2.Products
+            .Include(p => p.ProductVariants)
+            .ThenInclude(v => v.ProductCollectionPhotos)
+            .FirstOrDefaultAsync(p => p.Id == product.Id);
+
+        updatedProduct.Should().NotBeNull();
+        updatedProduct!.Name.Should().Be($"Updated_{uniqueId}");
+        updatedProduct.ShortDescription.Should().Be("Mô tả ngắn");
+        updatedProduct.SeatHeight.Should().Be(800);
+
+        var variant = updatedProduct.ProductVariants.First();
+        variant.UrlSlug.Should().Be($"updated-slug-{uniqueId}");
+        variant.CoverImageUrl.Should().Be("http://example.com/new-cover.jpg");
+        variant.ProductCollectionPhotos.Should().ContainSingle(p => p.ImageUrl == "http://example.com/photo1.jpg");
+    }
+
 #pragma warning restore CRR0035
 }

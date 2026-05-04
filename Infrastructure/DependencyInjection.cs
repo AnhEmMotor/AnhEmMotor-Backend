@@ -23,6 +23,7 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        services.Configure<LocalFileStorageOptions>(configuration.GetSection(LocalFileStorageOptions.SectionName));
         var provider = configuration.GetValue("Provider", "SqlServer");
         if (string.Compare(provider, "MySql") == 0)
         {
