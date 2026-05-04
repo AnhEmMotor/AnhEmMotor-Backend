@@ -50,7 +50,7 @@ namespace Application.Features.Payments.Commands.ProcessPayOSWebhook
             }
             order.TransactionId = request.Data.TransactionId;
             order.PaidAmount = request.Data.Amount;
-            order.PaidAt = DateTimeOffset.Now;
+            order.PaidAt = DateTimeOffset.UtcNow;
             updateRepository.Update(order);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return Result.Success();

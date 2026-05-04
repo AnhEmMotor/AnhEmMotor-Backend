@@ -30,7 +30,7 @@ public class OrderCleanupService(IServiceProvider serviceProvider) : BackgroundS
                     !string.IsNullOrEmpty(o.PaymentMethod) &&
                     o.PaymentMethod != PaymentMethod.COD &&
                     (o.PaymentExpiredAt.HasValue
-                        ? o.PaymentExpiredAt.Value < DateTimeOffset.Now
+                        ? o.PaymentExpiredAt.Value < DateTimeOffset.UtcNow
                         : o.CreatedAt < expirationThreshold))
             .ToList();
         if (expiredOrders.Count > 0)

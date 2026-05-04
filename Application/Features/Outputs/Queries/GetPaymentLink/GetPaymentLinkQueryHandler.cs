@@ -83,7 +83,7 @@ namespace Application.Features.Outputs.Queries.GetPaymentLink
             }
             if (!string.IsNullOrEmpty(order.PaymentUrl) &&
                 order.PaymentExpiredAt.HasValue &&
-                order.PaymentExpiredAt.Value > DateTimeOffset.Now &&
+                order.PaymentExpiredAt.Value > DateTimeOffset.UtcNow &&
                 string.Compare(order.PaymentMethod, paymentMethod) == 0)
             {
                 return order.PaymentUrl;
@@ -96,12 +96,12 @@ namespace Application.Features.Outputs.Queries.GetPaymentLink
                     OrderCode = order.Id.ToString(),
                     Amount = amountToPay,
                     Description = $"Thanh toan don hang {order.Id}",
-                    CreatedDate = DateTime.Now
+                    CreatedDate = DateTime.UtcNow
                 };
                 var paymentUrl = vnpayService.CreatePaymentUrl(context, vnpayRequest);
                 order.PaymentUrl = paymentUrl;
                 order.PaymentCode = order.Id.ToString();
-                order.PaymentExpiredAt = DateTimeOffset.Now.AddMinutes(15);
+                order.PaymentExpiredAt = DateTimeOffset.UtcNow.AddMinutes(15);
                 updateRepository.Update(order);
                 await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 return paymentUrl;
@@ -122,7 +122,7 @@ namespace Application.Features.Outputs.Queries.GetPaymentLink
                 {
                     order.PaymentUrl = response.CheckoutUrl;
                     order.PaymentCode = orderCode.ToString();
-                    order.PaymentExpiredAt = DateTimeOffset.Now.AddDays(1);
+                    order.PaymentExpiredAt = DateTimeOffset.UtcNow.AddDays(1);
                     updateRepository.Update(order);
                     await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                     return response.CheckoutUrl;

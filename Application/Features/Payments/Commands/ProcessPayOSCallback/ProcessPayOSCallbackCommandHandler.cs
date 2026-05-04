@@ -43,7 +43,7 @@ namespace Application.Features.Payments.Commands.ProcessPayOSCallback
                     order.PaymentStatus = OrderPaymentStatus.Partial;
                 }
                 order.PaidAmount = payosData.Amount;
-                order.PaidAt = DateTimeOffset.Now;
+                order.PaidAt = DateTimeOffset.UtcNow;
                 updateRepository.Update(order);
                 await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 return Result<int>.Success(order.Id);
