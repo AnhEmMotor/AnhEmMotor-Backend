@@ -16,13 +16,12 @@ namespace Infrastructure.Services
         public void SetRefreshTokenToCookie(string token, DateTimeOffset expiresAt)
         {
             var cookieDomain = configuration["CookieDomain"];
-            var isHttps = httpContextAccessor.HttpContext?.Request.IsHttps ?? false;
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
                 Expires = expiresAt,
-                Secure = isHttps,
-                SameSite = isHttps ? SameSiteMode.None : SameSiteMode.Lax,
+                Secure = true,
+                SameSite = SameSiteMode.None,
                 Path = "/"
             };
             if (!string.IsNullOrEmpty(cookieDomain))
@@ -35,12 +34,11 @@ namespace Infrastructure.Services
         public void DeleteRefreshTokenFromCookie()
         {
             var cookieDomain = configuration["CookieDomain"];
-            var isHttps = httpContextAccessor.HttpContext?.Request.IsHttps ?? false;
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = isHttps,
-                SameSite = isHttps ? SameSiteMode.None : SameSiteMode.Lax,
+                Secure = true,
+                SameSite = SameSiteMode.None,
                 Path = "/"
             };
             if (!string.IsNullOrEmpty(cookieDomain))

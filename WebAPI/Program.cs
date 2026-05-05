@@ -14,11 +14,10 @@ var configuration = builder.Configuration;
 var environment = builder.Environment;
 
 var customUploadPath = configuration["LocalFileStorage:UploadPath"];
-if (string.IsNullOrWhiteSpace(customUploadPath))
+if (!string.IsNullOrWhiteSpace(customUploadPath))
 {
-    throw new InvalidOperationException("Configuration 'LocalFileStorage:UploadPath' is missing. Please set it in appsettings.json or as an environment variable (UPLOAD_PATH).");
+    environment.WebRootPath = customUploadPath;
 }
-environment.WebRootPath = customUploadPath;
 builder.Services.AddApplicationServices();
 if (!environment.IsEnvironment("Test"))
 {
@@ -105,5 +104,8 @@ if (!app.Environment.IsEnvironment("Test"))
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-await app.ApplyMigrationsAndSeedAsync(app.Lifetime.ApplicationStopping).ConfigureAwait(true);
+if (!app.Environment.IsEnvironment("Test"))
+{
+    await app.ApplyMigrationsAndSeedAsync(app.Lifetime.ApplicationStopping).ConfigureAwait(true);
+}
 app.Run();
