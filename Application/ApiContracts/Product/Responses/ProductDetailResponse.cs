@@ -23,7 +23,7 @@ namespace Application.ApiContracts.Product.Responses
 
         public string? Dimensions { get; set; }
 
-        public decimal? Wheelbase { get; set; }
+        public string? Wheelbase { get; set; }
 
         [JsonPropertyName("seat_height")]
         public decimal? SeatHeight { get; set; }

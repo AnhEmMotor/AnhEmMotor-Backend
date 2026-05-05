@@ -18,15 +18,11 @@ public sealed class GetProductsListQueryHandler(IProductReadRepository readRepos
             .Select(s => s.Trim())
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
-<<<<<<< HEAD
         if (normalizedStatusIds.Count == 0)
         {
             normalizedStatusIds.Add(ProductStatus.ForSale);
         }
         var (entities, totalCount, groupedOptionFilters) = await readRepository.GetPagedProductsAsync(
-=======
-        var (entities, totalCount, groupedOptionValueIds) = await readRepository.GetPagedProductsAsync(
->>>>>>> main
             request.Search,
             normalizedStatusIds,
             request.CategoryIds,

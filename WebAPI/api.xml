@@ -653,17 +653,13 @@
             Quản lý sản phẩm.
             </summary>
         </member>
-<<<<<<< HEAD
-        <member name="M:WebAPI.Controllers.V1.ProductController.GetProductsAsync(Application.Features.Products.Queries.GetProductsList.GetProductsRequest,System.Nullable{System.Decimal},System.Nullable{System.Decimal},System.Threading.CancellationToken)">
-=======
         <member name="M:WebAPI.Controllers.V1.ProductController.GetSitemapSlugsAsync(System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách toàn bộ Slug của sản phẩm phục vụ cho việc tạo Sitemap. Chỉ cho phép gọi từ Localhost để đảm bảo
             bảo mật.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.GetProductsAsync(Application.Features.Products.Queries.GetProductsList.GetProductsRequest,System.Threading.CancellationToken)">
->>>>>>> main
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetProductsAsync(Application.ApiContracts.Product.Requests.GetProductsRequest,System.Nullable{System.Decimal},System.Nullable{System.Decimal},System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách sản phẩm đầy đủ dành cho khách hàng (có phân trang, lọc, tìm kiếm).
             </summary>
@@ -705,11 +701,6 @@
             <summary>
             Lấy danh sách các thuộc tính được định nghĩa sẵn dưới dạng từ điển key-value. Chỉ người dùng có quyền tạo hoặc
             chỉnh sửa sản phẩm mới có thể truy cập.
-            </summary>
-        </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.GetOptionsAsync(System.Threading.CancellationToken)">
-            <summary>
-            Lấy danh sách toàn bộ các thuộc tính (Options) và các giá trị của chúng (OptionValues).
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.ProductController.GetInventoryStatuses">
