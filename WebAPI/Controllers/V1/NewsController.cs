@@ -27,13 +27,14 @@ public class NewsController(IMediator mediator) : ApiController
     /// Tạo bài viết mới.
     /// </summary>
     /// <param name="command"></param>
+    /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpPost]
     [HasPermission("Permissions.News.Create")]
     [SwaggerOperation(Summary = "Tạo bài viết mới")]
-    public async Task<IActionResult> Create([FromBody] CreateNewsCommand command)
+    public async Task<IActionResult> CreateAsync([FromBody] CreateNewsCommand command, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(command);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -41,13 +42,14 @@ public class NewsController(IMediator mediator) : ApiController
     /// Lấy danh sách bài viết.
     /// </summary>
     /// <param name="sieveModel"></param>
+    /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpGet]
     [SwaggerOperation(Summary = "Lấy danh sách tin tức")]
     [ProducesResponseType(typeof(PagedResult<NewsResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetList([FromQuery] SieveModel sieveModel)
+    public async Task<IActionResult> GetListAsync([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetNewsListQuery { SieveModel = sieveModel });
+        var result = await mediator.Send(new GetNewsListQuery { SieveModel = sieveModel }, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -55,14 +57,15 @@ public class NewsController(IMediator mediator) : ApiController
     /// Lấy chi tiết bài viết theo Slug.
     /// </summary>
     /// <param name="slug"></param>
+    /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpGet("{slug}")]
     [SwaggerOperation(Summary = "Lấy chi tiết tin tức theo slug")]
     [ProducesResponseType(typeof(NewsResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetBySlug(string slug)
+    public async Task<IActionResult> GetBySlugAsync(string slug, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetNewsBySlugQuery { Slug = slug });
+        var result = await mediator.Send(new GetNewsBySlugQuery { Slug = slug }, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 }

@@ -1,9 +1,8 @@
 using Application;
-using Application.ApiContracts.Technology.Responses;
+
 using Asp.Versioning.ApiExplorer;
 using Infrastructure;
-using Infrastructure.DBContexts;
-using Microsoft.EntityFrameworkCore;
+
 using Serilog;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.SwaggerUI;
@@ -98,25 +97,6 @@ if (!app.Environment.IsEnvironment("Test"))
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.MapGet(
-    "/api/v1/technology",
-    async (ApplicationDBContext db) =>
-    {
-        var technologies = await EntityFrameworkQueryableExtensions.ToListAsync(
-            Queryable.Select(
-                    EntityFrameworkQueryableExtensions.Include(db.Technologies, t => t.Category),
-                    t => new TechnologyResponse
-                    {
-                        Id = t.Id,
-                        Name = t.Name,
-                        DefaultTitle = t.DefaultTitle,
-                        DefaultDescription = t.DefaultDescription,
-                        DefaultImageUrl = t.DefaultImageUrl,
-                        CategoryId = t.CategoryId,
-                        CategoryName = t.Category != null ? t.Category.Name : null
-                    }));
-        return TypedResults.Ok(technologies);
-    })
-    .RequireAuthorization();
+
 await app.ApplyMigrationsAndSeedAsync(app.Lifetime.ApplicationStopping).ConfigureAwait(true);
 app.Run();

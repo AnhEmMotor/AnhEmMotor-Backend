@@ -36,15 +36,15 @@ public class NotificationController(INotificationService notificationService) : 
         {
             await Response.WriteAsync(
                 $"data: {JsonSerializer.Serialize(new { message = "Connected to notification stream" }, _jsonSerializerOptions)}\n\n",
-                cancellationToken);
-            await Response.Body.FlushAsync(cancellationToken);
+                cancellationToken).ConfigureAwait(true);
+            await Response.Body.FlushAsync(cancellationToken).ConfigureAwait(true);
             while (!cancellationToken.IsCancellationRequested)
             {
-                var message = await notificationService.WaitForNotificationAsync(cancellationToken);
-                var notification = new { type = "NewBooking", message = message, timestamp = DateTimeOffset.UtcNow };
+                var message = await notificationService.WaitForNotificationAsync(cancellationToken).ConfigureAwait(true);
+                var notification = new { type = "NewBooking", message, timestamp = DateTimeOffset.UtcNow };
                 var json = JsonSerializer.Serialize(notification, _jsonSerializerOptions);
-                await Response.WriteAsync($"data: {json}\n\n", cancellationToken);
-                await Response.Body.FlushAsync(cancellationToken);
+                await Response.WriteAsync($"data: {json}\n\n", cancellationToken).ConfigureAwait(true);
+                await Response.Body.FlushAsync(cancellationToken).ConfigureAwait(true);
             }
         } catch (OperationCanceledException)
         {

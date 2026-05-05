@@ -11,7 +11,7 @@ public class GetContactsQueryHandler(IContactReadRepository contactReadRepositor
 {
     public async Task<Result<List<Contact>>> Handle(GetContactsQuery request, CancellationToken cancellationToken)
     {
-        var contacts = await contactReadRepository.GetAllAsync(cancellationToken);
+        var contacts = await contactReadRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
         return Result<List<Contact>>.Success(contacts);
     }
 }

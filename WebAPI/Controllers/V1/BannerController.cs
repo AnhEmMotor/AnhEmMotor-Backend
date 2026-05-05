@@ -22,25 +22,27 @@ public class BannerController(ISender sender) : ApiController
     /// Thêm banner mới.
     /// </summary>
     /// <param name="command"></param>
+    /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpPost]
     [HasPermission("Permissions.Banners.Create")]
     [SwaggerOperation(Summary = "Thêm banner mới")]
-    public async Task<IActionResult> Create([FromBody] CreateBannerCommand command)
+    public async Task<IActionResult> CreateAsync([FromBody] CreateBannerCommand command, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(command);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
     /// <summary>
     /// Lấy danh sách banner đang hoạt động.
     /// </summary>
+    /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpGet("active")]
     [SwaggerOperation(Summary = "Lấy danh sách banner đang hoạt động")]
-    public async Task<IActionResult> GetActive()
+    public async Task<IActionResult> GetActiveAsync(CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetActiveBannersQuery());
+        var result = await sender.Send(new GetActiveBannersQuery(), cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 }

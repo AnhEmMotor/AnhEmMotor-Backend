@@ -100,12 +100,12 @@ public sealed record GetProductsListQuery : IRequest<Result<PagedResult<ProductL
             if (!trimmedPart.StartsWith(key, StringComparison.OrdinalIgnoreCase))
                 continue;
             var operators = new[] { "<=", ">=", "<", ">", "==", "!", "@", "=" };
-            var foundOp = operators.FirstOrDefault(o => trimmedPart.Substring(key.Length).Trim().StartsWith(o));
+            var foundOp = operators.FirstOrDefault(o => trimmedPart[key.Length..].Trim().StartsWith(o));
             if (foundOp != null)
             {
-                if (!string.IsNullOrEmpty(op) && foundOp != op)
+                if (!string.IsNullOrEmpty(op) && string.Compare(foundOp, op) != 0)
                     continue;
-                var value = trimmedPart.Substring(key.Length).Trim().Substring(foundOp.Length).Trim();
+                var value = trimmedPart[key.Length..].Trim()[foundOp.Length..].Trim();
                 return value;
             }
         }

@@ -10,16 +10,16 @@ public static class BrandSeeder
     {
         var brands = new List<Brand>
         {
-            new Brand { Name = "Honda" },
-            new Brand { Name = "Yamaha" },
-            new Brand { Name = "Suzuki" },
-            new Brand { Name = "Piaggio" },
-            new Brand { Name = "Kawasaki" }
+            new() { Name = "Honda" },
+            new() { Name = "Yamaha" },
+            new() { Name = "Suzuki" },
+            new() { Name = "Piaggio" },
+            new() { Name = "Kawasaki" }
         };
         foreach (var brand in brands)
         {
             var existing = await context.Brands
-                .FirstOrDefaultAsync(b => b.Name == brand.Name, cancellationToken)
+                .FirstOrDefaultAsync(b => string.Compare(b.Name, brand.Name) == 0, cancellationToken)
                 .ConfigureAwait(false);
             if (existing == null)
             {

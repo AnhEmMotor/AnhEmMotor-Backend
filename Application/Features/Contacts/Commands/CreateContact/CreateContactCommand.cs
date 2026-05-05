@@ -33,7 +33,7 @@ public class CreateContactCommandHandler(IContactInsertRepository contactInsertR
             Status = "Pending"
         };
         contactInsertRepository.Add(contact);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return Result<int>.Success(contact.Id);
     }
 }

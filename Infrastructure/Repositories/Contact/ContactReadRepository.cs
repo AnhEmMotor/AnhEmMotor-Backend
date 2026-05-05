@@ -11,11 +11,11 @@ public class ContactReadRepository(ApplicationDBContext context) : IContactReadR
         return await context.Contacts
             .Include(c => c.Replies)
             .ThenInclude(r => r.RepliedBy)
-            .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
+            .FirstOrDefaultAsync(c => c.Id == id, cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<List<Domain.Entities.Contact>> GetAllAsync(CancellationToken cancellationToken)
     {
-        return await context.Contacts.OrderByDescending(c => c.CreatedAt).ToListAsync(cancellationToken);
+        return await context.Contacts.OrderByDescending(c => c.CreatedAt).ToListAsync(cancellationToken).ConfigureAwait(false);
     }
 }

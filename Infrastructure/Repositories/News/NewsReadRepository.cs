@@ -19,12 +19,12 @@ namespace Infrastructure.Repositories.News
 
         public async Task<Domain.Entities.News?> GetByIdAsync(int id, CancellationToken cancellationToken)
         {
-            return await context.News.FirstOrDefaultAsync(n => n.Id == id, cancellationToken);
+            return await context.News.FirstOrDefaultAsync(n => n.Id == id, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<Domain.Entities.News?> GetBySlugAsync(string slug, CancellationToken cancellationToken)
         {
-            return await context.News.FirstOrDefaultAsync(n => n.Slug == slug, cancellationToken);
+            return await context.News.FirstOrDefaultAsync(n => string.Compare(n.Slug, slug) == 0, cancellationToken).ConfigureAwait(false);
         }
     }
 }

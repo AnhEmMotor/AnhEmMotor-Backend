@@ -25,7 +25,7 @@ public class LeadController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(List<LeadResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetLeadsAsync(CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetLeadsQuery(), cancellationToken);
+        var result = await mediator.Send(new GetLeadsQuery(), cancellationToken).ConfigureAwait(true);
         return Ok(result);
     }
 }

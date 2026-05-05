@@ -1,9 +1,5 @@
 using Application.Common.Models;
-using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.Booking;
-using Application.Interfaces.Repositories.Lead;
-using Application.Interfaces.Services;
-using Domain.Entities;
+using Domain.Constants.Booking;
 using MediatR;
 
 namespace Application.Features.Bookings.Commands.CreateBooking;
@@ -22,73 +18,7 @@ public record CreateBookingCommand : IRequest<Result<int>>
 
     public string Note { get; init; } = string.Empty;
 
-    public string Location { get; init; } = "Showroom";
+    public string Location { get; init; } = BookingLocation.Showroom;
 
-    public string BookingType { get; init; } = "TestDrive";
-}
-
-public class CreateBookingCommandHandler(
-    IBookingInsertRepository bookingInsertRepository,
-    ILeadReadRepository leadReadRepository,
-    ILeadInsertRepository leadInsertRepository,
-    ILeadActivityInsertRepository leadActivityInsertRepository,
-    INotificationService notificationService,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateBookingCommand, Result<int>>
-{
-    public async Task<Result<int>> Handle(CreateBookingCommand request, CancellationToken cancellationToken)
-    {
-        var lead = await leadReadRepository.GetByPhoneNumberAsync(request.PhoneNumber, cancellationToken).ConfigureAwait(false);
-        if (lead == null)
-        {
-            lead = new Lead
-            {
-                FullName = request.FullName,
-                PhoneNumber = request.PhoneNumber,
-                Email = request.Email,
-                Score = 30,
-                Status = "Consulting",
-                Source = "WebStore"
-            };
-            leadInsertRepository.Add(lead);
-            leadActivityInsertRepository.Add(
-                new LeadActivity
-                {
-                    Lead = lead,
-                    ActivityType = "Booking",
-                    Description =
-                        $"Đăng ký {(request.BookingType == "TestDrive" ? "Lái thử" : request.BookingType)} mới tại {request.Location}. (Khách hàng mới)",
-                    CreatedAt = DateTimeOffset.UtcNow
-                });
-        } else
-        {
-            lead.Score += 30;
-            leadInsertRepository.Update(lead);
-            leadActivityInsertRepository.Add(
-                new LeadActivity
-                {
-                    LeadId = lead.Id,
-                    ActivityType = "Booking",
-                    Description =
-                        $"Đăng ký {(request.BookingType == "TestDrive" ? "Lái thử" : request.BookingType)} mới tại {request.Location}.",
-                    CreatedAt = DateTimeOffset.UtcNow
-                });
-        }
-        var booking = new Booking
-        {
-            FullName = request.FullName,
-            Email = request.Email,
-            PhoneNumber = request.PhoneNumber,
-            ProductVariantId = request.ProductVariantId,
-            PreferredDate = request.PreferredDate,
-            Note = request.Note,
-            Status = "Pending",
-            Location = request.Location,
-            BookingType = request.BookingType
-        };
-        bookingInsertRepository.Add(booking);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
-        notificationService.NotifyNewBooking(
-            $"Có yêu cầu lái thử mới từ khách hàng {request.FullName} ({request.PhoneNumber})");
-        return Result<int>.Success(booking.Id);
-    }
+    public string BookingType { get; init; } = Domain.Constants.Booking.BookingType.TestDrive;
 }

@@ -24,50 +24,54 @@ public class ContactsController(ISender sender) : ApiController
     /// Tạo yêu cầu liên hệ mới.
     /// </summary>
     /// <param name="command"></param>
+    /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpPost]
     [AllowAnonymous]
-    public async Task<IActionResult> Create(CreateContactCommand command)
+    public async Task<IActionResult> CreateAsync(CreateContactCommand command, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(command);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
     /// <summary>
     /// Lấy danh sách yêu cầu liên hệ.
     /// </summary>
+    /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpGet]
     [Authorize]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAllAsync(CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetContactsQuery());
+        var result = await sender.Send(new GetContactsQuery(), cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
     /// <summary>
     /// Phản hồi yêu cầu liên hệ.
     /// </summary>
+    /// <param name="cancellationToken"></param>
     /// <param name="command"></param>
     /// <returns></returns>
     [HttpPost("reply")]
     [Authorize]
-    public async Task<IActionResult> Reply(CreateContactReplyCommand command)
+    public async Task<IActionResult> ReplyAsync(CreateContactReplyCommand command, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(command);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
     /// <summary>
     /// Cập nhật ghi chú nội bộ cho yêu cầu liên hệ.
     /// </summary>
+    /// <param name="cancellationToken"></param>
     /// <param name="command"></param>
     /// <returns></returns>
     [HttpPatch("internal-note")]
     [Authorize]
-    public async Task<IActionResult> UpdateInternalNote(UpdateInternalNoteCommand command)
+    public async Task<IActionResult> UpdateInternalNoteAsync(UpdateInternalNoteCommand command, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(command);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 }

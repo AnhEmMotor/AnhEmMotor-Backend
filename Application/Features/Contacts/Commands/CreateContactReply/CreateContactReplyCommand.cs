@@ -24,7 +24,7 @@ public class CreateContactReplyCommandHandler(
 {
     public async Task<Result<int>> Handle(CreateContactReplyCommand request, CancellationToken cancellationToken)
     {
-        var contact = await contactReadRepository.GetByIdAsync(request.ContactId, cancellationToken);
+        var contact = await contactReadRepository.GetByIdAsync(request.ContactId, cancellationToken).ConfigureAwait(false);
         if (contact == null)
         {
             return Result<int>.Failure(Error.NotFound("Liên hệ không tồn tại."));
@@ -41,7 +41,7 @@ public class CreateContactReplyCommandHandler(
             contact.Status = "Processed";
             contactInsertRepository.Update(contact);
         }
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return Result<int>.Success(reply.Id);
     }
 }

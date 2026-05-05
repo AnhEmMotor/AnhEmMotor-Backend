@@ -1,6 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
+using Domain.Constants.Booking;
+
 namespace Domain.Entities;
 
 [Table("Booking")]
@@ -32,11 +34,11 @@ public class Booking : BaseEntity
     public string Note { get; set; } = string.Empty;
 
     [Column("Status", TypeName = "nvarchar(20)")]
-    public string Status { get; set; } = "Pending";
+    public string Status { get; set; } = BookingStatus.Pending;
 
     [Column("BookingType", TypeName = "nvarchar(20)")]
-    public string BookingType { get; set; } = "TestDrive";
+    public string BookingType { get; set; } = Domain.Constants.Booking.BookingType.TestDrive;
 
     [Column("Location", TypeName = "nvarchar(200)")]
-    public string Location { get; set; } = "Showroom";
+    public string Location { get; set; } = BookingLocation.Showroom;
 }

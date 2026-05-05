@@ -10,8 +10,7 @@ public static class NewsSeeder
     {
         var newsList = new List<News>
         {
-            new News
-            {
+            new() {
                 Title = "Khai trương showroom mới tại TP.HCM",
                 Slug = "khai-truong-showroom-moi-tphcm",
                 Content = "Chúng tôi vui mừng thông báo khai trương showroom mới với nhiều ưu đãi hấp dẫn...",
@@ -20,8 +19,7 @@ public static class NewsSeeder
                 PublishedDate = DateTimeOffset.UtcNow,
                 CoverImageUrl = "/assets/image/news/news-1.webp"
             },
-            new News
-            {
+            new() {
                 Title = "Ưu đãi cực khủng tháng 4 cho dòng xe tay ga",
                 Slug = "uu-dai-thang-4-xe-tay-ga",
                 Content = "Giảm ngay 5 triệu đồng khi mua các dòng xe tay ga Honda, Yamaha trong tháng 4...",
@@ -30,8 +28,7 @@ public static class NewsSeeder
                 PublishedDate = DateTimeOffset.UtcNow,
                 CoverImageUrl = "/assets/image/news/news-2.webp"
             },
-            new News
-            {
+            new() {
                 Title = "Hướng dẫn bảo dưỡng xe máy định kỳ đúng cách",
                 Slug = "huong-dan-bao-duong-xe-may",
                 Content = "Việc bảo dưỡng xe máy định kỳ giúp kéo dài tuổi thọ và đảm bảo an toàn...",
@@ -44,7 +41,7 @@ public static class NewsSeeder
         foreach (var news in newsList)
         {
             var existing = await context.News
-                .FirstOrDefaultAsync(n => n.Slug == news.Slug, cancellationToken)
+                .FirstOrDefaultAsync(n => string.Compare(n.Slug, news.Slug) == 0, cancellationToken)
                 .ConfigureAwait(false);
             if (existing == null)
             {

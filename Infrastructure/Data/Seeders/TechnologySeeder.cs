@@ -6,15 +6,15 @@ namespace Infrastructure.Data.Seeders
 {
     public static class TechnologySeeder
     {
-        public static async Task SeedAsync(ApplicationDBContext context)
+        public static async Task SeedAsync(ApplicationDBContext context, CancellationToken cancellationToken)
         {
-            if (!await context.TechnologyCategories.AnyAsync())
+            if (!await context.TechnologyCategories.AnyAsync(cancellationToken).ConfigureAwait(false))
             {
                 var safety = new TechnologyCategory { Name = "An Toàn" };
                 var engine = new TechnologyCategory { Name = "Động Cơ" };
                 var utility = new TechnologyCategory { Name = "Tiện Ích" };
                 context.TechnologyCategories.AddRange(safety, engine, utility);
-                await context.SaveChangesAsync();
+                await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 var abs = new Technology
                 {
                     CategoryId = safety.Id,
@@ -44,7 +44,7 @@ namespace Infrastructure.Data.Seeders
                         "http://localhost:5000/api/v1/MediaFile/view-image/products/placeholder-smartkey.webp"
                 };
                 context.Technologies.AddRange(abs, esp, smartkey);
-                await context.SaveChangesAsync();
+                await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
         }
     }

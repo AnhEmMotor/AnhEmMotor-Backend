@@ -11,7 +11,7 @@ public class BookingReadRepository(ApplicationDBContext context) : IBookingReadR
         return await context.Bookings
             .Include(b => b.ProductVariant)
             .ThenInclude(pv => pv.Product)
-            .FirstOrDefaultAsync(b => b.Id == id, cancellationToken);
+            .FirstOrDefaultAsync(b => b.Id == id, cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<List<Domain.Entities.Booking>> GetAllAsync(CancellationToken cancellationToken)
@@ -20,6 +20,6 @@ public class BookingReadRepository(ApplicationDBContext context) : IBookingReadR
             .Include(b => b.ProductVariant)
             .ThenInclude(pv => pv.Product)
             .OrderByDescending(b => b.PreferredDate)
-            .ToListAsync(cancellationToken);
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
     }
 }

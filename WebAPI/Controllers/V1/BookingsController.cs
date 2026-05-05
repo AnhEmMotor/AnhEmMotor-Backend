@@ -23,24 +23,26 @@ public class BookingsController(ISender sender) : ApiController
     /// Tạo yêu cầu đặt lịch lái thử mới.
     /// </summary>
     /// <param name="command"></param>
+    /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpPost]
     [AllowAnonymous]
-    public async Task<IActionResult> Create(CreateBookingCommand command)
+    public async Task<IActionResult> CreateAsync(CreateBookingCommand command, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(command);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
     /// <summary>
     /// Lấy danh sách yêu cầu đặt lịch lái thử.
     /// </summary>
+    /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpGet]
     [Authorize]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAllAsync(CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetBookingsQuery());
+        var result = await sender.Send(new GetBookingsQuery(), cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -51,9 +53,9 @@ public class BookingsController(ISender sender) : ApiController
     /// <returns></returns>
     [HttpPost("confirm")]
     [Authorize]
-    public async Task<IActionResult> Confirm(ConfirmBookingCommand command)
+    public async Task<IActionResult> ConfirmAsync(ConfirmBookingCommand command, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(command);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 }

@@ -113,7 +113,7 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             .ThenInclude(v => v.OutputInfos)
             .ThenInclude(oi => oi.OutputOrder)
             .AsSplitQuery()
-            .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+            .FirstOrDefaultAsync(p => p.Id == id, cancellationToken).ConfigureAwait(false);
     }
 
     public Task<IEnumerable<ProductEntity>> GetByIdWithVariantsAsync(
@@ -236,7 +236,7 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
                             Names = g.Select(x => x.Name?.ToLower() ?? string.Empty).ToList()
                         })
                     .ToList();
-                groupedOptionFilters = groups.Select(g => new FilterGroup { Ids = g.Ids, Names = g.Names }).ToList();
+                groupedOptionFilters = [.. groups.Select(g => new FilterGroup { Ids = g.Ids, Names = g.Names })];
                 var variantSubquery = context.ProductVariants.Where(v => v.DeletedAt == null);
                 if (minPrice.HasValue || maxPrice.HasValue)
                 {
@@ -251,8 +251,8 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
                     variantSubquery = variantSubquery.Where(
                         v => v.VariantOptionValues
                                 .Any(vov => vov.OptionValueId != null && ids.Contains(vov.OptionValueId.Value)) ||
-                            (v.ColorName != null && names.Any(n => v.ColorName.ToLower().Contains(n))) ||
-                            (v.VersionName != null && names.Any(n => v.VersionName.ToLower().Contains(n))));
+                            (v.ColorName != null && names.Any(n => v.ColorName.Contains(n, StringComparison.CurrentCultureIgnoreCase))) ||
+                            (v.VersionName != null && names.Any(n => v.VersionName.Contains(n, StringComparison.CurrentCultureIgnoreCase))));
                 }
                 var matchingProductIds = variantSubquery.Select(v => v.ProductId);
                 query = query.Where(p => matchingProductIds.Contains(p.Id));
@@ -357,6 +357,6 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             .Include(v => v.OutputInfos.Where(oi => oi.DeletedAt == null))
             .ThenInclude(oi => oi.OutputOrder)
             .AsSplitQuery()
-            .FirstOrDefaultAsync(v => v.UrlSlug == slug, cancellationToken);
+            .FirstOrDefaultAsync(v => string.Compare(v.UrlSlug, slug) == 0, cancellationToken);
     }
 }

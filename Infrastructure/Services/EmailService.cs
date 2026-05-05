@@ -3,11 +3,11 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Services;
 
-public class EmailService(ILogger<EmailService> logger) : IEmailService
+public class EmailService : IEmailService
 {
-    public Task SendEmailAsync(string to, string subject, string body)
+    public Task SendEmailAsync(string to, string subject, string body, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Sending email to {To} with subject: {Subject}", to, subject);
+        cancellationToken.ThrowIfCancellationRequested();
         return Task.CompletedTask;
     }
 }

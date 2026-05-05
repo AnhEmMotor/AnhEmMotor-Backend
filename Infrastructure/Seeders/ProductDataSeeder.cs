@@ -9,15 +9,15 @@ public static class ProductDataSeeder
     public static async Task SeedAsync(ApplicationDBContext context, CancellationToken cancellationToken)
     {
         var bikeCategory = await context.ProductCategories
-            .FirstOrDefaultAsync(c => c.Name == "Xe máy", cancellationToken)
+            .FirstOrDefaultAsync(c => string.Compare(c.Name, "Xe máy") == 0, cancellationToken)
             .ConfigureAwait(false);
         if (bikeCategory == null)
             return;
         var honda = await context.Brands
-            .FirstOrDefaultAsync(b => b.Name == "Honda", cancellationToken)
+            .FirstOrDefaultAsync(b => string.Compare(b.Name, "Honda") == 0, cancellationToken)
             .ConfigureAwait(false);
         var yamaha = await context.Brands
-            .FirstOrDefaultAsync(b => b.Name == "Yamaha", cancellationToken)
+            .FirstOrDefaultAsync(b => string.Compare(b.Name, "Yamaha") == 0, cancellationToken)
             .ConfigureAwait(false);
         var productsToSeed = new List<Product>();
         var colors = await context.Set<OptionValue>()
@@ -25,17 +25,17 @@ public static class ProductDataSeeder
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
         var colorOption = await context.Set<Option>()
-            .FirstOrDefaultAsync(o => o.Name == "Color" || o.Name == "Màu sắc", cancellationToken)
+            .FirstOrDefaultAsync(o => string.Compare(o.Name, "Color") == 0 || string.Compare(o.Name, "Màu sắc") == 0, cancellationToken)
             .ConfigureAwait(false);
         var typeOption = await context.Set<Option>()
-            .FirstOrDefaultAsync(o => o.Name == "VehicleType" || o.Name == "Loại xe", cancellationToken)
+            .FirstOrDefaultAsync(o => string.Compare(o.Name, "VehicleType") == 0 || string.Compare(o.Name, "Loại xe") == 0, cancellationToken)
             .ConfigureAwait(false);
         foreach (var p in productsToSeed)
         {
             var existing = await context.Products
                 .Include(x => x.ProductVariants)
                 .ThenInclude(v => v.VariantOptionValues)
-                .FirstOrDefaultAsync(x => x.Name == p.Name, cancellationToken)
+                .FirstOrDefaultAsync(x => string.Compare(x.Name, p.Name) == 0, cancellationToken)
                 .ConfigureAwait(false);
             if (existing == null)
             {
@@ -45,7 +45,7 @@ public static class ProductDataSeeder
             }
             foreach (var variant in existing.ProductVariants)
             {
-                var pVariant = p.ProductVariants.FirstOrDefault(v => v.UrlSlug == variant.UrlSlug);
+                var pVariant = p.ProductVariants.FirstOrDefault(v => string.Compare(v.UrlSlug, variant.UrlSlug) == 0);
                 if (pVariant != null)
                 {
                     variant.VersionName = pVariant.VersionName;
@@ -54,7 +54,7 @@ public static class ProductDataSeeder
                     variant.SKU = pVariant.SKU;
                     variant.Price = pVariant.Price;
                 }
-                if (!variant.VariantOptionValues.Any())
+                if (variant.VariantOptionValues.Count == 0)
                 {
                     var typeName = (p.Name ?? string.Empty).Contains("Vision") ||
                             (p.Name ?? string.Empty).Contains("SH")
@@ -64,8 +64,8 @@ public static class ProductDataSeeder
                     {
                         var typeVal = await context.Set<OptionValue>()
                             .FirstOrDefaultAsync(
-                                v => v.OptionId == typeOption.Id && v.Name == typeName,
-                                cancellationToken);
+                                v => v.OptionId == typeOption.Id && string.Compare(v.Name, typeName) == 0,
+                                cancellationToken).ConfigureAwait(false);
                         if (typeVal != null)
                         {
                             variant.VariantOptionValues.Add(new VariantOptionValue { OptionValueId = typeVal.Id });
@@ -78,8 +78,8 @@ public static class ProductDataSeeder
                     {
                         var colorVal = await context.Set<OptionValue>()
                             .FirstOrDefaultAsync(
-                                v => v.OptionId == colorOption.Id && v.Name == colorName,
-                                cancellationToken);
+                                v => v.OptionId == colorOption.Id && string.Compare(v.Name, colorName) == 0,
+                                cancellationToken).ConfigureAwait(false);
                         if (colorVal != null)
                         {
                             variant.VariantOptionValues.Add(new VariantOptionValue { OptionValueId = colorVal.Id });

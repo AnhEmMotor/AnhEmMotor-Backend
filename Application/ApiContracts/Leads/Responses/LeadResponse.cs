@@ -20,7 +20,7 @@ public class LeadResponse
 
     public DateTimeOffset CreatedAt { get; set; }
 
-    public List<LeadActivityResponse> Activities { get; set; } = new();
+    public List<LeadActivityResponse> Activities { get; set; } = [];
 }
 
 public class LeadActivityResponse

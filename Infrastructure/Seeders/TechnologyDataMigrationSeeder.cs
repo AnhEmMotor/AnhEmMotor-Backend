@@ -7,19 +7,19 @@ namespace Infrastructure.Seeders
 {
     public static class TechnologyDataMigrationSeeder
     {
-        public static async Task MigrateExistingHighlightsAsync(ApplicationDBContext context)
+        public static async Task MigrateExistingHighlightsAsync(ApplicationDBContext context, CancellationToken cancellationToken)
         {
-            if (await context.Set<ProductTechnology>().AnyAsync())
+            if (await context.Set<ProductTechnology>().AnyAsync(cancellationToken).ConfigureAwait(false))
             {
                 return;
             }
             var productsWithHighlights = await context.Products
                 .Where(p => !string.IsNullOrEmpty(p.Highlights))
-                .ToListAsync();
-            if (!productsWithHighlights.Any())
+                .ToListAsync(cancellationToken).ConfigureAwait(false);
+            if (productsWithHighlights.Count == 0)
                 return;
-            var allTechs = await context.Set<Technology>().ToListAsync();
-            var categories = await context.Set<TechnologyCategory>().ToListAsync();
+            var allTechs = await context.Set<Technology>().ToListAsync(cancellationToken).ConfigureAwait(false);
+            var categories = await context.Set<TechnologyCategory>().ToListAsync(cancellationToken).ConfigureAwait(false);
             foreach (var product in productsWithHighlights)
             {
                 try
@@ -42,7 +42,7 @@ namespace Infrastructure.Seeders
                             {
                                 category = new TechnologyCategory { Name = categoryName };
                                 context.Set<TechnologyCategory>().Add(category);
-                                await context.SaveChangesAsync();
+                                await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                                 categories.Add(category);
                             }
                             tech = new Technology
@@ -54,7 +54,7 @@ namespace Infrastructure.Seeders
                                 CategoryId = category.Id
                             };
                             context.Set<Technology>().Add(tech);
-                            await context.SaveChangesAsync();
+                            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                             allTechs.Add(tech);
                         }
                         context.Set<ProductTechnology>()
@@ -63,10 +63,10 @@ namespace Infrastructure.Seeders
                                 {
                                     ProductId = product.Id,
                                     TechnologyId = tech.Id,
-                                    CustomTitle = tech.DefaultTitle == hl.Title ? null : hl.Title,
+                                    CustomTitle = string.Compare(tech.DefaultTitle, hl.Title) == 0 ? null : hl.Title,
                                     CustomDescription =
-                                        tech.DefaultDescription == hl.Description ? null : hl.Description,
-                                    CustomImageUrl = tech.DefaultImageUrl == hl.Image ? null : hl.Image,
+                                        string.Compare(tech.DefaultDescription, hl.Description) == 0 ? null : hl.Description,
+                                    CustomImageUrl = string.Compare(tech.DefaultImageUrl, hl.Image) == 0 ? null : hl.Image,
                                     DisplayOrder = order++
                                 });
                     }
@@ -74,7 +74,7 @@ namespace Infrastructure.Seeders
                 {
                 }
             }
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
 
         private class HighlightJson

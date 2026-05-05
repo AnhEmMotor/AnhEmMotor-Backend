@@ -28,13 +28,13 @@ public class CreateOptionValueCommandHandler(
         int targetOptionId = request.OptionId;
         if (targetOptionId <= 0)
         {
-            var options = await optionReadRepository.GetByNamesAsync(["VehicleType", "Loại xe"], cancellationToken);
+            var options = await optionReadRepository.GetByNamesAsync(["VehicleType", "Loại xe"], cancellationToken).ConfigureAwait(false)   ;
             var vehicleTypeOption = options.FirstOrDefault();
             if (vehicleTypeOption == null)
             {
                 vehicleTypeOption = new OptionEntity { Name = "VehicleType" };
                 optionInsertRepository.Add(vehicleTypeOption);
-                await unitOfWork.SaveChangesAsync(cancellationToken);
+                await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false)  ;
             }
             targetOptionId = vehicleTypeOption.Id;
         }
@@ -45,7 +45,7 @@ public class CreateOptionValueCommandHandler(
             ColorCode = request.ColorCode
         };
         optionValueInsertRepository.Add(optionValue);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return Result<int>.Success(optionValue.Id);
     }
 }

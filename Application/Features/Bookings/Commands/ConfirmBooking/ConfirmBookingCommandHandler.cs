@@ -1,4 +1,13 @@
-﻿using System;
+using Application.Common.Models;
+using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.Booking;
+using Application.Interfaces.Repositories.Lead;
+using Application.Interfaces.Services;
+using Domain.Constants.Booking;
+using Domain.Constants.Lead;
+using Domain.Entities;
+using MediatR;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -20,18 +29,18 @@ namespace Application.Features.Bookings.Commands.ConfirmBooking
             {
                 return Result<bool>.Failure(Error.NotFound("Lịch hẹn không tồn tại."));
             }
-            booking.Status = "Confirmed";
+            booking.Status = BookingStatus.Confirmed;
             bookingInsertRepository.Update(booking);
             var lead = await leadReadRepository.GetByPhoneNumberAsync(booking.PhoneNumber, cancellationToken).ConfigureAwait(false);
             if (lead != null)
             {
-                lead.Status = "TestDriving";
+                lead.Status = LeadStatus.TestDriving;
                 leadInsertRepository.Update(lead);
                 leadActivityInsertRepository.Add(
                     new LeadActivity
                     {
                         LeadId = lead.Id,
-                        ActivityType = "Contact",
+                        ActivityType = LeadActivityType.Contact,
                         Description =
                             $"Xác nhận lịch hẹn lái thử cho {booking.ProductVariant?.Product?.Name}. Chuyển trạng thái sang Đang lái thử.",
                         CreatedAt = DateTimeOffset.UtcNow
@@ -66,7 +75,7 @@ namespace Application.Features.Bookings.Commands.ConfirmBooking
             </div>";
             try
             {
-                await emailService.SendEmailAsync(booking.Email, subject, body).ConfigureAwait(false);
+                await emailService.SendEmailAsync(booking.Email, subject, body, cancellationToken).ConfigureAwait(false);
             }
             catch
             {
@@ -74,5 +83,4 @@ namespace Application.Features.Bookings.Commands.ConfirmBooking
             return Result<bool>.Success(true);
         }
     }
-
 }
