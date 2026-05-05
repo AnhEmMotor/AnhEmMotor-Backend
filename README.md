@@ -407,7 +407,7 @@ dotnet ef migrations add MigrationName --context PostgreSqlDbContext --output-di
 
 ```powershell
 # SQL Server migrations
-dotnet ef migrations list --project Infrastructure --startup-project WebAPI
+dotnet ef migrations list --context ApplicationDBContext --project Infrastructure --startup-project WebAPI
 
 # MySQL migrations
 dotnet ef migrations list --context MySqlDbContext --project Infrastructure --startup-project WebAPI
@@ -420,7 +420,7 @@ dotnet ef migrations list --context PostgreSqlDbContext --project Infrastructure
 
 ```powershell
 # SQL Server
-dotnet ef migrations remove --project Infrastructure --startup-project WebAPI
+dotnet ef migrations remove --context ApplicationDBContext--project Infrastructure --startup-project WebAPI
 
 # MySQL
 dotnet ef migrations remove --context MySqlDbContext --project Infrastructure --startup-project WebAPI
@@ -1041,7 +1041,7 @@ dotnet ef database update --context ApplicationDBContext --project Infrastructur
 ### Tạo SQL Server Migration
 
 ```powershell
-dotnet ef migrations add TenMigration --project Infrastructure --startup-project WebAPI
+dotnet ef migrations add TenMigration --context ApplicationDBContext --project Infrastructure --startup-project WebAPI
 ```
 
 ### Tạo MySQL Migration
@@ -1072,7 +1072,7 @@ dotnet ef migrations add TenMigration --context PostgreSqlDbContext --output-dir
 
 ```powershell
 # SQL Server migrations
-dotnet ef migrations list --project Infrastructure --startup-project WebAPI
+dotnet ef migrations list --context ApplicationDBContext --project Infrastructure --startup-project WebAPI
 
 # MySQL migrations
 dotnet ef migrations list --context MySqlDbContext --project Infrastructure --startup-project WebAPI
@@ -1085,7 +1085,7 @@ dotnet ef migrations list --context PostgreSqlDbContext --project Infrastructure
 
 ```powershell
 # SQL Server
-dotnet ef migrations remove --project Infrastructure --startup-project WebAPI
+dotnet ef migrations remove --context ApplicationDBContext --project Infrastructure --startup-project WebAPI
 
 # MySQL
 dotnet ef migrations remove --context MySqlDbContext --project Infrastructure --startup-project WebAPI
