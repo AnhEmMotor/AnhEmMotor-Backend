@@ -1,3 +1,4 @@
+using Application.ApiContracts.Product.Requests;
 using Application.ApiContracts.Product.Responses;
 using Application.Common.Models;
 using Domain.Primitives;

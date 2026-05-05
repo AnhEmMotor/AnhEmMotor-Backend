@@ -155,7 +155,13 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             .ThenInclude(vov => vov.OptionValue)
             .ThenInclude(ov => ov!.Option)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
-            .ThenInclude(v => v.ProductCollectionPhotos);
+            .ThenInclude(v => v.ProductCollectionPhotos)
+            .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
+            .ThenInclude(v => v.InputInfos)
+            .ThenInclude(ii => ii.InputReceipt)
+            .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
+            .ThenInclude(v => v.OutputInfos)
+            .ThenInclude(oi => oi.OutputOrder);
         if (string.IsNullOrWhiteSpace(sorts))
         {
             dbQuery = dbQuery.OrderByDescending(p => p.DeletedAt);

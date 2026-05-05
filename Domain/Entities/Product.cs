@@ -41,7 +41,7 @@ namespace Domain.Entities
         public string? Dimensions { get; set; }
 
         [Column("Wheelbase", TypeName = "nvarchar(20)")]
-        public decimal? Wheelbase { get; set; }
+        public string? Wheelbase { get; set; }
 
         [Column("SeatHeight", TypeName = "nvarchar(20)")]
         public decimal? SeatHeight { get; set; }

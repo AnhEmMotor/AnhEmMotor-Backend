@@ -423,7 +423,8 @@ public class ProductMappingConfig : IRegister
             Id = variant.Id,
             DisplayName = displayName,
             Price = variant.Price ?? 0,
-            CoverImageUrl = coverImage
+            CoverImageUrl = coverImage,
+            ProductLimit = variant.Product?.ProductCategory?.MaxPurchaseQuantity
         };
     }
 

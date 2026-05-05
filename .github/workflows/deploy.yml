@@ -38,6 +38,17 @@ jobs:
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           FACEBOOK_APP_ID: ${{ secrets.FACEBOOK_APP_ID }}
           FACEBOOK_APP_SECRET: ${{ secrets.FACEBOOK_APP_SECRET }}
+          VNPAY_TMN_CODE: ${{ secrets.VNPAY__TMN_CODE }}
+          VNPAY_HASH_SECRET: ${{ secrets.VNPAY__HASH_SECRET }}
+          VNPAY_BASE_URL: ${{ secrets.VNPAY__BASE_URL }}
+          VNPAY_CALLBACK_URL: ${{ secrets.VNPAY__CALLBACK_URL }}
+          PAYOS_CLIENT_ID: ${{ secrets.PAYOS__CLIENT_ID }}
+          PAYOS_API_KEY: ${{ secrets.PAYOS__API_KEY }}
+          PAYOS_CHECKSUM_KEY: ${{ secrets.PAYOS__CHECKSUM_KEY }}
+          PAYOS_BASE_URL: ${{ secrets.PAYOS__BASE_URL }}
+          PAYOS_RETURN_URL: ${{ secrets.PAYOS__RETURN_URL }}
+          PAYOS_CANCEL_URL: ${{ secrets.PAYOS__CANCEL_URL }}
+          UPLOAD_PATH: ${{ secrets.UPLOAD_PATH }}
         run: >
           jq '
             .Provider = "PostgreSql" |
@@ -56,7 +67,18 @@ jobs:
             .Authentication.Google.ClientId = env.GOOGLE_CLIENT_ID |
             .Authentication.Google.ClientSecret = env.GOOGLE_CLIENT_SECRET |
             .Authentication.Facebook.AppId = env.FACEBOOK_APP_ID |
-            .Authentication.Facebook.AppSecret = env.FACEBOOK_APP_SECRET
+            .Authentication.Facebook.AppSecret = env.FACEBOOK_APP_SECRET |
+            .VNPay.TmnCode = env.VNPAY_TMN_CODE |
+            .VNPay.HashSecret = env.VNPAY_HASH_SECRET |
+            .VNPay.BaseUrl = env.VNPAY_BASE_URL |
+            .VNPay.CallbackUrl = env.VNPAY_CALLBACK_URL |
+            .PayOS.ClientId = env.PAYOS_CLIENT_ID |
+            .PayOS.ApiKey = env.PAYOS_API_KEY |
+            .PayOS.ChecksumKey = env.PAYOS_CHECKSUM_KEY |
+            .PayOS.BaseUrl = env.PAYOS_BASE_URL |
+            .PayOS.ReturnUrl = env.PAYOS_RETURN_URL |
+            .PayOS.CancelUrl = env.PAYOS_CANCEL_URL |
+            .LocalFileStorage.UploadPath = env.UPLOAD_PATH
           ' appsettings.Production.json > tmp.json && mv tmp.json appsettings.Production.json
       - name: Restore dependencies
         run: dotnet restore
@@ -92,7 +114,8 @@ jobs:
           key: ${{ secrets.SERVER_REMOTE_ACCESS_PRIVATE_KEY }}
           port: 22
           script: |
-            rm -rf /var/www/anhemmotor/backend/*
+            # Xoá tất cả trừ thư mục uploads để tránh mất ảnh khi deploy
+            find /var/www/anhemmotor/backend -mindepth 1 -maxdepth 1 -not -name 'uploads' -exec rm -rf {} +
       - name: Copy Files via SCP
         uses: appleboy/scp-action@master
         with:

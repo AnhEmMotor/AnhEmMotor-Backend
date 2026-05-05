@@ -42,38 +42,47 @@ public sealed class UpdateOutputStatusCommandHandler(
         {
             case OrderStatus.Completed:
                 output.FinishedBy = request.CurrentUserId;
-                await updateRepository.ProcessCOGSForCompletedOrderAsync(output.Id, cancellationToken)
+                var deductionResult = await updateRepository.HandleInventoryTransactionAsync(
+                    output.Id,
+                    true,
+                    cancellationToken)
                     .ConfigureAwait(false);
+                if (deductionResult.IsFailure)
+                {
+                    return Result<OrderDetailResponse>.Failure(deductionResult.Errors!);
+                }
                 break;
+
+            case OrderStatus.Delivering:
+                var checkResult = await updateRepository.HandleInventoryTransactionAsync(
+                    output.Id,
+                    false,
+                    cancellationToken)
+                    .ConfigureAwait(false);
+                if (checkResult.IsFailure)
+                {
+                    return Result<OrderDetailResponse>.Failure(checkResult.Errors!);
+                }
+                break;
+
             case OrderStatus.Cancelled:
             case OrderStatus.Refunding:
             case OrderStatus.Refunded:
                 break;
+
             default:
-                foreach (var outputInfo in output.OutputInfos)
-                {
-                    if (outputInfo.ProductVarientId.HasValue && outputInfo.Count.HasValue)
-                    {
-                        var stock = await readRepository.GetStockQuantityByVariantIdAsync(
-                            outputInfo.ProductVarientId.Value,
-                            cancellationToken)
-                            .ConfigureAwait(false);
-                        if (stock < outputInfo.Count.Value)
-                        {
-                            return Error.BadRequest(
-                                $"Sản phẩm ID {outputInfo.ProductVarientId} không đủ tồn kho. Hiện có: {stock}, cần: {outputInfo.Count.Value}",
-                                "Products");
-                        }
-                    }
-                }
                 break;
         }
+
         output.StatusId = request.StatusId;
         output.LastStatusChangedAt = DateTimeOffset.UtcNow;
         updateRepository.Update(output);
+        
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        
         var updated = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
         ArgumentNullException.ThrowIfNull(updated);
+        
         return updated.Adapt<OrderDetailResponse>();
     }
 }

@@ -23,6 +23,7 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        services.Configure<LocalFileStorageOptions>(configuration.GetSection(LocalFileStorageOptions.SectionName));
         var provider = configuration.GetValue("Provider", "SqlServer");
         if (string.Compare(provider, "MySql") == 0)
         {
@@ -78,9 +79,12 @@ public static class DependencyInjection
         services.AddScoped<IProtectedProductCategoryService, ProtectedProductCategoryService>();
         services.AddScoped<IFileStorageService, LocalFileStorageService>();
         services.AddScoped<IExternalAuthService, ExternalAuthService>();
+        services.AddScoped<IVNPayService, VNPayService>();
+        services.AddScoped<IPayOSService, PayOSService>();
         services.AddScoped<ISievePaginator, SievePaginator>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddHostedService<OrderCleanupService>();
         services.AddHttpClient();
         services.Scan(
             scan => scan

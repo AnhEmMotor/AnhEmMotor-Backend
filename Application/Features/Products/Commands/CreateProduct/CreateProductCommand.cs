@@ -9,6 +9,7 @@ namespace Application.Features.Products.Commands.CreateProduct;
 
 public sealed record CreateProductCommand : IRequest<Result<ProductDetailForManagerResponse?>>
 {
+    [JsonPropertyName("name")]
     public string? Name { get; init; }
 
     [JsonPropertyName("category_id")]
@@ -20,15 +21,19 @@ public sealed record CreateProductCommand : IRequest<Result<ProductDetailForMana
     [JsonPropertyName("status_id")]
     public string? StatusId { get; init; } = "for-sale";
 
+    [JsonPropertyName("description")]
     public string? Description { get; init; }
 
+    [JsonPropertyName("weight")]
     [JsonConverter(typeof(NullableDecimalConverter))]
     public decimal? Weight { get; init; }
 
+    [JsonPropertyName("dimensions")]
     public string? Dimensions { get; init; }
 
-    [JsonConverter(typeof(NullableDecimalConverter))]
-    public decimal? Wheelbase { get; init; }
+    [JsonPropertyName("wheelbase")]
+    [JsonConverter(typeof(FlexibleStringConverter))]
+    public string? Wheelbase { get; init; }
 
     [JsonPropertyName("seat_height")]
     [JsonConverter(typeof(NullableDecimalConverter))]
@@ -73,6 +78,7 @@ public sealed record CreateProductCommand : IRequest<Result<ProductDetailForMana
     [JsonPropertyName("max_torque")]
     public string? MaxTorque { get; init; }
 
+    [JsonPropertyName("displacement")]
     [JsonConverter(typeof(NullableDecimalConverter))]
     public decimal? Displacement { get; init; }
 
@@ -94,5 +100,6 @@ public sealed record CreateProductCommand : IRequest<Result<ProductDetailForMana
     [JsonPropertyName("highlights")]
     public string? Highlights { get; init; }
 
+    [JsonPropertyName("variants")]
     public List<CreateProductVariantRequest> Variants { get; init; } = [];
 }

@@ -1,3 +1,4 @@
+using Application.ApiContracts.Product.Requests;
 using Application.ApiContracts.Product.Responses;
 using Application.Common.Helper;
 using Application.Common.Models;
@@ -23,16 +24,15 @@ namespace Application.Features.Products.Commands.UpdateProduct;
 
 public sealed class UpdateProductCommandHandler(
     IProductReadRepository productReadRepository,
-    IBrandReadRepository brandReadRepository,
-    IProductCategoryReadRepository productCategoryReadRepository,
     IProductVariantReadRepository productVariantReadRepository,
-    IOptionReadRepository optionReadRepository,
+    IProductCategoryReadRepository productCategoryReadRepository,
+    IBrandReadRepository brandReadRepository,
     IPredefinedOptionReadRepository predefinedOptionReadRepository,
+    IOptionReadRepository optionReadRepository,
     IOptionValueReadRepository optionValueReadRepository,
-    IOptionValueInsertRepository optionValueInsertRepository,
     IProductVariantInsertRepository productVariantInsertRepository,
+    IOptionValueInsertRepository optionValueInsertRepository,
     IVariantOptionValueDeleteRepository variantOptionValueDeleteRepository,
-    IProductUpdateRepository updateRepository,
     IProductVarientDeleteRepository productVarientDeleteRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateProductCommand, Result<ProductDetailForManagerResponse?>>
 {
@@ -377,8 +377,8 @@ public sealed class UpdateProductCommandHandler(
             foreach (var link in currentLinks)
             {
                 variantOptionValueDeleteRepository.Delete(link);
-                variantEntity.VariantOptionValues.Remove(link);
             }
+            variantEntity.VariantOptionValues.Clear();
             if (variantReq.OptionValues?.Count > 0)
             {
                 foreach (var kvp in variantReq.OptionValues)
@@ -491,7 +491,6 @@ public sealed class UpdateProductCommandHandler(
                         });
             }
         }
-        updateRepository.Update(product);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         var response = product.Adapt<ProductDetailForManagerResponse>();
         return response;
@@ -522,20 +521,5 @@ public sealed class UpdateProductCommandHandler(
                 variant.ProductCollectionPhotos.Add(new ProductCollectionPhoto { ImageUrl = url });
             }
         }
-    }
-
-    private class TechnologyJsonRequest
-    {
-        [JsonPropertyName("technologyId")]
-        public int TechnologyId { get; set; }
-
-        [JsonPropertyName("customTitle")]
-        public string? CustomTitle { get; set; }
-
-        [JsonPropertyName("customDescription")]
-        public string? CustomDescription { get; set; }
-
-        [JsonPropertyName("customImageUrl")]
-        public string? CustomImageUrl { get; set; }
     }
 }

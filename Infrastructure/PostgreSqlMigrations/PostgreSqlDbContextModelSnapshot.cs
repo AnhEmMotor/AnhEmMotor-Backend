@@ -1,4 +1,4 @@
-﻿using Infrastructure.DBContexts;
+using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using System;
@@ -14,7 +14,7 @@ namespace Infrastructure.PostgreSqlMigrations
         {
             #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.5")
+                .HasAnnotation("ProductVersion", "10.0.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
             modelBuilder.Entity(
@@ -196,20 +196,52 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("integer").HasColumnName("id");
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-                    b.Property<Guid?>("BuyerId").HasColumnType("uuid").HasColumnName("BuyerId");
-                    b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("timestamp with time zone");
-                    b.Property<Guid?>("CreatedBy").HasColumnType("uuid").HasColumnName("CreatedBy");
-                    b.Property<string>("CustomerAddress").HasColumnType("text").HasColumnName("CustomerAddress");
-                    b.Property<string>("CustomerName").HasColumnType("text").HasColumnName("CustomerName");
-                    b.Property<string>("CustomerPhone").HasColumnType("text").HasColumnName("CustomerPhone");
-                    b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("timestamp with time zone");
-                    b.Property<Guid?>("FinishedBy").HasColumnType("uuid").HasColumnName("FinishedBy");
+
+                    b.Property<Guid?>("BuyerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("BuyerId");
+
+                    b.Property<DateTimeOffset?>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("CreatedBy");
+
+                    b.Property<string>("CustomerAddress")
+                        .HasColumnType("text")
+                        .HasColumnName("CustomerAddress");
+
+                    b.Property<string>("CustomerName")
+                        .HasColumnType("text")
+                        .HasColumnName("CustomerName");
+
+                    b.Property<string>("CustomerPhone")
+                        .HasColumnType("text")
+                        .HasColumnName("CustomerPhone");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("FinishedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("FinishedBy");
+
                     b.Property<DateTimeOffset?>("LastStatusChangedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("LastStatusChangedAt");
-                    b.Property<string>("Notes").HasColumnType("text").HasColumnName("Notes");
-                    b.Property<string>("StatusId").HasColumnType("text").HasColumnName("StatusId");
-                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text")
+                        .HasColumnName("Notes");
+
+                    b.Property<string>("StatusId")
+                        .HasColumnType("text")
+                        .HasColumnName("StatusId");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.HasKey("Id");
                     b.HasIndex("BuyerId");
                     b.HasIndex("CreatedBy");
@@ -320,11 +352,24 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("integer").HasColumnName("Id");
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-                    b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("timestamp with time zone");
-                    b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("timestamp with time zone");
-                    b.Property<string>("Description").HasColumnType("text").HasColumnName("Description");
-                    b.Property<string>("Name").HasColumnType("text").HasColumnName("Name");
-                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("Description");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("text")
+                        .HasColumnName("Name");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.HasKey("Id");
                     b.ToTable("ProductCategory");
                 });

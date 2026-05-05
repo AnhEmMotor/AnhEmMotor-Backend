@@ -1,8 +1,6 @@
 using Application;
-
 using Asp.Versioning.ApiExplorer;
 using Infrastructure;
-
 using Serilog;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.SwaggerUI;
@@ -14,6 +12,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog();
 var configuration = builder.Configuration;
 var environment = builder.Environment;
+
+var customUploadPath = configuration["LocalFileStorage:UploadPath"];
+if (string.IsNullOrWhiteSpace(customUploadPath))
+{
+    throw new InvalidOperationException("Configuration 'LocalFileStorage:UploadPath' is missing. Please set it in appsettings.json or as an environment variable (UPLOAD_PATH).");
+}
+environment.WebRootPath = customUploadPath;
 builder.Services.AddApplicationServices();
 if (!environment.IsEnvironment("Test"))
 {
@@ -61,7 +66,10 @@ app.UseSerilogRequestLogging(
     {
         options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
         {
-            diagnosticContext.Set("ClientIP", httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown");
+            var clientIp = httpContext.Request.Headers["CF-Connecting-IP"].FirstOrDefault()
+                           ?? httpContext.Connection.RemoteIpAddress?.ToString()
+                           ?? "unknown";
+            diagnosticContext.Set("ClientIP", clientIp);
         };
     });
 app.UseExceptionHandler();

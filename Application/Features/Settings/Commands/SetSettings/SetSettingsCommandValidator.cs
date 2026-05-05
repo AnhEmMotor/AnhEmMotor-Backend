@@ -1,4 +1,4 @@
-﻿using Domain.Constants;
+using Domain.Constants;
 using FluentValidation;
 
 namespace Application.Features.Settings.Commands.SetSettings;
@@ -45,8 +45,7 @@ public sealed class SetSettingsCommandValidator : AbstractValidator<SetSettingsC
                         }
                     }
                 } else if (string.Compare(key, SettingKeys.InventoryAlertLevel) == 0 ||
-                    string.Compare(key, SettingKeys.OrderValueExceeds) == 0 ||
-                    string.Compare(key, SettingKeys.ZBikeThresholdForMeeting) == 0)
+                    string.Compare(key, SettingKeys.OrderValueExceeds) == 0)
                 {
                     if (decimal.TryParse(value, out var _))
                     {

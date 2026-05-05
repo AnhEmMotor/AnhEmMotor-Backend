@@ -32,21 +32,13 @@ public class EmptyStringConverter : JsonConverter<string>
         }
         if (reader.TokenType == JsonTokenType.Number)
         {
-            if (reader.TryGetInt64(out long longValue))
-            {
-                return longValue.ToString();
-            }
-            if (reader.TryGetDouble(out double doubleValue))
-            {
-                return doubleValue.ToString();
-            }
+            if (reader.TryGetInt64(out long longValue)) return longValue.ToString();
+            if (reader.TryGetDouble(out double doubleValue)) return doubleValue.ToString();
         }
-        if (reader.TokenType == JsonTokenType.True)
-            return "true";
-        if (reader.TokenType == JsonTokenType.False)
-            return "false";
-        if (reader.TokenType == JsonTokenType.Null)
-            return string.Empty;
+        if (reader.TokenType == JsonTokenType.True) return "true";
+        if (reader.TokenType == JsonTokenType.False) return "false";
+        if (reader.TokenType == JsonTokenType.Null) return string.Empty;
+        
         return string.Empty;
     }
 
@@ -59,7 +51,11 @@ public class EmptyStringConverter : JsonConverter<string>
     /// <param name="options">Options to control JSON serialization behavior. This parameter can be used to customize serialization features.</param>
     public override void Write(Utf8JsonWriter writer, string value, JsonSerializerOptions options)
     {
-        writer.WriteStringValue(value ?? string.Empty);
+        if (string.IsNullOrEmpty(value))
+        {
+            return;
+        }
+        writer.WriteStringValue(value);
     }
 
     /// <summary>
@@ -80,10 +76,7 @@ public class EmptyStringConverter : JsonConverter<string>
     /// <param name="typeToConvert"></param>
     /// <param name="options"></param>
     /// <returns></returns>
-    public override string ReadAsPropertyName(
-        ref Utf8JsonReader reader,
-        Type typeToConvert,
-        JsonSerializerOptions options)
+    public override string ReadAsPropertyName(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         return reader.GetString() ?? string.Empty;
     }

@@ -1,10 +1,12 @@
-﻿using Application.Common.Models;
+using Application.Common.Models;
 using Application.Interfaces.Repositories.LocalFile;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Webp;
 using SixLabors.ImageSharp.Processing;
+using Microsoft.Extensions.Options;
+
 
 namespace Infrastructure.Repositories.LocalFile;
 
@@ -14,15 +16,30 @@ public class LocalFileStorageService : IFileStorageService
     private readonly string _uploadFolder;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public LocalFileStorageService(IWebHostEnvironment environment, IHttpContextAccessor httpContextAccessor)
+    public LocalFileStorageService(
+        IWebHostEnvironment environment,
+        IHttpContextAccessor httpContextAccessor,
+        IOptions<LocalFileStorageOptions> options)
     {
         _httpContextAccessor = httpContextAccessor;
-        if (string.IsNullOrEmpty(environment.WebRootPath))
+        var configPath = options.Value.UploadPath;
+
+        if (!string.IsNullOrEmpty(configPath))
         {
-            _uploadFolder = Path.Combine(Path.GetTempPath(), "AnhEmMotor_Test_Uploads");
-        } else
+            _uploadFolder = configPath;
+        }
+        else if (string.IsNullOrEmpty(environment.WebRootPath))
+        {
+            _uploadFolder = Path.Combine(Path.GetTempPath(), "AnhEmMotor_Uploads");
+        }
+        else
         {
             _uploadFolder = Path.Combine(environment.WebRootPath, "uploads");
+        }
+
+        if (!Directory.Exists(_uploadFolder))
+        {
+            Directory.CreateDirectory(_uploadFolder);
         }
     }
 

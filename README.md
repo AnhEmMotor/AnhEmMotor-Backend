@@ -351,6 +351,13 @@ Use a script wrapper to automatically create migrations for BOTH providers:
 .\add-migration.ps1 "MigrationName"
 ```
 
+> **⚠️ RULE: ONE BRANCH = ONE MIGRATION**
+>
+> To keep the migration history clean and avoid deployment conflicts, **each branch/Pull Request is only allowed to have EXACTLY ONE migration**.
+>
+> - If you need to make more changes to the database, **remove the previous migration** and create a new one, or combine your changes.
+> - The `add-migration.ps1` script and GitHub Actions will block you if you try to include more than one migration.
+
 **Example:**
 
 ```powershell
@@ -552,6 +559,17 @@ The following secrets need to be set up in the GitHub repository:
 | `GOOGLE_CLIENT_SECRET`             | Google OAuth Client Secret               | `GOCSPX-your-google-secret`                                                                              |
 | `FACEBOOK_APP_ID`                  | Facebook App ID                          | `your-facebook-app-id`                                                                                   |
 | `FACEBOOK_APP_SECRET`              | Facebook App Secret                      | `your-facebook-app-secret`                                                                               |
+| `VNPAY__TMN_CODE`                  | VNPay TmnCode                            | `your-vnpay-tmn-code`                                                                                    |
+| `VNPAY__HASH_SECRET`               | VNPay HashSecret                         | `your-vnpay-hash-secret`                                                                                 |
+| `VNPAY__BASE_URL`                  | VNPay BaseUrl                            | `https://sandbox.vnpayment.vn/paymentv2/vpcpay.html`                                                     |
+| `VNPAY__CALLBACK_URL`              | VNPay CallbackUrl                        | `https://api.yourdomain.com/api/payment/vnpay-callback`                                                  |
+| `PAYOS__CLIENT_ID`                 | PayOS Client ID                          | `your-payos-client-id`                                                                                   |
+| `PAYOS__API_KEY`                   | PayOS API Key                            | `your-payos-api-key`                                                                                     |
+| `PAYOS__CHECKSUM_KEY`              | PayOS Checksum Key                       | `your-payos-checksum-key`                                                                                |
+| `PAYOS__BASE_URL`                  | PayOS Base URL                           | `https://api-merchant.payos.vn`                                                                          |
+| `PAYOS__RETURN_URL`                | PayOS Return URL                         | `https://anhemmotor.online/payment-processing`                                                           |
+| `PAYOS__CANCEL_URL`                | PayOS Cancel URL                         | `https://anhemmotor.online/payment-processing`                                                           |
+| `UPLOAD_PATH`                      | Persistent image storage path             | `/var/www/anhemmotor/uploads`                                                                            |
 
 ### Array Secrets (SuperRoles, ProtectedUsers, DefaultRoles)
 
@@ -610,7 +628,30 @@ The following secrets need to be set up in the GitHub repository:
 ["admin@anhem.com:Admin@123456", "manager@anhem.com"]
 ```
 
-# 7. Troubleshooting
+# 7. Online Payment Configuration (English)
+
+To enable payment features, you need to obtain credentials from VNPay and PayOS.
+
+### 1. VNPay Configuration (Sandbox Environment)
+
+1.  **Register Test Account**: Visit [VNPay Sandbox](https://sandbox.vnpayment.vn/devreg/) or contact VNPay to get a test account.
+2.  **Obtain Credentials**: After registration, you will receive an email containing:
+    - **vnp_TmnCode**: Terminal ID.
+    - **vnp_HashSecret**: Secret key used for signing hashes.
+3.  **Callback Configuration**: Ensure the callback URL matches your environment:
+    - `https://api.yourdomain.com/api/payment/vnpay-callback` (Production)
+    - `https://localhost:7001/api/payment/vnpay-callback` (Local)
+
+### 2. PayOS Configuration (Production or Test)
+
+1.  **Create Account**: Sign up at [PayOS.vn](https://payos.vn/).
+2.  **Create Payment Channel**: Go to **"Payment Channels"** -> **"Create Payment Channel"** -> Choose the appropriate type.
+3.  **Get API Key**: After creating a channel or by clicking on an existing one, you will find:
+    - **Client ID**
+    - **API Key**
+    - **Checksum Key**
+
+# 8. Troubleshooting
 
 ## Error: "Docker is not running"
 
@@ -1016,6 +1057,13 @@ Sử dụng script wrapper để tự động tạo migrations cho CẢ 2 provid
 .\add-migration.ps1 "TenMigration"
 ```
 
+> **⚠️ QUY ĐỊNH: 1 NHÁNH = 1 MIGRATION**
+>
+> Để giữ lịch sử migration sạch sẽ và tránh xung đột khi deploy, **mỗi nhánh (branch) hoặc Pull Request chỉ được phép có DUY NHẤT 1 migration**.
+>
+> - Nếu bạn cần thay đổi thêm database, hãy **xóa migration cũ** và tạo lại cái mới, hoặc gộp các thay đổi lại.
+> - Script `add-migration.ps1` và GitHub Actions sẽ chặn nếu bạn cố tình tạo nhiều hơn 1 migration trong cùng 1 PR.
+
 **Ví dụ:**
 
 ```powershell
@@ -1223,6 +1271,17 @@ Cần setup các secrets sau trong GitHub repository:
 | `GOOGLE_CLIENT_SECRET`             | Google OAuth Client Secret                | `GOCSPX-your-google-secret`                                                                              |
 | `FACEBOOK_APP_ID`                  | Facebook App ID                           | `your-facebook-app-id`                                                                                   |
 | `FACEBOOK_APP_SECRET`              | Facebook App Secret                       | `your-facebook-app-secret`                                                                               |
+| `VNPAY__TMN_CODE`                  | VNPay Terminal Code (TmnCode)             | `XXT7WT32`                                                                                               |
+| `VNPAY__HASH_SECRET`               | VNPay Hash Secret                         | `1ff1b8243e86dd74cd6f4c284b06bb2ad5...`                                                                  |
+| `VNPAY__BASE_URL`                  | VNPay Base URL (Sandbox/Production)       | `https://sandbox.vnpayment.vn/paymentv2/vpcpay.html`                                                     |
+| `VNPAY__CALLBACK_URL`              | VNPay Return/Callback URL                 | `https://api.yourdomain.com/api/payment/vnpay-callback`                                                  |
+| `PAYOS__CLIENT_ID`                 | PayOS Client ID                           | `your-payos-client-id`                                                                                   |
+| `PAYOS__API_KEY`                   | PayOS API Key                             | `your-payos-api-key`                                                                                     |
+| `PAYOS__CHECKSUM_KEY`              | PayOS Checksum Key                        | `your-payos-checksum-key`                                                                                |
+| `PAYOS__BASE_URL`                  | PayOS Base URL                            | `https://api-merchant.payos.vn`                                                                          |
+| `PAYOS__RETURN_URL`                | PayOS Return URL                          | `https://yourdomain.online/payment-processing`                                                           |
+| `PAYOS__CANCEL_URL`                | PayOS Cancel URL                          | `https://yourdomain.online/payment-processing`                                                           |
+| `UPLOAD_PATH`                      | Đường dẫn lưu trữ ảnh vĩnh viễn            | `/var/www/anhemmotor/uploads`                                                                            |
 
 ### Array Secrets (SuperRoles, ProtectedUsers, DefaultRoles)
 
@@ -1281,7 +1340,30 @@ Cần setup các secrets sau trong GitHub repository:
 ["admin@anhem.com:Admin@123456", "manager@anhem.com"]
 ```
 
-# 7. Troubleshooting
+# 8. Hướng dẫn Cấu hình Thanh toán Online
+
+Để tính năng thanh toán hoạt động, bạn cần lấy các mã bí mật từ cổng VNPay và PayOS.
+
+### 1. Cấu hình VNPay (Môi trường Sandbox)
+
+1.  **Đăng ký tài khoản Test**: Truy cập [VNPay Sandbox](https://sandbox.vnpayment.vn/devreg/) hoặc liên hệ VNPay để lấy tài khoản test.
+2.  **Lấy thông tin**: Sau khi đăng ký, bạn sẽ nhận được email chứa:
+    - **vnp_TmnCode**: Mã định danh cửa hàng (Terminal ID).
+    - **vnp_HashSecret**: Chuỗi bí mật dùng để tạo chữ ký (Secret Key).
+3.  **Cấu hình Callback**: Đảm bảo URL gọi lại khớp với cấu hình của bạn:
+    - `https://api.yourdomain.com/api/payment/vnpay-callback` (Production)
+    - `https://localhost:7001/api/payment/vnpay-callback` (Local)
+
+### 2. Cấu hình PayOS (Chính thức hoặc Test)
+
+1.  **Tạo tài khoản**: Đăng ký tại [PayOS.vn](https://payos.vn/).
+2.  **Tạo kênh thanh toán**: Vào mục **"Kênh thanh toán"** -> **"Tạo kênh thanh toán"** -> Chọn loại hình phù hợp.
+3.  **Lấy API Key**: Ở lần đầu tiên sau khi tạo kênh thanh toán hoặc khi bấm vào kênh thanh toán trong phần "Kênh thanh toán", bạn sẽ thấy:
+    - **Client ID**
+    - **API Key**
+    - **Checksum Key**
+
+# 9. Troubleshooting
 
 ## Lỗi: "Docker is not running"
 

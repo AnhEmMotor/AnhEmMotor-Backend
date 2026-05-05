@@ -42,6 +42,46 @@
              <param name="result"></param>
              <returns></returns>
         </member>
+        <member name="T:WebAPI.Controllers.PaymentController">
+            <summary>
+            Controller for handling payment-related operations.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.PaymentController.#ctor(MediatR.IMediator)">
+            <summary>
+            Controller for handling payment-related operations.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.PaymentController.PayOSWebhook(Application.ApiContracts.Payment.Requests.PayOSWebhookData,System.Threading.CancellationToken)">
+            <summary>
+            Webhook endpoint for PayOS to notify payment status.
+            </summary>
+            <param name="data">Webhook data from PayOS.</param>
+            <param name="cancellationToken">Cancellation Token.</param>
+            <returns>Success response.</returns>
+        </member>
+        <member name="M:WebAPI.Controllers.PaymentController.GetPaymentLink(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Generates a payment link for a specific order.
+            </summary>
+            <param name="orderId">The ID of the order.</param>
+            <param name="cancellationToken">Cancellation Token</param>
+            <returns>The payment link data.</returns>
+        </member>
+        <member name="M:WebAPI.Controllers.PaymentController.VNPayCallback(System.Threading.CancellationToken)">
+            <summary>
+            Callback endpoint for VNPay after payment completion.
+            </summary>
+            <param name="cancellationToken">Cancellation Token</param>
+            <returns>Redirects to the storefront processing page.</returns>
+        </member>
+        <member name="M:WebAPI.Controllers.PaymentController.PayOSCallback(System.Threading.CancellationToken)">
+            <summary>
+            Callback endpoint for PayOS after payment completion.
+            </summary>
+            <param name="cancellationToken">Cancellation Token</param>
+            <returns>Redirects to the storefront processing page.</returns>
+        </member>
         <member name="T:WebAPI.Controllers.V1.AuthController">
             <summary>
             Controller xử lý xác thực và đăng nhập
@@ -613,7 +653,17 @@
             Quản lý sản phẩm.
             </summary>
         </member>
+<<<<<<< HEAD
         <member name="M:WebAPI.Controllers.V1.ProductController.GetProductsAsync(Application.Features.Products.Queries.GetProductsList.GetProductsRequest,System.Nullable{System.Decimal},System.Nullable{System.Decimal},System.Threading.CancellationToken)">
+=======
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetSitemapSlugsAsync(System.Threading.CancellationToken)">
+            <summary>
+            Lấy danh sách toàn bộ Slug của sản phẩm phục vụ cho việc tạo Sitemap. Chỉ cho phép gọi từ Localhost để đảm bảo
+            bảo mật.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetProductsAsync(Application.Features.Products.Queries.GetProductsList.GetProductsRequest,System.Threading.CancellationToken)">
+>>>>>>> main
             <summary>
             Lấy danh sách sản phẩm đầy đủ dành cho khách hàng (có phân trang, lọc, tìm kiếm).
             </summary>
@@ -921,6 +971,13 @@
         <member name="M:WebAPI.Controllers.V1.SettingController.GetAllSettingsAsync(System.Threading.CancellationToken)">
             <summary>
             Lấy các thông số cài đặt hệ thống (số lượng cảnh báo tồn kho, số lượng mua tối đa, ...)
+            </summary>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.SettingController.GetStoreSettingsAsync(System.Threading.CancellationToken)">
+            <summary>
+            Lấy các thông số cài đặt công khai cho Store
             </summary>
             <param name="cancellationToken"></param>
             <returns></returns>

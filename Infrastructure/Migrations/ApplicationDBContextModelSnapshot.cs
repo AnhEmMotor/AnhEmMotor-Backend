@@ -86,7 +86,8 @@ namespace Infrastructure.Migrations
                         .HasColumnName("RowVersion");
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
                     b.HasKey("Id");
-                    b.ToTable("Brand", (string)null);
+
+                    b.ToTable("Brand");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.Input",
@@ -110,7 +111,8 @@ namespace Infrastructure.Migrations
                     b.HasIndex("SourceOrderId");
                     b.HasIndex("StatusId");
                     b.HasIndex("SupplierId");
-                    b.ToTable("Input", (string)null);
+
+                    b.ToTable("Input");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.InputInfo",
@@ -131,7 +133,8 @@ namespace Infrastructure.Migrations
                     b.HasIndex("InputId");
                     b.HasIndex("ParentOutputInfoId");
                     b.HasIndex("ProductId");
-                    b.ToTable("InputInfo", (string)null);
+
+                    b.ToTable("InputInfo");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.InputStatus",
@@ -142,7 +145,8 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
                     b.HasKey("Key");
-                    b.ToTable("InputStatus", (string)null);
+
+                    b.ToTable("InputStatus");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.MediaFile",
@@ -160,7 +164,8 @@ namespace Infrastructure.Migrations
                     b.Property<string>("StorageType").IsRequired().HasMaxLength(50).HasColumnType("nvarchar(50)");
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
                     b.HasKey("Id");
-                    b.ToTable("MediaFiles", (string)null);
+
+                    b.ToTable("MediaFiles");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.Option",
@@ -174,7 +179,8 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
                     b.HasKey("Id");
                     b.HasIndex("Name");
-                    b.ToTable("Option", (string)null);
+
+                    b.ToTable("Option");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.OptionValue",
@@ -189,7 +195,8 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
                     b.HasKey("Id");
                     b.HasIndex("OptionId");
-                    b.ToTable("OptionValue", (string)null);
+
+                    b.ToTable("OptionValue");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.Output",
@@ -203,22 +210,44 @@ namespace Infrastructure.Migrations
                     b.Property<string>("CustomerAddress")
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("CustomerAddress");
-                    b.Property<string>("CustomerName").HasColumnType("nvarchar(max)").HasColumnName("CustomerName");
-                    b.Property<string>("CustomerPhone").HasColumnType("nvarchar(max)").HasColumnName("CustomerPhone");
-                    b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
-                    b.Property<Guid?>("FinishedBy").HasColumnType("uniqueidentifier").HasColumnName("FinishedBy");
+
+                    b.Property<string>("CustomerName")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("CustomerName");
+
+                    b.Property<string>("CustomerPhone")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("CustomerPhone");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("FinishedBy")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("FinishedBy");
+
                     b.Property<DateTimeOffset?>("LastStatusChangedAt")
                         .HasColumnType("datetimeoffset")
                         .HasColumnName("LastStatusChangedAt");
-                    b.Property<string>("Notes").HasColumnType("nvarchar(MAX)").HasColumnName("Notes");
-                    b.Property<string>("StatusId").HasColumnType("nvarchar(450)").HasColumnName("StatusId");
-                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnName("Notes");
+
+                    b.Property<string>("StatusId")
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("StatusId");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
                     b.HasKey("Id");
                     b.HasIndex("BuyerId");
                     b.HasIndex("CreatedBy");
                     b.HasIndex("FinishedBy");
                     b.HasIndex("StatusId");
-                    b.ToTable("Output", (string)null);
+
+                    b.ToTable("Output");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.OutputInfo",
@@ -237,7 +266,8 @@ namespace Infrastructure.Migrations
                     b.HasKey("Id");
                     b.HasIndex("OutputId");
                     b.HasIndex("ProductVarientId");
-                    b.ToTable("OutputInfo", (string)null);
+
+                    b.ToTable("OutputInfo");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.OutputStatus",
@@ -248,7 +278,8 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
                     b.HasKey("Key");
-                    b.ToTable("OutputStatus", (string)null);
+
+                    b.ToTable("OutputStatus");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.Permission",
@@ -272,8 +303,11 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
                     b.Property<string>("Value").IsRequired().HasColumnType("nvarchar(200)").HasColumnName("Value");
                     b.HasKey("Id");
-                    b.HasIndex("Key").IsUnique();
-                    b.ToTable("PredefinedOption", (string)null);
+
+                    b.HasIndex("Key")
+                        .IsUnique();
+
+                    b.ToTable("PredefinedOption");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.Product",
@@ -325,7 +359,8 @@ namespace Infrastructure.Migrations
                     b.HasIndex("BrandId");
                     b.HasIndex("CategoryId");
                     b.HasIndex("StatusId");
-                    b.ToTable("Product", (string)null);
+
+                    b.ToTable("Product");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.ProductCategory",
@@ -333,13 +368,28 @@ namespace Infrastructure.Migrations
                 {
                     b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int").HasColumnName("Id");
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-                    b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("datetimeoffset");
-                    b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
-                    b.Property<string>("Description").HasColumnType("nvarchar(max)").HasColumnName("Description");
-                    b.Property<string>("Name").HasColumnType("nvarchar(max)").HasColumnName("Name");
-                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Description");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Name");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
                     b.HasKey("Id");
-                    b.ToTable("ProductCategory", (string)null);
+
+                    b.ToTable("ProductCategory");
+
                     b.HasAnnotation("Relational:Collation", "utf8mb4_unicode_ci");
                 });
             modelBuilder.Entity(
@@ -352,7 +402,8 @@ namespace Infrastructure.Migrations
                     b.Property<int>("ProductVariantId").HasColumnType("int").HasColumnName("ProductVariantId");
                     b.HasKey("Id");
                     b.HasIndex("ProductVariantId");
-                    b.ToTable("ProductCollectionPhoto", (string)null);
+
+                    b.ToTable("ProductCollectionPhoto");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.ProductStatus",
@@ -363,7 +414,8 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
                     b.HasKey("Key");
-                    b.ToTable("ProductStatus", (string)null);
+
+                    b.ToTable("ProductStatus");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.ProductVariant",
@@ -380,7 +432,8 @@ namespace Infrastructure.Migrations
                     b.Property<string>("UrlSlug").HasColumnType("nvarchar(255)").HasColumnName("UrlSlug");
                     b.HasKey("Id");
                     b.HasIndex("ProductId");
-                    b.ToTable("ProductVariant", (string)null);
+
+                    b.ToTable("ProductVariant");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.RolePermission",
@@ -402,7 +455,8 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
                     b.Property<string>("Value").HasColumnType("nvarchar(MAX)").HasColumnName("Value");
                     b.HasKey("Key");
-                    b.ToTable("Setting", (string)null);
+
+                    b.ToTable("Setting");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.Supplier",
@@ -424,7 +478,8 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
                     b.HasKey("Id");
                     b.HasIndex("StatusId");
-                    b.ToTable("Supplier", (string)null);
+
+                    b.ToTable("Supplier");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.SupplierContact",
@@ -442,7 +497,8 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
                     b.HasKey("Id");
                     b.HasIndex("SupplierId");
-                    b.ToTable("SupplierContact", (string)null);
+
+                    b.ToTable("SupplierContact");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.SupplierStatus",
@@ -453,7 +509,8 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
                     b.HasKey("Key");
-                    b.ToTable("SupplierStatus", (string)null);
+
+                    b.ToTable("SupplierStatus");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.VariantOptionValue",
@@ -466,7 +523,8 @@ namespace Infrastructure.Migrations
                     b.HasKey("Id");
                     b.HasIndex("OptionValueId");
                     b.HasIndex("VariantId");
-                    b.ToTable("VariantOptionValue", (string)null);
+
+                    b.ToTable("VariantOptionValue");
                 });
             modelBuilder.Entity(
                 "Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>",

@@ -1,4 +1,4 @@
-﻿using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.LocalFile;
 using Application.Interfaces.Services;
 using Domain.Entities;
@@ -115,7 +115,8 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                             ["Logging:LogLevel:Microsoft.EntityFrameworkCore.Database.Command"] = "None",
                             ["Logging:LogLevel:Microsoft.EntityFrameworkCore"] = "Warning",
                             ["Logging:LogLevel:Microsoft.AspNetCore"] = "Warning",
-                            ["Logging:LogLevel:LuckyPennySoftware.MediatR.License"] = "None"
+                            ["Logging:LogLevel:LuckyPennySoftware.MediatR.License"] = "None",
+                            ["LocalFileStorage:UploadPath"] = "upload-test"
                         });
                 config.AddEnvironmentVariables();
             });

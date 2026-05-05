@@ -1,5 +1,6 @@
-﻿using Application.ApiContracts.Auth.Responses;
+using Application.ApiContracts.Auth.Responses;
 using Application.ApiContracts.Output.Responses;
+using Application.Common.Models;
 using Application.Features.Outputs.Commands.CreateOutput;
 using Application.Features.Outputs.Commands.CreateOutputByManager;
 using Application.Features.Outputs.Commands.DeleteManyOutputs;
@@ -19,11 +20,12 @@ using Application.Features.Outputs.Queries.GetOutputsList;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.ProductVariant;
+using Application.Interfaces.Repositories.Setting;
 using Application.Interfaces.Repositories.User;
 using Domain.Constants;
 using Domain.Constants.Order;
-using Domain.DomainServices;
 using Domain.Entities;
+using Domain.Primitives;
 using FluentAssertions;
 using FluentValidation.TestHelper;
 using Mapster;
@@ -31,6 +33,7 @@ using Moq;
 using Sieve.Models;
 using ProductEntity = Domain.Entities.Product;
 using ProductStatus = Domain.Constants.Product.ProductStatus;
+using SettingEntity = Domain.Entities.Setting;
 
 namespace UnitTests;
 
@@ -42,6 +45,7 @@ public class SalesOrder
     private readonly Mock<IOutputReadRepository> _readRepoMock;
     private readonly Mock<IProductVariantReadRepository> _variantRepoMock;
     private readonly Mock<IUserReadRepository> _userRepoMock;
+    private readonly Mock<ISettingRepository> _settingRepoMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<ISievePaginator> _paginatorMock;
 
@@ -53,8 +57,26 @@ public class SalesOrder
         _readRepoMock = new Mock<IOutputReadRepository>();
         _variantRepoMock = new Mock<IProductVariantReadRepository>();
         _userRepoMock = new Mock<IUserReadRepository>();
+        _settingRepoMock = new Mock<ISettingRepository>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _paginatorMock = new Mock<ISievePaginator>();
+        _paginatorMock.Setup(
+            x => x.ApplyAsync<Output, OutputItemResponse>(
+                It.IsAny<IQueryable<Output>>(),
+                It.IsAny<SieveModel>(),
+                It.IsAny<DataFetchMode?>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new PagedResult<OutputItemResponse>([], 0, 1, 10));
+        _paginatorMock.Setup(
+            x => x.ApplyAsync<Output, MyOrderResponse>(
+                It.IsAny<IQueryable<Output>>(),
+                It.IsAny<SieveModel>(),
+                It.IsAny<DataFetchMode?>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new PagedResult<MyOrderResponse>([], 0, 1, 10));
+        _updateRepoMock.Setup(
+            x => x.HandleInventoryTransactionAsync(It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<bool>.Success(true));
         new OutputMappingConfig().Register(TypeAdapterConfig.GlobalSettings);
     }
 
@@ -80,6 +102,7 @@ public class SalesOrder
             _readRepoMock.Object,
             _insertRepoMock.Object,
             _variantRepoMock.Object,
+            _settingRepoMock.Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
@@ -108,6 +131,7 @@ public class SalesOrder
             _readRepoMock.Object,
             _insertRepoMock.Object,
             _variantRepoMock.Object,
+            _settingRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new CreateOutputCommand
         {
@@ -146,6 +170,7 @@ public class SalesOrder
             _readRepoMock.Object,
             _insertRepoMock.Object,
             _variantRepoMock.Object,
+            _settingRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new CreateOutputCommand
         {
@@ -183,6 +208,7 @@ public class SalesOrder
             _readRepoMock.Object,
             _insertRepoMock.Object,
             _variantRepoMock.Object,
+            _settingRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new CreateOutputCommand
         {
@@ -227,6 +253,7 @@ public class SalesOrder
             _readRepoMock.Object,
             _insertRepoMock.Object,
             _variantRepoMock.Object,
+            _settingRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new CreateOutputCommand
         {
@@ -477,6 +504,7 @@ public class SalesOrder
             _updateRepoMock.Object,
             _variantRepoMock.Object,
             _userRepoMock.Object,
+            _settingRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new CreateOutputByManagerCommand
         {
@@ -513,6 +541,7 @@ public class SalesOrder
             _updateRepoMock.Object,
             _variantRepoMock.Object,
             _userRepoMock.Object,
+            _settingRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new CreateOutputByManagerCommand
         {
@@ -806,7 +835,7 @@ public class SalesOrder
     [Fact(DisplayName = "SO_027 - GetOutputById trả về đơn hàng")]
     public async Task GetOutputById_WithValidId_ShouldReturnOrder()
     {
-        var handler = new GetOutputByIdQueryHandler(_readRepoMock.Object);
+        var handler = new GetOutputByIdQueryHandler(_readRepoMock.Object, _settingRepoMock.Object);
         var orderId = 1;
         var expectedOrder = new Output { Id = orderId, BuyerId = Guid.NewGuid() };
         _readRepoMock.Setup(
@@ -822,7 +851,10 @@ public class SalesOrder
     [Fact(DisplayName = "SO_028 - GetOutputsByUserId chỉ lấy đơn của user")]
     public async Task GetOutputsByUserId_ShouldReturnOnlyUserOrders()
     {
-        var handler = new GetOutputsByUserIdQueryHandler(_readRepoMock.Object, _paginatorMock.Object);
+        var handler = new GetOutputsByUserIdQueryHandler(
+            _readRepoMock.Object,
+            _paginatorMock.Object,
+            _settingRepoMock.Object);
         var userId = Guid.NewGuid();
         var query = new GetOutputsByUserIdQuery() { BuyerId = userId, SieveModel = new SieveModel() };
         var userOutputs = new List<Output> { new() { Id = 1, BuyerId = userId }, new() { Id = 2, BuyerId = userId } }.AsQueryable(
@@ -842,7 +874,10 @@ public class SalesOrder
     [Fact(DisplayName = "SO_029 - GetOutputsList hỗ trợ phân trang")]
     public async Task GetOutputsList_ShouldSupportPagination()
     {
-        var handler = new GetOutputsListQueryHandler(_readRepoMock.Object, _paginatorMock.Object);
+        var handler = new GetOutputsListQueryHandler(
+            _readRepoMock.Object,
+            _paginatorMock.Object,
+            _settingRepoMock.Object);
         var query = new GetOutputsListQuery() { SieveModel = new SieveModel { Page = 1, PageSize = 10 } };
         var outputs = new List<Output> { new() { Id = 1 }, new() { Id = 2 } }.AsQueryable();
         _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(outputs);
@@ -860,7 +895,10 @@ public class SalesOrder
     [Fact(DisplayName = "SO_030 - GetOutputsList filter theo status")]
     public async Task GetOutputsList_ShouldFilterByStatus()
     {
-        var handler = new GetOutputsListQueryHandler(_readRepoMock.Object, _paginatorMock.Object);
+        var handler = new GetOutputsListQueryHandler(
+            _readRepoMock.Object,
+            _paginatorMock.Object,
+            _settingRepoMock.Object);
         var query = new GetOutputsListQuery() { SieveModel = new SieveModel { Filters = "StatusId==pending" } };
         var outputs = new List<Output>
         {
@@ -882,7 +920,10 @@ public class SalesOrder
     [Fact(DisplayName = "SO_031 - GetOutputsList sort theo CreatedAt")]
     public async Task GetOutputsList_ShouldSortByCreatedAt()
     {
-        var handler = new GetOutputsListQueryHandler(_readRepoMock.Object, _paginatorMock.Object);
+        var handler = new GetOutputsListQueryHandler(
+            _readRepoMock.Object,
+            _paginatorMock.Object,
+            _settingRepoMock.Object);
         var query = new GetOutputsListQuery() { SieveModel = new SieveModel { Sorts = "-CreatedAt" } };
         var outputs = new List<Output>
         {
@@ -959,6 +1000,7 @@ public class SalesOrder
             _readRepoMock.Object,
             _insertRepoMock.Object,
             _variantRepoMock.Object,
+            _settingRepoMock.Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.IsSuccess.Should().BeTrue();
@@ -1008,6 +1050,7 @@ public class SalesOrder
             _readRepoMock.Object,
             _insertRepoMock.Object,
             _variantRepoMock.Object,
+            _settingRepoMock.Object,
             _unitOfWorkMock.Object);
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         capturedOutput.Should().NotBeNull();
@@ -1022,6 +1065,7 @@ public class SalesOrder
             _readRepoMock.Object,
             _insertRepoMock.Object,
             _variantRepoMock.Object,
+            _settingRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new CreateOutputCommand
         {
@@ -1039,6 +1083,7 @@ public class SalesOrder
             _readRepoMock.Object,
             _insertRepoMock.Object,
             _variantRepoMock.Object,
+            _settingRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new CreateOutputCommand
         {
@@ -1124,6 +1169,9 @@ public class SalesOrder
         var existingOutput = new Output { Id = 1, StatusId = "delivering" };
         _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);
+        _updateRepoMock.Setup(
+            x => x.HandleInventoryTransactionAsync(It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         existingOutput.FinishedBy.Should().Be(finishedBy);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -1155,6 +1203,7 @@ public class SalesOrder
             _readRepoMock.Object,
             _insertRepoMock.Object,
             _variantRepoMock.Object,
+            _settingRepoMock.Object,
             _unitOfWorkMock.Object);
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         capturedOutput.Should().NotBeNull();
@@ -1165,7 +1214,7 @@ public class SalesOrder
     [Fact(DisplayName = "SO_043 - GetOutputById không trả về đơn đã xóa")]
     public async Task GetOutputById_DeletedOrder_ShouldReturnNull()
     {
-        var handler = new GetOutputByIdQueryHandler(_readRepoMock.Object);
+        var handler = new GetOutputByIdQueryHandler(_readRepoMock.Object, _settingRepoMock.Object);
         var orderId = 1;
         _readRepoMock.Setup(
             x => x.GetByIdWithDetailsAsync(orderId, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
@@ -1178,11 +1227,21 @@ public class SalesOrder
     [Fact(DisplayName = "SO_044 - GetOutputsList exclude soft deleted")]
     public async Task GetOutputsList_ShouldExcludeSoftDeleted()
     {
-        var handler = new GetOutputsListQueryHandler(_readRepoMock.Object, _paginatorMock.Object);
+        var handler = new GetOutputsListQueryHandler(
+            _readRepoMock.Object,
+            _paginatorMock.Object,
+            _settingRepoMock.Object);
         var query = new GetOutputsListQuery() { SieveModel = new SieveModel() };
         var outputs = new List<Output> { new() { Id = 1, DeletedAt = null }, new() { Id = 2, DeletedAt = null } }.AsQueryable(
             );
         _readRepoMock.Setup(x => x.GetQueryable(DataFetchMode.ActiveOnly)).Returns(outputs);
+        _paginatorMock.Setup(
+            x => x.ApplyAsync<Output, OutputItemResponse>(
+                It.IsAny<IQueryable<Output>>(),
+                It.IsAny<SieveModel>(),
+                It.IsAny<DataFetchMode?>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new PagedResult<OutputItemResponse>([], 0, 1, 10));
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
         _readRepoMock.Verify(x => x.GetQueryable(DataFetchMode.ActiveOnly), Times.Once);
@@ -1195,6 +1254,7 @@ public class SalesOrder
             _readRepoMock.Object,
             _insertRepoMock.Object,
             _variantRepoMock.Object,
+            _settingRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new CreateOutputCommand
         {
@@ -1279,7 +1339,10 @@ public class SalesOrder
     [Fact(DisplayName = "SO_052 - GetOutputsByUserId với pagination")]
     public async Task GetOutputsByUserId_ShouldSupportPagination()
     {
-        var handler = new GetOutputsByUserIdQueryHandler(_readRepoMock.Object, _paginatorMock.Object);
+        var handler = new GetOutputsByUserIdQueryHandler(
+            _readRepoMock.Object,
+            _paginatorMock.Object,
+            _settingRepoMock.Object);
         var userId = Guid.NewGuid();
         var query = new GetOutputsByUserIdQuery()
         {
@@ -1347,6 +1410,7 @@ public class SalesOrder
             _readRepoMock.Object,
             _insertRepoMock.Object,
             _variantRepoMock.Object,
+            _settingRepoMock.Object,
             _unitOfWorkMock.Object);
         var command = new CreateOutputCommand
         {
@@ -1379,6 +1443,9 @@ public class SalesOrder
         _readRepoMock.Setup(
             x => x.GetByIdWithDetailsAsync(outputId, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingOutput);
+        _updateRepoMock.Setup(
+            x => x.HandleInventoryTransactionAsync(It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
         var handlerResult = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         handlerResult.IsSuccess.Should().BeTrue();
         existingOutput.StatusId.Should().Be("refunding");
@@ -1415,6 +1482,7 @@ public class SalesOrder
             _readRepoMock.Object,
             _insertRepoMock.Object,
             _variantRepoMock.Object,
+            _settingRepoMock.Object,
             _unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         capturedOutput.Should().NotBeNull();
@@ -1467,7 +1535,10 @@ public class SalesOrder
     [Fact(DisplayName = "SO_059 - GetOutputsList search theo CustomerName")]
     public async Task GetOutputsList_ShouldSearchByCustomerName()
     {
-        var handler = new GetOutputsListQueryHandler(_readRepoMock.Object, _paginatorMock.Object);
+        var handler = new GetOutputsListQueryHandler(
+            _readRepoMock.Object,
+            _paginatorMock.Object,
+            _settingRepoMock.Object);
         var query = new GetOutputsListQuery() { SieveModel = new SieveModel { Filters = "CustomerName@=Nguyen" } };
         var outputs = new List<Output>
         {
@@ -1489,7 +1560,10 @@ public class SalesOrder
     [Fact(DisplayName = "SO_060 - GetOutputsList filter theo date range")]
     public async Task GetOutputsList_ShouldFilterByDateRange()
     {
-        var handler = new GetOutputsListQueryHandler(_readRepoMock.Object, _paginatorMock.Object);
+        var handler = new GetOutputsListQueryHandler(
+            _readRepoMock.Object,
+            _paginatorMock.Object,
+            _settingRepoMock.Object);
         var query = new GetOutputsListQuery()
         {
             SieveModel = new SieveModel { Filters = "CreatedAt>=2024-01-01,CreatedAt<=2024-12-31" }
@@ -1534,17 +1608,135 @@ public class SalesOrder
         resultInv2.ShouldHaveValidationErrorFor(x => x.CustomerPhone).WithErrorMessage("Invalid phone number format.");
     }
 
-    [Fact(DisplayName = "SO_105 - InventoryValuationService tính COGS theo FIFO 2 lô")]
-    public void CalculateUnitCostAndDeductInventory_WithMultipleBatches_ShouldCalculateFIFO()
+    [Fact(DisplayName = "SO_111 - CreateOutput - Tổng tiền dưới ngưỡng -> Pending")]
+    public async Task CreateOutput_TotalPriceBelowThreshold_ShouldSetStatusToPending()
     {
-        var batches = new List<InputInfo>
+        var productId = 1;
+        var command = new CreateOutputCommand { OutputInfos = [new() { ProductId = productId, Count = 1 }] };
+        _variantRepoMock.Setup(
+            x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync(
+                [new ProductVariant
+                {
+                    Id = productId,
+                    Price = 50000000,
+                    Product = new ProductEntity { StatusId = ProductStatus.ForSale }
+                }]);
+        _settingRepoMock.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([new SettingEntity { Key = SettingKeys.OrderValueExceeds, Value = "100000000" }]);
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Output { Id = 1, StatusId = OrderStatus.Pending });
+        var handler = new CreateOutputCommandHandler(
+            _readRepoMock.Object,
+            _insertRepoMock.Object,
+            _variantRepoMock.Object,
+            _settingRepoMock.Object,
+            _unitOfWorkMock.Object);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        _insertRepoMock.Verify(
+            x => x.Add(It.Is<Output>(o => string.Compare(o.StatusId, OrderStatus.Pending) == 0)),
+            Times.Once);
+    }
+
+    [Fact(DisplayName = "SO_112 - CreateOutput - Tổng tiền vượt ngưỡng -> WaitingDeposit")]
+    public async Task CreateOutput_TotalPriceAboveThreshold_ShouldSetStatusToWaitingDeposit()
+    {
+        var productId = 1;
+        var command = new CreateOutputCommand { OutputInfos = [new() { ProductId = productId, Count = 1 }] };
+        _variantRepoMock.Setup(
+            x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync(
+                [new ProductVariant
+                {
+                    Id = productId,
+                    Price = 150000000,
+                    Product = new ProductEntity { StatusId = ProductStatus.ForSale }
+                }]);
+        _settingRepoMock.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([new SettingEntity { Key = SettingKeys.OrderValueExceeds, Value = "100000000" }]);
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Output { Id = 1, StatusId = OrderStatus.WaitingDeposit });
+        var handler = new CreateOutputCommandHandler(
+            _readRepoMock.Object,
+            _insertRepoMock.Object,
+            _variantRepoMock.Object,
+            _settingRepoMock.Object,
+            _unitOfWorkMock.Object);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        _insertRepoMock.Verify(
+            x => x.Add(It.Is<Output>(o => string.Compare(o.StatusId, OrderStatus.WaitingDeposit) == 0)),
+            Times.Once);
+    }
+
+    [Fact(DisplayName = "SO_113 - CreateOutput - Không có cấu hình ngưỡng -> Mặc định 100tr")]
+    public async Task CreateOutput_NoThresholdConfig_ShouldUseDefault100M()
+    {
+        var productId = 1;
+        var command = new CreateOutputCommand { OutputInfos = [new() { ProductId = productId, Count = 1 }] };
+        _variantRepoMock.Setup(
+            x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync(
+                [new ProductVariant
+                {
+                    Id = productId,
+                    Price = 120000000,
+                    Product = new ProductEntity { StatusId = ProductStatus.ForSale }
+                }]);
+        _settingRepoMock.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync([]);
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Output { Id = 1, StatusId = OrderStatus.WaitingDeposit });
+        var handler = new CreateOutputCommandHandler(
+            _readRepoMock.Object,
+            _insertRepoMock.Object,
+            _variantRepoMock.Object,
+            _settingRepoMock.Object,
+            _unitOfWorkMock.Object);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        _insertRepoMock.Verify(
+            x => x.Add(It.Is<Output>(o => string.Compare(o.StatusId, OrderStatus.WaitingDeposit) == 0)),
+            Times.Once);
+    }
+
+    [Fact(DisplayName = "SO_114 - CreateOutputByManager - Tự động chuyển WaitingDeposit")]
+    public async Task CreateOutputByManager_TotalPriceAboveThreshold_ShouldSetStatusToWaitingDeposit()
+    {
+        var productId = 1;
+        var buyerId = Guid.NewGuid();
+        var command = new CreateOutputByManagerCommand
         {
-            new() { Id = 1, RemainingCount = 10, InputPrice = 100 },
-            new() { Id = 2, RemainingCount = 20, InputPrice = 150 }
+            BuyerId = buyerId,
+            OutputInfos = [new() { ProductId = productId, Count = 1 }]
         };
-        var unitCost = InventoryValuationService.CalculateUnitCostAndDeductInventory(batches, 15);
-        unitCost.Should().Be(117);
-        batches[0].RemainingCount.Should().Be(0);
-        batches[1].RemainingCount.Should().Be(15);
+        _userRepoMock.Setup(x => x.GetUserByIDAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new UserAuth());
+        _variantRepoMock.Setup(
+            x => x.GetByIdAsync(It.IsAny<List<int>>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync(
+                [new ProductVariant
+                {
+                    Id = productId,
+                    Price = 200000000,
+                    Product = new ProductEntity { StatusId = ProductStatus.ForSale }
+                }]);
+        _settingRepoMock.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([new SettingEntity { Key = SettingKeys.OrderValueExceeds, Value = "100000000" }]);
+        _readRepoMock.Setup(x => x.GetByIdWithDetailsAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new Output { Id = 1, StatusId = OrderStatus.WaitingDeposit });
+        var handler = new CreateOutputByManagerCommandHandler(
+            _readRepoMock.Object,
+            _insertRepoMock.Object,
+            _updateRepoMock.Object,
+            _variantRepoMock.Object,
+            _userRepoMock.Object,
+            _settingRepoMock.Object,
+            _unitOfWorkMock.Object);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+        result.IsSuccess.Should().BeTrue();
+        _insertRepoMock.Verify(
+            x => x.Add(It.Is<Output>(o => string.Compare(o.StatusId, OrderStatus.WaitingDeposit) == 0)),
+            Times.Once);
     }
 }

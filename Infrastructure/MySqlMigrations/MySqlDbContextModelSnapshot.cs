@@ -1,4 +1,4 @@
-﻿using Infrastructure.DBContexts;
+using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using System;
@@ -14,7 +14,7 @@ namespace Infrastructure.MySqlMigrations
         {
             #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.5")
+                .HasAnnotation("ProductVersion", "10.0.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
             modelBuilder.Entity(
@@ -191,20 +191,52 @@ namespace Infrastructure.MySqlMigrations
                 {
                     b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int").HasColumnName("id");
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-                    b.Property<Guid?>("BuyerId").HasColumnType("char(36)").HasColumnName("BuyerId");
-                    b.Property<long?>("CreatedAt").HasColumnType("bigint");
-                    b.Property<Guid?>("CreatedBy").HasColumnType("char(36)").HasColumnName("CreatedBy");
-                    b.Property<string>("CustomerAddress").HasColumnType("longtext").HasColumnName("CustomerAddress");
-                    b.Property<string>("CustomerName").HasColumnType("longtext").HasColumnName("CustomerName");
-                    b.Property<string>("CustomerPhone").HasColumnType("longtext").HasColumnName("CustomerPhone");
-                    b.Property<long?>("DeletedAt").HasColumnType("bigint");
-                    b.Property<Guid?>("FinishedBy").HasColumnType("char(36)").HasColumnName("FinishedBy");
+
+                    b.Property<Guid?>("BuyerId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("BuyerId");
+
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("CreatedBy");
+
+                    b.Property<string>("CustomerAddress")
+                        .HasColumnType("longtext")
+                        .HasColumnName("CustomerAddress");
+
+                    b.Property<string>("CustomerName")
+                        .HasColumnType("longtext")
+                        .HasColumnName("CustomerName");
+
+                    b.Property<string>("CustomerPhone")
+                        .HasColumnType("longtext")
+                        .HasColumnName("CustomerPhone");
+
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
+
+                    b.Property<Guid?>("FinishedBy")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("FinishedBy");
+
                     b.Property<long?>("LastStatusChangedAt")
                         .HasColumnType("bigint")
                         .HasColumnName("LastStatusChangedAt");
-                    b.Property<string>("Notes").HasColumnType("longtext").HasColumnName("Notes");
-                    b.Property<string>("StatusId").HasColumnType("varchar(255)").HasColumnName("StatusId");
-                    b.Property<long?>("UpdatedAt").HasColumnType("bigint");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("longtext")
+                        .HasColumnName("Notes");
+
+                    b.Property<string>("StatusId")
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("StatusId");
+
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
+
                     b.HasKey("Id");
                     b.HasIndex("BuyerId");
                     b.HasIndex("CreatedBy");
@@ -317,11 +349,24 @@ namespace Infrastructure.MySqlMigrations
                 {
                     b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int").HasColumnName("Id");
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-                    b.Property<long?>("CreatedAt").HasColumnType("bigint");
-                    b.Property<long?>("DeletedAt").HasColumnType("bigint");
-                    b.Property<string>("Description").HasColumnType("longtext").HasColumnName("Description");
-                    b.Property<string>("Name").HasColumnType("longtext").HasColumnName("Name");
-                    b.Property<long?>("UpdatedAt").HasColumnType("bigint");
+
+                    b.Property<long?>("CreatedAt")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeletedAt")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("longtext")
+                        .HasColumnName("Description");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("longtext")
+                        .HasColumnName("Name");
+
+                    b.Property<long?>("UpdatedAt")
+                        .HasColumnType("bigint");
+
                     b.HasKey("Id");
                     b.ToTable("ProductCategory");
                     MySqlEntityTypeBuilderExtensions.UseCollation(b, "utf8mb4_unicode_ci");

@@ -79,19 +79,26 @@ public sealed class UpdateManyOutputStatusCommandHandler(
         {
             return errors;
         }
-        if (string.Compare(request.StatusId, OrderStatus.Completed) == 0)
-        {
-            foreach (var output in outputsList)
-            {
-                await updateRepository.ProcessCOGSForCompletedOrderAsync(output.Id, cancellationToken)
-                    .ConfigureAwait(false);
-            }
-        }
+
         foreach (var output in outputsList)
         {
+            if (string.Compare(request.StatusId, OrderStatus.Completed) == 0)
+            {
+                var result = await updateRepository.HandleInventoryTransactionAsync(output.Id, true, cancellationToken)
+                    .ConfigureAwait(false);
+                if (result.IsFailure) return result.Errors!;
+            }
+            else if (string.Compare(request.StatusId, OrderStatus.Delivering) == 0)
+            {
+                var result = await updateRepository.HandleInventoryTransactionAsync(output.Id, false, cancellationToken)
+                    .ConfigureAwait(false);
+                if (result.IsFailure) return result.Errors!;
+            }
+
             output.StatusId = request.StatusId;
             updateRepository.Update(output);
         }
+
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return outputsList.Adapt<List<OutputItemResponse>>();
     }

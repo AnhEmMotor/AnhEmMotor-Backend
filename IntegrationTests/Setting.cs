@@ -1,4 +1,4 @@
-﻿using Application.Common.Models;
+using Application.Common.Models;
 using Domain.Constants.Permission;
 using FluentAssertions;
 using Infrastructure.DBContexts;
@@ -80,12 +80,6 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
                     "Order_value_exceeds",
                     "50000000")
                 .ConfigureAwait(true);
-            await db.Database
-                .ExecuteSqlRawAsync(
-                    "INSERT INTO \"Setting\" (\"Key\", \"Value\") VALUES ({0}, {1}) ON CONFLICT (\"Key\") DO UPDATE SET \"Value\"=EXCLUDED.\"Value\", \"DeletedAt\"=NULL",
-                    "Z-bike_threshold_for_meeting",
-                    "5")
-                .ConfigureAwait(true);
         }
         var response = await _client.GetAsync("/api/v1/Setting", CancellationToken.None).ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -93,11 +87,10 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             .ReadFromJsonAsync<Dictionary<string, string?>>(CancellationToken.None)
             .ConfigureAwait(true);
         content.Should().NotBeNull();
-        content.Should().HaveCount(4);
+        content.Should().HaveCount(3);
         content!["Deposit_ratio"].Should().Be("50.5");
         content["Inventory_alert_level"].Should().Be("10");
         content["Order_value_exceeds"].Should().Be("50000000");
-        content["Z-bike_threshold_for_meeting"].Should().Be("5");
     }
 
     [Fact(DisplayName = "SETTING_002 - GetAllSettings - Không có quyền xem")]
@@ -230,34 +223,23 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
                     "Order_value_exceeds",
                     "30000000")
                 .ConfigureAwait(true);
-            await db.Database
-                .ExecuteSqlRawAsync(
-                    "INSERT INTO \"Setting\" (\"Key\", \"Value\") VALUES ({0}, {1}) ON CONFLICT (\"Key\") DO UPDATE SET \"Value\"=EXCLUDED.\"Value\", \"DeletedAt\"=NULL",
-                    "Z-bike_threshold_for_meeting",
-                    "3")
-                .ConfigureAwait(true);
         }
         var request = new Dictionary<string, string?>
-        {
-            { "Deposit_ratio", "50" },
-            { "Inventory_alert_level", "10" },
-            { "Order_value_exceeds", "50000000" },
-            { "Z-bike_threshold_for_meeting", "5" }
-        };
+        { { "Deposit_ratio", "50" }, { "Inventory_alert_level", "10" }, { "Order_value_exceeds", "50000000" } };
         var response = await _client.PutAsJsonAsync("/api/v1/Setting", request).ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         var content = await response.Content
             .ReadFromJsonAsync<Dictionary<string, string?>>(CancellationToken.None)
             .ConfigureAwait(true);
         content.Should().NotBeNull();
-        content.Should().HaveCount(4);
+        content.Should().HaveCount(3);
         content!["Deposit_ratio"].Should().Be("50");
         content["Inventory_alert_level"].Should().Be("10");
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var savedSettings = db.Settings.ToList();
-            savedSettings.Should().HaveCount(4);
+            savedSettings.Should().HaveCount(3);
             savedSettings.First(s => string.Compare(s.Key, "Deposit_ratio") == 0).Value.Should().Be("50");
             savedSettings.First(s => string.Compare(s.Key, "Inventory_alert_level") == 0).Value.Should().Be("10");
         }

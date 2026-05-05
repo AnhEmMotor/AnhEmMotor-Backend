@@ -1,3 +1,4 @@
+using Application.ApiContracts.Product.Requests;
 using Application.ApiContracts.Product.Responses;
 using Application.Common.Helper;
 using Application.Common.Models;
@@ -10,12 +11,10 @@ using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.ProductCategory;
 using Application.Interfaces.Repositories.ProductVariant;
 using Domain.Constants;
-
 using Domain.Entities;
 using Mapster;
 using MediatR;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using OptionEntity = Domain.Entities.Option;
 using OptionValueEntity = Domain.Entities.OptionValue;
 using ProductEntity = Domain.Entities.Product;
@@ -297,7 +296,7 @@ public sealed class CreateProductCommandHandler(
             Description = request.Description?.Trim(),
             Weight = request.Weight,
             Dimensions = request.Dimensions?.Trim(),
-            Wheelbase = request.Wheelbase,
+            Wheelbase = request.Wheelbase?.Trim(),
             SeatHeight = request.SeatHeight,
             GroundClearance = request.GroundClearance,
             FuelCapacity = request.FuelCapacity,
@@ -438,20 +437,5 @@ public sealed class CreateProductCommandHandler(
         productInsertRepository.Add(product);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return Result<ProductDetailForManagerResponse?>.Success(product.Adapt<ProductDetailForManagerResponse>());
-    }
-
-    private class TechnologyJsonRequest
-    {
-        [JsonPropertyName("technologyId")]
-        public int TechnologyId { get; set; }
-
-        [JsonPropertyName("customTitle")]
-        public string? CustomTitle { get; set; }
-
-        [JsonPropertyName("customDescription")]
-        public string? CustomDescription { get; set; }
-
-        [JsonPropertyName("customImageUrl")]
-        public string? CustomImageUrl { get; set; }
     }
 }
