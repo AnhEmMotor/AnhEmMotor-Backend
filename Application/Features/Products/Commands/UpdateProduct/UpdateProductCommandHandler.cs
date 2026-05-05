@@ -280,8 +280,7 @@ public sealed class UpdateProductCommandHandler(
                 }
             }
             var colorNamesWithCodes = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
-            if (optionNameMap.TryGetValue("Màu sắc", out _) ||
-                optionNameMap.TryGetValue("Color", out _))
+            if (optionNameMap.TryGetValue("Màu sắc", out _) || optionNameMap.TryGetValue("Color", out _))
             {
                 foreach (var vReq in inputVariants)
                 {

@@ -32,7 +32,9 @@ public class NewsController(IMediator mediator) : ApiController
     [HttpPost]
     [HasPermission("Permissions.News.Create")]
     [SwaggerOperation(Summary = "Tạo bài viết mới")]
-    public async Task<IActionResult> CreateAsync([FromBody] CreateNewsCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateAsync(
+        [FromBody] CreateNewsCommand command,
+        CancellationToken cancellationToken)
     {
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
@@ -47,9 +49,12 @@ public class NewsController(IMediator mediator) : ApiController
     [HttpGet]
     [SwaggerOperation(Summary = "Lấy danh sách tin tức")]
     [ProducesResponseType(typeof(PagedResult<NewsResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetListAsync([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetListAsync(
+        [FromQuery] SieveModel sieveModel,
+        CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetNewsListQuery { SieveModel = sieveModel }, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(new GetNewsListQuery { SieveModel = sieveModel }, cancellationToken)
+            .ConfigureAwait(true);
         return HandleResult(result);
     }
 

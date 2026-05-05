@@ -1,7 +1,7 @@
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
 using Domain.Constants.Booking;
+using System.ComponentModel.DataAnnotations;
+
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities;
 
@@ -37,7 +37,7 @@ public class Booking : BaseEntity
     public string Status { get; set; } = BookingStatus.Pending;
 
     [Column("BookingType", TypeName = "nvarchar(20)")]
-    public string BookingType { get; set; } = Domain.Constants.Booking.BookingType.TestDrive;
+    public string BookingType { get; set; } = Constants.Booking.BookingType.TestDrive;
 
     [Column("Location", TypeName = "nvarchar(200)")]
     public string Location { get; set; } = BookingLocation.Showroom;

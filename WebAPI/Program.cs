@@ -97,6 +97,5 @@ if (!app.Environment.IsEnvironment("Test"))
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-
 await app.ApplyMigrationsAndSeedAsync(app.Lifetime.ApplicationStopping).ConfigureAwait(true);
 app.Run();

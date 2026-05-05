@@ -7,7 +7,9 @@ namespace Infrastructure.Seeders
 {
     public static class TechnologyDataMigrationSeeder
     {
-        public static async Task MigrateExistingHighlightsAsync(ApplicationDBContext context, CancellationToken cancellationToken)
+        public static async Task MigrateExistingHighlightsAsync(
+            ApplicationDBContext context,
+            CancellationToken cancellationToken)
         {
             if (await context.Set<ProductTechnology>().AnyAsync(cancellationToken).ConfigureAwait(false))
             {
@@ -15,11 +17,14 @@ namespace Infrastructure.Seeders
             }
             var productsWithHighlights = await context.Products
                 .Where(p => !string.IsNullOrEmpty(p.Highlights))
-                .ToListAsync(cancellationToken).ConfigureAwait(false);
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
             if (productsWithHighlights.Count == 0)
                 return;
             var allTechs = await context.Set<Technology>().ToListAsync(cancellationToken).ConfigureAwait(false);
-            var categories = await context.Set<TechnologyCategory>().ToListAsync(cancellationToken).ConfigureAwait(false);
+            var categories = await context.Set<TechnologyCategory>()
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
             foreach (var product in productsWithHighlights)
             {
                 try
@@ -65,8 +70,11 @@ namespace Infrastructure.Seeders
                                     TechnologyId = tech.Id,
                                     CustomTitle = string.Compare(tech.DefaultTitle, hl.Title) == 0 ? null : hl.Title,
                                     CustomDescription =
-                                        string.Compare(tech.DefaultDescription, hl.Description) == 0 ? null : hl.Description,
-                                    CustomImageUrl = string.Compare(tech.DefaultImageUrl, hl.Image) == 0 ? null : hl.Image,
+                                        string.Compare(tech.DefaultDescription, hl.Description) == 0
+                                                ? null
+                                                : hl.Description,
+                                    CustomImageUrl =
+                                        string.Compare(tech.DefaultImageUrl, hl.Image) == 0 ? null : hl.Image,
                                     DisplayOrder = order++
                                 });
                     }

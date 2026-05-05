@@ -232,14 +232,16 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         var twoHoursAgo = now.AddHours(-2);
         var overdueOrdersCount = await context.OutputOrders
             .CountAsync(
-                o => (string.Compare(o.StatusId, OrderStatus.Pending) == 0 || string.Compare(o.StatusId, OrderStatus.WaitingDeposit) == 0) &&
+                o => (string.Compare(o.StatusId, OrderStatus.Pending) == 0 ||
+                        string.Compare(o.StatusId, OrderStatus.WaitingDeposit) == 0) &&
                     o.CreatedAt != null &&
                     o.CreatedAt <= twoHoursAgo,
                 cancellationToken)
             .ConfigureAwait(false);
         var pendingOrdersCount = await context.OutputOrders
             .CountAsync(
-                o => string.Compare(o.StatusId, OrderStatus.Pending) == 0 || string.Compare(o.StatusId, OrderStatus.WaitingDeposit) == 0,
+                o => string.Compare(o.StatusId, OrderStatus.Pending) == 0 ||
+                    string.Compare(o.StatusId, OrderStatus.WaitingDeposit) == 0,
                 cancellationToken)
             .ConfigureAwait(false);
         async Task<int> GetVehiclesSold(DateTimeOffset start, DateTimeOffset end)
@@ -360,7 +362,8 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         var totalSKU = await context.Products.CountAsync(cancellationToken).ConfigureAwait(false);
         var activeInstallments = await context.OutputOrders
             .CountAsync(
-                o => string.Compare(o.StatusId, OrderStatus.WaitingDeposit) == 0 || string.Compare(o.StatusId, OrderStatus.DepositPaid) == 0,
+                o => string.Compare(o.StatusId, OrderStatus.WaitingDeposit) == 0 ||
+                    string.Compare(o.StatusId, OrderStatus.DepositPaid) == 0,
                 cancellationToken)
             .ConfigureAwait(false);
         var topProducts = await context.OutputInfos
@@ -411,7 +414,8 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         var todayInst = await context.OutputOrders
             .CountAsync(
                 o => o.CreatedAt >= todayStart &&
-                    (string.Compare(o.StatusId, OrderStatus.WaitingDeposit) == 0 || string.Compare(o.StatusId, OrderStatus.DepositPaid) == 0),
+                    (string.Compare(o.StatusId, OrderStatus.WaitingDeposit) == 0 ||
+                        string.Compare(o.StatusId, OrderStatus.DepositPaid) == 0),
                 cancellationToken)
             .ConfigureAwait(false);
         if (todayInst > 0)
@@ -584,7 +588,10 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         var last30Days = new DateTimeOffset(DateTime.UtcNow.AddDays(-30), TimeSpan.Zero);
         var confirmedInputs = await context.InputInfos
             .Join(context.InputReceipts, ii => ii.InputId, i => i.Id, (ii, i) => new { ii, i })
-            .Where(x => string.Compare(x.i.StatusId, InputStatus.Finish) == 0 && x.ii.DeletedAt == null && x.i.DeletedAt == null)
+            .Where(
+                x => string.Compare(x.i.StatusId, InputStatus.Finish) == 0 &&
+                    x.ii.DeletedAt == null &&
+                    x.i.DeletedAt == null)
             .GroupBy(x => x.ii.ProductId)
             .Select(g => new { VariantId = g.Key, TotalIn = g.Sum(x => (long)(x.ii.Count ?? 0)) })
             .ToListAsync(cancellationToken)
@@ -659,7 +666,10 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             .ConfigureAwait(false);
         var confirmedInputs = await context.InputInfos
             .Join(context.InputReceipts, ii => ii.InputId, i => i.Id, (ii, i) => new { ii, i })
-            .Where(x => string.Compare(x.i.StatusId, InputStatus.Finish) == 0 && x.ii.DeletedAt == null && x.i.DeletedAt == null)
+            .Where(
+                x => string.Compare(x.i.StatusId, InputStatus.Finish) == 0 &&
+                    x.ii.DeletedAt == null &&
+                    x.i.DeletedAt == null)
             .GroupBy(x => x.ii.ProductId)
             .Select(
                 g => new

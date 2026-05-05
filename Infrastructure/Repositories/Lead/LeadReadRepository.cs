@@ -22,10 +22,7 @@ public class LeadReadRepository(ApplicationDBContext context) : ILeadReadReposit
 
     public Task<List<Domain.Entities.Lead>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        return context.Leads
-            .Include(l => l.Activities)
-            .OrderByDescending(l => l.Score)
-            .ToListAsync(cancellationToken);
+        return context.Leads.Include(l => l.Activities).OrderByDescending(l => l.Score).ToListAsync(cancellationToken);
     }
 
     public IQueryable<Domain.Entities.Lead> GetQueryable()

@@ -227,8 +227,7 @@ public sealed class CreateProductCommandHandler(
                 }
             }
             var colorNamesWithCodes = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
-            if (optionNameMap.TryGetValue("Màu sắc", out _) ||
-                optionNameMap.TryGetValue("Color", out _))
+            if (optionNameMap.TryGetValue("Màu sắc", out _) || optionNameMap.TryGetValue("Color", out _))
             {
                 foreach (var vReq in request.Variants)
                 {

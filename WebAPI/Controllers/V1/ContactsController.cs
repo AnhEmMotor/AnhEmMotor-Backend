@@ -69,7 +69,9 @@ public class ContactsController(ISender sender) : ApiController
     /// <returns></returns>
     [HttpPatch("internal-note")]
     [Authorize]
-    public async Task<IActionResult> UpdateInternalNoteAsync(UpdateInternalNoteCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateInternalNoteAsync(
+        UpdateInternalNoteCommand command,
+        CancellationToken cancellationToken)
     {
         var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);

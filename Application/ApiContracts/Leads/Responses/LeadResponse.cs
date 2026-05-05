@@ -23,4 +23,3 @@ public class LeadResponse
     public List<LeadActivityResponse> Activities { get; set; } = [];
 }
 
-

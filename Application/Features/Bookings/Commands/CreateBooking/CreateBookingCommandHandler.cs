@@ -3,7 +3,6 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Booking;
 using Application.Interfaces.Repositories.Lead;
 using Application.Interfaces.Services;
-using Domain.Constants;
 using Domain.Constants.Booking;
 using Domain.Constants.Lead;
 using Domain.Entities;
@@ -21,7 +20,8 @@ public class CreateBookingCommandHandler(
 {
     public async Task<Result<int>> Handle(CreateBookingCommand request, CancellationToken cancellationToken)
     {
-        var lead = await leadReadRepository.GetByPhoneNumberAsync(request.PhoneNumber, cancellationToken).ConfigureAwait(false);
+        var lead = await leadReadRepository.GetByPhoneNumberAsync(request.PhoneNumber, cancellationToken)
+            .ConfigureAwait(false);
         if (lead == null)
         {
             lead = new Lead
@@ -43,8 +43,7 @@ public class CreateBookingCommandHandler(
                         $"Đăng ký {(string.Compare(request.BookingType, BookingType.TestDrive, StringComparison.Ordinal) == 0 ? "Lái thử" : request.BookingType)} mới tại {request.Location}. (Khách hàng mới)",
                     CreatedAt = DateTimeOffset.UtcNow
                 });
-        }
-        else
+        } else
         {
             lead.Score += 30;
             leadInsertRepository.Update(lead);

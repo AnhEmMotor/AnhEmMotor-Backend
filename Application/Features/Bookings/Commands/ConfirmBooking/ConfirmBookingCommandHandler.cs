@@ -8,30 +8,30 @@ using Domain.Constants.Lead;
 using Domain.Entities;
 using MediatR;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Application.Features.Bookings.Commands.ConfirmBooking
 {
     public class ConfirmBookingCommandHandler(
-    IBookingReadRepository bookingReadRepository,
-    IBookingInsertRepository bookingInsertRepository,
-    ILeadReadRepository leadReadRepository,
-    ILeadInsertRepository leadInsertRepository,
-    ILeadActivityInsertRepository leadActivityInsertRepository,
-    IUnitOfWork unitOfWork,
-    IEmailService emailService) : IRequestHandler<ConfirmBookingCommand, Result<bool>>
+        IBookingReadRepository bookingReadRepository,
+        IBookingInsertRepository bookingInsertRepository,
+        ILeadReadRepository leadReadRepository,
+        ILeadInsertRepository leadInsertRepository,
+        ILeadActivityInsertRepository leadActivityInsertRepository,
+        IUnitOfWork unitOfWork,
+        IEmailService emailService) : IRequestHandler<ConfirmBookingCommand, Result<bool>>
     {
         public async Task<Result<bool>> Handle(ConfirmBookingCommand request, CancellationToken cancellationToken)
         {
-            var booking = await bookingReadRepository.GetByIdAsync(request.BookingId, cancellationToken).ConfigureAwait(false);
+            var booking = await bookingReadRepository.GetByIdAsync(request.BookingId, cancellationToken)
+                .ConfigureAwait(false);
             if (booking == null)
             {
                 return Result<bool>.Failure(Error.NotFound("Lịch hẹn không tồn tại."));
             }
             booking.Status = BookingStatus.Confirmed;
             bookingInsertRepository.Update(booking);
-            var lead = await leadReadRepository.GetByPhoneNumberAsync(booking.PhoneNumber, cancellationToken).ConfigureAwait(false);
+            var lead = await leadReadRepository.GetByPhoneNumberAsync(booking.PhoneNumber, cancellationToken)
+                .ConfigureAwait(false);
             if (lead != null)
             {
                 lead.Status = LeadStatus.TestDriving;
@@ -76,8 +76,7 @@ namespace Application.Features.Bookings.Commands.ConfirmBooking
             try
             {
                 await emailService.SendEmailAsync(booking.Email, subject, body, cancellationToken).ConfigureAwait(false);
-            }
-            catch
+            } catch
             {
             }
             return Result<bool>.Success(true);

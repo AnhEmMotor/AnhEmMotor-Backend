@@ -1,3 +1,4 @@
+
 namespace Application.ApiContracts.Banner.Responses;
 
 public sealed record BannerResponse

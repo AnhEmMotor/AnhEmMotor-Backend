@@ -36,7 +36,8 @@ public class NotificationController(INotificationService notificationService) : 
         {
             await Response.WriteAsync(
                 $"data: {JsonSerializer.Serialize(new { message = "Connected to notification stream" }, _jsonSerializerOptions)}\n\n",
-                cancellationToken).ConfigureAwait(true);
+                cancellationToken)
+                .ConfigureAwait(true);
             await Response.Body.FlushAsync(cancellationToken).ConfigureAwait(true);
             while (!cancellationToken.IsCancellationRequested)
             {

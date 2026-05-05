@@ -1,5 +1,4 @@
 using Application.Interfaces.Services;
-using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Services;
 

@@ -15,7 +15,8 @@ public class CreateContactReplyCommandHandler(
 {
     public async Task<Result<int>> Handle(CreateContactReplyCommand request, CancellationToken cancellationToken)
     {
-        var contact = await contactReadRepository.GetByIdAsync(request.ContactId, cancellationToken).ConfigureAwait(false);
+        var contact = await contactReadRepository.GetByIdAsync(request.ContactId, cancellationToken)
+            .ConfigureAwait(false);
         if (contact == null)
         {
             return Result<int>.Failure(Error.NotFound("Liên hệ không tồn tại."));

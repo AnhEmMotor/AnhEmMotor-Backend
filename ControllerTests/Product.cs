@@ -246,7 +246,8 @@ public class Product
             new PagedResult<ProductListStoreResponse>([], 15, 2, 5));
         _senderMock.Setup(m => m.Send(It.IsAny<GetProductsListQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResult);
-        var result = await _controller.GetProductsAsync(sieveModel, null, null, CancellationToken.None).ConfigureAwait(true);
+        var result = await _controller.GetProductsAsync(sieveModel, null, null, CancellationToken.None)
+            .ConfigureAwait(true);
         Assert.NotNull(result);
         _senderMock.Verify(m => m.Send(It.IsAny<GetProductsListQuery>(), It.IsAny<CancellationToken>()), Times.Once);
     }

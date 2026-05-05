@@ -1,3 +1,4 @@
+
 namespace Domain.Constants.Lead;
 
 public static class LeadSource

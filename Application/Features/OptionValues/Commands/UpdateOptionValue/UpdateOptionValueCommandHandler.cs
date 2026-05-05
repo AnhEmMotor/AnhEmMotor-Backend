@@ -11,7 +11,8 @@ public class UpdateOptionValueCommandHandler(
 {
     public async Task<Result> Handle(UpdateOptionValueCommand request, CancellationToken cancellationToken)
     {
-        var optionValue = await optionValueReadRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
+        var optionValue = await optionValueReadRepository.GetByIdAsync(request.Id, cancellationToken)
+            .ConfigureAwait(false);
         if (optionValue == null)
         {
             return Result.Failure(new Error("OptionValue.NotFound", "Không tìm thấy thuộc tính yêu cầu."));

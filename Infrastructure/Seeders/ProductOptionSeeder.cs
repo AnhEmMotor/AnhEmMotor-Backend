@@ -9,7 +9,10 @@ public static class ProductOptionSeeder
     public static async Task SeedAsync(ApplicationDBContext context, CancellationToken cancellationToken)
     {
         var colorOption = await context.Set<Option>()
-            .FirstOrDefaultAsync(o => string.Compare(o.Name, "Color") == 0 || string.Compare(o.Name, "Màu sắc") == 0, cancellationToken).ConfigureAwait(false);
+            .FirstOrDefaultAsync(
+                o => string.Compare(o.Name, "Color") == 0 || string.Compare(o.Name, "Màu sắc") == 0,
+                cancellationToken)
+            .ConfigureAwait(false);
         if (colorOption == null)
         {
             colorOption = new Option { Name = "Color" };
@@ -28,20 +31,27 @@ public static class ProductOptionSeeder
         foreach (var color in colors)
         {
             var existing = await context.Set<OptionValue>()
-                .FirstOrDefaultAsync(v => v.OptionId == colorOption.Id && string.Compare(v.Name, color.Key) == 0, cancellationToken).ConfigureAwait(false);
+                .FirstOrDefaultAsync(
+                    v => v.OptionId == colorOption.Id && string.Compare(v.Name, color.Key) == 0,
+                    cancellationToken)
+                .ConfigureAwait(false);
             if (existing == null)
             {
                 await context.Set<OptionValue>()
                     .AddAsync(
                         new OptionValue { OptionId = colorOption.Id, Name = color.Key, ColorCode = color.Value },
-                        cancellationToken).ConfigureAwait(false);
+                        cancellationToken)
+                    .ConfigureAwait(false);
             } else
             {
                 existing.ColorCode = color.Value;
             }
         }
         var typeOption = await context.Set<Option>()
-            .FirstOrDefaultAsync(o => string.Compare(o.Name, "VehicleType") == 0 || string.Compare(o.Name, "Loại xe") == 0, cancellationToken).ConfigureAwait(false);
+            .FirstOrDefaultAsync(
+                o => string.Compare(o.Name, "VehicleType") == 0 || string.Compare(o.Name, "Loại xe") == 0,
+                cancellationToken)
+            .ConfigureAwait(false);
         if (typeOption == null)
         {
             typeOption = new Option { Name = "VehicleType" };
@@ -52,10 +62,12 @@ public static class ProductOptionSeeder
         foreach (var type in types)
         {
             if (!await context.Set<OptionValue>()
-                .AnyAsync(v => v.OptionId == typeOption.Id && string.Compare(v.Name, type) == 0, cancellationToken).ConfigureAwait(false))
+                .AnyAsync(v => v.OptionId == typeOption.Id && string.Compare(v.Name, type) == 0, cancellationToken)
+                .ConfigureAwait(false))
             {
                 await context.Set<OptionValue>()
-                    .AddAsync(new OptionValue { OptionId = typeOption.Id, Name = type }, cancellationToken).ConfigureAwait(false);
+                    .AddAsync(new OptionValue { OptionId = typeOption.Id, Name = type }, cancellationToken)
+                    .ConfigureAwait(false);
             }
         }
         await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

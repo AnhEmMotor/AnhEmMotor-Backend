@@ -10,7 +10,7 @@ public class GetLeadsQueryHandler(ILeadReadRepository leadReadRepository) : IReq
     public async Task<List<LeadResponse>> Handle(GetLeadsQuery request, CancellationToken cancellationToken)
     {
         var leads = await leadReadRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
-        return [.. leads.Select(
+        return[.. leads.Select(
             l => new LeadResponse
             {
                 Id = l.Id,

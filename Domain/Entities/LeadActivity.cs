@@ -1,8 +1,6 @@
+using Domain.Constants.Lead;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-
-using Domain.Constants;
-using Domain.Constants.Lead;
 
 namespace Domain.Entities;
 

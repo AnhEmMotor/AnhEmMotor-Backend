@@ -27,7 +27,9 @@ public class BannerController(ISender sender) : ApiController
     [HttpPost]
     [HasPermission("Permissions.Banners.Create")]
     [SwaggerOperation(Summary = "Thêm banner mới")]
-    public async Task<IActionResult> CreateAsync([FromBody] CreateBannerCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateAsync(
+        [FromBody] CreateBannerCommand command,
+        CancellationToken cancellationToken)
     {
         var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);

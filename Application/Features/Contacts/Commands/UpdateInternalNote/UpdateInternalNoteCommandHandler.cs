@@ -12,7 +12,8 @@ public class UpdateInternalNoteCommandHandler(
 {
     public async Task<Result<bool>> Handle(UpdateInternalNoteCommand request, CancellationToken cancellationToken)
     {
-        var contact = await contactReadRepository.GetByIdAsync(request.ContactId, cancellationToken).ConfigureAwait(false);
+        var contact = await contactReadRepository.GetByIdAsync(request.ContactId, cancellationToken)
+            .ConfigureAwait(false);
         if (contact == null)
         {
             return Result<bool>.Failure(Error.NotFound("Liên hệ không tồn tại."));

@@ -1,3 +1,4 @@
+
 namespace Domain.Constants.Booking;
 
 public static class BookingType
