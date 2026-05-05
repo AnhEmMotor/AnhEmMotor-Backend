@@ -79,7 +79,7 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             .ContinueWith<IEnumerable<ProductEntity>>(t => t.Result, cancellationToken);
     }
 
-    public async Task<ProductEntity?> GetByIdWithDetailsAsync(
+    public Task<ProductEntity?> GetByIdWithDetailsAsync(
         int id,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
@@ -94,7 +94,7 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
         {
             query = query.Where(p => p.DeletedAt != null);
         }
-        return await query
+        return query
             .Include(p => p.ProductCategory)
             .Include(p => p.Brand)
             .Include(p => p.ProductTechnologies)
@@ -113,7 +113,7 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             .ThenInclude(v => v.OutputInfos)
             .ThenInclude(oi => oi.OutputOrder)
             .AsSplitQuery()
-            .FirstOrDefaultAsync(p => p.Id == id, cancellationToken).ConfigureAwait(false);
+            .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
     }
 
     public Task<IEnumerable<ProductEntity>> GetByIdWithVariantsAsync(

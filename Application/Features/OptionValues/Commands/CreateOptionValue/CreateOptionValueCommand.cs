@@ -17,35 +17,4 @@ public record CreateOptionValueCommand : IRequest<Result<int>>
     public string? ColorCode { get; init; }
 }
 
-public class CreateOptionValueCommandHandler(
-    IOptionReadRepository optionReadRepository,
-    IOptionInsertRepository optionInsertRepository,
-    IOptionValueInsertRepository optionValueInsertRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateOptionValueCommand, Result<int>>
-{
-    public async Task<Result<int>> Handle(CreateOptionValueCommand request, CancellationToken cancellationToken)
-    {
-        int targetOptionId = request.OptionId;
-        if (targetOptionId <= 0)
-        {
-            var options = await optionReadRepository.GetByNamesAsync(["VehicleType", "Loại xe"], cancellationToken).ConfigureAwait(false)   ;
-            var vehicleTypeOption = options.FirstOrDefault();
-            if (vehicleTypeOption == null)
-            {
-                vehicleTypeOption = new OptionEntity { Name = "VehicleType" };
-                optionInsertRepository.Add(vehicleTypeOption);
-                await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false)  ;
-            }
-            targetOptionId = vehicleTypeOption.Id;
-        }
-        var optionValue = new OptionValueEntity
-        {
-            OptionId = targetOptionId,
-            Name = request.Name,
-            ColorCode = request.ColorCode
-        };
-        optionValueInsertRepository.Add(optionValue);
-        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        return Result<int>.Success(optionValue.Id);
-    }
-}
+

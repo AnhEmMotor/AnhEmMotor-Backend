@@ -49,6 +49,7 @@ public class BookingsController(ISender sender) : ApiController
     /// <summary>
     /// Xác nhận yêu cầu đặt lịch lái thử.
     /// </summary>
+    /// <param name="cancellationToken"></param>
     /// <param name="command"></param>
     /// <returns></returns>
     [HttpPost("confirm")]

@@ -6,26 +6,26 @@ namespace Infrastructure.Repositories.Lead;
 
 public class LeadReadRepository(ApplicationDBContext context) : ILeadReadRepository
 {
-    public async Task<Domain.Entities.Lead?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+    public Task<Domain.Entities.Lead?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        return await context.Leads.Include(l => l.Activities).FirstOrDefaultAsync(l => l.Id == id, cancellationToken).ConfigureAwait(false);
+        return context.Leads.Include(l => l.Activities).FirstOrDefaultAsync(l => l.Id == id, cancellationToken);
     }
 
-    public async Task<Domain.Entities.Lead?> GetByPhoneNumberAsync(
+    public Task<Domain.Entities.Lead?> GetByPhoneNumberAsync(
         string phoneNumber,
         CancellationToken cancellationToken = default)
     {
-        return await context.Leads
+        return context.Leads
             .Include(l => l.Activities)
-            .FirstOrDefaultAsync(l => string.Compare(l.PhoneNumber, phoneNumber) == 0, cancellationToken).ConfigureAwait(false);
+            .FirstOrDefaultAsync(l => string.Compare(l.PhoneNumber, phoneNumber) == 0, cancellationToken);
     }
 
-    public async Task<List<Domain.Entities.Lead>> GetAllAsync(CancellationToken cancellationToken = default)
+    public Task<List<Domain.Entities.Lead>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        return await context.Leads
+        return context.Leads
             .Include(l => l.Activities)
             .OrderByDescending(l => l.Score)
-            .ToListAsync(cancellationToken).ConfigureAwait(false);
+            .ToListAsync(cancellationToken);
     }
 
     public IQueryable<Domain.Entities.Lead> GetQueryable()

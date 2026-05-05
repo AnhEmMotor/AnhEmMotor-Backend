@@ -19,21 +19,3 @@ public record CreateContactCommand : IRequest<Result<int>>
     public string Message { get; init; } = string.Empty;
 }
 
-public class CreateContactCommandHandler(IContactInsertRepository contactInsertRepository, IUnitOfWork unitOfWork) : IRequestHandler<CreateContactCommand, Result<int>>
-{
-    public async Task<Result<int>> Handle(CreateContactCommand request, CancellationToken cancellationToken)
-    {
-        var contact = new Contact
-        {
-            FullName = request.FullName,
-            Email = request.Email,
-            PhoneNumber = request.PhoneNumber,
-            Subject = request.Subject,
-            Message = request.Message,
-            Status = "Pending"
-        };
-        contactInsertRepository.Add(contact);
-        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        return Result<int>.Success(contact.Id);
-    }
-}

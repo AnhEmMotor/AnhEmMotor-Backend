@@ -15,5 +15,8 @@ namespace Application.Interfaces.Repositories.Technology
             int id,
             CancellationToken cancellationToken,
             DataFetchMode mode = DataFetchMode.ActiveOnly);
+        public Task<IEnumerable<TechnologyEntity>> GetAllWithCategoryAsync(
+            CancellationToken cancellationToken,
+            DataFetchMode mode = DataFetchMode.ActiveOnly);
     }
 }

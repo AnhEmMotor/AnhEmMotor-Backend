@@ -17,14 +17,14 @@ namespace Infrastructure.Repositories.News
             return query;
         }
 
-        public async Task<Domain.Entities.News?> GetByIdAsync(int id, CancellationToken cancellationToken)
+        public Task<Domain.Entities.News?> GetByIdAsync(int id, CancellationToken cancellationToken)
         {
-            return await context.News.FirstOrDefaultAsync(n => n.Id == id, cancellationToken).ConfigureAwait(false);
+            return context.News.FirstOrDefaultAsync(n => n.Id == id, cancellationToken);
         }
 
-        public async Task<Domain.Entities.News?> GetBySlugAsync(string slug, CancellationToken cancellationToken)
+        public Task<Domain.Entities.News?> GetBySlugAsync(string slug, CancellationToken cancellationToken)
         {
-            return await context.News.FirstOrDefaultAsync(n => string.Compare(n.Slug, slug) == 0, cancellationToken).ConfigureAwait(false);
+            return context.News.FirstOrDefaultAsync(n => string.Compare(n.Slug, slug) == 0, cancellationToken);
         }
     }
 }

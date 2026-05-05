@@ -13,14 +13,14 @@ public static class ProductDataSeeder
             .ConfigureAwait(false);
         if (bikeCategory == null)
             return;
-        var honda = await context.Brands
+        await context.Brands
             .FirstOrDefaultAsync(b => string.Compare(b.Name, "Honda") == 0, cancellationToken)
             .ConfigureAwait(false);
-        var yamaha = await context.Brands
+        await context.Brands
             .FirstOrDefaultAsync(b => string.Compare(b.Name, "Yamaha") == 0, cancellationToken)
             .ConfigureAwait(false);
         var productsToSeed = new List<Product>();
-        var colors = await context.Set<OptionValue>()
+        await context.Set<OptionValue>()
             .Include(v => v.Option)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);

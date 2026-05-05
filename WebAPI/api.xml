@@ -104,17 +104,19 @@
             </summary>
             <param name="sender"></param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.BannerController.Create(Application.Features.Banners.Commands.CreateBanner.CreateBannerCommand)">
+        <member name="M:WebAPI.Controllers.V1.BannerController.CreateAsync(Application.Features.Banners.Commands.CreateBanner.CreateBannerCommand,System.Threading.CancellationToken)">
             <summary>
             Thêm banner mới.
             </summary>
             <param name="command"></param>
+            <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.BannerController.GetActive">
+        <member name="M:WebAPI.Controllers.V1.BannerController.GetActiveAsync(System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách banner đang hoạt động.
             </summary>
+            <param name="cancellationToken"></param>
             <returns></returns>
         </member>
         <member name="T:WebAPI.Controllers.V1.BookingsController">
@@ -129,23 +131,26 @@
             </summary>
             <param name="sender"></param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.BookingsController.Create(Application.Features.Bookings.Commands.CreateBooking.CreateBookingCommand)">
+        <member name="M:WebAPI.Controllers.V1.BookingsController.CreateAsync(Application.Features.Bookings.Commands.CreateBooking.CreateBookingCommand,System.Threading.CancellationToken)">
             <summary>
             Tạo yêu cầu đặt lịch lái thử mới.
             </summary>
             <param name="command"></param>
+            <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.BookingsController.GetAll">
+        <member name="M:WebAPI.Controllers.V1.BookingsController.GetAllAsync(System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách yêu cầu đặt lịch lái thử.
             </summary>
+            <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.BookingsController.Confirm(Application.Features.Bookings.Commands.ConfirmBooking.ConfirmBookingCommand)">
+        <member name="M:WebAPI.Controllers.V1.BookingsController.ConfirmAsync(Application.Features.Bookings.Commands.ConfirmBooking.ConfirmBookingCommand,System.Threading.CancellationToken)">
             <summary>
             Xác nhận yêu cầu đặt lịch lái thử.
             </summary>
+            <param name="cancellationToken"></param>
             <param name="command"></param>
             <returns></returns>
         </member>
@@ -221,30 +226,34 @@
             </summary>
             <param name="sender"></param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ContactsController.Create(Application.Features.Contacts.Commands.CreateContact.CreateContactCommand)">
+        <member name="M:WebAPI.Controllers.V1.ContactsController.CreateAsync(Application.Features.Contacts.Commands.CreateContact.CreateContactCommand,System.Threading.CancellationToken)">
             <summary>
             Tạo yêu cầu liên hệ mới.
             </summary>
             <param name="command"></param>
+            <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ContactsController.GetAll">
+        <member name="M:WebAPI.Controllers.V1.ContactsController.GetAllAsync(System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách yêu cầu liên hệ.
             </summary>
+            <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ContactsController.Reply(Application.Features.Contacts.Commands.CreateContactReply.CreateContactReplyCommand)">
+        <member name="M:WebAPI.Controllers.V1.ContactsController.ReplyAsync(Application.Features.Contacts.Commands.CreateContactReply.CreateContactReplyCommand,System.Threading.CancellationToken)">
             <summary>
             Phản hồi yêu cầu liên hệ.
             </summary>
+            <param name="cancellationToken"></param>
             <param name="command"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ContactsController.UpdateInternalNote(Application.Features.Contacts.Commands.UpdateInternalNote.UpdateInternalNoteCommand)">
+        <member name="M:WebAPI.Controllers.V1.ContactsController.UpdateInternalNoteAsync(Application.Features.Contacts.Commands.UpdateInternalNote.UpdateInternalNoteCommand,System.Threading.CancellationToken)">
             <summary>
             Cập nhật ghi chú nội bộ cho yêu cầu liên hệ.
             </summary>
+            <param name="cancellationToken"></param>
             <param name="command"></param>
             <returns></returns>
         </member>
@@ -420,25 +429,28 @@
             </summary>
             <param name="mediator"></param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.NewsController.Create(Application.Features.News.Commands.CreateNews.CreateNewsCommand)">
+        <member name="M:WebAPI.Controllers.V1.NewsController.CreateAsync(Application.Features.News.Commands.CreateNews.CreateNewsCommand,System.Threading.CancellationToken)">
             <summary>
             Tạo bài viết mới.
             </summary>
             <param name="command"></param>
+            <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.NewsController.GetList(Sieve.Models.SieveModel)">
+        <member name="M:WebAPI.Controllers.V1.NewsController.GetListAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách bài viết.
             </summary>
             <param name="sieveModel"></param>
+            <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.NewsController.GetBySlug(System.String)">
+        <member name="M:WebAPI.Controllers.V1.NewsController.GetBySlugAsync(System.String,System.Threading.CancellationToken)">
             <summary>
             Lấy chi tiết bài viết theo Slug.
             </summary>
             <param name="slug"></param>
+            <param name="cancellationToken"></param>
             <returns></returns>
         </member>
         <member name="T:WebAPI.Controllers.V1.NotificationController">
@@ -1096,6 +1108,21 @@
             <param name="request">Danh sách Id nhà cung cấp và trạng thái mới.</param>
             <param name="cancellationToken"></param>
             <returns></returns>
+        </member>
+        <member name="T:WebAPI.Controllers.V1.TechnologyController">
+            <summary>
+            Quản lý danh sách các công nghệ.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.TechnologyController.#ctor(MediatR.IMediator)">
+            <summary>
+            Quản lý danh sách các công nghệ.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.TechnologyController.GetTechnologiesAsync(System.Threading.CancellationToken)">
+            <summary>
+            Lấy danh sách các công nghệ.
+            </summary>
         </member>
         <member name="T:WebAPI.Controllers.V1.UserController">
             <summary>

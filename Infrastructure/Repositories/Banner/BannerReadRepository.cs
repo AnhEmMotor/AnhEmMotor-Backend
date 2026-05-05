@@ -6,21 +6,21 @@ namespace Infrastructure.Repositories.Banner
 {
     public class BannerReadRepository(ApplicationDBContext context) : IBannerReadRepository
     {
-        public async Task<Domain.Entities.Banner?> GetByIdAsync(int id, CancellationToken cancellationToken)
+        public Task<Domain.Entities.Banner?> GetByIdAsync(int id, CancellationToken cancellationToken)
         {
-            return await context.Banners.FirstOrDefaultAsync(b => b.Id == id, cancellationToken).ConfigureAwait(false);
+            return context.Banners.FirstOrDefaultAsync(b => b.Id == id, cancellationToken);
         }
 
-        public async Task<List<Domain.Entities.Banner>> GetActiveBannersAsync(CancellationToken cancellationToken)
+        public Task<List<Domain.Entities.Banner>> GetActiveBannersAsync(CancellationToken cancellationToken)
         {
             var now = DateTimeOffset.UtcNow;
-            return await context.Banners
+            return context.Banners
                 .Where(
                     b => b.IsActive &&
                         (!b.StartDate.HasValue || b.StartDate <= now) &&
                         (!b.EndDate.HasValue || b.EndDate >= now))
                 .OrderBy(b => b.DisplayOrder)
-                .ToListAsync(cancellationToken).ConfigureAwait(false);
+                .ToListAsync(cancellationToken);
         }
     }
 }

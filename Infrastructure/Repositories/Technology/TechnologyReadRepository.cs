@@ -27,6 +27,16 @@ public class TechnologyReadRepository(ApplicationDBContext context) : ITechnolog
             .ContinueWith(t => t.Result, cancellationToken);
     }
 
+    public Task<IEnumerable<TechnologyEntity>> GetAllWithCategoryAsync(
+        CancellationToken cancellationToken,
+        DataFetchMode mode = DataFetchMode.ActiveOnly)
+    {
+        return context.GetQuery<TechnologyEntity>(mode)
+            .Include(t => t.Category)
+            .ToListAsync(cancellationToken)
+            .ContinueWith<IEnumerable<TechnologyEntity>>(t => t.Result, cancellationToken);
+    }
+
     public IQueryable<TechnologyEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         return context.GetQuery<TechnologyEntity>(mode);
