@@ -258,9 +258,9 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
                         v => v.VariantOptionValues
                                 .Any(vov => vov.OptionValueId != null && ids.Contains(vov.OptionValueId.Value)) ||
                             (v.ColorName != null &&
-                                names.Any(n => v.ColorName.Contains(n, StringComparison.CurrentCultureIgnoreCase))) ||
+                                names.Any(n => v.ColorName.Contains(n))) ||
                             (v.VersionName != null &&
-                                names.Any(n => v.VersionName.Contains(n, StringComparison.CurrentCultureIgnoreCase))));
+                                names.Any(n => v.VersionName.Contains(n))));
                 }
                 var matchingProductIds = variantSubquery.Select(v => v.ProductId);
                 query = query.Where(p => matchingProductIds.Contains(p.Id));
@@ -283,7 +283,13 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.VariantOptionValues)
             .ThenInclude(vov => vov.OptionValue)
-            .ThenInclude(ov => ov!.Option);
+            .ThenInclude(ov => ov!.Option)
+            .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
+            .ThenInclude(v => v.InputInfos)
+            .ThenInclude(ii => ii.InputReceipt)
+            .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
+            .ThenInclude(v => v.OutputInfos)
+            .ThenInclude(oi => oi.OutputOrder);
         if (string.IsNullOrWhiteSpace(sorts))
         {
             dbQuery = dbQuery.OrderByDescending(p => p.CreatedAt);

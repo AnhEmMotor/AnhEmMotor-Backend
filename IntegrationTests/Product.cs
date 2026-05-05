@@ -2708,7 +2708,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             ""name"": ""Updated_{uniqueId}"",
             ""categoryId"": {category.Id},
             ""brandId"": {brand.Id},
-            ""short_description"": ""Mô tả ngắn"",
+            ""shortDescription"": ""Mô tả ngắn"",
             ""seatHeight"": 800,
             ""variants"": [{{
                 ""id"": {variantId},

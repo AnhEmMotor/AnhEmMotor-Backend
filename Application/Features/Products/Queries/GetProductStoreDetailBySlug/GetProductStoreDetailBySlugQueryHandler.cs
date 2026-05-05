@@ -78,7 +78,13 @@ public sealed class GetProductStoreDetailBySlugQueryHandler(IProductReadReposito
             ? $"{variant.VersionName} - {variant.ColorName}"
             : (!string.IsNullOrWhiteSpace(variant.VersionName)
                 ? variant.VersionName
-                : (variant.ColorName ?? "Tiêu chuẩn"));
+                : (!string.IsNullOrWhiteSpace(variant.ColorName)
+                    ? variant.ColorName
+                    : (variant.VariantOptionValues.Count > 0
+                        ? string.Join(" - ", variant.VariantOptionValues
+                            .Where(vov => vov.OptionValue != null)
+                            .Select(vov => vov.OptionValue!.Name))
+                        : "Tiêu chuẩn")));
         var currentVariantResponse = new CurrentVariantStoreResponse
         {
             Id = variant.Id,

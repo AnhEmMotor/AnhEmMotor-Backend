@@ -12,7 +12,6 @@ public sealed record CreateProductCommand : IRequest<Result<ProductDetailForMana
     [JsonPropertyName("name")]
     public string? Name { get; init; }
 
-    [JsonPropertyName("category_id")]
     public int? CategoryId { get; init; }
 
     [JsonPropertyName("brand_id")]

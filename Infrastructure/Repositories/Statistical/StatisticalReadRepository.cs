@@ -238,10 +238,13 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                     o.CreatedAt <= twoHoursAgo,
                 cancellationToken)
             .ConfigureAwait(false);
+        var thirtyDaysAgo = now.AddDays(-30);
         var pendingOrdersCount = await context.OutputOrders
             .CountAsync(
-                o => string.Compare(o.StatusId, OrderStatus.Pending) == 0 ||
-                    string.Compare(o.StatusId, OrderStatus.WaitingDeposit) == 0,
+                o => (string.Compare(o.StatusId, OrderStatus.Pending) == 0 ||
+                        string.Compare(o.StatusId, OrderStatus.WaitingDeposit) == 0) &&
+                    o.CreatedAt != null &&
+                    o.CreatedAt >= thirtyDaysAgo,
                 cancellationToken)
             .ConfigureAwait(false);
         async Task<int> GetVehiclesSold(DateTimeOffset start, DateTimeOffset end)

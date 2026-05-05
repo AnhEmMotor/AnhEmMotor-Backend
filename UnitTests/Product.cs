@@ -75,6 +75,13 @@ public class Product
         _predefinedOptionReadRepoMock
             .Setup(x => x.GetAllKeysAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(["Màu sắc", "Phiên bản", "Kích thước"]);
+        _predefinedOptionReadRepoMock
+            .Setup(x => x.GetAllAsDictionaryAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    { "Color", "Màu sắc" }, { "Version", "Phiên bản" }, { "Size", "Kích thước" }
+                });
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _productVariantInsertRepository = new Mock<IProductVariantInsertRepository>();
         _variantOptionValueDeleteRepoMock = new Mock<IVariantOptionValueDeleteRepository>();
@@ -467,6 +474,13 @@ public class Product
         specificPredefinedOptionRepoMock
             .Setup(x => x.GetAllKeysAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(["Màu sắc", "Phiên bản"]);
+        specificPredefinedOptionRepoMock
+            .Setup(x => x.GetAllAsDictionaryAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    { "Color", "Màu sắc" }, { "Version", "Phiên bản" }
+                });
         var handler = new CreateProductCommandHandler(
             _productCategoryReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -1338,7 +1352,7 @@ public class Product
         result.IsValid.Should().BeFalse();
         result.Errors
             .Should()
-            .Contain(e => e.ErrorMessage.Contains("Multiple variants require all variants to have options"));
+            .Contain(e => e.ErrorMessage.Contains("Khi có nhiều biến thể, tất cả các biến thể phải có thuộc tính phân biệt"));
     }
 
     [Fact(DisplayName = "PRODUCT_114 - Tạo sản phẩm thất bại khi nhiều biến thể trùng OptionValues")]
@@ -1365,7 +1379,7 @@ public class Product
         var validator = new CreateProductCommandValidator();
         var result = validator.Validate(command);
         result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(e => e.ErrorMessage.Contains("Duplicate option combinations"));
+        result.Errors.Should().Contain(e => e.ErrorMessage.Contains("Các biến thể không được trùng lặp tổ hợp thuộc tính, màu sắc và phiên bản."));
     }
 
     [Fact(
@@ -1391,7 +1405,7 @@ public class Product
         result.IsValid.Should().BeFalse();
         result.Errors
             .Should()
-            .Contain(e => e.ErrorMessage.Contains("Multiple variants require all variants to have options"));
+            .Contain(e => e.ErrorMessage.Contains("Khi có nhiều biến thể, tất cả các biến thể phải có thuộc tính phân biệt"));
     }
 
     [Fact(DisplayName = "PRODUCT_116 - Sửa sản phẩm thất bại khi nhiều biến thể trùng OptionValues")]
@@ -1420,7 +1434,7 @@ public class Product
         var validator = new UpdateProductCommandValidator();
         var result = validator.Validate(command);
         result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(e => e.ErrorMessage.Contains("Duplicate option combinations"));
+        result.Errors.Should().Contain(e => e.ErrorMessage.Contains("Các biến thể không được trùng lặp tổ hợp thuộc tính, màu sắc và phiên bản."));
     }
 
     [Fact(DisplayName = "PRODUCT_120 - Handler ánh xạ đúng từ Entity sang DTO lite cho price management")]

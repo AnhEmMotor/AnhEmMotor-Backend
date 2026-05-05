@@ -313,7 +313,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         content!.PendingOrdersCount.Should().Be(7);
     }
 
-    [Fact(DisplayName = "STAT_027 - User mới đăng ký (Expect 0 due to hardcoded)")]
+    [Fact(DisplayName = "STAT_027 - Số lượng User mới đăng ký hôm nay")]
     public async Task GetDashboardStats_NewUsers()
     {
         await AuthenticateAsync(CancellationToken.None).ConfigureAwait(true);
@@ -322,7 +322,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var content = await response.Content
             .ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None)
             .ConfigureAwait(true);
-        content!.NewCustomersCount.Should().Be(0);
+        content!.NewCustomersCount.Should().BeGreaterThanOrEqualTo(1);
     }
 
     [Fact(DisplayName = "STAT_028 - Monthly Revenue 6 Months")]

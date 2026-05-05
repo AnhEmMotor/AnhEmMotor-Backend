@@ -228,6 +228,10 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
                     entry.Entity.UpdatedAt = DateTimeOffset.UtcNow;
                     break;
                 case EntityState.Deleted:
+                    if (entry.Entity is VariantOptionValue or ProductTechnology or ProductCollectionPhoto)
+                    {
+                        break;
+                    }
                     entry.State = EntityState.Modified;
                     entry.Entity.DeletedAt = DateTimeOffset.UtcNow;
                     break;

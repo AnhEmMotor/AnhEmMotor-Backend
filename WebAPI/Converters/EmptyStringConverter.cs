@@ -51,11 +51,7 @@ public class EmptyStringConverter : JsonConverter<string>
     /// <param name="options">Options to control JSON serialization behavior. This parameter can be used to customize serialization features.</param>
     public override void Write(Utf8JsonWriter writer, string value, JsonSerializerOptions options)
     {
-        if (string.IsNullOrEmpty(value))
-        {
-            return;
-        }
-        writer.WriteStringValue(value);
+        writer.WriteStringValue(value ?? string.Empty);
     }
 
     /// <summary>

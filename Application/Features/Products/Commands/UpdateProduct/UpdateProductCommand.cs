@@ -80,7 +80,6 @@ public sealed record UpdateProductCommand : IRequest<Result<ProductDetailForMana
     [JsonPropertyName("compressionRatio")]
     public string? CompressionRatio { get; init; }
 
-    [JsonPropertyName("short_description")]
     public string? ShortDescription { get; init; }
 
     [JsonPropertyName("meta_title")]
