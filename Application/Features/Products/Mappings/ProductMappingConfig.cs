@@ -3,7 +3,9 @@ using Application.ApiContracts.Product.Responses;
 using Domain.Constants;
 using Domain.Constants.Input;
 using Domain.Constants.Order;
+using Domain.Constants.Product;
 using Mapster;
+using System.Reflection;
 using System.Text.Json;
 using ProductEntity = Domain.Entities.Product;
 using ProductVariantEntity = Domain.Entities.ProductVariant;
@@ -83,6 +85,51 @@ public class ProductMappingConfig : IRegister
             .MapWith(src => BuildVariantLiteResponseForInput(src, null));
         config.NewConfig<ProductVariantEntity, VariantCartDetailResponse>()
             .MapWith(src => BuildVariantCartDetailResponse(src));
+
+        config.NewConfig<ProductEntity, ProductInfoStoreResponse>()
+            .Map(dest => dest.Brand, src => src.Brand != null ? src.Brand.Name : null)
+            .Map(dest => dest.Category, src => src.ProductCategory != null ? src.ProductCategory.Name : null)
+            .Map(
+                dest => dest.ProductLimit,
+                src => src.ProductCategory != null ? src.ProductCategory.MaxPurchaseQuantity : null)
+            .Map(dest => dest.Highlights, src => MapProductHighlights(src))
+            .AfterMapping(
+                (src, dest) =>
+                {
+                    var specProperties = typeof(ProductEntity)
+                        .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                        .Where(p => !ProductAttributeLabels.IsInternalProperty(p.Name));
+                    foreach (var prop in specProperties)
+                    {
+                        var value = prop.GetValue(src);
+                        if (value is not null)
+                        {
+                            if (value is decimal d && d == 0)
+                                continue;
+                            dest.Specifications[prop.Name] = value;
+                        }
+                    }
+                });
+
+        config.NewConfig<ProductVariantEntity, CurrentVariantStoreResponse>()
+            .Map(dest => dest.DisplayName, src => BuildStoreVariantDisplayName(src))
+            .Map(
+                dest => dest.CoverImageUrl,
+                src => !string.IsNullOrWhiteSpace(src.CoverImageUrl)
+                    ? src.CoverImageUrl
+                    : src.ProductCollectionPhotos
+                        .Where(p => !string.IsNullOrEmpty(p.ImageUrl))
+                        .Select(p => p.ImageUrl)
+                        .FirstOrDefault())
+            .Map(
+                dest => dest.PhotoCollection,
+                src => src.ProductCollectionPhotos
+                    .Where(p => !string.IsNullOrEmpty(p.ImageUrl))
+                    .Select(p => p.ImageUrl!)
+                    .ToList());
+
+        config.NewConfig<ProductVariantEntity, OtherVariantStoreResponse>()
+            .Map(dest => dest.DisplayName, src => BuildStoreVariantDisplayName(src, true));
     }
 
     private static ProductDetailForManagerResponse MapProductToDetailForManagerResponse(ProductEntity product)
@@ -461,5 +508,53 @@ public class ProductMappingConfig : IRegister
                 })
             .ToList();
         return statuses.Count == 0 ? InventoryStatus.OutOfStock : statuses.MinBy(InventoryStatus.GetSeverity)!;
+    }
+
+    private static string? MapProductHighlights(ProductEntity product)
+    {
+        return product.ProductTechnologies?.Count > 0
+            ? JsonSerializer.Serialize(
+                product.ProductTechnologies
+                    .OrderBy(t => t.DisplayOrder)
+                    .Select(
+                        t => new
+                        {
+                            title = t.CustomTitle ??
+                                t.Technology?.DefaultTitle ??
+                                t.Technology?.Name,
+                            tag = t.Technology?.Category?.Name ?? "TECHNOLOGY",
+                            description = t.CustomDescription ?? t.Technology?.DefaultDescription,
+                            image = t.CustomImageUrl ?? t.Technology?.DefaultImageUrl
+                        }))
+            : null;
+    }
+
+    private static string BuildStoreVariantDisplayName(ProductVariantEntity variant, bool isOtherVariant = false)
+    {
+        if (!string.IsNullOrWhiteSpace(variant.VersionName) && !string.IsNullOrWhiteSpace(variant.ColorName))
+        {
+            return $"{variant.VersionName} - {variant.ColorName}";
+        }
+
+        if (!string.IsNullOrWhiteSpace(variant.VersionName))
+        {
+            return variant.VersionName;
+        }
+
+        if (!string.IsNullOrWhiteSpace(variant.ColorName))
+        {
+            return variant.ColorName;
+        }
+
+        if (!isOtherVariant && variant.VariantOptionValues.Count > 0)
+        {
+            return string.Join(
+                " - ",
+                variant.VariantOptionValues
+                    .Where(vov => vov.OptionValue != null)
+                    .Select(vov => vov.OptionValue!.Name));
+        }
+
+        return "Tiêu chuẩn";
     }
 }
