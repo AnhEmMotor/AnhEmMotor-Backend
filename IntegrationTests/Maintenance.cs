@@ -176,7 +176,7 @@ public class Maintenance(IntegrationTestWebAppFactory factory) : IClassFixture<I
     }
 
     [Fact(DisplayName = "MAINT_008 - Xóa phương tiện và các dữ liệu liên quan")]
-    public async Task DeleteVehicle_CascadesToRelatedData()
+    public async Task DeleteVehicle_SoftDeleteCascadesToRelatedData()
     {
         // Arrange
         int vehicleId;
@@ -202,7 +202,10 @@ public class Maintenance(IntegrationTestWebAppFactory factory) : IClassFixture<I
         using (var scope = factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var vehicle = await db.Vehicles.FirstOrDefaultAsync(x => x.Id == vehicleId, TestContext.Current.CancellationToken).ConfigureAwait(true);
+            var vehicle = await db.Vehicles
+                .Include(v => v.MaintenanceHistories)
+                .Include(v => v.Documents)
+                .FirstOrDefaultAsync(x => x.Id == vehicleId, TestContext.Current.CancellationToken).ConfigureAwait(true);
             db.Vehicles.Remove(vehicle!);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         }

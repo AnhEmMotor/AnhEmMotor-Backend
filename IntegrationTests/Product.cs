@@ -1351,7 +1351,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
     }
 
     [Fact(DisplayName = "PRODUCT_106 - Cập nhật sản phẩm verify xóa cứng VariantOptionValue")]
-    public async Task UpdateProduct_HardDeleteVariantOptionValue_Verified()
+    public async Task UpdateProduct_SoftDeleteVariantOptionValue_Verified()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"u_{uniqueId}";
@@ -1412,11 +1412,16 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         };
         var response = await _client.PutAsJsonAsync($"/api/v1/product/{product.Id}", updateCommand).ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var exists = await db.Set<VariantOptionValue>()
+        var existsWithFilter = await db.Set<VariantOptionValue>()
+            .AnyAsync(v => v.VariantId == variant.Id, CancellationToken.None)
+            .ConfigureAwait(true);
+        var existsIgnoreFilter = await db.Set<VariantOptionValue>()
             .IgnoreQueryFilters()
             .AnyAsync(v => v.VariantId == variant.Id, CancellationToken.None)
             .ConfigureAwait(true);
-        exists.Should().BeFalse();
+        
+        existsWithFilter.Should().BeFalse();
+        existsIgnoreFilter.Should().BeTrue();
     }
 
     [Fact(DisplayName = "PRODUCT_108 - Gọi API PredefinedOptions với quyền View hợp lệ")]
