@@ -18,15 +18,15 @@ namespace ControllerTests;
 
 public class Lead
 {
-    private readonly Mock<ISender> _senderMock;
+    private readonly Mock<IMediator> _mediatorMock;
     private readonly BookingsController _bookingsController;
     private readonly LeadController _leadController;
 
     public Lead()
     {
-        _senderMock = new Mock<ISender>();
-        _bookingsController = new BookingsController(_senderMock.Object);
-        _leadController = new LeadController(_senderMock.Object);
+        _mediatorMock = new Mock<IMediator>();
+        _bookingsController = new BookingsController(_mediatorMock.Object);
+        _leadController = new LeadController(_mediatorMock.Object);
         
         var httpContext = new DefaultHttpContext();
         _bookingsController.ControllerContext = new ControllerContext { HttpContext = httpContext };
@@ -38,7 +38,7 @@ public class Lead
     {
         // Arrange
         var command = new CreateBookingCommand { PhoneNumber = "0909999999", FullName = "New Customer" };
-        _senderMock.Setup(m => m.Send(command, It.IsAny<CancellationToken>()))
+        _mediatorMock.Setup(m => m.Send(command, It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<int>.Success(1));
 
         // Act
@@ -46,7 +46,7 @@ public class Lead
 
         // Assert
         Assert.IsType<OkObjectResult>(result);
-        _senderMock.Verify(m => m.Send(command, It.IsAny<CancellationToken>()), Times.Once);
+        _mediatorMock.Verify(m => m.Send(command, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact(DisplayName = "LEAD_003 - Tăng điểm tiềm năng cho Lead đã tồn tại khi đặt lịch thêm (API)")]
@@ -54,7 +54,7 @@ public class Lead
     {
         // Arrange
         var command = new CreateBookingCommand { PhoneNumber = "0909123456", FullName = "Existing Customer" };
-        _senderMock.Setup(m => m.Send(command, It.IsAny<CancellationToken>()))
+        _mediatorMock.Setup(m => m.Send(command, It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<int>.Success(1));
 
         // Act
@@ -62,7 +62,7 @@ public class Lead
 
         // Assert
         Assert.IsType<OkObjectResult>(result);
-        _senderMock.Verify(m => m.Send(command, It.IsAny<CancellationToken>()), Times.Once);
+        _mediatorMock.Verify(m => m.Send(command, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact(DisplayName = "LEAD_004 - Ghi nhận hoạt động đặt lịch mới cho Lead (API)")]
@@ -70,7 +70,7 @@ public class Lead
     {
         // Arrange
         var command = new CreateBookingCommand { PhoneNumber = "0909123456", FullName = "Existing Customer", Location = "Showroom A" };
-        _senderMock.Setup(m => m.Send(command, It.IsAny<CancellationToken>()))
+        _mediatorMock.Setup(m => m.Send(command, It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<int>.Success(1));
 
         // Act
@@ -84,7 +84,7 @@ public class Lead
     public async Task GetLeads_NotAuthenticated_ThrowsUnauthorized()
     {
         // Arrange
-        _senderMock.Setup(m => m.Send(It.IsAny<GetLeadsQuery>(), It.IsAny<CancellationToken>()))
+        _mediatorMock.Setup(m => m.Send(It.IsAny<GetLeadsQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException());
 
         // Act & Assert
@@ -115,7 +115,7 @@ public class Lead
             }
         };
 
-        _senderMock.Setup(m => m.Send(It.IsAny<GetLeadsQuery>(), It.IsAny<CancellationToken>()))
+        _mediatorMock.Setup(m => m.Send(It.IsAny<GetLeadsQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedLeads);
 
         // Act
@@ -139,7 +139,7 @@ public class Lead
             new LeadResponse { Id = 1, FullName = "User A", Score = 100 }
         };
 
-        _senderMock.Setup(m => m.Send(It.IsAny<GetLeadsQuery>(), It.IsAny<CancellationToken>()))
+        _mediatorMock.Setup(m => m.Send(It.IsAny<GetLeadsQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedLeads);
 
         // Act

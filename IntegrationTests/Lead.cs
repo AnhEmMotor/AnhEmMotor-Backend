@@ -102,7 +102,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content.ReadFromJsonAsync<List<LeadResponse>>(TestContext.Current.CancellationToken).ConfigureAwait(true);
         content.Should().NotBeNull();
-        content.Should().HaveCountGreaterOrEqualTo(2);
+        content.Should().HaveCountGreaterThanOrEqualTo(2);
         content.Any(l => l.PhoneNumber == "0901000001" && l.Activities.Count > 0).Should().BeTrue();
     }
 
@@ -207,11 +207,11 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
     {
         // Arrange
         var phoneNumber = "0909000180";
-        using (var scope = _factory.Services.CreateScope())
+        using (var setupScope = _factory.Services.CreateScope())
         {
-            var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            db.Leads.Add(new Domain.Entities.Lead { FullName = "Old", PhoneNumber = phoneNumber });
-            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+            var setupDb = setupScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+            setupDb.Leads.Add(new Domain.Entities.Lead { FullName = "Old", PhoneNumber = phoneNumber });
+            await setupDb.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         }
 
         var command = new CreateBookingCommand 
@@ -244,11 +244,11 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         // Arrange
         var phoneNumber = "0909000190";
         int bookingId;
-        using (var scope = _factory.Services.CreateScope())
+        using (var setupScope = _factory.Services.CreateScope())
         {
-            var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+            var setupDb = setupScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var lead = new Domain.Entities.Lead { FullName = "Test", PhoneNumber = phoneNumber };
-            db.Leads.Add(lead);
+            setupDb.Leads.Add(lead);
             var booking = new Domain.Entities.Booking 
             { 
                 FullName = "Test", 
@@ -259,8 +259,8 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
                 Location = "Showroom",
                 BookingType = BookingType.TestDrive
             };
-            db.Bookings.Add(booking);
-            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+            setupDb.Bookings.Add(booking);
+            await setupDb.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             bookingId = booking.Id;
         }
 

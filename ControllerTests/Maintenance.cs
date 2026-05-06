@@ -19,7 +19,7 @@ public class Maintenance
     public Maintenance()
     {
         _senderMock = new Mock<ISender>();
-        _vehiclesController = new VehiclesController(_senderMock.Object);
+        _vehiclesController = new VehiclesController();
         
         var httpContext = new DefaultHttpContext();
         _vehiclesController.ControllerContext = new ControllerContext { HttpContext = httpContext };

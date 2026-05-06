@@ -1,4 +1,5 @@
 using Application.Common.Models;
+using Application.Features.Contacts.Commands.CreateContact;
 using Application.Features.Contacts.Commands.CreateContactReply;
 using Application.Features.Contacts.Commands.UpdateInternalNote;
 using Domain.Constants.Permission;

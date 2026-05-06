@@ -378,7 +378,7 @@ public class PermissionAndRole
         var bookingsController = new BookingsController(_mediatorMock.Object);
         _mediatorMock.Setup(m => m.Send(It.IsAny<ConfirmBookingCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException());
-        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => bookingsController.ConfirmAsync(1, CancellationToken.None));
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => bookingsController.ConfirmAsync(new ConfirmBookingCommand { BookingId = 1 }, CancellationToken.None));
     }
 
     [Fact(DisplayName = "PERM_025 - Controller - Xác nhận lịch lái thử khi có đủ quyền")]
@@ -386,8 +386,8 @@ public class PermissionAndRole
     {
         var bookingsController = new BookingsController(_mediatorMock.Object);
         _mediatorMock.Setup(m => m.Send(It.IsAny<ConfirmBookingCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Success());
-        var result = await bookingsController.ConfirmAsync(1, CancellationToken.None);
+            .ReturnsAsync(Result<bool>.Success(true));
+        var result = await bookingsController.ConfirmAsync(new ConfirmBookingCommand { BookingId = 1 }, CancellationToken.None);
         result.Should().BeOfType<OkObjectResult>();
     }
 
@@ -425,7 +425,7 @@ public class PermissionAndRole
     {
         var contactsController = new ContactsController(_mediatorMock.Object);
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateInternalNoteCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Success());
+            .ReturnsAsync(Result<bool>.Success(true));
         var result = await contactsController.UpdateInternalNoteAsync(new UpdateInternalNoteCommand(), CancellationToken.None);
         result.Should().BeOfType<OkObjectResult>();
     }

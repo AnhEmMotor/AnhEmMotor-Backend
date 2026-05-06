@@ -19,7 +19,7 @@ using Xunit;
 
 namespace UnitTests;
 
-public class Lead
+public class LeadTests
 {
     private readonly Mock<ILeadReadRepository> _leadReadRepoMock;
     private readonly Mock<ILeadInsertRepository> _leadInsertRepoMock;
@@ -30,7 +30,7 @@ public class Lead
     private readonly Mock<IEmailService> _emailServiceMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
 
-    public Lead()
+    public LeadTests()
     {
         _leadReadRepoMock = new Mock<ILeadReadRepository>();
         _leadInsertRepoMock = new Mock<ILeadInsertRepository>();
@@ -66,7 +66,7 @@ public class Lead
         var result = SlugHelper.GenerateSlug(input);
 
         // Assert
-        result.Length.Should().BeLessOrEqualTo(255);
+        result.Length.Should().BeLessThanOrEqualTo(255);
         result.Should().NotContainAny("!", "@", "#", "$", "%", "^", "&", "*", "(", ")");
     }
 
@@ -75,7 +75,7 @@ public class Lead
     {
         // Arrange
         var command = new CreateBookingCommand { PhoneNumber = "0909123456", FullName = "Test User" };
-        var existingLead = new Domain.Entities.Lead { Id = 1, PhoneNumber = "0909123456", Score = 50 };
+        var existingLead = new Lead { Id = 1, PhoneNumber = "0909123456", Score = 50 };
         
         _leadReadRepoMock.Setup(x => x.GetByPhoneNumberAsync(command.PhoneNumber, It.IsAny<CancellationToken>()))
             .ReturnsAsync(existingLead);
@@ -103,7 +103,7 @@ public class Lead
         var command = new CreateBookingCommand { PhoneNumber = "0909999999", FullName = "New User" };
         
         _leadReadRepoMock.Setup(x => x.GetByPhoneNumberAsync(command.PhoneNumber, It.IsAny<CancellationToken>()))
-            .ReturnsAsync((Domain.Entities.Lead?)null);
+            .ReturnsAsync((Lead?)null);
 
         var handler = new CreateBookingCommandHandler(
             _bookingInsertRepoMock.Object,
@@ -117,7 +117,7 @@ public class Lead
         await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        _leadInsertRepoMock.Verify(x => x.Add(It.Is<Domain.Entities.Lead>(l => l.Score == 30)), Times.Once);
+        _leadInsertRepoMock.Verify(x => x.Add(It.Is<Lead>(l => l.Score == 30)), Times.Once);
     }
 
     [Fact(DisplayName = "LEAD_010 - Xác định trạng thái Lead mới tạo")]
@@ -127,7 +127,7 @@ public class Lead
         var command = new CreateBookingCommand { PhoneNumber = "0909999999", FullName = "New User" };
         
         _leadReadRepoMock.Setup(x => x.GetByPhoneNumberAsync(command.PhoneNumber, It.IsAny<CancellationToken>()))
-            .ReturnsAsync((Domain.Entities.Lead?)null);
+            .ReturnsAsync((Lead?)null);
 
         var handler = new CreateBookingCommandHandler(
             _bookingInsertRepoMock.Object,
@@ -141,7 +141,7 @@ public class Lead
         await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        _leadInsertRepoMock.Verify(x => x.Add(It.Is<Domain.Entities.Lead>(l => l.Status == "Consulting")), Times.Once);
+        _leadInsertRepoMock.Verify(x => x.Add(It.Is<Lead>(l => l.Status == "Consulting")), Times.Once);
     }
 
     [Fact(DisplayName = "LEAD_011 - Ghi nhận mô tả Activity cho khách hàng mới")]
@@ -157,7 +157,7 @@ public class Lead
         };
         
         _leadReadRepoMock.Setup(x => x.GetByPhoneNumberAsync(command.PhoneNumber, It.IsAny<CancellationToken>()))
-            .ReturnsAsync((Domain.Entities.Lead?)null);
+            .ReturnsAsync((Lead?)null);
 
         var handler = new CreateBookingCommandHandler(
             _bookingInsertRepoMock.Object,
@@ -187,7 +187,7 @@ public class Lead
             BookingType = "Other",
             Location = "Showroom B"
         };
-        var existingLead = new Domain.Entities.Lead { Id = 1, PhoneNumber = "0909123456" };
+        var existingLead = new Lead { Id = 1, PhoneNumber = "0909123456" };
         
         _leadReadRepoMock.Setup(x => x.GetByPhoneNumberAsync(command.PhoneNumber, It.IsAny<CancellationToken>()))
             .ReturnsAsync(existingLead);
@@ -239,8 +239,8 @@ public class Lead
     public async Task ConfirmBooking_ValidBooking_UpdatesLeadStatus()
     {
         // Arrange
-        var booking = new Domain.Entities.Booking { Id = 1, PhoneNumber = "0909123456" };
-        var lead = new Domain.Entities.Lead { Id = 1, PhoneNumber = "0909123456", Status = "Consulting" };
+        var booking = new Booking { Id = 1, PhoneNumber = "0909123456" };
+        var lead = new Lead { Id = 1, PhoneNumber = "0909123456", Status = "Consulting" };
         var command = new ConfirmBookingCommand { BookingId = 1 };
 
         _bookingReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
@@ -269,7 +269,7 @@ public class Lead
     public async Task GetLeads_ValidData_MapsCorrectly()
     {
         // Arrange
-        var lead = new Domain.Entities.Lead
+        var lead = new Lead
         {
             Id = 1,
             FullName = "Nguyen Van A",
@@ -323,7 +323,7 @@ public class Lead
             Location = "Showroom"
         };
         _leadReadRepoMock.Setup(x => x.GetByPhoneNumberAsync(command.PhoneNumber, It.IsAny<CancellationToken>()))
-            .ReturnsAsync((Domain.Entities.Lead?)null);
+            .ReturnsAsync((Lead?)null);
 
         var handler = new CreateBookingCommandHandler(
             _bookingInsertRepoMock.Object,
@@ -354,7 +354,7 @@ public class Lead
             Location = "Showroom"
         };
         _leadReadRepoMock.Setup(x => x.GetByPhoneNumberAsync(command.PhoneNumber, It.IsAny<CancellationToken>()))
-            .ReturnsAsync((Domain.Entities.Lead?)null);
+            .ReturnsAsync((Lead?)null);
 
         var handler = new CreateBookingCommandHandler(
             _bookingInsertRepoMock.Object,
@@ -424,7 +424,7 @@ public class Lead
         // Arrange
         var command = new CreateBookingCommand { PhoneNumber = "0909000001", FullName = "New User" };
         _leadReadRepoMock.Setup(x => x.GetByPhoneNumberAsync(command.PhoneNumber, It.IsAny<CancellationToken>()))
-            .ReturnsAsync((Domain.Entities.Lead?)null);
+            .ReturnsAsync((Lead?)null);
 
         var handler = new CreateBookingCommandHandler(
             _bookingInsertRepoMock.Object,
@@ -438,7 +438,7 @@ public class Lead
         await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        _leadInsertRepoMock.Verify(x => x.Add(It.Is<Domain.Entities.Lead>(l => l.Score == 30)), Times.Once);
+        _leadInsertRepoMock.Verify(x => x.Add(It.Is<Lead>(l => l.Score == 30)), Times.Once);
     }
 
     [Fact(DisplayName = "LEAD_028 - Cộng dồn điểm khi khách hàng cũ đặt lịch")]
@@ -446,7 +446,7 @@ public class Lead
     {
         // Arrange
         var command = new CreateBookingCommand { PhoneNumber = "0909000002", FullName = "Existing User" };
-        var existingLead = new Domain.Entities.Lead { Id = 1, PhoneNumber = "0909000002", Score = 30 };
+        var existingLead = new Lead { Id = 1, PhoneNumber = "0909000002", Score = 30 };
         
         _leadReadRepoMock.Setup(x => x.GetByPhoneNumberAsync(command.PhoneNumber, It.IsAny<CancellationToken>()))
             .ReturnsAsync(existingLead);
@@ -471,7 +471,7 @@ public class Lead
     public void LeadEntity_DefaultConstructor_ScoreIsZero()
     {
         // Act
-        var lead = new Domain.Entities.Lead();
+        var lead = new Lead();
 
         // Assert
         lead.Score.Should().Be(0);
@@ -481,7 +481,7 @@ public class Lead
     public void Lead_MappingToResponse_PreservesScore()
     {
         // Arrange
-        var lead = new Domain.Entities.Lead { Score = 150 };
+        var lead = new Lead { Score = 150 };
 
         // Act
         var response = new LeadResponse { Score = lead.Score };
@@ -498,7 +498,7 @@ public class Lead
         // Arrange
         var command = new CreateBookingCommand { PhoneNumber = "0909000003", FullName = "User", Location = location };
         _leadReadRepoMock.Setup(x => x.GetByPhoneNumberAsync(command.PhoneNumber, It.IsAny<CancellationToken>()))
-            .ReturnsAsync((Domain.Entities.Lead?)null);
+            .ReturnsAsync((Lead?)null);
 
         var handler = new CreateBookingCommandHandler(
             _bookingInsertRepoMock.Object,
@@ -512,7 +512,7 @@ public class Lead
         await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        _leadInsertRepoMock.Verify(x => x.Add(It.Is<Domain.Entities.Lead>(l => l.Score == 30)), Times.Once);
+        _leadInsertRepoMock.Verify(x => x.Add(It.Is<Lead>(l => l.Score == 30)), Times.Once);
     }
 
     [Theory(DisplayName = "LEAD_034 - Kiểm tra Score khi đặt lịch với loại Booking khác nhau")]
@@ -523,7 +523,7 @@ public class Lead
         // Arrange
         var command = new CreateBookingCommand { PhoneNumber = "0909000004", FullName = "User", BookingType = bookingType };
         _leadReadRepoMock.Setup(x => x.GetByPhoneNumberAsync(command.PhoneNumber, It.IsAny<CancellationToken>()))
-            .ReturnsAsync((Domain.Entities.Lead?)null);
+            .ReturnsAsync((Lead?)null);
 
         var handler = new CreateBookingCommandHandler(
             _bookingInsertRepoMock.Object,
@@ -537,6 +537,6 @@ public class Lead
         await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        _leadInsertRepoMock.Verify(x => x.Add(It.Is<Domain.Entities.Lead>(l => l.Score == 30)), Times.Once);
+        _leadInsertRepoMock.Verify(x => x.Add(It.Is<Lead>(l => l.Score == 30)), Times.Once);
     }
 }

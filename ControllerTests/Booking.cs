@@ -59,10 +59,10 @@ public class Booking
         var query = new GetBookingsQuery();
         // Giả sử GetBookingsQuery trả về danh sách DTO
         _senderMock.Setup(m => m.Send(It.IsAny<GetBookingsQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<Application.ApiContracts.Bookings.Responses.BookingResponse>());
+            .ReturnsAsync(Result<List<Domain.Entities.Booking>>.Success([]));
 
         // Act
-        var result = await _bookingsController.GetBookingsAsync(query, CancellationToken.None);
+        var result = await _bookingsController.GetAllAsync(CancellationToken.None);
 
         // Assert
         Assert.IsType<OkObjectResult>(result);

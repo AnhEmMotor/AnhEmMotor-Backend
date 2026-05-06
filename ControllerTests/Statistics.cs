@@ -312,8 +312,8 @@ public class Statistics
         {
             TopSellingProducts = new List<TopSellingProductResponse>
             {
-                new() { ProductName = "Xe Vision", SoldQuantity = 50 },
-                new() { ProductName = "Xe Janus", SoldQuantity = 30 }
+                new() { ProductName = "Xe Vision", QuantitySold = 50 },
+                new() { ProductName = "Xe Janus", QuantitySold = 30 }
             }
         };
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetDashboardStatsQuery>(), It.IsAny<CancellationToken>()))
@@ -323,7 +323,7 @@ public class Statistics
         var actualStats = okResult.Value.Should().BeAssignableTo<DashboardStatsResponse>().Subject;
         actualStats.TopSellingProducts.Should().HaveCount(2);
         actualStats.TopSellingProducts[0].ProductName.Should().Be("Xe Vision");
-        actualStats.TopSellingProducts[0].SoldQuantity.Should().Be(50);
+        actualStats.TopSellingProducts[0].QuantitySold.Should().Be(50);
     }
 
 #pragma warning restore CRR0035

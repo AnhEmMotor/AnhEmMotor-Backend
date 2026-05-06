@@ -13,13 +13,13 @@ using Xunit;
 
 namespace UnitTests;
 
-public class News
+public class NewsTests
 {
     private readonly Mock<INewsReadRepository> _newsReadRepoMock;
     private readonly Mock<INewsInsertRepository> _newsInsertRepoMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
 
-    public News()
+    public NewsTests()
     {
         _newsReadRepoMock = new Mock<INewsReadRepository>();
         _newsInsertRepoMock = new Mock<INewsInsertRepository>();
@@ -149,6 +149,6 @@ public class News
         var slug = SlugHelper.GenerateSlug(longTitle);
 
         // Assert
-        slug.Length.Should().BeLessOrEqualTo(255);
+        slug.Length.Should().BeLessThanOrEqualTo(255);
     }
 }

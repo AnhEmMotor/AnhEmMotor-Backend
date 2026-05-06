@@ -18,7 +18,7 @@ using Xunit;
 
 namespace UnitTests;
 
-public class Booking
+public class BookingTests
 {
     private readonly Mock<IBookingReadRepository> _bookingReadRepoMock;
     private readonly Mock<IBookingInsertRepository> _bookingInsertRepoMock;
@@ -29,7 +29,7 @@ public class Booking
     private readonly Mock<IEmailService> _emailServiceMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
 
-    public Booking()
+    public BookingTests()
     {
         _bookingReadRepoMock = new Mock<IBookingReadRepository>();
         _bookingInsertRepoMock = new Mock<IBookingInsertRepository>();
@@ -47,7 +47,7 @@ public class Booking
         // Arrange
         var command = new CreateBookingCommand { Location = BookingLocation.Showroom, PhoneNumber = "0909123456" };
         _leadReadRepoMock.Setup(x => x.GetByPhoneNumberAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Domain.Entities.Lead { Id = 1 });
+            .ReturnsAsync(new Lead { Id = 1 });
 
         var handler = new CreateBookingCommandHandler(
             _bookingInsertRepoMock.Object,
@@ -61,7 +61,7 @@ public class Booking
         await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        _bookingInsertRepoMock.Verify(x => x.Add(It.Is<Domain.Entities.Booking>(b => b.Location == BookingLocation.Showroom)), Times.Once);
+        _bookingInsertRepoMock.Verify(x => x.Add(It.Is<Booking>(b => b.Location == BookingLocation.Showroom)), Times.Once);
     }
 
     [Fact(DisplayName = "BOOKING_003 - Tạo lịch hẹn tại địa chỉ khách hàng")]
@@ -70,7 +70,7 @@ public class Booking
         // Arrange
         var command = new CreateBookingCommand { Location = BookingLocation.CustomerAddress, PhoneNumber = "0909123456" };
         _leadReadRepoMock.Setup(x => x.GetByPhoneNumberAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Domain.Entities.Lead { Id = 1 });
+            .ReturnsAsync(new Lead { Id = 1 });
 
         var handler = new CreateBookingCommandHandler(
             _bookingInsertRepoMock.Object,
@@ -84,7 +84,7 @@ public class Booking
         await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        _bookingInsertRepoMock.Verify(x => x.Add(It.Is<Domain.Entities.Booking>(b => b.Location == BookingLocation.CustomerAddress)), Times.Once);
+        _bookingInsertRepoMock.Verify(x => x.Add(It.Is<Booking>(b => b.Location == BookingLocation.CustomerAddress)), Times.Once);
     }
 
     [Fact(DisplayName = "BOOKING_004 - Tự động gán loại hình Lái thử mặc định")]
@@ -103,7 +103,7 @@ public class Booking
         // Arrange
         var command = new CreateBookingCommand { BookingType = BookingType.TestDrive, PhoneNumber = "0909123456" };
         _leadReadRepoMock.Setup(x => x.GetByPhoneNumberAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Domain.Entities.Lead { Id = 1 });
+            .ReturnsAsync(new Lead { Id = 1 });
 
         var handler = new CreateBookingCommandHandler(
             _bookingInsertRepoMock.Object,
@@ -126,7 +126,7 @@ public class Booking
         // Arrange
         var command = new ConfirmBookingCommand { BookingId = 999 };
         _bookingReadRepoMock.Setup(x => x.GetByIdAsync(999, It.IsAny<CancellationToken>()))
-            .ReturnsAsync((Domain.Entities.Booking?)null);
+            .ReturnsAsync((Booking?)null);
 
         var handler = new ConfirmBookingCommandHandler(
             _bookingReadRepoMock.Object,
@@ -149,7 +149,7 @@ public class Booking
     public async Task ConfirmBooking_ValidBooking_EmailContainsVariantInfo()
     {
         // Arrange
-        var booking = new Domain.Entities.Booking 
+        var booking = new Booking 
         { 
             Id = 1, 
             PhoneNumber = "0909123456",
@@ -190,7 +190,7 @@ public class Booking
     public async Task ConfirmBooking_EmailServiceThrows_StillSucceedsInDB()
     {
         // Arrange
-        var booking = new Domain.Entities.Booking { Id = 1, PhoneNumber = "0909123456", Email = "test@gmail.com" };
+        var booking = new Booking { Id = 1, PhoneNumber = "0909123456", Email = "test@gmail.com" };
         _bookingReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
             .ReturnsAsync(booking);
         _emailServiceMock.Setup(x => x.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
@@ -218,7 +218,7 @@ public class Booking
     {
         // Arrange
         var preferredDate = new DateTimeOffset(2026, 5, 20, 10, 30, 0, TimeSpan.Zero);
-        var booking = new Domain.Entities.Booking 
+        var booking = new Booking 
         { 
             Id = 1, 
             PhoneNumber = "0909123456", 
@@ -267,7 +267,7 @@ public class Booking
         await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        _bookingInsertRepoMock.Verify(x => x.Add(It.Is<Domain.Entities.Booking>(b => b.ProductVariantId == 101)), Times.Once);
+        _bookingInsertRepoMock.Verify(x => x.Add(It.Is<Booking>(b => b.ProductVariantId == 101)), Times.Once);
     }
 
     [Fact(DisplayName = "BOOKING_017 - Kiểm tra logic gán LeadSource khi tạo Booking")]
