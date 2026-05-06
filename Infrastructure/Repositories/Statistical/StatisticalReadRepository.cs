@@ -42,30 +42,32 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             .Select(x => new { x.oi.ProductVarientId, Price = x.oi.Price ?? 0, Count = x.oi.Count ?? 0 })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-
         var grouped = rawData.GroupBy(x => x.ProductVarientId)
             .Select(
                 g => new { VariantId = g.Key, Revenue = g.Sum(x => x.Price * x.Count), SoldCount = g.Sum(x => x.Count) })
             .OrderByDescending(x => x.Revenue)
             .Take(limit)
             .ToList();
-
         var variantIds = grouped.Select(g => g.VariantId).ToList();
         var variants = await context.ProductVariants
             .Include(pv => pv.Product)
             .Where(pv => variantIds.Contains(pv.Id))
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-
         return grouped.Select(
             g =>
             {
                 var variant = variants.FirstOrDefault(v => v.Id == g.VariantId);
                 return new TopProductRevenueResponse
                 {
-                    ProductName = variant != null 
-                        ? $"{variant.Product?.Name} - {variant.VersionName} ({variant.ColorName?.Split(',').FirstOrDefault()})".Trim(' ', '-', '(', ')')
-                        : "Sản phẩm không xác định",
+                    ProductName =
+                        variant != null
+                                ? $"{variant.Product?.Name} - {variant.VersionName} ({variant.ColorName?.Split(',').FirstOrDefault()})".Trim(
+                                    ' ',
+                                    '-',
+                                    '(',
+                                    ')')
+                                : "Sản phẩm không xác định",
                     UnitsSold = g.SoldCount,
                     Revenue = g.Revenue
                 };
@@ -84,23 +86,19 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             .Select(x => new { x.oi.ProductVarientId, Price = x.oi.Price ?? 0, Count = x.oi.Count ?? 0 })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-
         var variantIds = rawData.Select(x => x.ProductVarientId).Distinct().ToList();
-
         var variants = await context.ProductVariants
             .Include(pv => pv.Product)
             .ThenInclude(p => p!.Brand)
             .Where(pv => variantIds.Contains(pv.Id))
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-
         var revenueData = rawData.Select(
             r => new
             {
                 BrandName = variants.FirstOrDefault(v => v.Id == r.ProductVarientId)?.Product?.Brand?.Name ?? "Khác",
                 Revenue = r.Price * r.Count
             });
-
         return revenueData.GroupBy(r => r.BrandName)
             .Select(g => new BrandRevenueResponse { BrandName = g.Key, Revenue = g.Sum(x => x.Revenue) })
             .OrderByDescending(b => b.Revenue)
@@ -113,9 +111,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
     {
         var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-(days - 1)));
         var startDateTimeOffset = new DateTimeOffset(startDate.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
-
         var dateSeries = Enumerable.Range(0, days).Select(i => startDate.AddDays(i)).ToList();
-
         var rawData = await context.OutputInfos
             .Join(context.OutputOrders, oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
             .Where(
@@ -135,7 +131,6 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                 })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-
         var revenueData = rawData
             .GroupBy(x => DateOnly.FromDateTime(x.CreatedAt.DateTime))
             .Select(
@@ -148,20 +143,17 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                     HasZeroCostPrice = g.Any(x => x.CostPrice == 0)
                 })
             .ToList();
-
         var result = new List<DailyRevenueTableResponse>();
-        for(int i = 0; i < dateSeries.Count; i++)
+        for (int i = 0; i < dateSeries.Count; i++)
         {
             var day = dateSeries[i];
             var dayData = revenueData.FirstOrDefault(r => r.Day == day);
             var prevDayData = i > 0 ? revenueData.FirstOrDefault(r => r.Day == dateSeries[i - 1]) : null;
-
             double growth = 0;
-            if(prevDayData != null && prevDayData.Revenue > 0 && dayData != null)
+            if (prevDayData != null && prevDayData.Revenue > 0 && dayData != null)
             {
                 growth = (double)((dayData.Revenue - prevDayData.Revenue) / prevDayData.Revenue * 100);
             }
-
             result.Add(
                 new DailyRevenueTableResponse
                 {
@@ -182,9 +174,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
     {
         var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-(days - 1)));
         var startDateTimeOffset = new DateTimeOffset(startDate.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
-
         var dateSeries = Enumerable.Range(0, days).Select(i => startDate.AddDays(i)).ToList();
-
         var rawData = await context.OutputInfos
             .Join(context.OutputOrders, oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
             .Where(
@@ -196,12 +186,10 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             .Select(x => new { CreatedAt = x.o.CreatedAt!.Value, Price = x.oi.Price ?? 0, Count = x.oi.Count ?? 0 })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-
         var revenueData = rawData
             .GroupBy(x => DateOnly.FromDateTime(x.CreatedAt.DateTime))
             .Select(g => new { Day = g.Key, Revenue = g.Sum(x => x.Price * x.Count) })
             .ToList();
-
         return dateSeries.Select(
             day => new DailyRevenueResponse
             {
@@ -216,24 +204,26 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         var todayStart = new DateTimeOffset(now.Year, now.Month, now.Day, 0, 0, 0, TimeSpan.Zero);
         var yesterdayStart = todayStart.AddDays(-1);
         var currentMonthStart = new DateTimeOffset(now.Year, now.Month, 1, 0, 0, 0, TimeSpan.Zero);
-        
         var lastMonthStart = currentMonthStart.AddMonths(-1);
         var lastMonthEnd = currentMonthStart.AddTicks(-1);
-
-        // Helper to get Revenue/Profit in a range
         async Task<(decimal Rev, decimal Prof)> GetStatsInRange(DateTimeOffset start, DateTimeOffset end)
         {
             var stats = await context.OutputInfos
                 .Join(context.OutputOrders, oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
-                .Where(x => x.o.CreatedAt >= start && x.o.CreatedAt <= end &&
-                           (x.o.StatusId == OrderStatus.Delivering ||
+                .Where(
+                    x => x.o.CreatedAt >= start &&
+                        x.o.CreatedAt <= end &&
+                        (x.o.StatusId == OrderStatus.Delivering ||
                             x.o.StatusId == OrderStatus.WaitingPickup ||
                             x.o.StatusId == OrderStatus.Completed))
-                .Select(x => new { Revenue = (decimal)((x.oi.Price ?? 0) * (x.oi.Count ?? 0)), 
-                                   Profit = (decimal)(((x.oi.Price ?? 0) - (x.oi.CostPrice ?? 0)) * (x.oi.Count ?? 0)) })
+                .Select(
+                    x => new
+                    {
+                        Revenue = (x.oi.Price ?? 0) * (x.oi.Count ?? 0),
+                        Profit = ((x.oi.Price ?? 0) - (x.oi.CostPrice ?? 0)) * (x.oi.Count ?? 0)
+                    })
                 .ToListAsync(cancellationToken)
                 .ConfigureAwait(false);
-
             return (stats.Sum(x => x.Revenue), stats.Sum(x => x.Profit));
         }
 
@@ -241,96 +231,96 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         var yesterdayStats = await GetStatsInRange(yesterdayStart, todayStart.AddTicks(-1));
         var monthStats = await GetStatsInRange(currentMonthStart, now);
         var lastMonthStats = await GetStatsInRange(lastMonthStart, lastMonthEnd);
-
         decimal revenueChange = 0;
         if (yesterdayStats.Rev > 0)
             revenueChange = ((todayStats.Rev - yesterdayStats.Rev) / yesterdayStats.Rev) * 100;
         else if (todayStats.Rev > 0)
             revenueChange = 100;
-
-        // OVERDUE ORDERS (> 2h)
         var twoHoursAgo = now.AddHours(-2);
         var overdueOrdersCount = await context.OutputOrders
-            .CountAsync(o => (o.StatusId == OrderStatus.Pending || o.StatusId == OrderStatus.WaitingDeposit) && o.CreatedAt != null && o.CreatedAt <= twoHoursAgo, cancellationToken)
+            .CountAsync(
+                o => (o.StatusId == OrderStatus.Pending || o.StatusId == OrderStatus.WaitingDeposit) &&
+                    o.CreatedAt != null &&
+                    o.CreatedAt <= twoHoursAgo,
+                cancellationToken)
             .ConfigureAwait(false);
-
-        // PENDING ORDERS (All)
         var pendingOrdersCount = await context.OutputOrders
-            .CountAsync(o => o.StatusId == OrderStatus.Pending || o.StatusId == OrderStatus.WaitingDeposit, cancellationToken)
+            .CountAsync(
+                o => o.StatusId == OrderStatus.Pending || o.StatusId == OrderStatus.WaitingDeposit,
+                cancellationToken)
             .ConfigureAwait(false);
-
-        // VEHICLES SOLD (Category "Xe máy")
         async Task<int> GetVehiclesSold(DateTimeOffset start, DateTimeOffset end)
         {
             var data = await context.OutputInfos
                 .Join(context.OutputOrders, oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
-                .Join(context.ProductVariants, x => x.oi.ProductVarientId, pv => pv.Id, (x, pv) => new { x.oi, x.o, pv })
+                .Join(
+                    context.ProductVariants,
+                    x => x.oi.ProductVarientId,
+                    pv => pv.Id,
+                    (x, pv) => new { x.oi, x.o, pv })
                 .Join(context.Products, x => x.pv.ProductId, p => p.Id, (x, p) => new { x.oi, x.o, p })
                 .Join(context.ProductCategories, x => x.p.CategoryId, c => c.Id, (x, c) => new { x.oi, x.o, c })
-                .Where(x => x.o.CreatedAt >= start && x.o.CreatedAt <= end &&
-                           (x.o.StatusId == OrderStatus.Delivering ||
+                .Where(
+                    x => x.o.CreatedAt >= start &&
+                        x.o.CreatedAt <= end &&
+                        (x.o.StatusId == OrderStatus.Delivering ||
                             x.o.StatusId == OrderStatus.WaitingPickup ||
                             x.o.StatusId == OrderStatus.Completed) &&
-                            x.c.Name == "Xe máy")
+                        x.c.Name == "Xe máy")
                 .Select(x => x.oi.Count ?? 0)
                 .ToListAsync(cancellationToken)
                 .ConfigureAwait(false);
-            
             return data.Sum();
         }
 
         var todayVehicles = await GetVehiclesSold(todayStart, now);
         var monthVehicles = await GetVehiclesSold(currentMonthStart, now);
-
-        // INVENTORY
         var confirmedInputs = await context.InputInfos
             .Join(context.InputReceipts, ii => ii.InputId, i => i.Id, (ii, i) => new { ii, i })
             .Where(x => x.i.StatusId == InputStatus.Finish)
-            .GroupBy(x => x.ii.ProductId) // Using ProductId as the VariantId reference
+            .GroupBy(x => x.ii.ProductId)
             .Select(g => new { VariantId = g.Key, TotalIn = g.Sum(x => (long)(x.ii.Count ?? 0)) })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-
         var soldOutputs = await context.OutputInfos
             .Join(context.OutputOrders, oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
-            .Where(x => x.o.StatusId == OrderStatus.Delivering || x.o.StatusId == OrderStatus.WaitingPickup || x.o.StatusId == OrderStatus.Completed)
+            .Where(
+                x => x.o.StatusId == OrderStatus.Delivering ||
+                    x.o.StatusId == OrderStatus.WaitingPickup ||
+                    x.o.StatusId == OrderStatus.Completed)
             .GroupBy(x => x.oi.ProductVarientId)
             .Select(g => new { VariantId = g.Key, TotalOut = g.Sum(x => (long)(x.oi.Count ?? 0)) })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-
         var totalInventory = confirmedInputs.Sum(i => i.TotalIn) - soldOutputs.Sum(o => o.TotalOut);
-
-        // BRAND DISTRIBUTION
         var brandData = await context.Products
             .Join(context.Brands, p => p.BrandId, b => b.Id, (p, b) => new { p, b })
             .Join(context.ProductVariants, x => x.p.Id, pv => pv.ProductId, (x, pv) => new { x.p, x.b, pv })
             .Select(x => new { x.b.Name, VariantId = x.pv.Id })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-
         var brandStock = brandData
-            .Select(x => new BrandStockResponse { 
-                BrandName = x.Name, 
-                StockCount = (int)((confirmedInputs.FirstOrDefault(i => i.VariantId == x.VariantId)?.TotalIn ?? 0) - 
-                             (soldOutputs.FirstOrDefault(o => o.VariantId == x.VariantId)?.TotalOut ?? 0))
-            })
+            .Select(
+                x => new BrandStockResponse
+                {
+                    BrandName = x.Name,
+                    StockCount =
+                        (int)((confirmedInputs.FirstOrDefault(i => i.VariantId == x.VariantId)?.TotalIn ?? 0) -
+                                (soldOutputs.FirstOrDefault(o => o.VariantId == x.VariantId)?.TotalOut ?? 0))
+                })
             .GroupBy(x => x.BrandName)
             .Select(g => new BrandStockResponse { BrandName = g.Key, StockCount = g.Sum(x => x.StockCount) })
             .Where(x => x.StockCount > 0)
             .OrderByDescending(x => x.StockCount)
             .Take(5)
             .ToList();
-
-        // LOW STOCK (< 3)
         int lowStockCount = 0;
-        foreach(var input in confirmedInputs)
+        foreach (var input in confirmedInputs)
         {
             var sold = soldOutputs.FirstOrDefault(x => x.VariantId == input.VariantId)?.TotalOut ?? 0;
-            if (input.TotalIn - sold < 3) lowStockCount++;
+            if (input.TotalIn - sold < 3)
+                lowStockCount++;
         }
-
-        // OVERSTOCK (> 60 days)
         var sixtyDaysAgo = now.AddDays(-60);
         var oldInputVariants = await context.InputInfos
             .Join(context.InputReceipts, ii => ii.InputId, i => i.Id, (ii, i) => new { ii, i })
@@ -339,89 +329,105 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             .Distinct()
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-        
         int overstockCount = 0;
-        foreach(var vId in oldInputVariants)
+        foreach (var vId in oldInputVariants)
         {
             var tin = confirmedInputs.FirstOrDefault(x => x.VariantId == vId)?.TotalIn ?? 0;
             var tout = soldOutputs.FirstOrDefault(x => x.VariantId == vId)?.TotalOut ?? 0;
-            if (tin > tout) overstockCount++;
+            if (tin > tout)
+                overstockCount++;
         }
-
         var last7DaysStart = todayStart.AddDays(-6);
         var last7DaysData = await context.OutputInfos
             .Join(context.OutputOrders, oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
-            .Where(x => x.o.CreatedAt >= last7DaysStart && 
-                       (x.o.StatusId == OrderStatus.Delivering || x.o.StatusId == OrderStatus.WaitingPickup || x.o.StatusId == OrderStatus.Completed))
-            .GroupBy(x => new { Year = x.o.CreatedAt!.Value.Year, Month = x.o.CreatedAt!.Value.Month, Day = x.o.CreatedAt!.Value.Day })
-            .Select(g => new { 
-                Date = g.Key, 
-                Revenue = g.Sum(x => (decimal)((x.oi.Price ?? 0) * (x.oi.Count ?? 0))),
-                Profit = g.Sum(x => (decimal)(((x.oi.Price ?? 0) - (x.oi.CostPrice ?? 0)) * (x.oi.Count ?? 0)))
-            })
+            .Where(
+                x => x.o.CreatedAt >= last7DaysStart &&
+                    (x.o.StatusId == OrderStatus.Delivering ||
+                        x.o.StatusId == OrderStatus.WaitingPickup ||
+                        x.o.StatusId == OrderStatus.Completed))
+            .GroupBy(
+                x => new
+                {
+                    Year = x.o.CreatedAt!.Value.Year,
+                    Month = x.o.CreatedAt!.Value.Month,
+                    Day = x.o.CreatedAt!.Value.Day
+                })
+            .Select(
+                g => new
+                {
+                    Date = g.Key,
+                    Revenue = g.Sum(x => (x.oi.Price ?? 0) * (x.oi.Count ?? 0)),
+                    Profit = g.Sum(x => ((x.oi.Price ?? 0) - (x.oi.CostPrice ?? 0)) * (x.oi.Count ?? 0))
+                })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-
         decimal total7dRev = last7DaysData.Sum(x => x.Revenue);
         decimal total7dProf = last7DaysData.Sum(x => x.Profit);
         var bestDay = last7DaysData.OrderByDescending(x => x.Revenue).FirstOrDefault();
-
         var totalSKU = await context.Products.CountAsync(cancellationToken).ConfigureAwait(false);
-
-        var activeInstallments = await context.OutputOrders.CountAsync(o => o.StatusId == OrderStatus.WaitingDeposit || o.StatusId == OrderStatus.DepositPaid, cancellationToken).ConfigureAwait(false);
-
-        // TOP SELLERS (Last 7 days)
+        var activeInstallments = await context.OutputOrders
+            .CountAsync(
+                o => o.StatusId == OrderStatus.WaitingDeposit || o.StatusId == OrderStatus.DepositPaid,
+                cancellationToken)
+            .ConfigureAwait(false);
         var topProducts = await context.OutputInfos
             .Join(context.OutputOrders, oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
-            .Where(x => x.o.CreatedAt >= last7DaysStart && 
-                       (x.o.StatusId == OrderStatus.Delivering || x.o.StatusId == OrderStatus.WaitingPickup || x.o.StatusId == OrderStatus.Completed))
+            .Where(
+                x => x.o.CreatedAt >= last7DaysStart &&
+                    (x.o.StatusId == OrderStatus.Delivering ||
+                        x.o.StatusId == OrderStatus.WaitingPickup ||
+                        x.o.StatusId == OrderStatus.Completed))
             .Join(context.ProductVariants, x => x.oi.ProductVarientId, pv => pv.Id, (x, pv) => new { x.oi, x.o, pv })
             .Join(context.Products, x => x.pv.ProductId, p => p.Id, (x, p) => new { x.oi, x.o, p })
             .GroupBy(x => x.p.Name)
-            .Select(g => new TopSellingProductResponse
-            {
-                ProductName = g.Key,
-                QuantitySold = g.Sum(x => x.oi.Count ?? 0),
-                TotalRevenue = g.Sum(x => (decimal)((x.oi.Price ?? 0) * (x.oi.Count ?? 0)))
-            })
+            .Select(
+                g => new TopSellingProductResponse
+                {
+                    ProductName = g.Key,
+                    QuantitySold = g.Sum(x => x.oi.Count ?? 0),
+                    TotalRevenue = g.Sum(x => (x.oi.Price ?? 0) * (x.oi.Count ?? 0))
+                })
             .OrderByDescending(x => x.QuantitySold)
             .Take(5)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-
-        // BRAND REVENUE (Last 7 days)
         var brandRevenue = await context.OutputInfos
             .Join(context.OutputOrders, oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
-            .Where(x => x.o.CreatedAt >= last7DaysStart && 
-                       (x.o.StatusId == OrderStatus.Delivering || x.o.StatusId == OrderStatus.WaitingPickup || x.o.StatusId == OrderStatus.Completed))
+            .Where(
+                x => x.o.CreatedAt >= last7DaysStart &&
+                    (x.o.StatusId == OrderStatus.Delivering ||
+                        x.o.StatusId == OrderStatus.WaitingPickup ||
+                        x.o.StatusId == OrderStatus.Completed))
             .Join(context.ProductVariants, x => x.oi.ProductVarientId, pv => pv.Id, (x, pv) => new { x.oi, x.o, pv })
             .Join(context.Products, x => x.pv.ProductId, p => p.Id, (x, p) => new { x.oi, x.o, p })
             .Join(context.Brands, x => x.p.BrandId, b => b.Id, (x, b) => new { x.oi, x.o, b })
             .GroupBy(x => x.b.Name)
-            .Select(g => new BrandRevenueResponse
-            {
-                BrandName = g.Key,
-                TotalRevenue = g.Sum(x => (decimal)((x.oi.Price ?? 0) * (x.oi.Count ?? 0))),
-                QuantitySold = g.Sum(x => x.oi.Count ?? 0)
-            })
+            .Select(
+                g => new BrandRevenueResponse
+                {
+                    BrandName = g.Key,
+                    TotalRevenue = g.Sum(x => (x.oi.Price ?? 0) * (x.oi.Count ?? 0)),
+                    QuantitySold = g.Sum(x => x.oi.Count ?? 0)
+                })
             .OrderByDescending(x => x.TotalRevenue)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-
-        // TODAY ACTIVITIES
         var todayActivities = new List<string>();
-        if (todayVehicles > 0) todayActivities.Add($"{todayVehicles} xe đã giao");
-        
+        if (todayVehicles > 0)
+            todayActivities.Add($"{todayVehicles} xe đã giao");
         var todayInst = await context.OutputOrders
-            .CountAsync(o => o.CreatedAt >= todayStart && (o.StatusId == OrderStatus.WaitingDeposit || o.StatusId == OrderStatus.DepositPaid), cancellationToken)
+            .CountAsync(
+                o => o.CreatedAt >= todayStart &&
+                    (o.StatusId == OrderStatus.WaitingDeposit || o.StatusId == OrderStatus.DepositPaid),
+                cancellationToken)
             .ConfigureAwait(false);
-        if (todayInst > 0) todayActivities.Add($"{todayInst} đơn trả góp mới");
-        
+        if (todayInst > 0)
+            todayActivities.Add($"{todayInst} đơn trả góp mới");
         var todayCust = await context.Users
             .CountAsync(u => u.CreatedAt >= todayStart, cancellationToken)
             .ConfigureAwait(false);
-        if (todayCust > 0) todayActivities.Add($"{todayCust} khách ghé thăm");
-
+        if (todayCust > 0)
+            todayActivities.Add($"{todayCust} khách ghé thăm");
         return new DashboardStatsResponse
         {
             TodayRevenue = todayStats.Rev,
@@ -462,9 +468,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         var currentMonth = new DateOnly(DateTimeOffset.UtcNow.Year, DateTimeOffset.UtcNow.Month, 1);
         var startMonth = currentMonth.AddMonths(-(months - 1));
         var startDateTimeOffset = new DateTimeOffset(startMonth.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
-
         var monthSeries = Enumerable.Range(0, months).Select(i => startMonth.AddMonths(i)).ToList();
-
         var rawData = await context.OutputInfos
             .Join(context.OutputOrders, oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
             .Where(
@@ -483,7 +487,6 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                 })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-
         var revenueData = rawData
             .GroupBy(x => new DateOnly(x.CreatedAt.DateTime.Year, x.CreatedAt.DateTime.Month, 1))
             .Select(
@@ -495,7 +498,6 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                     HasZeroCostPrice = g.Any(x => x.CostPrice == 0)
                 })
             .ToList();
-
         return monthSeries.Select(
             month => new MonthlyRevenueProfitResponse
             {
@@ -537,7 +539,6 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             0,
             0,
             TimeSpan.Zero);
-
         var confirmedInputs = await context.InputInfos
             .Join(context.InputReceipts, ii => ii.InputId, i => i.Id, (ii, i) => new { ii, i })
             .Where(x => x.i.StatusId == InputStatus.Finish)
@@ -545,7 +546,6 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             .Select(g => new { VariantId = g.Key, TotalIn = g.Sum(x => (long)(x.ii.Count ?? 0)) })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-
         var soldOutputsAll = await context.OutputInfos
             .Join(context.OutputOrders, oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
             .Where(
@@ -556,7 +556,6 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             .Select(g => new { VariantId = g.Key, TotalOut = g.Sum(x => (long)(x.oi.Count ?? 0)) })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-
         var soldLastMonth = await context.OutputInfos
             .Join(context.OutputOrders, oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
             .Where(
@@ -569,16 +568,19 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             .Select(g => new { VariantId = g.Key, TotalSold = g.Sum(x => (long)(x.oi.Count ?? 0)) })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-
         var variants = await context.ProductVariants
             .Include(pv => pv.Product)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-
         return variants.Select(
             pv => new ProductReportResponse
             {
-                ProductName = $"{pv.Product?.Name} - {pv.VersionName} ({pv.ColorName?.Split(',').FirstOrDefault()})".Trim(' ', '-', '(', ')'),
+                ProductName =
+                    $"{pv.Product?.Name} - {pv.VersionName} ({pv.ColorName?.Split(',').FirstOrDefault()})".Trim(
+                            ' ',
+                            '-',
+                            '(',
+                            ')'),
                 VariantId = pv.Id,
                 StockQuantity =
                     (int)((confirmedInputs.FirstOrDefault(x => x.VariantId == pv.Id)?.TotalIn ?? 0) -
@@ -591,7 +593,6 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         CancellationToken cancellationToken)
     {
         var last30Days = new DateTimeOffset(DateTime.UtcNow.AddDays(-30), TimeSpan.Zero);
-
         var confirmedInputs = await context.InputInfos
             .Join(context.InputReceipts, ii => ii.InputId, i => i.Id, (ii, i) => new { ii, i })
             .Where(x => x.i.StatusId == InputStatus.Finish && x.ii.DeletedAt == null && x.i.DeletedAt == null)
@@ -599,7 +600,6 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             .Select(g => new { VariantId = g.Key, TotalIn = g.Sum(x => (long)(x.ii.Count ?? 0)) })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-
         var outputsData = await context.OutputInfos
             .Join(context.OutputOrders, oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
             .Where(
@@ -619,23 +619,19 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                 })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-
         var soldOutputsAll = outputsData
             .GroupBy(x => x.ProductVarientId)
             .Select(g => new { VariantId = g.Key, TotalOut = g.Sum(x => (long)x.Count) })
             .ToList();
-
         var soldLast30Days = outputsData
             .Where(x => x.CreatedAt >= last30Days)
             .GroupBy(x => x.ProductVarientId)
             .Select(g => new { VariantId = g.Key, TotalSold = g.Sum(x => (long)x.Count) })
             .ToList();
-
         var variants = await context.ProductVariants
             .Include(pv => pv.Product)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-
         return variants.Select(
             pv =>
             {
@@ -647,10 +643,14 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                 var totalCost = variantOutputs.Sum(x => x.Cost * x.Count);
                 var margin = totalRevenue > 0 ? (double)((totalRevenue - totalCost) / totalRevenue * 100) : 0;
                 var sellPrice = pv.Price ?? 0;
-
                 return new ProductPerformanceTableResponse
                 {
-                    ProductName = $"{pv.Product?.Name} - {pv.VersionName} ({pv.ColorName?.Split(',').FirstOrDefault()})".Trim(' ', '-', '(', ')'),
+                    ProductName =
+                        $"{pv.Product?.Name} - {pv.VersionName} ({pv.ColorName?.Split(',').FirstOrDefault()})".Trim(
+                                ' ',
+                                '-',
+                                '(',
+                                ')'),
                     SellPrice = sellPrice,
                     SoldCount30Days = sold30,
                     StockQuantity = stock,
@@ -671,7 +671,6 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             .ThenInclude(p => p!.Brand)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-
         var confirmedInputs = await context.InputInfos
             .Join(context.InputReceipts, ii => ii.InputId, i => i.Id, (ii, i) => new { ii, i })
             .Where(x => x.i.StatusId == InputStatus.Finish && x.ii.DeletedAt == null && x.i.DeletedAt == null)
@@ -686,7 +685,6 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                 })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-
         var soldOutputsAll = await context.OutputInfos
             .Join(context.OutputOrders, oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
             .Where(
@@ -699,7 +697,6 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             .Select(g => new { VariantId = g.Key, TotalOut = g.Sum(x => (long)(x.oi.Count ?? 0)) })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-
         var variantDatas = variants.Select(
             pv =>
             {
@@ -709,7 +706,6 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                 var costPrice = confirmedInput?.AvgInputPrice ?? 0;
                 return new { BrandName = pv.Product?.Brand?.Name, Stock = stock, Value = stock * costPrice };
             });
-
         var grouped = variantDatas
             .GroupBy(x => x.BrandName ?? "Khác")
             .Select(
@@ -719,7 +715,6 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                     int lowStock = g.Count(x => x.Stock > 0 && x.Stock < 5);
                     int outOfStock = g.Count(x => x.Stock <= 0);
                     decimal value = g.Sum(x => x.Value);
-
                     return new WarehouseTableDataResponse
                     {
                         BrandName = g.Key,
@@ -733,7 +728,6 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                 })
             .OrderByDescending(x => x.TotalStock)
             .ToList();
-
         return grouped;
     }
 
@@ -744,19 +738,16 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         var variant = await context.ProductVariants
             .FirstOrDefaultAsync(pv => pv.Id == variantId, cancellationToken)
             .ConfigureAwait(false);
-
-        if(variant is null)
+        if (variant is null)
         {
             return null;
         }
-
         var totalInput = await context.InputInfos
                 .Join(context.InputReceipts, ii => ii.InputId, i => i.Id, (ii, i) => new { ii, i })
                 .Where(x => x.ii.ProductId == variantId && x.i.StatusId == InputStatus.Finish)
                 .SumAsync(x => (long?)(x.ii.Count ?? 0), cancellationToken)
                 .ConfigureAwait(false) ??
             0;
-
         var totalOutput = await context.OutputInfos
                 .Join(context.OutputOrders, oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
                 .Where(
@@ -767,7 +758,6 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                 .SumAsync(x => (long?)(x.oi.Count ?? 0), cancellationToken)
                 .ConfigureAwait(false) ??
             0;
-
         return new ProductStockPriceResponse
         {
             UnitPrice = variant.Price ?? 0,

@@ -12,13 +12,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog();
 var configuration = builder.Configuration;
 var environment = builder.Environment;
-
 builder.Services.AddApplicationServices();
-if(!environment.IsEnvironment("Test"))
+if (!environment.IsEnvironment("Test"))
 {
     builder.Services.AddInfrastructureServices(configuration);
 }
-
 builder.Services
     .AddCustomLogging(configuration, "Anh Em Motor")
     .AddCustomMvc()
@@ -30,20 +28,16 @@ builder.Services
                 policy =>
                 {
                     var rawOrigins = configuration["Cors:AllowedOrigins"];
-
-                    if(string.IsNullOrWhiteSpace(rawOrigins))
+                    if (string.IsNullOrWhiteSpace(rawOrigins))
                     {
                         throw new InvalidOperationException("CORS AllowedOrigins is missing in appsettings.json.");
                     }
-
                     var allowedOrigins = rawOrigins.Split(';', StringSplitOptions.RemoveEmptyEntries);
-
-                    if(allowedOrigins.Any(origin => string.Compare(origin, "*") == 0))
+                    if (allowedOrigins.Any(origin => string.Compare(origin, "*") == 0))
                     {
                         throw new InvalidOperationException(
                             "Wildcard '*' is not allowed when using AllowCredentials. Please specify exact origins.");
                     }
-
                     policy.WithOrigins(allowedOrigins).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
                 });
         })
@@ -51,15 +45,13 @@ builder.Services
     .AddAuthorization()
     .AddCustomSwagger(environment)
     .AddCustomOpenTelemetry(configuration, "Anh Em Motor");
-
-if(!builder.Environment.IsEnvironment("Test"))
+if (!builder.Environment.IsEnvironment("Test"))
 {
     builder.Services.AddRateLimitingServices();
 }
 builder.Services.Configure<SieveOptions>(configuration.GetSection("Sieve"));
 builder.Services.AddHttpContextAccessor();
 builder.Services.ConfigureOptions<ConfigureSwaggerOptions>();
-
 var app = builder.Build();
 app.UseMiddleware<LogContextMiddleware>();
 app.UseSerilogRequestLogging(
@@ -70,17 +62,15 @@ app.UseSerilogRequestLogging(
             diagnosticContext.Set("ClientIP", httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown");
         };
     });
-
 app.UseExceptionHandler();
-
-if(app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI(
         options =>
         {
             var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
-            foreach(var description in provider.ApiVersionDescriptions)
+            foreach (var description in provider.ApiVersionDescriptions)
             {
                 options.SwaggerEndpoint(
                     $"/swagger/{description.GroupName}/swagger.json",
@@ -95,22 +85,15 @@ if(app.Environment.IsDevelopment())
     Console.WriteLine("=======================================================\n");
     Console.ForegroundColor = originalColor;
 }
-
 app.UseRouting();
-
 app.UseCors("CorsPolicy");
-
-if(!app.Environment.IsEnvironment("Test"))
+if (!app.Environment.IsEnvironment("Test"))
 {
     app.UseForwardedHeaders();
     app.UseRateLimiter();
 }
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
-
 await app.ApplyMigrationsAndSeedAsync(app.Lifetime.ApplicationStopping).ConfigureAwait(true);
-
 app.Run();

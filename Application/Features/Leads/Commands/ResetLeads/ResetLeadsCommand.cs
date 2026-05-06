@@ -3,8 +3,6 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Lead;
 using MediatR;
 using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.Leads.Commands.ResetLeads;
 
@@ -19,8 +17,7 @@ public class ResetLeadsCommandHandler(ILeadWriteRepository leadWriteRepository, 
             await leadWriteRepository.ClearAllAsync(cancellationToken);
             await unitOfWork.SaveChangesAsync(cancellationToken);
             return Result<bool>.Success(true);
-        }
-        catch (Exception ex)
+        } catch (Exception ex)
         {
             return Result<bool>.Failure($"Lỗi khi reset dữ liệu: {ex.Message}");
         }

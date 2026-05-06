@@ -2,6 +2,7 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Banner;
 using Application.Interfaces.Services;
+using Domain.Entities;
 using MediatR;
 
 namespace Application.Features.Banners.Commands.CreateBanner;
@@ -14,7 +15,7 @@ public sealed class CreateBannerCommandHandler(
 {
     public async Task<Result<int>> Handle(CreateBannerCommand request, CancellationToken cancellationToken)
     {
-        var banner = new Domain.Entities.Banner
+        var banner = new Banner
         {
             Title = request.Title.Trim(),
             DesktopImageUrl = request.DesktopImageUrl.Trim(),
@@ -27,20 +28,16 @@ public sealed class CreateBannerCommandHandler(
             IsActive = request.IsActive,
             Priority = request.Priority
         };
-
         bannerInsertRepository.Add(banner);
-
-        // Audit Log
-        bannerAuditRepository.AddLog(new Domain.Entities.BannerAuditLog
-        {
-            Banner = banner,
-            Action = "Create",
-            ChangedBy = tokenAccessorService.GetUserId() ?? "Unknown",
-            Details = $"Created banner '{banner.Title}'"
-        });
-
+        bannerAuditRepository.AddLog(
+            new BannerAuditLog
+            {
+                Banner = banner,
+                Action = "Create",
+                ChangedBy = tokenAccessorService.GetUserId() ?? "Unknown",
+                Details = $"Created banner '{banner.Title}'"
+            });
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
         return Result<int>.Success(banner.Id);
     }
 }

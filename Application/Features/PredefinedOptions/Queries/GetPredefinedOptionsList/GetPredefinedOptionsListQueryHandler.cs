@@ -13,7 +13,6 @@ public sealed class GetPredefinedOptionsListQueryHandler(IPredefinedOptionReadRe
         var options = await repository
             .GetAllAsDictionaryAsync(cancellationToken)
             .ConfigureAwait(false);
-
         return Result<Dictionary<string, string>>.Success(options);
     }
 }

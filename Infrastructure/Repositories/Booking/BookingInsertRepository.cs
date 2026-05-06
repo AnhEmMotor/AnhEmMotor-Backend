@@ -1,5 +1,4 @@
 using Application.Interfaces.Repositories.Booking;
-using Domain.Entities;
 using Infrastructure.DBContexts;
 
 namespace Infrastructure.Repositories.Booking;

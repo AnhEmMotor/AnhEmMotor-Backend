@@ -29,7 +29,7 @@ namespace Domain.Entities
         public string? CtaText { get; set; }
 
         [Column("Placement", TypeName = "nvarchar(50)")]
-        public string? Placement { get; set; } // Home, Category, News
+        public string? Placement { get; set; }
 
         [Column("StartDate")]
         public DateTimeOffset? StartDate { get; set; }
@@ -41,7 +41,7 @@ namespace Domain.Entities
         public bool IsActive { get; set; } = true;
 
         [Column("Priority")]
-        public int Priority { get; set; } // 1-10
+        public int Priority { get; set; }
 
         [Column("ClickCount")]
         public int ClickCount { get; set; } = 0;

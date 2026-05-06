@@ -19,23 +19,18 @@ public sealed class CreateProductCategoryCommandHandler(
         CancellationToken cancellationToken)
     {
         var categoryName = request.Name?.Trim();
-
         var isExisted = await readRepository.ExistsByNameAsync(categoryName!, cancellationToken, DataFetchMode.All)
             .ConfigureAwait(false);
-
-        if(isExisted)
+        if (isExisted)
         {
             return Result<ProductCategoryResponse>.Failure(
                 Error.Conflict($"Category name '{categoryName}' already exists."));
         }
-
         var category = request.Adapt<ProductCategoryEntity>();
         category.Name = categoryName;
         category.Description = string.IsNullOrWhiteSpace(request.Description) ? null : request.Description.Trim();
-
         repository.Add(category);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         return category.Adapt<ProductCategoryResponse>();
     }
 }

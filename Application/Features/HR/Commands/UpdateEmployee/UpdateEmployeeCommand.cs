@@ -3,20 +3,25 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.HR;
 using MediatR;
 using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.HR.Commands.UpdateEmployee;
 
 public record UpdateEmployeeCommand : IRequest<Result<int>>
 {
     public int Id { get; init; }
+
     public string IdentityNumber { get; init; } = string.Empty;
+
     public string Address { get; init; } = string.Empty;
+
     public DateTime ContractDate { get; init; }
+
     public string BankName { get; init; } = string.Empty;
+
     public string BankAccountNumber { get; init; } = string.Empty;
+
     public string JobTitle { get; init; } = string.Empty;
+
     public decimal BaseSalary { get; init; }
 }
 
@@ -32,7 +37,6 @@ public class UpdateEmployeeCommandHandler(
         {
             return Result<int>.Failure("Không tìm thấy hồ sơ nhân sự.");
         }
-
         employee.IdentityNumber = request.IdentityNumber.Trim();
         employee.Address = request.Address.Trim();
         employee.ContractDate = request.ContractDate;
@@ -40,10 +44,8 @@ public class UpdateEmployeeCommandHandler(
         employee.BankAccountNumber = request.BankAccountNumber.Trim();
         employee.JobTitle = request.JobTitle;
         employee.BaseSalary = request.BaseSalary;
-
         employeeUpdateRepository.Update(employee);
         await unitOfWork.SaveChangesAsync(cancellationToken);
-        
         return Result<int>.Success(employee.Id);
     }
 }

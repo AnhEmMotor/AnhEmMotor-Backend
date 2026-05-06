@@ -5,13 +5,13 @@ using MediatR;
 
 namespace Application.Features.Bookings.Queries.GetBookings;
 
-public record GetBookingsQuery : IRequest<Result<List<Domain.Entities.Booking>>>;
+public record GetBookingsQuery : IRequest<Result<List<Booking>>>;
 
-public class GetBookingsQueryHandler(IBookingReadRepository bookingReadRepository) : IRequestHandler<GetBookingsQuery, Result<List<Domain.Entities.Booking>>>
+public class GetBookingsQueryHandler(IBookingReadRepository bookingReadRepository) : IRequestHandler<GetBookingsQuery, Result<List<Booking>>>
 {
-    public async Task<Result<List<Domain.Entities.Booking>>> Handle(GetBookingsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<Booking>>> Handle(GetBookingsQuery request, CancellationToken cancellationToken)
     {
         var bookings = await bookingReadRepository.GetAllAsync(cancellationToken);
-        return Result<List<Domain.Entities.Booking>>.Success(bookings);
+        return Result<List<Booking>>.Success(bookings);
     }
 }

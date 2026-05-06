@@ -21,16 +21,13 @@ public sealed class DeleteProductImageCommandHandler(
             cancellationToken,
             DataFetchMode.ActiveOnly)
             .ConfigureAwait(false);
-
-        if(mediaFile is null)
+        if (mediaFile is null)
         {
             return Result.Failure(Error.NotFound("File not found."));
         }
-
         deleteRepository.Delete(mediaFile);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-        if(!string.IsNullOrWhiteSpace(mediaFile.StoragePath))
+        if (!string.IsNullOrWhiteSpace(mediaFile.StoragePath))
         {
             try
             {
@@ -39,7 +36,6 @@ public sealed class DeleteProductImageCommandHandler(
             {
             }
         }
-
         return Result.Success();
     }
 }

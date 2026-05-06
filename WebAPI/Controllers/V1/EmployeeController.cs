@@ -1,15 +1,10 @@
-using Application.Common.Models;
-using Application.Features.HR.Queries.GetEmployees;
-using Application.Features.HR.Commands.UpdateEmployee;
 using Application.Features.HR.Commands.CreateEmployee;
+using Application.Features.HR.Commands.UpdateEmployee;
+using Application.Features.HR.Queries.GetEmployees;
 using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
 using Swashbuckle.AspNetCore.Annotations;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1;
@@ -44,7 +39,9 @@ public class EmployeeController(IMediator mediator) : ApiController
     /// <returns>The created employee ID.</returns>
     [HttpPost]
     [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
-    public async Task<IActionResult> CreateEmployeeAsync([FromBody] CreateEmployeeCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateEmployeeAsync(
+        [FromBody] CreateEmployeeCommand command,
+        CancellationToken cancellationToken)
     {
         var result = await mediator.Send(command, cancellationToken);
         return HandleResult(result);
@@ -59,13 +56,15 @@ public class EmployeeController(IMediator mediator) : ApiController
     /// <returns>The updated employee ID.</returns>
     [HttpPut("{id}")]
     [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
-    public async Task<IActionResult> UpdateEmployeeAsync(int id, [FromBody] UpdateEmployeeCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateEmployeeAsync(
+        int id,
+        [FromBody] UpdateEmployeeCommand command,
+        CancellationToken cancellationToken)
     {
         if (id != command.Id)
         {
             return BadRequest("ID mismatch.");
         }
-
         var result = await mediator.Send(command, cancellationToken);
         return HandleResult(result);
     }

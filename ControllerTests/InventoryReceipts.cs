@@ -37,13 +37,12 @@ public class InventoryReceipts
     {
         _mediatorMock = new Mock<IMediator>();
         _controller = new InventoryReceiptsController(_mediatorMock.Object);
-
         var httpContext = new DefaultHttpContext();
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
     }
 
-#pragma warning disable IDE0079 
-#pragma warning disable CRR0035
+    #pragma warning disable IDE0079 
+    #pragma warning disable CRR0035
     [Fact(DisplayName = "INPUT_003 - Tạo phiếu nhập thiếu quyền Create")]
     public async Task CreateInput_MissingPermission_ReturnsForbidden()
     {
@@ -51,12 +50,10 @@ public class InventoryReceipts
         {
             Notes = "Test",
             SupplierId = 1,
-            Products = [ new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 } ]
+            Products = [new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }]
         };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateInputCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException("User does not have permission Permissions.Inputs.Create"));
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.CreateInputAsync(request, CancellationToken.None))
             .ConfigureAwait(true);
@@ -66,10 +63,8 @@ public class InventoryReceipts
     public async Task GetInputs_MissingPermission_ReturnsForbidden()
     {
         var sieveModel = new SieveModel { Page = 1, PageSize = 10 };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetInputsListQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException("User does not have permission Permissions.Inputs.View"));
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.GetInputsAsync(sieveModel, CancellationToken.None))
             .ConfigureAwait(true);
@@ -79,10 +74,8 @@ public class InventoryReceipts
     public async Task GetInputById_MissingPermission_ReturnsForbidden()
     {
         int inputId = 1;
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetInputByIdQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException("User does not have permission Permissions.Inputs.View"));
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.GetInputByIdAsync(inputId, CancellationToken.None))
             .ConfigureAwait(true);
@@ -93,10 +86,8 @@ public class InventoryReceipts
     {
         int inputId = 1;
         var request = new UpdateInputCommand { Notes = "Updated", SupplierId = 2, Products = [] };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateInputCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException("User does not have permission Permissions.Inputs.Edit"));
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.UpdateInputAsync(inputId, request, CancellationToken.None))
             .ConfigureAwait(true);
@@ -107,12 +98,9 @@ public class InventoryReceipts
     {
         int inputId = 9999;
         var request = new UpdateInputCommand { Notes = "Updated", SupplierId = 2, Products = [] };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateInputCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<InputDetailResponse?>.Failure(Error.NotFound("Input not found")));
-
         var result = await _controller.UpdateInputAsync(inputId, request, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().BeOfType<NotFoundObjectResult>();
     }
 
@@ -121,11 +109,9 @@ public class InventoryReceipts
     {
         int inputId = 1;
         var request = new UpdateInputStatusCommand { StatusId = "finished" };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateInputStatusCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(
                 new UnauthorizedAccessException("User does not have permission Permissions.Inputs.ChangeStatus"));
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.UpdateInputStatusAsync(inputId, request, CancellationToken.None))
             .ConfigureAwait(true);
@@ -135,12 +121,9 @@ public class InventoryReceipts
     public async Task DeleteInput_FinishedStatus_ReturnsBadRequest()
     {
         int inputId = 1;
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteInputCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Failure(Error.BadRequest("Cannot delete finished input")));
-
         var result = await _controller.DeleteInputAsync(inputId, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().BeOfType<BadRequestObjectResult>();
     }
 
@@ -148,10 +131,8 @@ public class InventoryReceipts
     public async Task DeleteInput_MissingPermission_ReturnsForbidden()
     {
         int inputId = 1;
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteInputCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException("User does not have permission Permissions.Inputs.Delete"));
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.DeleteInputAsync(inputId, CancellationToken.None))
             .ConfigureAwait(true);
@@ -161,12 +142,9 @@ public class InventoryReceipts
     public async Task DeleteInput_NotFound_ReturnsNotFound()
     {
         int inputId = 9999;
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteInputCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Failure(Error.NotFound("Input not found")));
-
         var result = await _controller.DeleteInputAsync(inputId, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().BeOfType<NotFoundObjectResult>();
     }
 
@@ -174,12 +152,9 @@ public class InventoryReceipts
     public async Task RestoreInput_NotDeleted_ReturnsBadRequest()
     {
         int inputId = 1;
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<RestoreInputCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<InputDetailResponse>.Failure(Error.BadRequest("Input is not deleted")));
-
         var result = await _controller.RestoreInputAsync(inputId, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().BeOfType<BadRequestObjectResult>();
     }
 
@@ -187,10 +162,8 @@ public class InventoryReceipts
     public async Task CloneInput_MissingPermission_ReturnsForbidden()
     {
         int inputId = 1;
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<CloneInputCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException("User does not have permission Permissions.Inputs.Create"));
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.CloneInputAsync(inputId, CancellationToken.None))
             .ConfigureAwait(true);
@@ -200,12 +173,9 @@ public class InventoryReceipts
     public async Task CloneInput_NotFound_ReturnsNotFound()
     {
         int inputId = 9999;
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<CloneInputCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<InputDetailResponse?>.Failure(Error.NotFound("Input not found")));
-
         var result = await _controller.CloneInputAsync(inputId, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().BeOfType<NotFoundObjectResult>();
     }
 
@@ -213,10 +183,8 @@ public class InventoryReceipts
     public async Task DeleteManyInputs_EmptyList_ReturnsBadRequest()
     {
         var request = new DeleteManyInputsCommand { Ids = [] };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteManyInputsCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new ValidationException("InputIds cannot be empty"));
-
         await Assert.ThrowsAsync<ValidationException>(
             () => _controller.DeleteManyInputsAsync(request, CancellationToken.None))
             .ConfigureAwait(true);
@@ -226,10 +194,8 @@ public class InventoryReceipts
     public async Task UpdateManyInputStatus_EmptyList_ReturnsBadRequest()
     {
         var request = new UpdateManyInputStatusCommand { Ids = [], StatusId = "finished" };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateManyInputStatusCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new ValidationException("InputIds cannot be empty"));
-
         await Assert.ThrowsAsync<ValidationException>(
             () => _controller.UpdateManyInputStatusAsync(request, CancellationToken.None))
             .ConfigureAwait(true);
@@ -239,10 +205,8 @@ public class InventoryReceipts
     public async Task RestoreManyInputs_EmptyList_ReturnsBadRequest()
     {
         var request = new RestoreManyInputsCommand { Ids = [] };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<RestoreManyInputsCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new ValidationException("InputIds cannot be empty"));
-
         await Assert.ThrowsAsync<ValidationException>(
             () => _controller.RestoreManyInputsAsync(request, CancellationToken.None))
             .ConfigureAwait(true);
@@ -253,12 +217,9 @@ public class InventoryReceipts
     {
         var sieveModel = new SieveModel { Page = 1, PageSize = 10 };
         var expectedResponse = new PagedResult<InputListResponse>([], 0, 1, 10);
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetDeletedInputsListQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PagedResult<InputListResponse>>.Success(expectedResponse));
-
         var result = await _controller.GetDeletedInputsAsync(sieveModel, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().BeOfType<OkObjectResult>();
         var okResult = result as OkObjectResult;
         okResult!.Value.Should().BeEquivalentTo(expectedResponse);
@@ -270,13 +231,10 @@ public class InventoryReceipts
         int supplierId = 1;
         var sieveModel = new SieveModel { Page = 1, PageSize = 10 };
         var expectedResponse = new PagedResult<InputListResponse>([], 0, 1, 10);
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetInputsBySupplierIdQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PagedResult<InputListResponse>>.Success(expectedResponse));
-
         var result = await _controller.GetInputsBySupplierIdAsync(supplierId, sieveModel, CancellationToken.None)
             .ConfigureAwait(true);
-
         result.Should().BeOfType<OkObjectResult>();
         var okResult = result as OkObjectResult;
         okResult!.Value.Should().BeEquivalentTo(expectedResponse);
@@ -289,16 +247,12 @@ public class InventoryReceipts
         {
             Notes = "Test",
             SupplierId = 1,
-            Products = [ new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 } ]
+            Products = [new CreateInputInfoRequest { ProductId = 1, Count = 10, InputPrice = 100000 }]
         };
-
         var expectedResponse = new InputDetailResponse { Id = 1, StatusId = "working" };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateInputCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<InputDetailResponse?>.Success(expectedResponse));
-
         var result = await _controller.CreateInputAsync(request, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().BeOfType<CreatedAtRouteResult>();
         _mediatorMock.Verify(m => m.Send(It.IsAny<CreateInputCommand>(), It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -308,14 +262,10 @@ public class InventoryReceipts
     {
         int inputId = 1;
         var request = new UpdateInputCommand { Notes = "Updated", SupplierId = 2, Products = [] };
-
         var expectedResponse = new InputDetailResponse { Id = inputId, Notes = "Updated" };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateInputCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<InputDetailResponse?>.Success(expectedResponse));
-
         var result = await _controller.UpdateInputAsync(inputId, request, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().BeOfType<OkObjectResult>();
         _mediatorMock.Verify(m => m.Send(It.IsAny<UpdateInputCommand>(), It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -325,15 +275,11 @@ public class InventoryReceipts
     {
         int inputId = 1;
         var request = new UpdateInputStatusCommand { StatusId = "finished" };
-
         var expectedResponse = new InputDetailResponse { Id = inputId, StatusId = "finished" };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateInputStatusCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<InputDetailResponse>.Success(expectedResponse));
-
         var result = await _controller.UpdateInputStatusAsync(inputId, request, CancellationToken.None)
             .ConfigureAwait(true);
-
         result.Should().BeOfType<OkObjectResult>();
         _mediatorMock.Verify(
             m => m.Send(It.IsAny<UpdateInputStatusCommand>(), It.IsAny<CancellationToken>()),
@@ -345,7 +291,6 @@ public class InventoryReceipts
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetInputStatusListQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException("User does not have permission Permissions.Inputs.View"));
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.GetInputStatusesAsync(CancellationToken.None))
             .ConfigureAwait(true);
@@ -362,9 +307,7 @@ public class InventoryReceipts
         };
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetInputStatusListQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<Dictionary<string, string>>.Success(expectedStatuses));
-
         var result = await _controller.GetInputStatusesAsync(CancellationToken.None).ConfigureAwait(true);
-
         result.Should().BeOfType<OkObjectResult>();
         _mediatorMock.Verify(
             m => m.Send(It.IsAny<GetInputStatusListQuery>(), It.IsAny<CancellationToken>()),
@@ -377,13 +320,11 @@ public class InventoryReceipts
         var expectedStatuses = new Dictionary<string, string> { { InputStatus.Working, "Phi?u t?m" } };
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetInputStatusListQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<Dictionary<string, string>>.Success(expectedStatuses));
-
         var result = await _controller.GetInputStatusesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var okResult = result as OkObjectResult;
         okResult.Should().NotBeNull();
         okResult!.Value.Should().BeEquivalentTo(expectedStatuses);
     }
-#pragma warning restore CRR0035
-#pragma warning restore IDE0079
+    #pragma warning restore CRR0035
+    #pragma warning restore IDE0079
 }

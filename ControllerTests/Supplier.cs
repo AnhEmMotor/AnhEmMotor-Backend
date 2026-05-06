@@ -30,18 +30,16 @@ public class Supplier
     {
         _mediatorMock = new Mock<IMediator>();
         _controller = new SupplierController(_mediatorMock.Object);
-
         var httpContext = new DefaultHttpContext();
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
     }
 
-#pragma warning disable IDE0079 
-#pragma warning disable CRR0035
+    #pragma warning disable IDE0079 
+    #pragma warning disable CRR0035
     [Fact(DisplayName = "SUP_046 - Tạo Supplier thành công qua API")]
     public async Task CreateSupplier_Success_ReturnsCreatedSupplier()
     {
         var request = new CreateSupplierCommand { Name = "API Supplier", Phone = "0123456789", Address = "API Street" };
-
         var expectedResponse = new SupplierResponse
         {
             Id = 1,
@@ -50,18 +48,12 @@ public class Supplier
             Address = "API Street",
             StatusId = "active"
         };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateSupplierCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<SupplierResponse>.Success(expectedResponse));
-
         var result = await _controller.CreateSupplierAsync(request, CancellationToken.None).ConfigureAwait(true);
-
         var createdAtActionResult = result.Should().BeOfType<CreatedAtRouteResult>().Subject;
-
         createdAtActionResult.StatusCode.Should().Be(StatusCodes.Status201Created);
-
         createdAtActionResult.RouteValues?["id"].Should().Be(1);
-
         var response = createdAtActionResult.Value.Should().BeOfType<SupplierResponse>().Subject;
         response.Id.Should().Be(1);
         response.Name.Should().Be("API Supplier");
@@ -72,10 +64,8 @@ public class Supplier
     public async Task CreateSupplier_NoPermission_ReturnsForbidden()
     {
         var request = new CreateSupplierCommand { Name = "No Permission", Phone = "0123456789", Address = "123 Street" };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateSupplierCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException("No permission"));
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.CreateSupplierAsync(request, CancellationToken.None))
             .ConfigureAwait(true);
@@ -85,10 +75,8 @@ public class Supplier
     public async Task CreateSupplier_Unauthorized_ReturnsUnauthorized()
     {
         var request = new CreateSupplierCommand { Name = "Unauthorized", Phone = "0123456789", Address = "123 Street" };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateSupplierCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException("Not authenticated"));
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.CreateSupplierAsync(request, CancellationToken.None))
             .ConfigureAwait(true);
@@ -104,12 +92,9 @@ public class Supplier
             new() { Id = 2, Name = "Supplier 2", StatusId = "inactive", TotalInput = 2000000 }
         };
         var expectedResponse = new PagedResult<SupplierResponse>(items, 15, 1, 10);
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetSuppliersListQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PagedResult<SupplierResponse>>.Success(expectedResponse));
-
         var result = await _controller.GetSuppliersAsync(sieveModel, CancellationToken.None).ConfigureAwait(true);
-
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
         var response = okResult.Value.Should().BeOfType<PagedResult<SupplierResponse>>().Subject;
         response.Items.Should().HaveCount(2);
@@ -121,26 +106,19 @@ public class Supplier
     public async Task GetSuppliersForInput_ReturnsOnlyActiveSuppliers()
     {
         var sieveModel = new SieveModel();
-
         var items = new List<SupplierForInputManagerResponse>
         {
             new() { Id = 1, Name = "Supplier 1" },
             new() { Id = 2, Name = "Supplier 2" }
         };
-
         var expectedResponse = new PagedResult<SupplierForInputManagerResponse>(items, 10, 1, 10);
-
         _mediatorMock.Setup(
             m => m.Send(It.IsAny<GetSuppliersListForInputManagerQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PagedResult<SupplierForInputManagerResponse>>.Success(expectedResponse));
-
         var result = await _controller.GetSuppliersForInputAsync(sieveModel, CancellationToken.None)
             .ConfigureAwait(true);
-
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
-
         var response = okResult.Value.Should().BeOfType<PagedResult<SupplierForInputManagerResponse>>().Subject;
-
         response.Items.Should().HaveCount(2);
     }
 
@@ -155,12 +133,9 @@ public class Supplier
             new() { Id = 2, Name = "Supplier 2", StatusId = "active" }
         };
         var expectedResponse = new PagedResult<SupplierResponse>(items, 10, 1, 10);
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetSuppliersListQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PagedResult<SupplierResponse>>.Success(expectedResponse));
-
         var result = await _controller.GetSuppliersAsync(sieveModel, CancellationToken.None).ConfigureAwait(true);
-
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
         var response = okResult.Value.Should().BeOfType<PagedResult<SupplierResponse>>().Subject;
         response.Items.Should().OnlyContain(s => string.Compare(s.StatusId, "active") == 0);
@@ -177,12 +152,9 @@ public class Supplier
             StatusId = "active",
             TotalInput = 5000000
         };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetSupplierByIdQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<SupplierResponse?>.Success(expectedResponse));
-
         var result = await _controller.GetSupplierByIdAsync(1, CancellationToken.None).ConfigureAwait(true);
-
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
         var response = okResult.Value.Should().BeOfType<SupplierResponse>().Subject;
         response.Id.Should().Be(1);
@@ -199,12 +171,9 @@ public class Supplier
             StatusId = "active",
             TotalInput = 5000000
         };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetSupplierByIdQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<SupplierResponse?>.Success(expectedResponse));
-
         var result = await _controller.GetSupplierByIdAsync(1, CancellationToken.None).ConfigureAwait(true);
-
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
         var response = okResult.Value.Should().BeOfType<SupplierResponse>().Subject;
         response.StatusId.Should().Be("active");
@@ -216,7 +185,6 @@ public class Supplier
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetSupplierByIdQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException("No permission to view inactive supplier"));
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.GetSupplierByIdAsync(1, CancellationToken.None))
             .ConfigureAwait(true);
@@ -226,10 +194,8 @@ public class Supplier
     public async Task UpdateSupplier_NoPermission_ReturnsForbidden()
     {
         var request = new UpdateSupplierCommand { Name = "Updated" };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateSupplierCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException("No permission"));
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.UpdateSupplierAsync(1, request, CancellationToken.None))
             .ConfigureAwait(true);
@@ -240,7 +206,6 @@ public class Supplier
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteSupplierCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException("No permission"));
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.DeleteSupplierAsync(1, CancellationToken.None))
             .ConfigureAwait(true);
@@ -250,10 +215,8 @@ public class Supplier
     public async Task GetDeletedSuppliers_NoPermission_ReturnsForbidden()
     {
         var sieveModel = new SieveModel();
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetDeletedSuppliersListQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException("No permission"));
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.GetDeletedSuppliersAsync(sieveModel, CancellationToken.None))
             .ConfigureAwait(true);
@@ -262,11 +225,9 @@ public class Supplier
     [Fact(DisplayName = "SUP_058 - Xóa nhiều Supplier với một phần thành công và một phần thất bại")]
     public async Task DeleteManySuppliers_PartialFailure_ReturnsError()
     {
-        var request = new DeleteManySuppliersCommand { Ids = [ 1, 2, 3 ] };
-
+        var request = new DeleteManySuppliersCommand { Ids = [1, 2, 3] };
         _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteManySuppliersCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new InvalidOperationException("Cannot delete supplier with working input receipts"));
-
         await Assert.ThrowsAsync<InvalidOperationException>(
             () => _controller.DeleteSuppliersAsync(request, CancellationToken.None))
             .ConfigureAwait(true);
@@ -277,7 +238,6 @@ public class Supplier
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<RestoreSupplierCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException("No permission"));
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.RestoreSupplierAsync(1, CancellationToken.None))
             .ConfigureAwait(true);
@@ -286,15 +246,13 @@ public class Supplier
     [Fact(DisplayName = "SUP_060 - Cập nhật trạng thái nhiều Supplier thất bại khi không có quyền")]
     public async Task UpdateManySupplierStatus_NoPermission_ReturnsForbidden()
     {
-        var request = new UpdateManySupplierStatusCommand { Ids = [ 1, 2 ], StatusId = "inactive" };
-
+        var request = new UpdateManySupplierStatusCommand { Ids = [1, 2], StatusId = "inactive" };
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateManySupplierStatusCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException("No permission"));
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.UpdateManySupplierStatusAsync(request, CancellationToken.None))
             .ConfigureAwait(true);
     }
-#pragma warning restore CRR0035
-#pragma warning restore IDE0079
+    #pragma warning restore CRR0035
+    #pragma warning restore IDE0079
 }

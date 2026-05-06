@@ -18,41 +18,34 @@ public class ChangeUserStatusCommandHandler(
         CancellationToken cancellationToken)
     {
         var user = await userReadRepository.FindUserByIdAsync(request.UserId, cancellationToken).ConfigureAwait(false);
-        if(user is null)
+        if (user is null)
         {
             return Error.NotFound("User not found.");
         }
-
-        if(user.DeletedAt is not null)
+        if (user.DeletedAt is not null)
         {
             return Error.BadRequest("Cannot change status of a deleted user.");
         }
-
         cancellationToken.ThrowIfCancellationRequested();
-
-        if(string.Compare(request.Status, UserStatus.Banned) == 0)
+        if (string.Compare(request.Status, UserStatus.Banned) == 0)
         {
             var protectedUsers = protectedEntityManagerService.GetProtectedUsers() ?? [];
             var protectedEmails = protectedUsers.Select(entry => entry.Split(':')[0].Trim()).ToList();
-
-            if(!string.IsNullOrEmpty(user.Email) && protectedEmails.Contains(user.Email))
+            if (!string.IsNullOrEmpty(user.Email) && protectedEmails.Contains(user.Email))
             {
                 return Error.Validation("Cannot deactivate protected user.", "Email");
             }
-
             var superRoles = protectedEntityManagerService.GetSuperRoles() ?? [];
             var userRoles = await userReadRepository.GetUserRolesAsync(user, cancellationToken).ConfigureAwait(false);
-
-            foreach(var userRole in userRoles)
+            foreach (var userRole in userRoles)
             {
-                if(superRoles.Contains(userRole))
+                if (superRoles.Contains(userRole))
                 {
                     var usersInRole = await userReadRepository.GetUsersInRoleAsync(userRole, cancellationToken)
                         .ConfigureAwait(false);
                     var activeUsersInRole = usersInRole.Where(u => string.Compare(u.Status, UserStatus.Active) == 0)
                         .ToList();
-
-                    if(activeUsersInRole.Count == 1 && activeUsersInRole[0].Id == request.UserId)
+                    if (activeUsersInRole.Count == 1 && activeUsersInRole[0].Id == request.UserId)
                     {
                         return Error.Validation(
                             $"Cannot deactivate user. This is the last active user with SuperRole '{userRole}'.",
@@ -61,18 +54,15 @@ public class ChangeUserStatusCommandHandler(
                 }
             }
         }
-
         user.Status = request.Status!;
         var (succeeded, errors) = await userUpdateRepository.UpdateUserAsync(user, cancellationToken)
             .ConfigureAwait(false);
-        if(!succeeded)
+        if (!succeeded)
         {
             var validationErrors = errors.Select(e => Error.Validation(e)).ToList();
             return Result<ChangeStatusUserByManagerResponse>.Failure(validationErrors);
         }
-
         userStreamService.NotifyUserUpdate(user.Id);
-
         return new ChangeStatusUserByManagerResponse()
         {
             Message = $"User status changed to {request.Status} successfully.",

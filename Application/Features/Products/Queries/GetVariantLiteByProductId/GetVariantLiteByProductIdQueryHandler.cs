@@ -19,44 +19,36 @@ public sealed class GetVariantLiteByProductIdQueryHandler(
     {
         var product = await productReadRepository.GetByIdAsync(request.ProductId, cancellationToken)
             .ConfigureAwait(false);
-
-        if(product == null)
+        if (product == null)
         {
             return Error.NotFound($"Product with Id {request.ProductId} not found.");
         }
-
         var mode = request.IncludeDeleted ? DataFetchMode.All : DataFetchMode.ActiveOnly;
-
         var variants = await variantReadRepository.GetByProductIdAsync(request.ProductId, cancellationToken, mode)
             .ConfigureAwait(false);
-
         var responses = variants.Select(
             v =>
             {
                 var response = v.Adapt<ProductVariantLiteResponse>();
-
-                if(string.IsNullOrWhiteSpace(response.VariantName) && v.VariantOptionValues.Count > 0)
+                if (string.IsNullOrWhiteSpace(response.VariantName) && v.VariantOptionValues.Count > 0)
                 {
                     var parts = v.VariantOptionValues
                         .Where(vov => vov.OptionValue != null)
                         .Select(vov => vov.OptionValue!.Name)
                         .Where(n => !string.IsNullOrWhiteSpace(n))
                         .ToList();
-
-                    if(parts.Count > 0)
+                    if (parts.Count > 0)
                     {
                         response.VariantName = string.Join(" - ", parts);
-                        if(!string.IsNullOrWhiteSpace(response.ProductName))
+                        if (!string.IsNullOrWhiteSpace(response.ProductName))
                         {
                             response.DisplayName = $"{response.ProductName} ({response.VariantName})";
                         }
                     }
                 }
-
                 return response;
             })
             .ToList();
-
         return responses;
     }
 }

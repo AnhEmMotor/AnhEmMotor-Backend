@@ -1,12 +1,11 @@
 using Application.ApiContracts.News.Responses;
 using Application.Common.Models;
 using Application.Features.News.Commands.CreateNews;
-using Application.Features.News.Commands.UpdateNews;
 using Application.Features.News.Commands.DeleteNews;
+using Application.Features.News.Commands.UpdateNews;
 using Application.Features.News.Queries.GetNewsBySlug;
 using Application.Features.News.Queries.GetNewsList;
 using Asp.Versioning;
-using Domain.Constants;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
@@ -14,7 +13,6 @@ using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
-
 
 namespace WebAPI.Controllers.V1;
 
@@ -65,7 +63,8 @@ public class NewsController(IMediator mediator) : ApiController
     [SwaggerOperation(Summary = "Cập nhật bài viết")]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateNewsCommand command)
     {
-        if (id != command.Id) return BadRequest("ID mismatch");
+        if (id != command.Id)
+            return BadRequest("ID mismatch");
         var result = await mediator.Send(command);
         return HandleResult(result);
     }

@@ -1,3 +1,4 @@
+
 namespace Domain.Entities.HR;
 
 /// <summary>
@@ -5,10 +6,16 @@ namespace Domain.Entities.HR;
 /// </summary>
 public enum CommissionStatus
 {
-    /// <summary>Tạm tính - Khi đơn hàng đang Processing/Confirmed</summary>
+    /// <summary>
+    /// Tạm tính - Khi đơn hàng đang Processing/Confirmed
+    /// </summary>
     Pending = 0,
-    /// <summary>Ghi nhận - Khi đơn hàng chuyển sang Completed</summary>
+    /// <summary>
+    /// Ghi nhận - Khi đơn hàng chuyển sang Completed
+    /// </summary>
     Confirmed = 1,
-    /// <summary>Đã chi trả - Sau khi Admin duyệt chi trả cuối tháng</summary>
+    /// <summary>
+    /// Đã chi trả - Sau khi Admin duyệt chi trả cuối tháng
+    /// </summary>
     Paid = 2
 }

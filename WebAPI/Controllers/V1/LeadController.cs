@@ -1,19 +1,18 @@
 using Application.ApiContracts.Leads.Responses;
-using Application.Features.Leads.Commands.UpdateLead;
-using Application.Features.Leads.Queries.GetLeads;
-using Application.Features.Leads.Commands.ResetLeads;
+using Application.Features.Leads.Commands.AddLeadActivity;
 using Application.Features.Leads.Commands.AssignLead;
+using Application.Features.Leads.Commands.ResetLeads;
 using Application.Features.Leads.Commands.SeedLeads;
+using Application.Features.Leads.Commands.UpdateLead;
+using Application.Features.Leads.Queries.GetLeadById;
+using Application.Features.Leads.Queries.GetLeadPipeline;
+using Application.Features.Leads.Queries.GetLeads;
 using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 
 namespace WebAPI.Controllers.V1;
 
@@ -45,7 +44,7 @@ public class LeadController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(LeadResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetLeadByIdAsync(int id, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new Application.Features.Leads.Queries.GetLeadById.GetLeadByIdQuery(id), cancellationToken);
+        var result = await mediator.Send(new GetLeadByIdQuery(id), cancellationToken);
         return HandleResult(result);
     }
 
@@ -54,10 +53,10 @@ public class LeadController(IMediator mediator) : ApiController
     /// </summary>
     [HttpGet("pipeline")]
     [Authorize]
-    [ProducesResponseType(typeof(List<Application.Features.Leads.Queries.GetLeadPipeline.LeadPipelineGroupResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(List<LeadPipelineGroupResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetPipelineAsync(CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new Application.Features.Leads.Queries.GetLeadPipeline.GetLeadPipelineQuery(), cancellationToken);
+        var result = await mediator.Send(new GetLeadPipelineQuery(), cancellationToken);
         return HandleResult(result);
     }
 
@@ -67,9 +66,13 @@ public class LeadController(IMediator mediator) : ApiController
     [HttpPut("{id}")]
     [Authorize]
     [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
-    public async Task<IActionResult> UpdateLeadAsync(int id, UpdateLeadCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateLeadAsync(
+        int id,
+        UpdateLeadCommand command,
+        CancellationToken cancellationToken)
     {
-        if (id != command.Id) return BadRequest();
+        if (id != command.Id)
+            return BadRequest();
         var result = await mediator.Send(command, cancellationToken);
         return HandleResult(result);
     }
@@ -80,9 +83,13 @@ public class LeadController(IMediator mediator) : ApiController
     [HttpPost("{id}/activities")]
     [Authorize]
     [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
-    public async Task<IActionResult> AddActivityAsync(int id, [FromBody] Application.Features.Leads.Commands.AddLeadActivity.AddLeadActivityCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> AddActivityAsync(
+        int id,
+        [FromBody] AddLeadActivityCommand command,
+        CancellationToken cancellationToken)
     {
-        if (id != command.LeadId) return BadRequest();
+        if (id != command.LeadId)
+            return BadRequest();
         var result = await mediator.Send(command, cancellationToken);
         return Ok(result);
     }
@@ -93,7 +100,10 @@ public class LeadController(IMediator mediator) : ApiController
     [HttpPost("{id}/assign")]
     [Authorize]
     [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
-    public async Task<IActionResult> AssignLeadAsync(int id, [FromBody] Guid? userId, CancellationToken cancellationToken)
+    public async Task<IActionResult> AssignLeadAsync(
+        int id,
+        [FromBody] Guid? userId,
+        CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new AssignLeadCommand(id, userId), cancellationToken);
         return HandleResult(result);

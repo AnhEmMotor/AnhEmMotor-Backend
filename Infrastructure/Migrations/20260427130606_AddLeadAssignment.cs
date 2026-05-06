@@ -1,5 +1,5 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 #nullable disable
 
@@ -16,12 +16,7 @@ namespace Infrastructure.Migrations
                 table: "Lead",
                 type: "uniqueidentifier",
                 nullable: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Lead_AssignedToId",
-                table: "Lead",
-                column: "AssignedToId");
-
+            migrationBuilder.CreateIndex(name: "IX_Lead_AssignedToId", table: "Lead", column: "AssignedToId");
             migrationBuilder.AddForeignKey(
                 name: "FK_Lead_Users_AssignedToId",
                 table: "Lead",
@@ -33,17 +28,9 @@ namespace Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Lead_Users_AssignedToId",
-                table: "Lead");
-
-            migrationBuilder.DropIndex(
-                name: "IX_Lead_AssignedToId",
-                table: "Lead");
-
-            migrationBuilder.DropColumn(
-                name: "AssignedToId",
-                table: "Lead");
+            migrationBuilder.DropForeignKey(name: "FK_Lead_Users_AssignedToId", table: "Lead");
+            migrationBuilder.DropIndex(name: "IX_Lead_AssignedToId", table: "Lead");
+            migrationBuilder.DropColumn(name: "AssignedToId", table: "Lead");
         }
     }
 }

@@ -5,10 +5,10 @@ using System;
 
 namespace Infrastructure.Migrations
 {
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public partial class AddOptionNameFkToPredefinedOption : Migration
     {
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
@@ -27,15 +27,12 @@ namespace Infrastructure.Migrations
                     table.PrimaryKey("PK_PredefinedOption", x => x.Id);
                     table.UniqueConstraint("AK_PredefinedOption_Key", x => x.Key);
                 });
-
             migrationBuilder.CreateIndex(name: "IX_Option_Name", table: "Option", column: "Name");
-
             migrationBuilder.CreateIndex(
                 name: "IX_PredefinedOption_Key",
                 table: "PredefinedOption",
                 column: "Key",
                 unique: true);
-
             migrationBuilder.AddForeignKey(
                 name: "FK_Option_PredefinedOption_Name",
                 table: "Option",
@@ -45,13 +42,11 @@ namespace Infrastructure.Migrations
                 onDelete: ReferentialAction.Restrict);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(name: "FK_Option_PredefinedOption_Name", table: "Option");
-
             migrationBuilder.DropTable(name: "PredefinedOption");
-
             migrationBuilder.DropIndex(name: "IX_Option_Name", table: "Option");
         }
     }

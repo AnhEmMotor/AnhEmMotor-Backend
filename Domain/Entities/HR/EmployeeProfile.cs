@@ -30,11 +30,12 @@ public class EmployeeProfile : BaseEntity
     public string BankAccountNumber { get; set; } = string.Empty;
 
     [Column(TypeName = "nvarchar(50)")]
-    public string JobTitle { get; set; } = string.Empty; // Trưởng phòng, Sale, Kế toán
+    public string JobTitle { get; set; } = string.Empty;
 
     [Column(TypeName = "decimal(18,2)")]
     public decimal BaseSalary { get; set; }
 
     public ICollection<CommissionRecord> CommissionRecords { get; set; } = [];
+
     public ICollection<KPI> KPIs { get; set; } = [];
 }

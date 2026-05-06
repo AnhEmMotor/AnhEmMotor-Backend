@@ -109,19 +109,26 @@ namespace Application.ApiContracts.Product.Responses
         public string? DashboardType { get; set; }
 
         public string? Material { get; set; }
+
         public string? Origin { get; set; }
+
         [JsonPropertyName("warranty_period")]
         public string? WarrantyPeriod { get; set; }
+
         public string? Unit { get; set; }
 
         [JsonPropertyName("std_dot")]
         public bool StdDot { get; set; }
+
         [JsonPropertyName("std_ece")]
         public bool StdEce { get; set; }
+
         [JsonPropertyName("std_snell")]
         public bool StdSnell { get; set; }
+
         [JsonPropertyName("std_jis")]
         public bool StdJis { get; set; }
+
         [JsonPropertyName("other_standards")]
         public string? OtherStandards { get; set; }
 

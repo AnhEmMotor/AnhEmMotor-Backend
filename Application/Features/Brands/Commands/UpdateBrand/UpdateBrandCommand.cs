@@ -10,7 +10,7 @@ public sealed record UpdateBrandCommand : IRequest<Result<BrandResponse?>>
     public int Id { get; init; }
 
     public string? Name { get; init; }
-    
+
     public string? Origin { get; init; }
 
     public string? LogoUrl { get; init; }

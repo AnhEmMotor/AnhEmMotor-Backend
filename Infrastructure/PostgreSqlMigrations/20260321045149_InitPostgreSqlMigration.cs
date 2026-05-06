@@ -6,10 +6,10 @@ using System;
 
 namespace Infrastructure.PostgreSqlMigrations
 {
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public partial class InitPostgreSqlMigration : Migration
     {
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
@@ -31,7 +31,6 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     table.PrimaryKey("PK_Brand", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "InputStatus",
                 columns: table => new
@@ -45,7 +44,6 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     table.PrimaryKey("PK_InputStatus", x => x.Key);
                 });
-
             migrationBuilder.CreateTable(
                 name: "MediaFiles",
                 columns: table => new
@@ -71,7 +69,6 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     table.PrimaryKey("PK_MediaFiles", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "OutputStatus",
                 columns: table => new
@@ -85,7 +82,6 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     table.PrimaryKey("PK_OutputStatus", x => x.Key);
                 });
-
             migrationBuilder.CreateTable(
                 name: "Permissions",
                 columns: table => new
@@ -100,7 +96,6 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     table.PrimaryKey("PK_Permissions", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "PredefinedOption",
                 columns: table => new
@@ -120,7 +115,6 @@ namespace Infrastructure.PostgreSqlMigrations
                     table.PrimaryKey("PK_PredefinedOption", x => x.Id);
                     table.UniqueConstraint("AK_PredefinedOption_Key", x => x.Key);
                 });
-
             migrationBuilder.CreateTable(
                 name: "ProductCategory",
                 columns: table => new
@@ -139,7 +133,6 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     table.PrimaryKey("PK_ProductCategory", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "ProductStatus",
                 columns: table => new
@@ -153,7 +146,6 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     table.PrimaryKey("PK_ProductStatus", x => x.Key);
                 });
-
             migrationBuilder.CreateTable(
                 name: "Roles",
                 columns: table => new
@@ -171,7 +163,6 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     table.PrimaryKey("PK_Roles", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "Setting",
                 columns: table => new
@@ -186,7 +177,6 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     table.PrimaryKey("PK_Setting", x => x.Key);
                 });
-
             migrationBuilder.CreateTable(
                 name: "SupplierStatus",
                 columns: table => new
@@ -200,7 +190,6 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     table.PrimaryKey("PK_SupplierStatus", x => x.Key);
                 });
-
             migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
@@ -242,7 +231,6 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "Option",
                 columns: table => new
@@ -266,7 +254,6 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalColumn: "Key",
                         onDelete: ReferentialAction.Restrict);
                 });
-
             migrationBuilder.CreateTable(
                 name: "Product",
                 columns: table => new
@@ -325,7 +312,6 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalTable: "ProductStatus",
                         principalColumn: "Key");
                 });
-
             migrationBuilder.CreateTable(
                 name: "RoleClaims",
                 columns: table => new
@@ -348,7 +334,6 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "RolePermissions",
                 columns: table => new
@@ -372,7 +357,6 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "Supplier",
                 columns: table => new
@@ -401,7 +385,6 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalTable: "SupplierStatus",
                         principalColumn: "Key");
                 });
-
             migrationBuilder.CreateTable(
                 name: "Output",
                 columns: table => new
@@ -447,7 +430,6 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalTable: "Users",
                         principalColumn: "Id");
                 });
-
             migrationBuilder.CreateTable(
                 name: "UserClaims",
                 columns: table => new
@@ -470,7 +452,6 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "UserLogins",
                 columns: table => new
@@ -490,7 +471,6 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "UserRoles",
                 columns: table => new
@@ -520,7 +500,6 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "UserTokens",
                 columns: table => new
@@ -540,7 +519,6 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "OptionValue",
                 columns: table => new
@@ -564,7 +542,6 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalTable: "Option",
                         principalColumn: "Id");
                 });
-
             migrationBuilder.CreateTable(
                 name: "ProductVariant",
                 columns: table => new
@@ -591,7 +568,6 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "SupplierContact",
                 columns: table => new
@@ -618,7 +594,6 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalTable: "Supplier",
                         principalColumn: "Id");
                 });
-
             migrationBuilder.CreateTable(
                 name: "Input",
                 columns: table => new
@@ -667,7 +642,6 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalTable: "Users",
                         principalColumn: "Id");
                 });
-
             migrationBuilder.CreateTable(
                 name: "OutputInfo",
                 columns: table => new
@@ -700,7 +674,6 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalTable: "ProductVariant",
                         principalColumn: "Id");
                 });
-
             migrationBuilder.CreateTable(
                 name: "ProductCollectionPhoto",
                 columns: table => new
@@ -721,7 +694,6 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalTable: "ProductVariant",
                         principalColumn: "Id");
                 });
-
             migrationBuilder.CreateTable(
                 name: "VariantOptionValue",
                 columns: table => new
@@ -747,7 +719,6 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalTable: "ProductVariant",
                         principalColumn: "Id");
                 });
-
             migrationBuilder.CreateTable(
                 name: "InputInfo",
                 columns: table => new
@@ -786,174 +757,110 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalTable: "ProductVariant",
                         principalColumn: "Id");
                 });
-
             migrationBuilder.CreateIndex(name: "IX_Input_ConfirmedBy", table: "Input", column: "ConfirmedBy");
-
             migrationBuilder.CreateIndex(name: "IX_Input_CreatedBy", table: "Input", column: "CreatedBy");
-
             migrationBuilder.CreateIndex(name: "IX_Input_SourceOrderId", table: "Input", column: "SourceOrderId");
-
             migrationBuilder.CreateIndex(name: "IX_Input_StatusId", table: "Input", column: "StatusId");
-
             migrationBuilder.CreateIndex(name: "IX_Input_SupplierId", table: "Input", column: "SupplierId");
-
             migrationBuilder.CreateIndex(name: "IX_InputInfo_InputId", table: "InputInfo", column: "InputId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_InputInfo_ParentOutputInfoId",
                 table: "InputInfo",
                 column: "ParentOutputInfoId");
-
             migrationBuilder.CreateIndex(name: "IX_InputInfo_ProductId", table: "InputInfo", column: "ProductId");
-
             migrationBuilder.CreateIndex(name: "IX_Option_Name", table: "Option", column: "Name");
-
             migrationBuilder.CreateIndex(name: "IX_OptionValue_OptionId", table: "OptionValue", column: "OptionId");
-
             migrationBuilder.CreateIndex(name: "IX_Output_BuyerId", table: "Output", column: "BuyerId");
-
             migrationBuilder.CreateIndex(name: "IX_Output_CreatedBy", table: "Output", column: "CreatedBy");
-
             migrationBuilder.CreateIndex(name: "IX_Output_FinishedBy", table: "Output", column: "FinishedBy");
-
             migrationBuilder.CreateIndex(name: "IX_Output_StatusId", table: "Output", column: "StatusId");
-
             migrationBuilder.CreateIndex(name: "IX_OutputInfo_OutputId", table: "OutputInfo", column: "OutputId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_OutputInfo_ProductVarientId",
                 table: "OutputInfo",
                 column: "ProductVarientId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_PredefinedOption_Key",
                 table: "PredefinedOption",
                 column: "Key",
                 unique: true);
-
             migrationBuilder.CreateIndex(name: "IX_Product_BrandId", table: "Product", column: "BrandId");
-
             migrationBuilder.CreateIndex(name: "IX_Product_CategoryId", table: "Product", column: "CategoryId");
-
             migrationBuilder.CreateIndex(name: "IX_Product_StatusId", table: "Product", column: "StatusId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ProductCollectionPhoto_ProductVariantId",
                 table: "ProductCollectionPhoto",
                 column: "ProductVariantId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ProductVariant_ProductId",
                 table: "ProductVariant",
                 column: "ProductId");
-
             migrationBuilder.CreateIndex(name: "IX_RoleClaims_RoleId", table: "RoleClaims", column: "RoleId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_RolePermissions_PermissionId",
                 table: "RolePermissions",
                 column: "PermissionId");
-
             migrationBuilder.CreateIndex(name: "RoleNameIndex", table: "Roles", column: "NormalizedName", unique: true);
-
             migrationBuilder.CreateIndex(name: "IX_Supplier_StatusId", table: "Supplier", column: "StatusId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_SupplierContact_SupplierId",
                 table: "SupplierContact",
                 column: "SupplierId");
-
             migrationBuilder.CreateIndex(name: "IX_UserClaims_UserId", table: "UserClaims", column: "UserId");
-
             migrationBuilder.CreateIndex(name: "IX_UserLogins_UserId", table: "UserLogins", column: "UserId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_UserRoles_ApplicationUserId",
                 table: "UserRoles",
                 column: "ApplicationUserId");
-
             migrationBuilder.CreateIndex(name: "IX_UserRoles_RoleId", table: "UserRoles", column: "RoleId");
-
             migrationBuilder.CreateIndex(name: "EmailIndex", table: "Users", column: "NormalizedEmail");
-
             migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
                 table: "Users",
                 column: "NormalizedUserName",
                 unique: true);
-
             migrationBuilder.CreateIndex(
                 name: "IX_VariantOptionValue_OptionValueId",
                 table: "VariantOptionValue",
                 column: "OptionValueId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_VariantOptionValue_VariantId",
                 table: "VariantOptionValue",
                 column: "VariantId");
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(name: "InputInfo");
-
             migrationBuilder.DropTable(name: "MediaFiles");
-
             migrationBuilder.DropTable(name: "ProductCollectionPhoto");
-
             migrationBuilder.DropTable(name: "RoleClaims");
-
             migrationBuilder.DropTable(name: "RolePermissions");
-
             migrationBuilder.DropTable(name: "Setting");
-
             migrationBuilder.DropTable(name: "SupplierContact");
-
             migrationBuilder.DropTable(name: "UserClaims");
-
             migrationBuilder.DropTable(name: "UserLogins");
-
             migrationBuilder.DropTable(name: "UserRoles");
-
             migrationBuilder.DropTable(name: "UserTokens");
-
             migrationBuilder.DropTable(name: "VariantOptionValue");
-
             migrationBuilder.DropTable(name: "Input");
-
             migrationBuilder.DropTable(name: "OutputInfo");
-
             migrationBuilder.DropTable(name: "Permissions");
-
             migrationBuilder.DropTable(name: "Roles");
-
             migrationBuilder.DropTable(name: "OptionValue");
-
             migrationBuilder.DropTable(name: "InputStatus");
-
             migrationBuilder.DropTable(name: "Supplier");
-
             migrationBuilder.DropTable(name: "Output");
-
             migrationBuilder.DropTable(name: "ProductVariant");
-
             migrationBuilder.DropTable(name: "Option");
-
             migrationBuilder.DropTable(name: "SupplierStatus");
-
             migrationBuilder.DropTable(name: "OutputStatus");
-
             migrationBuilder.DropTable(name: "Users");
-
             migrationBuilder.DropTable(name: "Product");
-
             migrationBuilder.DropTable(name: "PredefinedOption");
-
             migrationBuilder.DropTable(name: "Brand");
-
             migrationBuilder.DropTable(name: "ProductCategory");
-
             migrationBuilder.DropTable(name: "ProductStatus");
         }
     }

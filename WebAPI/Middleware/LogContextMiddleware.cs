@@ -20,10 +20,9 @@ public class LogContextMiddleware(RequestDelegate next)
         var clientIp = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
         var method = context.Request.Method;
         var path = context.Request.Path.Value ?? "unknown";
-
-        using(LogContext.PushProperty("ClientIP", clientIp))
-            using(LogContext.PushProperty("RequestMethod", method))
-                using(LogContext.PushProperty("RequestPath", path))
+        using (LogContext.PushProperty("ClientIP", clientIp))
+            using (LogContext.PushProperty("RequestMethod", method))
+                using (LogContext.PushProperty("RequestPath", path))
                 {
                     await next(context).ConfigureAwait(true);
                 }

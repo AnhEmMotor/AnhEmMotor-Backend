@@ -14,14 +14,14 @@ namespace Domain.Entities
         public int BannerId { get; set; }
 
         [Column("Action", TypeName = "nvarchar(50)")]
-        public string Action { get; set; } = string.Empty; // Create, Update, Delete, Pause, Resume
+        public string Action { get; set; } = string.Empty;
 
         [Column("ChangedBy", TypeName = "nvarchar(255)")]
         public string ChangedBy { get; set; } = string.Empty;
 
         [Column("Details", TypeName = "nvarchar(max)")]
         public string? Details { get; set; }
-        
+
         [ForeignKey("BannerId")]
         public virtual Banner Banner { get; set; } = null!;
     }

@@ -10,9 +10,7 @@ public class TechnologyRepository(ApplicationDBContext context) : ITechnologyRep
 
     public Task<Domain.Entities.Technology?> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
-        return context.Technologies
-            .Include(t => t.Category)
-            .FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
+        return context.Technologies.Include(t => t.Category).FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
     }
 
     public void Add(Domain.Entities.Technology technology)

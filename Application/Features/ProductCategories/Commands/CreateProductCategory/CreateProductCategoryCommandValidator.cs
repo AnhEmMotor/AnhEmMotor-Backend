@@ -7,7 +7,6 @@ public sealed class CreateProductCategoryCommandValidator : AbstractValidator<Cr
     public CreateProductCategoryCommandValidator()
     {
         RuleFor(x => x.Name).NotEmpty().MaximumLength(100);
-
         RuleFor(x => x.Description).MaximumLength(500).When(x => !string.IsNullOrWhiteSpace(x.Description));
     }
 }

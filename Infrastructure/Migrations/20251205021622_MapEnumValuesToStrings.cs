@@ -4,10 +4,10 @@
 
 namespace Infrastructure.Migrations
 {
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public partial class MapEnumValuesToStrings : Migration
     {
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.Sql(
@@ -20,7 +20,6 @@ namespace Infrastructure.Migrations
                     ELSE 'Male'
                 END
             ");
-
             migrationBuilder.Sql(
                 @"
                 UPDATE [Users]
@@ -34,7 +33,7 @@ namespace Infrastructure.Migrations
             ");
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.Sql(
@@ -47,7 +46,6 @@ namespace Infrastructure.Migrations
                     ELSE '0'
                 END
             ");
-
             migrationBuilder.Sql(
                 @"
                 UPDATE [Users]

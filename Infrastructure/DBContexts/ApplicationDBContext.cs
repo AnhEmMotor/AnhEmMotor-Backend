@@ -1,6 +1,7 @@
 using Application.Interfaces;
 using Domain.Constants;
 using Domain.Entities;
+using Domain.Entities.HR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -15,11 +16,11 @@ namespace Infrastructure.DBContexts;
 
 public class ApplicationDBContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>, IApplicationDBContext
 {
-    public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options) : base(options)
+    public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options): base(options)
     {
     }
 
-    protected ApplicationDBContext(DbContextOptions options) : base(options)
+    protected ApplicationDBContext(DbContextOptions options): base(options)
     {
     }
 
@@ -46,6 +47,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
     public virtual DbSet<Product> Products { get; set; }
 
     public virtual DbSet<ProductCategory> ProductCategories { get; set; }
+
     public virtual DbSet<VehicleType> VehicleTypes { get; set; }
 
     public virtual DbSet<ProductCollectionPhoto> ProductCollectionPhotos { get; set; }
@@ -75,33 +77,50 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
     public virtual DbSet<RolePermission> RolePermissions { get; set; }
 
     public virtual DbSet<TechnologyCategory> TechnologyCategories { get; set; }
+
     public virtual DbSet<Technology> Technologies { get; set; }
+
     public virtual DbSet<TechnologyImage> TechnologyImages { get; set; }
+
     public virtual DbSet<ProductTechnology> ProductTechnologies { get; set; }
+
     public virtual DbSet<News> News { get; set; }
+
     public virtual DbSet<Banner> Banners { get; set; }
+
     public virtual DbSet<BannerAuditLog> BannerAuditLogs { get; set; }
+
     public virtual DbSet<Contact> Contacts { get; set; }
+
     public virtual DbSet<ContactReply> ContactReplies { get; set; }
+
     public virtual DbSet<Booking> Bookings { get; set; }
+
     public virtual DbSet<Lead> Leads { get; set; }
+
     public virtual DbSet<LeadActivity> LeadActivities { get; set; }
+
     public virtual DbSet<Vehicle> Vehicles { get; set; }
+
     public virtual DbSet<VehicleDocument> VehicleDocuments { get; set; }
+
     public virtual DbSet<MaintenanceHistory> MaintenanceHistories { get; set; }
 
-    // HR & Payroll
-    public virtual DbSet<Domain.Entities.HR.EmployeeProfile> EmployeeProfiles { get; set; }
-    public virtual DbSet<Domain.Entities.HR.CommissionPolicy> CommissionPolicies { get; set; }
-    public virtual DbSet<Domain.Entities.HR.CommissionRecord> CommissionRecords { get; set; }
-    public virtual DbSet<Domain.Entities.HR.Payroll> Payrolls { get; set; }
-    public virtual DbSet<Domain.Entities.HR.KPI> KPIs { get; set; }
-    public virtual DbSet<Domain.Entities.HR.CommissionPolicyAuditLog> CommissionPolicyAuditLogs { get; set; }
+    public virtual DbSet<EmployeeProfile> EmployeeProfiles { get; set; }
+
+    public virtual DbSet<CommissionPolicy> CommissionPolicies { get; set; }
+
+    public virtual DbSet<CommissionRecord> CommissionRecords { get; set; }
+
+    public virtual DbSet<Payroll> Payrolls { get; set; }
+
+    public virtual DbSet<KPI> KPIs { get; set; }
+
+    public virtual DbSet<CommissionPolicyAuditLog> CommissionPolicyAuditLogs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-
         modelBuilder.Entity<ApplicationUser>().ToTable("Users");
         modelBuilder.Entity<ApplicationRole>().ToTable("Roles");
         modelBuilder.Entity<IdentityUserRole<Guid>>().ToTable("UserRoles");
@@ -109,106 +128,84 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
         modelBuilder.Entity<IdentityUserLogin<Guid>>().ToTable("UserLogins");
         modelBuilder.Entity<IdentityRoleClaim<Guid>>().ToTable("RoleClaims");
         modelBuilder.Entity<IdentityUserToken<Guid>>().ToTable("UserTokens");
-
         modelBuilder.Entity<Permission>().ToTable("Permissions");
         modelBuilder.Entity<RolePermission>().ToTable("RolePermissions");
-
-        if(string.Compare(Database.ProviderName, "Npgsql.EntityFrameworkCore.PostgreSQL") != 0)
+        if (string.Compare(Database.ProviderName, "Npgsql.EntityFrameworkCore.PostgreSQL") != 0)
         {
             modelBuilder.Entity<ProductCategory>().HasAnnotation("Relational:Collation", "utf8mb4_unicode_ci");
         }
-
         modelBuilder.Entity<RolePermission>().HasKey(rp => new { rp.RoleId, rp.PermissionId });
-
         modelBuilder.Entity<RolePermission>()
             .HasOne(rp => rp.Role)
             .WithMany(r => r.RolePermissions)
             .HasForeignKey(rp => rp.RoleId)
             .OnDelete(DeleteBehavior.Cascade);
-
         modelBuilder.Entity<RolePermission>()
             .HasOne(rp => rp.Permission)
             .WithMany(p => p.RolePermissions)
             .HasForeignKey(rp => rp.PermissionId)
             .OnDelete(DeleteBehavior.Cascade);
-
         modelBuilder.Entity<PredefinedOption>().HasIndex(p => p.Key).IsUnique();
-
         modelBuilder.Entity<Option>()
             .HasOne<PredefinedOption>()
             .WithMany()
             .HasPrincipalKey(p => p.Key)
             .HasForeignKey(o => o.Name)
             .OnDelete(DeleteBehavior.Restrict);
-
         modelBuilder.Entity<ProductCollectionPhoto>()
             .HasOne(p => p.ProductVariant)
             .WithMany(v => v.ProductCollectionPhotos)
             .HasForeignKey(p => p.ProductVariantId)
             .OnDelete(DeleteBehavior.Cascade);
-
         modelBuilder.Entity<VariantOptionValue>()
             .HasOne(v => v.ProductVariant)
             .WithMany(pv => pv.VariantOptionValues)
             .HasForeignKey(v => v.VariantId)
             .OnDelete(DeleteBehavior.Cascade);
-
         modelBuilder.Entity<ProductTechnology>().HasKey(pt => new { pt.ProductId, pt.TechnologyId });
-        
         modelBuilder.Entity<ProductTechnology>()
             .HasOne(pt => pt.Product)
             .WithMany(p => p.ProductTechnologies)
             .HasForeignKey(pt => pt.ProductId)
             .OnDelete(DeleteBehavior.Cascade);
-
         modelBuilder.Entity<ProductTechnology>()
             .HasOne(pt => pt.Technology)
             .WithMany(t => t.ProductTechnologies)
             .HasForeignKey(pt => pt.TechnologyId)
             .OnDelete(DeleteBehavior.Cascade);
-
         modelBuilder.Entity<ProductCompatibility>()
             .HasOne(pc => pc.BaseProduct)
             .WithMany(p => p.CompatibleWith)
             .HasForeignKey(pc => pc.BaseProductId)
             .OnDelete(DeleteBehavior.Cascade);
-
         modelBuilder.Entity<ProductCompatibility>()
             .HasOne(pc => pc.CompatibleVehicleModel)
             .WithMany(p => p.SupportedBy)
             .HasForeignKey(pc => pc.CompatibleVehicleModelId)
             .OnDelete(DeleteBehavior.Restrict);
-
         var isNotSqlServer = string.Compare(Database.ProviderName, "Microsoft.EntityFrameworkCore.SqlServer") != 0;
         var isPostgres = string.Compare(Database.ProviderName, "Npgsql.EntityFrameworkCore.PostgreSQL") == 0;
-
-        if(isNotSqlServer)
+        if (isNotSqlServer)
         {
-            foreach(var entityType in modelBuilder.Model.GetEntityTypes())
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             {
                 var tableName = entityType.GetTableName();
-
-                if(string.Compare(tableName, "Roles") == 0)
+                if (string.Compare(tableName, "Roles") == 0)
                 {
                     var index = entityType.GetIndexes()
                         .FirstOrDefault(i => string.Compare(i.GetDatabaseName(), "RoleNameIndex") == 0);
-
                     index?.SetFilter(null);
                 }
-
-                if(string.Compare(tableName, "Users") == 0)
+                if (string.Compare(tableName, "Users") == 0)
                 {
                     var index = entityType.GetIndexes()
                         .FirstOrDefault(i => string.Compare(i.GetDatabaseName(), "UserNameIndex") == 0);
-
                     index?.SetFilter(null);
                 }
-
-                foreach(var property in entityType.GetProperties())
+                foreach (var property in entityType.GetProperties())
                 {
                     var columnType = property.GetColumnType();
-
-                    if(columnType is not null &&
+                    if (columnType is not null &&
                         (columnType.Contains("nvarchar", StringComparison.OrdinalIgnoreCase) ||
                             columnType.Contains("uniqueidentifier", StringComparison.OrdinalIgnoreCase) ||
                             columnType.Contains("datetimeoffset", StringComparison.OrdinalIgnoreCase) ||
@@ -217,15 +214,13 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
                     {
                         property.SetColumnType(null);
                     }
-
-                    if(isPostgres &&
+                    if (isPostgres &&
                         (property.ClrType == typeof(DateTimeOffset) || property.ClrType == typeof(DateTimeOffset?)))
                     {
                         property.SetValueConverter(
                             new ValueConverter<DateTimeOffset, DateTimeOffset>(v => v.ToUniversalTime(), v => v));
                     }
-
-                    if(!isPostgres &&
+                    if (!isPostgres &&
                         (property.ClrType == typeof(DateTimeOffset) || property.ClrType == typeof(DateTimeOffset?)))
                     {
                         property.SetValueConverter(typeof(DateTimeOffsetToBinaryConverter));
@@ -233,10 +228,9 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
                 }
             }
         }
-
-        foreach(var entityType in modelBuilder.Model.GetEntityTypes())
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
-            if(typeof(BaseEntity).IsAssignableFrom(entityType.ClrType))
+            if (typeof(BaseEntity).IsAssignableFrom(entityType.ClrType))
             {
                 var parameter = Expression.Parameter(entityType.ClrType, "e");
                 var deletedAtProperty = Expression.Property(parameter, nameof(BaseEntity.DeletedAt));
@@ -250,29 +244,25 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         var entries = ChangeTracker.Entries<BaseEntity>();
-
-        foreach(var entry in entries)
+        foreach (var entry in entries)
         {
-            switch(entry.State)
+            switch (entry.State)
             {
                 case EntityState.Added:
-                    if(entry.Entity.CreatedAt == null)
+                    if (entry.Entity.CreatedAt == null)
                     {
                         entry.Entity.CreatedAt = DateTimeOffset.UtcNow;
                     }
                     break;
-
                 case EntityState.Modified:
                     entry.Entity.UpdatedAt = DateTimeOffset.UtcNow;
                     break;
-
                 case EntityState.Deleted:
                     entry.State = EntityState.Modified;
                     entry.Entity.DeletedAt = DateTimeOffset.UtcNow;
                     break;
             }
         }
-
         return base.SaveChangesAsync(cancellationToken);
     }
 
@@ -301,7 +291,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public void SoftDeleteUsingSetColumnRange<T>(IEnumerable<T> entities) where T : BaseEntity
     {
-        foreach(var entity in entities)
+        foreach (var entity in entities)
         {
             entity.DeletedAt = DateTimeOffset.UtcNow;
             Entry(entity).State = EntityState.Modified;
@@ -310,7 +300,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public void RestoreDeleteUsingSetColumnRange<T>(IEnumerable<T> entities) where T : BaseEntity
     {
-        foreach(var entity in entities)
+        foreach (var entity in entities)
         {
             entity.DeletedAt = null;
             Entry(entity).State = EntityState.Modified;

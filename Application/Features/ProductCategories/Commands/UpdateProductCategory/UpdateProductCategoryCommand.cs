@@ -21,6 +21,6 @@ public sealed record UpdateProductCategoryCommand : IRequest<Result<ProductCateg
     public int? ParentId { get; init; }
 
     public string? Description { get; init; }
-    
+
     public string? CategoryGroup { get; init; }
 }

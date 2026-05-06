@@ -56,20 +56,19 @@ public class SalesOrdersController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if(string.IsNullOrEmpty(currentUserId) || !Guid.TryParse(currentUserId, out var buyerId))
+        if (string.IsNullOrEmpty(currentUserId) || !Guid.TryParse(currentUserId, out var buyerId))
         {
             return Unauthorized(
                 new ErrorResponse
                 {
                     Errors =
-                        [ new ErrorDetail
+                        [new ErrorDetail
                             {
                                 Field = "Authorization",
                                 Message = "Không thể lấy thông tin người dùng từ token."
-                            } ]
+                            }]
                 });
         }
-
         var query = new GetOutputsByUserIdQuery() { BuyerId = buyerId, SieveModel = sieveModel };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
@@ -314,7 +313,6 @@ public class SalesOrdersController(IMediator mediator) : ApiController
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
-
 
     /// <summary>
     /// Cập nhật trạng thái của đơn hàng.

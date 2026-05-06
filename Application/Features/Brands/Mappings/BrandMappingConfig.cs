@@ -11,9 +11,7 @@ public sealed class BrandMappingConfig : IRegister
     public void Register(TypeAdapterConfig config)
     {
         config.NewConfig<CreateBrandCommand, BrandEntity>();
-
         config.NewConfig<BrandEntity, BrandResponse>();
-
         config.NewConfig<UpdateBrandCommand, BrandEntity>().IgnoreNullValues(true);
     }
 }

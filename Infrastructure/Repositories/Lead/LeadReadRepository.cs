@@ -1,5 +1,4 @@
 using Application.Interfaces.Repositories.Lead;
-using Domain.Entities;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,12 +8,12 @@ public class LeadReadRepository(ApplicationDBContext context) : ILeadReadReposit
 {
     public async Task<Domain.Entities.Lead?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        return await context.Leads
-            .Include(l => l.Activities)
-            .FirstOrDefaultAsync(l => l.Id == id, cancellationToken);
+        return await context.Leads.Include(l => l.Activities).FirstOrDefaultAsync(l => l.Id == id, cancellationToken);
     }
 
-    public async Task<Domain.Entities.Lead?> GetByPhoneNumberAsync(string phoneNumber, CancellationToken cancellationToken = default)
+    public async Task<Domain.Entities.Lead?> GetByPhoneNumberAsync(
+        string phoneNumber,
+        CancellationToken cancellationToken = default)
     {
         return await context.Leads
             .Include(l => l.Activities)
@@ -29,7 +28,8 @@ public class LeadReadRepository(ApplicationDBContext context) : ILeadReadReposit
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<List<Domain.Entities.Lead>> GetAllLeadsWithActivitiesAsync(CancellationToken cancellationToken = default)
+    public async Task<List<Domain.Entities.Lead>> GetAllLeadsWithActivitiesAsync(
+        CancellationToken cancellationToken = default)
     {
         return await context.Leads
             .Include(l => l.Activities)
@@ -37,16 +37,15 @@ public class LeadReadRepository(ApplicationDBContext context) : ILeadReadReposit
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<List<Domain.Entities.Lead>> GetLoyaltyMembersAsync(string? search, CancellationToken cancellationToken = default)
+    public async Task<List<Domain.Entities.Lead>> GetLoyaltyMembersAsync(
+        string? search,
+        CancellationToken cancellationToken = default)
     {
         var query = context.Leads.AsQueryable();
-
         if (!string.IsNullOrWhiteSpace(search))
         {
-            query = query.Where(l => l.FullName.Contains(search) || 
-                                     l.PhoneNumber.Contains(search));
+            query = query.Where(l => l.FullName.Contains(search) || l.PhoneNumber.Contains(search));
         }
-
         return await query
             .OrderByDescending(l => l.Points)
             .ToListAsync(cancellationToken);

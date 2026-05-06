@@ -32,11 +32,11 @@ public class Booking : BaseEntity
     public string Note { get; set; } = string.Empty;
 
     [Column("Status", TypeName = "nvarchar(20)")]
-    public string Status { get; set; } = "Pending"; // Pending, Confirmed, Cancelled, Completed
+    public string Status { get; set; } = "Pending";
 
     [Column("BookingType", TypeName = "nvarchar(20)")]
-    public string BookingType { get; set; } = "TestDrive"; // TestDrive, Maintenance
+    public string BookingType { get; set; } = "TestDrive";
 
     [Column("Location", TypeName = "nvarchar(200)")]
-    public string Location { get; set; } = "Showroom"; // Showroom, Home
+    public string Location { get; set; } = "Showroom";
 }

@@ -17,8 +17,7 @@ public class LocalFileStorageService : IFileStorageService
     public LocalFileStorageService(IWebHostEnvironment environment, IHttpContextAccessor httpContextAccessor)
     {
         _httpContextAccessor = httpContextAccessor;
-
-        if(string.IsNullOrEmpty(environment.WebRootPath))
+        if (string.IsNullOrEmpty(environment.WebRootPath))
         {
             _uploadFolder = Path.Combine(Path.GetTempPath(), "AnhEmMotor_Test_Uploads");
         } else
@@ -27,7 +26,7 @@ public class LocalFileStorageService : IFileStorageService
         }
     }
 
-    private readonly List<string> _allowedMimeTypes = [ "image/jpeg", "image/png", "image/gif", "image/webp" ];
+    private readonly List<string> _allowedMimeTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
 
     public async Task<Result<FileUpload>> SaveFileAsync(
         Stream file,
@@ -36,53 +35,42 @@ public class LocalFileStorageService : IFileStorageService
     {
         try
         {
-            if(file is null || file.Length is 0)
+            if (file is null || file.Length is 0)
             {
                 return Result<FileUpload>.Failure("File stream is empty");
             }
-
             var targetFolder = string.IsNullOrWhiteSpace(subFolder)
                 ? _uploadFolder
                 : Path.Combine(_uploadFolder, subFolder);
-
-            if(!Directory.Exists(targetFolder))
+            if (!Directory.Exists(targetFolder))
             {
                 Directory.CreateDirectory(targetFolder);
             }
-
-            if(file.CanSeek)
+            if (file.CanSeek)
             {
                 file.Position = 0;
             }
-
             var format = await Image.DetectFormatAsync(file, cancellationToken).ConfigureAwait(false);
-
-            if(format is null)
+            if (format is null)
             {
                 return Result<FileUpload>.Failure("Unable to detect image format");
             }
-
-            if(!_allowedMimeTypes.Contains(format.DefaultMimeType))
+            if (!_allowedMimeTypes.Contains(format.DefaultMimeType))
             {
                 return Result<FileUpload>.Failure($"Format {format.DefaultMimeType} is not supported");
             }
-
             var storageFileName = $"{Guid.NewGuid()}.webp";
             var relativePath = string.IsNullOrWhiteSpace(subFolder)
                 ? storageFileName
                 : Path.Combine(subFolder, storageFileName).Replace("\\", "/");
-
             var fullPath = Path.Combine(_uploadFolder, relativePath);
-
             using var compressedStream = await CompressImageAsync(file, 75, DefaultMaxWidth, cancellationToken)
                 .ConfigureAwait(false);
             var compressedSize = compressedStream.Length;
-
             using var fileStream = new FileStream(fullPath, FileMode.Create);
             await compressedStream.CopyToAsync(fileStream, cancellationToken).ConfigureAwait(false);
-
             return new FileUpload(relativePath, ".webp", compressedSize);
-        } catch(Exception ex)
+        } catch (Exception ex)
         {
             return Result<FileUpload>.Failure(ex.Message);
         }
@@ -91,7 +79,7 @@ public class LocalFileStorageService : IFileStorageService
     public bool DeleteFile(string storagePath)
     {
         var fullPath = Path.Combine(_uploadFolder, storagePath);
-        if(File.Exists(fullPath))
+        if (File.Exists(fullPath))
         {
             try
             {
@@ -108,8 +96,8 @@ public class LocalFileStorageService : IFileStorageService
     public bool DeleteFile(IEnumerable<string> storagePaths)
     {
         var allDeleted = true;
-        foreach(var path in storagePaths)
-            if(!DeleteFile(path))
+        foreach (var path in storagePaths)
+            if (!DeleteFile(path))
                 allDeleted = false;
         return allDeleted;
     }
@@ -117,7 +105,7 @@ public class LocalFileStorageService : IFileStorageService
     public string GetPublicUrl(string storagePath)
     {
         var request = _httpContextAccessor.HttpContext?.Request;
-        if(request is null)
+        if (request is null)
             return $"/api/v1/MediaFile/view-image/{storagePath}";
         return $"{request.Scheme}://{request.Host.Value}/api/v1/MediaFile/view-image/{storagePath}";
     }
@@ -127,9 +115,8 @@ public class LocalFileStorageService : IFileStorageService
         CancellationToken cancellationToken)
     {
         var fullPath = Path.Combine(_uploadFolder, storagePath);
-        if(!File.Exists(fullPath))
+        if (!File.Exists(fullPath))
             return null;
-
         var fileBytes = await File.ReadAllBytesAsync(fullPath, cancellationToken).ConfigureAwait(false);
         return (fileBytes, "image/webp");
     }
@@ -146,23 +133,18 @@ public class LocalFileStorageService : IFileStorageService
         int? maxWidth,
         CancellationToken cancellationToken)
     {
-        if(inputStream.CanSeek)
+        if (inputStream.CanSeek)
             inputStream.Position = 0;
-
         using var image = await Image.LoadAsync(inputStream, cancellationToken).ConfigureAwait(false);
-
         var targetWidth = maxWidth ?? DefaultMaxWidth;
-
-        if(image.Width > targetWidth)
+        if (image.Width > targetWidth)
         {
             var newHeight = (int)((double)targetWidth / image.Width * image.Height);
             image.Mutate(x => x.Resize(targetWidth, newHeight));
         }
-
         var outputStream = new MemoryStream();
         await image.SaveAsWebpAsync(outputStream, new WebpEncoder { Quality = quality }, cancellationToken)
             .ConfigureAwait(false);
-
         outputStream.Position = 0;
         return outputStream;
     }

@@ -8,8 +8,8 @@ namespace Infrastructure.Seeders
     {
         public async Task SeedAsync()
         {
-            if (await context.VehicleTypes.AnyAsync()) return;
-
+            if (await context.VehicleTypes.AnyAsync())
+                return;
             var vehicleTypes = new List<VehicleType>
             {
                 new() { Name = "Xe số", Slug = "xe-so", IsActive = true, SortOrder = 1 },
@@ -17,7 +17,6 @@ namespace Infrastructure.Seeders
                 new() { Name = "Xe côn tay", Slug = "xe-con-tay", IsActive = true, SortOrder = 3 },
                 new() { Name = "Xe Mô tô", Slug = "xe-mo-to", IsActive = true, SortOrder = 4 }
             };
-
             context.VehicleTypes.AddRange(vehicleTypes);
             await context.SaveChangesAsync();
         }

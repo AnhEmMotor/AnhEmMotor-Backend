@@ -51,6 +51,8 @@ namespace Infrastructure.Repositories.OptionValue
         }
 
         public IQueryable<OptionValueEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
-        { return context.GetQuery<OptionValueEntity>(mode); }
+        {
+            return context.GetQuery<OptionValueEntity>(mode);
+        }
     }
 }

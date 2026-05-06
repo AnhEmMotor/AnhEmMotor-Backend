@@ -33,7 +33,6 @@ namespace Domain.Entities
         [Column("IsPublished")]
         public bool IsPublished { get; set; }
 
-        // SEO Metadata
         [Column("MetaTitle", TypeName = "nvarchar(100)")]
         public string? MetaTitle { get; set; }
 

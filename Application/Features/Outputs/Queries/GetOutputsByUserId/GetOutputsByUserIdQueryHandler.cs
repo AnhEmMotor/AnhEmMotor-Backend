@@ -16,13 +16,11 @@ public class GetOutputsByUserIdQueryHandler(IOutputReadRepository outputReadRepo
     {
         var query = outputReadRepository.GetQueryable();
         query = query.Where(o => o.BuyerId == request.BuyerId);
-
         var pagedResult = await sievePaginator.ApplyAsync<OutputEntity, MyOrderResponse>(
             query,
             request.SieveModel!,
             cancellationToken: cancellationToken)
             .ConfigureAwait(false);
-
         return pagedResult;
     }
 }

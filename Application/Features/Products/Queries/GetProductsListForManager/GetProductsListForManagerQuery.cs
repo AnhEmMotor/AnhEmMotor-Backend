@@ -33,14 +33,11 @@ public sealed record GetProductsListForManagerQuery : IRequest<Result<PagedResul
                 StringSplitOptions.RemoveEmptyEntries)
                 .ToList() ??
             [];
-
         var inventoryStatusFilter = ExtractFilterValue(request.Filters, "inventoryStatus");
-
         var sortByInventoryStatus = request.Sorts is not null &&
                 request.Sorts.Contains("inventoryStatus", StringComparison.OrdinalIgnoreCase)
             ? request.Sorts.TrimStart().StartsWith('-') ? SortDirection.Descending : SortDirection.Ascending
             : (SortDirection?)null;
-
         return new GetProductsListForManagerQuery
         {
             Page = request.Page ?? 1,
@@ -56,22 +53,20 @@ public sealed record GetProductsListForManagerQuery : IRequest<Result<PagedResul
 
     private static string? ExtractFilterValue(string? filters, string key)
     {
-        if(string.IsNullOrWhiteSpace(filters))
+        if (string.IsNullOrWhiteSpace(filters))
         {
             return null;
         }
-
         var parts = filters.Split(',');
-        foreach(var part in parts)
+        foreach (var part in parts)
         {
-            var keyValue = part.Split([ '=', '@', '!', '<', '>' ], 2);
-            if(keyValue.Length == 2 && keyValue[0].Trim().Equals(key, StringComparison.OrdinalIgnoreCase))
+            var keyValue = part.Split(['=', '@', '!', '<', '>'], 2);
+            if (keyValue.Length == 2 && keyValue[0].Trim().Equals(key, StringComparison.OrdinalIgnoreCase))
             {
                 var value = keyValue[1].Trim();
                 return value.TrimStart('=', '@', '!', '<', '>', '*');
             }
         }
-
         return null;
     }
 }

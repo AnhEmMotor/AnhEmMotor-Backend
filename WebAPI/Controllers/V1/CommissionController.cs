@@ -1,4 +1,5 @@
-using Application.Common.Models;
+using Application.Features.HR.Commands.ApprovePayroll;
+using Application.Features.HR.Queries.GetPayrollSummary;
 using Application.Interfaces;
 using Asp.Versioning;
 using Domain.Entities.HR;
@@ -6,10 +7,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace WebAPI.Controllers.V1;
 
@@ -42,9 +40,13 @@ public class CommissionController(IApplicationDBContext context) : ControllerBas
     /// Gets a summary of payroll (salary + commissions).
     /// </summary>
     [HttpGet("payroll-summary")]
-    public async Task<IActionResult> GetPayrollSummary([FromQuery] int month, [FromQuery] int year, [FromServices] IMediator mediator, CancellationToken ct)
+    public async Task<IActionResult> GetPayrollSummary(
+        [FromQuery] int month,
+        [FromQuery] int year,
+        [FromServices] IMediator mediator,
+        CancellationToken ct)
     {
-        var result = await mediator.Send(new Application.Features.HR.Queries.GetPayrollSummary.GetPayrollSummaryQuery(month, year), ct);
+        var result = await mediator.Send(new GetPayrollSummaryQuery(month, year), ct);
         return Ok(result.Value);
     }
 
@@ -52,10 +54,14 @@ public class CommissionController(IApplicationDBContext context) : ControllerBas
     /// Approves commission payments.
     /// </summary>
     [HttpPost("approve-payroll")]
-    public async Task<IActionResult> ApprovePayroll([FromBody] Application.Features.HR.Commands.ApprovePayroll.ApprovePayrollCommand command, [FromServices] IMediator mediator, CancellationToken ct)
+    public async Task<IActionResult> ApprovePayroll(
+        [FromBody] ApprovePayrollCommand command,
+        [FromServices] IMediator mediator,
+        CancellationToken ct)
     {
         var result = await mediator.Send(command, ct);
-        if (!result.IsSuccess) return BadRequest(result.Error);
+        if (!result.IsSuccess)
+            return BadRequest(result.Error);
         return Ok();
     }
 }

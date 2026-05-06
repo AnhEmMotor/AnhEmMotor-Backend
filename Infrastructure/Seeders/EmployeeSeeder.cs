@@ -5,10 +5,7 @@ using Infrastructure.DBContexts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Seeders;
 
@@ -27,7 +24,6 @@ public static class EmployeeSeeder
             ("pham.thi.d@anhemmotor.com", "Phạm Thị D", "Chuyên viên Tư vấn", 14000000),
             ("hoang.van.e@anhemmotor.com", "Hoàng Văn E", "Kỹ thuật viên", 12000000)
         };
-
         foreach (var emp in employeesToSeed)
         {
             var user = await userManager.FindByEmailAsync(emp.Email).ConfigureAwait(false);
@@ -41,15 +37,13 @@ public static class EmployeeSeeder
                     Status = UserStatus.Active,
                     EmailConfirmed = true
                 };
-
                 var result = await userManager.CreateAsync(user, "Employee@123456").ConfigureAwait(false);
-                if (!result.Succeeded) continue;
+                if (!result.Succeeded)
+                    continue;
             }
-
             var profile = await context.EmployeeProfiles
                 .FirstOrDefaultAsync(p => p.UserId == user.Id, cancellationToken)
                 .ConfigureAwait(false);
-
             if (profile == null)
             {
                 profile = new EmployeeProfile
@@ -66,7 +60,6 @@ public static class EmployeeSeeder
                 await context.EmployeeProfiles.AddAsync(profile, cancellationToken).ConfigureAwait(false);
             }
         }
-
         await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 }

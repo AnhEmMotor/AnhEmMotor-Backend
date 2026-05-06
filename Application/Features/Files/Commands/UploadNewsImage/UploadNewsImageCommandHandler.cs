@@ -20,31 +20,25 @@ public sealed class UploadNewsImageCommandHandler(
         UploadNewsImageCommand request,
         CancellationToken cancellationToken)
     {
-        if(string.IsNullOrWhiteSpace(request.FileName))
+        if (string.IsNullOrWhiteSpace(request.FileName))
         {
             return Result<MediaFileResponse>.Failure("Filename is required");
         }
-
-        if(request.FileContent == null || request.FileContent.Length == 0)
+        if (request.FileContent == null || request.FileContent.Length == 0)
         {
             return Result<MediaFileResponse>.Failure("File is empty or required");
         }
-
-        if(request.FileContent.Length > MaxFileSize)
+        if (request.FileContent.Length > MaxFileSize)
         {
             return Result<MediaFileResponse>.Failure("File size exceeds 10MB limit");
         }
-
         var saveResult = await fileStorageService.SaveFileAsync(request.FileContent, cancellationToken, "news")
             .ConfigureAwait(false);
-
-        if(saveResult.IsFailure)
+        if (saveResult.IsFailure)
         {
             return Result<MediaFileResponse>.Failure(saveResult.Error ?? Error.Failure("Unknown upload error"));
         }
-
         var savedFile = saveResult.Value;
-
         var mediaFile = new MediaFileEntity
         {
             StorageType = "local",
@@ -54,13 +48,10 @@ public sealed class UploadNewsImageCommandHandler(
             FileExtension = savedFile.Extension,
             FileSize = savedFile.Size
         };
-
         insertRepository.Add(mediaFile);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         var response = mediaFile.Adapt<MediaFileResponse>();
         response.PublicUrl = fileStorageService.GetPublicUrl(savedFile.StoragePath);
-
         return response;
     }
 }

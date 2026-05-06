@@ -16,26 +16,32 @@ public class CommissionRecord : BaseEntity
     public EmployeeProfile EmployeeProfile { get; set; } = null!;
 
     [Required]
-    public int OutputId { get; set; } // Sales Order
+    public int OutputId { get; set; }
 
     [ForeignKey("OutputId")]
     public Output Output { get; set; } = null!;
 
-    /// <summary>Tổng tiền hoa hồng của đơn hàng này</summary>
+    /// <summary>
+    /// Tổng tiền hoa hồng của đơn hàng này
+    /// </summary>
     [Column(TypeName = "decimal(18,2)")]
     public decimal Amount { get; set; }
 
-    /// <summary>Trạng thái: Pending → Confirmed → Paid</summary>
+    /// <summary>
+    /// Trạng thái: Pending → Confirmed → Paid
+    /// </summary>
     public CommissionStatus Status { get; set; } = CommissionStatus.Pending;
 
     public DateTime DateEarned { get; set; } = DateTime.UtcNow;
 
-    /// <summary>Thời điểm Admin duyệt chi trả</summary>
+    /// <summary>
+    /// Thời điểm Admin duyệt chi trả
+    /// </summary>
     public DateTime? PaidAt { get; set; }
 
     /// <summary>
-    /// Ảnh chụp (Snapshot) chi tiết tính toán tại thời điểm ghi nhận.
-    /// Bất biến — không thay đổi dù Admin cập nhật chính sách về sau.
+    /// Ảnh chụp (Snapshot) chi tiết tính toán tại thời điểm ghi nhận. Bất biến — không thay đổi dù Admin cập nhật chính
+    /// sách về sau.
     /// </summary>
     [Column(TypeName = "nvarchar(MAX)")]
     public string? PolicySnapshot { get; set; }

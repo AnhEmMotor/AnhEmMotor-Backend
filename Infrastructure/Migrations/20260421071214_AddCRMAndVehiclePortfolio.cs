@@ -1,5 +1,5 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 #nullable disable
 
@@ -16,34 +16,25 @@ namespace Infrastructure.Migrations
                 table: "Lead",
                 type: "nvarchar(500)",
                 nullable: false,
-                defaultValue: "");
-
+                defaultValue: string.Empty);
             migrationBuilder.AddColumn<int>(
                 name: "Points",
                 table: "Lead",
                 type: "int",
                 nullable: false,
                 defaultValue: 0);
-
             migrationBuilder.AddColumn<string>(
                 name: "Tier",
                 table: "Lead",
                 type: "nvarchar(50)",
                 nullable: false,
-                defaultValue: "");
-
-            migrationBuilder.AddColumn<int>(
-                name: "Rating",
-                table: "Contact",
-                type: "int",
-                nullable: true);
-
+                defaultValue: string.Empty);
+            migrationBuilder.AddColumn<int>(name: "Rating", table: "Contact", type: "int", nullable: true);
             migrationBuilder.CreateTable(
                 name: "Vehicle",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     LeadId = table.Column<int>(type: "int", nullable: false),
                     VinNumber = table.Column<string>(type: "nvarchar(100)", nullable: false),
                     EngineNumber = table.Column<string>(type: "nvarchar(100)", nullable: false),
@@ -63,13 +54,11 @@ namespace Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "MaintenanceHistory",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     VehicleId = table.Column<int>(type: "int", nullable: false),
                     MaintenanceDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     Mileage = table.Column<int>(type: "int", nullable: false),
@@ -88,13 +77,11 @@ namespace Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "VehicleDocument",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     VehicleId = table.Column<int>(type: "int", nullable: false),
                     DocumentType = table.Column<string>(type: "nvarchar(50)", nullable: false),
                     FileUrl = table.Column<string>(type: "nvarchar(500)", nullable: false),
@@ -113,17 +100,11 @@ namespace Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateIndex(
                 name: "IX_MaintenanceHistory_VehicleId",
                 table: "MaintenanceHistory",
                 column: "VehicleId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Vehicle_LeadId",
-                table: "Vehicle",
-                column: "LeadId");
-
+            migrationBuilder.CreateIndex(name: "IX_Vehicle_LeadId", table: "Vehicle", column: "LeadId");
             migrationBuilder.CreateIndex(
                 name: "IX_VehicleDocument_VehicleId",
                 table: "VehicleDocument",
@@ -133,30 +114,13 @@ namespace Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "MaintenanceHistory");
-
-            migrationBuilder.DropTable(
-                name: "VehicleDocument");
-
-            migrationBuilder.DropTable(
-                name: "Vehicle");
-
-            migrationBuilder.DropColumn(
-                name: "Address",
-                table: "Lead");
-
-            migrationBuilder.DropColumn(
-                name: "Points",
-                table: "Lead");
-
-            migrationBuilder.DropColumn(
-                name: "Tier",
-                table: "Lead");
-
-            migrationBuilder.DropColumn(
-                name: "Rating",
-                table: "Contact");
+            migrationBuilder.DropTable(name: "MaintenanceHistory");
+            migrationBuilder.DropTable(name: "VehicleDocument");
+            migrationBuilder.DropTable(name: "Vehicle");
+            migrationBuilder.DropColumn(name: "Address", table: "Lead");
+            migrationBuilder.DropColumn(name: "Points", table: "Lead");
+            migrationBuilder.DropColumn(name: "Tier", table: "Lead");
+            migrationBuilder.DropColumn(name: "Rating", table: "Contact");
         }
     }
 }

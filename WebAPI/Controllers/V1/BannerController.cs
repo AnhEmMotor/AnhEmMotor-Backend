@@ -1,9 +1,11 @@
 using Application.Features.Banners.Commands.CreateBanner;
-using Application.Features.Banners.Commands.UpdateBanner;
 using Application.Features.Banners.Commands.DeleteBanner;
 using Application.Features.Banners.Commands.TrackBannerClick;
+using Application.Features.Banners.Commands.UpdateBanner;
+using Application.Features.Banners.Queries.GetActiveBanners;
+using Application.Features.Banners.Queries.GetBannerAuditLogs;
+using Application.Features.Banners.Queries.GetBannersList;
 using Asp.Versioning;
-using Domain.Constants;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -45,7 +47,8 @@ public class BannerController(ISender sender) : ApiController
     [SwaggerOperation(Summary = "Cập nhật banner")]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateBannerCommand command)
     {
-        if (id != command.Id) return BadRequest("ID mismatch");
+        if (id != command.Id)
+            return BadRequest("ID mismatch");
         var result = await sender.Send(command);
         return HandleResult(result);
     }
@@ -85,7 +88,7 @@ public class BannerController(ISender sender) : ApiController
     [SwaggerOperation(Summary = "Lấy danh sách banner đang hoạt động")]
     public async Task<IActionResult> GetActive()
     {
-        var result = await sender.Send(new Application.Features.Banners.Queries.GetActiveBanners.GetActiveBannersQuery());
+        var result = await sender.Send(new GetActiveBannersQuery());
         return HandleResult(result);
     }
 
@@ -98,9 +101,10 @@ public class BannerController(ISender sender) : ApiController
     [SwaggerOperation(Summary = "Lấy toàn bộ danh sách banner")]
     public async Task<IActionResult> GetList()
     {
-        var result = await sender.Send(new Application.Features.Banners.Queries.GetBannersList.GetBannersListQuery());
+        var result = await sender.Send(new GetBannersListQuery());
         return HandleResult(result);
     }
+
     /// <summary>
     /// Lấy lịch sử thay đổi của banner
     /// </summary>
@@ -111,7 +115,7 @@ public class BannerController(ISender sender) : ApiController
     [SwaggerOperation(Summary = "Lấy lịch sử thay đổi của banner")]
     public async Task<IActionResult> GetAuditLogs(int id)
     {
-        var result = await sender.Send(new Application.Features.Banners.Queries.GetBannerAuditLogs.GetBannerAuditLogsQuery(id));
+        var result = await sender.Send(new GetBannerAuditLogsQuery(id));
         return HandleResult(result);
     }
 }

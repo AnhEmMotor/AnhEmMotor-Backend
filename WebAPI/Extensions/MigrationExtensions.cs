@@ -24,10 +24,10 @@ public static class MigrationExtensions
     /// </summary>
     /// <remarks>
     /// Data seeding is performed only if the configuration value 'SeedingOptions:RunDataSeedingOnStartup' is set to
-    /// <see langword="true"/>. This method should be called during application startup to ensure the database schema is
-    /// up to date and required data is present.
+    /// <see langword="true" />. This method should be called during application startup to ensure the database schema
+    /// is up to date and required data is present.
     /// </remarks>
-    /// <param name="app">The current <see cref="WebApplication"/> instance to which migrations and seeding will be applied.</param>
+    /// <param name="app">The current <see cref="WebApplication" /> instance to which migrations and seeding will be applied.</param>
     /// <param name="cancellationToken">A cancellation token that can be used to cancel the migration and seeding operations.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
     public static async Task ApplyMigrationsAndSeedAsync(this WebApplication app, CancellationToken cancellationToken)
@@ -35,22 +35,16 @@ public static class MigrationExtensions
         using var scope = app.Services.CreateScope();
         var services = scope.ServiceProvider;
         var configuration = services.GetRequiredService<IConfiguration>();
-
         var logger = services.GetRequiredService<ILogger<Program>>();
-
         try
         {
             var dbContext = services.GetRequiredService<ApplicationDBContext>();
-            
-            // Tự động chạy Migration để tạo/cập nhật Database khi khởi động
             await dbContext.Database.MigrateAsync(cancellationToken).ConfigureAwait(true);
-
             var shouldSeed = configuration.GetValue<bool>("SeedingOptions:RunDataSeedingOnStartup");
-            if(shouldSeed)
+            if (shouldSeed)
             {
                 var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
                 var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
-
                 await ProductCategorySeeder.SeedAsync(dbContext, configuration, cancellationToken).ConfigureAwait(true);
                 await InputStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
                 await OutputStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
@@ -64,9 +58,7 @@ public static class MigrationExtensions
                 await NewsSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
                 await TechnologySeeder.SeedAsync(dbContext).ConfigureAwait(true);
                 await new VehicleTypeSeeder(dbContext).SeedAsync().ConfigureAwait(true);
-
                 await TechnologyDataMigrationSeeder.MigrateExistingHighlightsAsync(dbContext).ConfigureAwait(true);
-
                 await PermissionDataSeeder.SeedPermissionsAsync(dbContext, cancellationToken).ConfigureAwait(true);
                 await ProtectedEntitiesSeeder.SeedProtectedEntitiesAsync(
                     dbContext,
@@ -76,12 +68,11 @@ public static class MigrationExtensions
                     logger,
                     cancellationToken)
                     .ConfigureAwait(true);
-
                 await EmployeeSeeder.SeedAsync(dbContext, userManager, cancellationToken).ConfigureAwait(true);
                 await LeadSeeder.SeedAsync(dbContext, userManager).ConfigureAwait(true);
                 await CommissionPolicySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
             }
-        } catch(Exception ex)
+        } catch (Exception ex)
         {
             logger.LogError(ex, "An error occurred during migration/seeding.");
             throw;

@@ -26,18 +26,17 @@ public static class ProductAttributeLabels
         { "CompressionRatio", "Tỉ số nén" }
     };
 
-    public static readonly string[] InternalProperties = [ "Id", "Name", "Description", "ShortDescription", "MetaTitle", "MetaDescription", "Brand", "ProductCategory", "ProductStatus", "ProductVariants", "ProductTechnologies", "Highlights", "BrandId", "CategoryId", "StatusId", "CreatedAt", "UpdatedAt", "DeletedAt", "CreatedBy", "UpdatedBy" ];
+    public static readonly string[] InternalProperties = ["Id", "Name", "Description", "ShortDescription", "MetaTitle", "MetaDescription", "Brand", "ProductCategory", "ProductStatus", "ProductVariants", "ProductTechnologies", "Highlights", "BrandId", "CategoryId", "StatusId", "CreatedAt", "UpdatedAt", "DeletedAt", "CreatedBy", "UpdatedBy"];
 
     public static bool IsInternalProperty(string propertyName)
     {
-        foreach(var internalProperty in InternalProperties)
+        foreach (var internalProperty in InternalProperties)
         {
-            if(string.Compare(propertyName, internalProperty, StringComparison.Ordinal) is 0)
+            if (string.Compare(propertyName, internalProperty, StringComparison.Ordinal) is 0)
             {
                 return true;
             }
         }
-
         return false;
     }
 }

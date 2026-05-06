@@ -4,8 +4,8 @@ using Application.Features.UserManager.Commands.AssignRoles;
 using Application.Features.UserManager.Commands.ChangeMultipleUsersStatus;
 using Application.Features.UserManager.Commands.ChangePasswordByManager;
 using Application.Features.UserManager.Commands.ChangeUserStatus;
-using Application.Features.UserManager.Commands.UpdateUser;
 using Application.Features.UserManager.Commands.CreateUserByManager;
+using Application.Features.UserManager.Commands.UpdateUser;
 using Application.Features.UserManager.Queries.GetUserById;
 using Application.Features.UserManager.Queries.GetUsersList;
 using Application.Features.UserManager.Queries.GetUsersListForOutput;
@@ -180,7 +180,6 @@ public class UserManagerController(IMediator mediator) : ApiController
         var result = await mediator.Send(modelToSend, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
-
 
     /// <summary>
     /// Thay đổi trạng thái của nhiều người dùng

@@ -27,18 +27,15 @@ public class TokenManagerService : ITokenManagerService
         var audience = configuration["Jwt:Audience"];
         var accessTokenExpiry = configuration["Jwt:AccessTokenExpiryInMinutes"];
         var refreshTokenExpiry = configuration["Jwt:RefreshTokenExpiryInDays"];
-
-        if(string.IsNullOrEmpty(jwtKey))
+        if (string.IsNullOrEmpty(jwtKey))
             throw new InvalidOperationException("Jwt:Key is missing.");
-        if(string.IsNullOrEmpty(issuer))
+        if (string.IsNullOrEmpty(issuer))
             throw new InvalidOperationException("Jwt:Issuer is missing.");
-        if(string.IsNullOrEmpty(audience))
+        if (string.IsNullOrEmpty(audience))
             throw new InvalidOperationException("Jwt:Audience is missing.");
-
         _authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
         _issuer = issuer;
         _audience = audience;
-
         _accessTokenExpiryMinutes = int.TryParse(accessTokenExpiry, out var accessMinutes) && accessMinutes > 0
             ? accessMinutes
             : 15;
@@ -59,8 +56,7 @@ public class TokenManagerService : ITokenManagerService
             new(ClaimJWTPayload.Status, user.Status ?? string.Empty),
             new("AspNet.Identity.SecurityStamp", user.SecurityStamp ?? string.Empty)
         };
-
-        if(user.AuthMethods is not null && user.AuthMethods.Any())
+        if (user.AuthMethods is not null && user.AuthMethods.Any())
         {
             claims.Add(
                 new Claim(
@@ -68,22 +64,19 @@ public class TokenManagerService : ITokenManagerService
                     JsonSerializer.Serialize(user.AuthMethods),
                     JsonClaimValueTypes.JsonArray));
         }
-
-        if(user.Roles is not null)
+        if (user.Roles is not null)
         {
-            foreach(var role in user.Roles)
+            foreach (var role in user.Roles)
             {
                 claims.Add(new Claim(ClaimJWTPayload.Role, role));
             }
         }
-
         var token = new JwtSecurityToken(
             issuer: _issuer,
             audience: _audience,
             expires: expiryTime.UtcDateTime,
             claims: claims,
             signingCredentials: new SigningCredentials(_authSigningKey, SecurityAlgorithms.HmacSha256));
-
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
@@ -98,7 +91,6 @@ public class TokenManagerService : ITokenManagerService
     public string? GetClaimFromToken(string token, string claimType)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
-
         try
         {
             tokenHandler.ValidateToken(
@@ -112,8 +104,7 @@ public class TokenManagerService : ITokenManagerService
                     ClockSkew = TimeSpan.Zero
                 },
                 out SecurityToken validatedToken);
-
-            if(validatedToken is JwtSecurityToken jwtToken)
+            if (validatedToken is JwtSecurityToken jwtToken)
             {
                 return jwtToken.Claims.FirstOrDefault(c => string.Compare(c.Type, claimType) == 0)?.Value;
             }
@@ -121,7 +112,6 @@ public class TokenManagerService : ITokenManagerService
         {
             return null;
         }
-
         return null;
     }
 

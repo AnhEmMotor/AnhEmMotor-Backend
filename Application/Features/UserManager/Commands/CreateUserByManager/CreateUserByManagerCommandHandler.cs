@@ -3,7 +3,6 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories.User;
 using Domain.Constants;
 using Domain.Entities;
-using Mapster;
 using MediatR;
 
 namespace Application.Features.UserManager.Commands.CreateUserByManager;
@@ -12,7 +11,9 @@ public class CreateUserByManagerCommandHandler(
     IUserCreateRepository userCreateRepository,
     IUserReadRepository userReadRepository) : IRequestHandler<CreateUserByManagerCommand, Result<UserDTOForManagerResponse>>
 {
-    public async Task<Result<UserDTOForManagerResponse>> Handle(CreateUserByManagerCommand request, CancellationToken cancellationToken)
+    public async Task<Result<UserDTOForManagerResponse>> Handle(
+        CreateUserByManagerCommand request,
+        CancellationToken cancellationToken)
     {
         var user = new ApplicationUser
         {
@@ -23,27 +24,22 @@ public class CreateUserByManagerCommandHandler(
             Gender = request.Gender ?? GenderStatus.Male,
             Status = request.Status ?? UserStatus.Active
         };
-
         var (succeeded, errors) = await userCreateRepository.CreateUserAsync(user, request.Password!, cancellationToken)
             .ConfigureAwait(false);
-
-        if(!succeeded)
+        if (!succeeded)
         {
             var validationErrors = errors.Select(e => Error.Validation(e)).ToList();
             return Result<UserDTOForManagerResponse>.Failure(validationErrors);
         }
-
-        if(request.RoleNames != null && request.RoleNames.Count > 0)
+        if (request.RoleNames != null && request.RoleNames.Count > 0)
         {
-            foreach(var role in request.RoleNames)
+            foreach (var role in request.RoleNames)
             {
                 await userCreateRepository.AddUserToRoleAsync(user, role, cancellationToken).ConfigureAwait(false);
             }
         }
-
         var newUser = await userReadRepository.FindUserByIdAsync(user.Id, cancellationToken).ConfigureAwait(false);
         var roles = await userReadRepository.GetUserRoleIdsAsync(newUser!, cancellationToken).ConfigureAwait(false);
-
         return new UserDTOForManagerResponse()
         {
             Id = newUser!.Id,

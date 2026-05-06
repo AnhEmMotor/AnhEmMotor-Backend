@@ -1,3 +1,4 @@
+using Application.Common.Models;
 using Application.Interfaces.Repositories.Product;
 using Domain.Constants;
 using Infrastructure.DBContexts;
@@ -11,7 +12,15 @@ namespace Infrastructure.Repositories.Product;
 public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor sieveProcessor) : IProductReadRepository
 {
     public IQueryable<ProductEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
-    { return context.GetQuery<ProductEntity>(mode).Include(p => p.ProductCategory).ThenInclude(c => c!.Parent).Include(p => p.Brand).Include(p => p.ProductTechnologies).ThenInclude(pt => pt.Technology).ThenInclude(t => t!.Category); }
+    {
+        return context.GetQuery<ProductEntity>(mode)
+            .Include(p => p.ProductCategory)
+            .ThenInclude(c => c!.Parent)
+            .Include(p => p.Brand)
+            .Include(p => p.ProductTechnologies)
+            .ThenInclude(pt => pt.Technology)
+            .ThenInclude(t => t!.Category);
+    }
 
     public Task<IEnumerable<ProductEntity>> GetAllAsync(
         CancellationToken cancellationToken,
@@ -28,24 +37,21 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         IQueryable<ProductEntity> query = context.Products;
-
         if (mode != DataFetchMode.ActiveOnly)
             query = query.IgnoreQueryFilters();
-
-        if(mode == DataFetchMode.ActiveOnly)
+        if (mode == DataFetchMode.ActiveOnly)
         {
             query = query.Where(p => p.DeletedAt == null);
-        } else if(mode == DataFetchMode.DeletedOnly)
+        } else if (mode == DataFetchMode.DeletedOnly)
         {
             query = query.Where(p => p.DeletedAt != null);
         }
-
         return query
             .Include(p => p.ProductCategory)
             .Include(p => p.Brand)
             .Include(p => p.ProductTechnologies)
-                .ThenInclude(pt => pt.Technology)
-                .ThenInclude(t => t!.Category)
+            .ThenInclude(pt => pt.Technology)
+            .ThenInclude(t => t!.Category)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.VariantOptionValues)
             .ThenInclude(vov => vov.OptionValue)
@@ -73,29 +79,29 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             .ToListAsync(cancellationToken)
             .ContinueWith<IEnumerable<ProductEntity>>(t => t.Result, cancellationToken);
     }
-    public async Task<ProductEntity?> GetByIdWithDetailsAsync(int id, CancellationToken cancellationToken, DataFetchMode mode = DataFetchMode.ActiveOnly)
+
+    public async Task<ProductEntity?> GetByIdWithDetailsAsync(
+        int id,
+        CancellationToken cancellationToken,
+        DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         IQueryable<ProductEntity> query = context.Products;
-
         if (mode != DataFetchMode.ActiveOnly)
             query = query.IgnoreQueryFilters();
-
-        if(mode == DataFetchMode.ActiveOnly)
+        if (mode == DataFetchMode.ActiveOnly)
         {
             query = query.Where(p => p.DeletedAt == null);
-        }
-        else if (mode == DataFetchMode.DeletedOnly)
+        } else if (mode == DataFetchMode.DeletedOnly)
         {
             query = query.Where(p => p.DeletedAt != null);
         }
-
         return await query
             .Include(p => p.ProductCategory)
-                .ThenInclude(c => c!.Parent)
+            .ThenInclude(c => c!.Parent)
             .Include(p => p.Brand)
             .Include(p => p.ProductTechnologies)
-                .ThenInclude(pt => pt.Technology)
-                .ThenInclude(t => t!.Category)
+            .ThenInclude(pt => pt.Technology)
+            .ThenInclude(t => t!.Category)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.VariantOptionValues)
             .ThenInclude(vov => vov.OptionValue)
@@ -133,10 +139,8 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
         CancellationToken cancellationToken)
     {
         var query = context.DeletedOnly<ProductEntity>();
-
         var normalizedPage = Math.Max(page, 1);
         var normalizedPageSize = Math.Max(pageSize, 1);
-
         var sieveModel = new SieveModel
         {
             Filters = filters,
@@ -144,11 +148,8 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             Page = normalizedPage,
             PageSize = normalizedPageSize
         };
-
         query = sieveProcessor.Apply(sieveModel, query, applyPagination: false);
-
         var totalCount = await query.CountAsync(cancellationToken).ConfigureAwait(false);
-
         IQueryable<ProductEntity> dbQuery = query
             .Include(p => p.ProductCategory)
             .Include(p => p.Brand)
@@ -158,23 +159,20 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             .ThenInclude(ov => ov!.Option)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.ProductCollectionPhotos);
-
-        if(string.IsNullOrWhiteSpace(sorts))
+        if (string.IsNullOrWhiteSpace(sorts))
         {
             dbQuery = dbQuery.OrderByDescending(p => p.DeletedAt);
         }
-
         var items = await dbQuery
             .Skip((normalizedPage - 1) * normalizedPageSize)
             .Take(normalizedPageSize)
             .AsSplitQuery()
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-
         return (items, totalCount);
     }
 
-    public async Task<(List<ProductEntity> Items, int TotalCount, List<Application.Common.Models.FilterGroup> GroupedOptionFilters)> GetPagedProductsAsync(
+    public async Task<(List<ProductEntity> Items, int TotalCount, List<FilterGroup> GroupedOptionFilters)> GetPagedProductsAsync(
         string? search,
         List<string> statusIds,
         List<int> categoryIds,
@@ -191,43 +189,36 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
         var normalizedPage = Math.Max(page, 1);
         var normalizedPageSize = Math.Max(pageSize, 1);
         var searchPattern = string.IsNullOrWhiteSpace(search) ? null : $"%{search.Trim()}%";
-
         var query = context.Products.AsNoTracking();
-
-        if(searchPattern != null)
+        if (searchPattern != null)
         {
             query = query.Where(
                 p => EF.Functions.Like(p.Name, searchPattern) ||
                     (p.ProductCategory != null && EF.Functions.Like(p.ProductCategory.Name, searchPattern)) ||
                     (p.Brand != null && EF.Functions.Like(p.Brand.Name, searchPattern)));
         }
-
-        if(statusIds != null && statusIds.Count > 0)
+        if (statusIds != null && statusIds.Count > 0)
         {
             query = query.Where(p => p.StatusId != null && statusIds.Contains(p.StatusId));
         }
-
-        if(categoryIds != null && categoryIds.Count > 0)
+        if (categoryIds != null && categoryIds.Count > 0)
         {
             query = query.Where(p => p.CategoryId != null && categoryIds.Contains(p.CategoryId.Value));
         }
-
-        if(brandIds != null && brandIds.Count > 0)
+        if (brandIds != null && brandIds.Count > 0)
         {
             query = query.Where(p => p.BrandId != null && brandIds.Contains(p.BrandId.Value));
         }
-
-        if(minPrice.HasValue || maxPrice.HasValue)
+        if (minPrice.HasValue || maxPrice.HasValue)
         {
-            query = query.Where(p => p.ProductVariants.Any(v => 
-                v.DeletedAt == null && 
-                (!minPrice.HasValue || v.Price >= minPrice.Value) &&
-                (!maxPrice.HasValue || v.Price <= maxPrice.Value)
-            ));
+            query = query.Where(
+                p => p.ProductVariants
+                    .Any(
+                        v => v.DeletedAt == null &&
+                                (!minPrice.HasValue || v.Price >= minPrice.Value) &&
+                                (!maxPrice.HasValue || v.Price <= maxPrice.Value)));
         }
-
-        var groupedOptionFilters = new List<Application.Common.Models.FilterGroup>();
-
+        var groupedOptionFilters = new List<FilterGroup>();
         if (optionValueIds != null && optionValueIds.Count > 0)
         {
             var valuesWithOption = await context.OptionValues
@@ -235,45 +226,45 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
                 .Select(ov => new { ov.Id, ov.OptionId, ov.Name })
                 .ToListAsync(cancellationToken)
                 .ConfigureAwait(false);
-
             if (valuesWithOption.Count == 0)
             {
                 query = query.Where(p => false);
-            }
-            else
+            } else
             {
                 var groups = valuesWithOption.GroupBy(v => v.OptionId)
-                    .Select(g => new
-                    {
-                        Ids = g.Select(x => x.Id).ToList(),
-                        Names = g.Select(x => x.Name?.ToLower() ?? "").ToList()
-                    })
+                    .Select(
+                        g => new
+                        {
+                            Ids = g.Select(x => x.Id).ToList(),
+                            Names = g.Select(x => x.Name?.ToLower() ?? string.Empty).ToList()
+                        })
                     .ToList();
-
-                groupedOptionFilters = groups.Select(g => new Application.Common.Models.FilterGroup { Ids = g.Ids, Names = g.Names }).ToList();
-
-                // Optimization: Use Any() directly on the main query instead of creating a huge ID list
-                query = query.Where(p => p.ProductVariants.Any(v =>
-                    v.DeletedAt == null &&
-                    (!minPrice.HasValue || v.Price >= minPrice.Value) &&
-                    (!maxPrice.HasValue || v.Price <= maxPrice.Value) &&
-                    groups.All(group =>
-                        v.VariantOptionValues.Any(vov => vov.OptionValueId != null && group.Ids.Contains(vov.OptionValueId.Value)) ||
-                        (v.ColorName != null && group.Names.Any(n => v.ColorName.ToLower().Contains(n))) ||
-                        (v.VersionName != null && group.Names.Any(n => v.VersionName.ToLower().Contains(n)))
-                    )
-                ));
+                groupedOptionFilters = groups.Select(g => new FilterGroup { Ids = g.Ids, Names = g.Names }).ToList();
+                query = query.Where(
+                    p => p.ProductVariants
+                        .Any(
+                            v => v.DeletedAt == null &&
+                                    (!minPrice.HasValue || v.Price >= minPrice.Value) &&
+                                    (!maxPrice.HasValue || v.Price <= maxPrice.Value) &&
+                                    groups.All(
+                                        group => v.VariantOptionValues
+                                                .Any(
+                                                    vov => vov.OptionValueId != null &&
+                                                                            group.Ids.Contains(vov.OptionValueId.Value)) ||
+                                            (v.ColorName != null &&
+                                                group.Names.Any(n => v.ColorName.ToLower().Contains(n))) ||
+                                            (v.VersionName != null &&
+                                                group.Names.Any(n => v.VersionName.ToLower().Contains(n))))));
             }
-        }
-        else if (minPrice.HasValue || maxPrice.HasValue)
+        } else if (minPrice.HasValue || maxPrice.HasValue)
         {
-            query = query.Where(p => p.ProductVariants.Any(v =>
-                v.DeletedAt == null &&
-                (!minPrice.HasValue || v.Price >= minPrice.Value) &&
-                (!maxPrice.HasValue || v.Price <= maxPrice.Value)
-            ));
+            query = query.Where(
+                p => p.ProductVariants
+                    .Any(
+                        v => v.DeletedAt == null &&
+                                (!minPrice.HasValue || v.Price >= minPrice.Value) &&
+                                (!maxPrice.HasValue || v.Price <= maxPrice.Value)));
         }
-
         var sieveModel = new SieveModel
         {
             Filters = filters,
@@ -281,11 +272,8 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             Page = normalizedPage,
             PageSize = normalizedPageSize
         };
-
         query = sieveProcessor.Apply(sieveModel, query, applyPagination: false);
-
         var totalCount = await query.CountAsync(cancellationToken).ConfigureAwait(false);
-
         IQueryable<ProductEntity> dbQuery = query
             .Include(p => p.ProductCategory)
             .Include(p => p.Brand)
@@ -295,19 +283,16 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             .ThenInclude(v => v.VariantOptionValues)
             .ThenInclude(vov => vov.OptionValue)
             .ThenInclude(ov => ov!.Option);
-
-        if(string.IsNullOrWhiteSpace(sorts))
+        if (string.IsNullOrWhiteSpace(sorts))
         {
             dbQuery = dbQuery.OrderByDescending(p => p.CreatedAt);
         }
-
         var entities = await dbQuery
             .Skip((normalizedPage - 1) * normalizedPageSize)
             .Take(normalizedPageSize)
             .AsSplitQuery()
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-
         return (entities, totalCount, groupedOptionFilters);
     }
 
@@ -320,11 +305,8 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
     {
         var normalizedPage = Math.Max(page, 1);
         var normalizedPageSize = Math.Max(pageSize, 1);
-
         var query = context.Products.Where(p => p.DeletedAt == null).AsNoTracking();
-
         var effectiveSorts = string.IsNullOrWhiteSpace(sorts) ? "-CreatedAt" : sorts;
-
         var sieveModel = new SieveModel
         {
             Filters = filters,
@@ -332,20 +314,16 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             Page = normalizedPage,
             PageSize = normalizedPageSize
         };
-
         var filteredQuery = sieveProcessor.Apply(sieveModel, query, applyPagination: false);
         var totalCount = await filteredQuery.CountAsync(cancellationToken).ConfigureAwait(false);
-
         IQueryable<ProductEntity> dbQuery = sieveProcessor.Apply(sieveModel, query)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.VariantOptionValues)
             .ThenInclude(vov => vov.OptionValue);
-
         var entities = await dbQuery
             .AsSplitQuery()
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
-
         return (entities, totalCount);
     }
 
@@ -355,18 +333,15 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         IQueryable<Domain.Entities.ProductVariant> query = context.ProductVariants;
-
         if (mode != DataFetchMode.ActiveOnly)
             query = query.IgnoreQueryFilters();
-
-        if(mode == DataFetchMode.ActiveOnly)
+        if (mode == DataFetchMode.ActiveOnly)
         {
             query = query.Where(v => v.DeletedAt == null);
-        } else if(mode == DataFetchMode.DeletedOnly)
+        } else if (mode == DataFetchMode.DeletedOnly)
         {
             query = query.Where(v => v.DeletedAt != null);
         }
-
         return query
             .Include(v => v.Product)
             .ThenInclude(p => p!.ProductCategory)

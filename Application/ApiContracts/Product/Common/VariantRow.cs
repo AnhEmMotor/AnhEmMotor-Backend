@@ -29,17 +29,29 @@ namespace Application.ApiContracts.Product.Common
         public string? SKU { get; set; }
 
         public decimal? Weight { get; set; }
+
         public string? Dimensions { get; set; }
+
         public decimal? Wheelbase { get; set; }
+
         public decimal? SeatHeight { get; set; }
+
         public decimal? GroundClearance { get; set; }
+
         public decimal? FuelCapacity { get; set; }
+
         public string? TireSize { get; set; }
+
         public string? FrontBrake { get; set; }
+
         public string? RearBrake { get; set; }
+
         public string? FrontSuspension { get; set; }
+
         public string? RearSuspension { get; set; }
+
         public string? EngineType { get; set; }
+
         public int? StockQuantity { get; set; }
     }
 }

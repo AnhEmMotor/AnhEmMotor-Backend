@@ -1,5 +1,4 @@
 using Application.Interfaces.Repositories.Contact;
-using Domain.Entities;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,14 +10,12 @@ public class ContactReadRepository(ApplicationDBContext context) : IContactReadR
     {
         return await context.Contacts
             .Include(c => c.Replies)
-                .ThenInclude(r => r.RepliedBy)
+            .ThenInclude(r => r.RepliedBy)
             .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
     }
 
     public async Task<List<Domain.Entities.Contact>> GetAllAsync(CancellationToken cancellationToken)
     {
-        return await context.Contacts
-            .OrderByDescending(c => c.CreatedAt)
-            .ToListAsync(cancellationToken);
+        return await context.Contacts.OrderByDescending(c => c.CreatedAt).ToListAsync(cancellationToken);
     }
 }

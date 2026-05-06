@@ -10,19 +10,17 @@ public class UserStreamService : IUserStreamService
     public async Task WaitForUpdateAsync(Guid userId, CancellationToken cancellationToken)
     {
         var tcs = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-
         _listeners.AddOrUpdate(
             userId,
-            _ => [ tcs ],
+            _ => [tcs],
             (_, list) =>
             {
-                lock(list)
+                lock (list)
                 {
                     list.Add(tcs);
                 }
                 return list;
             });
-
         try
         {
             await tcs.Task.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -34,16 +32,15 @@ public class UserStreamService : IUserStreamService
 
     public void NotifyUserUpdate(Guid userId)
     {
-        if(_listeners.TryGetValue(userId, out var list))
+        if (_listeners.TryGetValue(userId, out var list))
         {
             List<TaskCompletionSource> snapshot;
-            lock(list)
+            lock (list)
             {
-                snapshot = [ .. list ];
+                snapshot = [.. list];
                 list.Clear();
             }
-
-            foreach(var tcs in snapshot)
+            foreach (var tcs in snapshot)
             {
                 tcs.TrySetResult();
             }
@@ -52,12 +49,12 @@ public class UserStreamService : IUserStreamService
 
     private void RemoveListener(Guid userId, TaskCompletionSource tcs)
     {
-        if(_listeners.TryGetValue(userId, out var list))
+        if (_listeners.TryGetValue(userId, out var list))
         {
-            lock(list)
+            lock (list)
             {
                 list.Remove(tcs);
-                if(list.Count == 0)
+                if (list.Count == 0)
                 {
                 }
             }

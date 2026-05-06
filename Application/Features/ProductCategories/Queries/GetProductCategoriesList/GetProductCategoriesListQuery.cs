@@ -9,8 +9,10 @@ namespace Application.Features.ProductCategories.Queries.GetProductCategoriesLis
 public sealed record GetProductCategoriesListQuery : IRequest<Result<PagedResult<ProductCategoryResponse>>>
 {
     public SieveModel? SieveModel { get; init; }
-    /// <summary>Nếu true, chỉ trả về thể loại sản phẩm (CategoryGroup="Product"), loại bỏ loại xe.</summary>
+
+    /// <summary>
+    /// Nếu true, chỉ trả về thể loại sản phẩm (CategoryGroup="Product"), loại bỏ loại xe.
+    /// </summary>
     public bool ProductOnly { get; init; } = false;
 }
-
 

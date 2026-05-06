@@ -16,7 +16,7 @@ public class KPI : BaseEntity
     public EmployeeProfile EmployeeProfile { get; set; } = null!;
 
     [Column(TypeName = "nvarchar(100)")]
-    public string MetricName { get; set; } = string.Empty; // e.g. "Vehicles Sold"
+    public string MetricName { get; set; } = string.Empty;
 
     [Column(TypeName = "decimal(18,2)")]
     public decimal TargetValue { get; set; }
@@ -25,6 +25,7 @@ public class KPI : BaseEntity
     public decimal ActualValue { get; set; }
 
     public DateTime PeriodStart { get; set; }
+
     public DateTime PeriodEnd { get; set; }
 
     [Column(TypeName = "nvarchar(MAX)")]

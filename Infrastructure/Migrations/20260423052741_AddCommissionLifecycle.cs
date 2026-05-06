@@ -1,5 +1,5 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 #nullable disable
 
@@ -16,26 +16,22 @@ namespace Infrastructure.Migrations
                 table: "CommissionRecord",
                 type: "datetime2",
                 nullable: true);
-
             migrationBuilder.AddColumn<string>(
                 name: "PolicySnapshot",
                 table: "CommissionRecord",
                 type: "nvarchar(MAX)",
                 nullable: true);
-
             migrationBuilder.AddColumn<int>(
                 name: "Status",
                 table: "CommissionRecord",
                 type: "int",
                 nullable: false,
                 defaultValue: 0);
-
             migrationBuilder.CreateTable(
                 name: "CommissionPolicyAuditLog",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     PolicyId = table.Column<int>(type: "int", nullable: false),
                     Action = table.Column<string>(type: "nvarchar(20)", nullable: false),
                     ChangedByName = table.Column<string>(type: "nvarchar(200)", nullable: false),
@@ -58,7 +54,6 @@ namespace Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateIndex(
                 name: "IX_CommissionPolicyAuditLog_PolicyId",
                 table: "CommissionPolicyAuditLog",
@@ -68,20 +63,10 @@ namespace Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "CommissionPolicyAuditLog");
-
-            migrationBuilder.DropColumn(
-                name: "PaidAt",
-                table: "CommissionRecord");
-
-            migrationBuilder.DropColumn(
-                name: "PolicySnapshot",
-                table: "CommissionRecord");
-
-            migrationBuilder.DropColumn(
-                name: "Status",
-                table: "CommissionRecord");
+            migrationBuilder.DropTable(name: "CommissionPolicyAuditLog");
+            migrationBuilder.DropColumn(name: "PaidAt", table: "CommissionRecord");
+            migrationBuilder.DropColumn(name: "PolicySnapshot", table: "CommissionRecord");
+            migrationBuilder.DropColumn(name: "Status", table: "CommissionRecord");
         }
     }
 }

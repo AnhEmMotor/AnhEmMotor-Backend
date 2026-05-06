@@ -10,6 +10,7 @@ namespace Domain.Entities
         public int Id { get; set; }
 
         public int? CategoryId { get; set; }
+
         public int? BrandId { get; set; }
 
         [Required]
@@ -26,9 +27,11 @@ namespace Domain.Entities
         public string? DefaultImageUrl { get; set; }
 
         public TechnologyCategory? Category { get; set; }
+
         public Brand? Brand { get; set; }
 
         public ICollection<TechnologyImage> Images { get; set; } = [];
+
         public ICollection<ProductTechnology> ProductTechnologies { get; set; } = [];
     }
 }

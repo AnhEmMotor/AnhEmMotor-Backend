@@ -19,26 +19,21 @@ public sealed class CreateBrandCommandHandler(
         var cleanDescription = request.Description?.Trim();
         var cleanOrigin = request.Origin?.Trim();
         var cleanLogoUrl = request.LogoUrl?.Trim();
-
-        if(cleanName == null)
+        if (cleanName == null)
             return Error.BadRequest("Name is empty/null, please check again");
-
         var existingBrands = await brandReadRepository.GetByNameAsync(cleanName, cancellationToken)
             .ConfigureAwait(false);
-        if(existingBrands.Count != 0)
+        if (existingBrands.Count != 0)
         {
             return Result<BrandResponse>.Failure("Brand name already exists.");
         }
-
         var brand = request.Adapt<BrandEntity>();
         brand.Name = cleanName;
         brand.Description = cleanDescription;
         brand.Origin = cleanOrigin;
         brand.LogoUrl = cleanLogoUrl;
-
         repository.Add(brand);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         return brand.Adapt<BrandResponse>();
     }
 }

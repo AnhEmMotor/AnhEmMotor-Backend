@@ -122,7 +122,6 @@ namespace Domain.Entities
         [Column("DashboardType", TypeName = "nvarchar(100)")]
         public string? DashboardType { get; set; }
 
-        // Spare Parts & Accessories Specs
         [Column("Material", TypeName = "nvarchar(100)")]
         public string? Material { get; set; }
 
@@ -135,7 +134,6 @@ namespace Domain.Entities
         [Column("Unit", TypeName = "nvarchar(20)")]
         public string? Unit { get; set; }
 
-        // Quality Standards
         [Column("StdDot")]
         public bool StdDot { get; set; }
 
@@ -161,7 +159,6 @@ namespace Domain.Entities
 
         public ICollection<ProductTechnology> ProductTechnologies { get; set; } = [];
 
-
         public ProductCategory? ProductCategory { get; set; }
 
         public VehicleType? VehicleType { get; set; }
@@ -171,9 +168,9 @@ namespace Domain.Entities
         public ICollection<ProductVariant> ProductVariants { get; set; } = [];
 
         [InverseProperty("BaseProduct")]
-        public ICollection<ProductCompatibility> CompatibleWith { get; set; } = []; // For Parts/Accessories: List of vehicles this part fits
+        public ICollection<ProductCompatibility> CompatibleWith { get; set; } = [];
 
         [InverseProperty("CompatibleVehicleModel")]
-        public ICollection<ProductCompatibility> SupportedBy { get; set; } = []; // For Vehicles: List of parts that fit this vehicle
+        public ICollection<ProductCompatibility> SupportedBy { get; set; } = [];
     }
 }

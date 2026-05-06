@@ -14,13 +14,13 @@ public class CommissionPolicy : BaseEntity
     public string Name { get; set; } = string.Empty;
 
     [Column(TypeName = "nvarchar(50)")]
-    public string Type { get; set; } = "FixedAmount"; // FixedAmount, Percentage
+    public string Type { get; set; } = "FixedAmount";
 
     [Column(TypeName = "decimal(18,2)")]
     public decimal Value { get; set; }
 
     public int? ProductId { get; set; }
-    
+
     [ForeignKey("ProductId")]
     public Product? Product { get; set; }
 
@@ -29,10 +29,10 @@ public class CommissionPolicy : BaseEntity
     [ForeignKey("CategoryId")]
     public ProductCategory? Category { get; set; }
 
-    public Guid? EmployeeId { get; set; } // Individual policy
+    public Guid? EmployeeId { get; set; }
 
     [Column(TypeName = "nvarchar(50)")]
-    public string? TargetGroup { get; set; } // e.g. "Sale", "Manager"
+    public string? TargetGroup { get; set; }
 
     public DateTimeOffset EffectiveDate { get; set; } = DateTimeOffset.UtcNow;
 
@@ -40,7 +40,7 @@ public class CommissionPolicy : BaseEntity
     public string? Notes { get; set; }
 
     [Column(TypeName = "nvarchar(20)")]
-    public string? Unit { get; set; } // e.g. "xe", "cái", "bộ"
+    public string? Unit { get; set; }
 
     public bool IsActive { get; set; } = true;
 }

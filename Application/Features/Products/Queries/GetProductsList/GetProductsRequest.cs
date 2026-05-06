@@ -9,9 +9,9 @@ namespace Application.Features.Products.Queries.GetProductsList
         public string? BrandIds { get; set; }
 
         public string? OptionValueIds { get; set; }
-        
+
         public decimal? MinPrice { get; set; }
-        
+
         public decimal? MaxPrice { get; set; }
     }
 }

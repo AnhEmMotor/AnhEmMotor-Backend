@@ -26,13 +26,10 @@ public sealed class CreateOutputCommandHandler(
             .Select(p => p.ProductId!.Value)
             .Distinct()
             .ToList();
-
         var variants = await variantRepository.GetByIdAsync(variantIds, cancellationToken, DataFetchMode.ActiveOnly)
             .ConfigureAwait(false);
-
         var variantsList = variants.ToList();
-
-        if(variantsList.Count != variantIds.Count)
+        if (variantsList.Count != variantIds.Count)
         {
             var foundIds = variantsList.Select(v => v.Id).ToList();
             var missingIds = variantIds.Except(foundIds).ToList();
@@ -40,10 +37,9 @@ public sealed class CreateOutputCommandHandler(
                 $"Không tìm thấy {missingIds.Count} sản phẩm: {string.Join(", ", missingIds)}",
                 "Products");
         }
-
-        foreach(var variant in variantsList)
+        foreach (var variant in variantsList)
         {
-            if(string.Compare(variant.Product?.StatusId, Domain.Constants.Product.ProductStatus.ForSale) != 0)
+            if (string.Compare(variant.Product?.StatusId, Domain.Constants.Product.ProductStatus.ForSale) != 0)
             {
                 return Error.BadRequest(
                     $"Sản phẩm '{variant.Product?.Name ?? variant.Id.ToString()}' không còn được bán.",
@@ -51,30 +47,24 @@ public sealed class CreateOutputCommandHandler(
             }
         }
         var output = request.Adapt<Output>();
-
-        foreach(var info in output.OutputInfos)
+        foreach (var info in output.OutputInfos)
         {
             var matchingVariant = variantsList.FirstOrDefault(v => v.Id == info.ProductVarientId);
-            if(matchingVariant != null)
+            if (matchingVariant != null)
             {
                 info.Price = matchingVariant.Price;
             }
         }
-
-        if(string.IsNullOrWhiteSpace(output.StatusId))
+        if (string.IsNullOrWhiteSpace(output.StatusId))
         {
             output.StatusId = OrderStatus.Pending;
         }
-
         output.BuyerId = request.BuyerId;
         output.CreatedBy = request.BuyerId;
-
         insertRepository.Add(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         var created = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
         ArgumentNullException.ThrowIfNull(created);
-
         return created.Adapt<OrderDetailResponse>();
     }
 }

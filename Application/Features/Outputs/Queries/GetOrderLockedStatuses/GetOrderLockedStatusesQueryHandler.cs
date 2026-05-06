@@ -12,14 +12,12 @@ public sealed class GetOrderLockedStatusesQueryHandler : IRequestHandler<GetOrde
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-
         var result = new OrderLockStatusResponse
         {
             BuyerAndProducts = OrderLockStatus.BuyerAndProductsLockedStatuses,
             DeliveryInfo = OrderLockStatus.DeliveryInfoLockedStatuses,
             Notes = OrderLockStatus.NotesLockedStatuses
         };
-
         return Task.FromResult(Result<OrderLockStatusResponse>.Success(result));
     }
 }

@@ -33,7 +33,6 @@ namespace Application.ApiContracts.Product.Responses
         [JsonPropertyName("sku")]
         public string? SKU { get; set; }
 
-        // Overridable Specs
         public decimal? Weight { get; set; }
 
         public string? Dimensions { get; set; }

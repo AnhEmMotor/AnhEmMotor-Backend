@@ -3,7 +3,6 @@ using Application.Features.Contacts.Commands.CreateContactReply;
 using Application.Features.Contacts.Commands.UpdateInternalNote;
 using Application.Features.Contacts.Queries.GetContacts;
 using Asp.Versioning;
-using Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

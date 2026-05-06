@@ -16,73 +16,60 @@ public class UpdateCurrentUserCommandHandler(
         UpdateCurrentUserCommand request,
         CancellationToken cancellationToken)
     {
-        if(string.IsNullOrEmpty(request.UserId) || !Guid.TryParse(request.UserId, out var userId))
+        if (string.IsNullOrEmpty(request.UserId) || !Guid.TryParse(request.UserId, out var userId))
         {
             return Error.BadRequest("Invalid user ID.");
         }
-
         var user = await userReadRepository.FindUserByIdAsync(userId, cancellationToken).ConfigureAwait(false);
-        if(user is null)
+        if (user is null)
         {
             return Error.NotFound("User not found.");
         }
-
-        if(user.DeletedAt is not null)
+        if (user.DeletedAt is not null)
         {
             return Error.Forbidden("User account is deleted.");
         }
-
-        if(string.Compare(user.Status, UserStatus.Banned) == 0)
+        if (string.Compare(user.Status, UserStatus.Banned) == 0)
         {
             return Error.Forbidden("User account is banned.");
         }
-
         cancellationToken.ThrowIfCancellationRequested();
-
-
-        if(request.FullName is not null)
+        if (request.FullName is not null)
         {
             user.FullName = request.FullName.Trim();
         }
-
-        if(request.Gender is not null)
+        if (request.Gender is not null)
         {
             user.Gender = request.Gender.Trim();
         }
-
-        if(request.PhoneNumber is not null)
+        if (request.PhoneNumber is not null)
         {
             var trimmedPhone = request.PhoneNumber.Trim();
-            if(string.IsNullOrEmpty(trimmedPhone))
+            if (string.IsNullOrEmpty(trimmedPhone))
             {
                 user.PhoneNumber = null;
-            } else if(string.Compare(trimmedPhone, user.PhoneNumber) != 0)
+            } else if (string.Compare(trimmedPhone, user.PhoneNumber) != 0)
             {
                 user.PhoneNumber = trimmedPhone;
             }
         }
-
-        if(request.DateOfBirth.HasValue)
+        if (request.DateOfBirth.HasValue)
         {
             user.DateOfBirth = request.DateOfBirth.Value;
         }
-
         var (succeeded, errors) = await userUpdateRepository.UpdateUserAsync(user, cancellationToken)
             .ConfigureAwait(false);
-        if(!succeeded)
+        if (!succeeded)
         {
-            if(!errors.Any())
+            if (!errors.Any())
             {
                 return Error.Validation("Failed to update user.", "UpdateFailed");
             }
             var validationErrors = errors.Select(e => Error.Validation("UpdateError", e)).ToList();
             return Result<UserDTOForManagerResponse>.Failure(validationErrors);
         }
-
         userStreamService.NotifyUserUpdate(user.Id);
-
         var roles = await userReadRepository.GetUserRolesAsync(user, cancellationToken).ConfigureAwait(false);
-
         return new UserDTOForManagerResponse()
         {
             Id = user.Id,

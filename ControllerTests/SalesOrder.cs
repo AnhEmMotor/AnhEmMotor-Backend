@@ -38,22 +38,19 @@ public class SalesOrder
     {
         _mediatorMock = new Mock<IMediator>();
         _controller = new SalesOrdersController(_mediatorMock.Object);
-
         var httpContext = new DefaultHttpContext();
         _controller.ControllerContext = new ControllerContext() { HttpContext = httpContext };
     }
 
-#pragma warning disable IDE0079 
-#pragma warning disable CRR0035
+    #pragma warning disable IDE0079 
+    #pragma warning disable CRR0035
     [Fact(DisplayName = "SO_081 - GetMyPurchases - L?y don hng c?a chnh mnh")]
     public async Task GetMyPurchases_UserAuthenticated_ReturnsOrders()
     {
         var buyerId = Guid.NewGuid();
-
         var claims = new List<Claim> { new(ClaimTypes.NameIdentifier, buyerId.ToString()) };
         var identity = new ClaimsIdentity(claims, "TestAuthType");
         var claimsPrincipal = new ClaimsPrincipal(identity);
-
         _controller.ControllerContext = new ControllerContext
         {
             HttpContext = new DefaultHttpContext { User = claimsPrincipal }
@@ -63,10 +60,8 @@ public class SalesOrder
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputsByUserIdQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(
                 Result<PagedResult<MyOrderResponse>>.Success(
-                    new PagedResult<MyOrderResponse>([ expectedOrder ], 1, 1, 10)));
-
+                    new PagedResult<MyOrderResponse>([expectedOrder], 1, 1, 10)));
         var result = await _controller.GetMyPurchasesAsync(sieveModel, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
         _mediatorMock.Verify(
             m => m.Send(It.IsAny<GetOutputsByUserIdQuery>(), It.IsAny<CancellationToken>()),
@@ -78,13 +73,10 @@ public class SalesOrder
     {
         var buyerId = Guid.NewGuid();
         var sieveModel = new SieveModel();
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputsByUserIdQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PagedResult<MyOrderResponse>>.Success(new PagedResult<MyOrderResponse>([], 0, 1, 10)));
-
         var result = await _controller.GetPurchasesByIDAsync(sieveModel, buyerId, CancellationToken.None)
             .ConfigureAwait(true);
-
         result.Should().NotBeNull();
         _mediatorMock.Verify(
             m => m.Send(It.IsAny<GetOutputsByUserIdQuery>(), It.IsAny<CancellationToken>()),
@@ -98,9 +90,7 @@ public class SalesOrder
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputsListQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(
                 Result<PagedResult<OutputItemResponse>>.Success(new PagedResult<OutputItemResponse>([], 0, 1, 10)));
-
         var result = await _controller.GetOutputsAsync(sieveModel, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
         _mediatorMock.Verify(m => m.Send(It.IsAny<GetOutputsListQuery>(), It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -112,9 +102,7 @@ public class SalesOrder
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetDeletedOutputsListQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(
                 Result<PagedResult<OutputItemResponse>>.Success(new PagedResult<OutputItemResponse>([], 0, 1, 10)));
-
         var result = await _controller.GetDeletedOutputsAsync(sieveModel, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
         _mediatorMock.Verify(
             m => m.Send(It.IsAny<GetDeletedOutputsListQuery>(), It.IsAny<CancellationToken>()),
@@ -128,9 +116,7 @@ public class SalesOrder
         var expectedOrder = new OrderDetailResponse { Id = orderId };
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputByIdQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<OrderDetailResponse>.Success(expectedOrder));
-
         var result = await _controller.GetOutputByIdAsync(orderId, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
         _mediatorMock.Verify(m => m.Send(It.IsAny<GetOutputByIdQuery>(), It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -142,9 +128,7 @@ public class SalesOrder
         var expectedResponse = new OrderDetailResponse { Id = 1, BuyerId = request.BuyerId };
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateOutputCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<OrderDetailResponse>.Success(expectedResponse));
-
         var result = await _controller.CreateOutputAsync(request, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
         _mediatorMock.Verify(m => m.Send(It.IsAny<CreateOutputCommand>(), It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -157,13 +141,10 @@ public class SalesOrder
         var identity = new ClaimsIdentity(claims, "TestAuthType");
         var claimsPrincipal = new ClaimsPrincipal(identity);
         _controller.ControllerContext.HttpContext.User = claimsPrincipal;
-
         var request = new CreateOutputByManagerCommand { BuyerId = Guid.NewGuid(), Notes = "Admin order" };
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateOutputByManagerCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<OrderDetailResponse>.Success(new OrderDetailResponse()));
-
         var result = await _controller.CreateOutputForAdminAsync(request, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
         _mediatorMock.Verify(
             m => m.Send(
@@ -179,10 +160,8 @@ public class SalesOrder
         var request = new UpdateOutputCommand { Notes = "Updated notes" };
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateOutputCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<OrderDetailResponse>.Success(new OrderDetailResponse { Id = orderId }));
-
         var result = await _controller.UpdateOutputForManagerAsync(orderId, request, CancellationToken.None)
             .ConfigureAwait(true);
-
         result.Should().NotBeNull();
         _mediatorMock.Verify(m => m.Send(It.IsAny<UpdateOutputCommand>(), It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -195,14 +174,11 @@ public class SalesOrder
         var identity = new ClaimsIdentity(claims, "TestAuthType");
         var claimsPrincipal = new ClaimsPrincipal(identity);
         _controller.ControllerContext.HttpContext.User = claimsPrincipal;
-
         int orderId = 1;
         var request = new UpdateOutputForManagerCommand();
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateOutputForManagerCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<OrderDetailResponse>.Success(new OrderDetailResponse()));
-
         var result = await _controller.UpdateOutputAsync(orderId, request, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
         _mediatorMock.Verify(
             m => m.Send(
@@ -218,10 +194,8 @@ public class SalesOrder
         var request = new UpdateOutputStatusCommand { StatusId = "confirmed_cod" };
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateOutputStatusCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<OrderDetailResponse>.Success(new OrderDetailResponse { StatusId = "confirmed_cod" }));
-
         var result = await _controller.UpdateOutputStatusAsync(orderId, request, CancellationToken.None)
             .ConfigureAwait(true);
-
         result.Should().NotBeNull();
         _mediatorMock.Verify(
             m => m.Send(It.IsAny<UpdateOutputStatusCommand>(), It.IsAny<CancellationToken>()),
@@ -231,12 +205,10 @@ public class SalesOrder
     [Fact(DisplayName = "SO_091 - UpdateManyOutputStatus - C?p nh?t tr?ng thi nhi?u don")]
     public async Task UpdateManyOutputStatus_ValidRequest_UpdatesMultipleOrders()
     {
-        var request = new UpdateManyOutputStatusCommand { Ids = [ 1, 2, 3 ], StatusId = "confirmed_cod" };
+        var request = new UpdateManyOutputStatusCommand { Ids = [1, 2, 3], StatusId = "confirmed_cod" };
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateManyOutputStatusCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<List<OutputItemResponse>?>.Success([]));
-
         var result = await _controller.UpdateManyOutputStatusAsync(request, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
         _mediatorMock.Verify(
             m => m.Send(It.IsAny<UpdateManyOutputStatusCommand>(), It.IsAny<CancellationToken>()),
@@ -249,9 +221,7 @@ public class SalesOrder
         int orderId = 1;
         _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteOutputCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success());
-
         var result = await _controller.DeleteOutputAsync(orderId, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
         _mediatorMock.Verify(m => m.Send(It.IsAny<DeleteOutputCommand>(), It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -261,17 +231,14 @@ public class SalesOrder
     {
         var expectedResponse = new OrderLockStatusResponse
         {
-            BuyerAndProducts = [ OrderStatus.Completed ],
-            DeliveryInfo = [ OrderStatus.Completed ],
-            Notes = [ OrderStatus.Completed ]
+            BuyerAndProducts = [OrderStatus.Completed],
+            DeliveryInfo = [OrderStatus.Completed],
+            Notes = [OrderStatus.Completed]
         };
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetOrderLockedStatusesQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<OrderLockStatusResponse>.Success(expectedResponse));
-
         _controller.Should().NotBeNull();
-
         var result = await _controller!.GetLockedStatusesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var okResult = result as OkObjectResult;
         okResult.Should().NotBeNull();
         okResult!.StatusCode.Should().Be(200);
@@ -285,12 +252,10 @@ public class SalesOrder
     [Fact(DisplayName = "SO_093 - DeleteManyOutputs - Xoá nhiều đơn hàng")]
     public async Task DeleteManyOutputs_ValidRequest_DeletesMultipleOrders()
     {
-        var request = new DeleteManyOutputsCommand { Ids = [ 1, 2, 3 ] };
+        var request = new DeleteManyOutputsCommand { Ids = [1, 2, 3] };
         _mediatorMock.Setup(m => m.Send(It.IsAny<DeleteManyOutputsCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success());
-
         var result = await _controller.DeleteManyOutputsAsync(request, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
         _mediatorMock.Verify(
             m => m.Send(It.IsAny<DeleteManyOutputsCommand>(), It.IsAny<CancellationToken>()),
@@ -303,9 +268,7 @@ public class SalesOrder
         int orderId = 1;
         _mediatorMock.Setup(m => m.Send(It.IsAny<RestoreOutputCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<OrderDetailResponse>.Success(new OrderDetailResponse { Id = orderId }));
-
         var result = await _controller.RestoreOutputAsync(orderId, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
         _mediatorMock.Verify(m => m.Send(It.IsAny<RestoreOutputCommand>(), It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -313,12 +276,10 @@ public class SalesOrder
     [Fact(DisplayName = "SO_095 - RestoreManyOutputs - Kh�i ph?c nhi?u don h�ng")]
     public async Task RestoreManyOutputs_DeletedOrders_RestoresMultipleOrders()
     {
-        var request = new RestoreManyOutputsCommand { Ids = [ 1, 2, 3 ] };
+        var request = new RestoreManyOutputsCommand { Ids = [1, 2, 3] };
         _mediatorMock.Setup(m => m.Send(It.IsAny<RestoreManyOutputsCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<List<OutputItemResponse>?>.Success([ new(), new(), new() ]));
-
+            .ReturnsAsync(Result<List<OutputItemResponse>?>.Success([new(), new(), new()]));
         var result = await _controller.RestoreManyOutputsAsync(request, CancellationToken.None).ConfigureAwait(true);
-
         result.Should().NotBeNull();
         _mediatorMock.Verify(
             m => m.Send(It.IsAny<RestoreManyOutputsCommand>(), It.IsAny<CancellationToken>()),
@@ -330,7 +291,6 @@ public class SalesOrder
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateOutputCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException());
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.CreateOutputAsync(new CreateOutputCommand(), CancellationToken.None))
             .ConfigureAwait(true);
@@ -341,7 +301,6 @@ public class SalesOrder
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputByIdQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new KeyNotFoundException());
-
         await Assert.ThrowsAsync<KeyNotFoundException>(
             () => _controller.GetOutputByIdAsync(999, CancellationToken.None))
             .ConfigureAwait(true);
@@ -352,7 +311,6 @@ public class SalesOrder
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateOutputCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new InvalidOperationException("Validation failed"));
-
         await Assert.ThrowsAsync<InvalidOperationException>(
             () => _controller.CreateOutputAsync(new CreateOutputCommand(), CancellationToken.None))
             .ConfigureAwait(true);
@@ -363,7 +321,6 @@ public class SalesOrder
     {
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputStatusListQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException("User does not have permission Permissions.Outputs.View"));
-
         await Assert.ThrowsAsync<UnauthorizedAccessException>(
             () => _controller.GetOutputStatusesAsync(CancellationToken.None))
             .ConfigureAwait(true);
@@ -375,9 +332,7 @@ public class SalesOrder
         var expectedStatuses = new Dictionary<string, string> { { OrderStatus.Pending, "Ch? x�c nh?n" } };
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputStatusListQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<Dictionary<string, string>>.Success(expectedStatuses));
-
         var result = await _controller.GetOutputStatusesAsync(CancellationToken.None).ConfigureAwait(true);
-
         result.Should().BeOfType<OkObjectResult>();
         _mediatorMock.Verify(
             m => m.Send(It.IsAny<GetOutputStatusListQuery>(), It.IsAny<CancellationToken>()),
@@ -390,13 +345,11 @@ public class SalesOrder
         var expectedStatuses = new Dictionary<string, string> { { OrderStatus.Pending, "Ch? x�c nh?n" } };
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetOutputStatusListQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<Dictionary<string, string>>.Success(expectedStatuses));
-
         var result = await _controller.GetOutputStatusesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var okResult = result as OkObjectResult;
         okResult.Should().NotBeNull();
         okResult!.Value.Should().BeEquivalentTo(expectedStatuses);
     }
-#pragma warning restore CRR0035
-#pragma warning restore IDE0079
+    #pragma warning restore CRR0035
+    #pragma warning restore IDE0079
 }

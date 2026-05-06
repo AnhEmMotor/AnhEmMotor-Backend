@@ -1,5 +1,5 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 #nullable disable
 
@@ -15,8 +15,7 @@ namespace Infrastructure.Migrations
                 name: "Booking",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     FullName = table.Column<string>(type: "nvarchar(100)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(100)", nullable: false),
                     PhoneNumber = table.Column<string>(type: "nvarchar(20)", nullable: false),
@@ -38,13 +37,11 @@ namespace Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "Contact",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     FullName = table.Column<string>(type: "nvarchar(100)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(100)", nullable: false),
                     PhoneNumber = table.Column<string>(type: "nvarchar(20)", nullable: false),
@@ -60,13 +57,11 @@ namespace Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_Contact", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "ContactReply",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     ContactId = table.Column<int>(type: "int", nullable: false),
                     Message = table.Column<string>(type: "nvarchar(MAX)", nullable: false),
                     RepliedById = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -90,17 +85,11 @@ namespace Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateIndex(
                 name: "IX_Booking_ProductVariantId",
                 table: "Booking",
                 column: "ProductVariantId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ContactReply_ContactId",
-                table: "ContactReply",
-                column: "ContactId");
-
+            migrationBuilder.CreateIndex(name: "IX_ContactReply_ContactId", table: "ContactReply", column: "ContactId");
             migrationBuilder.CreateIndex(
                 name: "IX_ContactReply_RepliedById",
                 table: "ContactReply",
@@ -110,14 +99,9 @@ namespace Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "Booking");
-
-            migrationBuilder.DropTable(
-                name: "ContactReply");
-
-            migrationBuilder.DropTable(
-                name: "Contact");
+            migrationBuilder.DropTable(name: "Booking");
+            migrationBuilder.DropTable(name: "ContactReply");
+            migrationBuilder.DropTable(name: "Contact");
         }
     }
 }

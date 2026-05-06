@@ -2,6 +2,7 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Banner;
 using Application.Interfaces.Services;
+using Domain.Entities;
 using MediatR;
 
 namespace Application.Features.Banners.Commands.UpdateBanner;
@@ -16,10 +17,9 @@ public sealed class UpdateBannerCommandHandler(
     public async Task<Result<Unit>> Handle(UpdateBannerCommand request, CancellationToken cancellationToken)
     {
         var banner = await bannerReadRepository.GetByIdAsync(request.Id, cancellationToken);
-        if (banner == null) return Result<Unit>.Failure("Banner not found");
-
+        if (banner == null)
+            return Result<Unit>.Failure("Banner not found");
         var oldStatus = banner.IsActive;
-        
         banner.Title = request.Title.Trim();
         banner.DesktopImageUrl = request.DesktopImageUrl.Trim();
         banner.MobileImageUrl = request.MobileImageUrl.Trim();
@@ -30,21 +30,17 @@ public sealed class UpdateBannerCommandHandler(
         banner.EndDate = request.EndDate;
         banner.IsActive = request.IsActive;
         banner.Priority = request.Priority;
-
         bannerUpdateRepository.Update(banner);
-
-        // Audit Log
         var action = oldStatus != banner.IsActive ? (banner.IsActive ? "Resume" : "Pause") : "Update";
-        bannerAuditRepository.AddLog(new Domain.Entities.BannerAuditLog
-        {
-            Banner = banner,
-            Action = action,
-            ChangedBy = tokenAccessorService.GetUserId() ?? "Unknown",
-            Details = $"Updated banner '{banner.Title}'"
-        });
-
+        bannerAuditRepository.AddLog(
+            new BannerAuditLog
+            {
+                Banner = banner,
+                Action = action,
+                ChangedBy = tokenAccessorService.GetUserId() ?? "Unknown",
+                Details = $"Updated banner '{banner.Title}'"
+            });
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
         return Result<Unit>.Success(Unit.Value);
     }
 }

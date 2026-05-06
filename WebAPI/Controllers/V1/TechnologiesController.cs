@@ -2,10 +2,10 @@ using Application.Features.Technologies.Commands.CreateTechnology;
 using Application.Features.Technologies.Commands.CreateTechnologyCategory;
 using Application.Features.Technologies.Queries.GetAllTechnologies;
 using Application.Features.Technologies.Queries.GetAllTechnologyCategories;
+using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using WebAPI.Controllers.Base;
-using Asp.Versioning;
 
 namespace WebAPI.Controllers.V1;
 

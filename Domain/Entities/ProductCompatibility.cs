@@ -11,17 +11,17 @@ namespace Domain.Entities
         public int Id { get; set; }
 
         [Column("BaseProductId")]
-        public int BaseProductId { get; set; } // The Part or Accessory
+        public int BaseProductId { get; set; }
 
         [Column("CompatibleVehicleModelId")]
-        public int CompatibleVehicleModelId { get; set; } // The Vehicle Product it fits
+        public int CompatibleVehicleModelId { get; set; }
 
         [ForeignKey("BaseProductId")]
         public Product? BaseProduct { get; set; }
 
         [ForeignKey("CompatibleVehicleModelId")]
         public Product? CompatibleVehicleModel { get; set; }
-        
+
         [Column("Notes", TypeName = "nvarchar(500)")]
         public string? Notes { get; set; }
     }

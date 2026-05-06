@@ -10,23 +10,12 @@ namespace Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // The column 'InterestedVehicle' is now added in the initial Lead table creation.
-            /*
-            migrationBuilder.AddColumn<string>(
-                name: "InterestedVehicle",
-                table: "Lead",
-                type: "nvarchar(255)",
-                nullable: true,
-                defaultValue: "");
-            */
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "InterestedVehicle",
-                table: "Lead");
+            migrationBuilder.DropColumn(name: "InterestedVehicle", table: "Lead");
         }
     }
 }

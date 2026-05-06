@@ -36,8 +36,8 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         GC.SuppressFinalize(this);
     }
 
-#pragma warning disable IDE0079 
-#pragma warning disable CRR0035
+    #pragma warning disable IDE0079 
+    #pragma warning disable CRR0035
     [Fact(DisplayName = "MF_002 - Tải lên ảnh thành công với định dạng JPG hợp lệ")]
     public async Task UploadImage_ValidJpg_Success()
     {
@@ -45,37 +45,30 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         var username = $"user_{uniqueId}";
         var email = $"user_{uniqueId}@gmail.com";
         var password = "ThisIsStrongPassword1@";
-
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Products.Create ],
+            [PermissionsList.Products.Create],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
-
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
             _client,
             username,
             password,
             CancellationToken.None)
             .ConfigureAwait(true);
-
         _client.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         var content = IntegrationTestFileHelper.CreateSingleImageForm();
-
         var response = await _client.PostAsync("/api/v1/MediaFile/product/upload", content, CancellationToken.None)
             .ConfigureAwait(true);
-
-        if(response.StatusCode != HttpStatusCode.Created)
+        if (response.StatusCode != HttpStatusCode.Created)
         {
             var errorContent = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
             throw new Exception($"API returned {response.StatusCode}. Response Body: {errorContent}");
         }
-
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         var result = await response.Content
             .ReadFromJsonAsync<MediaFileResponse>(CancellationToken.None)
@@ -99,7 +92,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Products.Create ],
+            [PermissionsList.Products.Create],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -110,19 +103,16 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         var validBytes = IntegrationTestFileHelper.GetValidJpgBytes();
         var content = IntegrationTestFileHelper.CreateManyImagesForm(
             ("files", "image1.jpg", "image/jpeg", validBytes),
             ("files", "image2.jpg", "image/jpeg", validBytes),
             ("files", "image3.jpg", "image/jpeg", validBytes));
-
         var response = await _client.PostAsync(
             "/api/v1/MediaFile/product/upload-many",
             content,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         var results = await response.Content
             .ReadFromJsonAsync<List<MediaFileResponse>>(CancellationToken.None)
@@ -144,7 +134,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Products.Edit ],
+            [PermissionsList.Products.Edit],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -155,10 +145,8 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-
         var mediaFile = new MediaFileEntity
         {
             StorageType = "local",
@@ -171,14 +159,11 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         };
         db.MediaFiles.Add(mediaFile);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var response = await _client.DeleteAsync(
             $"/api/v1/MediaFile/product/{mediaFile.StoragePath}",
             CancellationToken.None)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-
         using var verifyScope = _factory.Services.CreateScope();
         var verifyDb = verifyScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var deletedFile = await verifyDb.MediaFiles
@@ -200,7 +185,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Products.Edit, PermissionsList.Products.Create ],
+            [PermissionsList.Products.Edit, PermissionsList.Products.Create],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -211,13 +196,11 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         var validBytes = IntegrationTestFileHelper.GetValidJpgBytes();
         var content = IntegrationTestFileHelper.CreateManyImagesForm(
             ("files", "delete1.jpg", "image/jpeg", validBytes),
             ("files", "delete2.jpg", "image/jpeg", validBytes),
             ("files", "delete3.jpg", "image/jpeg", validBytes));
-
         var uploadRes = await _client.PostAsync(
             "/api/v1/MediaFile/product/upload-many",
             content,
@@ -227,21 +210,16 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         var uploadedFiles = await uploadRes.Content
             .ReadFromJsonAsync<List<MediaFileResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-
         var requestBody = new { StoragePaths = uploadedFiles!.Select(f => f.StoragePath!).ToList() };
-
         var requestMessage = new HttpRequestMessage(HttpMethod.Delete, "/api/v1/MediaFile/delete-many")
         {
             Content = JsonContent.Create(requestBody)
         };
         var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-
         using var verifyScope = _factory.Services.CreateScope();
         var verifyDb = verifyScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-
-        foreach(var file in uploadedFiles!)
+        foreach (var file in uploadedFiles!)
         {
             var deletedFile = await verifyDb.MediaFiles
                 .IgnoreQueryFilters()
@@ -263,7 +241,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Products.Edit ],
+            [PermissionsList.Products.Edit],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -274,10 +252,8 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-
         var mediaFile = new MediaFileEntity
         {
             StorageType = "local",
@@ -290,19 +266,16 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         };
         db.MediaFiles.Add(mediaFile);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var response = await _client.PostAsync(
             $"/api/v1/MediaFile/restore/{mediaFile.StoragePath}",
             null,
             CancellationToken.None)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-
         using var verifyScope = _factory.Services.CreateScope();
         var verifyDb = verifyScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var restoredFile = await verifyDb.MediaFiles
-            .FindAsync([ mediaFile.Id ], TestContext.Current.CancellationToken)
+            .FindAsync([mediaFile.Id], TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         restoredFile.Should().NotBeNull();
         restoredFile!.DeletedAt.Should().BeNull();
@@ -319,7 +292,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Products.Edit, PermissionsList.Products.Create ],
+            [PermissionsList.Products.Edit, PermissionsList.Products.Create],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -330,13 +303,11 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         var validBytes = IntegrationTestFileHelper.GetValidJpgBytes();
         var content = IntegrationTestFileHelper.CreateManyImagesForm(
             ("files", "restore1.jpg", "image/jpeg", validBytes),
             ("files", "restore2.jpg", "image/jpeg", validBytes),
             ("files", "restore3.jpg", "image/jpeg", validBytes));
-
         var uploadRes = await _client.PostAsync(
             "/api/v1/MediaFile/product/upload-many",
             content,
@@ -346,7 +317,6 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         var uploadedFiles = await uploadRes.Content
             .ReadFromJsonAsync<List<MediaFileResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-
         var requestBody = new { StoragePaths = uploadedFiles!.Select(f => f.StoragePath!).ToList() };
         var deleteMessage = new HttpRequestMessage(HttpMethod.Delete, "/api/v1/MediaFile/delete-many")
         {
@@ -354,19 +324,15 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         };
         var deleteRes = await _client.SendAsync(deleteMessage, CancellationToken.None).ConfigureAwait(true);
         deleteRes.EnsureSuccessStatusCode();
-
         var restoreRes = await _client.PostAsJsonAsync("/api/v1/MediaFile/restore-many", requestBody)
             .ConfigureAwait(true);
-
         restoreRes.StatusCode.Should().Be(HttpStatusCode.OK);
-
         using var verifyScope = _factory.Services.CreateScope();
         var verifyDb = verifyScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-
-        foreach(var file in uploadedFiles!)
+        foreach (var file in uploadedFiles!)
         {
             var restoredFile = await verifyDb.MediaFiles
-                .FindAsync([ file.Id ], TestContext.Current.CancellationToken)
+                .FindAsync([file.Id], TestContext.Current.CancellationToken)
                 .ConfigureAwait(true);
             restoredFile.Should().NotBeNull();
             restoredFile!.DeletedAt.Should().BeNull();
@@ -384,7 +350,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Products.Create, PermissionsList.Products.View ],
+            [PermissionsList.Products.Create, PermissionsList.Products.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -395,7 +361,6 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         var content = IntegrationTestFileHelper.CreateSingleImageForm();
         var uploadRes = await _client.PostAsync("/api/v1/MediaFile/product/upload", content, CancellationToken.None)
             .ConfigureAwait(true);
@@ -403,12 +368,10 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         var uploadedFile = await uploadRes.Content
             .ReadFromJsonAsync<MediaFileResponse>(CancellationToken.None)
             .ConfigureAwait(true);
-
         var response = await _client.GetAsync(
             $"/api/v1/MediaFile/view-image/{uploadedFile!.StoragePath}",
             CancellationToken.None)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         response.Content.Headers.ContentType?.MediaType.Should().Be("image/webp");
     }
@@ -424,7 +387,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Products.Create, PermissionsList.Products.View ],
+            [PermissionsList.Products.Create, PermissionsList.Products.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -435,7 +398,6 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         var content = IntegrationTestFileHelper.CreateSingleImageForm();
         var uploadRes = await _client.PostAsync("/api/v1/MediaFile/product/upload", content, CancellationToken.None)
             .ConfigureAwait(true);
@@ -443,12 +405,10 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         var uploadedFile = await uploadRes.Content
             .ReadFromJsonAsync<MediaFileResponse>(CancellationToken.None)
             .ConfigureAwait(true);
-
         var response = await _client.GetAsync(
             $"/api/v1/MediaFile/view-image/{uploadedFile!.StoragePath}?width=300",
             CancellationToken.None)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         response.Content.Headers.ContentType?.MediaType.Should().Be("image/webp");
     }
@@ -464,7 +424,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Products.Edit ],
+            [PermissionsList.Products.Edit],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -475,10 +435,8 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-
         var mediaFile = new MediaFileEntity
         {
             StorageType = "local",
@@ -491,10 +449,8 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         };
         db.MediaFiles.Add(mediaFile);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var response = await _client.GetAsync($"/api/v1/MediaFile/{mediaFile.Id}", CancellationToken.None)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var result = await response.Content
             .ReadFromJsonAsync<MediaFileResponse>(CancellationToken.None)
@@ -518,7 +474,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Products.View ],
+            [PermissionsList.Products.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -529,12 +485,10 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-
         var files = new List<MediaFileEntity>();
-        for(int i = 1; i <= 25; i++)
+        for (int i = 1; i <= 25; i++)
         {
             files.Add(
                 new MediaFileEntity
@@ -548,10 +502,8 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         }
         db.MediaFiles.AddRange(files);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var response = await _client.GetAsync("/api/v1/MediaFile?page=1&pageSize=10", CancellationToken.None)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
@@ -566,7 +518,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Products.View ],
+            [PermissionsList.Products.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -577,12 +529,10 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-
         var webpFiles = new List<MediaFileEntity>();
-        for(int i = 1; i <= 5; i++)
+        for (int i = 1; i <= 5; i++)
         {
             webpFiles.Add(
                 new MediaFileEntity
@@ -594,9 +544,8 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
                     DeletedAt = null
                 });
         }
-
         var jpgFiles = new List<MediaFileEntity>();
-        for(int i = 1; i <= 3; i++)
+        for (int i = 1; i <= 3; i++)
         {
             jpgFiles.Add(
                 new MediaFileEntity
@@ -608,16 +557,13 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
                     DeletedAt = null
                 });
         }
-
         db.MediaFiles.AddRange(webpFiles);
         db.MediaFiles.AddRange(jpgFiles);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var response = await _client.GetAsync(
             "/api/v1/MediaFile?filters=ContentType==image/webp",
             CancellationToken.None)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
@@ -632,7 +578,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Products.View ],
+            [PermissionsList.Products.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -643,10 +589,8 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-
         var files = new List<MediaFileEntity>
         {
             new()
@@ -692,10 +636,8 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         };
         db.MediaFiles.AddRange(files);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var response = await _client.GetAsync("/api/v1/MediaFile?sorts=-FileSize", CancellationToken.None)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
@@ -710,7 +652,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             _factory.Services,
             username,
             password,
-            [ PermissionsList.Products.View ],
+            [PermissionsList.Products.View],
             CancellationToken.None,
             email)
             .ConfigureAwait(true);
@@ -721,12 +663,10 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             CancellationToken.None)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-
         var deletedFiles = new List<MediaFileEntity>();
-        for(int i = 1; i <= 15; i++)
+        for (int i = 1; i <= 15; i++)
         {
             deletedFiles.Add(
                 new MediaFileEntity
@@ -740,11 +680,9 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         }
         db.MediaFiles.AddRange(deletedFiles);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var response = await _client.GetAsync("/api/v1/MediaFile/deleted?page=1&pageSize=10", CancellationToken.None)
             .ConfigureAwait(true);
-
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
-#pragma warning restore CRR0035
+    #pragma warning restore CRR0035
 }

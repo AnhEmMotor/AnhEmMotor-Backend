@@ -4,16 +4,15 @@
 
 namespace Infrastructure.Migrations
 {
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public partial class NotAllowNullInProductCollectionPhoto : Migration
     {
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
                 name: "FK_ProductCollectionPhoto_ProductVariant_ProductVariantId",
                 table: "ProductCollectionPhoto");
-
             migrationBuilder.AlterColumn<int>(
                 name: "ProductVariantId",
                 table: "ProductCollectionPhoto",
@@ -23,7 +22,6 @@ namespace Infrastructure.Migrations
                 oldClrType: typeof(int),
                 oldType: "int",
                 oldNullable: true);
-
             migrationBuilder.AddForeignKey(
                 name: "FK_ProductCollectionPhoto_ProductVariant_ProductVariantId",
                 table: "ProductCollectionPhoto",
@@ -33,13 +31,12 @@ namespace Infrastructure.Migrations
                 onDelete: ReferentialAction.Cascade);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
                 name: "FK_ProductCollectionPhoto_ProductVariant_ProductVariantId",
                 table: "ProductCollectionPhoto");
-
             migrationBuilder.AlterColumn<int>(
                 name: "ProductVariantId",
                 table: "ProductCollectionPhoto",
@@ -47,7 +44,6 @@ namespace Infrastructure.Migrations
                 nullable: true,
                 oldClrType: typeof(int),
                 oldType: "int");
-
             migrationBuilder.AddForeignKey(
                 name: "FK_ProductCollectionPhoto_ProductVariant_ProductVariantId",
                 table: "ProductCollectionPhoto",

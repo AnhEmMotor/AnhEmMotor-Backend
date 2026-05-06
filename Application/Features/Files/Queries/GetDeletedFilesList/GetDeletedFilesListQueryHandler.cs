@@ -20,27 +20,23 @@ public sealed class GetDeletedFilesListQueryHandler(
         CancellationToken cancellationToken)
     {
         var query = repository.GetQueryable(DataFetchMode.DeletedOnly);
-
         var result = await paginator.ApplyAsync<MediaFileEntity, MediaFileResponse>(
             query,
             request.SieveModel!,
             DataFetchMode.DeletedOnly,
             cancellationToken)
             .ConfigureAwait(false);
-
-        if(result.Items == null || result.Items.Count == 0)
+        if (result.Items == null || result.Items.Count == 0)
         {
             return result;
         }
-
-        foreach(var item in result.Items)
+        foreach (var item in result.Items)
         {
-            if(!string.IsNullOrEmpty(item.StoragePath))
+            if (!string.IsNullOrEmpty(item.StoragePath))
             {
                 item.PublicUrl = fileStorageService.GetPublicUrl(item.StoragePath);
             }
         }
-
         return result;
     }
 }

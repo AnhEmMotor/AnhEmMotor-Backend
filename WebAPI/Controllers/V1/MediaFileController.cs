@@ -4,9 +4,10 @@ using Application.Features.Files.Commands.DeleteFile;
 using Application.Features.Files.Commands.DeleteManyFiles;
 using Application.Features.Files.Commands.RestoreFile;
 using Application.Features.Files.Commands.RestoreManyFiles;
+using Application.Features.Files.Commands.UploadBannerImage;
 using Application.Features.Files.Commands.UploadManyProductImages;
-using Application.Features.Files.Commands.UploadProductImage;
 using Application.Features.Files.Commands.UploadNewsImage;
+using Application.Features.Files.Commands.UploadProductImage;
 using Application.Features.Files.Queries.GetDeletedFilesList;
 using Application.Features.Files.Queries.GetFileById;
 using Application.Features.Files.Queries.GetFilesList;
@@ -123,7 +124,7 @@ public class MediaFileController(IMediator mediator) : ApiController
     public async Task<IActionResult> UploadBannerImageAsync(IFormFile file, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(file);
-        var command = new Application.Features.Files.Commands.UploadBannerImage.UploadBannerImageCommand { FileContent = file.OpenReadStream(), FileName = file.FileName };
+        var command = new UploadBannerImageCommand { FileContent = file.OpenReadStream(), FileName = file.FileName };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleCreated(
             result,
@@ -143,17 +144,14 @@ public class MediaFileController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var fileDtos = new List<(Stream FileContent, string FileName)>();
-
-        foreach(var file in files)
+        foreach (var file in files)
         {
-            if(file.Length > 0)
+            if (file.Length > 0)
             {
                 fileDtos.Add((file.OpenReadStream(), file.FileName));
             }
         }
-
         var command = new UploadManyProductImagesCommand { Files = fileDtos };
-
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleCreated(result);
     }
@@ -229,20 +227,16 @@ public class MediaFileController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var query = new ViewImageQuery { StoragePath = storagePath, Width = width };
-
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
-
-        if(result.IsFailure)
+        if (result.IsFailure)
         {
             return HandleResult(result);
         }
-
-        if(result.Value is { } imageData)
+        if (result.Value is { } imageData)
         {
             var (fileStream, contentType) = imageData;
             return File(fileStream, contentType);
         }
-
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 }

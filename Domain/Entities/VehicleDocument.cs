@@ -17,7 +17,7 @@ public class VehicleDocument : BaseEntity
     public Vehicle Vehicle { get; set; } = null!;
 
     [Column("DocumentType", TypeName = "nvarchar(50)")]
-    public string DocumentType { get; set; } = string.Empty; // Registration, Insurance, Invoice
+    public string DocumentType { get; set; } = string.Empty;
 
     [Column("FileUrl", TypeName = "nvarchar(500)")]
     public string FileUrl { get; set; } = string.Empty;

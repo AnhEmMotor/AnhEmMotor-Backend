@@ -15,20 +15,17 @@ namespace Infrastructure.Migrations
                 table: "ProductCategory",
                 type: "nvarchar(max)",
                 nullable: true);
-
             migrationBuilder.AddColumn<bool>(
                 name: "IsActive",
                 table: "ProductCategory",
                 type: "bit",
                 nullable: false,
                 defaultValue: false);
-
             migrationBuilder.AddColumn<string>(
                 name: "Slug",
                 table: "ProductCategory",
                 type: "nvarchar(max)",
                 nullable: true);
-
             migrationBuilder.AddColumn<int>(
                 name: "SortOrder",
                 table: "ProductCategory",
@@ -40,21 +37,10 @@ namespace Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "ImageUrl",
-                table: "ProductCategory");
-
-            migrationBuilder.DropColumn(
-                name: "IsActive",
-                table: "ProductCategory");
-
-            migrationBuilder.DropColumn(
-                name: "Slug",
-                table: "ProductCategory");
-
-            migrationBuilder.DropColumn(
-                name: "SortOrder",
-                table: "ProductCategory");
+            migrationBuilder.DropColumn(name: "ImageUrl", table: "ProductCategory");
+            migrationBuilder.DropColumn(name: "IsActive", table: "ProductCategory");
+            migrationBuilder.DropColumn(name: "Slug", table: "ProductCategory");
+            migrationBuilder.DropColumn(name: "SortOrder", table: "ProductCategory");
         }
     }
 }

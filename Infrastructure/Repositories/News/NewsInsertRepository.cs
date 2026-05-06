@@ -1,5 +1,4 @@
 using Application.Interfaces.Repositories.News;
-using Domain.Entities;
 using Infrastructure.DBContexts;
 
 namespace Infrastructure.Repositories.News

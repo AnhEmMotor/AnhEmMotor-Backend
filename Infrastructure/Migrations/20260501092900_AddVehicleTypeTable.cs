@@ -1,5 +1,5 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 #nullable disable
 
@@ -11,18 +11,12 @@ namespace Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
-                name: "VehicleTypeId",
-                table: "Product",
-                type: "int",
-                nullable: true);
-
+            migrationBuilder.AddColumn<int>(name: "VehicleTypeId", table: "Product", type: "int", nullable: true);
             migrationBuilder.CreateTable(
                 name: "VehicleType",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Slug = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -37,12 +31,7 @@ namespace Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_VehicleType", x => x.Id);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Product_VehicleTypeId",
-                table: "Product",
-                column: "VehicleTypeId");
-
+            migrationBuilder.CreateIndex(name: "IX_Product_VehicleTypeId", table: "Product", column: "VehicleTypeId");
             migrationBuilder.AddForeignKey(
                 name: "FK_Product_VehicleType_VehicleTypeId",
                 table: "Product",
@@ -54,20 +43,10 @@ namespace Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Product_VehicleType_VehicleTypeId",
-                table: "Product");
-
-            migrationBuilder.DropTable(
-                name: "VehicleType");
-
-            migrationBuilder.DropIndex(
-                name: "IX_Product_VehicleTypeId",
-                table: "Product");
-
-            migrationBuilder.DropColumn(
-                name: "VehicleTypeId",
-                table: "Product");
+            migrationBuilder.DropForeignKey(name: "FK_Product_VehicleType_VehicleTypeId", table: "Product");
+            migrationBuilder.DropTable(name: "VehicleType");
+            migrationBuilder.DropIndex(name: "IX_Product_VehicleTypeId", table: "Product");
+            migrationBuilder.DropColumn(name: "VehicleTypeId", table: "Product");
         }
     }
 }

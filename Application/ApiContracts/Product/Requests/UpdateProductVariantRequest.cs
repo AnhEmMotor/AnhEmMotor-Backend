@@ -34,7 +34,6 @@ public class UpdateProductVariantRequest
     [JsonPropertyName("sku")]
     public string? SKU { get; set; }
 
-    // Overridable Specs
     [JsonConverter(typeof(NullableDecimalConverter))]
     public decimal? Weight { get; set; }
 

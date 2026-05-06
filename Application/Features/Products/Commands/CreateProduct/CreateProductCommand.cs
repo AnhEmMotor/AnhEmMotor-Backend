@@ -10,7 +10,7 @@ namespace Application.Features.Products.Commands.CreateProduct;
 public sealed record CreateProductCommand : IRequest<Result<ProductDetailForManagerResponse?>>
 {
     public string? Name { get; init; }
-    
+
     [JsonPropertyName("category_id")]
     public int? CategoryId { get; init; }
 
@@ -110,19 +110,26 @@ public sealed record CreateProductCommand : IRequest<Result<ProductDetailForMana
     public string? DashboardType { get; init; }
 
     public string? Material { get; init; }
+
     public string? Origin { get; init; }
+
     [JsonPropertyName("warranty_period")]
     public string? WarrantyPeriod { get; init; }
+
     public string? Unit { get; init; }
 
     [JsonPropertyName("std_dot")]
     public bool StdDot { get; init; }
+
     [JsonPropertyName("std_ece")]
     public bool StdEce { get; init; }
+
     [JsonPropertyName("std_snell")]
     public bool StdSnell { get; init; }
+
     [JsonPropertyName("std_jis")]
     public bool StdJis { get; init; }
+
     [JsonPropertyName("other_standards")]
     public string? OtherStandards { get; init; }
 

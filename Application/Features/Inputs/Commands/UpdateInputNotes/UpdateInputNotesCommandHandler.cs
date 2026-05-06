@@ -23,19 +23,14 @@ public sealed class UpdateInputNotesCommandHandler(
             cancellationToken,
             DataFetchMode.ActiveOnly)
             .ConfigureAwait(false);
-
-        if(input is null)
+        if (input is null)
         {
             return Error.NotFound($"Không tìm thấy phiếu nhập có ID {request.Id}.", "Id");
         }
-
         input.Notes = request.Notes;
-
         updateRepository.Update(input);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         var updated = await readRepository.GetByIdWithDetailsAsync(input.Id, cancellationToken).ConfigureAwait(false);
-
         return updated!.Adapt<InputDetailResponse>();
     }
 }

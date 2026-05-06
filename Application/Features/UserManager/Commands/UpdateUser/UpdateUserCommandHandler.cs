@@ -18,20 +18,18 @@ public class UpdateUserCommandHandler(
     {
         var user = await userReadRepository.FindUserByIdAsync(request.UserId!.Value, cancellationToken)
             .ConfigureAwait(false);
-        if(user is null)
+        if (user is null)
         {
             return Error.NotFound("User not found.");
         }
-
-        if(request.FullName is not null)
+        if (request.FullName is not null)
         {
             user.FullName = request.FullName.Trim();
         }
-
-        if(request.Gender is not null)
+        if (request.Gender is not null)
         {
             var gender = request.Gender.Trim();
-            if(!string.IsNullOrEmpty(gender) && !GenderStatus.IsValid(gender))
+            if (!string.IsNullOrEmpty(gender) && !GenderStatus.IsValid(gender))
             {
                 return Error.Validation(
                     $"Invalid gender value. Allowed values: {string.Join(", ", GenderStatus.All)}",
@@ -39,38 +37,34 @@ public class UpdateUserCommandHandler(
             }
             user.Gender = gender;
         }
-
         cancellationToken.ThrowIfCancellationRequested();
-
-        if(request.PhoneNumber is not null)
+        if (request.PhoneNumber is not null)
         {
             var trimmedPhone = request.PhoneNumber.Trim();
-            if(string.IsNullOrEmpty(trimmedPhone))
+            if (string.IsNullOrEmpty(trimmedPhone))
             {
                 user.PhoneNumber = null;
-            } else if(string.Compare(trimmedPhone, user.PhoneNumber) != 0)
+            } else if (string.Compare(trimmedPhone, user.PhoneNumber) != 0)
             {
                 var existingUser = await userReadRepository.FindUserByPhoneNumberAsync(trimmedPhone, cancellationToken)
                     .ConfigureAwait(false);
-                if(existingUser != null && existingUser.Id != user.Id)
+                if (existingUser != null && existingUser.Id != user.Id)
                 {
                     return Error.Conflict($"Phone number '{trimmedPhone}' is already taken.", "PhoneNumber");
                 }
                 user.PhoneNumber = trimmedPhone;
             }
         }
-
-        if(request.DateOfBirth.HasValue)
+        if (request.DateOfBirth.HasValue)
         {
             user.DateOfBirth = request.DateOfBirth.Value;
         }
-
         var (succeeded, errors) = await userUpdateRepository.UpdateUserAsync(user, cancellationToken)
             .ConfigureAwait(false);
-        if(!succeeded)
+        if (!succeeded)
         {
             var errorList = errors.ToList();
-            if(errorList.Any(
+            if (errorList.Any(
                 e => e.Contains("taken", StringComparison.OrdinalIgnoreCase) ||
                     e.Contains("duplicate", StringComparison.OrdinalIgnoreCase)))
             {
@@ -82,15 +76,11 @@ public class UpdateUserCommandHandler(
                     .ToList();
                 return Result<UserDTOForManagerResponse>.Failure(conflictErrors);
             }
-
             var validationErrors = errorList.Select(e => Error.Validation(e)).ToList();
             return Result<UserDTOForManagerResponse>.Failure(validationErrors);
         }
-
         userStreamService.NotifyUserUpdate(user.Id);
-
         var roles = await userReadRepository.GetUserRoleIdsAsync(user, cancellationToken).ConfigureAwait(false);
-
         return new UserDTOForManagerResponse
         {
             Id = user.Id,

@@ -4,16 +4,14 @@
 
 namespace Infrastructure.Migrations
 {
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public partial class EditSomeNullColumn : Migration
     {
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(name: "FK_InputInfo_Input_InputId", table: "InputInfo");
-
             migrationBuilder.DropForeignKey(name: "FK_OutputInfo_Output_OutputId", table: "OutputInfo");
-
             migrationBuilder.AlterColumn<int>(
                 name: "OutputId",
                 table: "OutputInfo",
@@ -23,7 +21,6 @@ namespace Infrastructure.Migrations
                 oldClrType: typeof(int),
                 oldType: "int",
                 oldNullable: true);
-
             migrationBuilder.AlterColumn<int>(
                 name: "InputId",
                 table: "InputInfo",
@@ -33,7 +30,6 @@ namespace Infrastructure.Migrations
                 oldClrType: typeof(int),
                 oldType: "int",
                 oldNullable: true);
-
             migrationBuilder.AddForeignKey(
                 name: "FK_InputInfo_Input_InputId",
                 table: "InputInfo",
@@ -41,7 +37,6 @@ namespace Infrastructure.Migrations
                 principalTable: "Input",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
-
             migrationBuilder.AddForeignKey(
                 name: "FK_OutputInfo_Output_OutputId",
                 table: "OutputInfo",
@@ -51,13 +46,11 @@ namespace Infrastructure.Migrations
                 onDelete: ReferentialAction.Cascade);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(name: "FK_InputInfo_Input_InputId", table: "InputInfo");
-
             migrationBuilder.DropForeignKey(name: "FK_OutputInfo_Output_OutputId", table: "OutputInfo");
-
             migrationBuilder.AlterColumn<int>(
                 name: "OutputId",
                 table: "OutputInfo",
@@ -65,7 +58,6 @@ namespace Infrastructure.Migrations
                 nullable: true,
                 oldClrType: typeof(int),
                 oldType: "int");
-
             migrationBuilder.AlterColumn<int>(
                 name: "InputId",
                 table: "InputInfo",
@@ -73,14 +65,12 @@ namespace Infrastructure.Migrations
                 nullable: true,
                 oldClrType: typeof(int),
                 oldType: "int");
-
             migrationBuilder.AddForeignKey(
                 name: "FK_InputInfo_Input_InputId",
                 table: "InputInfo",
                 column: "InputId",
                 principalTable: "Input",
                 principalColumn: "Id");
-
             migrationBuilder.AddForeignKey(
                 name: "FK_OutputInfo_Output_OutputId",
                 table: "OutputInfo",

@@ -57,7 +57,6 @@ public class AuthController(IMediator mediator, IHttpTokenAccessorService httpTo
     public async Task<IActionResult> LoginAsync([FromBody] LoginCommand command, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-
         return HandleResult(result);
     }
 
@@ -92,9 +91,8 @@ public class AuthController(IMediator mediator, IHttpTokenAccessorService httpTo
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var result = await mediator.Send(new LogoutCommand() { UserId = userId }, cancellationToken)
             .ConfigureAwait(true);
-        if(result.IsFailure)
+        if (result.IsFailure)
             return HandleResult(result);
-
         httpTokenAccessorService.DeleteRefreshTokenFromCookie();
         return Ok(new LogoutResponse());
     }
@@ -145,7 +143,6 @@ public class AuthController(IMediator mediator, IHttpTokenAccessorService httpTo
         CancellationToken cancellationToken)
     {
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
-
         return HandleResult(result);
     }
 

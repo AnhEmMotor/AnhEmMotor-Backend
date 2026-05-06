@@ -10,7 +10,9 @@ namespace Application.Features.Contacts.Commands.CreateContactReply;
 public record CreateContactReplyCommand : IRequest<Result<int>>
 {
     public int ContactId { get; init; }
+
     public string Message { get; init; } = string.Empty;
+
     public bool MarkAsProcessed { get; init; } = true;
 }
 
@@ -27,30 +29,19 @@ public class CreateContactReplyCommandHandler(
         {
             return Result<int>.Failure(Error.NotFound("Liên hệ không tồn tại."));
         }
-
         var userIdString = tokenAccessor.GetUserId();
         if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out var userId))
         {
             return Result<int>.Failure(Error.Unauthorized("Không thể xác định người dùng thực hiện phản hồi."));
         }
-
-        var reply = new ContactReply
-        {
-            ContactId = contact.Id,
-            Message = request.Message,
-            RepliedById = userId
-        };
-
+        var reply = new ContactReply { ContactId = contact.Id, Message = request.Message, RepliedById = userId };
         contactInsertRepository.AddReply(reply);
-
         if (request.MarkAsProcessed)
         {
             contact.Status = "Processed";
             contactInsertRepository.Update(contact);
         }
-
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
         return Result<int>.Success(reply.Id);
     }
 }

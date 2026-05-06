@@ -35,7 +35,6 @@ namespace Domain.Entities
         [Column("SKU", TypeName = "nvarchar(50)")]
         public string? SKU { get; set; }
 
-        // Overridable Specs
         [Column("Weight", TypeName = "decimal(18, 2)")]
         public decimal? Weight { get; set; }
 

@@ -11,7 +11,6 @@ public sealed class RestoreManyProductCategoriesCommandValidator : AbstractValid
             .WithMessage("Bạn chưa truyền danh sách Product Category ID để khôi phục.")
             .Must(ids => ids.Count <= 50)
             .WithMessage("Không được khôi phục quá 50 danh mục một lần.");
-
         RuleForEach(x => x.Ids).NotEmpty();
     }
 }

@@ -1,3 +1,4 @@
+
 namespace Infrastructure.Scratch;
 
 using Infrastructure.DBContexts;
@@ -13,11 +14,7 @@ public class OrderChecker
     {
         using var scope = services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        
-        var orders = await context.OutputOrders
-            .Select(o => new { o.Id, o.StatusId, o.CustomerName })
-            .ToListAsync();
-            
+        var orders = await context.OutputOrders.Select(o => new { o.Id, o.StatusId, o.CustomerName }).ToListAsync();
         Console.WriteLine("--- List of Orders in DB ---");
         foreach (var o in orders)
         {

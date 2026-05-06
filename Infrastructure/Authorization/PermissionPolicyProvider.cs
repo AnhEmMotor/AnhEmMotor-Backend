@@ -18,15 +18,14 @@ public class PermissionPolicyProvider(IOptions<AuthorizationOptions> options) : 
 
     public Task<AuthorizationPolicy?> GetPolicyAsync(string policyName)
     {
-        if(policyName.StartsWith(HasPermissionPrefix, StringComparison.OrdinalIgnoreCase))
+        if (policyName.StartsWith(HasPermissionPrefix, StringComparison.OrdinalIgnoreCase))
         {
             var permission = policyName[HasPermissionPrefix.Length..];
             var policy = new AuthorizationPolicyBuilder();
             policy.AddRequirements(new PermissionRequirement(permission));
             return Task.FromResult<AuthorizationPolicy?>(policy.Build());
         }
-
-        if(policyName.StartsWith(RequiresAllPermissionsPrefix, StringComparison.OrdinalIgnoreCase))
+        if (policyName.StartsWith(RequiresAllPermissionsPrefix, StringComparison.OrdinalIgnoreCase))
         {
             var permissionsString = policyName[RequiresAllPermissionsPrefix.Length..];
             var permissions = permissionsString.Split(',', StringSplitOptions.RemoveEmptyEntries);
@@ -34,8 +33,7 @@ public class PermissionPolicyProvider(IOptions<AuthorizationOptions> options) : 
             policy.AddRequirements(new AllPermissionsRequirement(permissions));
             return Task.FromResult<AuthorizationPolicy?>(policy.Build());
         }
-
-        if(policyName.StartsWith(RequiresAnyPermissionsPrefix, StringComparison.OrdinalIgnoreCase))
+        if (policyName.StartsWith(RequiresAnyPermissionsPrefix, StringComparison.OrdinalIgnoreCase))
         {
             var permissionsString = policyName[RequiresAnyPermissionsPrefix.Length..];
             var permissions = permissionsString.Split(',', StringSplitOptions.RemoveEmptyEntries);
@@ -43,7 +41,6 @@ public class PermissionPolicyProvider(IOptions<AuthorizationOptions> options) : 
             policy.AddRequirements(new AnyPermissionsRequirement(permissions));
             return Task.FromResult<AuthorizationPolicy?>(policy.Build());
         }
-
         return FallbackPolicyProvider.GetPolicyAsync(policyName);
     }
 }

@@ -28,7 +28,6 @@ namespace Application.Features.Products.Queries.GetActiveVariantLiteListForOutpu
                     StringSplitOptions.RemoveEmptyEntries)
                     .ToList() ??
                 [];
-
             return new GetActiveVariantLiteListForOutputQuery
             {
                 Page = request.Page ?? 1,
@@ -42,22 +41,20 @@ namespace Application.Features.Products.Queries.GetActiveVariantLiteListForOutpu
 
         private static string? ExtractFilterValue(string? filters, string key)
         {
-            if(string.IsNullOrWhiteSpace(filters))
+            if (string.IsNullOrWhiteSpace(filters))
             {
                 return null;
             }
-
             var parts = filters.Split(',');
-            foreach(var part in parts)
+            foreach (var part in parts)
             {
-                var keyValue = part.Split([ '=', '@', '!' ], 2);
-                if(keyValue.Length == 2 && keyValue[0].Trim().Equals(key, StringComparison.OrdinalIgnoreCase))
+                var keyValue = part.Split(['=', '@', '!'], 2);
+                if (keyValue.Length == 2 && keyValue[0].Trim().Equals(key, StringComparison.OrdinalIgnoreCase))
                 {
                     var value = keyValue[1].Trim();
                     return value.TrimStart('=', '@', '!', '<', '>', '_');
                 }
             }
-
             return null;
         }
     }

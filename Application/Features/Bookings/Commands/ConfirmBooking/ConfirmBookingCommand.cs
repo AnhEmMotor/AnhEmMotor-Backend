@@ -29,32 +29,24 @@ public class ConfirmBookingCommandHandler(
         {
             return Result<bool>.Failure(Error.NotFound("Lịch hẹn không tồn tại."));
         }
-
-        // 1. Cập nhật trạng thái Booking
         booking.Status = "Confirmed";
         bookingInsertRepository.Update(booking);
-
-        // 2. Giai đoạn 4: Chuyển đổi (Lead logic)
         var lead = await leadReadRepository.GetByPhoneNumberAsync(booking.PhoneNumber, cancellationToken);
         if (lead != null)
         {
-            // Chuyển trạng thái sang "Đang lái thử"
             lead.Status = "TestDriving";
             leadWriteRepository.Update(lead);
-
-            // Ghi chú lịch sử
-            leadActivityInsertRepository.Add(new LeadActivity
-            {
-                LeadId = lead.Id,
-                ActivityType = "Contact",
-                Description = $"Xác nhận lịch hẹn lái thử cho {booking.ProductVariant?.Product?.Name}. Chuyển trạng thái sang Đang lái thử.",
-                CreatedAt = DateTimeOffset.UtcNow
-            });
+            leadActivityInsertRepository.Add(
+                new LeadActivity
+                {
+                    LeadId = lead.Id,
+                    ActivityType = "Contact",
+                    Description =
+                        $"Xác nhận lịch hẹn lái thử cho {booking.ProductVariant?.Product?.Name}. Chuyển trạng thái sang Đang lái thử.",
+                    CreatedAt = DateTimeOffset.UtcNow
+                });
         }
-
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
-        // 3. Giai đoạn 3: Gửi thông báo cho khách hàng kèm địa chỉ Google Maps
         var googleMapsLink = "https://www.google.com/maps/search/?api=1&query=Showroom+AnhEm+Motor+Biên+Hòa";
         var subject = "Xác nhận lịch hẹn lái thử | AnhEm Motor";
         var body = $@"
@@ -81,16 +73,12 @@ public class ConfirmBookingCommandHandler(
                     Hotline: 0909 xxx xxx | Website: anhemmotor.com
                 </p>
             </div>";
-
-        try 
+        try
         {
             await emailService.SendEmailAsync(booking.Email, subject, body);
-        }
-        catch 
+        } catch
         {
-            // Log error but don't fail the command
         }
-
         return Result<bool>.Success(true);
     }
 }

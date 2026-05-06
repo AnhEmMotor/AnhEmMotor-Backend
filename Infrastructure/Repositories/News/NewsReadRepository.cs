@@ -1,5 +1,4 @@
 using Application.Interfaces.Repositories.News;
-using Domain.Entities;
 using Domain.Constants;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
@@ -20,14 +19,12 @@ namespace Infrastructure.Repositories.News
 
         public async Task<Domain.Entities.News?> GetByIdAsync(int id, CancellationToken cancellationToken)
         {
-            return await context.News
-                .FirstOrDefaultAsync(n => n.Id == id, cancellationToken);
+            return await context.News.FirstOrDefaultAsync(n => n.Id == id, cancellationToken);
         }
 
         public async Task<Domain.Entities.News?> GetBySlugAsync(string slug, CancellationToken cancellationToken)
         {
-            return await context.News
-                .FirstOrDefaultAsync(n => n.Slug == slug, cancellationToken);
+            return await context.News.FirstOrDefaultAsync(n => n.Slug == slug, cancellationToken);
         }
     }
 }

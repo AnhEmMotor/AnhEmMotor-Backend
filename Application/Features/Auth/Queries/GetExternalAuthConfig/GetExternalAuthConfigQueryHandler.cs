@@ -13,13 +13,11 @@ public class GetExternalAuthConfigQueryHandler(IConfiguration configuration) : I
     {
         ArgumentNullException.ThrowIfNull(request);
         cancellationToken.ThrowIfCancellationRequested();
-
         var response = new ExternalAuthConfigResponse
         {
             GoogleClientId = configuration["Authentication:Google:ClientId"] ?? string.Empty,
             FacebookAppId = configuration["Authentication:Facebook:AppId"] ?? string.Empty
         };
-
         return Task.FromResult(Result<ExternalAuthConfigResponse>.Success(response));
     }
 }

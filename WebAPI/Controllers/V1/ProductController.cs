@@ -1,6 +1,10 @@
-using Application.ApiContracts.Product.Responses;
 using Application.ApiContracts.Option.Responses;
+using Application.ApiContracts.Product.Responses;
 using Application.Common.Models;
+using Application.Features.Options.Queries.GetOptionsList;
+using Application.Features.OptionValues.Commands.CreateOptionValue;
+using Application.Features.OptionValues.Commands.DeleteOptionValue;
+using Application.Features.OptionValues.Commands.UpdateOptionValue;
 using Application.Features.PredefinedOptions.Queries.GetPredefinedOptionsList;
 using Application.Features.Products.Commands.CreateProduct;
 using Application.Features.Products.Commands.DeleteManyProducts;
@@ -27,10 +31,6 @@ using Application.Features.Products.Queries.GetProductsListForPriceManagement;
 using Application.Features.Products.Queries.GetProductStoreDetailBySlug;
 using Application.Features.Products.Queries.GetVariantCartDetailsBatch;
 using Application.Features.Products.Queries.GetVariantLiteByProductId;
-using Application.Features.Options.Queries.GetOptionsList;
-using Application.Features.OptionValues.Commands.CreateOptionValue;
-using Application.Features.OptionValues.Commands.UpdateOptionValue;
-using Application.Features.OptionValues.Commands.DeleteOptionValue;
 using Asp.Versioning;
 using Domain.Constants;
 using Domain.Primitives;
@@ -178,7 +178,6 @@ public class ProductController(ISender sender) : ApiController
     {
         var query = new GetPredefinedOptionsListQuery();
         var result = await sender.Send(query, cancellationToken).ConfigureAwait(true);
-
         return HandleResult(result);
     }
 
@@ -554,9 +553,7 @@ public class ProductController(ISender sender) : ApiController
     [HttpDelete("option-values/{id:int}")]
     [HasPermission(Products.Delete)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    public async Task<IActionResult> DeleteOptionValueAsync(
-        int id,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> DeleteOptionValueAsync(int id, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new DeleteOptionValueCommand(id), cancellationToken).ConfigureAwait(true);
         return HandleResult(result);

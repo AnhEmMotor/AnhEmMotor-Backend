@@ -66,7 +66,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             _factory.Services,
             username,
             "StrongPass1@",
-            [ PermissionsList.Statistical.View ],
+            [PermissionsList.Statistical.View],
             CancellationToken.None)
             .ConfigureAwait(true);
         var token = (await IntegrationTestAuthHelper.AuthenticateAsync(
@@ -83,19 +83,19 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         ApplicationDBContext db,
         CancellationToken cancellationToken = default)
     {
-        if(!await db.OutputStatuses
+        if (!await db.OutputStatuses
             .AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, cancellationToken)
             .ConfigureAwait(false))
             db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Pending });
-        if(!await db.OutputStatuses
+        if (!await db.OutputStatuses
             .AnyAsync(x => string.Compare(x.Key, OrderStatus.Completed) == 0, cancellationToken)
             .ConfigureAwait(false))
             db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Completed });
-        if(!await db.OutputStatuses
+        if (!await db.OutputStatuses
             .AnyAsync(x => string.Compare(x.Key, OrderStatus.Cancelled) == 0, cancellationToken)
             .ConfigureAwait(false))
             db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Cancelled });
-        if(!await db.ProductStatuses
+        if (!await db.ProductStatuses
             .AnyAsync(x => string.Compare(x.Key, "ForSale") == 0, cancellationToken)
             .ConfigureAwait(false))
             db.ProductStatuses.Add(new ProductStatusEntity { Key = "ForSale" });
@@ -113,7 +113,6 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var category = new ProductCategoryEntity { Name = $"Cat_{uniqueId}" };
         db.ProductCategories.Add(category);
         await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         var product = new ProductEntity
         {
             Name = $"Prod_{uniqueId}",
@@ -123,15 +122,14 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         };
         db.Products.Add(product);
         await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         var variant = new ProductVariant { ProductId = product.Id, Price = price, UrlSlug = $"slug-{uniqueId}" };
         db.ProductVariants.Add(variant);
         await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return variant.Id;
     }
 
-#pragma warning disable IDE0079
-#pragma warning disable CRR0035
+    #pragma warning disable IDE0079
+    #pragma warning disable CRR0035
     [Fact(DisplayName = "STAT_021 - Lấy doanh thu 7 ngày gần nhất (Completed Only)")]
     public async Task GetDailyRevenue_Last7Days_ReturnsCorrectData()
     {
@@ -142,35 +140,29 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
         var variantId = await SeedProductVariantAsync(db, uniqueId, cancellationToken: CancellationToken.None)
             .ConfigureAwait(true);
-
         var today = DateTime.UtcNow;
         var o1 = new OutputEntity { StatusId = OrderStatus.Completed, CreatedAt = today, Notes = "Order1" };
         db.OutputOrders.Add(o1);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         db.OutputInfos
             .Add(new OutputInfoEntity { OutputId = o1.Id, ProductVarientId = variantId, Price = 600000, Count = 2 });
-
         var o2 = new OutputEntity { StatusId = OrderStatus.Completed, CreatedAt = today.AddDays(-1), Notes = "Order2" };
         db.OutputOrders.Add(o2);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         db.OutputInfos
             .Add(new OutputInfoEntity { OutputId = o2.Id, ProductVarientId = variantId, Price = 3500000, Count = 1 });
-
         var o3 = new OutputEntity { StatusId = OrderStatus.Completed, CreatedAt = today.AddDays(-2), Notes = "Order3" };
         db.OutputOrders.Add(o3);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         db.OutputInfos
             .Add(new OutputInfoEntity { OutputId = o3.Id, ProductVarientId = variantId, Price = 2800000, Count = 1 });
-
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var response = await _client.GetAsync("/api/v1/Statistics/daily-revenue?days=5", CancellationToken.None)
             .ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response.Content
             .ReadFromJsonAsync<List<DailyRevenueResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-
         content!.Count.Should().Be(5);
         content.First(x => x.ReportDay == DateOnly.FromDateTime(today)).TotalRevenue.Should().Be(1200000);
         content.First(x => x.ReportDay == DateOnly.FromDateTime(today.AddDays(-1))).TotalRevenue.Should().Be(3500000);
@@ -188,28 +180,23 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
         var variantId = await SeedProductVariantAsync(db, uniqueId, cancellationToken: CancellationToken.None)
             .ConfigureAwait(true);
-
         var today = DateTime.UtcNow;
         var o1 = new OutputEntity { StatusId = OrderStatus.Completed, CreatedAt = today };
         db.OutputOrders.Add(o1);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         db.OutputInfos
             .Add(new OutputInfoEntity { OutputId = o1.Id, ProductVarientId = variantId, Price = 2000000, Count = 1 });
-
         var o2 = new OutputEntity { StatusId = OrderStatus.Cancelled, CreatedAt = today };
         db.OutputOrders.Add(o2);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         db.OutputInfos
             .Add(new OutputInfoEntity { OutputId = o2.Id, ProductVarientId = variantId, Price = 5000000, Count = 1 });
-
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var response = await _client.GetAsync("/api/v1/Statistics/daily-revenue?days=1", CancellationToken.None)
             .ConfigureAwait(true);
         var content = await response.Content
             .ReadFromJsonAsync<List<DailyRevenueResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-
         content!.First().TotalRevenue.Should().Be(2000000);
     }
 
@@ -223,7 +210,6 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
         var variantId = await SeedProductVariantAsync(db, uniqueId, cancellationToken: CancellationToken.None)
             .ConfigureAwait(true);
-
         var date = new DateTime(2025, 1, 1, 23, 30, 0, DateTimeKind.Utc);
         var o1 = new OutputEntity { StatusId = OrderStatus.Completed, CreatedAt = date };
         db.OutputOrders.Add(o1);
@@ -231,7 +217,6 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         db.OutputInfos
             .Add(new OutputInfoEntity { OutputId = o1.Id, ProductVarientId = variantId, Price = 1000000, Count = 1 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var yest = DateTime.UtcNow.Date.AddDays(-1).AddHours(23).AddMinutes(30);
         var o2 = new OutputEntity { StatusId = OrderStatus.Completed, CreatedAt = yest };
         db.OutputOrders.Add(o2);
@@ -239,13 +224,11 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         db.OutputInfos
             .Add(new OutputInfoEntity { OutputId = o2.Id, ProductVarientId = variantId, Price = 500000, Count = 1 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var response = await _client.GetAsync("/api/v1/Statistics/daily-revenue?days=5", CancellationToken.None)
             .ConfigureAwait(true);
         var content = await response.Content
             .ReadFromJsonAsync<List<DailyRevenueResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-
         var targetDay = DateOnly.FromDateTime(yest);
         content!.FirstOrDefault(x => x.ReportDay == targetDay)?.TotalRevenue.Should().Be(500000);
     }
@@ -260,20 +243,17 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
         var variantId = await SeedProductVariantAsync(db, uniqueId, 1000000, CancellationToken.None)
             .ConfigureAwait(true);
-
         var o1 = new OutputEntity { StatusId = OrderStatus.Completed, CreatedAt = DateTime.UtcNow };
         db.OutputOrders.Add(o1);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         db.OutputInfos
             .Add(new OutputInfoEntity { OutputId = o1.Id, ProductVarientId = variantId, Price = 800000, Count = 1 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var response = await _client.GetAsync("/api/v1/Statistics/daily-revenue?days=1", CancellationToken.None)
             .ConfigureAwait(true);
         var content = await response.Content
             .ReadFromJsonAsync<List<DailyRevenueResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-
         content!.First().TotalRevenue.Should().Be(800000);
     }
 
@@ -287,10 +267,8 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
         var variantId = await SeedProductVariantAsync(db, uniqueId, cancellationToken: CancellationToken.None)
             .ConfigureAwait(true);
-
         var today = DateTime.UtcNow;
         var lastMonthDate = new DateTime(today.Year, today.Month, 15, 12, 0, 0, DateTimeKind.Utc).AddMonths(-1);
-
         var o1 = new OutputEntity { StatusId = OrderStatus.Completed, CreatedAt = lastMonthDate };
         db.OutputOrders.Add(o1);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -305,13 +283,11 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
                     Count = 1
                 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None)
             .ConfigureAwait(true);
         var content = await response.Content
             .ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None)
             .ConfigureAwait(true);
-
         content!.LastMonthRevenue.Should().Be(30000000);
         content.LastMonthProfit.Should().Be(12000000);
     }
@@ -324,19 +300,16 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         await WipeStatisticsDataAsync(db, CancellationToken.None).ConfigureAwait(true);
         await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
-
-        for(int i = 0; i < 7; i++)
+        for (int i = 0; i < 7; i++)
         {
             db.OutputOrders.Add(new OutputEntity { StatusId = OrderStatus.Pending, CreatedAt = DateTime.UtcNow });
         }
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None)
             .ConfigureAwait(true);
         var content = await response.Content
             .ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None)
             .ConfigureAwait(true);
-
         content!.PendingOrdersCount.Should().Be(7);
     }
 
@@ -362,16 +335,13 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
         var variantId = await SeedProductVariantAsync(db, uniqueId, cancellationToken: CancellationToken.None)
             .ConfigureAwait(true);
-
         var currentMonthStart = new DateOnly(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
-
         var d1 = DateTime.UtcNow.AddMonths(-1);
         var o1 = new OutputEntity { StatusId = OrderStatus.Completed, CreatedAt = d1 };
         db.OutputOrders.Add(o1);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         db.OutputInfos
             .Add(new OutputInfoEntity { OutputId = o1.Id, ProductVarientId = variantId, Price = 1000000, Count = 1 });
-
         var d2 = DateTime.UtcNow.AddMonths(-3);
         var o2 = new OutputEntity { StatusId = OrderStatus.Completed, CreatedAt = d2 };
         db.OutputOrders.Add(o2);
@@ -379,7 +349,6 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         db.OutputInfos
             .Add(new OutputInfoEntity { OutputId = o2.Id, ProductVarientId = variantId, Price = 2000000, Count = 1 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var response = await _client.GetAsync(
             "/api/v1/Statistics/monthly-revenue-profit?months=6",
             CancellationToken.None)
@@ -387,7 +356,6 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var content = await response.Content
             .ReadFromJsonAsync<List<MonthlyRevenueProfitResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-
         content!.Count.Should().Be(6);
         content.First(x => x.ReportMonth == currentMonthStart.AddMonths(-1)).TotalRevenue.Should().Be(1000000);
         content.First(x => x.ReportMonth == currentMonthStart.AddMonths(-3)).TotalRevenue.Should().Be(2000000);
@@ -403,7 +371,6 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
         var variantId = await SeedProductVariantAsync(db, uniqueId, cancellationToken: CancellationToken.None)
             .ConfigureAwait(true);
-
         var o1 = new OutputEntity { StatusId = OrderStatus.Completed, CreatedAt = DateTime.UtcNow };
         db.OutputOrders.Add(o1);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -418,7 +385,6 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
                     Count = 1
                 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var response = await _client.GetAsync(
             "/api/v1/Statistics/monthly-revenue-profit?months=1",
             CancellationToken.None)
@@ -426,7 +392,6 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var content = await response.Content
             .ReadFromJsonAsync<List<MonthlyRevenueProfitResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-
         content!.First().TotalProfit.Should().Be(1000000);
     }
 
@@ -438,20 +403,17 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         await WipeStatisticsDataAsync(db, CancellationToken.None).ConfigureAwait(true);
         await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
-
-        for(int i = 0; i < 3; i++)
+        for (int i = 0; i < 3; i++)
             db.OutputOrders.Add(new OutputEntity { StatusId = OrderStatus.Pending, CreatedAt = DateTime.UtcNow });
-        for(int i = 0; i < 10; i++)
+        for (int i = 0; i < 10; i++)
             db.OutputOrders.Add(new OutputEntity { StatusId = OrderStatus.Completed, CreatedAt = DateTime.UtcNow });
         db.OutputOrders.Add(new OutputEntity { StatusId = OrderStatus.Cancelled, CreatedAt = DateTime.UtcNow });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var response = await _client.GetAsync("/api/v1/Statistics/order-status-counts", CancellationToken.None)
             .ConfigureAwait(true);
         var content = await response.Content
             .ReadFromJsonAsync<List<OrderStatusCountResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-
         content?.First(x => string.Compare(x.StatusName, OrderStatus.Pending, StringComparison.Ordinal) == 0).OrderCount
         .Should()
         .Be(3);
@@ -477,7 +439,6 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             .ConfigureAwait(true);
         var v2 = await SeedProductVariantAsync(db, $"{uniqueId}2", cancellationToken: CancellationToken.None)
             .ConfigureAwait(true);
-
         var lastMonth = DateTime.UtcNow.AddMonths(-1);
         var o1 = new OutputEntity { StatusId = OrderStatus.Completed, CreatedAt = lastMonth };
         db.OutputOrders.Add(o1);
@@ -485,13 +446,11 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         db.OutputInfos.Add(new OutputInfoEntity { OutputId = o1.Id, ProductVarientId = v1, Count = 20 });
         db.OutputInfos.Add(new OutputInfoEntity { OutputId = o1.Id, ProductVarientId = v2, Count = 15 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var response = await _client.GetAsync("/api/v1/Statistics/product-report-last-month", CancellationToken.None)
             .ConfigureAwait(true);
         var content = await response.Content
             .ReadFromJsonAsync<List<ProductReportResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-
         content?.First(x => x.VariantId == v1).SoldLastMonth.Should().Be(20);
         content?.First(x => x.VariantId == v2).SoldLastMonth.Should().Be(15);
     }
@@ -506,23 +465,19 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
         var vid = await SeedProductVariantAsync(db, uniqueId, cancellationToken: CancellationToken.None)
             .ConfigureAwait(true);
-
-        var v = await db.ProductVariants.FindAsync([ vid ], CancellationToken.None).ConfigureAwait(true);
+        var v = await db.ProductVariants.FindAsync([vid], CancellationToken.None).ConfigureAwait(true);
         v!.DeletedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var o1 = new OutputEntity { StatusId = OrderStatus.Completed, CreatedAt = DateTime.UtcNow.AddMonths(-1) };
         db.OutputOrders.Add(o1);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         db.OutputInfos.Add(new OutputInfoEntity { OutputId = o1.Id, ProductVarientId = vid, Count = 5 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var response = await _client.GetAsync("/api/v1/Statistics/product-report-last-month", CancellationToken.None)
             .ConfigureAwait(true);
         var content = await response.Content
             .ReadFromJsonAsync<List<ProductReportResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-
         content!.Any(x => x.VariantId == vid).Should().BeTrue();
     }
 
@@ -534,11 +489,9 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         await WipeStatisticsDataAsync(db, CancellationToken.None).ConfigureAwait(true);
         await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
-
         decimal price = 1250750.50m;
         var vid = await SeedProductVariantAsync(db, uniqueId, price, CancellationToken.None).ConfigureAwait(true);
-
-        if(!await db.InputStatuses
+        if (!await db.InputStatuses
             .AnyAsync(
                 x => string.Compare(x.Key, Domain.Constants.Input.InputStatus.Finish) == 0,
                 CancellationToken.None)
@@ -552,13 +505,11 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         db.InputInfos.Add(new InputInfoEntity { InputId = inp.Id, ProductId = vid, Count = 35 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var response = await _client.GetAsync($"/api/v1/Statistics/product-stock-price/{vid}", CancellationToken.None)
             .ConfigureAwait(true);
         var content = await response.Content
             .ReadFromJsonAsync<ProductStockPriceResponse>(CancellationToken.None)
             .ConfigureAwait(true);
-
         content!.UnitPrice.Should().Be(price);
         content.StockQuantity.Should().Be(35);
     }
@@ -573,11 +524,9 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
         var vid = await SeedProductVariantAsync(db, uniqueId, cancellationToken: CancellationToken.None)
             .ConfigureAwait(true);
-
-        var v = await db.ProductVariants.FindAsync([ vid ], TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var v = await db.ProductVariants.FindAsync([vid], TestContext.Current.CancellationToken).ConfigureAwait(true);
         v!.DeletedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var response = await _client.GetAsync($"/api/v1/Statistics/product-stock-price/{vid}", CancellationToken.None)
             .ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -593,7 +542,6 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
         var vid = await SeedProductVariantAsync(db, uniqueId, cancellationToken: CancellationToken.None)
             .ConfigureAwait(true);
-
         var o1 = new OutputEntity { StatusId = OrderStatus.Completed, CreatedAt = DateTime.UtcNow };
         db.OutputOrders.Add(o1);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -602,13 +550,11 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             .Add(new OutputInfoEntity { OutputId = o1.Id, ProductVarientId = vid, Count = 1, Price = 1200000 });
         db.OutputInfos.Add(new OutputInfoEntity { OutputId = o1.Id, ProductVarientId = vid, Count = 3, Price = 300000 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var response = await _client.GetAsync("/api/v1/Statistics/daily-revenue?days=1", CancellationToken.None)
             .ConfigureAwait(true);
         var content = await response.Content
             .ReadFromJsonAsync<List<DailyRevenueResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-
         content!.First().TotalRevenue.Should().Be(3100000);
     }
 
@@ -622,7 +568,6 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
         var vid = await SeedProductVariantAsync(db, uniqueId, cancellationToken: CancellationToken.None)
             .ConfigureAwait(true);
-
         var o1 = new OutputEntity { StatusId = OrderStatus.Completed, CreatedAt = DateTime.UtcNow };
         db.OutputOrders.Add(o1);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -637,7 +582,6 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
                     CostPrice = 1500000
                 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var response = await _client.GetAsync(
             "/api/v1/Statistics/monthly-revenue-profit?months=1",
             CancellationToken.None)
@@ -645,7 +589,6 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var content = await response.Content
             .ReadFromJsonAsync<List<MonthlyRevenueProfitResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-
         content!.First().TotalProfit.Should().Be(-500000);
     }
 
@@ -659,14 +602,12 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
         var vid = await SeedProductVariantAsync(db, uniqueId, cancellationToken: CancellationToken.None)
             .ConfigureAwait(true);
-
         var d2 = DateTime.UtcNow.AddMonths(-2);
         var o1 = new OutputEntity { StatusId = OrderStatus.Completed, CreatedAt = d2 };
         db.OutputOrders.Add(o1);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         db.OutputInfos.Add(new OutputInfoEntity { OutputId = o1.Id, ProductVarientId = vid, Count = 1, Price = 100000 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var response = await _client.GetAsync(
             "/api/v1/Statistics/monthly-revenue-profit?months=3",
             CancellationToken.None)
@@ -674,10 +615,8 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var content = await response.Content
             .ReadFromJsonAsync<List<MonthlyRevenueProfitResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-
         var currentMonthStart = new DateOnly(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
         var monthGap = currentMonthStart.AddMonths(-1);
-
         content!.First(x => x.ReportMonth == monthGap).TotalRevenue.Should().Be(0);
     }
 
@@ -694,7 +633,6 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var content = await response.Content
             .ReadFromJsonAsync<List<OrderStatusCountResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-
         content.Should().NotBeNull();
         content!.All(x => x.OrderCount == 0).Should().BeTrue();
     }
@@ -709,13 +647,11 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
         var vid = await SeedProductVariantAsync(db, uniqueId, cancellationToken: CancellationToken.None)
             .ConfigureAwait(true);
-
         var response = await _client.GetAsync("/api/v1/Statistics/product-report-last-month", CancellationToken.None)
             .ConfigureAwait(true);
         var content = await response.Content
             .ReadFromJsonAsync<List<ProductReportResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-
         content!.First(x => x.VariantId == vid).SoldLastMonth.Should().Be(0);
         content!.First(x => x.VariantId == vid).StockQuantity.Should().Be(0);
     }
@@ -730,14 +666,12 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
         var variantId = await SeedProductVariantAsync(db, uniqueId, 1000000, CancellationToken.None)
             .ConfigureAwait(true);
-
         var today = DateTime.UtcNow;
         var o1 = new OutputEntity { StatusId = OrderStatus.Completed, CreatedAt = today };
         var o2 = new OutputEntity { StatusId = OrderStatus.Cancelled, CreatedAt = today };
         var o3 = new OutputEntity { StatusId = OrderStatus.Pending, CreatedAt = today };
         db.OutputOrders.AddRange(o1, o2, o3);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         db.OutputInfos
             .Add(new OutputInfoEntity { OutputId = o1.Id, ProductVarientId = variantId, Price = 1000000, Count = 1 });
         db.OutputInfos
@@ -745,13 +679,11 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         db.OutputInfos
             .Add(new OutputInfoEntity { OutputId = o3.Id, ProductVarientId = variantId, Price = 3000000, Count = 1 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var response = await _client.GetAsync("/api/v1/Statistics/daily-revenue?days=1", CancellationToken.None)
             .ConfigureAwait(true);
         var content = await response.Content
             .ReadFromJsonAsync<List<DailyRevenueResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-
         content!.First().TotalRevenue.Should().Be(1000000);
     }
 
@@ -765,11 +697,9 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
         var variantId = await SeedProductVariantAsync(db, uniqueId, 1000000, CancellationToken.None)
             .ConfigureAwait(true);
-
         var o1 = new OutputEntity { StatusId = OrderStatus.Completed, CreatedAt = DateTime.UtcNow };
         db.OutputOrders.Add(o1);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         db.OutputInfos
             .Add(
                 new OutputInfoEntity
@@ -781,13 +711,11 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
                     Count = 1
                 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var response = await _client.GetAsync("/api/v1/Statistics/revenue-analysis", CancellationToken.None)
             .ConfigureAwait(true);
         var content = await response.Content
             .ReadFromJsonAsync<AdminRevenueAnalysisResponse>(CancellationToken.None)
             .ConfigureAwait(true);
-
         content!.DailyTableData.First().TotalRevenue.Should().Be(1000000);
         content.DailyTableData.First().TotalProfit.Should().Be(1000000);
         content.DailyTableData.First().HasZeroCostPrice.Should().BeTrue();
@@ -803,11 +731,9 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
         var variantId = await SeedProductVariantAsync(db, uniqueId, 1000000, CancellationToken.None)
             .ConfigureAwait(true);
-
         var o1 = new OutputEntity { StatusId = OrderStatus.Completed, CreatedAt = DateTime.UtcNow };
         db.OutputOrders.Add(o1);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         db.OutputInfos
             .Add(
                 new OutputInfoEntity
@@ -819,7 +745,6 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
                     Count = 1
                 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var response = await _client.GetAsync(
             "/api/v1/Statistics/monthly-revenue-profit?months=1",
             CancellationToken.None)
@@ -827,7 +752,6 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var content = await response.Content
             .ReadFromJsonAsync<List<MonthlyRevenueProfitResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-
         content!.First().TotalRevenue.Should().Be(2000000);
         content!.First().TotalProfit.Should().Be(2000000);
         content!.First().HasZeroCostPrice.Should().BeTrue();
@@ -841,13 +765,11 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         await WipeStatisticsDataAsync(db, CancellationToken.None).ConfigureAwait(true);
         await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
-
         var brand = new BrandEntity { Name = $"Brand_{uniqueId}" };
         db.Brands.Add(brand);
         var cat = new ProductCategoryEntity { Name = $"Cat_{uniqueId}" };
         db.ProductCategories.Add(cat);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var prod = new ProductEntity
         {
             Name = $"Prod_{uniqueId}",
@@ -857,12 +779,10 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         };
         db.Products.Add(prod);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var vid = new ProductVariant { ProductId = prod.Id, Price = 100000, UrlSlug = $"slug-{uniqueId}" };
         db.ProductVariants.Add(vid);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
-        if(!await db.InputStatuses
+        if (!await db.InputStatuses
             .AnyAsync(
                 x => string.Compare(x.Key, Domain.Constants.Input.InputStatus.Finish) == 0,
                 CancellationToken.None)
@@ -871,23 +791,18 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             db.InputStatuses.Add(new InputStatusEntity { Key = Domain.Constants.Input.InputStatus.Finish });
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
-
         var inp = new InputEntity { StatusId = Domain.Constants.Input.InputStatus.Finish, CreatedAt = DateTime.UtcNow };
         db.InputReceipts.Add(inp);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         db.InputInfos.Add(new InputInfoEntity { InputId = inp.Id, ProductId = vid.Id, Count = 10, InputPrice = 50000 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         vid.DeletedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var response = await _client.GetAsync("/api/v1/Statistics/warehouse-report", CancellationToken.None)
             .ConfigureAwait(true);
         var content = await response.Content
             .ReadFromJsonAsync<AdminWarehouseReportResponse>(CancellationToken.None)
             .ConfigureAwait(true);
-
         var brandData = content!.WarehouseTableData.FirstOrDefault(x => string.Compare(x.BrandName, brand.Name) == 0);
         brandData.Should().NotBeNull();
         brandData!.TotalStock.Should().Be(10);
@@ -901,32 +816,27 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         await WipeStatisticsDataAsync(db, CancellationToken.None).ConfigureAwait(true);
         await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
-
         var baselineResponse = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None)
             .ConfigureAwait(true);
         var baselineContent = await baselineResponse.Content
             .ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         var initialCount = baselineContent!.PendingOrdersCount;
-
         var o1 = new OutputEntity { StatusId = OrderStatus.Pending, CreatedAt = DateTime.UtcNow };
         var o2 = new OutputEntity { StatusId = OrderStatus.Pending, CreatedAt = DateTime.UtcNow };
         db.OutputOrders.AddRange(o1, o2);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         await db.OutputOrders
             .Where(x => x.Id == o2.Id)
             .ExecuteUpdateAsync(
                 s => s.SetProperty(x => x.CreatedAt, DateTimeOffset.UtcNow.AddDays(-35)),
                 CancellationToken.None)
             .ConfigureAwait(true);
-
         var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None)
             .ConfigureAwait(true);
         var content = await response.Content
             .ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None)
             .ConfigureAwait(true);
-
         content!.PendingOrdersCount.Should().Be(initialCount + 1);
     }
 
@@ -938,13 +848,11 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         await WipeStatisticsDataAsync(db, CancellationToken.None).ConfigureAwait(true);
         await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
-
         var brand = new BrandEntity { Name = $"Brand_WAC_{uniqueId}" };
         db.Brands.Add(brand);
         var cat = new ProductCategoryEntity { Name = $"Cat_WAC_{uniqueId}" };
         db.ProductCategories.Add(cat);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var prod = new ProductEntity
         {
             Name = $"Prod_{uniqueId}",
@@ -954,12 +862,10 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         };
         db.Products.Add(prod);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var vid = new ProductVariant { ProductId = prod.Id, Price = 200000, UrlSlug = $"wac-slug-{uniqueId}" };
         db.ProductVariants.Add(vid);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
-        if(!await db.InputStatuses
+        if (!await db.InputStatuses
             .AnyAsync(
                 x => string.Compare(x.Key, Domain.Constants.Input.InputStatus.Finish) == 0,
                 CancellationToken.None)
@@ -968,24 +874,20 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             db.InputStatuses.Add(new InputStatusEntity { Key = Domain.Constants.Input.InputStatus.Finish });
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
-
         var inp1 = new InputEntity { StatusId = Domain.Constants.Input.InputStatus.Finish, CreatedAt = DateTime.UtcNow };
         var inp2 = new InputEntity { StatusId = Domain.Constants.Input.InputStatus.Finish, CreatedAt = DateTime.UtcNow };
         db.InputReceipts.AddRange(inp1, inp2);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         db.InputInfos
             .Add(new InputInfoEntity { InputId = inp1.Id, ProductId = vid.Id, Count = 10, InputPrice = 100000 });
         db.InputInfos
             .Add(new InputInfoEntity { InputId = inp2.Id, ProductId = vid.Id, Count = 20, InputPrice = 130000 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var response = await _client.GetAsync("/api/v1/Statistics/warehouse-report", CancellationToken.None)
             .ConfigureAwait(true);
         var content = await response.Content
             .ReadFromJsonAsync<AdminWarehouseReportResponse>(CancellationToken.None)
             .ConfigureAwait(true);
-
         var brandData = content!.WarehouseTableData.FirstOrDefault(x => string.Compare(x.BrandName, brand.Name) == 0);
         brandData.Should().NotBeNull();
         brandData!.TotalStock.Should().Be(30);
@@ -1000,13 +902,11 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         await WipeStatisticsDataAsync(db, CancellationToken.None).ConfigureAwait(true);
         await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
-
         var brand = new BrandEntity { Name = $"Brand_{uniqueId}" };
         db.Brands.Add(brand);
         var cat = new ProductCategoryEntity { Name = $"Cat_{uniqueId}" };
         db.ProductCategories.Add(cat);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var prod = new ProductEntity
         {
             Name = $"Prod_Perf_{uniqueId}",
@@ -1016,15 +916,12 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         };
         db.Products.Add(prod);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var vid = new ProductVariant { ProductId = prod.Id, Price = 500000, UrlSlug = $"perf-slug-{uniqueId}" };
         db.ProductVariants.Add(vid);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var o1 = new OutputEntity { StatusId = OrderStatus.Completed, CreatedAt = DateTime.UtcNow.AddDays(-1) };
         db.OutputOrders.Add(o1);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         db.OutputInfos
             .Add(
                 new OutputInfoEntity
@@ -1036,16 +933,13 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
                     CostPrice = 300000
                 });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         vid.DeletedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var response = await _client.GetAsync("/api/v1/Statistics/product-report", CancellationToken.None)
             .ConfigureAwait(true);
         var content = await response.Content
             .ReadFromJsonAsync<AdminProductReportResponse>(CancellationToken.None)
             .ConfigureAwait(true);
-
         var perfData = content!.ProductPerformanceTable
             .FirstOrDefault(x => string.Compare(x.ProductName, prod.Name) == 0);
         perfData.Should().NotBeNull();
@@ -1058,7 +952,6 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var uniqueId = await AuthenticateAsync(CancellationToken.None).ConfigureAwait(true);
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-
         var u1 = new ApplicationUser
         {
             UserName = $"u1_{uniqueId}",
@@ -1085,16 +978,13 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             Email = $"u3_{uniqueId}@test.com",
             CreatedAt = DateTime.UtcNow.AddMonths(-2)
         };
-
         db.Users.AddRange(u1, u2, u3);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None)
             .ConfigureAwait(true);
         var content = await response.Content
             .ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None)
             .ConfigureAwait(true);
-
         content!.NewCustomersCount.Should().BeGreaterThanOrEqualTo(1);
     }
 }

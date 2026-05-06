@@ -29,7 +29,7 @@ namespace Domain.Entities
         public string? Description { get; set; }
 
         [Column("CategoryGroup")]
-        public string? CategoryGroup { get; set; } // "Vehicle" or "Product"
+        public string? CategoryGroup { get; set; }
 
         [Column("ParentId")]
         public int? ParentId { get; set; }

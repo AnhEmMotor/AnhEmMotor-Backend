@@ -6,5 +6,8 @@ namespace Application.Features.Files.Mappings;
 
 public sealed class MediaFileMappingConfig : IRegister
 {
-    public void Register(TypeAdapterConfig config) { config.NewConfig<MediaFileEntity, MediaFileResponse>(); }
+    public void Register(TypeAdapterConfig config)
+    {
+        config.NewConfig<MediaFileEntity, MediaFileResponse>();
+    }
 }

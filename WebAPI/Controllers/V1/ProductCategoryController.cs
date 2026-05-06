@@ -41,7 +41,6 @@ public class ProductCategoryController(IMediator mediator) : ApiController
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
     {
-        // Endpoint công khai - trả TẤT CẢ category (dùng cho form thêm/sửa sản phẩm)
         var query = new GetProductCategoriesListQuery() { SieveModel = sieveModel, ProductOnly = false };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
@@ -57,7 +56,6 @@ public class ProductCategoryController(IMediator mediator) : ApiController
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
     {
-        // Endpoint cho bảng quản lý - chỉ trả thể loại sản phẩm (lọc bỏ loại xe)
         var query = new GetProductCategoriesListQuery() { SieveModel = sieveModel, ProductOnly = true };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);

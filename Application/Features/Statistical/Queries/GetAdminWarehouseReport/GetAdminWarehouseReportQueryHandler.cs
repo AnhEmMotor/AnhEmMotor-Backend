@@ -13,12 +13,10 @@ public sealed class GetAdminWarehouseReportQueryHandler(IStatisticalReadReposito
     {
         var warehouseData = await repository.GetWarehouseTableDataAsync(cancellationToken).ConfigureAwait(false);
         var tableDataList = warehouseData.ToList();
-
         var totalStock = tableDataList.Sum(x => x.TotalStock);
         var totalValue = tableDataList.Sum(x => x.Value);
         var lowStockCount = tableDataList.Sum(x => x.LowStock);
         var outOfStockCount = tableDataList.Sum(x => x.OutOfStock);
-
         var summary = new WarehouseSummaryResponse
         {
             TotalStock = totalStock,
@@ -26,7 +24,6 @@ public sealed class GetAdminWarehouseReportQueryHandler(IStatisticalReadReposito
             LowStockCount = lowStockCount,
             OutOfStockCount = outOfStockCount
         };
-
         var stockByBrand = tableDataList.Select(
             x => new BrandStockResponse
             {
@@ -36,7 +33,6 @@ public sealed class GetAdminWarehouseReportQueryHandler(IStatisticalReadReposito
                 OutOfStock = x.OutOfStock
             })
             .ToList();
-
         var safeCount = totalStock - lowStockCount - outOfStockCount;
         var stockStatusRatio = new List<StockStatusRatioResponse>
         {
@@ -44,7 +40,6 @@ public sealed class GetAdminWarehouseReportQueryHandler(IStatisticalReadReposito
             new StockStatusRatioResponse { StatusLabel = "Sắp hết", Count = lowStockCount },
             new StockStatusRatioResponse { StatusLabel = "Hết hàng", Count = outOfStockCount }
         };
-
         return new AdminWarehouseReportResponse
         {
             Summary = summary,
