@@ -84,6 +84,9 @@ namespace Application.ApiContracts.Product.Responses
         [JsonPropertyName("cover_image_url")]
         public string? CoverImageUrl { get; set; }
 
+        [JsonPropertyName("highlights")]
+        public string? Highlights { get; set; }
+
         public List<ProductVariantDetailResponse> Variants { get; set; } = [];
     }
 }

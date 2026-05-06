@@ -20,6 +20,18 @@ public class ProductVariantDetailForManagerResponse
     [JsonPropertyName("optionValues")]
     public Dictionary<string, string> OptionValues { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
+    [JsonPropertyName("version_name")]
+    public string? VersionName { get; set; }
+
+    [JsonPropertyName("color_name")]
+    public string? ColorName { get; set; }
+
+    [JsonPropertyName("color_code")]
+    public string? ColorCode { get; set; }
+
+    [JsonPropertyName("sku")]
+    public string? SKU { get; set; }
+
     [JsonPropertyName("photo_collection")]
     public List<string> PhotoCollection { get; set; } = [];
 

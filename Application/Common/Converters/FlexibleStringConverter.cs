@@ -11,7 +11,6 @@ public class FlexibleStringConverter : JsonConverter<string?>
         {
             return reader.GetString();
         }
-
         if (reader.TokenType == JsonTokenType.Number)
         {
             if (reader.TryGetInt64(out long l))
@@ -24,15 +23,14 @@ public class FlexibleStringConverter : JsonConverter<string?>
             }
             return reader.GetDecimal().ToString();
         }
-
         if (reader.TokenType == JsonTokenType.Null)
         {
             return null;
         }
-
-        if (reader.TokenType == JsonTokenType.True) return "true";
-        if (reader.TokenType == JsonTokenType.False) return "false";
-
+        if (reader.TokenType == JsonTokenType.True)
+            return "true";
+        if (reader.TokenType == JsonTokenType.False)
+            return "false";
         using var doc = JsonDocument.ParseValue(ref reader);
         return doc.RootElement.GetRawText();
     }
@@ -42,8 +40,7 @@ public class FlexibleStringConverter : JsonConverter<string?>
         if (value == null)
         {
             writer.WriteNullValue();
-        }
-        else
+        } else
         {
             writer.WriteStringValue(value);
         }

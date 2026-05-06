@@ -1,7 +1,8 @@
-﻿using Application.Interfaces.Services;
+using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Security.Claims;
 
 namespace Infrastructure.Services
 {
@@ -50,6 +51,12 @@ namespace Infrastructure.Services
         public string? GetAuthorizationValueFromHeader()
         {
             return httpContextAccessor.HttpContext?.Request.Headers.Authorization;
+        }
+
+        public string? GetUserId()
+        {
+            return httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value ??
+                httpContextAccessor.HttpContext?.User?.FindFirst("sub")?.Value;
         }
     }
 }

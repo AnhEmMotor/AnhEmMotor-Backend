@@ -49,7 +49,9 @@ public static class DependencyInjection
                 {
                     options.UseSqlServer(
                         configuration.GetConnectionString("StringConnection"),
-                        b => b.MigrationsAssembly(typeof(ApplicationDBContext).Assembly.FullName).CommandTimeout(30));
+                        b => b.MigrationsAssembly(typeof(ApplicationDBContext).Assembly.FullName)
+                                .CommandTimeout(30)
+                                .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
                 });
         }
         services.AddIdentity<ApplicationUser, ApplicationRole>(
@@ -66,6 +68,7 @@ public static class DependencyInjection
             .AddDefaultTokenProviders();
         services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
         services.AddSingleton<IUserStreamService, UserStreamService>();
+        services.AddSingleton<INotificationService, NotificationService>();
         services.AddScoped<IAuthorizationHandler, PermissionHandler>();
         services.AddScoped<IAuthorizationHandler, AllPermissionsHandler>();
         services.AddScoped<IAuthorizationHandler, AnyPermissionsHandler>();
@@ -79,6 +82,7 @@ public static class DependencyInjection
         services.AddScoped<IVNPayService, VNPayService>();
         services.AddScoped<IPayOSService, PayOSService>();
         services.AddScoped<ISievePaginator, SievePaginator>();
+        services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddHostedService<OrderCleanupService>();
         services.AddHttpClient();

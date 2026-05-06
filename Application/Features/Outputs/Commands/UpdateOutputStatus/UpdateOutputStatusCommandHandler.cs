@@ -66,6 +66,7 @@ public sealed class UpdateOutputStatusCommandHandler(
             case OrderStatus.Cancelled:
             case OrderStatus.Refunding:
             case OrderStatus.Refunded:
+                break;
             default:
                 break;
         }

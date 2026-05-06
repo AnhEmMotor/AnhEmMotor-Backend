@@ -16,7 +16,6 @@ namespace Infrastructure.PostgreSqlMigrations
                 table: "ProductCategory",
                 type: "integer",
                 nullable: true);
-
             migrationBuilder.AddColumn<int>(name: "DepositRatio", table: "Output", type: "integer", nullable: true);
             migrationBuilder.AddColumn<decimal>(
                 name: "PaidAmount",
@@ -53,7 +52,6 @@ namespace Infrastructure.PostgreSqlMigrations
             migrationBuilder.DropColumn(name: "PaymentStatus", table: "Output");
             migrationBuilder.DropColumn(name: "PaymentUrl", table: "Output");
             migrationBuilder.DropColumn(name: "TransactionId", table: "Output");
-
         }
     }
 }

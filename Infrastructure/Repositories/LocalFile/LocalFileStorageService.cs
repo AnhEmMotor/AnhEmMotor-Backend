@@ -2,11 +2,10 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories.LocalFile;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Webp;
 using SixLabors.ImageSharp.Processing;
-using Microsoft.Extensions.Options;
-
 
 namespace Infrastructure.Repositories.LocalFile;
 
@@ -23,20 +22,16 @@ public class LocalFileStorageService : IFileStorageService
     {
         _httpContextAccessor = httpContextAccessor;
         var configPath = options.Value.UploadPath;
-
         if (!string.IsNullOrEmpty(configPath))
         {
             _uploadFolder = configPath;
-        }
-        else if (string.IsNullOrEmpty(environment.WebRootPath))
+        } else if (string.IsNullOrEmpty(environment.WebRootPath))
         {
             _uploadFolder = Path.Combine(Path.GetTempPath(), "AnhEmMotor_Uploads");
-        }
-        else
+        } else
         {
             _uploadFolder = Path.Combine(environment.WebRootPath, "uploads");
         }
-
         if (!Directory.Exists(_uploadFolder))
         {
             Directory.CreateDirectory(_uploadFolder);

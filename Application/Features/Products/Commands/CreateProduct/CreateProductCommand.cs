@@ -12,12 +12,13 @@ public sealed record CreateProductCommand : IRequest<Result<ProductDetailForMana
     [JsonPropertyName("name")]
     public string? Name { get; init; }
 
-    [JsonPropertyName("categoryId")]
+    [JsonPropertyName("category_id")]
     public int? CategoryId { get; init; }
 
-    [JsonPropertyName("brandId")]
+    [JsonPropertyName("brand_id")]
     public int? BrandId { get; init; }
 
+    [JsonPropertyName("status_id")]
     public string? StatusId { get; init; } = "for-sale";
 
     [JsonPropertyName("description")]
@@ -34,57 +35,57 @@ public sealed record CreateProductCommand : IRequest<Result<ProductDetailForMana
     [JsonConverter(typeof(FlexibleStringConverter))]
     public string? Wheelbase { get; init; }
 
-    [JsonPropertyName("seatHeight")]
+    [JsonPropertyName("seat_height")]
     [JsonConverter(typeof(NullableDecimalConverter))]
     public decimal? SeatHeight { get; init; }
 
-    [JsonPropertyName("groundClearance")]
+    [JsonPropertyName("ground_clearance")]
     [JsonConverter(typeof(NullableDecimalConverter))]
     public decimal? GroundClearance { get; init; }
 
-    [JsonPropertyName("fuelCapacity")]
+    [JsonPropertyName("fuel_capacity")]
     [JsonConverter(typeof(NullableDecimalConverter))]
     public decimal? FuelCapacity { get; init; }
 
-    [JsonPropertyName("tireSize")]
+    [JsonPropertyName("tire_size")]
     public string? TireSize { get; init; }
 
-    [JsonPropertyName("frontSuspension")]
+    [JsonPropertyName("front_suspension")]
     public string? FrontSuspension { get; init; }
 
-    [JsonPropertyName("rearSuspension")]
+    [JsonPropertyName("rear_suspension")]
     public string? RearSuspension { get; init; }
 
-    [JsonPropertyName("engineType")]
+    [JsonPropertyName("engine_type")]
     public string? EngineType { get; init; }
 
-    [JsonPropertyName("maxPower")]
+    [JsonPropertyName("max_power")]
     public string? MaxPower { get; init; }
 
-    [JsonPropertyName("oilCapacity")]
+    [JsonPropertyName("oil_capacity")]
     [JsonConverter(typeof(NullableDecimalConverter))]
     public decimal? OilCapacity { get; init; }
 
-    [JsonPropertyName("fuelConsumption")]
+    [JsonPropertyName("fuel_consumption")]
     public string? FuelConsumption { get; init; }
 
-    [JsonPropertyName("transmissionType")]
+    [JsonPropertyName("transmission_type")]
     public string? TransmissionType { get; init; }
 
-    [JsonPropertyName("starterSystem")]
+    [JsonPropertyName("starter_system")]
     public string? StarterSystem { get; init; }
 
-    [JsonPropertyName("maxTorque")]
+    [JsonPropertyName("max_torque")]
     public string? MaxTorque { get; init; }
 
     [JsonPropertyName("displacement")]
     [JsonConverter(typeof(NullableDecimalConverter))]
     public decimal? Displacement { get; init; }
 
-    [JsonPropertyName("boreStroke")]
+    [JsonPropertyName("bore_stroke")]
     public string? BoreStroke { get; init; }
 
-    [JsonPropertyName("compressionRatio")]
+    [JsonPropertyName("compression_ratio")]
     public string? CompressionRatio { get; init; }
 
     [JsonPropertyName("short_description")]
@@ -95,6 +96,9 @@ public sealed record CreateProductCommand : IRequest<Result<ProductDetailForMana
 
     [JsonPropertyName("meta_description")]
     public string? MetaDescription { get; init; }
+
+    [JsonPropertyName("highlights")]
+    public string? Highlights { get; init; }
 
     [JsonPropertyName("variants")]
     public List<CreateProductVariantRequest> Variants { get; init; } = [];

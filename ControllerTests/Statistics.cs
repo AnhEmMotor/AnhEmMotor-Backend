@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Statistical.Responses;
+using Application.ApiContracts.Statistical.Responses;
 using Application.Features.Statistical.Queries.GetDailyRevenue;
 using Application.Features.Statistical.Queries.GetDashboardStats;
 using Application.Features.Statistical.Queries.GetMonthlyRevenueProfit;
@@ -305,6 +305,29 @@ public class Statistics
         actualResponse.UnitPrice.Should().Be(500000);
         actualResponse.StockQuantity.Should().Be(0);
     }
-    #pragma warning restore CRR0035
-    #pragma warning restore IDE0079
+
+    [Fact(DisplayName = "STAT_104 - Controller - Kiểm tra danh sách sản phẩm bán chạy nhất")]
+    public async Task GetDashboardStats_TopSellingProducts_ReturnsCorrectList()
+    {
+        var expectedStats = new DashboardStatsResponse
+        {
+            TopSellingProducts =
+                new List<TopSellingProductResponse>
+                {
+                    new() { ProductName = "Xe Vision", QuantitySold = 50 },
+                    new() { ProductName = "Xe Janus", QuantitySold = 30 }
+                }
+        };
+        _mediatorMock.Setup(m => m.Send(It.IsAny<GetDashboardStatsQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(expectedStats);
+        var result = await _controller.GetDashboardStatsAsync(CancellationToken.None).ConfigureAwait(true);
+        var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+        var actualStats = okResult.Value.Should().BeAssignableTo<DashboardStatsResponse>().Subject;
+        actualStats.TopSellingProducts.Should().HaveCount(2);
+        actualStats.TopSellingProducts[0].ProductName.Should().Be("Xe Vision");
+        actualStats.TopSellingProducts[0].QuantitySold.Should().Be(50);
+    }
+
+#pragma warning restore CRR0035
+#pragma warning restore IDE0079
 }

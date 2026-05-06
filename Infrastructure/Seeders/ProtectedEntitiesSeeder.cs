@@ -80,10 +80,7 @@ public static class ProtectedEntitiesSeeder
                 var result = await userManager.CreateAsync(newUser, password).ConfigureAwait(false);
                 if (result.Succeeded)
                 {
-                    if (superRoles.Count != 0)
-                    {
-                        await userManager.AddToRoleAsync(newUser, superRoles[0]).ConfigureAwait(false);
-                    }
+                    user = newUser;
                 } else
                 {
                     foreach (var error in result.Errors)
@@ -94,6 +91,16 @@ public static class ProtectedEntitiesSeeder
                             error.Description);
                     }
                     throw new Exception($"Failed to create protected user {email}. See logs for details.");
+                }
+            }
+            if (user != null && superRoles.Count > 0)
+            {
+                var roleName = superRoles[0];
+                var isInRole = await userManager.IsInRoleAsync(user, roleName).ConfigureAwait(false);
+                if (!isInRole)
+                {
+                    await userManager.AddToRoleAsync(user, roleName).ConfigureAwait(false);
+                    logger.LogInformation("Assigned SuperRole {Role} to user {Email}", roleName, email);
                 }
             }
         }

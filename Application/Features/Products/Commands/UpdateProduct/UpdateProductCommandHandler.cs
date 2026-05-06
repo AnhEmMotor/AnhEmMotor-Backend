@@ -1,4 +1,6 @@
+using Application.ApiContracts.Product.Requests;
 using Application.ApiContracts.Product.Responses;
+using Application.Common.Helper;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
@@ -13,6 +15,7 @@ using Domain.Constants;
 using Domain.Entities;
 using Mapster;
 using MediatR;
+using System.Text.Json;
 using OptionEntity = Domain.Entities.Option;
 using OptionValueEntity = Domain.Entities.OptionValue;
 
@@ -20,6 +23,7 @@ namespace Application.Features.Products.Commands.UpdateProduct;
 
 public sealed class UpdateProductCommandHandler(
     IProductReadRepository productReadRepository,
+    IProductTechnologyRepository productTechnologyRepository,
     IProductVariantReadRepository productVariantReadRepository,
     IProductCategoryReadRepository productCategoryReadRepository,
     IBrandReadRepository brandReadRepository,
@@ -41,7 +45,7 @@ public sealed class UpdateProductCommandHandler(
             .ConfigureAwait(false);
         if (product is null)
         {
-            return Error.NotFound($"Product with Id {command.Id} not found.");
+            return Error.NotFound($"Không tìm thấy sản phẩm với ID {command.Id}.");
         }
         if (command.CategoryId.HasValue)
         {
@@ -51,7 +55,7 @@ public sealed class UpdateProductCommandHandler(
             {
                 errors.Add(
                     Error.NotFound(
-                        $"Product category with Id {command.CategoryId} not found or has been deleted.",
+                        $"Danh mục sản phẩm với ID {command.CategoryId} không tồn tại hoặc đã bị xóa.",
                         nameof(command.CategoryId)));
             }
         }
@@ -63,7 +67,7 @@ public sealed class UpdateProductCommandHandler(
             {
                 errors.Add(
                     Error.NotFound(
-                        $"Brand with Id {command.BrandId} not found or has been deleted.",
+                        $"Thương hiệu với ID {command.BrandId} không tồn tại hoặc đã bị xóa.",
                         nameof(command.BrandId)));
             }
         }
@@ -75,7 +79,8 @@ public sealed class UpdateProductCommandHandler(
                 .ToList();
             if (slugs.Count != slugs.Distinct(StringComparer.OrdinalIgnoreCase).Count())
             {
-                errors.Add(Error.BadRequest("Duplicate slugs found within the command.", nameof(command.Variants)));
+                errors.Add(
+                    Error.BadRequest("Tìm thấy các đường dẫn (slug) trùng lặp trong yêu cầu.", nameof(command.Variants)));
             }
             foreach (var variantReq in command.Variants.Where(v => !string.IsNullOrWhiteSpace(v.UrlSlug)))
             {
@@ -89,7 +94,10 @@ public sealed class UpdateProductCommandHandler(
                     {
                         continue;
                     }
-                    errors.Add(Error.BadRequest($"Slug '{variantReq.UrlSlug}' is already in use.", "Variants.UrlSlug"));
+                    errors.Add(
+                        Error.BadRequest(
+                            $"Đường dẫn (slug) '{variantReq.UrlSlug}' đã được sử dụng bởi sản phẩm khác.",
+                            "Variants.UrlSlug"));
                 }
             }
         }
@@ -132,6 +140,10 @@ public sealed class UpdateProductCommandHandler(
             var potentialOptionNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (var variantReq in inputVariants)
             {
+                if (!string.IsNullOrWhiteSpace(variantReq.ColorName))
+                    potentialOptionNames.Add("Màu sắc");
+                if (!string.IsNullOrWhiteSpace(variantReq.VersionName))
+                    potentialOptionNames.Add("Phiên bản");
                 if (variantReq.OptionValues?.Count > 0)
                 {
                     foreach (var kvp in variantReq.OptionValues)
@@ -149,14 +161,21 @@ public sealed class UpdateProductCommandHandler(
             }
             if (potentialOptionNames.Count > 0)
             {
-                var allowedKeys = await predefinedOptionReadRepository.GetAllKeysAsync(cancellationToken)
+                var predefinedOptionsDict = await predefinedOptionReadRepository.GetAllAsDictionaryAsync(
+                    cancellationToken)
                     .ConfigureAwait(false);
-                var invalidOptions = potentialOptionNames.Except(allowedKeys, StringComparer.OrdinalIgnoreCase).ToList();
+                var allowedNamesSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var kvp in predefinedOptionsDict)
+                {
+                    allowedNamesSet.Add(kvp.Key);
+                    allowedNamesSet.Add(kvp.Value);
+                }
+                var invalidOptions = potentialOptionNames.Where(n => !allowedNamesSet.Contains(n)).ToList();
                 if (invalidOptions.Count > 0)
                 {
                     return Result<ProductDetailForManagerResponse?>.Failure(
                         Error.BadRequest(
-                            $"The following option names are invalid: {string.Join(", ", invalidOptions)}",
+                            $"Các tên thuộc tính sau không hợp lệ: {string.Join(", ", invalidOptions)}. Vui lòng chỉ sử dụng các thuộc tính đã được định nghĩa sẵn.",
                             "Variants.OptionValues"));
                 }
                 var existingOptions = await optionReadRepository.GetByNamesAsync(
@@ -174,13 +193,27 @@ public sealed class UpdateProductCommandHandler(
                 var missingNames = potentialOptionNames.Where(n => !optionNameMap.ContainsKey(n)).ToList();
                 if (missingNames.Count > 0)
                 {
-                    var newOptions = missingNames.Select(n => new OptionEntity { Name = n }).ToList();
+                    var newOptions = new List<OptionEntity>();
+                    foreach (var name in missingNames)
+                    {
+                        var key = predefinedOptionsDict.FirstOrDefault(
+                                kvp => kvp.Value.Equals(name, StringComparison.OrdinalIgnoreCase))
+                                .Key ??
+                            name;
+                        newOptions.Add(new OptionEntity { Name = key });
+                    }
                     productVariantInsertRepository.AddOptionRange(newOptions);
                     await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                     foreach (var opt in newOptions)
                     {
                         if (opt.Name is not null)
                         {
+                            var originalName = potentialOptionNames.FirstOrDefault(
+                                n => n.Equals(opt.Name, StringComparison.OrdinalIgnoreCase) ||
+                                    (predefinedOptionsDict.TryGetValue(opt.Name, out var val) &&
+                                        val.Equals(n, StringComparison.OrdinalIgnoreCase)));
+                            if (originalName != null)
+                                optionNameMap[originalName] = opt.Id;
                             optionNameMap[opt.Name] = opt.Id;
                         }
                     }
@@ -188,6 +221,31 @@ public sealed class UpdateProductCommandHandler(
             }
             foreach (var variantReq in inputVariants)
             {
+                if (!string.IsNullOrWhiteSpace(variantReq.ColorName) &&
+                    optionNameMap.TryGetValue("Màu sắc", out var colorOptId))
+                {
+                    if (!allOptionValues.TryGetValue(colorOptId, out var vSet))
+                    {
+                        vSet = [];
+                        allOptionValues[colorOptId] = vSet;
+                    }
+                    var names = variantReq.ColorName
+                        .Split(',')
+                        .Select(n => n.Trim())
+                        .Where(n => !string.IsNullOrEmpty(n));
+                    foreach (var name in names)
+                        vSet.Add(name);
+                }
+                if (!string.IsNullOrWhiteSpace(variantReq.VersionName) &&
+                    optionNameMap.TryGetValue("Phiên bản", out var versionOptId))
+                {
+                    if (!allOptionValues.TryGetValue(versionOptId, out var vSet))
+                    {
+                        vSet = [];
+                        allOptionValues[versionOptId] = vSet;
+                    }
+                    vSet.Add(variantReq.VersionName.Trim());
+                }
                 if (variantReq.OptionValues?.Count > 0)
                 {
                     foreach (var kvp in variantReq.OptionValues)
@@ -221,6 +279,27 @@ public sealed class UpdateProductCommandHandler(
                     }
                 }
             }
+            var colorNamesWithCodes = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+            if (optionNameMap.TryGetValue("Màu sắc", out _) || optionNameMap.TryGetValue("Color", out _))
+            {
+                foreach (var vReq in inputVariants)
+                {
+                    if (!string.IsNullOrWhiteSpace(vReq.ColorName))
+                    {
+                        var names = vReq.ColorName.Split(',').Select(n => n.Trim()).ToList();
+                        var codes = (vReq.ColorCode ?? string.Empty).Split(',').Select(c => c.Trim()).ToList();
+                        for (int i = 0; i < names.Count; i++)
+                        {
+                            var name = names[i];
+                            var code = i < codes.Count ? codes[i] : null;
+                            if (!string.IsNullOrWhiteSpace(name) && !colorNamesWithCodes.ContainsKey(name))
+                            {
+                                colorNamesWithCodes[name] = code;
+                            }
+                        }
+                    }
+                }
+            }
             foreach (var optionKvp in allOptionValues)
             {
                 var optionId = optionKvp.Key;
@@ -229,7 +308,7 @@ public sealed class UpdateProductCommandHandler(
                 if (option is null)
                 {
                     return Result<ProductDetailForManagerResponse?>.Failure(
-                        Error.NotFound($"Option with Id {optionId} not found.", "Variants.OptionValues"));
+                        Error.NotFound($"Thuộc tính với ID {optionId} không tồn tại.", "Variants.OptionValues"));
                 }
                 var valueMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
                 foreach (var valueName in valueNames)
@@ -242,9 +321,19 @@ public sealed class UpdateProductCommandHandler(
                     if (existingValue is not null)
                     {
                         valueMap[valueName] = existingValue.Id;
+                        if (string.IsNullOrWhiteSpace(existingValue.ColorCode) &&
+                            colorNamesWithCodes.TryGetValue(valueName, out var newCode) &&
+                            !string.IsNullOrWhiteSpace(newCode))
+                        {
+                            existingValue.ColorCode = newCode;
+                        }
                     } else
                     {
                         var newValue = new OptionValueEntity { OptionId = optionId, Name = valueName };
+                        if (colorNamesWithCodes.TryGetValue(valueName, out var code))
+                        {
+                            newValue.ColorCode = code;
+                        }
                         optionValueInsertRepository.Add(newValue);
                         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                         valueMap[valueName] = newValue.Id;
@@ -276,9 +365,13 @@ public sealed class UpdateProductCommandHandler(
                 variantEntity = new ProductVariant { ProductId = command.Id };
                 product.ProductVariants.Add(variantEntity);
             }
-            variantEntity.UrlSlug = variantReq.UrlSlug?.Trim();
+            variantEntity.UrlSlug = SlugHelper.GenerateSlug(variantReq.UrlSlug);
             variantEntity.Price = variantReq.Price;
             variantEntity.CoverImageUrl = variantReq.CoverImageUrl?.Trim();
+            variantEntity.VersionName = variantReq.VersionName?.Trim();
+            variantEntity.ColorName = variantReq.ColorName?.Trim();
+            variantEntity.ColorCode = variantReq.ColorCode?.Trim();
+            variantEntity.SKU = variantReq.SKU?.Trim();
             UpdateVariantPhotos(variantEntity, variantReq.PhotoCollection);
             var currentLinks = variantEntity.VariantOptionValues.ToList();
             foreach (var link in currentLinks)
@@ -313,6 +406,95 @@ public sealed class UpdateProductCommandHandler(
                         }
                     }
                 }
+            }
+            if (!string.IsNullOrWhiteSpace(variantEntity.ColorName))
+            {
+                if (optionNameMap.TryGetValue("Màu sắc", out var colorOptionId) ||
+                    optionNameMap.TryGetValue("Color", out colorOptionId))
+                {
+                    if (optionIdToValueMap.TryGetValue(colorOptionId, out var colorValueMap))
+                    {
+                        var names = variantEntity.ColorName
+                            .Split(',')
+                            .Select(n => n.Trim())
+                            .Where(n => !string.IsNullOrEmpty(n));
+                        foreach (var name in names)
+                        {
+                            if (colorValueMap.TryGetValue(name, out var colorValueId))
+                            {
+                                if (!variantEntity.VariantOptionValues.Any(vov => vov.OptionValueId == colorValueId))
+                                {
+                                    variantEntity.VariantOptionValues
+                                        .Add(new VariantOptionValue { OptionValueId = colorValueId });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (!string.IsNullOrWhiteSpace(variantEntity.VersionName))
+            {
+                if (optionNameMap.TryGetValue("Phiên bản", out var versionOptionId) ||
+                    optionNameMap.TryGetValue("Version", out versionOptionId))
+                {
+                    if (optionIdToValueMap.TryGetValue(versionOptionId, out var versionValueMap) &&
+                        versionValueMap.TryGetValue(variantEntity.VersionName, out var versionValueId))
+                    {
+                        if (!variantEntity.VariantOptionValues.Any(vov => vov.OptionValueId == versionValueId))
+                        {
+                            variantEntity.VariantOptionValues
+                                .Add(new VariantOptionValue { OptionValueId = versionValueId });
+                        }
+                    }
+                }
+            }
+        }
+        var existingTechs = product.ProductTechnologies.ToList();
+        var newTechList = new List<TechnologyJsonRequest>();
+        if (!string.IsNullOrWhiteSpace(command.Highlights))
+        {
+            try
+            {
+                newTechList = JsonSerializer.Deserialize<List<TechnologyJsonRequest>>(
+                        command.Highlights,
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ??
+                    [];
+            } catch
+            {
+                newTechList = [];
+            }
+        }
+        foreach (var existing in existingTechs)
+        {
+            if (!newTechList.Any(t => t.TechnologyId == existing.TechnologyId))
+            {
+                product.ProductTechnologies.Remove(existing);
+                productTechnologyRepository.Remove(existing);
+            }
+        }
+        var order = 1;
+        foreach (var t in newTechList)
+        {
+            var existing = existingTechs.FirstOrDefault(et => et.TechnologyId == t.TechnologyId);
+            if (existing != null)
+            {
+                existing.CustomTitle = t.CustomTitle;
+                existing.CustomDescription = t.CustomDescription;
+                existing.CustomImageUrl = t.CustomImageUrl;
+                existing.DisplayOrder = order++;
+            } else
+            {
+                product.ProductTechnologies
+                    .Add(
+                        new ProductTechnology
+                        {
+                            ProductId = product.Id,
+                            TechnologyId = t.TechnologyId,
+                            CustomTitle = t.CustomTitle,
+                            CustomDescription = t.CustomDescription,
+                            CustomImageUrl = t.CustomImageUrl,
+                            DisplayOrder = order++
+                        });
             }
         }
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

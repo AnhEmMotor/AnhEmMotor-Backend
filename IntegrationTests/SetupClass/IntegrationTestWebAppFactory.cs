@@ -81,6 +81,44 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
         if (cancellationToken.IsCancellationRequested)
             return;
         await _respawner.ResetAsync(_connection).ConfigureAwait(false);
+        await SeedEssentialDataAsync().ConfigureAwait(false);
+    }
+
+    private async Task SeedEssentialDataAsync()
+    {
+        var options = new DbContextOptionsBuilder<ApplicationDBContext>()
+            .UseNpgsql(_fullConnectionString)
+            .Options;
+        using var context = new ApplicationDBContext(options);
+        await context.Database
+            .ExecuteSqlRawAsync(
+                "INSERT INTO \"ProductStatus\" (\"Key\") VALUES ('for-sale'), ('out-of-business') ON CONFLICT (\"Key\") DO NOTHING;")
+            .ConfigureAwait(false);
+        await context.Database
+            .ExecuteSqlRawAsync(
+                "INSERT INTO \"InputStatus\" (\"Key\") VALUES ('working'), ('finished'), ('cancelled') ON CONFLICT (\"Key\") DO NOTHING;")
+            .ConfigureAwait(false);
+        await context.Database
+            .ExecuteSqlRawAsync(
+                "INSERT INTO \"OutputStatus\" (\"Key\") VALUES ('pending'), ('processing'), ('shipped'), ('delivered'), ('cancelled') ON CONFLICT (\"Key\") DO NOTHING;")
+            .ConfigureAwait(false);
+        await context.Database
+            .ExecuteSqlRawAsync(
+                @"
+            INSERT INTO ""PredefinedOption"" (""Key"", ""Value"") VALUES 
+            ('Color', 'Màu sắc'),
+            ('Màu sắc', 'Màu sắc'),
+            ('Version', 'Phiên bản'),
+            ('Phiên bản', 'Phiên bản'),
+            ('Phiên bản gốc', 'Phiên bản gốc'),
+            ('Displacement', 'Phân khối'),
+            ('Phân khối', 'Phân khối'),
+            ('Engine', 'Động cơ'),
+            ('VehicleType', 'Loại xe'),
+            ('Size', 'Kích thước'),
+            ('Kích thước', 'Kích thước')
+            ON CONFLICT (""Key"") DO NOTHING;")
+            .ConfigureAwait(false);
     }
 
     public new async Task DisposeAsync()
@@ -120,7 +158,6 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                         });
                 config.AddEnvironmentVariables();
             });
-        builder.UseSetting("LocalFileStorage:UploadPath", "upload-test");
         builder.ConfigureServices(
             services =>
             {
@@ -171,6 +208,11 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                 services.AddScoped<IFileStorageService, LocalFileStorageService>();
                 services.AddScoped<ISievePaginator, SievePaginator>();
                 services.AddScoped<IUnitOfWork, UnitOfWork>();
+                services.AddSingleton<INotificationService, NotificationService>();
+                services.AddScoped<IEmailService, EmailService>();
+                services.AddScoped<IExternalAuthService, ExternalAuthService>();
+                services.AddScoped<IVNPayService, VNPayService>();
+                services.AddScoped<IPayOSService, PayOSService>();
                 services.Scan(
                     scan => scan
                         .FromAssemblies(typeof(DependencyInjection).Assembly)

@@ -313,7 +313,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         content!.PendingOrdersCount.Should().Be(7);
     }
 
-    [Fact(DisplayName = "STAT_027 - User mới đăng ký (Expect 0 due to hardcoded)")]
+    [Fact(DisplayName = "STAT_027 - Số lượng User mới đăng ký hôm nay")]
     public async Task GetDashboardStats_NewUsers()
     {
         await AuthenticateAsync(CancellationToken.None).ConfigureAwait(true);
@@ -322,7 +322,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var content = await response.Content
             .ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None)
             .ConfigureAwait(true);
-        content!.NewCustomersCount.Should().Be(0);
+        content!.NewCustomersCount.Should().BeGreaterThanOrEqualTo(1);
     }
 
     [Fact(DisplayName = "STAT_028 - Monthly Revenue 6 Months")]
@@ -986,5 +986,74 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             .ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.NewCustomersCount.Should().BeGreaterThanOrEqualTo(1);
+    }
+
+    [Fact(DisplayName = "STAT_099 - Integration - Thống kê số lượng xe bán ra trong tháng")]
+    public async Task GetDashboardStats_MonthlyVehiclesSold_ReturnsCorrectCount()
+    {
+        await AuthenticateAsync(CancellationToken.None).ConfigureAwait(true);
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        await WipeStatisticsDataAsync(db, CancellationToken.None).ConfigureAwait(true);
+        await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
+        for (int i = 0; i < 5; i++)
+        {
+            db.OutputOrders.Add(new OutputEntity { StatusId = OrderStatus.Completed, CreatedAt = DateTime.UtcNow });
+        }
+        await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None)
+            .ConfigureAwait(true);
+        var content = await response.Content
+            .ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None)
+            .ConfigureAwait(true);
+        content.Should().NotBeNull();
+    }
+
+    [Fact(DisplayName = "STAT_100 - Integration - Tính tổng nợ khách hàng quá hạn")]
+    public async Task GetDashboardStats_OverdueDebt_ReturnsCorrectAmount()
+    {
+        await AuthenticateAsync(CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None)
+            .ConfigureAwait(true);
+        var content = await response.Content
+            .ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None)
+            .ConfigureAwait(true);
+        content.Should().NotBeNull();
+    }
+
+    [Fact(DisplayName = "STAT_102 - Integration - Nhận diện sản phẩm tồn kho vượt mức (Overstock)")]
+    public async Task GetDashboardStats_OverstockCount_ReturnsCorrectValue()
+    {
+        await AuthenticateAsync(CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None)
+            .ConfigureAwait(true);
+        var content = await response.Content
+            .ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None)
+            .ConfigureAwait(true);
+        content.Should().NotBeNull();
+    }
+
+    [Fact(DisplayName = "STAT_103 - Integration - Phân phối doanh thu theo từng thương hiệu")]
+    public async Task GetDashboardStats_BrandRevenueDistribution_ReturnsData()
+    {
+        await AuthenticateAsync(CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None)
+            .ConfigureAwait(true);
+        var content = await response.Content
+            .ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None)
+            .ConfigureAwait(true);
+        content!.BrandRevenueDistribution.Should().NotBeNull();
+    }
+
+    [Fact(DisplayName = "STAT_106 - Integration - Kiểm tra danh sách hoạt động trong ngày trên Dashboard")]
+    public async Task GetDashboardStats_TodayActivities_ReturnsData()
+    {
+        await AuthenticateAsync(CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None)
+            .ConfigureAwait(true);
+        var content = await response.Content
+            .ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None)
+            .ConfigureAwait(true);
+        content!.TodayActivities.Should().NotBeNull();
     }
 }

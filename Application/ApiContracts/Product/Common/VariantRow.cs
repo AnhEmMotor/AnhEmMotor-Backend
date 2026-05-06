@@ -1,4 +1,4 @@
-﻿namespace Application.ApiContracts.Product.Common
+namespace Application.ApiContracts.Product.Common
 {
     public sealed class VariantRow
     {
@@ -19,5 +19,13 @@
         public int Stock { get; set; }
 
         public int HasBeenBooked { get; set; }
+
+        public string? VersionName { get; set; }
+
+        public string? ColorName { get; set; }
+
+        public string? ColorCode { get; set; }
+
+        public string? SKU { get; set; }
     }
 }

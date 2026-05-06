@@ -101,6 +101,8 @@ public class ProductDetailForManagerResponse
     [JsonPropertyName("inventory_status")]
     public string InventoryStatus { get; set; } = Domain.Constants.InventoryStatus.InStock;
 
+    public string? Highlights { get; set; }
+
     public List<ProductVariantDetailForManagerResponse> Variants { get; set; } = [];
 }
 

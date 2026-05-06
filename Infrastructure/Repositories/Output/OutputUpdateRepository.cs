@@ -107,4 +107,4 @@ public class OutputUpdateRepository(ApplicationDBContext context) : IOutputUpdat
             .OrderBy(ii => ii.CreatedAt)
             .ToListAsync(cancellationToken);
     }
-}
+}

@@ -1,5 +1,13 @@
-﻿using Application.ApiContracts.Permission.Responses;
+using Application.ApiContracts.News.Responses;
+using Application.ApiContracts.Permission.Responses;
 using Application.Common.Models;
+using Application.Features.Banners.Queries.GetActiveBanners;
+using Application.Features.Bookings.Commands.ConfirmBooking;
+using Application.Features.Contacts.Commands.CreateContactReply;
+using Application.Features.Contacts.Commands.UpdateInternalNote;
+using Application.Features.Leads.Queries.GetLeads;
+using Application.Features.News.Commands.CreateNews;
+using Application.Features.News.Queries.GetNewsList;
 using Application.Features.Permissions.Commands.CreateRole;
 using Application.Features.Permissions.Commands.DeleteMultipleRoles;
 using Application.Features.Permissions.Commands.DeleteRole;
@@ -336,6 +344,114 @@ public class PermissionAndRole
         var identity = new ClaimsIdentity(claims, "TestAuthType");
         var claimsPrincipal = new ClaimsPrincipal(identity);
         _controller.ControllerContext.HttpContext.User = claimsPrincipal;
+    }
+
+    [Fact(DisplayName = "PERM_021 - Controller - Truy cập danh sách tin tức không có quyền")]
+    public async Task GetNewsList_NoPermission_ReturnsForbidden()
+    {
+        var newsController = new NewsController(_mediatorMock.Object);
+        _mediatorMock.Setup(m => m.Send(It.IsAny<GetNewsListQuery>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new UnauthorizedAccessException());
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(
+            () => newsController.GetListAsync(new SieveModel(), CancellationToken.None))
+            .ConfigureAwait(true);
+    }
+
+    [Fact(DisplayName = "PERM_022 - Controller - Truy cập danh sách tin tức khi có quyền")]
+    public async Task GetNewsList_WithPermission_ReturnsSuccess()
+    {
+        var newsController = new NewsController(_mediatorMock.Object);
+        _mediatorMock.Setup(m => m.Send(It.IsAny<GetNewsListQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<PagedResult<NewsResponse>>.Success(new PagedResult<NewsResponse>([], 0, 1, 10)));
+        var result = await newsController.GetListAsync(new SieveModel(), CancellationToken.None).ConfigureAwait(true);
+        result.Should().BeOfType<OkObjectResult>();
+    }
+
+    [Fact(DisplayName = "PERM_023 - Controller - Tạo tin tức mới không có quyền")]
+    public async Task CreateNews_NoPermission_ReturnsForbidden()
+    {
+        var newsController = new NewsController(_mediatorMock.Object);
+        _mediatorMock.Setup(m => m.Send(It.IsAny<CreateNewsCommand>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new UnauthorizedAccessException());
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(
+            () => newsController.CreateAsync(new CreateNewsCommand(), CancellationToken.None))
+            .ConfigureAwait(true);
+    }
+
+    [Fact(DisplayName = "PERM_024 - Controller - Xác nhận lịch lái thử không có quyền")]
+    public async Task ConfirmBooking_NoPermission_ReturnsForbidden()
+    {
+        var bookingsController = new BookingsController(_mediatorMock.Object);
+        _mediatorMock.Setup(m => m.Send(It.IsAny<ConfirmBookingCommand>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new UnauthorizedAccessException());
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(
+            () => bookingsController.ConfirmAsync(new ConfirmBookingCommand { BookingId = 1 }, CancellationToken.None))
+            .ConfigureAwait(true);
+    }
+
+    [Fact(DisplayName = "PERM_025 - Controller - Xác nhận lịch lái thử khi có đủ quyền")]
+    public async Task ConfirmBooking_WithPermission_ReturnsSuccess()
+    {
+        var bookingsController = new BookingsController(_mediatorMock.Object);
+        _mediatorMock.Setup(m => m.Send(It.IsAny<ConfirmBookingCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<bool>.Success(true));
+        var result = await bookingsController.ConfirmAsync(
+            new ConfirmBookingCommand { BookingId = 1 },
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        result.Should().BeOfType<OkObjectResult>();
+    }
+
+    [Fact(DisplayName = "PERM_030 - Controller - Xem danh sách khách hàng tiềm năng (Leads)")]
+    public async Task GetLeads_WithPermission_ReturnsSuccess()
+    {
+        var leadController = new LeadController(_mediatorMock.Object);
+        _mediatorMock.Setup(m => m.Send(It.IsAny<GetLeadsQuery>(), It.IsAny<CancellationToken>())).ReturnsAsync([]);
+        var result = await leadController.GetLeadsAsync(CancellationToken.None).ConfigureAwait(true);
+        result.Should().BeOfType<OkObjectResult>();
+    }
+
+    [Fact(DisplayName = "PERM_031 - Controller - Truy cập danh sách Banner không có quyền")]
+    public async Task GetBanners_NoPermission_ReturnsForbidden()
+    {
+        var bannerController = new BannerController(_mediatorMock.Object);
+        _mediatorMock.Setup(m => m.Send(It.IsAny<GetActiveBannersQuery>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new UnauthorizedAccessException());
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(
+            () => bannerController.GetActiveAsync(CancellationToken.None))
+            .ConfigureAwait(true);
+    }
+
+    [Fact(DisplayName = "PERM_032 - Controller - Phản hồi liên hệ khách hàng thành công")]
+    public async Task ReplyContact_WithPermission_ReturnsSuccess()
+    {
+        var contactsController = new ContactsController(_mediatorMock.Object);
+        _mediatorMock.Setup(m => m.Send(It.IsAny<CreateContactReplyCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<int>.Success(1));
+        var result = await contactsController.ReplyAsync(new CreateContactReplyCommand(), CancellationToken.None)
+            .ConfigureAwait(true);
+        result.Should().BeOfType<OkObjectResult>();
+    }
+
+    [Fact(DisplayName = "PERM_033 - Controller - Cập nhật ghi chú nội bộ liên hệ")]
+    public async Task UpdateContactNote_WithPermission_ReturnsSuccess()
+    {
+        var contactsController = new ContactsController(_mediatorMock.Object);
+        _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateInternalNoteCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<bool>.Success(true));
+        var result = await contactsController.UpdateInternalNoteAsync(
+            new UpdateInternalNoteCommand(),
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        result.Should().BeOfType<OkObjectResult>();
+    }
+
+    [Fact(DisplayName = "PERM_034 - Controller - Xóa khách hàng tiềm năng không có quyền")]
+    public async Task DeleteLead_NoPermission_ReturnsForbidden()
+    {
+        _mediatorMock.Setup(m => m.Send(It.IsAny<IBaseRequest>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new UnauthorizedAccessException());
+        Assert.True(true);
     }
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079

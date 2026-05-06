@@ -39,6 +39,42 @@ public sealed class UpdateManyOutputStatusCommandHandler(
                         "StatusId"));
             }
         }
+        if (string.Compare(request.StatusId, OrderStatus.Completed) == 0 && outputsList.Count > 0)
+        {
+            var productDemands = new Dictionary<int, int>();
+            foreach (var output in outputsList)
+            {
+                if (output.OutputInfos == null)
+                    continue;
+                foreach (var info in output.OutputInfos)
+                {
+                    if (info.ProductVarientId.HasValue && info.Count.HasValue)
+                    {
+                        if (productDemands.ContainsKey(info.ProductVarientId.Value))
+                        {
+                            productDemands[info.ProductVarientId.Value] += info.Count.Value;
+                        } else
+                        {
+                            productDemands[info.ProductVarientId.Value] = info.Count.Value;
+                        }
+                    }
+                }
+            }
+            foreach (var kvp in productDemands)
+            {
+                var variantId = kvp.Key;
+                var totalNeeded = kvp.Value;
+                var currentStock = await readRepository.GetStockQuantityByVariantIdAsync(variantId, cancellationToken)
+                    .ConfigureAwait(false);
+                if (currentStock < totalNeeded)
+                {
+                    errors.Add(
+                        Error.BadRequest(
+                            $"Sản phẩm ID {variantId} không đủ tồn kho. Tổng kho hiện có: {currentStock}, Tổng đơn hàng cần: {totalNeeded}, Thiếu: {totalNeeded - currentStock}",
+                            "Products"));
+                }
+            }
+        }
         if (errors.Count > 0)
         {
             return errors;

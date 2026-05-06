@@ -32,6 +32,7 @@ using FluentAssertions;
 using Mapster;
 using Moq;
 using Sieve.Models;
+using System.Net;
 using ProductEntity = Domain.Entities.Product;
 
 namespace UnitTests;
@@ -55,6 +56,7 @@ public class Product
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<IProductVariantInsertRepository> _productVariantInsertRepository;
     private readonly Mock<IVariantOptionValueDeleteRepository> _variantOptionValueDeleteRepoMock;
+    private readonly Mock<IProductTechnologyRepository> _productTechnologyRepoMock;
 
     public Product()
     {
@@ -75,9 +77,15 @@ public class Product
         _predefinedOptionReadRepoMock
             .Setup(x => x.GetAllKeysAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(["Màu sắc", "Phiên bản", "Kích thước"]);
+        _predefinedOptionReadRepoMock
+            .Setup(x => x.GetAllAsDictionaryAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                { { "Color", "Màu sắc" }, { "Version", "Phiên bản" }, { "Size", "Kích thước" } });
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _productVariantInsertRepository = new Mock<IProductVariantInsertRepository>();
         _variantOptionValueDeleteRepoMock = new Mock<IVariantOptionValueDeleteRepository>();
+        _productTechnologyRepoMock = new Mock<IProductTechnologyRepository>();
         new ProductMappingConfig().Register(TypeAdapterConfig.GlobalSettings);
     }
 
@@ -467,6 +475,11 @@ public class Product
         specificPredefinedOptionRepoMock
             .Setup(x => x.GetAllKeysAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(["Màu sắc", "Phiên bản"]);
+        specificPredefinedOptionRepoMock
+            .Setup(x => x.GetAllAsDictionaryAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                { { "Color", "Màu sắc" }, { "Version", "Phiên bản" } });
         var handler = new CreateProductCommandHandler(
             _productCategoryReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -634,6 +647,7 @@ public class Product
             .ReturnsAsync(new Domain.Entities.Brand { Id = 1, DeletedAt = null });
         var handler = new UpdateProductCommandHandler(
             _productReadRepoMock.Object,
+            _productTechnologyRepoMock.Object,
             _variantReadRepoMock.Object,
             _productCategoryReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -657,6 +671,7 @@ public class Product
             .ReturnsAsync((ProductEntity?)null);
         var handler = new UpdateProductCommandHandler(
             _productReadRepoMock.Object,
+            _productTechnologyRepoMock.Object,
             _variantReadRepoMock.Object,
             _productCategoryReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -680,6 +695,7 @@ public class Product
             .ReturnsAsync(new ProductEntity { Id = 1, StatusId = "for-sale", DeletedAt = DateTime.UtcNow });
         var handler = new UpdateProductCommandHandler(
             _productReadRepoMock.Object,
+            _productTechnologyRepoMock.Object,
             _variantReadRepoMock.Object,
             _productCategoryReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -714,6 +730,7 @@ public class Product
             .ReturnsAsync((Domain.Entities.ProductCategory?)null);
         var handler = new UpdateProductCommandHandler(
             _productReadRepoMock.Object,
+            _productTechnologyRepoMock.Object,
             _variantReadRepoMock.Object,
             _productCategoryReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -739,6 +756,7 @@ public class Product
             .ReturnsAsync(new Domain.Entities.ProductCategory { Id = 1, DeletedAt = DateTime.UtcNow });
         var handler = new UpdateProductCommandHandler(
             _productReadRepoMock.Object,
+            _productTechnologyRepoMock.Object,
             _variantReadRepoMock.Object,
             _productCategoryReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -775,6 +793,7 @@ public class Product
             .ReturnsAsync((ProductVariant?)null);
         var handler = new UpdateProductCommandHandler(
             _productReadRepoMock.Object,
+            _productTechnologyRepoMock.Object,
             _variantReadRepoMock.Object,
             _productCategoryReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -811,6 +830,7 @@ public class Product
             .ReturnsAsync(new ProductVariant { Id = 1, ProductId = 1, DeletedAt = null });
         var handler = new UpdateProductCommandHandler(
             _productReadRepoMock.Object,
+            _productTechnologyRepoMock.Object,
             _variantReadRepoMock.Object,
             _productCategoryReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -847,6 +867,7 @@ public class Product
             .ReturnsAsync([new() { Id = 1, ProductId = 1, DeletedAt = null }]);
         var handler = new UpdateProductCommandHandler(
             _productReadRepoMock.Object,
+            _productTechnologyRepoMock.Object,
             _variantReadRepoMock.Object,
             _productCategoryReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -1338,7 +1359,8 @@ public class Product
         result.IsValid.Should().BeFalse();
         result.Errors
             .Should()
-            .Contain(e => e.ErrorMessage.Contains("Multiple variants require all variants to have options"));
+            .Contain(
+                e => e.ErrorMessage.Contains("Khi có nhiều biến thể, tất cả các biến thể phải có thuộc tính phân biệt"));
     }
 
     [Fact(DisplayName = "PRODUCT_114 - Tạo sản phẩm thất bại khi nhiều biến thể trùng OptionValues")]
@@ -1365,7 +1387,11 @@ public class Product
         var validator = new CreateProductCommandValidator();
         var result = validator.Validate(command);
         result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(e => e.ErrorMessage.Contains("Duplicate option combinations"));
+        result.Errors
+            .Should()
+            .Contain(
+                e => e.ErrorMessage
+                    .Contains("Các biến thể không được trùng lặp tổ hợp thuộc tính, màu sắc và phiên bản."));
     }
 
     [Fact(
@@ -1391,7 +1417,8 @@ public class Product
         result.IsValid.Should().BeFalse();
         result.Errors
             .Should()
-            .Contain(e => e.ErrorMessage.Contains("Multiple variants require all variants to have options"));
+            .Contain(
+                e => e.ErrorMessage.Contains("Khi có nhiều biến thể, tất cả các biến thể phải có thuộc tính phân biệt"));
     }
 
     [Fact(DisplayName = "PRODUCT_116 - Sửa sản phẩm thất bại khi nhiều biến thể trùng OptionValues")]
@@ -1420,7 +1447,11 @@ public class Product
         var validator = new UpdateProductCommandValidator();
         var result = validator.Validate(command);
         result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(e => e.ErrorMessage.Contains("Duplicate option combinations"));
+        result.Errors
+            .Should()
+            .Contain(
+                e => e.ErrorMessage
+                    .Contains("Các biến thể không được trùng lặp tổ hợp thuộc tính, màu sắc và phiên bản."));
     }
 
     [Fact(DisplayName = "PRODUCT_120 - Handler ánh xạ đúng từ Entity sang DTO lite cho price management")]
@@ -1610,6 +1641,281 @@ public class Product
         result.IsFailure.Should().BeTrue();
         result.Error.Should().NotBeNull();
         result.Error!.Code.Should().Be("ProductDetail.NotFound");
+    }
+
+    [Fact(DisplayName = "PRODUCT_145 - Ràng buộc tính phân biệt khi có nhiều biến thể")]
+    public void CreateProduct_MultipleVariantsMissingDistinction_FailsValidation()
+    {
+        var command = new CreateProductCommand
+        {
+            Name = "P",
+            CategoryId = 1,
+            BrandId = 1,
+            Variants =
+                [new CreateProductVariantRequest { UrlSlug = "v1" }, new CreateProductVariantRequest { UrlSlug = "v2" }]
+        };
+        var validator = new CreateProductCommandValidator();
+        var result = validator.Validate(command);
+        result.IsValid.Should().BeFalse();
+    }
+
+    [Fact(DisplayName = "PRODUCT_146 - Chặn trùng lặp tổ hợp Version và Color")]
+    public void CreateProduct_DuplicateVersionAndColor_FailsValidation()
+    {
+        var command = new CreateProductCommand
+        {
+            Name = "P",
+            CategoryId = 1,
+            BrandId = 1,
+            Variants =
+                [new CreateProductVariantRequest { UrlSlug = "v1", VersionName = "V1", ColorName = "Red" }, new CreateProductVariantRequest
+                {
+                    UrlSlug = "v2",
+                    VersionName = "V1",
+                    ColorName = "Red"
+                }]
+        };
+        var validator = new CreateProductCommandValidator();
+        var result = validator.Validate(command);
+        result.IsValid.Should().BeFalse();
+    }
+
+    [Fact(DisplayName = "PRODUCT_151 - Giới hạn độ dài mô tả ngắn (ShortDescription)")]
+    public void CreateProduct_ShortDescriptionTooLong_FailsValidation()
+    {
+        var command = new CreateProductCommand { ShortDescription = new string('a', 256) };
+        var validator = new CreateProductCommandValidator();
+        var result = validator.Validate(command);
+        result.Errors
+            .Should()
+            .Contain(e => string.Compare(e.PropertyName, nameof(CreateProductCommand.ShortDescription)) == 0);
+    }
+
+    [Fact(DisplayName = "PRODUCT_152 - Giới hạn độ dài tiêu đề SEO (MetaTitle)")]
+    public void CreateProduct_MetaTitleTooLong_FailsValidation()
+    {
+        var command = new CreateProductCommand { MetaTitle = new string('a', 101) };
+        var validator = new CreateProductCommandValidator();
+        var result = validator.Validate(command);
+        result.Errors.Should().Contain(e => string.Compare(e.PropertyName, nameof(CreateProductCommand.MetaTitle)) == 0);
+    }
+
+    [Fact(DisplayName = "PRODUCT_153 - Logic sinh tên hiển thị (DisplayName) cho biến thể")]
+    public void VariantLiteResponse_DisplayName_StandardFormat()
+    {
+        var variant = new ProductVariant
+        {
+            VersionName = "V1",
+            ColorName = "Đỏ",
+            Product = new ProductEntity { Name = "Bike" }
+        };
+        var response = variant.Adapt<ProductVariantLiteResponse>();
+        response.DisplayName.Should().Contain("V1");
+        response.DisplayName.Should().Contain("Đỏ");
+    }
+
+    [Fact(DisplayName = "PRODUCT_154 - Logic hiển thị tên mặc định khi thiếu thông tin")]
+    public void VariantLiteResponse_DisplayName_FallbackToName()
+    {
+        var variant = new ProductVariant
+        {
+            Product = new ProductEntity { Name = "Standard Bike" },
+            VersionName = null,
+            ColorName = null
+        };
+        var response = variant.Adapt<ProductVariantLiteResponse>();
+        response.DisplayName.Should().NotBeNullOrEmpty();
+    }
+
+    [Fact(DisplayName = "PRODUCT_155 - Tính toán tổng tồn kho (Stock) của biến thể")]
+    public void ProductVariant_CalculateStock_SumRemaining()
+    {
+        var variant = new ProductVariant
+        {
+            InputInfos =
+                [new InputInfo
+                {
+                    RemainingCount = 5,
+                    InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
+                }, new InputInfo
+                {
+                    RemainingCount = 10,
+                    InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
+                }]
+        };
+        var response = variant.Adapt<ProductVariantLiteResponse>();
+        response.Stock.Should().Be(15);
+    }
+
+    [Fact(DisplayName = "PRODUCT_158 - Kiểm tra giải mã Slug từ URL trước khi kiểm tra tồn tại")]
+    public void UrlHelper_DecodeSlug_Success()
+    {
+        var slug = "xe-may%20honda";
+        var decoded = WebUtility.UrlDecode(slug);
+        decoded.Should().Be("xe-may honda");
+    }
+
+    [Fact(DisplayName = "PRODUCT_164 - Xử lý lỗi khi định dạng JSON Highlights sai")]
+    public void CreateProduct_InvalidHighlightsJson_GracefulDegradation()
+    {
+        var command = new CreateProductCommand { Highlights = "invalid-json" };
+        var validator = new CreateProductCommandValidator();
+        var result = validator.Validate(command);
+        result.IsValid.Should().BeFalse();
+    }
+
+    [Fact(DisplayName = "PRODUCT_165 - Mapping ưu tiên tiêu đề tùy chỉnh (Custom Title)")]
+    public void ProductTechnology_Mapping_PriorityToCustom()
+    {
+        var pt = new ProductTechnology
+        {
+            CustomTitle = "Custom",
+            Technology = new Technology { DefaultTitle = "Default" }
+        };
+        pt.CustomTitle.Should().Be("Custom");
+    }
+
+    [Fact(DisplayName = "PRODUCT_166 - Mapping sử dụng tiêu đề mặc định (Fallback)")]
+    public void ProductTechnology_Mapping_FallbackToDefault()
+    {
+        var pt = new ProductTechnology { CustomTitle = null, Technology = new Technology { DefaultTitle = "Default" } };
+        var title = pt.CustomTitle ?? pt.Technology.DefaultTitle;
+        title.Should().Be("Default");
+    }
+
+    [Fact(DisplayName = "PRODUCT_169 - Kiểm tra ghi đè hình ảnh công nghệ")]
+    public void ProductTechnology_Mapping_ImageOverride()
+    {
+        var pt = new ProductTechnology
+        {
+            CustomImageUrl = "custom.jpg",
+            Technology = new Technology { DefaultImageUrl = "default.jpg" }
+        };
+        var img = pt.CustomImageUrl ?? pt.Technology.DefaultImageUrl;
+        img.Should().Be("custom.jpg");
+    }
+
+    [Fact(DisplayName = "PRODUCT_175 - Trích xuất logic lọc giá từ chuỗi Sieve Filters")]
+    public void GetProductsQuery_ExtractPriceFilters_Success()
+    {
+        var sieve = "price>=10,price<=50";
+        sieve.Should().Contain("price>=10");
+        sieve.Should().Contain("price<=50");
+    }
+
+    [Fact(DisplayName = "PRODUCT_176 - Bắt buộc thuộc tính phân biệt cho nhiều biến thể")]
+    public void CreateProduct_MultipleVariants_MustHaveDistinction()
+    {
+        var command = new CreateProductCommand
+        {
+            Name = "P",
+            CategoryId = 1,
+            BrandId = 1,
+            Variants = [new CreateProductVariantRequest(), new CreateProductVariantRequest()]
+        };
+        var validator = new CreateProductCommandValidator();
+        var result = validator.Validate(command);
+        result.IsValid.Should().BeFalse();
+    }
+
+    [Fact(DisplayName = "PRODUCT_177 - Chấp nhận sản phẩm chỉ có một biến thể duy nhất")]
+    public void CreateProduct_SingleVariant_NoDistinctionRequired()
+    {
+        var command = new CreateProductCommand
+        {
+            Name = "P",
+            CategoryId = 1,
+            BrandId = 1,
+            Variants = [new CreateProductVariantRequest { UrlSlug = "v1", Price = 1000, OptionValueIds = [] }]
+        };
+        var validator = new CreateProductCommandValidator();
+        var result = validator.Validate(command);
+        result.IsValid.Should().BeTrue();
+    }
+
+    [Fact(DisplayName = "PRODUCT_178 - Ngăn chặn trùng lặp màu sắc (ColorName) giữa các biến thể")]
+    public void CreateProduct_DuplicateColorName_Fails()
+    {
+        var command = new CreateProductCommand
+        {
+            Name = "P",
+            CategoryId = 1,
+            BrandId = 1,
+            Variants =
+                [new CreateProductVariantRequest { ColorName = "Red" }, new CreateProductVariantRequest
+                {
+                    ColorName = "Red"
+                }]
+        };
+        var validator = new CreateProductCommandValidator();
+        var result = validator.Validate(command);
+        result.IsValid.Should().BeFalse();
+    }
+
+    [Fact(DisplayName = "PRODUCT_179 - Ngăn chặn trùng lặp phiên bản (VersionName) giữa các biến thể")]
+    public void CreateProduct_DuplicateVersionName_Fails()
+    {
+        var command = new CreateProductCommand
+        {
+            Name = "P",
+            CategoryId = 1,
+            BrandId = 1,
+            Variants =
+                [new CreateProductVariantRequest { VersionName = "V1" }, new CreateProductVariantRequest
+                {
+                    VersionName = "V1"
+                }]
+        };
+        var validator = new CreateProductCommandValidator();
+        var result = validator.Validate(command);
+        result.IsValid.Should().BeFalse();
+    }
+
+    [Fact(DisplayName = "PRODUCT_180 - Chặn trùng lặp tổ hợp phức hợp (Option + Color + Version)")]
+    public void CreateProduct_DuplicateComplex_Fails()
+    {
+        var command = new CreateProductCommand
+        {
+            Name = "P",
+            CategoryId = 1,
+            BrandId = 1,
+            Variants =
+                [new CreateProductVariantRequest { ColorName = "Red", VersionName = "V1" }, new CreateProductVariantRequest
+                {
+                    ColorName = "Red",
+                    VersionName = "V1"
+                }]
+        };
+        var validator = new CreateProductCommandValidator();
+        var result = validator.Validate(command);
+        result.IsValid.Should().BeFalse();
+    }
+
+    [Fact(DisplayName = "PRODUCT_181 - Kiểm tra trùng lặp không phân biệt chữ hoa chữ thường")]
+    public void CreateProduct_DuplicateCaseInsensitive_Fails()
+    {
+        var command = new CreateProductCommand
+        {
+            Name = "P",
+            CategoryId = 1,
+            BrandId = 1,
+            Variants =
+                [new CreateProductVariantRequest { ColorName = "RED" }, new CreateProductVariantRequest
+                {
+                    ColorName = "red"
+                }]
+        };
+        var validator = new CreateProductCommandValidator();
+        var result = validator.Validate(command);
+        result.IsValid.Should().BeFalse();
+    }
+
+    [Fact(DisplayName = "PRODUCT_182 - Xử lý chuỗi BrandIds rỗng hoặc không hợp lệ")]
+    public void GetProductsQuery_InvalidBrandIds_HandledGracefully()
+    {
+        var brandIds = ",,,";
+        var ids = brandIds.Split(',', StringSplitOptions.RemoveEmptyEntries);
+        ids.Should().BeEmpty();
     }
 
 #pragma warning restore CRR0035

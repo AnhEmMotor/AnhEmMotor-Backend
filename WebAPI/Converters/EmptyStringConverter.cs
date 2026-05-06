@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace WebAPI.Converters;
@@ -26,7 +26,24 @@ public class EmptyStringConverter : JsonConverter<string>
     /// <returns>The string value read from the JSON input. Returns <see langword="string.Empty" /> if the JSON value is null.</returns>
     public override string Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        return reader.GetString() ?? string.Empty;
+        if (reader.TokenType == JsonTokenType.String)
+        {
+            return reader.GetString() ?? string.Empty;
+        }
+        if (reader.TokenType == JsonTokenType.Number)
+        {
+            if (reader.TryGetInt64(out long longValue))
+                return longValue.ToString();
+            if (reader.TryGetDouble(out double doubleValue))
+                return doubleValue.ToString();
+        }
+        if (reader.TokenType == JsonTokenType.True)
+            return "true";
+        if (reader.TokenType == JsonTokenType.False)
+            return "false";
+        if (reader.TokenType == JsonTokenType.Null)
+            return string.Empty;
+        return string.Empty;
     }
 
     /// <summary>
@@ -38,10 +55,32 @@ public class EmptyStringConverter : JsonConverter<string>
     /// <param name="options">Options to control JSON serialization behavior. This parameter can be used to customize serialization features.</param>
     public override void Write(Utf8JsonWriter writer, string value, JsonSerializerOptions options)
     {
-        if (string.IsNullOrEmpty(value))
-        {
-            return;
-        }
-        writer.WriteStringValue(value);
+        writer.WriteStringValue(value ?? string.Empty);
+    }
+
+    /// <summary>
+    /// Writes the specified string value as a property name to the JSON output.
+    /// </summary>
+    /// <param name="writer"></param>
+    /// <param name="value"></param>
+    /// <param name="options"></param>
+    public override void WriteAsPropertyName(Utf8JsonWriter writer, string value, JsonSerializerOptions options)
+    {
+        writer.WritePropertyName(value ?? string.Empty);
+    }
+
+    /// <summary>
+    /// Reads a JSON property name and returns it as a string.
+    /// </summary>
+    /// <param name="reader"></param>
+    /// <param name="typeToConvert"></param>
+    /// <param name="options"></param>
+    /// <returns></returns>
+    public override string ReadAsPropertyName(
+        ref Utf8JsonReader reader,
+        Type typeToConvert,
+        JsonSerializerOptions options)
+    {
+        return reader.GetString() ?? string.Empty;
     }
 }

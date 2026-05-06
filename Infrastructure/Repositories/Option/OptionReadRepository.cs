@@ -1,4 +1,4 @@
-﻿using Application.Interfaces.Repositories.Option;
+using Application.Interfaces.Repositories.Option;
 using Domain.Constants;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +23,10 @@ public class OptionReadRepository(ApplicationDBContext context) : IOptionReadRep
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return GetQueryable(mode).Where(o => o.Name != null && names.Contains(o.Name)).ToListAsync(cancellationToken);
+        var lowerNames = names.Select(n => n.ToLower()).ToList();
+        return GetQueryable(mode)
+            .Where(o => o.Name != null && lowerNames.Contains(o.Name.ToLower()))
+            .ToListAsync(cancellationToken);
     }
 
     public Task<List<OptionEntity>> GetAllWithOptionsAsync(CancellationToken cancellationToken)

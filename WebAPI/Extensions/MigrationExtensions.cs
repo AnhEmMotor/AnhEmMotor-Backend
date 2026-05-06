@@ -1,7 +1,9 @@
-﻿using Domain.Entities;
+using Domain.Entities;
+using Infrastructure.Data.Seeders;
 using Infrastructure.DBContexts;
 using Infrastructure.Seeders;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace WebAPI.Extensions;
 
@@ -38,6 +40,7 @@ public static class MigrationExtensions
         try
         {
             var dbContext = services.GetRequiredService<ApplicationDBContext>();
+            await dbContext.Database.MigrateAsync(cancellationToken).ConfigureAwait(true);
             var shouldSeed = configuration.GetValue<bool>("SeedingOptions:RunDataSeedingOnStartup");
             if (shouldSeed)
             {
@@ -48,8 +51,15 @@ public static class MigrationExtensions
                 await OutputStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
                 await SupplierStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
                 await PredefinedOptionSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
+                await BrandSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
+                await ProductOptionSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
                 await ProductStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
+                await ProductDataSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
                 await SettingsSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
+                await NewsSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
+                await TechnologySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
+                await TechnologyDataMigrationSeeder.MigrateExistingHighlightsAsync(dbContext, cancellationToken)
+                    .ConfigureAwait(true);
                 await PermissionDataSeeder.SeedPermissionsAsync(dbContext, cancellationToken).ConfigureAwait(true);
                 await ProtectedEntitiesSeeder.SeedProtectedEntitiesAsync(
                     dbContext,
