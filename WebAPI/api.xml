@@ -92,6 +92,94 @@
             Lấy cấu hình các dịch vụ xác thực bên ngoài
             </summary>
         </member>
+        <member name="T:WebAPI.Controllers.V1.BannerController">
+            <summary>
+            Quản lý Banner &amp; Khuyến mãi (Marketing)
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.BannerController.#ctor(MediatR.ISender)">
+            <summary>
+            Quản lý Banner &amp; Khuyến mãi (Marketing)
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.BannerController.Create(Application.Features.Banners.Commands.CreateBanner.CreateBannerCommand)">
+            <summary>
+            Thêm banner mới
+            </summary>
+            <param name="command">Dữ liệu banner</param>
+            <returns>Kết quả tạo mới</returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.BannerController.Update(System.Int32,Application.Features.Banners.Commands.UpdateBanner.UpdateBannerCommand)">
+            <summary>
+            Cập nhật banner
+            </summary>
+            <param name="id">Mã banner</param>
+            <param name="command">Dữ liệu cập nhật</param>
+            <returns>Kết quả cập nhật</returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.BannerController.Delete(System.Int32)">
+            <summary>
+            Xóa banner
+            </summary>
+            <param name="id">Mã banner</param>
+            <returns>Kết quả xóa</returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.BannerController.TrackClick(System.Int32)">
+            <summary>
+            Ghi nhận lượt click vào banner
+            </summary>
+            <param name="id">Mã banner</param>
+            <returns>Kết quả</returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.BannerController.GetActive">
+            <summary>
+            Lấy danh sách banner đang hoạt động
+            </summary>
+            <returns>Danh sách banner</returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.BannerController.GetList">
+            <summary>
+            Lấy toàn bộ danh sách banner (Dành cho quản lý)
+            </summary>
+            <returns>Danh sách banner</returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.BannerController.GetAuditLogs(System.Int32)">
+            <summary>
+            Lấy lịch sử thay đổi của banner
+            </summary>
+            <param name="id">Mã banner</param>
+            <returns>Danh sách lịch sử</returns>
+        </member>
+        <member name="T:WebAPI.Controllers.V1.BookingsController">
+            <summary>
+            Quản lý đặt lịch lái thử (Booking)
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.BookingsController.#ctor(MediatR.ISender)">
+            <summary>
+            Quản lý đặt lịch lái thử (Booking)
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.BookingsController.Create(Application.Features.Bookings.Commands.CreateBooking.CreateBookingCommand)">
+            <summary>
+            Tạo mới một lịch hẹn lái thử
+            </summary>
+            <param name="command">Dữ liệu đặt lịch</param>
+            <returns>Kết quả tạo mới</returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.BookingsController.GetAll">
+            <summary>
+            Lấy danh sách tất cả các lịch đặt
+            </summary>
+            <returns>Danh sách đặt lịch</returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.BookingsController.Confirm(Application.Features.Bookings.Commands.ConfirmBooking.ConfirmBookingCommand)">
+            <summary>
+            Xác nhận lịch đặt (Chốt lịch)
+            </summary>
+            <param name="command">Dữ liệu xác nhận</param>
+            <returns>Kết quả xác nhận</returns>
+        </member>
         <member name="T:WebAPI.Controllers.V1.BrandController">
             <summary>
             Quản lý danh sách các thương hiệu sản phẩm (ví dụ: Honda, Yamaha, Suzuki).
@@ -151,6 +239,150 @@
             <summary>
             Khôi phục nhiều thương hiệu đã xoá cùng lúc.
             </summary>
+        </member>
+        <member name="T:WebAPI.Controllers.V1.CommissionController">
+            <summary>
+            Controller for managing employee commission records.
+            </summary>
+            <param name="context">The database context.</param>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.CommissionController.#ctor(Application.Interfaces.IApplicationDBContext)">
+            <summary>
+            Controller for managing employee commission records.
+            </summary>
+            <param name="context">The database context.</param>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.CommissionController.GetRecords(System.Threading.CancellationToken)">
+            <summary>
+            Gets all commission records.
+            </summary>
+            <param name="cancellationToken">The cancellation token.</param>
+            <returns>A list of commission records.</returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.CommissionController.GetPayrollSummary(System.Int32,System.Int32,MediatR.IMediator,System.Threading.CancellationToken)">
+            <summary>
+            Gets a summary of payroll (salary + commissions).
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.CommissionController.ApprovePayroll(Application.Features.HR.Commands.ApprovePayroll.ApprovePayrollCommand,MediatR.IMediator,System.Threading.CancellationToken)">
+            <summary>
+            Approves commission payments.
+            </summary>
+        </member>
+        <member name="T:WebAPI.Controllers.V1.CommissionPolicyController">
+            <summary>
+            Controller for managing commission policies.
+            </summary>
+            <param name="context">The database context.</param>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.CommissionPolicyController.#ctor(Application.Interfaces.IApplicationDBContext)">
+            <summary>
+            Controller for managing commission policies.
+            </summary>
+            <param name="context">The database context.</param>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.CommissionPolicyController.GetPolicies(System.Threading.CancellationToken)">
+            <summary>
+            Gets all commission policies.
+            </summary>
+            <param name="cancellationToken">The cancellation token.</param>
+            <returns>A list of commission policies.</returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.CommissionPolicyController.CreatePolicy(Application.Features.HR.Commands.CreateCommissionPolicy.CreateCommissionPolicyCommand,MediatR.IMediator,System.Threading.CancellationToken)">
+            <summary>
+            Creates a new commission policy.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.CommissionPolicyController.UpdatePolicy(System.Int32,Application.Features.HR.Commands.UpdateCommissionPolicy.UpdateCommissionPolicyCommand,MediatR.IMediator,System.Threading.CancellationToken)">
+            <summary>
+            Updates an existing commission policy.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.CommissionPolicyController.GetAuditLogs(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Gets audit logs for a policy.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.CommissionPolicyController.DeletePolicy(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Deletes a commission policy.
+            </summary>
+            <param name="id">The ID of the policy to delete.</param>
+            <param name="cancellationToken">The cancellation token.</param>
+            <returns>A no content result.</returns>
+        </member>
+        <member name="T:WebAPI.Controllers.V1.ContactsController">
+            <summary>
+            Quản lý liên hệ khách hàng (CRM)
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ContactsController.#ctor(MediatR.ISender)">
+            <summary>
+            Quản lý liên hệ khách hàng (CRM)
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ContactsController.Create(Application.Features.Contacts.Commands.CreateContact.CreateContactCommand)">
+            <summary>
+            Gửi thông tin liên hệ mới
+            </summary>
+            <param name="command">Dữ liệu liên hệ</param>
+            <returns>Kết quả gửi</returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ContactsController.GetAll">
+            <summary>
+            Lấy danh sách tất cả các liên hệ
+            </summary>
+            <returns>Danh sách liên hệ</returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ContactsController.Reply(Application.Features.Contacts.Commands.CreateContactReply.CreateContactReplyCommand)">
+            <summary>
+            Phản hồi liên hệ khách hàng
+            </summary>
+            <param name="command">Nội dung phản hồi</param>
+            <returns>Kết quả phản hồi</returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ContactsController.UpdateInternalNote(Application.Features.Contacts.Commands.UpdateInternalNote.UpdateInternalNoteCommand)">
+            <summary>
+            Cập nhật ghi chú nội bộ cho liên hệ
+            </summary>
+            <param name="command">Nội dung ghi chú</param>
+            <returns>Kết quả cập nhật</returns>
+        </member>
+        <member name="T:WebAPI.Controllers.V1.EmployeeController">
+            <summary>
+            Controller for managing employees (HR).
+            </summary>
+            <param name="mediator">The mediator instance.</param>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.EmployeeController.#ctor(MediatR.IMediator)">
+            <summary>
+            Controller for managing employees (HR).
+            </summary>
+            <param name="mediator">The mediator instance.</param>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.EmployeeController.GetEmployeesAsync(System.Threading.CancellationToken)">
+            <summary>
+            Gets all employees.
+            </summary>
+            <param name="cancellationToken">The cancellation token.</param>
+            <returns>A list of employee DTOs.</returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.EmployeeController.CreateEmployeeAsync(Application.Features.HR.Commands.CreateEmployee.CreateEmployeeCommand,System.Threading.CancellationToken)">
+            <summary>
+            Creates a new employee profile.
+            </summary>
+            <param name="command">The create command.</param>
+            <param name="cancellationToken">The cancellation token.</param>
+            <returns>The created employee ID.</returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.EmployeeController.UpdateEmployeeAsync(System.Int32,Application.Features.HR.Commands.UpdateEmployee.UpdateEmployeeCommand,System.Threading.CancellationToken)">
+            <summary>
+            Updates an employee profile.
+            </summary>
+            <param name="id">The employee ID.</param>
+            <param name="command">The update command.</param>
+            <param name="cancellationToken">The cancellation token.</param>
+            <returns>The updated employee ID.</returns>
         </member>
         <member name="T:WebAPI.Controllers.V1.InventoryReceiptsController">
             <summary>
@@ -252,6 +484,63 @@
             Lấy danh sách Leads
             </summary>
         </member>
+        <member name="M:WebAPI.Controllers.V1.LeadController.GetLeadByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Lấy thông tin chi tiết khách hàng theo ID
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.LeadController.GetPipelineAsync(System.Threading.CancellationToken)">
+            <summary>
+            Lấy danh sách khách hàng theo luồng Pipeline (Kanban)
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.LeadController.UpdateLeadAsync(System.Int32,Application.Features.Leads.Commands.UpdateLead.UpdateLeadCommand,System.Threading.CancellationToken)">
+            <summary>
+            Cập nhật thông tin khách hàng
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.LeadController.AddActivityAsync(System.Int32,Application.Features.Leads.Commands.AddLeadActivity.AddLeadActivityCommand,System.Threading.CancellationToken)">
+            <summary>
+            Thêm ghi chú/lịch sử tương tác
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.LeadController.AssignLeadAsync(System.Int32,System.Nullable{System.Guid},System.Threading.CancellationToken)">
+            <summary>
+            Giao việc cho nhân viên
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.LeadController.SeedSamplesAsync(System.Threading.CancellationToken)">
+            <summary>
+            Tạo dữ liệu mẫu (NỘI BỘ - KHÔNG AUTH)
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.LeadController.ResetLeadsAsync(System.Threading.CancellationToken)">
+            <summary>
+            Reset toàn bộ dữ liệu khách hàng (Xóa hết)
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.LeadController.ResetLeadsInternalAsync(System.Threading.CancellationToken)">
+            <summary>
+            Reset toàn bộ dữ liệu khách hàng (NỘI BỘ - KHÔNG AUTH)
+            </summary>
+        </member>
+        <member name="T:WebAPI.Controllers.V1.LoyaltyController">
+            <summary>
+            Quản lý Chăm sóc khách hàng &amp; Hội viên (Loyalty)
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.LoyaltyController.#ctor(MediatR.IMediator)">
+            <summary>
+            Quản lý Chăm sóc khách hàng &amp; Hội viên (Loyalty)
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.LoyaltyController.GetMembers(System.String)">
+            <summary>
+            Lấy danh sách hội viên và điểm thưởng
+            </summary>
+            <param name="search">Từ khóa tìm kiếm theo tên hoặc SĐT</param>
+            <returns>Danh sách hội viên</returns>
+        </member>
         <member name="T:WebAPI.Controllers.V1.MediaFileController">
             <summary>
             Quản lý tệp media (ảnh, video, tài liệu).
@@ -280,6 +569,16 @@
         <member name="M:WebAPI.Controllers.V1.MediaFileController.UploadProductImageAsync(Microsoft.AspNetCore.Http.IFormFile,System.Threading.CancellationToken)">
             <summary>
             Tải lên một tệp ảnh cho sản phẩm.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.MediaFileController.UploadNewsImageAsync(Microsoft.AspNetCore.Http.IFormFile,System.Threading.CancellationToken)">
+            <summary>
+            Tải lên một tệp ảnh cho bài viết/tin tức.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.MediaFileController.UploadBannerImageAsync(Microsoft.AspNetCore.Http.IFormFile,System.Threading.CancellationToken)">
+            <summary>
+            Tải lên một tệp ảnh cho banner.
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.MediaFileController.UploadManyProductImagesAsync(System.Collections.Generic.List{Microsoft.AspNetCore.Http.IFormFile},System.Threading.CancellationToken)">
@@ -311,6 +610,52 @@
             <summary>
             Xem ảnh với khả năng resize theo kích thước mong muốn.
             </summary>
+        </member>
+        <member name="T:WebAPI.Controllers.V1.NewsController">
+            <summary>
+            Quản lý bài viết &amp; tin tức (CMS)
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.NewsController.#ctor(MediatR.IMediator)">
+            <summary>
+            Quản lý bài viết &amp; tin tức (CMS)
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.NewsController.Create(Application.Features.News.Commands.CreateNews.CreateNewsCommand)">
+            <summary>
+            Tạo bài viết mới
+            </summary>
+            <param name="command">Dữ liệu bài viết</param>
+            <returns>Kết quả tạo</returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.NewsController.GetList(Sieve.Models.SieveModel)">
+            <summary>
+            Lấy danh sách tin tức
+            </summary>
+            <param name="sieveModel">Bộ lọc và phân trang</param>
+            <returns>Danh sách tin tức phân trang</returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.NewsController.Update(System.Int32,Application.Features.News.Commands.UpdateNews.UpdateNewsCommand)">
+            <summary>
+            Cập nhật bài viết
+            </summary>
+            <param name="id">Mã bài viết</param>
+            <param name="command">Dữ liệu cập nhật</param>
+            <returns>Kết quả cập nhật</returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.NewsController.Delete(System.Int32)">
+            <summary>
+            Xóa bài viết
+            </summary>
+            <param name="id">Mã bài viết</param>
+            <returns>Kết quả xóa</returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.NewsController.GetBySlug(System.String)">
+            <summary>
+            Lấy chi tiết tin tức theo slug
+            </summary>
+            <param name="slug">Đường dẫn tĩnh bài viết</param>
+            <returns>Chi tiết bài viết</returns>
         </member>
         <member name="T:WebAPI.Controllers.V1.NotificationController">
             <summary>
@@ -615,6 +960,31 @@
             <summary>
             Lấy danh sách thông tin của các mã biến thể được truyền vào để trả ra các thông tin phục vụ cho giỏ hàng
             </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.CreateOptionValueAsync(Application.Features.OptionValues.Commands.CreateOptionValue.CreateOptionValueCommand,System.Threading.CancellationToken)">
+            <summary>
+            Creates a new option value.
+            </summary>
+            <param name="request">The create option value command.</param>
+            <param name="cancellationToken">The cancellation token.</param>
+            <returns>The ID of the created option value.</returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateOptionValueAsync(System.Int32,Application.Features.OptionValues.Commands.UpdateOptionValue.UpdateOptionValueCommand,System.Threading.CancellationToken)">
+            <summary>
+            Updates an existing option value.
+            </summary>
+            <param name="id">The ID of the option value to update.</param>
+            <param name="request">The update option value command.</param>
+            <param name="cancellationToken">The cancellation token.</param>
+            <returns>A no content result.</returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.DeleteOptionValueAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Deletes an option value.
+            </summary>
+            <param name="id">The ID of the option value to delete.</param>
+            <param name="cancellationToken">The cancellation token.</param>
+            <returns>A no content result.</returns>
         </member>
         <member name="T:WebAPI.Controllers.V1.SalesOrdersController">
             <summary>
@@ -1014,6 +1384,11 @@
             </remarks>
             <param name="mediator">The MediatR mediator used to send queries and commands.</param>
         </member>
+        <member name="M:WebAPI.Controllers.V1.UserManagerController.CreateUserAsync(Application.Features.UserManager.Commands.CreateUserByManager.CreateUserByManagerCommand,System.Threading.CancellationToken)">
+            <summary>
+            Tạo người dùng mới (Admin)
+            </summary>
+        </member>
         <member name="M:WebAPI.Controllers.V1.UserManagerController.GetAllUsersAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách tất cả người dùng (có phân trang, lọc, sắp xếp - chỉ vào được khi người dùng có quyền xem danh
@@ -1065,6 +1440,23 @@
             Tải lên ảnh đại diện cho người dùng theo Id (Admin)
             </summary>
         </member>
+        <member name="T:WebAPI.Controllers.V1.VehicleController">
+            <summary>
+            Quản lý Tài sản xe của khách hàng
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.VehicleController.#ctor(MediatR.IMediator)">
+            <summary>
+            Quản lý Tài sản xe của khách hàng
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.VehicleController.GetList(System.String)">
+            <summary>
+            Lấy danh sách xe của khách hàng
+            </summary>
+            <param name="search">Từ khóa tìm kiếm (Biển số, VIN, Tên khách)</param>
+            <returns>Danh sách xe</returns>
+        </member>
         <member name="T:WebAPI.Converters.EmptyStringConverter">
             <summary>
             Provides a custom JSON converter for strings that substitutes empty strings for null values during deserialization
@@ -1096,6 +1488,23 @@
             <param name="writer">The <see cref="T:System.Text.Json.Utf8JsonWriter"/> instance used to write the JSON value.</param>
             <param name="value">The string value to write. If null or empty, no value is written.</param>
             <param name="options">Options to control JSON serialization behavior. This parameter can be used to customize serialization features.</param>
+        </member>
+        <member name="M:WebAPI.Converters.EmptyStringConverter.WriteAsPropertyName(System.Text.Json.Utf8JsonWriter,System.String,System.Text.Json.JsonSerializerOptions)">
+            <summary>
+            Writes the string value as a JSON property name.
+            </summary>
+            <param name="writer">The JSON writer.</param>
+            <param name="value">The string value.</param>
+            <param name="options">The serializer options.</param>
+        </member>
+        <member name="M:WebAPI.Converters.EmptyStringConverter.ReadAsPropertyName(System.Text.Json.Utf8JsonReader@,System.Type,System.Text.Json.JsonSerializerOptions)">
+            <summary>
+            Reads the string value as a JSON property name.
+            </summary>
+            <param name="reader">The JSON reader.</param>
+            <param name="typeToConvert">The type to convert.</param>
+            <param name="options">The serializer options.</param>
+            <returns>The string value.</returns>
         </member>
         <member name="T:WebAPI.Extensions.AuthenticationExtensions">
             <summary>

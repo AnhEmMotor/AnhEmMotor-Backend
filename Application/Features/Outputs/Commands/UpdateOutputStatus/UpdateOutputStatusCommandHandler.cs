@@ -2,6 +2,7 @@ using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
+using Application.Interfaces.Services.HR;
 using Domain.Constants;
 using Domain.Constants.Order;
 using Mapster;
@@ -12,6 +13,7 @@ namespace Application.Features.Outputs.Commands.UpdateOutputStatus;
 public sealed class UpdateOutputStatusCommandHandler(
     IOutputReadRepository readRepository,
     IOutputUpdateRepository updateRepository,
+    ICommissionService commissionService,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateOutputStatusCommand, Result<OrderDetailResponse>>
 {
     public async Task<Result<OrderDetailResponse>> Handle(
@@ -42,9 +44,11 @@ public sealed class UpdateOutputStatusCommandHandler(
                 "StatusId");
         }
 
+        bool isCompleting = false;
         switch(request.StatusId)
         {
             case OrderStatus.Completed:
+                isCompleting = true;
                 output.FinishedBy = request.CurrentUserId;
                 await updateRepository.ProcessCOGSForCompletedOrderAsync(output.Id, cancellationToken)
                     .ConfigureAwait(false);
@@ -53,6 +57,8 @@ public sealed class UpdateOutputStatusCommandHandler(
             case OrderStatus.Cancelled:
             case OrderStatus.Refunding:
             case OrderStatus.Refunded:
+                await commissionService.VoidCommissionAsync(output.Id, cancellationToken)
+                    .ConfigureAwait(false);
                 break;
 
             default:
@@ -81,6 +87,12 @@ public sealed class UpdateOutputStatusCommandHandler(
 
         updateRepository.Update(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        if (isCompleting)
+        {
+            await commissionService.CalculateAndRecordCommissionAsync(output.Id, cancellationToken)
+                .ConfigureAwait(false);
+        }
 
         var updated = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
         ArgumentNullException.ThrowIfNull(updated);

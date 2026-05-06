@@ -12,30 +12,54 @@ public static class ProductCategorySeeder
         IConfiguration configuration,
         CancellationToken cancellationToken)
     {
-        var protectedCategories = configuration.GetSection("ProtectedProductCategory").Get<List<string>>() ?? [];
+        var protectedCategories = configuration.GetSection("ProtectedCategories").Get<List<CategorySeedModel>>() ?? [];
 
-        if(protectedCategories.Count == 0)
+        if (protectedCategories.Count == 0) return;
+
+        var existingCategories = await context.ProductCategories.ToListAsync(cancellationToken);
+        var existingCategoryDict = existingCategories.ToDictionary(c => c.Name!, StringComparer.OrdinalIgnoreCase);
+
+        var categoriesToAdd = new List<ProductCategory>();
+        bool hasChanges = false;
+
+        foreach (var seed in protectedCategories)
         {
-            return;
+            if (string.IsNullOrWhiteSpace(seed.Name)) continue;
+
+            if (existingCategoryDict.TryGetValue(seed.Name, out var existing))
+            {
+                if (string.IsNullOrEmpty(existing.CategoryGroup) || existing.CategoryGroup != seed.Group)
+                {
+                    existing.CategoryGroup = seed.Group;
+                    hasChanges = true;
+                }
+            }
+            else
+            {
+                categoriesToAdd.Add(new ProductCategory
+                {
+                    Name = seed.Name,
+                    CategoryGroup = seed.Group,
+                    Slug = seed.Name.ToLower().Replace(" ", "-")
+                });
+            }
         }
 
-        var allExistingCategoryNames = await context.ProductCategories
-            .Where(c => c.Name != null)
-            .Select(c => c.Name!)
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
-
-        var existingCategorySet = new HashSet<string>(allExistingCategoryNames, StringComparer.OrdinalIgnoreCase);
-
-        var categoriesToAdd = protectedCategories
-            .Where(name => !string.IsNullOrWhiteSpace(name) && !existingCategorySet.Contains(name))
-            .Select(name => new ProductCategory { Name = name, })
-            .ToList();
-
-        if(categoriesToAdd.Count != 0)
+        if (categoriesToAdd.Count != 0)
         {
-            await context.ProductCategories.AddRangeAsync(categoriesToAdd, cancellationToken).ConfigureAwait(false);
-            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            await context.ProductCategories.AddRangeAsync(categoriesToAdd, cancellationToken);
+            hasChanges = true;
         }
+
+        if (hasChanges)
+        {
+            await context.SaveChangesAsync(cancellationToken);
+        }
+    }
+
+    private class CategorySeedModel
+    {
+        public string? Name { get; set; }
+        public string? Group { get; set; }
     }
 }

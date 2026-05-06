@@ -17,7 +17,7 @@ public class ConfirmBookingCommandHandler(
     IBookingReadRepository bookingReadRepository,
     IBookingInsertRepository bookingInsertRepository,
     ILeadReadRepository leadReadRepository,
-    ILeadInsertRepository leadInsertRepository,
+    ILeadWriteRepository leadWriteRepository,
     ILeadActivityInsertRepository leadActivityInsertRepository,
     IUnitOfWork unitOfWork,
     IEmailService emailService) : IRequestHandler<ConfirmBookingCommand, Result<bool>>
@@ -40,7 +40,7 @@ public class ConfirmBookingCommandHandler(
         {
             // Chuyển trạng thái sang "Đang lái thử"
             lead.Status = "TestDriving";
-            leadInsertRepository.Update(lead);
+            leadWriteRepository.Update(lead);
 
             // Ghi chú lịch sử
             leadActivityInsertRepository.Add(new LeadActivity

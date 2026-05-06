@@ -15,7 +15,7 @@ public sealed class GetProductsListQueryHandler(IProductReadRepository readRepos
     {
         var normalizedStatusIds = request.StatusIds
             .Where(s => !string.IsNullOrWhiteSpace(s))
-            .Select(s => s.Trim())
+            .Select(s => s.Trim()) 
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
 
@@ -23,6 +23,7 @@ public sealed class GetProductsListQueryHandler(IProductReadRepository readRepos
         {
             normalizedStatusIds.Add(ProductStatus.ForSale);
         }
+
 
         var (entities, totalCount, groupedOptionFilters) = await readRepository.GetPagedProductsAsync(
             request.Search,

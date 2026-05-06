@@ -2,7 +2,7 @@ using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
-
+using Application.Interfaces.Services.HR;
 using Domain.Constants.Order;
 using Mapster;
 using MediatR;
@@ -12,6 +12,7 @@ namespace Application.Features.Outputs.Commands.UpdateManyOutputStatus;
 public sealed class UpdateManyOutputStatusCommandHandler(
     IOutputReadRepository readRepository,
     IOutputUpdateRepository updateRepository,
+    ICommissionService commissionService,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateManyOutputStatusCommand, Result<List<OutputItemResponse>?>>
 {
     public async Task<Result<List<OutputItemResponse>?>> Handle(
@@ -45,7 +46,9 @@ public sealed class UpdateManyOutputStatusCommandHandler(
             }
         }
 
-        if(string.Compare(request.StatusId, OrderStatus.Completed) == 0 && outputsList.Count > 0)
+        bool isCompleting = string.Compare(request.StatusId, OrderStatus.Completed) == 0;
+
+        if(isCompleting && outputsList.Count > 0)
         {
             var productDemands = new Dictionary<int, int>();
 
@@ -92,7 +95,7 @@ public sealed class UpdateManyOutputStatusCommandHandler(
             return errors;
         }
 
-        if(string.Compare(request.StatusId, OrderStatus.Completed) == 0)
+        if(isCompleting)
         {
             foreach(var output in outputsList)
             {
@@ -108,6 +111,23 @@ public sealed class UpdateManyOutputStatusCommandHandler(
         }
 
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        if (isCompleting)
+        {
+            foreach (var output in outputsList)
+            {
+                await commissionService.CalculateAndRecordCommissionAsync(output.Id, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+        }
+        else if (request.StatusId == OrderStatus.Cancelled || request.StatusId == OrderStatus.Refunded)
+        {
+            foreach (var output in outputsList)
+            {
+                await commissionService.VoidCommissionAsync(output.Id, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+        }
 
         return outputsList.Adapt<List<OutputItemResponse>>();
     }

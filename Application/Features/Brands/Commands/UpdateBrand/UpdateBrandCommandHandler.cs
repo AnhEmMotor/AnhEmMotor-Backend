@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Brand.Responses;
+using Application.ApiContracts.Brand.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
@@ -23,6 +23,8 @@ public sealed class UpdateBrandCommandHandler(
 
         string? cleanName = request.Name?.Trim();
         string? cleanDescription = request.Description?.Trim();
+        string? cleanOrigin = request.Origin?.Trim();
+        string? cleanLogoUrl = request.LogoUrl?.Trim();
 
         var duplicateCandidates = await readRepository.GetByNameAsync(cleanName!, cancellationToken)
             .ConfigureAwait(false);
@@ -35,6 +37,8 @@ public sealed class UpdateBrandCommandHandler(
         request.Adapt(brand);
         brand.Name = cleanName;
         brand.Description = cleanDescription;
+        brand.Origin = cleanOrigin;
+        brand.LogoUrl = cleanLogoUrl;
 
         updateRepository.Update(brand);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

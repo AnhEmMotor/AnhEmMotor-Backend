@@ -13,7 +13,8 @@ public sealed class ProductCategoryMappingConfig : IRegister
         config.NewConfig<CreateProductCategoryCommand, CategoryEntity>()
             .Map(dest => dest.Description, src => string.IsNullOrWhiteSpace(src.Description) ? null : src.Description);
 
-        config.NewConfig<CategoryEntity, ProductCategoryResponse>();
+        config.NewConfig<CategoryEntity, ProductCategoryResponse>()
+            .Map(dest => dest.ProductCount, src => src.Products.Count);
 
         config.NewConfig<UpdateProductCategoryCommand, CategoryEntity>().IgnoreNullValues(true);
     }

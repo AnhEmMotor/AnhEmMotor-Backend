@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Product.Responses;
+using Application.ApiContracts.Product.Responses;
 using Application.Common.Models;
 using Application.Features.Products.Commands.CreateProduct;
 using Application.Features.Products.Commands.DeleteManyProducts;
@@ -85,7 +85,7 @@ public class Product
                 Result<PagedResult<ProductListStoreResponse>>.Success(
                     new PagedResult<ProductListStoreResponse>([], 0, 1, 10)));
 
-        var result = await _controller.GetProductsAsync(new GetProductsRequest(), CancellationToken.None)
+        var result = await _controller.GetProductsAsync(new GetProductsRequest(), null, null, CancellationToken.None)
             .ConfigureAwait(true);
 
         Assert.NotNull(result);
@@ -270,7 +270,7 @@ public class Product
         _senderMock.Setup(m => m.Send(It.IsAny<GetProductsListQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResult);
 
-        var result = await _controller.GetProductsAsync(sieveModel, CancellationToken.None).ConfigureAwait(true);
+        var result = await _controller.GetProductsAsync(sieveModel, null, null, CancellationToken.None).ConfigureAwait(true);
 
         Assert.NotNull(result);
         _senderMock.Verify(m => m.Send(It.IsAny<GetProductsListQuery>(), It.IsAny<CancellationToken>()), Times.Once);

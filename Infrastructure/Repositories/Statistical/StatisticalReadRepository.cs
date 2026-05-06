@@ -63,7 +63,9 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                 var variant = variants.FirstOrDefault(v => v.Id == g.VariantId);
                 return new TopProductRevenueResponse
                 {
-                    ProductName = variant?.Product?.Name ?? "Sản phẩm không xác định",
+                    ProductName = variant != null 
+                        ? $"{variant.Product?.Name} - {variant.VersionName} ({variant.ColorName?.Split(',').FirstOrDefault()})".Trim(' ', '-', '(', ')')
+                        : "Sản phẩm không xác định",
                     UnitsSold = g.SoldCount,
                     Revenue = g.Revenue
                 };
@@ -569,7 +571,6 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             .ConfigureAwait(false);
 
         var variants = await context.ProductVariants
-            .IgnoreQueryFilters()
             .Include(pv => pv.Product)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
@@ -577,7 +578,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         return variants.Select(
             pv => new ProductReportResponse
             {
-                ProductName = pv.Product?.Name,
+                ProductName = $"{pv.Product?.Name} - {pv.VersionName} ({pv.ColorName?.Split(',').FirstOrDefault()})".Trim(' ', '-', '(', ')'),
                 VariantId = pv.Id,
                 StockQuantity =
                     (int)((confirmedInputs.FirstOrDefault(x => x.VariantId == pv.Id)?.TotalIn ?? 0) -
@@ -631,7 +632,6 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             .ToList();
 
         var variants = await context.ProductVariants
-            .IgnoreQueryFilters()
             .Include(pv => pv.Product)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
@@ -650,7 +650,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
 
                 return new ProductPerformanceTableResponse
                 {
-                    ProductName = pv.Product?.Name ?? "Sản phẩm không rõ",
+                    ProductName = $"{pv.Product?.Name} - {pv.VersionName} ({pv.ColorName?.Split(',').FirstOrDefault()})".Trim(' ', '-', '(', ')'),
                     SellPrice = sellPrice,
                     SoldCount30Days = sold30,
                     StockQuantity = stock,
@@ -667,7 +667,6 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         CancellationToken cancellationToken)
     {
         var variants = await context.ProductVariants
-            .IgnoreQueryFilters()
             .Include(pv => pv.Product)
             .ThenInclude(p => p!.Brand)
             .ToListAsync(cancellationToken)

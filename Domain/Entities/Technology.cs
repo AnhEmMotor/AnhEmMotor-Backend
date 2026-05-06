@@ -10,6 +10,7 @@ namespace Domain.Entities
         public int Id { get; set; }
 
         public int? CategoryId { get; set; }
+        public int? BrandId { get; set; }
 
         [Required]
         [Column("Name", TypeName = "nvarchar(255)")]
@@ -25,6 +26,7 @@ namespace Domain.Entities
         public string? DefaultImageUrl { get; set; }
 
         public TechnologyCategory? Category { get; set; }
+        public Brand? Brand { get; set; }
 
         public ICollection<TechnologyImage> Images { get; set; } = [];
         public ICollection<ProductTechnology> ProductTechnologies { get; set; } = [];

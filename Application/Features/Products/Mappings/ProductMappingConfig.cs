@@ -135,6 +135,19 @@ public class ProductMappingConfig : IRegister
                         ColorName = row.ColorName,
                         ColorCode = row.ColorCode,
                         SKU = row.SKU,
+                        Weight = row.Weight,
+                        Dimensions = row.Dimensions,
+                        Wheelbase = row.Wheelbase,
+                        SeatHeight = row.SeatHeight,
+                        GroundClearance = row.GroundClearance,
+                        FuelCapacity = row.FuelCapacity,
+                        TireSize = row.TireSize,
+                        FrontBrake = row.FrontBrake,
+                        RearBrake = row.RearBrake,
+                        FrontSuspension = row.FrontSuspension,
+                        RearSuspension = row.RearSuspension,
+                        EngineType = row.EngineType,
+                        StockQuantity = row.StockQuantity,
                         StatusStockId = GetStockStatus(available),
                         InventoryStatus = inventoryStatus
                     };
@@ -178,8 +191,28 @@ public class ProductMappingConfig : IRegister
             Displacement = product.Displacement,
             BoreStroke = product.BoreStroke,
             CompressionRatio = product.CompressionRatio,
+            FuelSystem = product.FuelSystem,
+            FrameType = product.FrameType,
+            FrontTireSize = product.FrontTireSize,
+            RearTireSize = product.RearTireSize,
+            FrontBrake = product.FrontBrake,
+            RearBrake = product.RearBrake,
+            BatteryType = product.BatteryType,
+            LightingSystem = product.LightingSystem,
+            DashboardType = product.DashboardType,
+            Material = product.Material,
+            Origin = product.Origin,
+            WarrantyPeriod = product.WarrantyPeriod,
+            Unit = product.Unit,
+            StdDot = product.StdDot,
+            StdEce = product.StdEce,
+            StdSnell = product.StdSnell,
+            StdJis = product.StdJis,
+            OtherStandards = product.OtherStandards,
             ShortDescription = product.ShortDescription,
             MetaTitle = product.MetaTitle,
+            MetaDescription = product.MetaDescription,
+            CompatibleVehicleModelIds = product.CompatibleWith.Select(c => c.CompatibleVehicleModelId).ToList(),
             StatusId = product.StatusId,
             Highlights = product.ProductTechnologies?.Count > 0 ? System.Text.Json.JsonSerializer.Serialize(
                 product.ProductTechnologies.OrderBy(t => t.DisplayOrder).Select(t => new
@@ -246,9 +279,28 @@ public class ProductMappingConfig : IRegister
             Displacement = product.Displacement,
             BoreStroke = product.BoreStroke,
             CompressionRatio = product.CompressionRatio,
+            FuelSystem = product.FuelSystem,
+            FrameType = product.FrameType,
+            FrontTireSize = product.FrontTireSize,
+            RearTireSize = product.RearTireSize,
+            FrontBrake = product.FrontBrake,
+            RearBrake = product.RearBrake,
+            BatteryType = product.BatteryType,
+            LightingSystem = product.LightingSystem,
+            DashboardType = product.DashboardType,
+            Material = product.Material,
+            Origin = product.Origin,
+            WarrantyPeriod = product.WarrantyPeriod,
+            Unit = product.Unit,
+            StdDot = product.StdDot,
+            StdEce = product.StdEce,
+            StdSnell = product.StdSnell,
+            StdJis = product.StdJis,
+            OtherStandards = product.OtherStandards,
             ShortDescription = product.ShortDescription,
             MetaTitle = product.MetaTitle,
             MetaDescription = product.MetaDescription,
+            CompatibleVehicleModelIds = product.CompatibleWith.Select(c => c.CompatibleVehicleModelId).ToList(),
             Highlights = product.ProductTechnologies?.Count > 0 ? System.Text.Json.JsonSerializer.Serialize(
                 product.ProductTechnologies.OrderBy(t => t.DisplayOrder).Select(t => new
                 {
@@ -301,6 +353,7 @@ public class ProductMappingConfig : IRegister
             Id = variant.Id,
             ProductId = variant.ProductId,
             ProductName = productName,
+            CategoryId = variant.Product?.CategoryId,
             VariantName = variantName,
             DisplayName = displayName,
             Price = variant.Price,
@@ -367,9 +420,11 @@ public class ProductMappingConfig : IRegister
         return new ProductVariantLiteResponseForInput
         {
             Id = variant.Id,
+            ProductId = variant.ProductId,
             DisplayName = displayName,
             Price = variant.Price,
-            CoverImageUrl = variant.CoverImageUrl
+            CoverImageUrl = variant.CoverImageUrl,
+            CategoryId = variant.Product?.CategoryId
         };
     }
 

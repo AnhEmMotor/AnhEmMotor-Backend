@@ -25,6 +25,15 @@ public class GetLeadsQueryHandler(ILeadReadRepository leadReadRepository) : IReq
             Score = l.Score,
             Status = l.Status,
             Source = l.Source,
+            InterestedVehicle = l.InterestedVehicle,
+            Address = l.Address,
+            AddressDetail = l.AddressDetail,
+            Ward = l.Ward,
+            District = l.District,
+            Province = l.Province,
+            Gender = l.Gender,
+            Birthday = l.Birthday,
+            IdentificationNumber = l.IdentificationNumber,
             CreatedAt = l.CreatedAt ?? System.DateTimeOffset.MinValue,
             Activities = l.Activities.Select(a => new LeadActivityResponse
             {

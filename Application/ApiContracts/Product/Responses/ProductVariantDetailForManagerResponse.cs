@@ -32,6 +32,43 @@ public class ProductVariantDetailForManagerResponse
     [JsonPropertyName("sku")]
     public string? SKU { get; set; }
 
+    // Overridable Specs
+    public decimal? Weight { get; set; }
+
+    public string? Dimensions { get; set; }
+
+    public decimal? Wheelbase { get; set; }
+
+    [JsonPropertyName("seat_height")]
+    public decimal? SeatHeight { get; set; }
+
+    [JsonPropertyName("ground_clearance")]
+    public decimal? GroundClearance { get; set; }
+
+    [JsonPropertyName("fuel_capacity")]
+    public decimal? FuelCapacity { get; set; }
+
+    [JsonPropertyName("tire_size")]
+    public string? TireSize { get; set; }
+
+    [JsonPropertyName("front_brake")]
+    public string? FrontBrake { get; set; }
+
+    [JsonPropertyName("rear_brake")]
+    public string? RearBrake { get; set; }
+
+    [JsonPropertyName("front_suspension")]
+    public string? FrontSuspension { get; set; }
+
+    [JsonPropertyName("rear_suspension")]
+    public string? RearSuspension { get; set; }
+
+    [JsonPropertyName("engine_type")]
+    public string? EngineType { get; set; }
+
+    [JsonPropertyName("stock_quantity")]
+    public int? StockQuantity { get; set; }
+
     [JsonPropertyName("photo_collection")]
     public List<string> PhotoCollection { get; set; } = [];
 

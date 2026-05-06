@@ -14,7 +14,10 @@ public sealed class OutputMappingConfig : IRegister
         config.NewConfig<Output, OrderDetailResponse>()
             .Map(
                 dest => dest.Total,
-                src => src.OutputInfos != null ? src.OutputInfos.Sum(oi => (oi.Count ?? 0) * (oi.Price ?? 0)) : 0)
+                src => CalculateTotal(src))
+            .Map(
+                dest => dest.ShippingFee,
+                src => CalculateShippingFee(src))
             .Map(dest => dest.BuyerName, src => src.Buyer != null ? src.Buyer.FullName : null)
             .Map(dest => dest.BuyerPhone, src => src.Buyer != null ? src.Buyer.PhoneNumber : null)
             .Map(dest => dest.BuyerEmail, src => src.Buyer != null ? src.Buyer.Email : null)
@@ -31,14 +34,14 @@ public sealed class OutputMappingConfig : IRegister
             .Map(dest => dest.StatusId, src => src.StatusId)
             .Map(
                 dest => dest.Total,
-                src => src.OutputInfos != null ? src.OutputInfos.Sum(oi => (oi.Count ?? 0) * (oi.Price ?? 0)) : 0);
+                src => CalculateTotal(src));
 
         config.NewConfig<Output, MyOrderResponse>()
             .Map(dest => dest.CreatedAt, src => src.CreatedAt)
             .Map(dest => dest.OutputInfos, src => src.OutputInfos)
             .Map(
                 dest => dest.Total,
-                src => src.OutputInfos != null ? src.OutputInfos.Sum(oi => (oi.Count ?? 0) * (oi.Price ?? 0)) : 0);
+                src => CalculateTotal(src));
 
         config.NewConfig<OutputInfo, MyOrderItemResponse>()
             .Map(dest => dest.ProductName, src => MapProductName(src))
@@ -88,6 +91,20 @@ public sealed class OutputMappingConfig : IRegister
         }
 
         return $"{productName} ({string.Join(" - ", optionValues)})";
+    }
+
+    private static decimal CalculateTotal(Output src)
+    {
+        var subtotal = src.OutputInfos?.Sum(oi => (oi.Count ?? 0) * (oi.Price ?? 0)) ?? 0;
+        var shipping = CalculateShippingFee(src);
+        return subtotal + shipping;
+    }
+
+    private static decimal CalculateShippingFee(Output src)
+    {
+        var subtotal = src.OutputInfos?.Sum(oi => (oi.Count ?? 0) * (oi.Price ?? 0)) ?? 0;
+        if (subtotal == 0) return 0;
+        return subtotal > 10000000 ? 0 : 200000;
     }
 
     private static string? MapCoverImageUrl(ProductVariant? variant)

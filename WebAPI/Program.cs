@@ -111,25 +111,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapGet("/api/v1/technology", async (Infrastructure.DBContexts.ApplicationDBContext db) =>
-{
-    var technologies = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync(
-        System.Linq.Queryable.Select(
-            Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.Include(
-                db.Technologies, t => t.Category),
-            t => new Application.ApiContracts.Technology.Responses.TechnologyResponse
-            {
-                Id = t.Id,
-                Name = t.Name,
-                DefaultTitle = t.DefaultTitle,
-                DefaultDescription = t.DefaultDescription,
-                DefaultImageUrl = t.DefaultImageUrl,
-                CategoryId = t.CategoryId,
-                CategoryName = t.Category != null ? t.Category.Name : null
-            }));
-    return Microsoft.AspNetCore.Http.TypedResults.Ok(technologies);
-}).RequireAuthorization();
-
 await app.ApplyMigrationsAndSeedAsync(app.Lifetime.ApplicationStopping).ConfigureAwait(true);
 
 app.Run();

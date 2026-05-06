@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.ProductCategory.Responses;
+using Application.ApiContracts.ProductCategory.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductCategory;
@@ -49,6 +49,13 @@ public sealed class UpdateProductCategoryCommandHandler(
         {
             category.Description = request.Description.Trim();
         }
+
+        category.Slug = request.Slug?.Trim();
+        category.ImageUrl = request.ImageUrl?.Trim();
+        category.IsActive = request.IsActive;
+        category.SortOrder = request.SortOrder;
+        category.ParentId = request.ParentId;
+        category.CategoryGroup = request.CategoryGroup;
 
         updateRepository.Update(category);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

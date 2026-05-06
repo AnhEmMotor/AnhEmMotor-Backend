@@ -11,5 +11,6 @@ namespace Application.ApiContracts.Technology.Responses
         public string? DefaultImageUrl { get; set; }
         public int? CategoryId { get; set; }
         public string? CategoryName { get; set; }
+        public int? BrandId { get; set; }
     }
 }

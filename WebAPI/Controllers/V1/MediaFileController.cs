@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.File.Responses;
+using Application.ApiContracts.File.Responses;
 using Application.Common.Models;
 using Application.Features.Files.Commands.DeleteFile;
 using Application.Features.Files.Commands.DeleteManyFiles;
@@ -6,6 +6,7 @@ using Application.Features.Files.Commands.RestoreFile;
 using Application.Features.Files.Commands.RestoreManyFiles;
 using Application.Features.Files.Commands.UploadManyProductImages;
 using Application.Features.Files.Commands.UploadProductImage;
+using Application.Features.Files.Commands.UploadNewsImage;
 using Application.Features.Files.Queries.GetDeletedFilesList;
 using Application.Features.Files.Queries.GetFileById;
 using Application.Features.Files.Queries.GetFilesList;
@@ -87,6 +88,42 @@ public class MediaFileController(IMediator mediator) : ApiController
     {
         ArgumentNullException.ThrowIfNull(file);
         var command = new UploadProductImageCommand { FileContent = file.OpenReadStream(), FileName = file.FileName };
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleCreated(
+            result,
+            RouteNames.MediaFile.GetById,
+            new { id = result.IsSuccess ? result.Value.Id : null });
+    }
+
+    /// <summary>
+    /// Tải lên một tệp ảnh cho bài viết/tin tức.
+    /// </summary>
+    [HttpPost("news/upload")]
+    [RequiresAnyPermissions(Products.Edit, Products.Create)]
+    [ProducesResponseType(typeof(MediaFileResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UploadNewsImageAsync(IFormFile file, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(file);
+        var command = new UploadNewsImageCommand { FileContent = file.OpenReadStream(), FileName = file.FileName };
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleCreated(
+            result,
+            RouteNames.MediaFile.GetById,
+            new { id = result.IsSuccess ? result.Value.Id : null });
+    }
+
+    /// <summary>
+    /// Tải lên một tệp ảnh cho banner.
+    /// </summary>
+    [HttpPost("banner/upload")]
+    [RequiresAnyPermissions(Products.Edit, Products.Create)]
+    [ProducesResponseType(typeof(MediaFileResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UploadBannerImageAsync(IFormFile file, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(file);
+        var command = new Application.Features.Files.Commands.UploadBannerImage.UploadBannerImageCommand { FileContent = file.OpenReadStream(), FileName = file.FileName };
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleCreated(
             result,

@@ -132,6 +132,24 @@ public sealed class UpdateProductCommandHandler(
         product.Displacement = command.Displacement;
         product.BoreStroke = command.BoreStroke?.Trim();
         product.CompressionRatio = command.CompressionRatio?.Trim();
+        product.FuelSystem = command.FuelSystem?.Trim();
+        product.FrameType = command.FrameType?.Trim();
+        product.FrontTireSize = command.FrontTireSize?.Trim();
+        product.RearTireSize = command.RearTireSize?.Trim();
+        product.FrontBrake = command.FrontBrake?.Trim();
+        product.RearBrake = command.RearBrake?.Trim();
+        product.BatteryType = command.BatteryType?.Trim();
+        product.LightingSystem = command.LightingSystem?.Trim();
+        product.DashboardType = command.DashboardType?.Trim();
+        product.Material = command.Material?.Trim();
+        product.Origin = command.Origin?.Trim();
+        product.WarrantyPeriod = command.WarrantyPeriod?.Trim();
+        product.Unit = command.Unit?.Trim();
+        product.StdDot = command.StdDot;
+        product.StdEce = command.StdEce;
+        product.StdSnell = command.StdSnell;
+        product.StdJis = command.StdJis;
+        product.OtherStandards = command.OtherStandards?.Trim();
         product.ShortDescription = command.ShortDescription?.Trim();
         product.MetaTitle = command.MetaTitle?.Trim();
         product.MetaDescription = command.MetaDescription?.Trim();
@@ -401,6 +419,22 @@ public sealed class UpdateProductCommandHandler(
             variantEntity.ColorCode = variantReq.ColorCode?.Trim();
             variantEntity.SKU = variantReq.SKU?.Trim();
 
+            // --- OVERRIDABLE SPECS ---
+            variantEntity.Weight = variantReq.Weight;
+            variantEntity.Dimensions = variantReq.Dimensions?.Trim();
+            variantEntity.Wheelbase = variantReq.Wheelbase;
+            variantEntity.SeatHeight = variantReq.SeatHeight;
+            variantEntity.GroundClearance = variantReq.GroundClearance;
+            variantEntity.FuelCapacity = variantReq.FuelCapacity;
+            variantEntity.TireSize = variantReq.TireSize?.Trim();
+            variantEntity.FrontBrake = variantReq.FrontBrake?.Trim();
+            variantEntity.RearBrake = variantReq.RearBrake?.Trim();
+            variantEntity.FrontSuspension = variantReq.FrontSuspension?.Trim();
+            variantEntity.RearSuspension = variantReq.RearSuspension?.Trim();
+            variantEntity.EngineType = variantReq.EngineType?.Trim();
+            variantEntity.StockQuantity = variantReq.StockQuantity;
+            // -------------------------
+
             UpdateVariantPhotos(variantEntity, variantReq.PhotoCollection);
 
             var currentLinks = variantEntity.VariantOptionValues.ToList();
@@ -523,10 +557,30 @@ public sealed class UpdateProductCommandHandler(
             }
         }
 
+        // --- PRODUCT COMPATIBILITY ---
+        product.CompatibleWith.Clear();
+        if (command.CompatibleVehicleModelIds?.Count > 0)
+        {
+            foreach (var vehicleId in command.CompatibleVehicleModelIds.Distinct())
+            {
+                product.CompatibleWith.Add(new ProductCompatibility
+                {
+                    CompatibleVehicleModelId = vehicleId
+                });
+            }
+        }
+        // -----------------------------
+
         updateRepository.Update(product);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         var response = product.Adapt<ProductDetailForManagerResponse>();
+        if (response != null)
+        {
+            response.CompatibleVehicleModelIds = product.CompatibleWith
+                .Select(c => c.CompatibleVehicleModelId)
+                .ToList();
+        }
 
         return response;
     }

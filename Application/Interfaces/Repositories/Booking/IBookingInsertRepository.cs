@@ -4,6 +4,6 @@ namespace Application.Interfaces.Repositories.Booking;
 
 public interface IBookingInsertRepository
 {
-    void Add(Domain.Entities.Booking booking);
-    void Update(Domain.Entities.Booking booking);
+    public void Add(Domain.Entities.Booking booking);
+    public void Update(Domain.Entities.Booking booking);
 }

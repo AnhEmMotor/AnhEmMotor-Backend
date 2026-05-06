@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Auth.Responses;
+using Application.ApiContracts.Auth.Responses;
 using Application.ApiContracts.Output.Responses;
 using Application.Features.Outputs.Commands.CreateOutput;
 using Application.Features.Outputs.Commands.CreateOutputByManager;
@@ -20,6 +20,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.User;
+using Application.Interfaces.Services.HR;
 using Domain.Constants;
 using Domain.Constants.Order;
 using Domain.DomainServices;
@@ -43,6 +44,7 @@ public class SalesOrder
     private readonly Mock<IProductVariantReadRepository> _variantRepoMock;
     private readonly Mock<IUserReadRepository> _userRepoMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
+    private readonly Mock<ICommissionService> _commissionServiceMock;
     private readonly Mock<ISievePaginator> _paginatorMock;
 
     public SalesOrder()
@@ -54,6 +56,7 @@ public class SalesOrder
         _variantRepoMock = new Mock<IProductVariantReadRepository>();
         _userRepoMock = new Mock<IUserReadRepository>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
+        _commissionServiceMock = new Mock<ICommissionService>();
         _paginatorMock = new Mock<ISievePaginator>();
 
         new OutputMappingConfig().Register(TypeAdapterConfig.GlobalSettings);
@@ -282,6 +285,7 @@ public class SalesOrder
         var handler = new UpdateOutputStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _commissionServiceMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new UpdateOutputStatusCommand
@@ -308,6 +312,7 @@ public class SalesOrder
         var handler = new UpdateOutputStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _commissionServiceMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new UpdateOutputStatusCommand
@@ -333,6 +338,7 @@ public class SalesOrder
         var handler = new UpdateOutputStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _commissionServiceMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new UpdateOutputStatusCommand { Id = 1, StatusId = "delivering", CurrentUserId = Guid.NewGuid() };
@@ -353,6 +359,7 @@ public class SalesOrder
         var handler = new UpdateOutputStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _commissionServiceMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new UpdateOutputStatusCommand { Id = 1, StatusId = "completed", CurrentUserId = Guid.NewGuid() };
@@ -373,6 +380,7 @@ public class SalesOrder
         var handler = new UpdateOutputStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _commissionServiceMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new UpdateOutputStatusCommand
@@ -398,6 +406,7 @@ public class SalesOrder
         var handler = new UpdateOutputStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _commissionServiceMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new UpdateOutputStatusCommand
@@ -423,6 +432,7 @@ public class SalesOrder
         var handler = new UpdateOutputStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _commissionServiceMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new UpdateOutputStatusCommand { Id = 1, StatusId = "delivering", CurrentUserId = Guid.NewGuid() };
@@ -443,6 +453,7 @@ public class SalesOrder
         var handler = new UpdateOutputStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _commissionServiceMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new UpdateOutputStatusCommand { Id = 1, StatusId = "cancelled", CurrentUserId = Guid.NewGuid() };
@@ -463,6 +474,7 @@ public class SalesOrder
         var handler = new UpdateOutputStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _commissionServiceMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new UpdateOutputStatusCommand { Id = 1, StatusId = "completed", CurrentUserId = Guid.NewGuid() };
@@ -492,6 +504,7 @@ public class SalesOrder
         var handler = new UpdateOutputStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _commissionServiceMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new UpdateOutputStatusCommand
@@ -525,6 +538,7 @@ public class SalesOrder
         var handler = new UpdateOutputStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _commissionServiceMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new UpdateOutputStatusCommand
@@ -688,6 +702,7 @@ public class SalesOrder
             _deleteRepoMock.Object,
             _variantRepoMock.Object,
             _userRepoMock.Object,
+            _commissionServiceMock.Object,
             _unitOfWorkMock.Object);
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -742,6 +757,7 @@ public class SalesOrder
             _deleteRepoMock.Object,
             _variantRepoMock.Object,
             _userRepoMock.Object,
+            _commissionServiceMock.Object,
             _unitOfWorkMock.Object);
 
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -936,6 +952,7 @@ public class SalesOrder
         var handler = new UpdateManyOutputStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _commissionServiceMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new UpdateManyOutputStatusCommand { Ids = [ 1, 2, 3 ], StatusId = "confirmed_cod" };
@@ -1337,6 +1354,7 @@ public class SalesOrder
         var handler = new UpdateOutputStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _commissionServiceMock.Object,
             _unitOfWorkMock.Object);
 
         var finishedBy = Guid.NewGuid();
@@ -1465,6 +1483,7 @@ public class SalesOrder
         var handler = new UpdateOutputStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _commissionServiceMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new UpdateOutputStatusCommand { Id = 1, StatusId = string.Empty, CurrentUserId = Guid.NewGuid() };
@@ -1480,6 +1499,7 @@ public class SalesOrder
         var handler = new UpdateOutputStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _commissionServiceMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new UpdateOutputStatusCommand
@@ -1595,6 +1615,7 @@ public class SalesOrder
             _deleteRepoMock.Object,
             _variantRepoMock.Object,
             _userRepoMock.Object,
+            _commissionServiceMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new UpdateOutputForManagerCommand
@@ -1648,6 +1669,7 @@ public class SalesOrder
         var handler = new UpdateOutputStatusCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
+            _commissionServiceMock.Object,
             _unitOfWorkMock.Object);
 
         var command = new UpdateOutputStatusCommand { Id = 1, StatusId = "refunding", CurrentUserId = Guid.NewGuid() };

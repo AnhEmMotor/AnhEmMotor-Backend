@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -37,6 +37,7 @@ namespace Infrastructure.Migrations
                     Score = table.Column<int>(type: "int", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(20)", nullable: false),
                     Source = table.Column<string>(type: "nvarchar(50)", nullable: false),
+                    InterestedVehicle = table.Column<string>(type: "nvarchar(255)", nullable: true, defaultValue: ""),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)

@@ -63,6 +63,7 @@ public static class MigrationExtensions
                 await SettingsSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
                 await NewsSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
                 await TechnologySeeder.SeedAsync(dbContext).ConfigureAwait(true);
+                await new VehicleTypeSeeder(dbContext).SeedAsync().ConfigureAwait(true);
 
                 await TechnologyDataMigrationSeeder.MigrateExistingHighlightsAsync(dbContext).ConfigureAwait(true);
 
@@ -75,6 +76,10 @@ public static class MigrationExtensions
                     logger,
                     cancellationToken)
                     .ConfigureAwait(true);
+
+                await EmployeeSeeder.SeedAsync(dbContext, userManager, cancellationToken).ConfigureAwait(true);
+                await LeadSeeder.SeedAsync(dbContext, userManager).ConfigureAwait(true);
+                await CommissionPolicySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
             }
         } catch(Exception ex)
         {

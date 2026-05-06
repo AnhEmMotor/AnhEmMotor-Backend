@@ -26,6 +26,10 @@ namespace Domain.Entities
         [ForeignKey("ProductCategory")]
         public int? CategoryId { get; set; }
 
+        [Column("VehicleTypeId")]
+        [ForeignKey("VehicleType")]
+        public int? VehicleTypeId { get; set; }
+
         [Column("StatusId")]
         [ForeignKey("ProductStatus")]
         public string? StatusId { get; set; }
@@ -91,6 +95,62 @@ namespace Domain.Entities
         [Column("CompressionRatio", TypeName = "nvarchar(10)")]
         public string? CompressionRatio { get; set; }
 
+        [Column("FuelSystem", TypeName = "nvarchar(100)")]
+        public string? FuelSystem { get; set; }
+
+        [Column("FrameType", TypeName = "nvarchar(100)")]
+        public string? FrameType { get; set; }
+
+        [Column("FrontTireSize", TypeName = "nvarchar(100)")]
+        public string? FrontTireSize { get; set; }
+
+        [Column("RearTireSize", TypeName = "nvarchar(100)")]
+        public string? RearTireSize { get; set; }
+
+        [Column("FrontBrake", TypeName = "nvarchar(100)")]
+        public string? FrontBrake { get; set; }
+
+        [Column("RearBrake", TypeName = "nvarchar(100)")]
+        public string? RearBrake { get; set; }
+
+        [Column("BatteryType", TypeName = "nvarchar(100)")]
+        public string? BatteryType { get; set; }
+
+        [Column("LightingSystem", TypeName = "nvarchar(100)")]
+        public string? LightingSystem { get; set; }
+
+        [Column("DashboardType", TypeName = "nvarchar(100)")]
+        public string? DashboardType { get; set; }
+
+        // Spare Parts & Accessories Specs
+        [Column("Material", TypeName = "nvarchar(100)")]
+        public string? Material { get; set; }
+
+        [Column("Origin", TypeName = "nvarchar(100)")]
+        public string? Origin { get; set; }
+
+        [Column("WarrantyPeriod", TypeName = "nvarchar(50)")]
+        public string? WarrantyPeriod { get; set; }
+
+        [Column("Unit", TypeName = "nvarchar(20)")]
+        public string? Unit { get; set; }
+
+        // Quality Standards
+        [Column("StdDot")]
+        public bool StdDot { get; set; }
+
+        [Column("StdEce")]
+        public bool StdEce { get; set; }
+
+        [Column("StdSnell")]
+        public bool StdSnell { get; set; }
+
+        [Column("StdJis")]
+        public bool StdJis { get; set; }
+
+        [Column("OtherStandards", TypeName = "nvarchar(255)")]
+        public string? OtherStandards { get; set; }
+
         [Column("Description", TypeName = "nvarchar(MAX)")]
         public string? Description { get; set; }
 
@@ -104,8 +164,16 @@ namespace Domain.Entities
 
         public ProductCategory? ProductCategory { get; set; }
 
+        public VehicleType? VehicleType { get; set; }
+
         public ProductStatus? ProductStatus { get; set; }
 
         public ICollection<ProductVariant> ProductVariants { get; set; } = [];
+
+        [InverseProperty("BaseProduct")]
+        public ICollection<ProductCompatibility> CompatibleWith { get; set; } = []; // For Parts/Accessories: List of vehicles this part fits
+
+        [InverseProperty("CompatibleVehicleModel")]
+        public ICollection<ProductCompatibility> SupportedBy { get; set; } = []; // For Vehicles: List of parts that fit this vehicle
     }
 }

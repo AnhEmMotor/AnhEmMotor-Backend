@@ -17,7 +17,7 @@ public class LeadActivity : BaseEntity
     public Lead Lead { get; set; } = null!;
 
     [Column("ActivityType", TypeName = "nvarchar(50)")]
-    public string ActivityType { get; set; } = "Note"; // Note, Booking, Contact, Call
+    public string ActivityType { get; set; } = "Note"; // Note, Booking, Contact, Call, AI_Query
 
     [Column("Description", TypeName = "nvarchar(MAX)")]
     public string Description { get; set; } = string.Empty;

@@ -12,6 +12,11 @@ public record UpdateOptionValueCommand : IRequest<Result>
 {
     public int Id { get; init; }
     public string Name { get; init; } = string.Empty;
+    public string? Description { get; init; }
+    public string? ImageUrl { get; init; }
+    public string? SeoTitle { get; init; }
+    public string? SeoDescription { get; init; }
+    public bool IsActive { get; init; }
     public string? ColorCode { get; init; }
 }
 
@@ -29,6 +34,11 @@ public class UpdateOptionValueCommandHandler(
         }
 
         optionValue.Name = request.Name;
+        optionValue.Description = request.Description;
+        optionValue.ImageUrl = request.ImageUrl;
+        optionValue.SeoTitle = request.SeoTitle;
+        optionValue.SeoDescription = request.SeoDescription;
+        optionValue.IsActive = request.IsActive;
         optionValue.ColorCode = request.ColorCode;
 
         await unitOfWork.SaveChangesAsync(cancellationToken);

@@ -34,6 +34,48 @@ public class UpdateProductVariantRequest
     [JsonPropertyName("sku")]
     public string? SKU { get; set; }
 
+    // Overridable Specs
+    [JsonConverter(typeof(NullableDecimalConverter))]
+    public decimal? Weight { get; set; }
+
+    public string? Dimensions { get; set; }
+
+    [JsonConverter(typeof(NullableDecimalConverter))]
+    public decimal? Wheelbase { get; set; }
+
+    [JsonPropertyName("seat_height")]
+    [JsonConverter(typeof(NullableDecimalConverter))]
+    public decimal? SeatHeight { get; set; }
+
+    [JsonPropertyName("ground_clearance")]
+    [JsonConverter(typeof(NullableDecimalConverter))]
+    public decimal? GroundClearance { get; set; }
+
+    [JsonPropertyName("fuel_capacity")]
+    [JsonConverter(typeof(NullableDecimalConverter))]
+    public decimal? FuelCapacity { get; set; }
+
+    [JsonPropertyName("tire_size")]
+    public string? TireSize { get; set; }
+
+    [JsonPropertyName("front_brake")]
+    public string? FrontBrake { get; set; }
+
+    [JsonPropertyName("rear_brake")]
+    public string? RearBrake { get; set; }
+
+    [JsonPropertyName("front_suspension")]
+    public string? FrontSuspension { get; set; }
+
+    [JsonPropertyName("rear_suspension")]
+    public string? RearSuspension { get; set; }
+
+    [JsonPropertyName("engine_type")]
+    public string? EngineType { get; set; }
+
+    [JsonPropertyName("stock_quantity")]
+    public int? StockQuantity { get; set; }
+
     [JsonIgnore]
     public List<int> OptionValueIds { get; set; } = [];
 }

@@ -1,4 +1,4 @@
-﻿
+
 namespace Application.ApiContracts.Product.Responses;
 
 public class ProductVariantLiteResponse
@@ -8,6 +8,7 @@ public class ProductVariantLiteResponse
     public int? ProductId { get; set; }
 
     public string? ProductName { get; set; }
+    public int? CategoryId { get; set; }
 
     public string? DisplayName { get; set; }
 

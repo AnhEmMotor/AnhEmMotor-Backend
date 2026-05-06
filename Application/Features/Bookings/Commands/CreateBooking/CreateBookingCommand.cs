@@ -5,6 +5,9 @@ using Application.Interfaces.Repositories.Lead;
 using Application.Interfaces.Services;
 using Domain.Entities;
 using MediatR;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Application.Features.Bookings.Commands.CreateBooking;
 
@@ -23,8 +26,9 @@ public record CreateBookingCommand : IRequest<Result<int>>
 public class CreateBookingCommandHandler(
     IBookingInsertRepository bookingInsertRepository,
     ILeadReadRepository leadReadRepository,
-    ILeadInsertRepository leadInsertRepository,
+    ILeadWriteRepository leadWriteRepository,
     ILeadActivityInsertRepository leadActivityInsertRepository,
+    ILeadAssignmentService leadAssignmentService,
     INotificationService notificationService,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateBookingCommand, Result<int>>
 {
@@ -41,11 +45,15 @@ public class CreateBookingCommandHandler(
                 FullName = request.FullName,
                 PhoneNumber = request.PhoneNumber,
                 Email = request.Email,
-                Score = 30, // Cộng +30 điểm cho Lead này
-                Status = "Consulting",
+                Score = 30, // Cộng +30 điểm cho Lead này vì có nhu cầu thực tế
+                Status = "New",
                 Source = "WebStore"
             };
-            leadInsertRepository.Add(lead);
+
+            // Tự động gán cho Sale (Round Robin)
+            await leadAssignmentService.AssignLeadAsync(lead, cancellationToken);
+
+            leadWriteRepository.Add(lead);
             
             // Add activity
             leadActivityInsertRepository.Add(new LeadActivity
@@ -59,8 +67,10 @@ public class CreateBookingCommandHandler(
         else
         {
             // Nếu SĐT đã tồn tại: Cập nhật yêu cầu lái thử này vào Dòng thời gian
-            lead.Score += 30;
-            leadInsertRepository.Update(lead);
+            lead.Score += 30; // Tăng điểm vì quay lại đăng ký
+            if (lead.Score > 100) lead.Score = 100;
+
+            leadWriteRepository.Update(lead);
             
             leadActivityInsertRepository.Add(new LeadActivity
             {

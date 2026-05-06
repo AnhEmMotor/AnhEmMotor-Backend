@@ -1,3 +1,5 @@
+namespace Infrastructure.Scratch;
+
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;

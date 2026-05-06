@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Brand.Responses;
+using Application.ApiContracts.Brand.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Brand;
@@ -17,6 +17,8 @@ public sealed class CreateBrandCommandHandler(
     {
         var cleanName = request.Name?.Trim();
         var cleanDescription = request.Description?.Trim();
+        var cleanOrigin = request.Origin?.Trim();
+        var cleanLogoUrl = request.LogoUrl?.Trim();
 
         if(cleanName == null)
             return Error.BadRequest("Name is empty/null, please check again");
@@ -31,6 +33,8 @@ public sealed class CreateBrandCommandHandler(
         var brand = request.Adapt<BrandEntity>();
         brand.Name = cleanName;
         brand.Description = cleanDescription;
+        brand.Origin = cleanOrigin;
+        brand.LogoUrl = cleanLogoUrl;
 
         repository.Add(brand);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

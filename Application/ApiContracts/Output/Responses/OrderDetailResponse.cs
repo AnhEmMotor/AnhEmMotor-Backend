@@ -29,5 +29,7 @@ public class OrderDetailResponse
 
     public decimal? Total { get; set; }
 
+    public decimal? ShippingFee { get; set; }
+
     public List<OutputInfoResponse> Products { get; set; } = [];
 }

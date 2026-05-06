@@ -20,7 +20,14 @@ namespace Infrastructure.Repositories.Banner
                 .Where(b => b.IsActive && 
                            (!b.StartDate.HasValue || b.StartDate <= now) && 
                            (!b.EndDate.HasValue || b.EndDate >= now))
-                .OrderBy(b => b.DisplayOrder)
+                .OrderByDescending(b => b.Priority)
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<List<Domain.Entities.Banner>> GetAllAsync(CancellationToken cancellationToken = default)
+        {
+            return await context.Banners
+                .OrderByDescending(b => b.Priority)
                 .ToListAsync(cancellationToken);
         }
     }

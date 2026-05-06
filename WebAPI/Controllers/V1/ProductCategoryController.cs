@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.ProductCategory.Responses;
+using Application.ApiContracts.ProductCategory.Responses;
 using Application.Common.Models;
 using Application.Features.ProductCategories.Commands.CreateProductCategory;
 using Application.Features.ProductCategories.Commands.DeleteManyProductCategories;
@@ -41,7 +41,8 @@ public class ProductCategoryController(IMediator mediator) : ApiController
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
     {
-        var query = new GetProductCategoriesListQuery() { SieveModel = sieveModel };
+        // Endpoint công khai - trả TẤT CẢ category (dùng cho form thêm/sửa sản phẩm)
+        var query = new GetProductCategoriesListQuery() { SieveModel = sieveModel, ProductOnly = false };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
@@ -56,7 +57,8 @@ public class ProductCategoryController(IMediator mediator) : ApiController
         [FromQuery] SieveModel sieveModel,
         CancellationToken cancellationToken)
     {
-        var query = new GetProductCategoriesListQuery() { SieveModel = sieveModel };
+        // Endpoint cho bảng quản lý - chỉ trả thể loại sản phẩm (lọc bỏ loại xe)
+        var query = new GetProductCategoriesListQuery() { SieveModel = sieveModel, ProductOnly = true };
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }

@@ -1,10 +1,11 @@
-﻿using Application.ApiContracts.UserManager.Responses;
+using Application.ApiContracts.UserManager.Responses;
 using Application.Common.Models;
 using Application.Features.UserManager.Commands.AssignRoles;
 using Application.Features.UserManager.Commands.ChangeMultipleUsersStatus;
 using Application.Features.UserManager.Commands.ChangePasswordByManager;
 using Application.Features.UserManager.Commands.ChangeUserStatus;
 using Application.Features.UserManager.Commands.UpdateUser;
+using Application.Features.UserManager.Commands.CreateUserByManager;
 using Application.Features.UserManager.Queries.GetUserById;
 using Application.Features.UserManager.Queries.GetUsersList;
 using Application.Features.UserManager.Queries.GetUsersListForOutput;
@@ -39,6 +40,21 @@ namespace WebAPI.Controllers.V1;
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
 public class UserManagerController(IMediator mediator) : ApiController
 {
+    /// <summary>
+    /// Tạo người dùng mới (Admin)
+    /// </summary>
+    [HttpPost]
+    [HasPermission(Users.Create)]
+    [ProducesResponseType(typeof(UserDTOForManagerResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> CreateUserAsync(
+        [FromBody] CreateUserByManagerCommand model,
+        CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(model, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
     /// <summary>
     /// Lấy danh sách tất cả người dùng (có phân trang, lọc, sắp xếp - chỉ vào được khi người dùng có quyền xem danh
     /// sách người dùng).

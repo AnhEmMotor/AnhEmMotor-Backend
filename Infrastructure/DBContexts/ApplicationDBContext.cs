@@ -1,3 +1,4 @@
+using Application.Interfaces;
 using Domain.Constants;
 using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -12,7 +13,7 @@ using SupplierStatus = Domain.Entities.SupplierStatus;
 
 namespace Infrastructure.DBContexts;
 
-public class ApplicationDBContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
+public class ApplicationDBContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>, IApplicationDBContext
 {
     public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options) : base(options)
     {
@@ -45,6 +46,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
     public virtual DbSet<Product> Products { get; set; }
 
     public virtual DbSet<ProductCategory> ProductCategories { get; set; }
+    public virtual DbSet<VehicleType> VehicleTypes { get; set; }
 
     public virtual DbSet<ProductCollectionPhoto> ProductCollectionPhotos { get; set; }
 
@@ -62,6 +64,8 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<VariantOptionValue> VariantOptionValues { get; set; }
 
+    public virtual DbSet<ProductCompatibility> ProductCompatibilities { get; set; }
+
     public virtual DbSet<MediaFile> MediaFiles { get; set; }
 
     public virtual DbSet<Permission> Permissions { get; set; }
@@ -76,6 +80,7 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
     public virtual DbSet<ProductTechnology> ProductTechnologies { get; set; }
     public virtual DbSet<News> News { get; set; }
     public virtual DbSet<Banner> Banners { get; set; }
+    public virtual DbSet<BannerAuditLog> BannerAuditLogs { get; set; }
     public virtual DbSet<Contact> Contacts { get; set; }
     public virtual DbSet<ContactReply> ContactReplies { get; set; }
     public virtual DbSet<Booking> Bookings { get; set; }
@@ -84,6 +89,14 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
     public virtual DbSet<Vehicle> Vehicles { get; set; }
     public virtual DbSet<VehicleDocument> VehicleDocuments { get; set; }
     public virtual DbSet<MaintenanceHistory> MaintenanceHistories { get; set; }
+
+    // HR & Payroll
+    public virtual DbSet<Domain.Entities.HR.EmployeeProfile> EmployeeProfiles { get; set; }
+    public virtual DbSet<Domain.Entities.HR.CommissionPolicy> CommissionPolicies { get; set; }
+    public virtual DbSet<Domain.Entities.HR.CommissionRecord> CommissionRecords { get; set; }
+    public virtual DbSet<Domain.Entities.HR.Payroll> Payrolls { get; set; }
+    public virtual DbSet<Domain.Entities.HR.KPI> KPIs { get; set; }
+    public virtual DbSet<Domain.Entities.HR.CommissionPolicyAuditLog> CommissionPolicyAuditLogs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -153,6 +166,18 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .WithMany(t => t.ProductTechnologies)
             .HasForeignKey(pt => pt.TechnologyId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ProductCompatibility>()
+            .HasOne(pc => pc.BaseProduct)
+            .WithMany(p => p.CompatibleWith)
+            .HasForeignKey(pc => pc.BaseProductId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ProductCompatibility>()
+            .HasOne(pc => pc.CompatibleVehicleModel)
+            .WithMany(p => p.SupportedBy)
+            .HasForeignKey(pc => pc.CompatibleVehicleModelId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         var isNotSqlServer = string.Compare(Database.ProviderName, "Microsoft.EntityFrameworkCore.SqlServer") != 0;
         var isPostgres = string.Compare(Database.ProviderName, "Npgsql.EntityFrameworkCore.PostgreSQL") == 0;

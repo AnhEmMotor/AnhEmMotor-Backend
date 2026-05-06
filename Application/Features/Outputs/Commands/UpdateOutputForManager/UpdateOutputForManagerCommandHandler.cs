@@ -4,6 +4,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.User;
+using Application.Interfaces.Services.HR;
 
 using Domain.Constants;
 using Domain.Constants.Order;
@@ -19,6 +20,7 @@ public sealed class UpdateOutputForManagerCommandHandler(
     IOutputDeleteRepository deleteRepository,
     IProductVariantReadRepository variantRepository,
     IUserReadRepository userReadRepository,
+    ICommissionService commissionService,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateOutputForManagerCommand, Result<OrderDetailResponse>>
 {
     public async Task<Result<OrderDetailResponse>> Handle(
@@ -168,6 +170,8 @@ public sealed class UpdateOutputForManagerCommandHandler(
             updateRepository.Update(output);
             await updateRepository.ProcessCOGSForCompletedOrderAsync(output.Id, cancellationToken).ConfigureAwait(false);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            
+            await commissionService.CalculateAndRecordCommissionAsync(output.Id, cancellationToken).ConfigureAwait(false);
         }
 
         var updated = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);

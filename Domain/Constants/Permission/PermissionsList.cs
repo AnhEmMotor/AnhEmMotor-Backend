@@ -131,6 +131,21 @@ public static class PermissionsList
         public const string Delete = "Permissions.Leads.Delete";
     }
 
+    public static class HR
+    {
+        public const string View = "Permissions.HR.View";
+        public const string Create = "Permissions.HR.Create";
+        public const string Edit = "Permissions.HR.Edit";
+        public const string Delete = "Permissions.HR.Delete";
+    }
+
+    public static class Payroll
+    {
+        public const string View = "Permissions.Payroll.View";
+        public const string Configure = "Permissions.Payroll.Configure";
+        public const string Approve = "Permissions.Payroll.Approve";
+    }
+
     private static readonly Dictionary<string, PermissionMetadata> PermissionMetadataMap = new()
     {
         { Brands.View, new PermissionMetadata("View Brands", "Xem danh sách thương hiệu") },
@@ -218,6 +233,15 @@ public static class PermissionsList
         { Leads.Create, new PermissionMetadata("Create Lead", "Tạo khách hàng tiềm năng") },
         { Leads.Edit, new PermissionMetadata("Edit Lead", "Chỉnh sửa khách hàng tiềm năng") },
         { Leads.Delete, new PermissionMetadata("Delete Lead", "Xóa khách hàng tiềm năng") },
+
+        { HR.View, new PermissionMetadata("View HR", "Xem danh sách nhân sự") },
+        { HR.Create, new PermissionMetadata("Create Employee", "Thêm nhân viên mới") },
+        { HR.Edit, new PermissionMetadata("Edit Employee", "Chỉnh sửa thông tin nhân viên") },
+        { HR.Delete, new PermissionMetadata("Delete Employee", "Xóa nhân viên") },
+
+        { Payroll.View, new PermissionMetadata("View Payroll", "Xem Bảng Lương") },
+        { Payroll.Configure, new PermissionMetadata("Configure Payroll", "Cấu hình chính sách hoa hồng") },
+        { Payroll.Approve, new PermissionMetadata("Approve Payroll", "Duyệt chi lương") },
     };
 
     public static PermissionMetadata? GetMetadata(string permissionName)
@@ -256,7 +280,9 @@ public static class PermissionsList
         },
         { "Tin tức", [ News.View, News.Create, News.Edit, News.Delete ] },
         { "Banner", [ Banners.View, Banners.Create, Banners.Edit, Banners.Delete ] },
-        { "CRM & Connect", [ Contacts.View, Contacts.Reply, Contacts.EditNote, Contacts.Delete, Bookings.View, Bookings.Confirm, Bookings.Delete, Leads.View, Leads.Create, Leads.Edit, Leads.Delete ] },
+        { "Khách Hàng", [ Contacts.View, Contacts.Reply, Contacts.EditNote, Contacts.Delete, Bookings.View, Bookings.Confirm, Bookings.Delete, Leads.View, Leads.Create, Leads.Edit, Leads.Delete ] },
+        { "Nhân sự", [ HR.View, HR.Create, HR.Edit, HR.Delete ] },
+        { "Lương & Hoa hồng", [ Payroll.View, Payroll.Configure, Payroll.Approve ] },
     };
 
     public static readonly Dictionary<string, List<string>> Conflicts = new() { };
@@ -326,6 +352,13 @@ public static class PermissionsList
         { Leads.Create, [ Leads.View ] },
         { Leads.Edit, [ Leads.View ] },
         { Leads.Delete, [ Leads.View ] },
+
+        { HR.Create, [ HR.View ] },
+        { HR.Edit, [ HR.View ] },
+        { HR.Delete, [ HR.View ] },
+
+        { Payroll.Configure, [ Payroll.View ] },
+        { Payroll.Approve, [ Payroll.View ] },
     };
 
     public static (bool IsValid, string? ErrorMessage) ValidateRules(IEnumerable<string> permissions)

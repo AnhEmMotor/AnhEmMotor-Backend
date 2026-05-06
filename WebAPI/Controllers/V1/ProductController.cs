@@ -508,6 +508,12 @@ public class ProductController(ISender sender) : ApiController
         return HandleResult(result);
     }
 
+    /// <summary>
+    /// Creates a new option value.
+    /// </summary>
+    /// <param name="request">The create option value command.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The ID of the created option value.</returns>
     [HttpPost("option-values")]
     [HasPermission(Products.Create)]
     [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
@@ -519,6 +525,13 @@ public class ProductController(ISender sender) : ApiController
         return HandleResult(result);
     }
 
+    /// <summary>
+    /// Updates an existing option value.
+    /// </summary>
+    /// <param name="id">The ID of the option value to update.</param>
+    /// <param name="request">The update option value command.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>A no content result.</returns>
     [HttpPut("option-values/{id:int}")]
     [HasPermission(Products.Edit)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -532,6 +545,12 @@ public class ProductController(ISender sender) : ApiController
         return HandleResult(result);
     }
 
+    /// <summary>
+    /// Deletes an option value.
+    /// </summary>
+    /// <param name="id">The ID of the option value to delete.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>A no content result.</returns>
     [HttpDelete("option-values/{id:int}")]
     [HasPermission(Products.Delete)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

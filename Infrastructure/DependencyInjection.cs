@@ -1,3 +1,4 @@
+using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.LocalFile;
 using Application.Interfaces.Services;
@@ -8,6 +9,8 @@ using Infrastructure.DBContexts;
 using Infrastructure.Repositories;
 using Infrastructure.Repositories.LocalFile;
 using Infrastructure.Services;
+using Infrastructure.Services.HR;
+using Application.Interfaces.Services.HR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -57,6 +60,8 @@ public static class DependencyInjection
                 });
         }
 
+        services.AddScoped<IApplicationDBContext>(provider => provider.GetRequiredService<ApplicationDBContext>());
+
         services.AddIdentity<ApplicationUser, ApplicationRole>(
             options =>
             {
@@ -88,6 +93,8 @@ public static class DependencyInjection
         services.AddScoped<ISievePaginator, SievePaginator>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<ICommissionService, CommissionService>();
+        services.AddScoped<ILeadAssignmentService, LeadAssignmentService>();
 
         services.AddHttpClient();
 
@@ -97,6 +104,8 @@ public static class DependencyInjection
                 .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Repository")))
                 .AsImplementedInterfaces()
                 .WithScopedLifetime());
+
+        services.AddHostedService<Infrastructure.BackgroundJobs.BannerExpiryWorker>();
 
         return services;
     }

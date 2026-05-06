@@ -81,6 +81,53 @@ namespace Application.ApiContracts.Product.Responses
         [JsonPropertyName("meta_description")]
         public string? MetaDescription { get; set; }
 
+        [JsonPropertyName("fuel_system")]
+        public string? FuelSystem { get; set; }
+
+        [JsonPropertyName("frame_type")]
+        public string? FrameType { get; set; }
+
+        [JsonPropertyName("front_tire_size")]
+        public string? FrontTireSize { get; set; }
+
+        [JsonPropertyName("rear_tire_size")]
+        public string? RearTireSize { get; set; }
+
+        [JsonPropertyName("front_brake")]
+        public string? FrontBrake { get; set; }
+
+        [JsonPropertyName("rear_brake")]
+        public string? RearBrake { get; set; }
+
+        [JsonPropertyName("battery_type")]
+        public string? BatteryType { get; set; }
+
+        [JsonPropertyName("lighting_system")]
+        public string? LightingSystem { get; set; }
+
+        [JsonPropertyName("dashboard_type")]
+        public string? DashboardType { get; set; }
+
+        public string? Material { get; set; }
+        public string? Origin { get; set; }
+        [JsonPropertyName("warranty_period")]
+        public string? WarrantyPeriod { get; set; }
+        public string? Unit { get; set; }
+
+        [JsonPropertyName("std_dot")]
+        public bool StdDot { get; set; }
+        [JsonPropertyName("std_ece")]
+        public bool StdEce { get; set; }
+        [JsonPropertyName("std_snell")]
+        public bool StdSnell { get; set; }
+        [JsonPropertyName("std_jis")]
+        public bool StdJis { get; set; }
+        [JsonPropertyName("other_standards")]
+        public string? OtherStandards { get; set; }
+
+        [JsonPropertyName("compatible_vehicle_model_ids")]
+        public List<int> CompatibleVehicleModelIds { get; set; } = [];
+
         [JsonPropertyName("cover_image_url")]
         public string? CoverImageUrl { get; set; }
 

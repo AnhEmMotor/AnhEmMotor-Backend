@@ -14,6 +14,11 @@ public record CreateOptionValueCommand : IRequest<Result<int>>
 {
     public int OptionId { get; init; }
     public string Name { get; init; } = string.Empty;
+    public string? Description { get; init; }
+    public string? ImageUrl { get; init; }
+    public string? SeoTitle { get; init; }
+    public string? SeoDescription { get; init; }
+    public bool IsActive { get; init; } = true;
     public string? ColorCode { get; init; }
 }
 
@@ -49,6 +54,11 @@ public class CreateOptionValueCommandHandler(
         {
             OptionId = targetOptionId,
             Name = request.Name,
+            Description = request.Description,
+            ImageUrl = request.ImageUrl,
+            SeoTitle = request.SeoTitle,
+            SeoDescription = request.SeoDescription,
+            IsActive = request.IsActive,
             ColorCode = request.ColorCode
         };
 

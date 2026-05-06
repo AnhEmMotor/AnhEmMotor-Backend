@@ -335,6 +335,24 @@ public sealed class CreateProductCommandHandler(
             Displacement = request.Displacement,
             BoreStroke = request.BoreStroke?.Trim(),
             CompressionRatio = request.CompressionRatio?.Trim(),
+            FuelSystem = request.FuelSystem?.Trim(),
+            FrameType = request.FrameType?.Trim(),
+            FrontTireSize = request.FrontTireSize?.Trim(),
+            RearTireSize = request.RearTireSize?.Trim(),
+            FrontBrake = request.FrontBrake?.Trim(),
+            RearBrake = request.RearBrake?.Trim(),
+            BatteryType = request.BatteryType?.Trim(),
+            LightingSystem = request.LightingSystem?.Trim(),
+            DashboardType = request.DashboardType?.Trim(),
+            Material = request.Material?.Trim(),
+            Origin = request.Origin?.Trim(),
+            WarrantyPeriod = request.WarrantyPeriod?.Trim(),
+            Unit = request.Unit?.Trim(),
+            StdDot = request.StdDot,
+            StdEce = request.StdEce,
+            StdSnell = request.StdSnell,
+            StdJis = request.StdJis,
+            OtherStandards = request.OtherStandards?.Trim(),
             ShortDescription = request.ShortDescription?.Trim(),
             MetaTitle = request.MetaTitle?.Trim(),
             MetaDescription = request.MetaDescription?.Trim(),
@@ -433,9 +451,39 @@ public sealed class CreateProductCommandHandler(
                         }
                     }
                     // ---------------------------------------------------------
+
+                    // --- OVERRIDABLE SPECS ---
+                    variant.Weight = variantReq.Weight;
+                    variant.Dimensions = variantReq.Dimensions?.Trim();
+                    variant.Wheelbase = variantReq.Wheelbase;
+                    variant.SeatHeight = variantReq.SeatHeight;
+                    variant.GroundClearance = variantReq.GroundClearance;
+                    variant.FuelCapacity = variantReq.FuelCapacity;
+                    variant.TireSize = variantReq.TireSize?.Trim();
+                    variant.FrontBrake = variantReq.FrontBrake?.Trim();
+                    variant.RearBrake = variantReq.RearBrake?.Trim();
+                    variant.FrontSuspension = variantReq.FrontSuspension?.Trim();
+                    variant.RearSuspension = variantReq.RearSuspension?.Trim();
+                    variant.EngineType = variantReq.EngineType?.Trim();
+                    variant.StockQuantity = variantReq.StockQuantity;
+                    // -------------------------
+
                 product.ProductVariants.Add(variant);
             }
         }
+
+        // --- PRODUCT COMPATIBILITY ---
+        if (request.CompatibleVehicleModelIds?.Count > 0)
+        {
+            foreach (var vehicleId in request.CompatibleVehicleModelIds.Distinct())
+            {
+                product.CompatibleWith.Add(new ProductCompatibility
+                {
+                    CompatibleVehicleModelId = vehicleId
+                });
+            }
+        }
+        // -----------------------------
 
         if (!string.IsNullOrWhiteSpace(request.Highlights))
         {
@@ -467,7 +515,15 @@ public sealed class CreateProductCommandHandler(
         productInsertRepository.Add(product);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-        return Result<ProductDetailForManagerResponse?>.Success(product.Adapt<ProductDetailForManagerResponse>());
+        var response = product.Adapt<ProductDetailForManagerResponse>();
+        if (response != null)
+        {
+            response.CompatibleVehicleModelIds = product.CompatibleWith
+                .Select(c => c.CompatibleVehicleModelId)
+                .ToList();
+        }
+
+        return Result<ProductDetailForManagerResponse?>.Success(response);
     }
 
     private class TechnologyJsonRequest
