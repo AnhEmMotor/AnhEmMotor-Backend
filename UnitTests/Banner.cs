@@ -89,14 +89,14 @@ public class Banner
         var handler = new CreateBannerCommandHandler(_bannerInsertRepoMock.Object, _unitOfWorkMock.Object);
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         _bannerInsertRepoMock.Verify(x => x.Add(It.Is<Domain.Entities.Banner>(b => 
-            b.Title == "Title" && 
-            b.ImageUrl == "http://img.com" &&
-            b.LinkUrl == "http://link.com" &&
-            b.Position == "Home"
+            string.Compare(b.Title, "Title") == 0 && 
+            string.Compare(b.ImageUrl, "http://img.com") == 0 &&
+            string.Compare(b.LinkUrl, "http://link.com") == 0 &&
+            string.Compare(b.Position, "Home") == 0
         )), Times.Once);
     }
 
@@ -155,7 +155,7 @@ public class Banner
         var handler = new CreateBannerCommandHandler(_bannerInsertRepoMock.Object, _unitOfWorkMock.Object);
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         _bannerInsertRepoMock.Verify(x => x.Add(It.Is<Domain.Entities.Banner>(b => b.LinkUrl == null)), Times.Once);

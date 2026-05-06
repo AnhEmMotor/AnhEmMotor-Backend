@@ -42,7 +42,7 @@ public class Banner
             .ReturnsAsync(Result<int>.Success(50));
 
         // Act
-        var result = await _bannerController.CreateAsync(command, CancellationToken.None);
+        var result = await _bannerController.CreateAsync(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);

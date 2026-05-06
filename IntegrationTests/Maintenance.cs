@@ -62,11 +62,11 @@ public class Maintenance(IntegrationTestWebAppFactory factory) : IClassFixture<I
 
         var lead = new Domain.Entities.Lead { FullName = "Owner", PhoneNumber = "0909123456" };
         db.Leads.Add(lead);
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var vehicle = new Vehicle { LeadId = lead.Id, VinNumber = "V1", EngineNumber = "E1", LicensePlate = "L1" };
         db.Vehicles.Add(vehicle);
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var history = new MaintenanceHistory 
         { 
@@ -95,11 +95,11 @@ public class Maintenance(IntegrationTestWebAppFactory factory) : IClassFixture<I
 
         var lead = new Domain.Entities.Lead { FullName = "Owner", PhoneNumber = "123" };
         db.Leads.Add(lead);
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var vehicle = new Vehicle { LeadId = lead.Id, VinNumber = "V2", EngineNumber = "E2", LicensePlate = "L2" };
         db.Vehicles.Add(vehicle);
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var doc = new VehicleDocument 
         { 
@@ -128,13 +128,13 @@ public class Maintenance(IntegrationTestWebAppFactory factory) : IClassFixture<I
 
         var lead = new Domain.Entities.Lead { FullName = "Owner", PhoneNumber = "123" };
         db.Leads.Add(lead);
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         db.Vehicles.AddRange(
             new Vehicle { LeadId = lead.Id, VinNumber = "V1", EngineNumber = "E1", LicensePlate = "L1" },
             new Vehicle { LeadId = lead.Id, VinNumber = "V2", EngineNumber = "E2", LicensePlate = "L2" }
         );
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         // Act
         var vehicles = await db.Vehicles.Where(v => v.LeadId == lead.Id).ToListAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
@@ -152,18 +152,18 @@ public class Maintenance(IntegrationTestWebAppFactory factory) : IClassFixture<I
 
         var lead = new Domain.Entities.Lead { FullName = "Owner", PhoneNumber = "123" };
         db.Leads.Add(lead);
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var vehicle = new Vehicle { LeadId = lead.Id, VinNumber = "V3", EngineNumber = "E3", LicensePlate = "L3" };
         db.Vehicles.Add(vehicle);
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         db.MaintenanceHistories.AddRange(
             new MaintenanceHistory { VehicleId = vehicle.Id, Description = "H1", MaintenanceDate = DateTimeOffset.UtcNow },
             new MaintenanceHistory { VehicleId = vehicle.Id, Description = "H2", MaintenanceDate = DateTimeOffset.UtcNow },
             new MaintenanceHistory { VehicleId = vehicle.Id, Description = "H3", MaintenanceDate = DateTimeOffset.UtcNow }
         );
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         // Act
         var vehicleWithHistories = await db.Vehicles
@@ -186,16 +186,16 @@ public class Maintenance(IntegrationTestWebAppFactory factory) : IClassFixture<I
 
             var lead = new Domain.Entities.Lead { FullName = "Owner", PhoneNumber = "123" };
             db.Leads.Add(lead);
-            await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
             var vehicle = new Vehicle { LeadId = lead.Id, VinNumber = "V4", EngineNumber = "E4", LicensePlate = "L4" };
             db.Vehicles.Add(vehicle);
-            await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             vehicleId = vehicle.Id;
 
             db.MaintenanceHistories.Add(new MaintenanceHistory { VehicleId = vehicleId, Description = "H", MaintenanceDate = DateTimeOffset.UtcNow });
             db.VehicleDocuments.Add(new VehicleDocument { VehicleId = vehicleId, DocumentType = "D", FileUrl = "U" });
-            await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         }
 
         // Act
@@ -233,11 +233,11 @@ public class Maintenance(IntegrationTestWebAppFactory factory) : IClassFixture<I
 
             var lead = new Domain.Entities.Lead { FullName = "Owner", PhoneNumber = "123" };
             db.Leads.Add(lead);
-            await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
             var vehicle = new Vehicle { LeadId = lead.Id, VinNumber = "V5", EngineNumber = "E5", LicensePlate = "OLD" };
             db.Vehicles.Add(vehicle);
-            await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             vehicleId = vehicle.Id;
         }
 
@@ -279,7 +279,7 @@ public class Maintenance(IntegrationTestWebAppFactory factory) : IClassFixture<I
         Func<Task> action = async () => 
         {
             db.Vehicles.Add(vehicle);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         };
 
         // Assert

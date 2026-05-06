@@ -44,7 +44,7 @@ public class Booking
             .ReturnsAsync(Result<int>.Success(100));
 
         // Act
-        var result = await _bookingsController.CreateAsync(command, CancellationToken.None);
+        var result = await _bookingsController.CreateAsync(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
@@ -56,13 +56,12 @@ public class Booking
     public async Task GetBookings_WithPaging_ReturnsPagedList()
     {
         // Arrange
-        var query = new GetBookingsQuery();
         // Giả sử GetBookingsQuery trả về danh sách DTO
         _senderMock.Setup(m => m.Send(It.IsAny<GetBookingsQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<List<Domain.Entities.Booking>>.Success([]));
 
         // Act
-        var result = await _bookingsController.GetAllAsync(CancellationToken.None);
+        var result = await _bookingsController.GetAllAsync(CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         Assert.IsType<OkObjectResult>(result);

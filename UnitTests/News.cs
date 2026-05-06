@@ -1,9 +1,12 @@
 using Application.Common.Helper;
 using Application.Common.Models;
+#pragma warning disable IDE0079 
+#pragma warning disable CRR0035
 using Application.Features.News.Commands.CreateNews;
 using Application.Features.News.Queries.GetNewsBySlug;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.News;
+using NewsEntity = Domain.Entities.News;
 using Domain.Entities;
 using FluentAssertions;
 using Moq;
@@ -13,13 +16,13 @@ using Xunit;
 
 namespace UnitTests;
 
-public class NewsTests
+public class News
 {
     private readonly Mock<INewsReadRepository> _newsReadRepoMock;
     private readonly Mock<INewsInsertRepository> _newsInsertRepoMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
 
-    public NewsTests()
+    public News()
     {
         _newsReadRepoMock = new Mock<INewsReadRepository>();
         _newsInsertRepoMock = new Mock<INewsInsertRepository>();
@@ -37,10 +40,10 @@ public class NewsTests
         var handler = new CreateNewsCommandHandler(_newsInsertRepoMock.Object, _newsReadRepoMock.Object, _unitOfWorkMock.Object);
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
-        _newsInsertRepoMock.Verify(x => x.Add(It.Is<Domain.Entities.News>(n => n.Slug == "tin-tuc-moi")), Times.Once);
+        _newsInsertRepoMock.Verify(x => x.Add(It.Is<Domain.Entities.News>(n => string.Compare(n.Slug, "tin-tuc-moi") == 0)), Times.Once);
     }
 
     [Fact(DisplayName = "NEWS_002 - Tạo tin tức với Slug tùy chỉnh từ người dùng")]
@@ -54,10 +57,10 @@ public class NewsTests
         var handler = new CreateNewsCommandHandler(_newsInsertRepoMock.Object, _newsReadRepoMock.Object, _unitOfWorkMock.Object);
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
-        _newsInsertRepoMock.Verify(x => x.Add(It.Is<Domain.Entities.News>(n => n.Slug == "slug-tuy-chinh")), Times.Once);
+        _newsInsertRepoMock.Verify(x => x.Add(It.Is<Domain.Entities.News>(n => string.Compare(n.Slug, "slug-tuy-chinh") == 0)), Times.Once);
     }
 
     [Fact(DisplayName = "NEWS_003 - Chặn tạo tin tức khi Slug bị trùng lặp")]
@@ -71,7 +74,7 @@ public class NewsTests
         var handler = new CreateNewsCommandHandler(_newsInsertRepoMock.Object, _newsReadRepoMock.Object, _unitOfWorkMock.Object);
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -89,7 +92,7 @@ public class NewsTests
         var handler = new CreateNewsCommandHandler(_newsInsertRepoMock.Object, _newsReadRepoMock.Object, _unitOfWorkMock.Object);
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         _newsInsertRepoMock.Verify(x => x.Add(It.Is<Domain.Entities.News>(n => n.PublishedDate != null)), Times.Once);
@@ -106,7 +109,7 @@ public class NewsTests
         var handler = new CreateNewsCommandHandler(_newsInsertRepoMock.Object, _newsReadRepoMock.Object, _unitOfWorkMock.Object);
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         _newsInsertRepoMock.Verify(x => x.Add(It.Is<Domain.Entities.News>(n => n.PublishedDate == null)), Times.Once);
@@ -122,11 +125,11 @@ public class NewsTests
         var handler = new GetNewsBySlugQueryHandler(_newsReadRepoMock.Object);
 
         // Act
-        var result = await handler.Handle(new GetNewsBySlugQuery { Slug = "non-existent" }, CancellationToken.None);
+        var result = await handler.Handle(new GetNewsBySlugQuery { Slug = "non-existent" }, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Errors.Should().Contain(e => e.Code == "News.NotFound");
+        result.Errors.Should().Contain(e => string.Compare(e.Code, "News.NotFound") == 0);
     }
 
     [Fact(DisplayName = "NEWS_009 - Chuẩn hóa tiếng Việt có dấu sang Slug không dấu")]

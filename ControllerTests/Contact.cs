@@ -41,7 +41,7 @@ public class Contact
             .ReturnsAsync(Result<int>.Success(100));
 
         // Act
-        var result = await _contactsController.CreateAsync(command, CancellationToken.None);
+        var result = await _contactsController.CreateAsync(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);

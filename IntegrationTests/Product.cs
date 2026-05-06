@@ -1375,7 +1375,6 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var cat = new ProductCategoryEntity { Name = $"C_{uniqueId}" };
         var brand = new BrandEntity { Name = $"B_{uniqueId}" };
-        var predefinedOption = new PredefinedOption { Key = "Color", Value = "Màu sắc" };
         var option = new Option { Name = "Color" };
         var optionValue = new OptionValue { Option = option, Name = "Red" };
         db.ProductCategories.Add(cat);
@@ -2705,7 +2704,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
-        if (!await db.ProductStatuses.AnyAsync(x => x.Key == productStatusId, TestContext.Current.CancellationToken).ConfigureAwait(true))
+        if (!await db.ProductStatuses.AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken).ConfigureAwait(true))
         {
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         }
@@ -2759,7 +2758,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var updatedProduct = await db2.Products
             .Include(p => p.ProductVariants)
             .ThenInclude(v => v.ProductCollectionPhotos)
-            .FirstOrDefaultAsync(p => p.Id == product.Id, TestContext.Current.CancellationToken);
+            .FirstOrDefaultAsync(p => p.Id == product.Id, TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         updatedProduct.Should().NotBeNull();
         updatedProduct!.Name.Should().Be($"Updated_{uniqueId}");
@@ -2769,7 +2768,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var variant = updatedProduct.ProductVariants.First();
         variant.UrlSlug.Should().Be($"updated-slug-{uniqueId}");
         variant.CoverImageUrl.Should().Be("http://example.com/new-cover.jpg");
-        variant.ProductCollectionPhotos.Should().ContainSingle(p => p.ImageUrl == "http://example.com/photo1.jpg");
+        variant.ProductCollectionPhotos.Should().ContainSingle(p => string.Compare(p.ImageUrl, "http://example.com/photo1.jpg") == 0);
     }
 
     [Fact(DisplayName = "PRODUCT_144 - Lưu trữ thông tin định danh chuyên sâu của biến thể")]
@@ -2827,7 +2826,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
-        var variant = await db.ProductVariants.FirstOrDefaultAsync(v => v.SKU == "SKU-123", TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var variant = await db.ProductVariants.FirstOrDefaultAsync(v => string.Compare(v.SKU, "SKU-123") == 0, TestContext.Current.CancellationToken).ConfigureAwait(true);
         variant.Should().NotBeNull();
         variant!.VersionName.Should().Be("Premium");
         variant.ColorName.Should().Be("Deep Blue");
@@ -2896,10 +2895,10 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         // Assert
         using var assertScope = _factory.Services.CreateScope();
         var assertDb = assertScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var product = await assertDb.Products.AsNoTracking().FirstOrDefaultAsync(p => p.Name == "Bike", TestContext.Current.CancellationToken);
+        var product = await assertDb.Products.AsNoTracking().FirstOrDefaultAsync(p => string.Compare(p.Name, "Bike") == 0, TestContext.Current.CancellationToken).ConfigureAwait(true);
         product.Should().NotBeNull("Product should have been created");
 
-        var updatedOv = await assertDb.OptionValues.AsNoTracking().FirstAsync(v => v.Id == ov.Id, TestContext.Current.CancellationToken);
+        var updatedOv = await assertDb.OptionValues.AsNoTracking().FirstAsync(v => v.Id == ov.Id, TestContext.Current.CancellationToken).ConfigureAwait(true);
         updatedOv.ColorCode.Should().Be("#FF0000");
     }
 
@@ -2958,7 +2957,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         }
 
         // Assert
-        var product = await db.Products.FirstOrDefaultAsync(p => p.Name == "SEO Bike", TestContext.Current.CancellationToken);
+        var product = await db.Products.FirstOrDefaultAsync(p => string.Compare(p.Name, "SEO Bike") == 0, TestContext.Current.CancellationToken).ConfigureAwait(true);
         product!.MetaTitle.Should().Be("Meta Title");
         product.MetaDescription.Should().Be("Meta Description");
         product.ShortDescription.Should().Be("Short Description");
@@ -3017,7 +3016,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         // Assert
         using var assertScope = _factory.Services.CreateScope();
         var assertDb = assertScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var link = await assertDb.ProductTechnologies.AsNoTracking().FirstOrDefaultAsync(pt => pt.CustomTitle == "Cool ABS", TestContext.Current.CancellationToken);
+        var link = await assertDb.ProductTechnologies.AsNoTracking().FirstOrDefaultAsync(pt => string.Compare(pt.CustomTitle, "Cool ABS") == 0, TestContext.Current.CancellationToken).ConfigureAwait(true);
         link.Should().NotBeNull();
     }
 
@@ -3074,7 +3073,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         response.EnsureSuccessStatusCode();
 
         // Assert
-        var links = await db.ProductTechnologies.Where(pt => pt.ProductId == p.Id).ToListAsync(TestContext.Current.CancellationToken);
+        var links = await db.ProductTechnologies.Where(pt => pt.ProductId == p.Id).ToListAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         links.Should().HaveCount(2);
     }
 
@@ -3130,7 +3129,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         response.EnsureSuccessStatusCode();
 
         // Assert
-        var links = await db.ProductTechnologies.Where(pt => pt.ProductId == p.Id).ToListAsync(TestContext.Current.CancellationToken);
+        var links = await db.ProductTechnologies.Where(pt => pt.ProductId == p.Id).ToListAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         links.Should().BeEmpty();
     }
 
@@ -3188,7 +3187,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         response.EnsureSuccessStatusCode();
 
         // Assert
-        var link = await db.ProductTechnologies.AsNoTracking().FirstOrDefaultAsync(pt => pt.ProductId == p.Id, TestContext.Current.CancellationToken);
+        var link = await db.ProductTechnologies.AsNoTracking().FirstOrDefaultAsync(pt => pt.ProductId == p.Id, TestContext.Current.CancellationToken).ConfigureAwait(true);
         link!.CustomTitle.Should().Be("New");
     }
 
@@ -3234,7 +3233,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
 
         // Assert
         response.EnsureSuccessStatusCode();
-        var content = await response.Content.ReadFromJsonAsync<ProductDetailForManagerResponse>(TestContext.Current.CancellationToken);
+        var content = await response.Content.ReadFromJsonAsync<ProductDetailForManagerResponse>(TestContext.Current.CancellationToken).ConfigureAwait(true);
         var highlights = JsonSerializer.Deserialize<List<JsonElement>>(content!.Highlights!);
         highlights![0].GetProperty("technologyId").GetInt32().Should().Be(t2.Id);
     }
@@ -3329,7 +3328,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         // Assert
-        var link = await db.ProductTechnologies.FirstOrDefaultAsync(pt => pt.TechnologyId == t.Id, TestContext.Current.CancellationToken);
+        var link = await db.ProductTechnologies.FirstOrDefaultAsync(pt => pt.TechnologyId == t.Id, TestContext.Current.CancellationToken).ConfigureAwait(true);
         link.Should().BeNull();
     }
 #pragma warning restore CRR0035

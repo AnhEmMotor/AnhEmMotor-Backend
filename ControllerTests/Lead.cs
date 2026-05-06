@@ -42,7 +42,7 @@ public class Lead
             .ReturnsAsync(Result<int>.Success(1));
 
         // Act
-        var result = await _bookingsController.CreateAsync(command, CancellationToken.None);
+        var result = await _bookingsController.CreateAsync(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         Assert.IsType<OkObjectResult>(result);
@@ -58,7 +58,7 @@ public class Lead
             .ReturnsAsync(Result<int>.Success(1));
 
         // Act
-        var result = await _bookingsController.CreateAsync(command, CancellationToken.None);
+        var result = await _bookingsController.CreateAsync(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         Assert.IsType<OkObjectResult>(result);
@@ -74,7 +74,7 @@ public class Lead
             .ReturnsAsync(Result<int>.Success(1));
 
         // Act
-        var result = await _bookingsController.CreateAsync(command, CancellationToken.None);
+        var result = await _bookingsController.CreateAsync(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         Assert.IsType<OkObjectResult>(result);
@@ -88,7 +88,7 @@ public class Lead
             .ThrowsAsync(new UnauthorizedAccessException());
 
         // Act & Assert
-        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _leadController.GetLeadsAsync(CancellationToken.None));
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _leadController.GetLeadsAsync(CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "LEAD_026 - Đảm bảo tính nhất quán của danh sách hoạt động trong LeadResponse")]
@@ -119,7 +119,7 @@ public class Lead
             .ReturnsAsync(expectedLeads);
 
         // Act
-        var result = await _leadController.GetLeadsAsync(CancellationToken.None);
+        var result = await _leadController.GetLeadsAsync(CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
@@ -136,14 +136,14 @@ public class Lead
         // Arrange
         var expectedLeads = new List<LeadResponse>
         {
-            new LeadResponse { Id = 1, FullName = "User A", Score = 100 }
+            new() { Id = 1, FullName = "User A", Score = 100 }
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetLeadsQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedLeads);
 
         // Act
-        var result = await _leadController.GetLeadsAsync(CancellationToken.None);
+        var result = await _leadController.GetLeadsAsync(CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);

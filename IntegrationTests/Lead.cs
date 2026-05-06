@@ -103,7 +103,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var content = await response.Content.ReadFromJsonAsync<List<LeadResponse>>(TestContext.Current.CancellationToken).ConfigureAwait(true);
         content.Should().NotBeNull();
         content.Should().HaveCountGreaterThanOrEqualTo(2);
-        content.Any(l => l.PhoneNumber == "0901000001" && l.Activities.Count > 0).Should().BeTrue();
+        content.Any(l => string.Compare(l.PhoneNumber, "0901000001") == 0 && l.Activities.Count > 0).Should().BeTrue();
     }
 
     [Fact(DisplayName = "LEAD_005 - Chuyển đổi trạng thái Lead khi xác nhận lịch lái thử")]
@@ -172,7 +172,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         updatedLead!.Status.Should().Be(LeadStatus.TestDriving);
         
         var activities = await db.LeadActivities.Where(a => a.LeadId == lead.Id).ToListAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-        activities.Should().Contain(a => a.ActivityType == LeadActivityType.Contact && a.Description.Contains("Đang lái thử"));
+        activities.Should().Contain(a => string.Compare(a.ActivityType, LeadActivityType.Contact) == 0 && a.Description.Contains("Đang lái thử"));
     }
 
     [Fact(DisplayName = "LEAD_017 - Ghi nhận hoạt động đặt lịch cho khách hàng mới")]
@@ -196,7 +196,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var activity = await db.LeadActivities
             .Include(a => a.Lead)
-            .FirstOrDefaultAsync(a => a.Lead.PhoneNumber == phoneNumber, TestContext.Current.CancellationToken).ConfigureAwait(true);
+            .FirstOrDefaultAsync(a => string.Compare(a.Lead.PhoneNumber, phoneNumber) == 0, TestContext.Current.CancellationToken).ConfigureAwait(true);
         
         activity.Should().NotBeNull();
         activity!.Description.Should().Contain("(Khách hàng mới)");
@@ -322,7 +322,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var leadWithActivities = await db.Leads
                 .Include(l => l.Activities)
-                .FirstOrDefaultAsync(l => l.PhoneNumber == phoneNumber, TestContext.Current.CancellationToken).ConfigureAwait(true);
+                .FirstOrDefaultAsync(l => string.Compare(l.PhoneNumber, phoneNumber) == 0, TestContext.Current.CancellationToken).ConfigureAwait(true);
             
             leadWithActivities.Should().NotBeNull();
             leadWithActivities!.Activities.Should().HaveCount(3);
@@ -352,7 +352,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         // Assert
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var lead = await db.Leads.AsNoTracking().FirstOrDefaultAsync(l => l.PhoneNumber == phoneNumber, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var lead = await db.Leads.AsNoTracking().FirstOrDefaultAsync(l => string.Compare(l.PhoneNumber, phoneNumber) == 0, TestContext.Current.CancellationToken).ConfigureAwait(true);
         
         lead.Should().NotBeNull();
         lead!.Score.Should().Be(90);
@@ -385,7 +385,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var lead = await db.Leads.AsNoTracking().FirstOrDefaultAsync(l => l.PhoneNumber == phoneNumber, TestContext.Current.CancellationToken).ConfigureAwait(true);
+            var lead = await db.Leads.AsNoTracking().FirstOrDefaultAsync(l => string.Compare(l.PhoneNumber, phoneNumber) == 0, TestContext.Current.CancellationToken).ConfigureAwait(true);
             
             lead.Should().NotBeNull();
             lead!.Score.Should().Be(60);
@@ -412,7 +412,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         // Assert
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var lead = await db.Leads.AsNoTracking().FirstOrDefaultAsync(l => l.PhoneNumber == phoneNumber, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var lead = await db.Leads.AsNoTracking().FirstOrDefaultAsync(l => string.Compare(l.PhoneNumber, phoneNumber) == 0, TestContext.Current.CancellationToken).ConfigureAwait(true);
         
         lead.Should().NotBeNull();
         lead!.Score.Should().Be(30);

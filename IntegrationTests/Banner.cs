@@ -147,7 +147,7 @@ public class Banner : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetim
 
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var banner = await db.Banners.FirstOrDefaultAsync(b => b.Title == "Integrity Test", TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var banner = await db.Banners.FirstOrDefaultAsync(b => string.Compare(b.Title, "Integrity Test") == 0, TestContext.Current.CancellationToken).ConfigureAwait(true);
         banner.Should().NotBeNull();
         banner!.ImageUrl.Should().Be("http://anh-em-motor.com/banner.jpg");
     }

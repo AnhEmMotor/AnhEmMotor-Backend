@@ -160,7 +160,7 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
 
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var news = await db.News.FirstOrDefaultAsync(n => n.Title == "SEO News", TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var news = await db.News.FirstOrDefaultAsync(n => string.Compare(n.Title, "SEO News") == 0, TestContext.Current.CancellationToken).ConfigureAwait(true);
         news.Should().NotBeNull();
         news!.MetaTitle.Should().Be("Meta T");
         news.MetaDescription.Should().Be("Meta D");

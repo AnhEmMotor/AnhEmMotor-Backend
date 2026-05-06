@@ -1681,7 +1681,7 @@ public class Product
         var command = new CreateProductCommand { ShortDescription = new string('a', 256) };
         var validator = new CreateProductCommandValidator();
         var result = validator.Validate(command);
-        result.Errors.Should().Contain(e => e.PropertyName == nameof(CreateProductCommand.ShortDescription));
+        result.Errors.Should().Contain(e => string.Compare(e.PropertyName, nameof(CreateProductCommand.ShortDescription)) == 0);
     }
 
     [Fact(DisplayName = "PRODUCT_152 - Giới hạn độ dài tiêu đề SEO (MetaTitle)")]
@@ -1690,7 +1690,7 @@ public class Product
         var command = new CreateProductCommand { MetaTitle = new string('a', 101) };
         var validator = new CreateProductCommandValidator();
         var result = validator.Validate(command);
-        result.Errors.Should().Contain(e => e.PropertyName == nameof(CreateProductCommand.MetaTitle));
+        result.Errors.Should().Contain(e => string.Compare(e.PropertyName, nameof(CreateProductCommand.MetaTitle)) == 0);
     }
 
     [Fact(DisplayName = "PRODUCT_153 - Logic sinh tên hiển thị (DisplayName) cho biến thể")]

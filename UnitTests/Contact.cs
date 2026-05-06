@@ -38,10 +38,10 @@ public class Contact
         var handler = new CreateContactCommandHandler(_contactInsertRepoMock.Object, _unitOfWorkMock.Object);
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
-        _contactInsertRepoMock.Verify(x => x.Add(It.Is<Domain.Entities.Contact>(c => c.Status == "Pending")), Times.Once);
+        _contactInsertRepoMock.Verify(x => x.Add(It.Is<Domain.Entities.Contact>(c => string.Compare(c.Status, "Pending") == 0)), Times.Once);
     }
 
     [Fact(DisplayName = "CONT_005 - Tự động chuyển trạng thái liên hệ sang 'Đã xử lý'")]
@@ -60,7 +60,7 @@ public class Contact
             _tokenAccessorMock.Object);
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         contact.Status.Should().Be("Processed");
@@ -82,11 +82,11 @@ public class Contact
             _tokenAccessorMock.Object);
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Errors.Should().Contain(e => e.Message == "Liên hệ không tồn tại.");
+        result.Errors.Should().Contain(e => string.Compare(e.Message, "Liên hệ không tồn tại.") == 0);
     }
 
     [Fact(DisplayName = "CONT_007 - Xác định định danh người phản hồi từ Token")]
@@ -106,7 +106,7 @@ public class Contact
             _tokenAccessorMock.Object);
 
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         _contactInsertRepoMock.Verify(x => x.AddReply(It.Is<ContactReply>(r => r.RepliedById == userId)), Times.Once);
@@ -128,11 +128,11 @@ public class Contact
             _tokenAccessorMock.Object);
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Errors.Should().Contain(e => e.Message == "Không thể xác định người dùng thực hiện phản hồi.");
+        result.Errors.Should().Contain(e => string.Compare(e.Message, "Không thể xác định người dùng thực hiện phản hồi.") == 0);
     }
 
     [Fact(DisplayName = "CONT_010 - Cập nhật ghi chú cho liên hệ không tồn tại")]
@@ -149,11 +149,11 @@ public class Contact
             _unitOfWorkMock.Object);
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Errors.Should().Contain(e => e.Message == "Liên hệ không tồn tại.");
+        result.Errors.Should().Contain(e => string.Compare(e.Message, "Liên hệ không tồn tại.") == 0);
     }
 
     [Fact(DisplayName = "CONT_012 - Kiểm tra lưu trữ đánh giá của khách hàng")]

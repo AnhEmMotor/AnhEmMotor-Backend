@@ -248,7 +248,7 @@ public class Contact : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
 
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var contact = await db.Contacts.FirstOrDefaultAsync(c => c.Email == "vn@gmail.com", TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var contact = await db.Contacts.FirstOrDefaultAsync(c => string.Compare(c.Email, "vn@gmail.com") == 0, TestContext.Current.CancellationToken).ConfigureAwait(true);
         contact!.Subject.Should().Be("Cần tư vấn xe SH");
     }
 }

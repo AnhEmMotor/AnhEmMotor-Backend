@@ -350,7 +350,7 @@ public class PermissionAndRole
         var newsController = new NewsController(_mediatorMock.Object);
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetNewsListQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException());
-        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => newsController.GetListAsync(new SieveModel(), CancellationToken.None));
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => newsController.GetListAsync(new SieveModel(), CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "PERM_022 - Controller - Truy cập danh sách tin tức khi có quyền")]
@@ -359,7 +359,7 @@ public class PermissionAndRole
         var newsController = new NewsController(_mediatorMock.Object);
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetNewsListQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PagedResult<Application.ApiContracts.News.Responses.NewsResponse>>.Success(new PagedResult<Application.ApiContracts.News.Responses.NewsResponse>([], 0, 1, 10)));
-        var result = await newsController.GetListAsync(new SieveModel(), CancellationToken.None);
+        var result = await newsController.GetListAsync(new SieveModel(), CancellationToken.None).ConfigureAwait(true);
         result.Should().BeOfType<OkObjectResult>();
     }
 
@@ -369,7 +369,7 @@ public class PermissionAndRole
         var newsController = new NewsController(_mediatorMock.Object);
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateNewsCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException());
-        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => newsController.CreateAsync(new CreateNewsCommand(), CancellationToken.None));
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => newsController.CreateAsync(new CreateNewsCommand(), CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "PERM_024 - Controller - Xác nhận lịch lái thử không có quyền")]
@@ -378,7 +378,7 @@ public class PermissionAndRole
         var bookingsController = new BookingsController(_mediatorMock.Object);
         _mediatorMock.Setup(m => m.Send(It.IsAny<ConfirmBookingCommand>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException());
-        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => bookingsController.ConfirmAsync(new ConfirmBookingCommand { BookingId = 1 }, CancellationToken.None));
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => bookingsController.ConfirmAsync(new ConfirmBookingCommand { BookingId = 1 }, CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "PERM_025 - Controller - Xác nhận lịch lái thử khi có đủ quyền")]
@@ -387,7 +387,7 @@ public class PermissionAndRole
         var bookingsController = new BookingsController(_mediatorMock.Object);
         _mediatorMock.Setup(m => m.Send(It.IsAny<ConfirmBookingCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<bool>.Success(true));
-        var result = await bookingsController.ConfirmAsync(new ConfirmBookingCommand { BookingId = 1 }, CancellationToken.None);
+        var result = await bookingsController.ConfirmAsync(new ConfirmBookingCommand { BookingId = 1 }, CancellationToken.None).ConfigureAwait(true);
         result.Should().BeOfType<OkObjectResult>();
     }
 
@@ -397,7 +397,7 @@ public class PermissionAndRole
         var leadController = new LeadController(_mediatorMock.Object);
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetLeadsQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
-        var result = await leadController.GetLeadsAsync(CancellationToken.None);
+        var result = await leadController.GetLeadsAsync(CancellationToken.None).ConfigureAwait(true);
         result.Should().BeOfType<OkObjectResult>();
     }
 
@@ -407,7 +407,7 @@ public class PermissionAndRole
         var bannerController = new BannerController(_mediatorMock.Object);
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetActiveBannersQuery>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new UnauthorizedAccessException());
-        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => bannerController.GetActiveAsync(CancellationToken.None));
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => bannerController.GetActiveAsync(CancellationToken.None)).ConfigureAwait(true);
     }
 
     [Fact(DisplayName = "PERM_032 - Controller - Phản hồi liên hệ khách hàng thành công")]
@@ -416,7 +416,7 @@ public class PermissionAndRole
         var contactsController = new ContactsController(_mediatorMock.Object);
         _mediatorMock.Setup(m => m.Send(It.IsAny<CreateContactReplyCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<int>.Success(1));
-        var result = await contactsController.ReplyAsync(new CreateContactReplyCommand(), CancellationToken.None);
+        var result = await contactsController.ReplyAsync(new CreateContactReplyCommand(), CancellationToken.None).ConfigureAwait(true);
         result.Should().BeOfType<OkObjectResult>();
     }
 
@@ -426,7 +426,7 @@ public class PermissionAndRole
         var contactsController = new ContactsController(_mediatorMock.Object);
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateInternalNoteCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<bool>.Success(true));
-        var result = await contactsController.UpdateInternalNoteAsync(new UpdateInternalNoteCommand(), CancellationToken.None);
+        var result = await contactsController.UpdateInternalNoteAsync(new UpdateInternalNoteCommand(), CancellationToken.None).ConfigureAwait(true);
         result.Should().BeOfType<OkObjectResult>();
     }
 

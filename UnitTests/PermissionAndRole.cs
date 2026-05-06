@@ -632,7 +632,7 @@ public class PermissionAndRole
         var query = new GetAllPermissionsQuery();
 
         // 2. Sử dụng await thay vì .Result
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         var groups = result.Value;
 
         // 3. Kiểm tra kết quả (Assertions)
