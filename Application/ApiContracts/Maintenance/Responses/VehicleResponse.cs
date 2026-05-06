@@ -8,5 +8,5 @@ public class VehicleResponse
     public string EngineNumber { get; set; } = string.Empty;
     public string LicensePlate { get; set; } = string.Empty;
     public DateTimeOffset PurchaseDate { get; set; }
-    public List<VehicleDocumentResponse> Documents { get; set; } = new();
+    public List<VehicleDocumentResponse> Documents { get; set; } = [];
 }

@@ -1294,6 +1294,19 @@
             Tải lên ảnh đại diện cho người dùng theo Id (Admin)
             </summary>
         </member>
+        <member name="T:WebAPI.Controllers.V1.VehiclesController">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.VehiclesController.GetByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            
+            </summary>
+            <param name="id"></param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
         <member name="T:WebAPI.Converters.EmptyStringConverter">
             <summary>
             Provides a custom JSON converter for strings that substitutes empty strings for null values during deserialization

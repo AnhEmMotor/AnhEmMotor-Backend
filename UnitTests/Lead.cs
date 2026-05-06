@@ -239,7 +239,7 @@ public class Lead
     public async Task ConfirmBooking_ValidBooking_UpdatesLeadStatus()
     {
         // Arrange
-        var booking = new Booking { Id = 1, PhoneNumber = "0909123456" };
+        var booking = new Domain.Entities.Booking { Id = 1, PhoneNumber = "0909123456" };
         var lead = new Domain.Entities.Lead { Id = 1, PhoneNumber = "0909123456", Status = "Consulting" };
         var command = new ConfirmBookingCommand { BookingId = 1 };
 
@@ -305,7 +305,7 @@ public class Lead
     public void LeadActivityEntity_DefaultConstructor_ActivityTypeIsNote()
     {
         // Act
-        var activity = new Domain.Entities.LeadActivity();
+        var activity = new LeadActivity();
 
         // Assert
         activity.ActivityType.Should().Be("Note");
@@ -337,7 +337,7 @@ public class Lead
         await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        _leadActivityInsertRepoMock.Verify(x => x.Add(It.Is<Domain.Entities.LeadActivity>(a => 
+        _leadActivityInsertRepoMock.Verify(x => x.Add(It.Is<LeadActivity>(a => 
             a.Description.Contains("Lái thử")
         )), Times.Once);
     }
@@ -368,7 +368,7 @@ public class Lead
         await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        _leadActivityInsertRepoMock.Verify(x => x.Add(It.Is<Domain.Entities.LeadActivity>(a => 
+        _leadActivityInsertRepoMock.Verify(x => x.Add(It.Is<LeadActivity>(a => 
             a.Description.Contains("Consulting")
         )), Times.Once);
     }
@@ -378,7 +378,7 @@ public class Lead
     {
         // Arrange
         var createdAt = DateTimeOffset.UtcNow;
-        var activity = new Domain.Entities.LeadActivity
+        var activity = new LeadActivity
         {
             Id = 100,
             ActivityType = "Booking",
@@ -406,7 +406,7 @@ public class Lead
     public void LeadActivity_MappingWithNullCreatedAt_ReturnsMinValue()
     {
         // Arrange
-        var activity = new Domain.Entities.LeadActivity { CreatedAt = null };
+        var activity = new LeadActivity { CreatedAt = null };
 
         // Act
         var response = new LeadActivityResponse

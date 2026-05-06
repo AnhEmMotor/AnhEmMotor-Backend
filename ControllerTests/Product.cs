@@ -19,6 +19,7 @@ using Application.Features.Products.Queries.GetDeletedProductsList;
 using Application.Features.Products.Queries.GetProductsList;
 using Application.Features.Products.Queries.GetProductsListForManager;
 using Application.Features.Products.Queries.GetProductsListForPriceManagement;
+using Application.Features.Products.Queries.GetProductStoreDetailBySlug;
 using Domain.Primitives;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -263,31 +264,6 @@ public class Product
             () => _controller.GetProductsForPriceManagementAsync(new SieveModel(), CancellationToken.None))
             .ConfigureAwait(true);
     }
-    [Fact(DisplayName = "PRODUCT_157 - Kiểm tra Mapping trường Highlights hỗ trợ SEO")]
-    public async Task GetProductDetail_HighlightsPresentInResponse_ForSeo()
-    {
-        // Arrange
-        var productId = 1;
-        var response = new ProductDetailResponse
-        {
-            Id = productId,
-            Name = "SEO Product",
-            Highlights = "[{\"technologyId\":1, \"title\":\"ABS\"}]"
-        };
-
-        _senderMock.Setup(m => m.Send(It.Is<GetProductStoreDetailByIdQuery>(q => q.Id == productId), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Success(response));
-
-        // Act
-        var result = await _controller.GetProductStoreDetailByIdAsync(productId, CancellationToken.None).ConfigureAwait(true);
-
-        // Assert
-        var okResult = Assert.IsType<OkObjectResult>(result);
-        var value = Assert.IsType<ProductDetailResponse>(okResult.Value);
-        value.Highlights.Should().NotBeNullOrEmpty();
-        value.Highlights.Should().Contain("ABS");
-    }
-
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079
 }

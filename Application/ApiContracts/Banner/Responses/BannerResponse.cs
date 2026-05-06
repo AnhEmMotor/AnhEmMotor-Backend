@@ -12,4 +12,6 @@ public sealed record BannerResponse
     public string? LinkUrl { get; init; }
 
     public string? Position { get; init; }
+
+    public int DisplayOrder { get; init; }
 }

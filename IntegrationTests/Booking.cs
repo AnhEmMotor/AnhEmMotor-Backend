@@ -10,7 +10,6 @@ using Infrastructure.DBContexts;
 using IntegrationTests.SetupClass;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +19,6 @@ using System.Net.Http.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
@@ -88,7 +86,7 @@ public class Booking : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
                 BookingType = BookingType.TestDrive
             };
             db.Bookings.Add(b);
-            await db.SaveChangesAsync().ConfigureAwait(true);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             bookingId = b.Id;
         }
 
@@ -99,11 +97,16 @@ public class Booking : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        
+
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var updatedBooking = await db.Bookings.FindAsync(bookingId).ConfigureAwait(true);
+
+            var updatedBooking = await db.Bookings
+                .FirstOrDefaultAsync(x => x.Id == bookingId, TestContext.Current.CancellationToken)
+                .ConfigureAwait(true);
+
+            updatedBooking.Should().NotBeNull();
             updatedBooking!.Status.Should().Be(BookingStatus.Confirmed);
         }
     }
@@ -127,7 +130,7 @@ public class Booking : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
                 BookingType = BookingType.TestDrive
             };
             db.Bookings.Add(b);
-            await db.SaveChangesAsync().ConfigureAwait(true);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             bookingId = b.Id;
         }
 
@@ -149,7 +152,7 @@ public class Booking : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var lead = new Lead { FullName = "Sync Lead", PhoneNumber = phone, Status = LeadStatus.Consulting };
+            var lead = new Domain.Entities.Lead { FullName = "Sync Lead", PhoneNumber = phone, Status = LeadStatus.Consulting };
             db.Leads.Add(lead);
             
             var b = new Domain.Entities.Booking 
@@ -163,7 +166,7 @@ public class Booking : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
                 BookingType = BookingType.TestDrive
             };
             db.Bookings.Add(b);
-            await db.SaveChangesAsync().ConfigureAwait(true);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             bookingId = b.Id;
         }
 
@@ -174,7 +177,7 @@ public class Booking : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var updatedLead = await db.Leads.FirstOrDefaultAsync(l => l.PhoneNumber == phone).ConfigureAwait(true);
+            var updatedLead = await db.Leads.FirstOrDefaultAsync(l => l.PhoneNumber == phone, TestContext.Current.CancellationToken).ConfigureAwait(true);
             updatedLead!.Status.Should().Be(LeadStatus.TestDriving);
         }
     }
@@ -190,11 +193,11 @@ public class Booking : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
                 new Domain.Entities.Booking { FullName = "B1", PhoneNumber = "0900000001", Email = "b1@gmail.com", Location = "A", BookingType = "T1" },
                 new Domain.Entities.Booking { FullName = "B2", PhoneNumber = "0900000002", Email = "b2@gmail.com", Location = "B", BookingType = "T2" }
             );
-            await db.SaveChangesAsync().ConfigureAwait(true);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         }
 
         // Act
-        var response = await _client.GetAsync("/api/v1/bookings").ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/bookings", TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);

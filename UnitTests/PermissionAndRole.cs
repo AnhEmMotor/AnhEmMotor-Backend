@@ -625,17 +625,23 @@ public class PermissionAndRole
     }
 
     [Fact(DisplayName = "PERM_035 - Unit - Kiểm tra cấu trúc nhóm quyền CRM & Connect")]
-    public void GetAllPermissions_CRMAndConnectGroup_ContainsCorrectPermissions()
+    public async Task GetAllPermissions_CRMAndConnectGroup_ContainsCorrectPermissions()
     {
+        // 1. Khởi tạo
         var handler = new GetAllPermissionsQueryHandler();
         var query = new GetAllPermissionsQuery();
-        var result = handler.Handle(query, CancellationToken.None).Result;
+
+        // 2. Sử dụng await thay vì .Result
+        var result = await handler.Handle(query, CancellationToken.None);
         var groups = result.Value;
+
+        // 3. Kiểm tra kết quả (Assertions)
         groups.Should().ContainKey("CRM & Connect");
         var crmPerms = groups["CRM & Connect"];
-        crmPerms.Any(p => p.ID.Contains("Contacts")).Should().BeTrue();
-        crmPerms.Any(p => p.ID.Contains("Bookings")).Should().BeTrue();
-        crmPerms.Any(p => p.ID.Contains("Leads")).Should().BeTrue();
+
+        crmPerms.Any(p => p.ID!.Contains("Contacts")).Should().BeTrue();
+        crmPerms.Any(p => p.ID!.Contains("Bookings")).Should().BeTrue();
+        crmPerms.Any(p => p.ID!.Contains("Leads")).Should().BeTrue();
     }
 
 #pragma warning restore CRR0035

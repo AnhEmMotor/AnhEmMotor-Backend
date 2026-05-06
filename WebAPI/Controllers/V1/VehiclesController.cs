@@ -6,14 +6,23 @@ using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1;
 
+/// <summary>
+/// 
+/// </summary>
 [Route("api/v{version:apiVersion}/[controller]")]
-public class VehiclesController(ISender sender) : ApiController
+public class VehiclesController : ApiController
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     [HttpGet("{id}")]
     [Authorize]
     public async Task<IActionResult> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
-        // Placeholder for testing
+        cancellationToken.ThrowIfCancellationRequested();
         return Ok(new VehicleResponse { Id = id });
     }
 }

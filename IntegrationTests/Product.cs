@@ -22,6 +22,7 @@ using ProductEntity = Domain.Entities.Product;
 
 namespace IntegrationTests;
 
+using System.Text.Json;
 using System.Threading.Tasks;
 using Xunit;
 using ProductStatusConstants = Domain.Constants.Product.ProductStatus;
@@ -2751,8 +2752,8 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         // Arrange
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var cat = new ProductCategory { Name = "Cat-Special" };
-        var brand = new Brand { Name = "Brand-Special" };
+        var cat = new ProductCategoryEntity { Name = "Cat-Special" };
+        var brand = new BrandEntity { Name = "Brand-Special" };
         db.ProductCategories.Add(cat);
         db.Brands.Add(brand);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
@@ -2776,7 +2777,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/product", command, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/product", command).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
@@ -2793,7 +2794,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         // Arrange
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var cat = new ProductCategory { Name = "Cat-ColorUpdate" };
+        var cat = new ProductCategoryEntity { Name = "Cat-ColorUpdate" };
         var option = new Option { Name = "Màu sắc" };
         var ov = new OptionValue { Option = option, Name = "Đỏ", ColorCode = null };
         db.ProductCategories.Add(cat);
@@ -2809,10 +2810,10 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         };
 
         // Act
-        await _client.PostAsJsonAsync("/api/v1/product", command, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        await _client.PostAsJsonAsync("/api/v1/product", command).ConfigureAwait(true);
 
         // Assert
-        var updatedOv = await db.OptionValues.FirstAsync(v => v.Id == ov.Id);
+        var updatedOv = await db.OptionValues.FirstAsync(v => v.Id == ov.Id, TestContext.Current.CancellationToken);
         updatedOv.ColorCode.Should().Be("#FF0000");
     }
 
@@ -2822,7 +2823,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         // Arrange
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var cat = new ProductCategory { Name = "Cat-SEO" };
+        var cat = new ProductCategoryEntity { Name = "Cat-SEO" };
         db.ProductCategories.Add(cat);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
@@ -2837,10 +2838,10 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         };
 
         // Act
-        await _client.PostAsJsonAsync("/api/v1/product", command, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        await _client.PostAsJsonAsync("/api/v1/product", command).ConfigureAwait(true);
 
         // Assert
-        var product = await db.Products.FirstOrDefaultAsync(p => p.Name == "SEO Bike");
+        var product = await db.Products.FirstOrDefaultAsync(p => p.Name == "SEO Bike", TestContext.Current.CancellationToken);
         product!.MetaTitle.Should().Be("Meta Title");
         product.MetaDescription.Should().Be("Meta Description");
         product.ShortDescription.Should().Be("Short Description");
@@ -2852,7 +2853,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         // Arrange
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var cat = new ProductCategory { Name = "Cat-Tech" };
+        var cat = new ProductCategoryEntity { Name = "Cat-Tech" };
         var tech = new Technology { Name = "ABS" };
         db.ProductCategories.Add(cat);
         db.Technologies.Add(tech);
@@ -2866,10 +2867,10 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         };
 
         // Act
-        await _client.PostAsJsonAsync("/api/v1/product", command, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        await _client.PostAsJsonAsync("/api/v1/product", command).ConfigureAwait(true);
 
         // Assert
-        var link = await db.ProductTechnologies.FirstOrDefaultAsync(pt => pt.CustomTitle == "Cool ABS");
+        var link = await db.ProductTechnologies.FirstOrDefaultAsync(pt => pt.CustomTitle == "Cool ABS", TestContext.Current.CancellationToken).ConfigureAwait(true);
         link.Should().NotBeNull();
     }
 
@@ -2879,7 +2880,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         // Arrange
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var cat = new ProductCategory { Name = "Cat-UpdateAdd" };
+        var cat = new ProductCategoryEntity { Name = "Cat-UpdateAdd" };
         var t1 = new Technology { Name = "T1" };
         var t2 = new Technology { Name = "T2" };
         db.ProductCategories.Add(cat);
@@ -2894,10 +2895,10 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var cmd = new UpdateProductCommand { Id = p.Id, Name = "P", CategoryId = cat.Id, Highlights = $"[{{\"technologyId\":{t1.Id}}}, {{\"technologyId\":{t2.Id}}}]" };
 
         // Act
-        await _client.PutAsJsonAsync($"/api/v1/product/{p.Id}", cmd, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        await _client.PutAsJsonAsync($"/api/v1/product/{p.Id}", cmd).ConfigureAwait(true);
 
         // Assert
-        var links = await db.ProductTechnologies.Where(pt => pt.ProductId == p.Id).ToListAsync();
+        var links = await db.ProductTechnologies.Where(pt => pt.ProductId == p.Id).ToListAsync(TestContext.Current.CancellationToken);
         links.Should().HaveCount(2);
     }
 
@@ -2907,7 +2908,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         // Arrange
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var cat = new ProductCategory { Name = "Cat-UpdateRem" };
+        var cat = new ProductCategoryEntity { Name = "Cat-UpdateRem" };
         var t1 = new Technology { Name = "T1" };
         db.ProductCategories.Add(cat);
         db.Technologies.Add(t1);
@@ -2921,10 +2922,10 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var cmd = new UpdateProductCommand { Id = p.Id, Name = "P", CategoryId = cat.Id, Highlights = "[]" };
 
         // Act
-        await _client.PutAsJsonAsync($"/api/v1/product/{p.Id}", cmd, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        await _client.PutAsJsonAsync($"/api/v1/product/{p.Id}", cmd).ConfigureAwait(true);
 
         // Assert
-        var links = await db.ProductTechnologies.Where(pt => pt.ProductId == p.Id).ToListAsync();
+        var links = await db.ProductTechnologies.Where(pt => pt.ProductId == p.Id).ToListAsync(TestContext.Current.CancellationToken);
         links.Should().BeEmpty();
     }
 
@@ -2934,7 +2935,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         // Arrange
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var cat = new ProductCategory { Name = "Cat-UpdateCust" };
+        var cat = new ProductCategoryEntity { Name = "Cat-UpdateCust" };
         var t1 = new Technology { Name = "T1" };
         db.ProductCategories.Add(cat);
         db.Technologies.Add(t1);
@@ -2948,10 +2949,10 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var cmd = new UpdateProductCommand { Id = p.Id, Name = "P", CategoryId = cat.Id, Highlights = $"[{{\"technologyId\":{t1.Id}, \"customTitle\":\"New\"}}]" };
 
         // Act
-        await _client.PutAsJsonAsync($"/api/v1/product/{p.Id}", cmd, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        await _client.PutAsJsonAsync($"/api/v1/product/{p.Id}", cmd).ConfigureAwait(true);
 
         // Assert
-        var link = await db.ProductTechnologies.FirstOrDefaultAsync(pt => pt.ProductId == p.Id);
+        var link = await db.ProductTechnologies.FirstOrDefaultAsync(pt => pt.ProductId == p.Id, TestContext.Current.CancellationToken);
         link!.CustomTitle.Should().Be("New");
     }
 
@@ -2961,7 +2962,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         // Arrange
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var cat = new ProductCategory { Name = "Cat-Order" };
+        var cat = new ProductCategoryEntity { Name = "Cat-Order" };
         var t1 = new Technology { Name = "T1" };
         var t2 = new Technology { Name = "T2" };
         db.ProductCategories.Add(cat);
@@ -2978,7 +2979,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var response = await _client.GetAsync($"/api/v1/product/for-manager/{p.Id}", TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         // Assert
-        var content = await response.Content.ReadFromJsonAsync<ProductDetailForManagerResponse>();
+        var content = await response.Content.ReadFromJsonAsync<ProductDetailForManagerResponse>(TestContext.Current.CancellationToken);
         var highlights = JsonSerializer.Deserialize<List<JsonElement>>(content!.Highlights!);
         highlights![0].GetProperty("technologyId").GetInt32().Should().Be(t2.Id);
     }
@@ -2993,31 +2994,6 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
-    [Fact(DisplayName = "PRODUCT_170 - Đảm bảo Cascade Delete khi xóa công nghệ gốc")]
-    public async Task DeleteTechnology_CascadeDeletesLinks()
-    {
-        // Arrange
-        using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var cat = new ProductCategory { Name = "Cat-Cascade" };
-        var t = new Technology { Name = "T" };
-        db.ProductCategories.Add(cat);
-        db.Technologies.Add(t);
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-
-        var p = new ProductEntity { Name = "P", CategoryId = cat.Id, StatusId = "for-sale" };
-        db.Products.Add(p);
-        db.ProductTechnologies.Add(new ProductTechnology { ProductId = p.Id, TechnologyId = t.Id });
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-
-        // Act
-        db.Technologies.Remove(t);
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-
-        // Assert
-        var link = await db.ProductTechnologies.FirstOrDefaultAsync(pt => pt.TechnologyId == t.Id);
-        link.Should().BeNull();
-    }
 
     [Fact(DisplayName = "PRODUCT_171 - Tìm kiếm sản phẩm theo giá tối thiểu (MinPrice)")]
     public async Task GetProducts_MinPrice_FiltersCorrectly()
@@ -3059,261 +3035,13 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
-    [Fact(DisplayName = "PRODUCT_144 - Lưu trữ thông tin định danh chuyên sâu của biến thể")]
-    public async Task CreateProduct_SpecializedIdentifiers_SavesCorrectly()
-    {
-        // Arrange
-        using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var cat = new ProductCategory { Name = "Cat-Special" };
-        var brand = new Brand { Name = "Brand-Special" };
-        db.ProductCategories.Add(cat);
-        db.Brands.Add(brand);
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-
-        var command = new CreateProductCommand
-        {
-            Name = "Special Bike",
-            CategoryId = cat.Id,
-            BrandId = brand.Id,
-            Variants =
-            [
-                new CreateProductVariantRequest
-                {
-                    SKU = "SKU-123",
-                    VersionName = "Premium",
-                    ColorName = "Deep Blue",
-                    ColorCode = "#00008B",
-                    UrlSlug = "special-bike-v1"
-                }
-            ]
-        };
-
-        // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/product", command, TestContext.Current.CancellationToken).ConfigureAwait(true);
-
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
-        var variant = await db.ProductVariants.FirstOrDefaultAsync(v => v.SKU == "SKU-123", TestContext.Current.CancellationToken).ConfigureAwait(true);
-        variant.Should().NotBeNull();
-        variant!.VersionName.Should().Be("Premium");
-        variant.ColorName.Should().Be("Deep Blue");
-        variant.ColorCode.Should().Be("#00008B");
-    }
-
-    [Fact(DisplayName = "PRODUCT_149 - Tự động cập nhật mã màu cho OptionValue cũ")]
-    public async Task CreateProduct_UpdateExistingOptionValueColorCode()
-    {
-        // Arrange
-        using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var cat = new ProductCategory { Name = "Cat-ColorUpdate" };
-        var option = new Option { Name = "Màu sắc" };
-        var ov = new OptionValue { Option = option, Name = "Đỏ", ColorCode = null };
-        db.ProductCategories.Add(cat);
-        db.Options.Add(option);
-        db.OptionValues.Add(ov);
-        db.PredefinedOptions.Add(new PredefinedOption { Key = "Color", Value = "Màu sắc" });
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-
-        var command = new CreateProductCommand
-        {
-            Name = "Bike", CategoryId = cat.Id,
-            Variants = [new CreateProductVariantRequest { UrlSlug = "v1", ColorName = "Đỏ", ColorCode = "#FF0000" }]
-        };
-
-        // Act
-        await _client.PostAsJsonAsync("/api/v1/product", command, TestContext.Current.CancellationToken).ConfigureAwait(true);
-
-        // Assert
-        var updatedOv = await db.OptionValues.FirstAsync(v => v.Id == ov.Id);
-        updatedOv.ColorCode.Should().Be("#FF0000");
-    }
-
-    [Fact(DisplayName = "PRODUCT_150 - Lưu trữ thông tin SEO Metadata cho sản phẩm")]
-    public async Task CreateProduct_SavesSeoMetadata()
-    {
-        // Arrange
-        using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var cat = new ProductCategory { Name = "Cat-SEO" };
-        db.ProductCategories.Add(cat);
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-
-        var command = new CreateProductCommand
-        {
-            Name = "SEO Bike",
-            CategoryId = cat.Id,
-            MetaTitle = "Meta Title",
-            MetaDescription = "Meta Description",
-            ShortDescription = "Short Description",
-            Variants = [new CreateProductVariantRequest { UrlSlug = "seo-bike" }]
-        };
-
-        // Act
-        await _client.PostAsJsonAsync("/api/v1/product", command, TestContext.Current.CancellationToken).ConfigureAwait(true);
-
-        // Assert
-        var product = await db.Products.FirstOrDefaultAsync(p => p.Name == "SEO Bike");
-        product!.MetaTitle.Should().Be("Meta Title");
-        product.MetaDescription.Should().Be("Meta Description");
-        product.ShortDescription.Should().Be("Short Description");
-    }
-
-    [Fact(DisplayName = "PRODUCT_159 - Tạo sản phẩm kèm danh sách công nghệ nổi bật")]
-    public async Task CreateProduct_WithHighlights_SavesCorrectly()
-    {
-        // Arrange
-        using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var cat = new ProductCategory { Name = "Cat-Tech" };
-        var tech = new Technology { Name = "ABS" };
-        db.ProductCategories.Add(cat);
-        db.Technologies.Add(tech);
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-
-        var command = new CreateProductCommand
-        {
-            Name = "Tech Bike", CategoryId = cat.Id,
-            Highlights = $"[{{\"technologyId\":{tech.Id}, \"customTitle\":\"Cool ABS\"}}]",
-            Variants = [new CreateProductVariantRequest { UrlSlug = "tech-bike" }]
-        };
-
-        // Act
-        await _client.PostAsJsonAsync("/api/v1/product", command, TestContext.Current.CancellationToken).ConfigureAwait(true);
-
-        // Assert
-        var link = await db.ProductTechnologies.FirstOrDefaultAsync(pt => pt.CustomTitle == "Cool ABS");
-        link.Should().NotBeNull();
-    }
-
-    [Fact(DisplayName = "PRODUCT_161 - Cập nhật Highlights: Thêm công nghệ mới")]
-    public async Task UpdateProduct_AddHighlight_Success()
-    {
-        // Arrange
-        using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var cat = new ProductCategory { Name = "Cat-UpdateAdd" };
-        var t1 = new Technology { Name = "T1" };
-        var t2 = new Technology { Name = "T2" };
-        db.ProductCategories.Add(cat);
-        db.Technologies.AddRange(t1, t2);
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-
-        var p = new ProductEntity { Name = "P", CategoryId = cat.Id, StatusId = "for-sale" };
-        db.Products.Add(p);
-        db.ProductTechnologies.Add(new ProductTechnology { ProductId = p.Id, TechnologyId = t1.Id });
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-
-        var cmd = new UpdateProductCommand { Id = p.Id, Name = "P", CategoryId = cat.Id, Highlights = $"[{{\"technologyId\":{t1.Id}}}, {{\"technologyId\":{t2.Id}}}]" };
-
-        // Act
-        await _client.PutAsJsonAsync($"/api/v1/product/{p.Id}", cmd, TestContext.Current.CancellationToken).ConfigureAwait(true);
-
-        // Assert
-        var links = await db.ProductTechnologies.Where(pt => pt.ProductId == p.Id).ToListAsync();
-        links.Should().HaveCount(2);
-    }
-
-    [Fact(DisplayName = "PRODUCT_162 - Cập nhật Highlights: Xóa công nghệ khỏi sản phẩm")]
-    public async Task UpdateProduct_RemoveHighlight_Success()
-    {
-        // Arrange
-        using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var cat = new ProductCategory { Name = "Cat-UpdateRem" };
-        var t1 = new Technology { Name = "T1" };
-        db.ProductCategories.Add(cat);
-        db.Technologies.Add(t1);
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-
-        var p = new ProductEntity { Name = "P", CategoryId = cat.Id, StatusId = "for-sale" };
-        db.Products.Add(p);
-        db.ProductTechnologies.Add(new ProductTechnology { ProductId = p.Id, TechnologyId = t1.Id });
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-
-        var cmd = new UpdateProductCommand { Id = p.Id, Name = "P", CategoryId = cat.Id, Highlights = "[]" };
-
-        // Act
-        await _client.PutAsJsonAsync($"/api/v1/product/{p.Id}", cmd, TestContext.Current.CancellationToken).ConfigureAwait(true);
-
-        // Assert
-        var links = await db.ProductTechnologies.Where(pt => pt.ProductId == p.Id).ToListAsync();
-        links.Should().BeEmpty();
-    }
-
-    [Fact(DisplayName = "PRODUCT_163 - Cập nhật Highlights: Thay đổi thông tin tùy chỉnh")]
-    public async Task UpdateProduct_UpdateHighlightCustom_Success()
-    {
-        // Arrange
-        using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var cat = new ProductCategory { Name = "Cat-UpdateCust" };
-        var t1 = new Technology { Name = "T1" };
-        db.ProductCategories.Add(cat);
-        db.Technologies.Add(t1);
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-
-        var p = new ProductEntity { Name = "P", CategoryId = cat.Id, StatusId = "for-sale" };
-        db.Products.Add(p);
-        db.ProductTechnologies.Add(new ProductTechnology { ProductId = p.Id, TechnologyId = t1.Id, CustomTitle = "Old" });
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-
-        var cmd = new UpdateProductCommand { Id = p.Id, Name = "P", CategoryId = cat.Id, Highlights = $"[{{\"technologyId\":{t1.Id}, \"customTitle\":\"New\"}}]" };
-
-        // Act
-        await _client.PutAsJsonAsync($"/api/v1/product/{p.Id}", cmd, TestContext.Current.CancellationToken).ConfigureAwait(true);
-
-        // Assert
-        var link = await db.ProductTechnologies.FirstOrDefaultAsync(pt => pt.ProductId == p.Id);
-        link!.CustomTitle.Should().Be("New");
-    }
-
-    [Fact(DisplayName = "PRODUCT_167 - Sắp xếp công nghệ theo thứ tự hiển thị khi truy vấn")]
-    public async Task GetProduct_HighlightsOrderedByDisplayOrder()
-    {
-        // Arrange
-        using var scope = _factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var cat = new ProductCategory { Name = "Cat-Order" };
-        var t1 = new Technology { Name = "T1" };
-        var t2 = new Technology { Name = "T2" };
-        db.ProductCategories.Add(cat);
-        db.Technologies.AddRange(t1, t2);
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-
-        var p = new ProductEntity { Name = "P-Ordered", CategoryId = cat.Id, StatusId = "for-sale" };
-        db.Products.Add(p);
-        db.ProductTechnologies.Add(new ProductTechnology { ProductId = p.Id, TechnologyId = t1.Id, DisplayOrder = 2 });
-        db.ProductTechnologies.Add(new ProductTechnology { ProductId = p.Id, TechnologyId = t2.Id, DisplayOrder = 1 });
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-
-        // Act
-        var response = await _client.GetAsync($"/api/v1/product/for-manager/{p.Id}", TestContext.Current.CancellationToken).ConfigureAwait(true);
-
-        // Assert
-        var content = await response.Content.ReadFromJsonAsync<ProductDetailForManagerResponse>();
-        var highlights = JsonSerializer.Deserialize<List<JsonElement>>(content!.Highlights!);
-        highlights![0].GetProperty("technologyId").GetInt32().Should().Be(t2.Id);
-    }
-
-    [Fact(DisplayName = "PRODUCT_168 - Lấy danh sách toàn bộ công nghệ template")]
-    public async Task GetTechnologies_ReturnsAllTemplates()
-    {
-        // Act
-        var response = await _client.GetAsync("/api/v1/technology", TestContext.Current.CancellationToken).ConfigureAwait(true);
-
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-    }
-
     [Fact(DisplayName = "PRODUCT_170 - Đảm bảo Cascade Delete khi xóa công nghệ gốc")]
     public async Task DeleteTechnology_CascadeDeletesLinks()
     {
         // Arrange
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var cat = new ProductCategory { Name = "Cat-Cascade" };
+        var cat = new ProductCategoryEntity { Name = "Cat-Cascade" };
         var t = new Technology { Name = "T" };
         db.ProductCategories.Add(cat);
         db.Technologies.Add(t);
@@ -3329,49 +3057,8 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         // Assert
-        var link = await db.ProductTechnologies.FirstOrDefaultAsync(pt => pt.TechnologyId == t.Id);
+        var link = await db.ProductTechnologies.FirstOrDefaultAsync(pt => pt.TechnologyId == t.Id, TestContext.Current.CancellationToken);
         link.Should().BeNull();
     }
-
-    [Fact(DisplayName = "PRODUCT_171 - Tìm kiếm sản phẩm theo giá tối thiểu (MinPrice)")]
-    public async Task GetProducts_MinPrice_FiltersCorrectly()
-    {
-        // Act
-        var response = await _client.GetAsync("/api/v1/product?MinPrice=50000000", TestContext.Current.CancellationToken).ConfigureAwait(true);
-
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-    }
-
-    [Fact(DisplayName = "PRODUCT_172 - Tìm kiếm sản phẩm theo giá tối đa (MaxPrice)")]
-    public async Task GetProducts_MaxPrice_FiltersCorrectly()
-    {
-        // Act
-        var response = await _client.GetAsync("/api/v1/product?MaxPrice=30000000", TestContext.Current.CancellationToken).ConfigureAwait(true);
-
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-    }
-
-    [Fact(DisplayName = "PRODUCT_173 - Tìm kiếm sản phẩm theo nhiều thương hiệu (BrandIds)")]
-    public async Task GetProducts_BrandIds_FiltersCorrectly()
-    {
-        // Act
-        var response = await _client.GetAsync("/api/v1/product?BrandIds=1,2", TestContext.Current.CancellationToken).ConfigureAwait(true);
-
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-    }
-
-    [Fact(DisplayName = "PRODUCT_174 - Kết hợp lọc giá và thương hiệu đồng thời")]
-    public async Task GetProducts_CombinedPriceBrand_FiltersCorrectly()
-    {
-        // Act
-        var response = await _client.GetAsync("/api/v1/product?MinPrice=40000000&BrandIds=1", TestContext.Current.CancellationToken).ConfigureAwait(true);
-
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-    }
-
 #pragma warning restore CRR0035
 }

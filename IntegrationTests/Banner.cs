@@ -14,7 +14,6 @@ using System.Net.Http.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
@@ -51,15 +50,15 @@ public class Banner : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetim
                 new Domain.Entities.Banner { Title = "A2", ImageUrl = "I2", IsActive = true },
                 new Domain.Entities.Banner { Title = "I1", ImageUrl = "I3", IsActive = false }
             );
-            await db.SaveChangesAsync().ConfigureAwait(true);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         }
 
         // Act
-        var response = await _client.GetAsync("/api/v1/banner/active").ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/banner/active", TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<List<BannerResponse>>().ConfigureAwait(true);
+        var content = await response.Content.ReadFromJsonAsync<List<BannerResponse>>(TestContext.Current.CancellationToken).ConfigureAwait(true);
         content.Should().NotBeNull();
         content.Should().HaveCount(2);
     }
@@ -76,14 +75,14 @@ public class Banner : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetim
                 new Domain.Entities.Banner { Title = "B2", ImageUrl = "I2", IsActive = true, DisplayOrder = 1 },
                 new Domain.Entities.Banner { Title = "B3", ImageUrl = "I3", IsActive = true, DisplayOrder = 5 }
             );
-            await db.SaveChangesAsync().ConfigureAwait(true);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         }
 
         // Act
-        var response = await _client.GetAsync("/api/v1/banner/active").ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/banner/active", TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         // Assert
-        var content = await response.Content.ReadFromJsonAsync<List<BannerResponse>>().ConfigureAwait(true);
+        var content = await response.Content.ReadFromJsonAsync<List<BannerResponse>>(TestContext.Current.CancellationToken).ConfigureAwait(true);
         content![0].DisplayOrder.Should().Be(1);
         content[1].DisplayOrder.Should().Be(5);
         content[2].DisplayOrder.Should().Be(10);
@@ -102,14 +101,14 @@ public class Banner : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetim
                 new Domain.Entities.Banner { Title = "Expired", ImageUrl = "I2", IsActive = true, EndDate = now.AddDays(-1) },
                 new Domain.Entities.Banner { Title = "Future", ImageUrl = "I3", IsActive = true, StartDate = now.AddDays(1) }
             );
-            await db.SaveChangesAsync().ConfigureAwait(true);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         }
 
         // Act
-        var response = await _client.GetAsync("/api/v1/banner/active").ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/banner/active", TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         // Assert
-        var content = await response.Content.ReadFromJsonAsync<List<BannerResponse>>().ConfigureAwait(true);
+        var content = await response.Content.ReadFromJsonAsync<List<BannerResponse>>(TestContext.Current.CancellationToken).ConfigureAwait(true);
         content.Should().HaveCount(1);
         content![0].Title.Should().Be("Valid");
     }
@@ -129,13 +128,11 @@ public class Banner : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetim
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        
-        using (var scope = _factory.Services.CreateScope())
-        {
-            var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var banner = await db.Banners.FirstOrDefaultAsync(b => b.Title == "Integrity Test").ConfigureAwait(true);
-            banner.Should().NotBeNull();
-            banner!.ImageUrl.Should().Be("http://anh-em-motor.com/banner.jpg");
-        }
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        var banner = await db.Banners.FirstOrDefaultAsync(b => b.Title == "Integrity Test", TestContext.Current.CancellationToken).ConfigureAwait(true);
+        banner.Should().NotBeNull();
+        banner!.ImageUrl.Should().Be("http://anh-em-motor.com/banner.jpg");
     }
 }

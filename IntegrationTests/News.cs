@@ -14,7 +14,6 @@ using System.Net.Http.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
@@ -53,15 +52,15 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
                 new Domain.Entities.News { Title = "D1", Slug = "d1", IsPublished = false, Content = "C" },
                 new Domain.Entities.News { Title = "D2", Slug = "d2", IsPublished = false, Content = "C" }
             );
-            await db.SaveChangesAsync().ConfigureAwait(true);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         }
 
         // Act
-        var response = await _client.GetAsync("/api/v1/news").ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/news", TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<List<Application.ApiContracts.News.Responses.NewsResponse>>().ConfigureAwait(true);
+        var content = await response.Content.ReadFromJsonAsync<List<Application.ApiContracts.News.Responses.NewsResponse>>(TestContext.Current.CancellationToken).ConfigureAwait(true);
         content.Should().NotBeNull();
         content.All(n => n.IsPublished).Should().BeTrue();
         content.Should().HaveCount(3);
@@ -75,15 +74,15 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             db.News.Add(new Domain.Entities.News { Title = "Target", Slug = "tin-abc", IsPublished = true, Content = "Full Content" });
-            await db.SaveChangesAsync().ConfigureAwait(true);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         }
 
         // Act
-        var response = await _client.GetAsync("/api/v1/news/tin-abc").ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/news/tin-abc", TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<Application.ApiContracts.News.Responses.NewsResponse>().ConfigureAwait(true);
+        var content = await response.Content.ReadFromJsonAsync<Application.ApiContracts.News.Responses.NewsResponse>(TestContext.Current.CancellationToken).ConfigureAwait(true);
         content.Should().NotBeNull();
         content!.Title.Should().Be("Target");
         content.Slug.Should().Be("tin-abc");
@@ -100,15 +99,15 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             {
                 db.News.Add(new Domain.Entities.News { Title = $"News {i}", Slug = $"news-{i}", IsPublished = true, Content = "C" });
             }
-            await db.SaveChangesAsync().ConfigureAwait(true);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         }
 
         // Act
-        var response = await _client.GetAsync("/api/v1/news?Page=1&PageSize=2").ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/news?Page=1&PageSize=2", TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<List<Application.ApiContracts.News.Responses.NewsResponse>>().ConfigureAwait(true);
+        var content = await response.Content.ReadFromJsonAsync<List<Application.ApiContracts.News.Responses.NewsResponse>>(TestContext.Current.CancellationToken).ConfigureAwait(true);
         content.Should().NotBeNull();
         content.Should().HaveCount(2);
     }
@@ -131,15 +130,13 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        
-        using (var scope = _factory.Services.CreateScope())
-        {
-            var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var news = await db.News.FirstOrDefaultAsync(n => n.Title == "SEO News").ConfigureAwait(true);
-            news.Should().NotBeNull();
-            news!.MetaTitle.Should().Be("Meta T");
-            news.MetaDescription.Should().Be("Meta D");
-            news.MetaKeywords.Should().Be("K1, K2");
-        }
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        var news = await db.News.FirstOrDefaultAsync(n => n.Title == "SEO News", TestContext.Current.CancellationToken).ConfigureAwait(true);
+        news.Should().NotBeNull();
+        news!.MetaTitle.Should().Be("Meta T");
+        news.MetaDescription.Should().Be("Meta D");
+        news.MetaKeywords.Should().Be("K1, K2");
     }
 }

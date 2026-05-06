@@ -1,5 +1,6 @@
 using Application.ApiContracts.Leads.Responses;
 using Application.Features.Bookings.Commands.ConfirmBooking;
+using Application.Features.Bookings.Commands.CreateBooking;
 using Domain.Constants.Booking;
 using Domain.Constants.Lead;
 using Domain.Constants.Permission;
@@ -86,20 +87,20 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             Score = 30
         };
         db.Leads.AddRange(lead1, lead2);
-        await db.SaveChangesAsync().ConfigureAwait(true);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         db.LeadActivities.AddRange(
             new LeadActivity { LeadId = lead1.Id, ActivityType = LeadActivityType.Booking, Description = "Activity 1", CreatedAt = DateTimeOffset.UtcNow },
             new LeadActivity { LeadId = lead2.Id, ActivityType = LeadActivityType.Booking, Description = "Activity 2", CreatedAt = DateTimeOffset.UtcNow }
         );
-        await db.SaveChangesAsync().ConfigureAwait(true);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         // Act
         var response = await _client.GetAsync("/api/v1/lead", CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<List<LeadResponse>>().ConfigureAwait(true);
+        var content = await response.Content.ReadFromJsonAsync<List<LeadResponse>>(TestContext.Current.CancellationToken).ConfigureAwait(true);
         content.Should().NotBeNull();
         content.Should().HaveCountGreaterOrEqualTo(2);
         content.Any(l => l.PhoneNumber == "0901000001" && l.Activities.Count > 0).Should().BeTrue();
@@ -143,9 +144,9 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             Score = 30
         };
         db.Leads.Add(lead);
-        await db.SaveChangesAsync().ConfigureAwait(true);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
-        var booking = new Booking
+        var booking = new Domain.Entities.Booking
         {
             FullName = lead.FullName,
             PhoneNumber = lead.PhoneNumber,
@@ -156,7 +157,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             BookingType = BookingType.TestDrive
         };
         db.Bookings.Add(booking);
-        await db.SaveChangesAsync().ConfigureAwait(true);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         // Act
         var confirmCommand = new ConfirmBookingCommand { BookingId = booking.Id };
@@ -166,11 +167,11 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
         // Refresh DB and check lead status
-        var updatedLead = await db.Leads.AsNoTracking().FirstOrDefaultAsync(l => l.Id == lead.Id).ConfigureAwait(true);
+        var updatedLead = await db.Leads.AsNoTracking().FirstOrDefaultAsync(l => l.Id == lead.Id, TestContext.Current.CancellationToken).ConfigureAwait(true);
         updatedLead.Should().NotBeNull();
         updatedLead!.Status.Should().Be(LeadStatus.TestDriving);
         
-        var activities = await db.LeadActivities.Where(a => a.LeadId == lead.Id).ToListAsync().ConfigureAwait(true);
+        var activities = await db.LeadActivities.Where(a => a.LeadId == lead.Id).ToListAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         activities.Should().Contain(a => a.ActivityType == LeadActivityType.Contact && a.Description.Contains("Đang lái thử"));
     }
 
@@ -195,7 +196,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var activity = await db.LeadActivities
             .Include(a => a.Lead)
-            .FirstOrDefaultAsync(a => a.Lead.PhoneNumber == phoneNumber).ConfigureAwait(true);
+            .FirstOrDefaultAsync(a => a.Lead.PhoneNumber == phoneNumber, TestContext.Current.CancellationToken).ConfigureAwait(true);
         
         activity.Should().NotBeNull();
         activity!.Description.Should().Contain("(Khách hàng mới)");
@@ -210,7 +211,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             db.Leads.Add(new Domain.Entities.Lead { FullName = "Old", PhoneNumber = phoneNumber });
-            await db.SaveChangesAsync().ConfigureAwait(true);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         }
 
         var command = new CreateBookingCommand 
@@ -231,7 +232,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             .Include(a => a.Lead)
             .Where(a => a.Lead.PhoneNumber == phoneNumber)
             .OrderByDescending(a => a.CreatedAt)
-            .FirstOrDefaultAsync().ConfigureAwait(true);
+            .FirstOrDefaultAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         
         activity.Should().NotBeNull();
         activity!.Description.Should().NotContain("(Khách hàng mới)");
@@ -248,7 +249,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var lead = new Domain.Entities.Lead { FullName = "Test", PhoneNumber = phoneNumber };
             db.Leads.Add(lead);
-            var booking = new Booking 
+            var booking = new Domain.Entities.Booking 
             { 
                 FullName = "Test", 
                 PhoneNumber = phoneNumber, 
@@ -259,7 +260,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
                 BookingType = BookingType.TestDrive
             };
             db.Bookings.Add(booking);
-            await db.SaveChangesAsync().ConfigureAwait(true);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             bookingId = booking.Id;
         }
 
@@ -273,7 +274,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var activity = await db.LeadActivities
             .Include(a => a.Lead)
             .Where(a => a.Lead.PhoneNumber == phoneNumber && a.ActivityType == LeadActivityType.Contact)
-            .FirstOrDefaultAsync().ConfigureAwait(true);
+            .FirstOrDefaultAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         
         activity.Should().NotBeNull();
         activity!.Description.Should().Contain("Đang lái thử");
@@ -289,14 +290,14 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var lead = new Domain.Entities.Lead { FullName = "User 25", PhoneNumber = phoneNumber };
             db.Leads.Add(lead);
-            await db.SaveChangesAsync().ConfigureAwait(true);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
             db.LeadActivities.AddRange(
-                new Domain.Entities.LeadActivity { LeadId = lead.Id, ActivityType = "Note", Description = "A1" },
-                new Domain.Entities.LeadActivity { LeadId = lead.Id, ActivityType = "Note", Description = "A2" },
-                new Domain.Entities.LeadActivity { LeadId = lead.Id, ActivityType = "Note", Description = "A3" }
+                new LeadActivity { LeadId = lead.Id, ActivityType = "Note", Description = "A1" },
+                new LeadActivity { LeadId = lead.Id, ActivityType = "Note", Description = "A2" },
+                new LeadActivity { LeadId = lead.Id, ActivityType = "Note", Description = "A3" }
             );
-            await db.SaveChangesAsync().ConfigureAwait(true);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         }
 
         // Act & Assert
@@ -305,7 +306,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var leadWithActivities = await db.Leads
                 .Include(l => l.Activities)
-                .FirstOrDefaultAsync(l => l.PhoneNumber == phoneNumber).ConfigureAwait(true);
+                .FirstOrDefaultAsync(l => l.PhoneNumber == phoneNumber, TestContext.Current.CancellationToken).ConfigureAwait(true);
             
             leadWithActivities.Should().NotBeNull();
             leadWithActivities!.Activities.Should().HaveCount(3);
@@ -335,7 +336,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         // Assert
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var lead = await db.Leads.AsNoTracking().FirstOrDefaultAsync(l => l.PhoneNumber == phoneNumber).ConfigureAwait(true);
+        var lead = await db.Leads.AsNoTracking().FirstOrDefaultAsync(l => l.PhoneNumber == phoneNumber, TestContext.Current.CancellationToken).ConfigureAwait(true);
         
         lead.Should().NotBeNull();
         lead!.Score.Should().Be(90);
@@ -350,7 +351,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             db.Leads.Add(new Domain.Entities.Lead { FullName = "Old Name", PhoneNumber = phoneNumber, Score = 30 });
-            await db.SaveChangesAsync().ConfigureAwait(true);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         }
 
         var command = new CreateBookingCommand 
@@ -368,7 +369,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var lead = await db.Leads.AsNoTracking().FirstOrDefaultAsync(l => l.PhoneNumber == phoneNumber).ConfigureAwait(true);
+            var lead = await db.Leads.AsNoTracking().FirstOrDefaultAsync(l => l.PhoneNumber == phoneNumber, TestContext.Current.CancellationToken).ConfigureAwait(true);
             
             lead.Should().NotBeNull();
             lead!.Score.Should().Be(60);
@@ -395,7 +396,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         // Assert
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var lead = await db.Leads.AsNoTracking().FirstOrDefaultAsync(l => l.PhoneNumber == phoneNumber).ConfigureAwait(true);
+        var lead = await db.Leads.AsNoTracking().FirstOrDefaultAsync(l => l.PhoneNumber == phoneNumber, TestContext.Current.CancellationToken).ConfigureAwait(true);
         
         lead.Should().NotBeNull();
         lead!.Score.Should().Be(30);

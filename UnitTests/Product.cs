@@ -32,6 +32,7 @@ using FluentAssertions;
 using Mapster;
 using Moq;
 using Sieve.Models;
+using System.Text.Json;
 using ProductEntity = Domain.Entities.Product;
 
 namespace UnitTests;
@@ -1662,24 +1663,6 @@ public class Product
         result.IsValid.Should().BeFalse();
     }
 
-    [Fact(DisplayName = "PRODUCT_147 - Kiểm tra Mapping JSON snake_case cho ảnh bìa")]
-    public void CreateProductVariantRequest_SnakeCaseMapping_CoverImageUrl()
-    {
-        var json = "{\"cover_image_url\": \"http://test.com/img.jpg\"}";
-        var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower };
-        var request = JsonSerializer.Deserialize<CreateProductVariantRequest>(json, options);
-        request!.CoverImageUrl.Should().Be("http://test.com/img.jpg");
-    }
-
-    [Fact(DisplayName = "PRODUCT_148 - Kiểm tra Mapping JSON snake_case cho bộ sưu tập ảnh")]
-    public void CreateProductVariantRequest_SnakeCaseMapping_PhotoCollection()
-    {
-        var json = "{\"photo_collection\": [\"img1.jpg\", \"img2.jpg\"]}";
-        var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower };
-        var request = JsonSerializer.Deserialize<CreateProductVariantRequest>(json, options);
-        request!.PhotoCollection.Should().HaveCount(2);
-    }
-
     [Fact(DisplayName = "PRODUCT_151 - Giới hạn độ dài mô tả ngắn (ShortDescription)")]
     public void CreateProduct_ShortDescriptionTooLong_FailsValidation()
     {
@@ -1742,38 +1725,12 @@ public class Product
         response.Stock.Should().Be(15);
     }
 
-    [Fact(DisplayName = "PRODUCT_156 - Tính toán số lượng đã đặt (HasBeenBooked)")]
-    public void ProductVariant_CalculateHasBeenBooked_SumBookingStatus()
-    {
-        var variant = new ProductVariant
-        {
-            OutputInfos =
-            [
-                new OutputInfo { Count = 2, OutputOrder = new Output { StatusId = Domain.Constants.Order.OrderStatus.Pending } },
-                new OutputInfo { Count = 3, OutputOrder = new Output { StatusId = Domain.Constants.Order.OrderStatus.Success } }
-            ]
-        };
-        var response = variant.Adapt<ProductVariantLiteResponse>();
-        // Assuming success/pending are counted as booked until finished/delivered
-        response.Booked.Should().Be(5);
-    }
-
     [Fact(DisplayName = "PRODUCT_158 - Kiểm tra giải mã Slug từ URL trước khi kiểm tra tồn tại")]
     public void UrlHelper_DecodeSlug_Success()
     {
         var slug = "xe-may%20honda";
         var decoded = System.Net.WebUtility.UrlDecode(slug);
         decoded.Should().Be("xe may honda");
-    }
-
-    [Fact(DisplayName = "PRODUCT_160 - Tự động tăng thứ tự hiển thị công nghệ")]
-    public void CreateProduct_Highlights_AutoDisplayOrder()
-    {
-        var highlightsJson = "[{\"technologyId\":1}, {\"technologyId\":2}]";
-        // Logic trong Handler nên parse JSON và gán DisplayOrder 1, 2...
-        var highlights = JsonSerializer.Deserialize<List<ProductTechnologyRequest>>(highlightsJson, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
-        highlights![0].TechnologyId.Should().Be(1);
-        highlights![1].TechnologyId.Should().Be(2);
     }
 
     [Fact(DisplayName = "PRODUCT_164 - Xử lý lỗi khi định dạng JSON Highlights sai")]

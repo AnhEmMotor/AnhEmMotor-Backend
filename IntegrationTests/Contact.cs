@@ -17,7 +17,6 @@ using System.Net.Http.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
@@ -53,17 +52,17 @@ public class Contact : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
                 new Domain.Entities.Contact { FullName = "C1", Email = "c1@gmail.com", PhoneNumber = "1", Subject = "S1", Message = "M1" },
                 new Domain.Entities.Contact { FullName = "C2", Email = "c2@gmail.com", PhoneNumber = "2", Subject = "S2", Message = "M2" }
             );
-            await db.SaveChangesAsync().ConfigureAwait(true);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         }
 
         // Act
-        var response = await _client.GetAsync("/api/v1/contacts").ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/contacts", TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<List<Domain.Entities.Contact>>().ConfigureAwait(true);
+        var content = await response.Content.ReadFromJsonAsync<List<Domain.Entities.Contact>>(TestContext.Current.CancellationToken).ConfigureAwait(true);
         content.Should().NotBeNull();
-        content.Should().HaveCountGreaterOrEqualTo(2);
+        content.Should().HaveCountGreaterThanOrEqualTo(2);
     }
 
     [Fact(DisplayName = "CONT_004 - Quản trị viên phản hồi liên hệ thành công")]
@@ -76,7 +75,7 @@ public class Contact : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var c = new Domain.Entities.Contact { FullName = "Reply Target", Email = "target@gmail.com", PhoneNumber = "123", Subject = "S", Message = "M" };
             db.Contacts.Add(c);
-            await db.SaveChangesAsync().ConfigureAwait(true);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             contactId = c.Id;
         }
 
@@ -105,7 +104,7 @@ public class Contact : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var contactWithReplies = await db.Contacts.Include(c => c.Replies).FirstOrDefaultAsync(c => c.Id == contactId).ConfigureAwait(true);
+            var contactWithReplies = await db.Contacts.Include(c => c.Replies).FirstOrDefaultAsync(c => c.Id == contactId, TestContext.Current.CancellationToken).ConfigureAwait(true);
             contactWithReplies!.Replies.Should().HaveCount(1);
             contactWithReplies.Replies.First().Message.Should().Be("Admin Reply");
             contactWithReplies.Status.Should().Be("Processed");
@@ -122,14 +121,14 @@ public class Contact : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var c = new Domain.Entities.Contact { FullName = "Note Target", Email = "note@gmail.com", PhoneNumber = "123", Subject = "S", Message = "M" };
             db.Contacts.Add(c);
-            await db.SaveChangesAsync().ConfigureAwait(true);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             contactId = c.Id;
         }
 
         var command = new UpdateInternalNoteCommand { ContactId = contactId, InternalNote = "New Internal Note" };
 
         // Act
-        var response = await _client.PatchAsJsonAsync($"/api/v1/contacts/{contactId}/internal-note", command).ConfigureAwait(true);
+        var response = await _client.PatchAsJsonAsync($"/api/v1/contacts/{contactId}/internal-note", command, TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -137,7 +136,7 @@ public class Contact : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var contact = await db.Contacts.FindAsync(contactId).ConfigureAwait(true);
+            var contact = await db.Contacts.FirstOrDefaultAsync(x => x.Id == contactId, TestContext.Current.CancellationToken).ConfigureAwait(true);
             contact!.InternalNote.Should().Be("New Internal Note");
         }
     }
@@ -152,18 +151,18 @@ public class Contact : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var c = new Domain.Entities.Contact { FullName = "Multi Reply", Email = "multi@gmail.com", PhoneNumber = "123", Subject = "S", Message = "M" };
             db.Contacts.Add(c);
-            await db.SaveChangesAsync().ConfigureAwait(true);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             contactId = c.Id;
 
             db.ContactReplies.AddRange(
                 new ContactReply { ContactId = contactId, Message = "R1", RepliedById = Guid.NewGuid() },
                 new ContactReply { ContactId = contactId, Message = "R2", RepliedById = Guid.NewGuid() }
             );
-            await db.SaveChangesAsync().ConfigureAwait(true);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         }
 
         // Act
-        var response = await _client.GetAsync($"/api/v1/contacts/{contactId}").ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/contacts/{contactId}", TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -188,12 +187,10 @@ public class Contact : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        
-        using (var scope = _factory.Services.CreateScope())
-        {
-            var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var contact = await db.Contacts.FirstOrDefaultAsync(c => c.Email == "vn@gmail.com").ConfigureAwait(true);
-            contact!.Subject.Should().Be("Cần tư vấn xe SH");
-        }
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        var contact = await db.Contacts.FirstOrDefaultAsync(c => c.Email == "vn@gmail.com", TestContext.Current.CancellationToken).ConfigureAwait(true);
+        contact!.Subject.Should().Be("Cần tư vấn xe SH");
     }
 }

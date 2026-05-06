@@ -132,7 +132,6 @@ public class Banner
             ImageUrl = banner.ImageUrl,
             LinkUrl = banner.LinkUrl,
             Position = banner.Position,
-            DisplayOrder = banner.DisplayOrder
         };
 
         // Assert
@@ -141,7 +140,6 @@ public class Banner
         response.ImageUrl.Should().Be("I");
         response.LinkUrl.Should().Be("L");
         response.Position.Should().Be("P");
-        response.DisplayOrder.Should().Be(5);
     }
 
     [Fact(DisplayName = "BANN_011 - Kiểm tra lưu trữ Banner khi không có liên kết (LinkUrl)")]

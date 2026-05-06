@@ -10,26 +10,16 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace IntegrationTests;
 
-public class Maintenance : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
+public class Maintenance(IntegrationTestWebAppFactory factory) : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
 {
-    private readonly IntegrationTestWebAppFactory _factory;
-    private readonly ITestOutputHelper _output;
-
-    public Maintenance(IntegrationTestWebAppFactory factory, ITestOutputHelper output)
-    {
-        _factory = factory;
-        _output = output;
-    }
-
     public ValueTask InitializeAsync() => ValueTask.CompletedTask;
 
     public async ValueTask DisposeAsync()
     {
-        await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(true);
+        await factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(true);
         GC.SuppressFinalize(this);
     }
 
@@ -37,12 +27,12 @@ public class Maintenance : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
     public async Task CreateVehicle_ValidLead_SavesSuccessfully()
     {
         // Arrange
-        using var scope = _factory.Services.CreateScope();
+        using var scope = factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var lead = new Lead { FullName = "Owner", PhoneNumber = "0909123456" };
+        var lead = new Domain.Entities.Lead { FullName = "Owner", PhoneNumber = "0909123456" };
         db.Leads.Add(lead);
-        await db.SaveChangesAsync().ConfigureAwait(true);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var vehicle = new Vehicle 
         { 
@@ -55,10 +45,10 @@ public class Maintenance : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
 
         // Act
         db.Vehicles.Add(vehicle);
-        await db.SaveChangesAsync().ConfigureAwait(true);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         // Assert
-        var savedVehicle = await db.Vehicles.FindAsync(vehicle.Id).ConfigureAwait(true);
+        var savedVehicle = await db.Vehicles.FirstOrDefaultAsync(x => x.Id == vehicle.Id, TestContext.Current.CancellationToken).ConfigureAwait(true);
         savedVehicle.Should().NotBeNull();
         savedVehicle!.LeadId.Should().Be(lead.Id);
     }
@@ -67,16 +57,16 @@ public class Maintenance : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
     public async Task CreateMaintenanceHistory_ValidVehicle_SavesSuccessfully()
     {
         // Arrange
-        using var scope = _factory.Services.CreateScope();
+        using var scope = factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var lead = new Lead { FullName = "Owner", PhoneNumber = "0909123456" };
+        var lead = new Domain.Entities.Lead { FullName = "Owner", PhoneNumber = "0909123456" };
         db.Leads.Add(lead);
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var vehicle = new Vehicle { LeadId = lead.Id, VinNumber = "V1", EngineNumber = "E1", LicensePlate = "L1" };
         db.Vehicles.Add(vehicle);
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var history = new MaintenanceHistory 
         { 
@@ -88,10 +78,10 @@ public class Maintenance : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
 
         // Act
         db.MaintenanceHistories.Add(history);
-        await db.SaveChangesAsync().ConfigureAwait(true);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         // Assert
-        var savedHistory = await db.MaintenanceHistories.FindAsync(history.Id).ConfigureAwait(true);
+        var savedHistory = await db.MaintenanceHistories.FirstOrDefaultAsync(x => x.Id == history.Id, TestContext.Current.CancellationToken).ConfigureAwait(true);
         savedHistory.Should().NotBeNull();
         savedHistory!.Mileage.Should().Be(5000);
     }
@@ -100,16 +90,16 @@ public class Maintenance : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
     public async Task CreateVehicleDocument_ValidVehicle_SavesSuccessfully()
     {
         // Arrange
-        using var scope = _factory.Services.CreateScope();
+        using var scope = factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var lead = new Lead { FullName = "Owner", PhoneNumber = "123" };
+        var lead = new Domain.Entities.Lead { FullName = "Owner", PhoneNumber = "123" };
         db.Leads.Add(lead);
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var vehicle = new Vehicle { LeadId = lead.Id, VinNumber = "V2", EngineNumber = "E2", LicensePlate = "L2" };
         db.Vehicles.Add(vehicle);
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var doc = new VehicleDocument 
         { 
@@ -121,10 +111,10 @@ public class Maintenance : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
 
         // Act
         db.VehicleDocuments.Add(doc);
-        await db.SaveChangesAsync().ConfigureAwait(true);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         // Assert
-        var savedDoc = await db.VehicleDocuments.FindAsync(doc.Id).ConfigureAwait(true);
+        var savedDoc = await db.VehicleDocuments.FirstOrDefaultAsync(x => x.Id == doc.Id, TestContext.Current.CancellationToken).ConfigureAwait(true);
         savedDoc.Should().NotBeNull();
         savedDoc!.DocumentType.Should().Be("Registration");
     }
@@ -133,21 +123,21 @@ public class Maintenance : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
     public async Task GetVehicles_ByLeadId_ReturnsCorrectList()
     {
         // Arrange
-        using var scope = _factory.Services.CreateScope();
+        using var scope = factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var lead = new Lead { FullName = "Owner", PhoneNumber = "123" };
+        var lead = new Domain.Entities.Lead { FullName = "Owner", PhoneNumber = "123" };
         db.Leads.Add(lead);
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         db.Vehicles.AddRange(
             new Vehicle { LeadId = lead.Id, VinNumber = "V1", EngineNumber = "E1", LicensePlate = "L1" },
             new Vehicle { LeadId = lead.Id, VinNumber = "V2", EngineNumber = "E2", LicensePlate = "L2" }
         );
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
-        var vehicles = await db.Vehicles.Where(v => v.LeadId == lead.Id).ToListAsync().ConfigureAwait(true);
+        var vehicles = await db.Vehicles.Where(v => v.LeadId == lead.Id).ToListAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         // Assert
         vehicles.Should().HaveCount(2);
@@ -157,28 +147,28 @@ public class Maintenance : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
     public async Task GetVehicle_WithMaintenanceHistories_ReturnsCorrectCount()
     {
         // Arrange
-        using var scope = _factory.Services.CreateScope();
+        using var scope = factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-        var lead = new Lead { FullName = "Owner", PhoneNumber = "123" };
+        var lead = new Domain.Entities.Lead { FullName = "Owner", PhoneNumber = "123" };
         db.Leads.Add(lead);
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var vehicle = new Vehicle { LeadId = lead.Id, VinNumber = "V3", EngineNumber = "E3", LicensePlate = "L3" };
         db.Vehicles.Add(vehicle);
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         db.MaintenanceHistories.AddRange(
             new MaintenanceHistory { VehicleId = vehicle.Id, Description = "H1", MaintenanceDate = DateTimeOffset.UtcNow },
             new MaintenanceHistory { VehicleId = vehicle.Id, Description = "H2", MaintenanceDate = DateTimeOffset.UtcNow },
             new MaintenanceHistory { VehicleId = vehicle.Id, Description = "H3", MaintenanceDate = DateTimeOffset.UtcNow }
         );
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         var vehicleWithHistories = await db.Vehicles
             .Include(v => v.MaintenanceHistories)
-            .FirstOrDefaultAsync(v => v.Id == vehicle.Id).ConfigureAwait(true);
+            .FirstOrDefaultAsync(v => v.Id == vehicle.Id, TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         // Assert
         vehicleWithHistories.Should().NotBeNull();
@@ -190,39 +180,39 @@ public class Maintenance : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
     {
         // Arrange
         int vehicleId;
-        using (var scope = _factory.Services.CreateScope())
+        using (var scope = factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-            var lead = new Lead { FullName = "Owner", PhoneNumber = "123" };
+            var lead = new Domain.Entities.Lead { FullName = "Owner", PhoneNumber = "123" };
             db.Leads.Add(lead);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
             var vehicle = new Vehicle { LeadId = lead.Id, VinNumber = "V4", EngineNumber = "E4", LicensePlate = "L4" };
             db.Vehicles.Add(vehicle);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken);
             vehicleId = vehicle.Id;
 
             db.MaintenanceHistories.Add(new MaintenanceHistory { VehicleId = vehicleId, Description = "H", MaintenanceDate = DateTimeOffset.UtcNow });
             db.VehicleDocuments.Add(new VehicleDocument { VehicleId = vehicleId, DocumentType = "D", FileUrl = "U" });
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken);
         }
 
         // Act
-        using (var scope = _factory.Services.CreateScope())
+        using (var scope = factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var vehicle = await db.Vehicles.FindAsync(vehicleId).ConfigureAwait(true);
+            var vehicle = await db.Vehicles.FirstOrDefaultAsync(x => x.Id == vehicleId, TestContext.Current.CancellationToken).ConfigureAwait(true);
             db.Vehicles.Remove(vehicle!);
-            await db.SaveChangesAsync().ConfigureAwait(true);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         }
 
         // Assert
-        using (var scope = _factory.Services.CreateScope())
+        using (var scope = factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var history = await db.MaintenanceHistories.AnyAsync(h => h.VehicleId == vehicleId).ConfigureAwait(true);
-            var document = await db.VehicleDocuments.AnyAsync(d => d.VehicleId == vehicleId).ConfigureAwait(true);
+            var history = await db.MaintenanceHistories.AnyAsync(h => h.VehicleId == vehicleId, TestContext.Current.CancellationToken).ConfigureAwait(true);
+            var document = await db.VehicleDocuments.AnyAsync(d => d.VehicleId == vehicleId, TestContext.Current.CancellationToken).ConfigureAwait(true);
 
             history.Should().BeFalse();
             document.Should().BeFalse();
@@ -234,34 +224,34 @@ public class Maintenance : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
     {
         // Arrange
         int vehicleId;
-        using (var scope = _factory.Services.CreateScope())
+        using (var scope = factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
-            var lead = new Lead { FullName = "Owner", PhoneNumber = "123" };
+            var lead = new Domain.Entities.Lead { FullName = "Owner", PhoneNumber = "123" };
             db.Leads.Add(lead);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
             var vehicle = new Vehicle { LeadId = lead.Id, VinNumber = "V5", EngineNumber = "E5", LicensePlate = "OLD" };
             db.Vehicles.Add(vehicle);
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken);
             vehicleId = vehicle.Id;
         }
 
         // Act
-        using (var scope = _factory.Services.CreateScope())
+        using (var scope = factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var vehicle = await db.Vehicles.FindAsync(vehicleId).ConfigureAwait(true);
+            var vehicle = await db.Vehicles.FirstOrDefaultAsync(x => x.Id == vehicleId, TestContext.Current.CancellationToken).ConfigureAwait(true);
             vehicle!.LicensePlate = "NEW-123";
-            await db.SaveChangesAsync().ConfigureAwait(true);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         }
 
         // Assert
-        using (var scope = _factory.Services.CreateScope())
+        using (var scope = factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var vehicle = await db.Vehicles.FindAsync(vehicleId).ConfigureAwait(true);
+            var vehicle = await db.Vehicles.FirstOrDefaultAsync(x => x.Id == vehicleId, TestContext.Current.CancellationToken).ConfigureAwait(true);
             vehicle!.LicensePlate.Should().Be("NEW-123");
             vehicle.VinNumber.Should().Be("V5");
         }
@@ -271,7 +261,7 @@ public class Maintenance : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
     public async Task CreateVehicle_InvalidLeadId_ThrowsException()
     {
         // Arrange
-        using var scope = _factory.Services.CreateScope();
+        using var scope = factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
 
         var vehicle = new Vehicle 

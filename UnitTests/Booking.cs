@@ -47,7 +47,7 @@ public class Booking
         // Arrange
         var command = new CreateBookingCommand { Location = BookingLocation.Showroom, PhoneNumber = "0909123456" };
         _leadReadRepoMock.Setup(x => x.GetByPhoneNumberAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Lead { Id = 1 });
+            .ReturnsAsync(new Domain.Entities.Lead { Id = 1 });
 
         var handler = new CreateBookingCommandHandler(
             _bookingInsertRepoMock.Object,
@@ -70,7 +70,7 @@ public class Booking
         // Arrange
         var command = new CreateBookingCommand { Location = BookingLocation.CustomerAddress, PhoneNumber = "0909123456" };
         _leadReadRepoMock.Setup(x => x.GetByPhoneNumberAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Lead { Id = 1 });
+            .ReturnsAsync(new Domain.Entities.Lead { Id = 1 });
 
         var handler = new CreateBookingCommandHandler(
             _bookingInsertRepoMock.Object,
@@ -103,7 +103,7 @@ public class Booking
         // Arrange
         var command = new CreateBookingCommand { BookingType = BookingType.TestDrive, PhoneNumber = "0909123456" };
         _leadReadRepoMock.Setup(x => x.GetByPhoneNumberAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new Lead { Id = 1 });
+            .ReturnsAsync(new Domain.Entities.Lead { Id = 1 });
 
         var handler = new CreateBookingCommandHandler(
             _bookingInsertRepoMock.Object,
@@ -158,7 +158,7 @@ public class Booking
             ProductVariant = new ProductVariant 
             { 
                 VersionName = "Standard",
-                Product = new Product { Name = "Honda SH" }
+                Product = new Domain.Entities.Product { Name = "Honda SH" }
             }
         };
         _bookingReadRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>()))
