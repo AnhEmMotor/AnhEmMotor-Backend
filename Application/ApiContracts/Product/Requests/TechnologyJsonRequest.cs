@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -7,16 +7,16 @@ namespace Application.ApiContracts.Product.Requests
 {
     public class TechnologyJsonRequest
     {
-        [JsonPropertyName("technologyId")]
+        [JsonPropertyName("technology_id")]
         public int TechnologyId { get; set; }
 
-        [JsonPropertyName("customTitle")]
+        [JsonPropertyName("custom_title")]
         public string? CustomTitle { get; set; }
 
-        [JsonPropertyName("customDescription")]
+        [JsonPropertyName("custom_description")]
         public string? CustomDescription { get; set; }
 
-        [JsonPropertyName("customImageUrl")]
+        [JsonPropertyName("custom_image_url")]
         public string? CustomImageUrl { get; set; }
     }
 }

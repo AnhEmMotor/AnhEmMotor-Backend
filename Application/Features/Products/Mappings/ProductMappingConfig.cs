@@ -280,6 +280,23 @@ public class ProductMappingConfig : IRegister
                 })
             .ToList();
         var variantName = BuildVariantName(optionPairs);
+        var extraParts = new List<string>();
+        if (!string.IsNullOrWhiteSpace(variant.VersionName)) extraParts.Add(variant.VersionName);
+        if (!string.IsNullOrWhiteSpace(variant.ColorName)) extraParts.Add(variant.ColorName);
+        
+        if (extraParts.Count > 0)
+        {
+            var extra = string.Join(" - ", extraParts);
+            if (string.IsNullOrWhiteSpace(variantName))
+            {
+                variantName = extra;
+            }
+            else if (!variantName.Contains(variant.VersionName ?? "NONE") && !variantName.Contains(variant.ColorName ?? "NONE"))
+            {
+                variantName = $"{variantName} - {extra}";
+            }
+        }
+
         var productName = variant.Product?.Name;
         var displayName = string.IsNullOrWhiteSpace(variantName)
             ? productName ?? string.Empty

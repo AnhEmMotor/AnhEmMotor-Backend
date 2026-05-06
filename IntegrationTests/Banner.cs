@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -54,7 +55,7 @@ public class Banner : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetim
         }
 
         // Act
-        var response = await _client.GetAsync("/api/v1/banner/active", TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/banners/active", TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -79,7 +80,7 @@ public class Banner : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetim
         }
 
         // Act
-        var response = await _client.GetAsync("/api/v1/banner/active", TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/banners/active", TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         // Assert
         var content = await response.Content.ReadFromJsonAsync<List<BannerResponse>>(TestContext.Current.CancellationToken).ConfigureAwait(true);
@@ -105,7 +106,7 @@ public class Banner : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetim
         }
 
         // Act
-        var response = await _client.GetAsync("/api/v1/banner/active", TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/banners/active", TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         // Assert
         var content = await response.Content.ReadFromJsonAsync<List<BannerResponse>>(TestContext.Current.CancellationToken).ConfigureAwait(true);
@@ -116,15 +117,30 @@ public class Banner : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetim
     [Fact(DisplayName = "BANN_012 - Kiểm tra tính toàn vẹn của dữ liệu ảnh (ImageUrl)")]
     public async Task CreateBanner_ValidImageUrl_SavesCorrectly()
     {
-        // Arrange
-        var command = new CreateBannerCommand 
-        { 
-            Title = "Integrity Test", 
-            ImageUrl = "http://anh-em-motor.com/banner.jpg" 
+        var payload = new
+        {
+            title = "Integrity Test",
+            image_url = "http://anh-em-motor.com/banner.jpg"
         };
 
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            $"user_{uniqueId}",
+            "Password123!",
+            ["Permissions.Banners.Create"],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            $"user_{uniqueId}",
+            "Password123!",
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/banner", command).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/banners", payload).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);

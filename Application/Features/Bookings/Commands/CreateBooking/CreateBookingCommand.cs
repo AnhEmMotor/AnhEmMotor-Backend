@@ -12,7 +12,7 @@ public record CreateBookingCommand : IRequest<Result<int>>
 
     public string PhoneNumber { get; init; } = string.Empty;
 
-    public int ProductVariantId { get; init; }
+    public int? ProductVariantId { get; init; }
 
     public DateTimeOffset PreferredDate { get; init; }
 

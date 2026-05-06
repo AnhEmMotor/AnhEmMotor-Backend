@@ -56,6 +56,7 @@ public class Product
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<IProductVariantInsertRepository> _productVariantInsertRepository;
     private readonly Mock<IVariantOptionValueDeleteRepository> _variantOptionValueDeleteRepoMock;
+    private readonly Mock<IProductTechnologyRepository> _productTechnologyRepoMock;
 
     public Product()
     {
@@ -86,6 +87,7 @@ public class Product
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _productVariantInsertRepository = new Mock<IProductVariantInsertRepository>();
         _variantOptionValueDeleteRepoMock = new Mock<IVariantOptionValueDeleteRepository>();
+        _productTechnologyRepoMock = new Mock<IProductTechnologyRepository>();
         new ProductMappingConfig().Register(TypeAdapterConfig.GlobalSettings);
     }
 
@@ -649,6 +651,7 @@ public class Product
             .ReturnsAsync(new Domain.Entities.Brand { Id = 1, DeletedAt = null });
         var handler = new UpdateProductCommandHandler(
             _productReadRepoMock.Object,
+            _productTechnologyRepoMock.Object,
             _variantReadRepoMock.Object,
             _productCategoryReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -672,6 +675,7 @@ public class Product
             .ReturnsAsync((ProductEntity?)null);
         var handler = new UpdateProductCommandHandler(
             _productReadRepoMock.Object,
+            _productTechnologyRepoMock.Object,
             _variantReadRepoMock.Object,
             _productCategoryReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -695,6 +699,7 @@ public class Product
             .ReturnsAsync(new ProductEntity { Id = 1, StatusId = "for-sale", DeletedAt = DateTime.UtcNow });
         var handler = new UpdateProductCommandHandler(
             _productReadRepoMock.Object,
+            _productTechnologyRepoMock.Object,
             _variantReadRepoMock.Object,
             _productCategoryReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -729,6 +734,7 @@ public class Product
             .ReturnsAsync((Domain.Entities.ProductCategory?)null);
         var handler = new UpdateProductCommandHandler(
             _productReadRepoMock.Object,
+            _productTechnologyRepoMock.Object,
             _variantReadRepoMock.Object,
             _productCategoryReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -754,6 +760,7 @@ public class Product
             .ReturnsAsync(new Domain.Entities.ProductCategory { Id = 1, DeletedAt = DateTime.UtcNow });
         var handler = new UpdateProductCommandHandler(
             _productReadRepoMock.Object,
+            _productTechnologyRepoMock.Object,
             _variantReadRepoMock.Object,
             _productCategoryReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -790,6 +797,7 @@ public class Product
             .ReturnsAsync((ProductVariant?)null);
         var handler = new UpdateProductCommandHandler(
             _productReadRepoMock.Object,
+            _productTechnologyRepoMock.Object,
             _variantReadRepoMock.Object,
             _productCategoryReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -826,6 +834,7 @@ public class Product
             .ReturnsAsync(new ProductVariant { Id = 1, ProductId = 1, DeletedAt = null });
         var handler = new UpdateProductCommandHandler(
             _productReadRepoMock.Object,
+            _productTechnologyRepoMock.Object,
             _variantReadRepoMock.Object,
             _productCategoryReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -862,6 +871,7 @@ public class Product
             .ReturnsAsync([new() { Id = 1, ProductId = 1, DeletedAt = null }]);
         var handler = new UpdateProductCommandHandler(
             _productReadRepoMock.Object,
+            _productTechnologyRepoMock.Object,
             _variantReadRepoMock.Object,
             _productCategoryReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -1634,6 +1644,7 @@ public class Product
         {
             Name = "P",
             CategoryId = 1,
+            BrandId = 1,
             Variants =
             [
                 new CreateProductVariantRequest { UrlSlug = "v1" },
@@ -1652,6 +1663,7 @@ public class Product
         {
             Name = "P",
             CategoryId = 1,
+            BrandId = 1,
             Variants =
             [
                 new CreateProductVariantRequest { UrlSlug = "v1", VersionName = "V1", ColorName = "Red" },
@@ -1730,7 +1742,7 @@ public class Product
     {
         var slug = "xe-may%20honda";
         var decoded = System.Net.WebUtility.UrlDecode(slug);
-        decoded.Should().Be("xe may honda");
+        decoded.Should().Be("xe-may honda");
     }
 
     [Fact(DisplayName = "PRODUCT_164 - Xử lý lỗi khi định dạng JSON Highlights sai")]
@@ -1782,6 +1794,9 @@ public class Product
     {
         var command = new CreateProductCommand
         {
+            Name = "P",
+            CategoryId = 1,
+            BrandId = 1,
             Variants = [new CreateProductVariantRequest(), new CreateProductVariantRequest()]
         };
         var validator = new CreateProductCommandValidator();
@@ -1795,7 +1810,8 @@ public class Product
         var command = new CreateProductCommand
         {
             Name = "P", CategoryId = 1,
-            Variants = [new CreateProductVariantRequest { UrlSlug = "v1" }]
+            BrandId = 1,
+            Variants = [new CreateProductVariantRequest { UrlSlug = "v1", Price = 1000, OptionValueIds = [] }]
         };
         var validator = new CreateProductCommandValidator();
         var result = validator.Validate(command);
@@ -1807,6 +1823,9 @@ public class Product
     {
         var command = new CreateProductCommand
         {
+            Name = "P",
+            CategoryId = 1,
+            BrandId = 1,
             Variants = [new CreateProductVariantRequest { ColorName = "Red" }, new CreateProductVariantRequest { ColorName = "Red" }]
         };
         var validator = new CreateProductCommandValidator();
@@ -1819,6 +1838,9 @@ public class Product
     {
         var command = new CreateProductCommand
         {
+            Name = "P",
+            CategoryId = 1,
+            BrandId = 1,
             Variants = [new CreateProductVariantRequest { VersionName = "V1" }, new CreateProductVariantRequest { VersionName = "V1" }]
         };
         var validator = new CreateProductCommandValidator();
@@ -1831,6 +1853,9 @@ public class Product
     {
         var command = new CreateProductCommand
         {
+            Name = "P",
+            CategoryId = 1,
+            BrandId = 1,
             Variants = [
                 new CreateProductVariantRequest { ColorName = "Red", VersionName = "V1" },
                 new CreateProductVariantRequest { ColorName = "Red", VersionName = "V1" }
@@ -1846,6 +1871,9 @@ public class Product
     {
         var command = new CreateProductCommand
         {
+            Name = "P",
+            CategoryId = 1,
+            BrandId = 1,
             Variants = [new CreateProductVariantRequest { ColorName = "RED" }, new CreateProductVariantRequest { ColorName = "red" }]
         };
         var validator = new CreateProductCommandValidator();

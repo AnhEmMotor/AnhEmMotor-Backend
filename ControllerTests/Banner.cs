@@ -46,7 +46,7 @@ public class Banner
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
-        var response = Assert.IsType<Result<int>>(okResult.Value);
-        Assert.Equal(50, response.Value);
+        var response = Assert.IsType<int>(okResult.Value);
+        Assert.Equal(50, response);
     }
 }

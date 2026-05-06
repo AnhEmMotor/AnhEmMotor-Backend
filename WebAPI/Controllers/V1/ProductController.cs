@@ -277,8 +277,7 @@ public class ProductController(ISender sender) : ApiController
         [FromBody] CreateProductCommand request,
         CancellationToken cancellationToken)
     {
-        var command = request.Adapt<CreateProductCommand>();
-        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(request, cancellationToken).ConfigureAwait(true);
         return HandleCreated(
             result,
             RouteNames.Product.GetVarientByIdForManager,

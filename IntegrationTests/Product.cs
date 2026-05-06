@@ -40,12 +40,15 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         _output = output;
     }
 
-    public ValueTask InitializeAsync() => ValueTask.CompletedTask;
-
-    public async ValueTask DisposeAsync()
+    public async ValueTask InitializeAsync()
     {
         await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(true);
+    }
+    
+    public ValueTask DisposeAsync()
+    {
         GC.SuppressFinalize(this);
+        return ValueTask.CompletedTask;
     }
 
     #pragma warning disable IDE0079
@@ -695,20 +698,23 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         db.Brands.Add(brand);
         db.PredefinedOptions.Add(new PredefinedOption { Key = $"Color_{uniqueId}", Value = "Màu sắc" });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        var request = new CreateProductCommand
+        var payload = new
         {
-            Name = $"Product_{uniqueId}",
-            CategoryId = category.Id,
-            BrandId = brand.Id,
-            Variants =
-                [new CreateProductVariantRequest
+            name = $"Product_{uniqueId}",
+            category_id = category.Id,
+            brand_id = brand.Id,
+            status_id = "for-sale",
+            variants = new[]
+            {
+                new
                 {
-                    UrlSlug = $"slug-{uniqueId}",
-                    Price = 20000000,
-                    OptionValues = new Dictionary<string, string> { { $"Color_{uniqueId}", "Green" } }
-                }]
+                    url_slug = $"slug-{uniqueId}",
+                    price = 20000000,
+                    optionValues = new Dictionary<string, string> { { $"Color_{uniqueId}", "Green" } }
+                }
+            }
         };
-        var response = await _client.PostAsJsonAsync("/api/v1/product", request).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/product", payload).ConfigureAwait(true);
         if (response.StatusCode != HttpStatusCode.Created)
         {
             var error = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
@@ -771,20 +777,23 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var optionValue = new OptionValue { OptionId = option.Id, Name = optionValueName };
         db.OptionValues.Add(optionValue);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        var request = new CreateProductCommand
+        var payload = new
         {
-            Name = $"Product_{uniqueId}",
-            CategoryId = category.Id,
-            BrandId = brand.Id,
-            Variants =
-                [new CreateProductVariantRequest
+            name = $"Product_{uniqueId}",
+            category_id = category.Id,
+            brand_id = brand.Id,
+            status_id = "for-sale",
+            variants = new[]
+            {
+                new
                 {
-                    UrlSlug = $"slug-{uniqueId}",
-                    Price = 20000000,
-                    OptionValues = new Dictionary<string, string> { { optionName, optionValueName } }
-                }]
+                    url_slug = $"slug-{uniqueId}",
+                    price = 20000000,
+                    optionValues = new Dictionary<string, string> { { optionName, optionValueName } }
+                }
+            }
         };
-        var response = await _client.PostAsJsonAsync("/api/v1/product", request).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/product", payload).ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         var count = await db.OptionValues
             .CountAsync(
@@ -840,10 +849,6 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var option1 = new Option { Name = "Color" };
         var option2 = new Option { Name = "Size" };
-        db.PredefinedOptions
-            .AddRange(
-                new PredefinedOption { Key = "Color", Value = "Màu sắc" },
-                new PredefinedOption { Key = "Size", Value = "Size" });
         db.Options.AddRange(option1, option2);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var val1 = new OptionValue { OptionId = option1.Id, Name = "Red" };
@@ -960,14 +965,22 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         db.ProductCategories.Add(category);
         db.Brands.Add(brand);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-        var request = new CreateProductCommand
+        var payload = new
         {
-            Name = $"Decimal_{uniqueId}",
-            CategoryId = category.Id,
-            BrandId = brand.Id,
-            Variants = [new CreateProductVariantRequest { UrlSlug = $"dec-{uniqueId}", Price = 20000000.99m }]
+            name = $"Decimal_{uniqueId}",
+            category_id = category.Id,
+            brand_id = brand.Id,
+            status_id = "for-sale",
+            variants = new[]
+            {
+                new
+                {
+                    url_slug = $"dec-{uniqueId}",
+                    price = 20000000.99m
+                }
+            }
         };
-        var response = await _client.PostAsJsonAsync("/api/v1/product", request).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/product", payload).ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         var content = await response.Content
             .ReadFromJsonAsync<ProductDetailResponse>(CancellationToken.None)
@@ -1263,14 +1276,23 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             db.ProductStatuses.Add(new ProductStatus { Key = ProductStatusConstants.ForSale });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         string longSlug = new('a', 200);
-        var command = new CreateProductCommand
+        var payload = new
         {
-            Name = "Long Slug Product",
-            CategoryId = cat.Id,
-            BrandId = brand.Id,
-            Variants = [new CreateProductVariantRequest { UrlSlug = longSlug, Price = 1000, OptionValueIds = [] }]
+            name = "Long Slug Product",
+            category_id = cat.Id,
+            brand_id = brand.Id,
+            status_id = "for-sale",
+            variants = new[]
+            {
+                new
+                {
+                    url_slug = longSlug,
+                    price = 1000,
+                    optionValueIds = Array.Empty<int>()
+                }
+            }
         };
-        var response = await _client.PostAsJsonAsync("/api/v1/product", command).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/product", payload).ConfigureAwait(true);
         response.StatusCode.Should().BeOneOf(HttpStatusCode.Created, HttpStatusCode.OK);
         var createdProduct = await db.ProductVariants
             .FirstOrDefaultAsync(v => string.Compare(v.UrlSlug, longSlug) == 0, CancellationToken.None)
@@ -1314,13 +1336,13 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var reqBody = new
         {
             name = "Test Product Decimal",
-            categoryId = cat.Id,
-            brandId = brand.Id,
+            category_id = cat.Id,
+            brand_id = brand.Id,
             weight = string.Empty,
             displacement = string.Empty,
             variants = new[]
             {
-                new { urlSlug = $"test-dec-{uniqueId}", price = 1000, optionValueIds = Array.Empty<int>() }
+                new { url_slug = $"test-dec-{uniqueId}", price = 1000, optionValueIds = Array.Empty<int>() }
             }
         };
         var response = await _client.PostAsJsonAsync("/api/v1/product", reqBody).ConfigureAwait(true);
@@ -1358,7 +1380,6 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var optionValue = new OptionValue { Option = option, Name = "Red" };
         db.ProductCategories.Add(cat);
         db.Brands.Add(brand);
-        db.PredefinedOptions.Add(predefinedOption);
         db.Options.Add(option);
         db.OptionValues.Add(optionValue);
         if (!await db.ProductStatuses
@@ -2758,26 +2779,46 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         db.Brands.Add(brand);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
-        var command = new CreateProductCommand
+        var payload = new
         {
-            Name = "Special Bike",
-            CategoryId = cat.Id,
-            BrandId = brand.Id,
-            Variants =
-            [
-                new CreateProductVariantRequest
+            name = "Special Bike",
+            category_id = cat.Id,
+            categoryId = cat.Id,
+            brand_id = brand.Id,
+            brandId = brand.Id,
+            status_id = "for-sale",
+            statusId = "for-sale",
+            variants = new[]
+            {
+                new
                 {
-                    SKU = "SKU-123",
-                    VersionName = "Premium",
-                    ColorName = "Deep Blue",
-                    ColorCode = "#00008B",
-                    UrlSlug = "special-bike-v1"
+                    sku = "SKU-123",
+                    version_name = "Premium",
+                    versionName = "Premium",
+                    color_name = "Deep Blue",
+                    colorName = "Deep Blue",
+                    color_code = "#00008B",
+                    colorCode = "#00008B",
+                    price = 1000,
+                    url_slug = "special-bike-v1",
+                    urlSlug = "special-bike-v1"
                 }
-            ]
+            }
         };
 
+        var uniqueIdAuth = Guid.NewGuid().ToString("N")[..8];
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            $"user_{uniqueIdAuth}",
+            "Password123!",
+            [PermissionsList.Products.Create, PermissionsList.Products.View],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResp = await IntegrationTestAuthHelper.AuthenticateAsync(_client, $"user_{uniqueIdAuth}", "Password123!", CancellationToken.None).ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResp.AccessToken);
+
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/product", command).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/product", payload).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
@@ -2792,28 +2833,68 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
     public async Task CreateProduct_UpdateExistingOptionValueColorCode()
     {
         // Arrange
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            $"user_{uniqueId}",
+            "Password123!",
+            [PermissionsList.Products.Create],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            $"user_{uniqueId}",
+            "Password123!",
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var cat = new ProductCategoryEntity { Name = "Cat-ColorUpdate" };
+        var brand = new BrandEntity { Name = "Brand-ColorUpdate" };
         var option = new Option { Name = "Màu sắc" };
-        var ov = new OptionValue { Option = option, Name = "Đỏ", ColorCode = null };
+        var ov = new OptionValue { Option = option, Name = "Red", ColorCode = null };
         db.ProductCategories.Add(cat);
+        db.Brands.Add(brand);
         db.Options.Add(option);
         db.OptionValues.Add(ov);
-        db.PredefinedOptions.Add(new PredefinedOption { Key = "Color", Value = "Màu sắc" });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
-        var command = new CreateProductCommand
+        var payload = new
         {
-            Name = "Bike", CategoryId = cat.Id,
-            Variants = [new CreateProductVariantRequest { UrlSlug = "v1", ColorName = "Đỏ", ColorCode = "#FF0000" }]
+            name = "Bike",
+            category_id = cat.Id,
+            categoryId = cat.Id,
+            brand_id = brand.Id,
+            brandId = brand.Id,
+            variants = new[]
+            {
+                new
+                {
+                    url_slug = "v1",
+                    urlSlug = "v1",
+                    price = 1000,
+                    color_name = "Red",
+                    colorName = "Red",
+                    color_code = "#FF0000",
+                    colorCode = "#FF0000",
+                    optionValues = new Dictionary<string, string> { { "Màu sắc", "Red" } }
+                }
+            }
         };
 
         // Act
-        await _client.PostAsJsonAsync("/api/v1/product", command).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/product", payload).ConfigureAwait(true);
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
 
         // Assert
-        var updatedOv = await db.OptionValues.FirstAsync(v => v.Id == ov.Id, TestContext.Current.CancellationToken);
+        using var assertScope = _factory.Services.CreateScope();
+        var assertDb = assertScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        var product = await assertDb.Products.AsNoTracking().FirstOrDefaultAsync(p => p.Name == "Bike", TestContext.Current.CancellationToken);
+        product.Should().NotBeNull("Product should have been created");
+
+        var updatedOv = await assertDb.OptionValues.AsNoTracking().FirstAsync(v => v.Id == ov.Id, TestContext.Current.CancellationToken);
         updatedOv.ColorCode.Should().Be("#FF0000");
     }
 
@@ -2821,24 +2902,55 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
     public async Task CreateProduct_SavesSeoMetadata()
     {
         // Arrange
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            $"user_{uniqueId}",
+            "Password123!",
+            [PermissionsList.Products.Create],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            $"user_{uniqueId}",
+            "Password123!",
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var cat = new ProductCategoryEntity { Name = "Cat-SEO" };
+        var brand = new BrandEntity { Name = "Brand-SEO" };
         db.ProductCategories.Add(cat);
+        db.Brands.Add(brand);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
-        var command = new CreateProductCommand
+        var payload = new
         {
-            Name = "SEO Bike",
-            CategoryId = cat.Id,
-            MetaTitle = "Meta Title",
-            MetaDescription = "Meta Description",
-            ShortDescription = "Short Description",
-            Variants = [new CreateProductVariantRequest { UrlSlug = "seo-bike" }]
+            name = "SEO Bike",
+            category_id = cat.Id,
+            brand_id = brand.Id,
+            meta_title = "Meta Title",
+            meta_description = "Meta Description",
+            short_description = "Short Description",
+            variants = new[]
+            {
+                new
+                {
+                    url_slug = "seo-bike",
+                    price = 1000
+                }
+            }
         };
 
         // Act
-        await _client.PostAsJsonAsync("/api/v1/product", command).ConfigureAwait(true);
+        var response150 = await _client.PostAsJsonAsync("/api/v1/product", payload).ConfigureAwait(true);
+        if (!response150.IsSuccessStatusCode)
+        {
+            var error = await response150.Content.ReadAsStringAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+            throw new Exception($"API failed with {response150.StatusCode}: {error}");
+        }
 
         // Assert
         var product = await db.Products.FirstOrDefaultAsync(p => p.Name == "SEO Bike", TestContext.Current.CancellationToken);
@@ -2851,26 +2963,56 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
     public async Task CreateProduct_WithHighlights_SavesCorrectly()
     {
         // Arrange
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            $"user_{uniqueId}",
+            "Password123!",
+            [PermissionsList.Products.Create],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            $"user_{uniqueId}",
+            "Password123!",
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var cat = new ProductCategoryEntity { Name = "Cat-Tech" };
+        var brand = new BrandEntity { Name = "Brand-Tech" };
         var tech = new Technology { Name = "ABS" };
         db.ProductCategories.Add(cat);
+        db.Brands.Add(brand);
         db.Technologies.Add(tech);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
-        var command = new CreateProductCommand
+        var payload = new
         {
-            Name = "Tech Bike", CategoryId = cat.Id,
-            Highlights = $"[{{\"technologyId\":{tech.Id}, \"customTitle\":\"Cool ABS\"}}]",
-            Variants = [new CreateProductVariantRequest { UrlSlug = "tech-bike" }]
+            name = "Tech Bike",
+            category_id = cat.Id,
+            brand_id = brand.Id,
+            highlights = $"[{{\"technology_id\":{tech.Id}, \"custom_title\":\"Cool ABS\"}}]",
+            variants = new[]
+            {
+                new
+                {
+                    url_slug = "tech-bike",
+                    price = 1000
+                }
+            }
         };
 
         // Act
-        await _client.PostAsJsonAsync("/api/v1/product", command).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/product", payload).ConfigureAwait(true);
+        response.EnsureSuccessStatusCode();
 
         // Assert
-        var link = await db.ProductTechnologies.FirstOrDefaultAsync(pt => pt.CustomTitle == "Cool ABS", TestContext.Current.CancellationToken).ConfigureAwait(true);
+        using var assertScope = _factory.Services.CreateScope();
+        var assertDb = assertScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        var link = await assertDb.ProductTechnologies.AsNoTracking().FirstOrDefaultAsync(pt => pt.CustomTitle == "Cool ABS", TestContext.Current.CancellationToken);
         link.Should().NotBeNull();
     }
 
@@ -2878,24 +3020,53 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
     public async Task UpdateProduct_AddHighlight_Success()
     {
         // Arrange
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            $"user_{uniqueId}",
+            "Password123!",
+            [PermissionsList.Products.Edit],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            $"user_{uniqueId}",
+            "Password123!",
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var cat = new ProductCategoryEntity { Name = "Cat-UpdateAdd" };
+        var brand = new BrandEntity { Name = "Brand-UpdateAdd" };
         var t1 = new Technology { Name = "T1" };
         var t2 = new Technology { Name = "T2" };
         db.ProductCategories.Add(cat);
+        db.Brands.Add(brand);
         db.Technologies.AddRange(t1, t2);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
-        var p = new ProductEntity { Name = "P", CategoryId = cat.Id, StatusId = "for-sale" };
+        var p = new ProductEntity { Name = "P", CategoryId = cat.Id, BrandId = brand.Id, StatusId = "for-sale" };
         db.Products.Add(p);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+
         db.ProductTechnologies.Add(new ProductTechnology { ProductId = p.Id, TechnologyId = t1.Id });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
-        var cmd = new UpdateProductCommand { Id = p.Id, Name = "P", CategoryId = cat.Id, Highlights = $"[{{\"technologyId\":{t1.Id}}}, {{\"technologyId\":{t2.Id}}}]" };
+        var cmd = new UpdateProductCommand 
+        { 
+            Id = p.Id, 
+            Name = "P", 
+            CategoryId = cat.Id, 
+            BrandId = brand.Id,
+            Highlights = $"[{{\"technology_id\":{t1.Id}}}, {{\"technology_id\":{t2.Id}}}]",
+            Variants = [new UpdateProductVariantRequest { UrlSlug = "v1", Price = 1000 }]
+        };
 
         // Act
-        await _client.PutAsJsonAsync($"/api/v1/product/{p.Id}", cmd).ConfigureAwait(true);
+        var response = await _client.PutAsJsonAsync($"/api/v1/product/{p.Id}", cmd).ConfigureAwait(true);
+        response.EnsureSuccessStatusCode();
 
         // Assert
         var links = await db.ProductTechnologies.Where(pt => pt.ProductId == p.Id).ToListAsync(TestContext.Current.CancellationToken);
@@ -2906,23 +3077,52 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
     public async Task UpdateProduct_RemoveHighlight_Success()
     {
         // Arrange
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            $"user_{uniqueId}",
+            "Password123!",
+            [PermissionsList.Products.Edit],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            $"user_{uniqueId}",
+            "Password123!",
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var cat = new ProductCategoryEntity { Name = "Cat-UpdateRem" };
+        var brand = new BrandEntity { Name = "Brand-UpdateRem" };
         var t1 = new Technology { Name = "T1" };
         db.ProductCategories.Add(cat);
+        db.Brands.Add(brand);
         db.Technologies.Add(t1);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
-        var p = new ProductEntity { Name = "P", CategoryId = cat.Id, StatusId = "for-sale" };
+        var p = new ProductEntity { Name = "P", CategoryId = cat.Id, BrandId = brand.Id, StatusId = "for-sale" };
         db.Products.Add(p);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+
         db.ProductTechnologies.Add(new ProductTechnology { ProductId = p.Id, TechnologyId = t1.Id });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
-        var cmd = new UpdateProductCommand { Id = p.Id, Name = "P", CategoryId = cat.Id, Highlights = "[]" };
+        var cmd = new UpdateProductCommand 
+        { 
+            Id = p.Id, 
+            Name = "P", 
+            CategoryId = cat.Id, 
+            BrandId = brand.Id,
+            Highlights = "[]",
+            Variants = [new UpdateProductVariantRequest { UrlSlug = "v1", Price = 1000 }]
+        };
 
         // Act
-        await _client.PutAsJsonAsync($"/api/v1/product/{p.Id}", cmd).ConfigureAwait(true);
+        var response = await _client.PutAsJsonAsync($"/api/v1/product/{p.Id}", cmd).ConfigureAwait(true);
+        response.EnsureSuccessStatusCode();
 
         // Assert
         var links = await db.ProductTechnologies.Where(pt => pt.ProductId == p.Id).ToListAsync(TestContext.Current.CancellationToken);
@@ -2933,6 +3133,22 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
     public async Task UpdateProduct_UpdateHighlightCustom_Success()
     {
         // Arrange
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            $"user_{uniqueId}",
+            "Password123!",
+            [PermissionsList.Products.Edit],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            $"user_{uniqueId}",
+            "Password123!",
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var cat = new ProductCategoryEntity { Name = "Cat-UpdateCust" };
@@ -2943,22 +3159,53 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
 
         var p = new ProductEntity { Name = "P", CategoryId = cat.Id, StatusId = "for-sale" };
         db.Products.Add(p);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+
         db.ProductTechnologies.Add(new ProductTechnology { ProductId = p.Id, TechnologyId = t1.Id, CustomTitle = "Old" });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
-        var cmd = new UpdateProductCommand { Id = p.Id, Name = "P", CategoryId = cat.Id, Highlights = $"[{{\"technologyId\":{t1.Id}, \"customTitle\":\"New\"}}]" };
+        var brand = new BrandEntity { Name = "B1" };
+        db.Brands.Add(brand);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+
+        var cmd = new UpdateProductCommand 
+        { 
+            Id = p.Id, 
+            Name = "P", 
+            CategoryId = cat.Id, 
+            BrandId = brand.Id,
+            Highlights = $"[{{\"technology_id\":{t1.Id}, \"custom_title\":\"New\"}}]",
+            Variants = [new UpdateProductVariantRequest { UrlSlug = "v1", Price = 1000 }]
+        };
 
         // Act
-        await _client.PutAsJsonAsync($"/api/v1/product/{p.Id}", cmd).ConfigureAwait(true);
+        var response = await _client.PutAsJsonAsync($"/api/v1/product/{p.Id}", cmd).ConfigureAwait(true);
+        response.EnsureSuccessStatusCode();
 
         // Assert
-        var link = await db.ProductTechnologies.FirstOrDefaultAsync(pt => pt.ProductId == p.Id, TestContext.Current.CancellationToken);
+        var link = await db.ProductTechnologies.AsNoTracking().FirstOrDefaultAsync(pt => pt.ProductId == p.Id, TestContext.Current.CancellationToken);
         link!.CustomTitle.Should().Be("New");
     }
 
     [Fact(DisplayName = "PRODUCT_167 - Sắp xếp công nghệ theo thứ tự hiển thị khi truy vấn")]
     public async Task GetProduct_HighlightsOrderedByDisplayOrder()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            $"user_{uniqueId}",
+            "Password123!",
+            [PermissionsList.Products.View],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            $"user_{uniqueId}",
+            "Password123!",
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         // Arrange
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
@@ -2971,14 +3218,17 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
 
         var p = new ProductEntity { Name = "P-Ordered", CategoryId = cat.Id, StatusId = "for-sale" };
         db.Products.Add(p);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+
         db.ProductTechnologies.Add(new ProductTechnology { ProductId = p.Id, TechnologyId = t1.Id, DisplayOrder = 2 });
         db.ProductTechnologies.Add(new ProductTechnology { ProductId = p.Id, TechnologyId = t2.Id, DisplayOrder = 1 });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         // Act
-        var response = await _client.GetAsync($"/api/v1/product/for-manager/{p.Id}", TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/product/{p.Id}/for-manager", TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         // Assert
+        response.EnsureSuccessStatusCode();
         var content = await response.Content.ReadFromJsonAsync<ProductDetailForManagerResponse>(TestContext.Current.CancellationToken);
         var highlights = JsonSerializer.Deserialize<List<JsonElement>>(content!.Highlights!);
         highlights![0].GetProperty("technologyId").GetInt32().Should().Be(t2.Id);
@@ -2987,6 +3237,22 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
     [Fact(DisplayName = "PRODUCT_168 - Lấy danh sách toàn bộ công nghệ template")]
     public async Task GetTechnologies_ReturnsAllTemplates()
     {
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            $"user_{uniqueId}",
+            "Password123!",
+            [],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            $"user_{uniqueId}",
+            "Password123!",
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         // Act
         var response = await _client.GetAsync("/api/v1/technology", TestContext.Current.CancellationToken).ConfigureAwait(true);
 
@@ -3049,6 +3315,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
 
         var p = new ProductEntity { Name = "P", CategoryId = cat.Id, StatusId = "for-sale" };
         db.Products.Add(p);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         db.ProductTechnologies.Add(new ProductTechnology { ProductId = p.Id, TechnologyId = t.Id });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 

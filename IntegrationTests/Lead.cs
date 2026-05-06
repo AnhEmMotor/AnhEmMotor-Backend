@@ -265,6 +265,22 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         }
 
         // Act
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            $"user_{uniqueId}",
+            "Password123!",
+            [],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            $"user_{uniqueId}",
+            "Password123!",
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         var confirmCommand = new ConfirmBookingCommand { BookingId = bookingId };
         await _client.PostAsJsonAsync("/api/v1/bookings/confirm", confirmCommand).ConfigureAwait(true);
 

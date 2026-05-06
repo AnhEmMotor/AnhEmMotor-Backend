@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -60,9 +61,11 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<List<Application.ApiContracts.News.Responses.NewsResponse>>(TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var pagedResult = await response.Content.ReadFromJsonAsync<Domain.Primitives.PagedResult<Application.ApiContracts.News.Responses.NewsResponse>>(TestContext.Current.CancellationToken).ConfigureAwait(true);
+        pagedResult.Should().NotBeNull();
+        var content = pagedResult!.Items;
         content.Should().NotBeNull();
-        content.All(n => n.IsPublished).Should().BeTrue();
+        content!.All(n => n.IsPublished).Should().BeTrue();
         content.Should().HaveCount(3);
     }
 
@@ -103,30 +106,54 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         }
 
         // Act
-        var response = await _client.GetAsync("/api/v1/news?Page=1&PageSize=2", TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/news?Page=1&PageSize=2&Sorts=id", TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<List<Application.ApiContracts.News.Responses.NewsResponse>>(TestContext.Current.CancellationToken).ConfigureAwait(true);
-        content.Should().NotBeNull();
-        content.Should().HaveCount(2);
+        if (response.StatusCode != HttpStatusCode.OK)
+        {
+            var error = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+            throw new Exception($"NEWS_011 failed with {response.StatusCode}: {error}");
+        }
+        var pagedResult = await response.Content.ReadFromJsonAsync<Domain.Primitives.PagedResult<Application.ApiContracts.News.Responses.NewsResponse>>(TestContext.Current.CancellationToken).ConfigureAwait(true);
+        pagedResult.Should().NotBeNull();
+        pagedResult.Items.Should().HaveCount(2);
     }
 
     [Fact(DisplayName = "NEWS_012 - Đảm bảo tính toàn vẹn của thông tin Metadata SEO")]
     public async Task CreateNews_WithSEO_SavesMetadataCorrectly()
     {
-        // Arrange
-        var command = new CreateNewsCommand 
-        { 
-            Title = "SEO News", 
-            Content = "C",
-            MetaTitle = "Meta T",
-            MetaDescription = "Meta D",
-            MetaKeywords = "K1, K2"
+        var payload = new
+        {
+            title = "SEO News",
+            content = "C",
+            meta_title = "Meta T",
+            metaTitle = "Meta T",
+            meta_description = "Meta D",
+            metaDescription = "Meta D",
+            meta_keywords = "K1, K2",
+            metaKeywords = "K1, K2",
+            is_published = true,
+            isPublished = true
         };
 
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            $"user_{uniqueId}",
+            "Password123!",
+            ["Permissions.News.Create"],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            $"user_{uniqueId}",
+            "Password123!",
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         // Act
-        var response = await _client.PostAsJsonAsync("/api/v1/news", command).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/news", payload).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);

@@ -56,6 +56,22 @@ public class Contact : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         }
 
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            $"user_{uniqueId}",
+            "Password123!",
+            [],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            $"user_{uniqueId}",
+            "Password123!",
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         // Act
         var response = await _client.GetAsync("/api/v1/contacts", TestContext.Current.CancellationToken).ConfigureAwait(true);
 
@@ -97,7 +113,7 @@ public class Contact : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var command = new CreateContactReplyCommand { ContactId = contactId, Message = "Admin Reply", MarkAsProcessed = true };
 
         // Act
-        var response = await _client.PostAsJsonAsync($"/api/v1/contacts/{contactId}/replies", command).ConfigureAwait(true);
+        var response = await _client.PostAsJsonAsync("/api/v1/contacts/reply", command).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -126,10 +142,26 @@ public class Contact : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             contactId = c.Id;
         }
 
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            $"user_{uniqueId}",
+            "Password123!",
+            [],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            $"user_{uniqueId}",
+            "Password123!",
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
         var command = new UpdateInternalNoteCommand { ContactId = contactId, InternalNote = "New Internal Note" };
 
         // Act
-        var response = await _client.PatchAsJsonAsync($"/api/v1/contacts/{contactId}/internal-note", command, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.PatchAsJsonAsync("/api/v1/contacts/internal-note", command, TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -155,19 +187,44 @@ public class Contact : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             contactId = c.Id;
 
+            var user = new ApplicationUser { UserName = "SeedUser", Email = "seed@gmail.com", FullName = "Seed User" };
+            db.Users.Add(user);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+            
             db.ContactReplies.AddRange(
-                new ContactReply { ContactId = contactId, Message = "R1", RepliedById = Guid.NewGuid() },
-                new ContactReply { ContactId = contactId, Message = "R2", RepliedById = Guid.NewGuid() }
+                new ContactReply { ContactId = contactId, Message = "R1", RepliedById = user.Id },
+                new ContactReply { ContactId = contactId, Message = "R2", RepliedById = user.Id }
             );
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         }
 
         // Act
-        var response = await _client.GetAsync($"/api/v1/contacts/{contactId}", TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            $"user_{uniqueId}",
+            "Password123!",
+            [],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            $"user_{uniqueId}",
+            "Password123!",
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        var response = await _client.GetAsync($"/api/v1/contacts", TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        // Có thể kiểm tra content nếu cần
+        var content = await response.Content.ReadFromJsonAsync<List<Domain.Entities.Contact>>(TestContext.Current.CancellationToken).ConfigureAwait(true);
+        content.Should().NotBeNull();
+        var contact = content!.FirstOrDefault(c => c.Id == contactId);
+        contact.Should().NotBeNull();
+        contact!.Replies.Should().HaveCount(2);
     }
 
     [Fact(DisplayName = "CONT_015 - Đảm bảo tính nhất quán của Subject trong liên hệ")]

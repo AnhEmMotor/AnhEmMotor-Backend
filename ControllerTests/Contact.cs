@@ -45,7 +45,7 @@ public class Contact
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
-        var response = Assert.IsType<Result<int>>(okResult.Value);
-        Assert.Equal(100, response.Value);
+        var response = Assert.IsType<int>(okResult.Value);
+        Assert.Equal(100, response);
     }
 }

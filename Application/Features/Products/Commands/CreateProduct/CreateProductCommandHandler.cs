@@ -113,23 +113,33 @@ public sealed class CreateProductCommandHandler(
                 var predefinedOptionsDict = await predefinedOptionReadRepository.GetAllAsDictionaryAsync(
                     cancellationToken)
                     .ConfigureAwait(false);
-                var allowedNamesSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                foreach (var kvp in predefinedOptionsDict)
-                {
-                    allowedNamesSet.Add(kvp.Key);
-                    allowedNamesSet.Add(kvp.Value);
-                }
-                var invalidOptions = potentialOptionNames.Where(n => !allowedNamesSet.Contains(n)).ToList();
+
+                var predefinedValues = predefinedOptionsDict.Values.Select(v => v.ToLower()).ToHashSet();
+                var predefinedKeys = predefinedOptionsDict.Keys.Select(k => k.ToLower()).ToHashSet();
+
+                var invalidOptions = potentialOptionNames
+                    .Where(n => !predefinedValues.Contains(n.ToLower()) && !predefinedKeys.Contains(n.ToLower()))
+                    .ToList();
+
                 if (invalidOptions.Count > 0)
                 {
-                    errors.Add(
-                        Error.BadRequest(
-                            $"Các tên thuộc tính sau không hợp lệ: {string.Join(", ", invalidOptions)}. Vui lòng chỉ sử dụng các thuộc tính đã được định nghĩa sẵn.",
-                            "Variants.OptionValues"));
+                    foreach (var opt in invalidOptions)
+                    {
+                        errors.Add(Error.BadRequest($"Thuộc tính '{opt}' không hợp lệ.", "Variants.OptionValues"));
+                    }
                     return Result<ProductDetailForManagerResponse?>.Failure(errors);
                 }
+
+                var searchNames = new HashSet<string>(potentialOptionNames, StringComparer.OrdinalIgnoreCase);
+                foreach (var kvp in predefinedOptionsDict)
+                {
+                    if (potentialOptionNames.Contains(kvp.Value))
+                    {
+                        searchNames.Add(kvp.Key);
+                    }
+                }
                 var existingOptions = await optionReadRepository.GetByNamesAsync(
-                    potentialOptionNames,
+                    searchNames,
                     cancellationToken,
                     DataFetchMode.All)
                     .ConfigureAwait(false);
@@ -173,7 +183,7 @@ public sealed class CreateProductCommandHandler(
             foreach (var variantReq in request.Variants)
             {
                 if (!string.IsNullOrWhiteSpace(variantReq.ColorName) &&
-                    optionNameMap.TryGetValue("Màu sắc", out var colorOptId))
+                    (optionNameMap.TryGetValue("Màu sắc", out var colorOptId) || optionNameMap.TryGetValue("Color", out colorOptId)))
                 {
                     if (!allOptionValues.TryGetValue(colorOptId, out var vSet))
                     {
@@ -183,7 +193,7 @@ public sealed class CreateProductCommandHandler(
                     vSet.Add(variantReq.ColorName.Trim());
                 }
                 if (!string.IsNullOrWhiteSpace(variantReq.VersionName) &&
-                    optionNameMap.TryGetValue("Phiên bản", out var versionOptId))
+                    (optionNameMap.TryGetValue("Phiên bản", out var versionOptId) || optionNameMap.TryGetValue("Version", out versionOptId)))
                 {
                     if (!allOptionValues.TryGetValue(versionOptId, out var vSet))
                     {
@@ -272,6 +282,8 @@ public sealed class CreateProductCommandHandler(
                             !string.IsNullOrWhiteSpace(newCode))
                         {
                             existingValue.ColorCode = newCode;
+                            optionValueInsertRepository.Update(existingValue);
+                            await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                         }
                     } else
                     {

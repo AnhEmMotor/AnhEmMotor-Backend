@@ -34,9 +34,9 @@ public class PermissionAndRole
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
         result.Value.Should().BeOfType<Dictionary<string, List<PermissionResponse>>>();
-        result.Value.Should().ContainKey("Brands");
-        result.Value.Should().ContainKey("Products");
-        result.Value.Should().ContainKey("Roles");
+        result.Value.Should().ContainKey("Thương hiệu");
+        result.Value.Should().ContainKey("Sản phẩm");
+        result.Value.Should().ContainKey("Vai trò");
     }
 
     [Fact(DisplayName = "PERM_002 - Lấy permissions của user hiện tại thành công")]

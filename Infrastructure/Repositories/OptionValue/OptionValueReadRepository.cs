@@ -30,7 +30,7 @@ namespace Infrastructure.Repositories.OptionValue
         {
             return context.OptionValues
                 .FirstOrDefaultAsync(
-                    ov => ov.OptionId == optionId && string.Compare(ov.Name, name) == 0,
+                    ov => ov.OptionId == optionId && ov.Name != null && ov.Name.ToLower() == name.ToLower(),
                     cancellationToken);
         }
 
@@ -39,15 +39,15 @@ namespace Infrastructure.Repositories.OptionValue
             List<string> names,
             CancellationToken cancellationToken)
         {
+            var lowerNames = names.Select(n => n.ToLower()).ToList();
             return GetQueryable()
                 .Where(
                     ov => ov.OptionId.HasValue &&
                         ov.Name != null &&
                         optionIds.Contains(ov.OptionId.Value) &&
-                        names.Contains(ov.Name))
+                        lowerNames.Contains(ov.Name.ToLower()))
                 .ToListAsync(cancellationToken)
                 .ContinueWith(t => t.Result, cancellationToken);
-            ;
         }
 
         public IQueryable<OptionValueEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)

@@ -48,8 +48,8 @@ public class Booking
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
-        var response = Assert.IsType<Result<int>>(okResult.Value);
-        Assert.Equal(100, response.Value);
+        var response = Assert.IsType<int>(okResult.Value);
+        Assert.Equal(100, response);
     }
 
     [Fact(DisplayName = "BOOKING_016 - Kiểm tra tích hợp Sieve Paging cho danh sách Booking")]

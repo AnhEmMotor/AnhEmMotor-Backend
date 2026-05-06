@@ -23,9 +23,9 @@ public class Booking : BaseEntity
 
     [Column("ProductVariantId")]
     [ForeignKey("ProductVariant")]
-    public int ProductVariantId { get; set; }
+    public int? ProductVariantId { get; set; }
 
-    public ProductVariant ProductVariant { get; set; } = null!;
+    public ProductVariant? ProductVariant { get; set; }
 
     [Column("PreferredDate")]
     public DateTimeOffset PreferredDate { get; set; }

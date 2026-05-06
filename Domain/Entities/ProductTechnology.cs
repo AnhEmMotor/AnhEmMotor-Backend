@@ -1,13 +1,24 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities
 {
+    [Table("ProductTechnology")]
     public class ProductTechnology : BaseEntity
     {
+        [Key]
+        [Column("Id")]
+        public int Id { get; set; }
+
+        [Column("ProductId")]
+        [ForeignKey("Product")]
         public int ProductId { get; set; }
 
+        [Column("TechnologyId")]
+        [ForeignKey("Technology")]
         public int TechnologyId { get; set; }
 
+        [Column("DisplayOrder")]
         public int DisplayOrder { get; set; } = 0;
 
         [Column("CustomTitle", TypeName = "nvarchar(255)")]

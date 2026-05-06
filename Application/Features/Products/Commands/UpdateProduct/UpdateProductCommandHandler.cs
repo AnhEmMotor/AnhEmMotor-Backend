@@ -24,6 +24,7 @@ namespace Application.Features.Products.Commands.UpdateProduct;
 
 public sealed class UpdateProductCommandHandler(
     IProductReadRepository productReadRepository,
+    IProductTechnologyRepository productTechnologyRepository,
     IProductVariantReadRepository productVariantReadRepository,
     IProductCategoryReadRepository productCategoryReadRepository,
     IBrandReadRepository brandReadRepository,
@@ -455,9 +456,13 @@ public sealed class UpdateProductCommandHandler(
         {
             try
             {
-                newTechList = JsonSerializer.Deserialize<List<TechnologyJsonRequest>>(command.Highlights) ?? [];
+                newTechList = JsonSerializer.Deserialize<List<TechnologyJsonRequest>>(command.Highlights, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                }) ?? [];
             } catch
             {
+                newTechList = [];
             }
         }
         foreach (var existing in existingTechs)
@@ -465,6 +470,7 @@ public sealed class UpdateProductCommandHandler(
             if (!newTechList.Any(t => t.TechnologyId == existing.TechnologyId))
             {
                 product.ProductTechnologies.Remove(existing);
+                productTechnologyRepository.Remove(existing);
             }
         }
         var order = 1;
@@ -483,6 +489,7 @@ public sealed class UpdateProductCommandHandler(
                     .Add(
                         new ProductTechnology
                         {
+                            ProductId = product.Id,
                             TechnologyId = t.TechnologyId,
                             CustomTitle = t.CustomTitle,
                             CustomDescription = t.CustomDescription,
