@@ -1,7 +1,6 @@
 using Application.Common.Helper;
 using Application.Common.Models;
-#pragma warning disable IDE0079 
-#pragma warning disable CRR0035
+
 using Application.Features.News.Commands.CreateNews;
 using Application.Features.News.Queries.GetNewsBySlug;
 using Application.Interfaces.Repositories;
@@ -29,6 +28,8 @@ public class News
         _unitOfWorkMock = new Mock<IUnitOfWork>();
     }
 
+    #pragma warning disable IDE0079 
+    #pragma warning disable CRR0035
     [Fact(DisplayName = "NEWS_001 - Tạo tin tức với Slug tự động từ tiêu đề")]
     public async Task CreateNews_NoSlugProvided_GeneratesSlugFromTitle()
     {
@@ -154,4 +155,6 @@ public class News
         // Assert
         slug.Length.Should().BeLessThanOrEqualTo(255);
     }
+    #pragma warning restore IDE0079 
+    #pragma warning restore CRR0035
 }

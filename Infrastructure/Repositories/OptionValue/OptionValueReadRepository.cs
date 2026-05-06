@@ -30,7 +30,7 @@ namespace Infrastructure.Repositories.OptionValue
         {
             return context.OptionValues
                 .FirstOrDefaultAsync(
-                    ov => ov.OptionId == optionId && ov.Name != null && ov.Name.ToLower() == name.ToLower(),
+                    ov => ov.OptionId == optionId && ov.Name != null && string.Compare(ov.Name.ToLower(), name.ToLower()) == 0,
                     cancellationToken);
         }
 

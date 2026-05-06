@@ -1,5 +1,4 @@
-#pragma warning disable IDE0079 
-#pragma warning disable CRR0035
+
 using Application.ApiContracts.Leads.Responses;
 using Application.Common.Helper;
 using Application.Features.Bookings.Commands.ConfirmBooking;
@@ -46,6 +45,8 @@ public class Lead
         _unitOfWorkMock = new Mock<IUnitOfWork>();
     }
 
+    #pragma warning disable IDE0079 
+    #pragma warning disable CRR0035
     [Fact(DisplayName = "LEAD_006 - Chuẩn hóa Slug từ tên khách hàng hoặc tiêu đề")]
     public void SlugHelper_GenerateSlug_ReturnsCorrectSlug()
     {
@@ -543,4 +544,6 @@ public class Lead
         // Assert
         _leadInsertRepoMock.Verify(x => x.Add(It.Is<LeadEntity>(l => l.Score == 30)), Times.Once);
     }
+    #pragma warning restore CRR0035
+    #pragma warning restore IDE0079
 }

@@ -1,5 +1,4 @@
-#pragma warning disable IDE0079 
-#pragma warning disable CRR0035
+
 using Application.Common.Models;
 using Application.Features.Bookings.Commands.ConfirmBooking;
 using Application.Features.Bookings.Commands.CreateBooking;
@@ -44,6 +43,9 @@ public class Booking
         _emailServiceMock = new Mock<IEmailService>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
     }
+
+    #pragma warning disable IDE0079 
+    #pragma warning disable CRR0035
 
     [Fact(DisplayName = "BOOKING_002 - Tạo lịch hẹn tại địa điểm Showroom")]
     public async Task CreateBooking_LocationShowroom_SavesCorrectLocation()
@@ -296,4 +298,6 @@ public class Booking
         // Assert
         _leadInsertRepoMock.Verify(x => x.Add(It.Is<LeadEntity>(l => string.Compare(l.Source, LeadSource.WebStore) == 0)), Times.Once);
     }
+    #pragma warning restore IDE0079 
+    #pragma warning restore CRR0035
 }
