@@ -1313,6 +1313,46 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
+        <member name="T:WebAPI.Controllers.V1.TechnologiesController">
+            <summary>
+            Controller for managing technologies and technology categories.
+            </summary>
+            <param name="mediator">The mediator instance.</param>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.TechnologiesController.#ctor(MediatR.IMediator)">
+            <summary>
+            Controller for managing technologies and technology categories.
+            </summary>
+            <param name="mediator">The mediator instance.</param>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.TechnologiesController.GetAll(System.Nullable{System.Int32},System.Nullable{System.Int32})">
+            <summary>
+            Gets all technologies, optionally filtered by category or brand.
+            </summary>
+            <param name="category_id">The category ID filter.</param>
+            <param name="brand_id">The brand ID filter.</param>
+            <returns>A list of technologies.</returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.TechnologiesController.GetCategories">
+            <summary>
+            Gets all technology categories.
+            </summary>
+            <returns>A list of technology categories.</returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.TechnologiesController.Create(Application.Features.Technologies.Commands.CreateTechnology.CreateTechnologyCommand)">
+            <summary>
+            Creates a new technology.
+            </summary>
+            <param name="command">The create technology command.</param>
+            <returns>The result of the creation.</returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.TechnologiesController.CreateCategory(Application.Features.Technologies.Commands.CreateTechnologyCategory.CreateTechnologyCategoryCommand)">
+            <summary>
+            Creates a new technology category.
+            </summary>
+            <param name="command">The create technology category command.</param>
+            <returns>The result of the creation.</returns>
+        </member>
         <member name="T:WebAPI.Controllers.V1.UserController">
             <summary>
             Quản lý người dùng (Bất cứ người dùng nào đã đăng nhập đều có quyền vào đây)
@@ -1456,6 +1496,58 @@
             </summary>
             <param name="search">Từ khóa tìm kiếm (Biển số, VIN, Tên khách)</param>
             <returns>Danh sách xe</returns>
+        </member>
+        <member name="T:WebAPI.Controllers.V1.VehicleTypeController">
+            <summary>
+            Controller for managing vehicle types.
+            </summary>
+            <param name="repository">The vehicle type repository.</param>
+            <param name="paginator">The sieve paginator.</param>
+            <param name="unitOfWork">The unit of work.</param>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.VehicleTypeController.#ctor(Application.Interfaces.Repositories.IVehicleTypeRepository,Application.Interfaces.Repositories.ISievePaginator,Application.Interfaces.Repositories.IUnitOfWork)">
+            <summary>
+            Controller for managing vehicle types.
+            </summary>
+            <param name="repository">The vehicle type repository.</param>
+            <param name="paginator">The sieve paginator.</param>
+            <param name="unitOfWork">The unit of work.</param>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.VehicleTypeController.GetList(Sieve.Models.SieveModel)">
+            <summary>
+            Gets a paginated list of vehicle types.
+            </summary>
+            <param name="sieveModel">The sieve model for filtering and pagination.</param>
+            <returns>A paginated list of vehicle types.</returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.VehicleTypeController.GetById(System.Int32)">
+            <summary>
+            Gets a vehicle type by its ID.
+            </summary>
+            <param name="id">The ID of the vehicle type.</param>
+            <returns>The vehicle type details.</returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.VehicleTypeController.Create(Domain.Entities.VehicleType)">
+            <summary>
+            Creates a new vehicle type.
+            </summary>
+            <param name="vehicleType">The vehicle type to create.</param>
+            <returns>A status result.</returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.VehicleTypeController.Update(System.Int32,Domain.Entities.VehicleType)">
+            <summary>
+            Updates an existing vehicle type.
+            </summary>
+            <param name="id">The ID of the vehicle type to update.</param>
+            <param name="vehicleType">The updated vehicle type data.</param>
+            <returns>A status result.</returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.VehicleTypeController.Delete(System.Int32)">
+            <summary>
+            Deletes a vehicle type by its ID.
+            </summary>
+            <param name="id">The ID of the vehicle type to delete.</param>
+            <returns>A status result.</returns>
         </member>
         <member name="T:WebAPI.Converters.EmptyStringConverter">
             <summary>

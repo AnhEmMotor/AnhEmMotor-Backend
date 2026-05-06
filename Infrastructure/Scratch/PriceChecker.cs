@@ -12,7 +12,7 @@ public class PriceChecker
         using var scope = services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var variants = await context.ProductVariants
-            .Select(v => new { v.Id, v.Price, v.Product.Name })
+            .Select(v => new { v.Id, v.Price, Name = v.Product!.Name })
             .Take(10)
             .ToListAsync();
         foreach (var v in variants)

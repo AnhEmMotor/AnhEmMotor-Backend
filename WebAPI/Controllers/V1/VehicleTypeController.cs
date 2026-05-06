@@ -9,6 +9,12 @@ using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1
 {
+    /// <summary>
+    /// Controller for managing vehicle types.
+    /// </summary>
+    /// <param name="repository">The vehicle type repository.</param>
+    /// <param name="paginator">The sieve paginator.</param>
+    /// <param name="unitOfWork">The unit of work.</param>
     [ApiVersion("1.0")]
     [Route("api/v{version:apiVersion}/[controller]")]
     public class VehicleTypeController(
@@ -16,6 +22,11 @@ namespace WebAPI.Controllers.V1
         ISievePaginator paginator,
         IUnitOfWork unitOfWork) : ApiController
     {
+        /// <summary>
+        /// Gets a paginated list of vehicle types.
+        /// </summary>
+        /// <param name="sieveModel">The sieve model for filtering and pagination.</param>
+        /// <returns>A paginated list of vehicle types.</returns>
         [HttpGet]
         public async Task<ActionResult<PagedResult<VehicleTypeResponse>>> GetList([FromQuery] SieveModel sieveModel)
         {
@@ -24,6 +35,11 @@ namespace WebAPI.Controllers.V1
             return Ok(result);
         }
 
+        /// <summary>
+        /// Gets a vehicle type by its ID.
+        /// </summary>
+        /// <param name="id">The ID of the vehicle type.</param>
+        /// <returns>The vehicle type details.</returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<VehicleTypeResponse>> GetById(int id)
         {
@@ -43,6 +59,11 @@ namespace WebAPI.Controllers.V1
                 });
         }
 
+        /// <summary>
+        /// Creates a new vehicle type.
+        /// </summary>
+        /// <param name="vehicleType">The vehicle type to create.</param>
+        /// <returns>A status result.</returns>
         [HttpPost]
         public async Task<ActionResult> Create([FromBody] VehicleType vehicleType)
         {
@@ -51,6 +72,12 @@ namespace WebAPI.Controllers.V1
             return Ok();
         }
 
+        /// <summary>
+        /// Updates an existing vehicle type.
+        /// </summary>
+        /// <param name="id">The ID of the vehicle type to update.</param>
+        /// <param name="vehicleType">The updated vehicle type data.</param>
+        /// <returns>A status result.</returns>
         [HttpPut("{id}")]
         public async Task<ActionResult> Update(int id, [FromBody] VehicleType vehicleType)
         {
@@ -61,6 +88,11 @@ namespace WebAPI.Controllers.V1
             return Ok();
         }
 
+        /// <summary>
+        /// Deletes a vehicle type by its ID.
+        /// </summary>
+        /// <param name="id">The ID of the vehicle type to delete.</param>
+        /// <returns>A status result.</returns>
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {

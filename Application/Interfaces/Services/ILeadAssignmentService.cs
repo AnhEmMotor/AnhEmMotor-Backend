@@ -4,5 +4,5 @@ namespace Application.Interfaces.Services;
 
 public interface ILeadAssignmentService
 {
-    Task AssignLeadAsync(Lead lead, CancellationToken cancellationToken = default);
+    public Task AssignLeadAsync(Lead lead, CancellationToken cancellationToken = default);
 }

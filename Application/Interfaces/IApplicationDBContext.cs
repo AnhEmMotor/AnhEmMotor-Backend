@@ -6,19 +6,19 @@ namespace Application.Interfaces;
 
 public interface IApplicationDBContext
 {
-    DbSet<EmployeeProfile> EmployeeProfiles { get; }
+    public DbSet<EmployeeProfile> EmployeeProfiles { get; }
 
-    DbSet<CommissionPolicy> CommissionPolicies { get; }
+    public DbSet<CommissionPolicy> CommissionPolicies { get; }
 
-    DbSet<CommissionRecord> CommissionRecords { get; }
+    public DbSet<CommissionRecord> CommissionRecords { get; }
 
-    DbSet<Payroll> Payrolls { get; }
+    public DbSet<Payroll> Payrolls { get; }
 
-    DbSet<KPI> KPIs { get; }
+    public DbSet<KPI> KPIs { get; }
 
-    DbSet<CommissionPolicyAuditLog> CommissionPolicyAuditLogs { get; }
+    public DbSet<CommissionPolicyAuditLog> CommissionPolicyAuditLogs { get; }
 
-    DatabaseFacade Database { get; }
+    public DatabaseFacade Database { get; }
 
-    Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+    public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

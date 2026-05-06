@@ -47,9 +47,9 @@ namespace Infrastructure.Seeders
                             }
                             tech = new Technology
                             {
-                                Name = hl.Title,
-                                DefaultTitle = hl.Title,
-                                DefaultDescription = hl.Description,
+                                Name = hl.Title ?? string.Empty,
+                                DefaultTitle = hl.Title ?? string.Empty,
+                                DefaultDescription = hl.Description ?? string.Empty,
                                 DefaultImageUrl = hl.Image,
                                 CategoryId = category.Id
                             };
