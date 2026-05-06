@@ -104,7 +104,7 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Property<DateTimeOffset>("PreferredDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("PreferredDate");
-                    b.Property<int>("ProductVariantId").HasColumnType("integer").HasColumnName("ProductVariantId");
+                    b.Property<int?>("ProductVariantId").HasColumnType("integer").HasColumnName("ProductVariantId");
                     b.Property<string>("Status").IsRequired().HasColumnType("text").HasColumnName("Status");
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("timestamp with time zone");
                     b.HasKey("Id");
@@ -224,6 +224,7 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("timestamp with time zone");
                     b.HasKey("Key");
                     b.ToTable("InputStatus");
+                    b.HasData(new { Key = "working" }, new { Key = "finished" }, new { Key = "cancelled" });
                 });
             modelBuilder.Entity(
                 "Domain.Entities.Lead",
@@ -425,6 +426,12 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("timestamp with time zone");
                     b.HasKey("Key");
                     b.ToTable("OutputStatus");
+                    b.HasData(
+                        new { Key = "pending" },
+                        new { Key = "processing" },
+                        new { Key = "shipped" },
+                        new { Key = "delivered" },
+                        new { Key = "cancelled" });
                 });
             modelBuilder.Entity(
                 "Domain.Entities.Permission",
@@ -536,23 +543,27 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("timestamp with time zone");
                     b.HasKey("Key");
                     b.ToTable("ProductStatus");
+                    b.HasData(new { Key = "for-sale" }, new { Key = "out-of-business" });
                 });
             modelBuilder.Entity(
                 "Domain.Entities.ProductTechnology",
                 b =>
                 {
-                    b.Property<int>("ProductId").HasColumnType("integer");
-                    b.Property<int>("TechnologyId").HasColumnType("integer");
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("integer").HasColumnName("Id");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
                     b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("timestamp with time zone");
                     b.Property<string>("CustomDescription").HasColumnType("text").HasColumnName("CustomDescription");
                     b.Property<string>("CustomImageUrl").HasColumnType("text").HasColumnName("CustomImageUrl");
                     b.Property<string>("CustomTitle").HasColumnType("text").HasColumnName("CustomTitle");
                     b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("timestamp with time zone");
-                    b.Property<int>("DisplayOrder").HasColumnType("integer");
+                    b.Property<int>("DisplayOrder").HasColumnType("integer").HasColumnName("DisplayOrder");
+                    b.Property<int>("ProductId").HasColumnType("integer").HasColumnName("ProductId");
+                    b.Property<int>("TechnologyId").HasColumnType("integer").HasColumnName("TechnologyId");
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("timestamp with time zone");
-                    b.HasKey("ProductId", "TechnologyId");
+                    b.HasKey("Id");
+                    b.HasIndex("ProductId");
                     b.HasIndex("TechnologyId");
-                    b.ToTable("ProductTechnologies");
+                    b.ToTable("ProductTechnology");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.ProductVariant",
@@ -815,9 +826,7 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
                         .WithMany()
-                        .HasForeignKey("ProductVariantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ProductVariantId");
                     b.Navigation("ProductVariant");
                 });
             modelBuilder.Entity(

@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.PostgreSqlMigrations
 {
     [DbContext(typeof(PostgreSqlDbContext))]
-    [Migration("20260505032712_CRMDatabaseAndAPIExpansion")]
-    partial class CRMDatabaseAndAPIExpansion
+    [Migration("20260506125702_CRMDatabaseandAPIExpansion")]
+    partial class CRMDatabaseandAPIExpansion
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -256,7 +256,7 @@ namespace Infrastructure.PostgreSqlMigrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("PreferredDate");
 
-                    b.Property<int>("ProductVariantId")
+                    b.Property<int?>("ProductVariantId")
                         .HasColumnType("integer")
                         .HasColumnName("ProductVariantId");
 
@@ -545,6 +545,20 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.HasKey("Key");
 
                     b.ToTable("InputStatus");
+
+                    b.HasData(
+                        new
+                        {
+                            Key = "working"
+                        },
+                        new
+                        {
+                            Key = "finished"
+                        },
+                        new
+                        {
+                            Key = "cancelled"
+                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.Lead", b =>
@@ -1039,6 +1053,28 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.HasKey("Key");
 
                     b.ToTable("OutputStatus");
+
+                    b.HasData(
+                        new
+                        {
+                            Key = "pending"
+                        },
+                        new
+                        {
+                            Key = "processing"
+                        },
+                        new
+                        {
+                            Key = "shipped"
+                        },
+                        new
+                        {
+                            Key = "delivered"
+                        },
+                        new
+                        {
+                            Key = "cancelled"
+                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.Permission", b =>
@@ -1321,15 +1357,26 @@ namespace Infrastructure.PostgreSqlMigrations
                     b.HasKey("Key");
 
                     b.ToTable("ProductStatus");
+
+                    b.HasData(
+                        new
+                        {
+                            Key = "for-sale"
+                        },
+                        new
+                        {
+                            Key = "out-of-business"
+                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductTechnology", b =>
                 {
-                    b.Property<int>("ProductId")
-                        .HasColumnType("integer");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("Id");
 
-                    b.Property<int>("TechnologyId")
-                        .HasColumnType("integer");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTimeOffset?>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -1350,16 +1397,27 @@ namespace Infrastructure.PostgreSqlMigrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("DisplayOrder")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("DisplayOrder");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("integer")
+                        .HasColumnName("ProductId");
+
+                    b.Property<int>("TechnologyId")
+                        .HasColumnType("integer")
+                        .HasColumnName("TechnologyId");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.HasKey("ProductId", "TechnologyId");
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
 
                     b.HasIndex("TechnologyId");
 
-                    b.ToTable("ProductTechnologies");
+                    b.ToTable("ProductTechnology");
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductVariant", b =>
@@ -1923,9 +1981,7 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
                         .WithMany()
-                        .HasForeignKey("ProductVariantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ProductVariantId");
 
                     b.Navigation("ProductVariant");
                 });

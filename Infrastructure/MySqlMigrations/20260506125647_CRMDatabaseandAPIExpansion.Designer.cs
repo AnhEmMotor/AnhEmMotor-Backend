@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.MySqlMigrations
 {
     [DbContext(typeof(MySqlDbContext))]
-    [Migration("20260505032659_CRMDatabaseAndAPIExpansion")]
-    partial class CRMDatabaseAndAPIExpansion
+    [Migration("20260506125647_CRMDatabaseandAPIExpansion")]
+    partial class CRMDatabaseandAPIExpansion
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -256,7 +256,7 @@ namespace Infrastructure.MySqlMigrations
                         .HasColumnType("bigint")
                         .HasColumnName("PreferredDate");
 
-                    b.Property<int>("ProductVariantId")
+                    b.Property<int?>("ProductVariantId")
                         .HasColumnType("int")
                         .HasColumnName("ProductVariantId");
 
@@ -545,6 +545,20 @@ namespace Infrastructure.MySqlMigrations
                     b.HasKey("Key");
 
                     b.ToTable("InputStatus");
+
+                    b.HasData(
+                        new
+                        {
+                            Key = "working"
+                        },
+                        new
+                        {
+                            Key = "finished"
+                        },
+                        new
+                        {
+                            Key = "cancelled"
+                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.Lead", b =>
@@ -1039,6 +1053,28 @@ namespace Infrastructure.MySqlMigrations
                     b.HasKey("Key");
 
                     b.ToTable("OutputStatus");
+
+                    b.HasData(
+                        new
+                        {
+                            Key = "pending"
+                        },
+                        new
+                        {
+                            Key = "processing"
+                        },
+                        new
+                        {
+                            Key = "shipped"
+                        },
+                        new
+                        {
+                            Key = "delivered"
+                        },
+                        new
+                        {
+                            Key = "cancelled"
+                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.Permission", b =>
@@ -1323,15 +1359,26 @@ namespace Infrastructure.MySqlMigrations
                     b.HasKey("Key");
 
                     b.ToTable("ProductStatus");
+
+                    b.HasData(
+                        new
+                        {
+                            Key = "for-sale"
+                        },
+                        new
+                        {
+                            Key = "out-of-business"
+                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductTechnology", b =>
                 {
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
 
-                    b.Property<int>("TechnologyId")
-                        .HasColumnType("int");
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<long?>("CreatedAt")
                         .HasColumnType("bigint");
@@ -1352,16 +1399,27 @@ namespace Infrastructure.MySqlMigrations
                         .HasColumnType("bigint");
 
                     b.Property<int>("DisplayOrder")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("DisplayOrder");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int")
+                        .HasColumnName("ProductId");
+
+                    b.Property<int>("TechnologyId")
+                        .HasColumnType("int")
+                        .HasColumnName("TechnologyId");
 
                     b.Property<long?>("UpdatedAt")
                         .HasColumnType("bigint");
 
-                    b.HasKey("ProductId", "TechnologyId");
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
 
                     b.HasIndex("TechnologyId");
 
-                    b.ToTable("ProductTechnologies");
+                    b.ToTable("ProductTechnology");
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductVariant", b =>
@@ -1925,9 +1983,7 @@ namespace Infrastructure.MySqlMigrations
                 {
                     b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
                         .WithMany()
-                        .HasForeignKey("ProductVariantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ProductVariantId");
 
                     b.Navigation("ProductVariant");
                 });

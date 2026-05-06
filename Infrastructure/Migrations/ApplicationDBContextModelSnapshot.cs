@@ -112,7 +112,7 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset>("PreferredDate")
                         .HasColumnType("datetimeoffset")
                         .HasColumnName("PreferredDate");
-                    b.Property<int>("ProductVariantId").HasColumnType("int").HasColumnName("ProductVariantId");
+                    b.Property<int?>("ProductVariantId").HasColumnType("int").HasColumnName("ProductVariantId");
                     b.Property<string>("Status").IsRequired().HasColumnType("nvarchar(20)").HasColumnName("Status");
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
                     b.HasKey("Id");
@@ -233,6 +233,7 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
                     b.HasKey("Key");
                     b.ToTable("InputStatus");
+                    b.HasData(new { Key = "working" }, new { Key = "finished" }, new { Key = "cancelled" });
                 });
             modelBuilder.Entity(
                 "Domain.Entities.Lead",
@@ -445,6 +446,12 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
                     b.HasKey("Key");
                     b.ToTable("OutputStatus");
+                    b.HasData(
+                        new { Key = "pending" },
+                        new { Key = "processing" },
+                        new { Key = "shipped" },
+                        new { Key = "delivered" },
+                        new { Key = "cancelled" });
                 });
             modelBuilder.Entity(
                 "Domain.Entities.Permission",
@@ -565,13 +572,14 @@ namespace Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
                     b.HasKey("Key");
                     b.ToTable("ProductStatus");
+                    b.HasData(new { Key = "for-sale" }, new { Key = "out-of-business" });
                 });
             modelBuilder.Entity(
                 "Domain.Entities.ProductTechnology",
                 b =>
                 {
-                    b.Property<int>("ProductId").HasColumnType("int");
-                    b.Property<int>("TechnologyId").HasColumnType("int");
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int").HasColumnName("Id");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
                     b.Property<DateTimeOffset?>("CreatedAt").HasColumnType("datetimeoffset");
                     b.Property<string>("CustomDescription")
                         .HasColumnType("nvarchar(MAX)")
@@ -579,11 +587,14 @@ namespace Infrastructure.Migrations
                     b.Property<string>("CustomImageUrl").HasColumnType("nvarchar(1000)").HasColumnName("CustomImageUrl");
                     b.Property<string>("CustomTitle").HasColumnType("nvarchar(255)").HasColumnName("CustomTitle");
                     b.Property<DateTimeOffset?>("DeletedAt").HasColumnType("datetimeoffset");
-                    b.Property<int>("DisplayOrder").HasColumnType("int");
+                    b.Property<int>("DisplayOrder").HasColumnType("int").HasColumnName("DisplayOrder");
+                    b.Property<int>("ProductId").HasColumnType("int").HasColumnName("ProductId");
+                    b.Property<int>("TechnologyId").HasColumnType("int").HasColumnName("TechnologyId");
                     b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("datetimeoffset");
-                    b.HasKey("ProductId", "TechnologyId");
+                    b.HasKey("Id");
+                    b.HasIndex("ProductId");
                     b.HasIndex("TechnologyId");
-                    b.ToTable("ProductTechnologies");
+                    b.ToTable("ProductTechnology");
                 });
             modelBuilder.Entity(
                 "Domain.Entities.ProductVariant",
@@ -868,9 +879,7 @@ namespace Infrastructure.Migrations
                 {
                     b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
                         .WithMany()
-                        .HasForeignKey("ProductVariantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ProductVariantId");
                     b.Navigation("ProductVariant");
                 });
             modelBuilder.Entity(

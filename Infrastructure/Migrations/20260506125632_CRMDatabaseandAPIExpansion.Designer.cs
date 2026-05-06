@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20260505032644_CRMDatabaseAndAPIExpansion")]
-    partial class CRMDatabaseAndAPIExpansion
+    [Migration("20260506125632_CRMDatabaseandAPIExpansion")]
+    partial class CRMDatabaseandAPIExpansion
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -258,7 +258,7 @@ namespace Infrastructure.Migrations
                         .HasColumnType("datetimeoffset")
                         .HasColumnName("PreferredDate");
 
-                    b.Property<int>("ProductVariantId")
+                    b.Property<int?>("ProductVariantId")
                         .HasColumnType("int")
                         .HasColumnName("ProductVariantId");
 
@@ -547,6 +547,20 @@ namespace Infrastructure.Migrations
                     b.HasKey("Key");
 
                     b.ToTable("InputStatus");
+
+                    b.HasData(
+                        new
+                        {
+                            Key = "working"
+                        },
+                        new
+                        {
+                            Key = "finished"
+                        },
+                        new
+                        {
+                            Key = "cancelled"
+                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.Lead", b =>
@@ -1041,6 +1055,28 @@ namespace Infrastructure.Migrations
                     b.HasKey("Key");
 
                     b.ToTable("OutputStatus");
+
+                    b.HasData(
+                        new
+                        {
+                            Key = "pending"
+                        },
+                        new
+                        {
+                            Key = "processing"
+                        },
+                        new
+                        {
+                            Key = "shipped"
+                        },
+                        new
+                        {
+                            Key = "delivered"
+                        },
+                        new
+                        {
+                            Key = "cancelled"
+                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.Permission", b =>
@@ -1325,15 +1361,26 @@ namespace Infrastructure.Migrations
                     b.HasKey("Key");
 
                     b.ToTable("ProductStatus");
+
+                    b.HasData(
+                        new
+                        {
+                            Key = "for-sale"
+                        },
+                        new
+                        {
+                            Key = "out-of-business"
+                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductTechnology", b =>
                 {
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("Id");
 
-                    b.Property<int>("TechnologyId")
-                        .HasColumnType("int");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTimeOffset?>("CreatedAt")
                         .HasColumnType("datetimeoffset");
@@ -1354,16 +1401,27 @@ namespace Infrastructure.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<int>("DisplayOrder")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("DisplayOrder");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int")
+                        .HasColumnName("ProductId");
+
+                    b.Property<int>("TechnologyId")
+                        .HasColumnType("int")
+                        .HasColumnName("TechnologyId");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.HasKey("ProductId", "TechnologyId");
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
 
                     b.HasIndex("TechnologyId");
 
-                    b.ToTable("ProductTechnologies");
+                    b.ToTable("ProductTechnology");
                 });
 
             modelBuilder.Entity("Domain.Entities.ProductVariant", b =>
@@ -1927,9 +1985,7 @@ namespace Infrastructure.Migrations
                 {
                     b.HasOne("Domain.Entities.ProductVariant", "ProductVariant")
                         .WithMany()
-                        .HasForeignKey("ProductVariantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ProductVariantId");
 
                     b.Navigation("ProductVariant");
                 });

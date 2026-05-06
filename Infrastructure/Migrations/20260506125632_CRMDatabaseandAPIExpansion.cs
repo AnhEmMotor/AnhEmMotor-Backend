@@ -3,10 +3,12 @@ using System;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class CRMDatabaseAndAPIExpansion : Migration
+    public partial class CRMDatabaseandAPIExpansion : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -114,7 +116,7 @@ namespace Infrastructure.Migrations
                     FullName = table.Column<string>(type: "nvarchar(100)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(100)", nullable: false),
                     PhoneNumber = table.Column<string>(type: "nvarchar(20)", nullable: false),
-                    ProductVariantId = table.Column<int>(type: "int", nullable: false),
+                    ProductVariantId = table.Column<int>(type: "int", nullable: true),
                     PreferredDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     Note = table.Column<string>(type: "nvarchar(MAX)", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(20)", nullable: false),
@@ -131,8 +133,7 @@ namespace Infrastructure.Migrations
                         name: "FK_Booking_ProductVariant_ProductVariantId",
                         column: x => x.ProductVariantId,
                         principalTable: "ProductVariant",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
             migrationBuilder.CreateTable(
                 name: "Contact",
@@ -358,9 +359,10 @@ namespace Infrastructure.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
             migrationBuilder.CreateTable(
-                name: "ProductTechnologies",
+                name: "ProductTechnology",
                 columns: table => new
                 {
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     ProductId = table.Column<int>(type: "int", nullable: false),
                     TechnologyId = table.Column<int>(type: "int", nullable: false),
                     DisplayOrder = table.Column<int>(type: "int", nullable: false),
@@ -373,15 +375,15 @@ namespace Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProductTechnologies", x => new { x.ProductId, x.TechnologyId });
+                    table.PrimaryKey("PK_ProductTechnology", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ProductTechnologies_Product_ProductId",
+                        name: "FK_ProductTechnology_Product_ProductId",
                         column: x => x.ProductId,
                         principalTable: "Product",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ProductTechnologies_Technologies_TechnologyId",
+                        name: "FK_ProductTechnology_Technologies_TechnologyId",
                         column: x => x.TechnologyId,
                         principalTable: "Technologies",
                         principalColumn: "Id",
@@ -409,6 +411,51 @@ namespace Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
+            migrationBuilder.InsertData(
+                table: "InputStatus",
+                columns: new[] { "Key", "CreatedAt", "DeletedAt", "UpdatedAt" },
+                values: new object[,]
+                { { "cancelled", null, null, null }, { "finished", null, null, null }, { "working", null, null, null } });
+            migrationBuilder.InsertData(
+                table: "OutputStatus",
+                columns: new[] { "Key", "CreatedAt", "DeletedAt", "UpdatedAt" },
+                values: new object[,]
+                {
+                {
+                    "cancelled",
+                    null,
+                    null,
+                    null
+                },
+                {
+                    "delivered",
+                    null,
+                    null,
+                    null
+                },
+                {
+                    "pending",
+                    null,
+                    null,
+                    null
+                },
+                {
+                    "processing",
+                    null,
+                    null,
+                    null
+                },
+                {
+                    "shipped",
+                    null,
+                    null,
+                    null
+                }
+                });
+            migrationBuilder.InsertData(
+                table: "ProductStatus",
+                columns: new[] { "Key", "CreatedAt", "DeletedAt", "UpdatedAt" },
+                values: new object[,] { { "for-sale", null, null, null }, { "out-of-business", null, null, null } });
             migrationBuilder.CreateIndex(
                 name: "IX_Booking_ProductVariantId",
                 table: "Booking",
@@ -424,8 +471,12 @@ namespace Infrastructure.Migrations
                 table: "MaintenanceHistory",
                 column: "VehicleId");
             migrationBuilder.CreateIndex(
-                name: "IX_ProductTechnologies_TechnologyId",
-                table: "ProductTechnologies",
+                name: "IX_ProductTechnology_ProductId",
+                table: "ProductTechnology",
+                column: "ProductId");
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductTechnology_TechnologyId",
+                table: "ProductTechnology",
                 column: "TechnologyId");
             migrationBuilder.CreateIndex(
                 name: "IX_Technologies_CategoryId",
@@ -471,7 +522,7 @@ namespace Infrastructure.Migrations
             migrationBuilder.DropTable(name: "LeadActivity");
             migrationBuilder.DropTable(name: "MaintenanceHistory");
             migrationBuilder.DropTable(name: "News");
-            migrationBuilder.DropTable(name: "ProductTechnologies");
+            migrationBuilder.DropTable(name: "ProductTechnology");
             migrationBuilder.DropTable(name: "TechnologyImages");
             migrationBuilder.DropTable(name: "VehicleDocument");
             migrationBuilder.DropTable(name: "Contact");
@@ -479,6 +530,16 @@ namespace Infrastructure.Migrations
             migrationBuilder.DropTable(name: "Vehicle");
             migrationBuilder.DropTable(name: "TechnologyCategories");
             migrationBuilder.DropTable(name: "Lead");
+            migrationBuilder.DeleteData(table: "InputStatus", keyColumn: "Key", keyValue: "cancelled");
+            migrationBuilder.DeleteData(table: "InputStatus", keyColumn: "Key", keyValue: "finished");
+            migrationBuilder.DeleteData(table: "InputStatus", keyColumn: "Key", keyValue: "working");
+            migrationBuilder.DeleteData(table: "OutputStatus", keyColumn: "Key", keyValue: "cancelled");
+            migrationBuilder.DeleteData(table: "OutputStatus", keyColumn: "Key", keyValue: "delivered");
+            migrationBuilder.DeleteData(table: "OutputStatus", keyColumn: "Key", keyValue: "pending");
+            migrationBuilder.DeleteData(table: "OutputStatus", keyColumn: "Key", keyValue: "processing");
+            migrationBuilder.DeleteData(table: "OutputStatus", keyColumn: "Key", keyValue: "shipped");
+            migrationBuilder.DeleteData(table: "ProductStatus", keyColumn: "Key", keyValue: "for-sale");
+            migrationBuilder.DeleteData(table: "ProductStatus", keyColumn: "Key", keyValue: "out-of-business");
             migrationBuilder.DropColumn(name: "CreatedAt", table: "VariantOptionValue");
             migrationBuilder.DropColumn(name: "DeletedAt", table: "VariantOptionValue");
             migrationBuilder.DropColumn(name: "UpdatedAt", table: "VariantOptionValue");
