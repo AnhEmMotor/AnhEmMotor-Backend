@@ -24,12 +24,6 @@ namespace Infrastructure.Persistence
                 .AddJsonFile($"appsettings.Development.json", optional: true)
                 .Build();
             var connectionString = configuration.GetConnectionString("StringConnection");
-            if (string.IsNullOrEmpty(connectionString) ||
-                connectionString.Contains("Server") is false ||
-                connectionString.Contains("Port") is false)
-            {
-                connectionString = "Host=localhost;Port=5432;Database=anhemmotor;Username=postgres;Password=postgres;";
-            }
             var builder = new DbContextOptionsBuilder<PostgreSqlDbContext>();
             builder.UseNpgsql(connectionString, b => b.MigrationsAssembly("Infrastructure"));
             return new PostgreSqlDbContext(builder.Options);
