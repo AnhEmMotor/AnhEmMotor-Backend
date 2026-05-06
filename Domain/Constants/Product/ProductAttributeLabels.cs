@@ -28,16 +28,32 @@ public static class ProductAttributeLabels
 
     private static readonly HashSet<string> TechnicalSpecExclusions = new(StringComparer.Ordinal)
     {
-        "Id", "Name", "Description", "ShortDescription", "MetaTitle", 
-        "MetaDescription", "Brand", "ProductCategory", "ProductStatus", 
-        "ProductVariants", "ProductTechnologies", "Highlights", 
-        "BrandId", "CategoryId", "StatusId", "CreatedAt", "UpdatedAt", 
-        "DeletedAt", "CreatedBy", "UpdatedBy"
+        "Id",
+        "Name",
+        "Description",
+        "ShortDescription",
+        "MetaTitle",
+        "MetaDescription",
+        "Brand",
+        "ProductCategory",
+        "ProductStatus",
+        "ProductVariants",
+        "ProductTechnologies",
+        "Highlights",
+        "BrandId",
+        "CategoryId",
+        "StatusId",
+        "CreatedAt",
+        "UpdatedAt",
+        "DeletedAt",
+        "CreatedBy",
+        "UpdatedBy"
     };
 
     public static bool IsInternalProperty(string propertyName)
     {
-        if (string.IsNullOrWhiteSpace(propertyName)) return false;
+        if (string.IsNullOrWhiteSpace(propertyName))
+            return false;
         return TechnicalSpecExclusions.Contains(propertyName);
     }
 }

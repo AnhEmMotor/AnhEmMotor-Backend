@@ -52,7 +52,6 @@ public sealed class UpdateOutputStatusCommandHandler(
                     return Result<OrderDetailResponse>.Failure(deductionResult.Errors!);
                 }
                 break;
-
             case OrderStatus.Delivering:
                 var checkResult = await updateRepository.HandleInventoryTransactionAsync(
                     output.Id,
@@ -64,25 +63,19 @@ public sealed class UpdateOutputStatusCommandHandler(
                     return Result<OrderDetailResponse>.Failure(checkResult.Errors!);
                 }
                 break;
-
             case OrderStatus.Cancelled:
             case OrderStatus.Refunding:
             case OrderStatus.Refunded:
                 break;
-
             default:
                 break;
         }
-
         output.StatusId = request.StatusId;
         output.LastStatusChangedAt = DateTimeOffset.UtcNow;
         updateRepository.Update(output);
-        
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        
         var updated = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
         ArgumentNullException.ThrowIfNull(updated);
-        
         return updated.Adapt<OrderDetailResponse>();
     }
 }

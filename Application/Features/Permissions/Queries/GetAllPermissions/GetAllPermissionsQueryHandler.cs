@@ -12,22 +12,22 @@ public class GetAllPermissionsQueryHandler : IRequestHandler<GetAllPermissionsQu
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-
-        var result = PermissionsList.Groups.ToDictionary(
-            g => g.Key,
-            g => g.Value.Select(
-                p =>
-                {
-                    var metadata = PermissionsList.GetMetadata(p);
-                    return new PermissionResponse()
-                    {
-                        ID = p,
-                        DisplayName = metadata?.DisplayName ?? p.Split('.').Last(),
-                        Description = metadata?.Description,
-                    };
-                })
-                .ToList());
-
+        var result = PermissionsList.Groups
+            .ToDictionary(
+                g => g.Key,
+                g => g.Value
+                    .Select(
+                        p =>
+                        {
+                            var metadata = PermissionsList.GetMetadata(p);
+                            return new PermissionResponse()
+                            {
+                                ID = p,
+                                DisplayName = metadata?.DisplayName ?? p.Split('.').Last(),
+                                Description = metadata?.Description,
+                            };
+                        })
+                    .ToList());
         return Task.FromResult<Result<Dictionary<string, List<PermissionResponse>>>>(result);
     }
 }

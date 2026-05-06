@@ -15,7 +15,6 @@ namespace Infrastructure.MySqlMigrations
                 table: "ProductCategory",
                 type: "int",
                 nullable: true);
-
             migrationBuilder.AddColumn<int>(name: "DepositRatio", table: "Output", type: "int", nullable: true);
             migrationBuilder.AddColumn<decimal>(
                 name: "PaidAmount",
@@ -49,7 +48,6 @@ namespace Infrastructure.MySqlMigrations
             migrationBuilder.DropColumn(name: "PaymentStatus", table: "Output");
             migrationBuilder.DropColumn(name: "PaymentUrl", table: "Output");
             migrationBuilder.DropColumn(name: "TransactionId", table: "Output");
-
         }
     }
 }

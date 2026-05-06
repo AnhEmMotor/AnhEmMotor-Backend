@@ -113,14 +113,11 @@ public sealed class CreateProductCommandHandler(
                 var predefinedOptionsDict = await predefinedOptionReadRepository.GetAllAsDictionaryAsync(
                     cancellationToken)
                     .ConfigureAwait(false);
-
                 var predefinedValues = predefinedOptionsDict.Values.Select(v => v.ToLower()).ToHashSet();
                 var predefinedKeys = predefinedOptionsDict.Keys.Select(k => k.ToLower()).ToHashSet();
-
                 var invalidOptions = potentialOptionNames
                     .Where(n => !predefinedValues.Contains(n.ToLower()) && !predefinedKeys.Contains(n.ToLower()))
                     .ToList();
-
                 if (invalidOptions.Count > 0)
                 {
                     foreach (var opt in invalidOptions)
@@ -129,7 +126,6 @@ public sealed class CreateProductCommandHandler(
                     }
                     return Result<ProductDetailForManagerResponse?>.Failure(errors);
                 }
-
                 var searchNames = new HashSet<string>(potentialOptionNames, StringComparer.OrdinalIgnoreCase);
                 foreach (var kvp in predefinedOptionsDict)
                 {
@@ -183,7 +179,8 @@ public sealed class CreateProductCommandHandler(
             foreach (var variantReq in request.Variants)
             {
                 if (!string.IsNullOrWhiteSpace(variantReq.ColorName) &&
-                    (optionNameMap.TryGetValue("Màu sắc", out var colorOptId) || optionNameMap.TryGetValue("Color", out colorOptId)))
+                    (optionNameMap.TryGetValue("Màu sắc", out var colorOptId) ||
+                        optionNameMap.TryGetValue("Color", out colorOptId)))
                 {
                     if (!allOptionValues.TryGetValue(colorOptId, out var vSet))
                     {
@@ -193,7 +190,8 @@ public sealed class CreateProductCommandHandler(
                     vSet.Add(variantReq.ColorName.Trim());
                 }
                 if (!string.IsNullOrWhiteSpace(variantReq.VersionName) &&
-                    (optionNameMap.TryGetValue("Phiên bản", out var versionOptId) || optionNameMap.TryGetValue("Version", out versionOptId)))
+                    (optionNameMap.TryGetValue("Phiên bản", out var versionOptId) ||
+                        optionNameMap.TryGetValue("Version", out versionOptId)))
                 {
                     if (!allOptionValues.TryGetValue(versionOptId, out var vSet))
                     {

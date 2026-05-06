@@ -32,7 +32,7 @@ using FluentAssertions;
 using Mapster;
 using Moq;
 using Sieve.Models;
-using System.Text.Json;
+using System.Net;
 using ProductEntity = Domain.Entities.Product;
 
 namespace UnitTests;
@@ -81,9 +81,7 @@ public class Product
             .Setup(x => x.GetAllAsDictionaryAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(
                 new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "Color", "Màu sắc" }, { "Version", "Phiên bản" }, { "Size", "Kích thước" }
-                });
+                { { "Color", "Màu sắc" }, { "Version", "Phiên bản" }, { "Size", "Kích thước" } });
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _productVariantInsertRepository = new Mock<IProductVariantInsertRepository>();
         _variantOptionValueDeleteRepoMock = new Mock<IVariantOptionValueDeleteRepository>();
@@ -481,9 +479,7 @@ public class Product
             .Setup(x => x.GetAllAsDictionaryAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(
                 new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "Color", "Màu sắc" }, { "Version", "Phiên bản" }
-                });
+                { { "Color", "Màu sắc" }, { "Version", "Phiên bản" } });
         var handler = new CreateProductCommandHandler(
             _productCategoryReadRepoMock.Object,
             _brandReadRepoMock.Object,
@@ -1363,7 +1359,8 @@ public class Product
         result.IsValid.Should().BeFalse();
         result.Errors
             .Should()
-            .Contain(e => e.ErrorMessage.Contains("Khi có nhiều biến thể, tất cả các biến thể phải có thuộc tính phân biệt"));
+            .Contain(
+                e => e.ErrorMessage.Contains("Khi có nhiều biến thể, tất cả các biến thể phải có thuộc tính phân biệt"));
     }
 
     [Fact(DisplayName = "PRODUCT_114 - Tạo sản phẩm thất bại khi nhiều biến thể trùng OptionValues")]
@@ -1390,7 +1387,11 @@ public class Product
         var validator = new CreateProductCommandValidator();
         var result = validator.Validate(command);
         result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(e => e.ErrorMessage.Contains("Các biến thể không được trùng lặp tổ hợp thuộc tính, màu sắc và phiên bản."));
+        result.Errors
+            .Should()
+            .Contain(
+                e => e.ErrorMessage
+                    .Contains("Các biến thể không được trùng lặp tổ hợp thuộc tính, màu sắc và phiên bản."));
     }
 
     [Fact(
@@ -1416,7 +1417,8 @@ public class Product
         result.IsValid.Should().BeFalse();
         result.Errors
             .Should()
-            .Contain(e => e.ErrorMessage.Contains("Khi có nhiều biến thể, tất cả các biến thể phải có thuộc tính phân biệt"));
+            .Contain(
+                e => e.ErrorMessage.Contains("Khi có nhiều biến thể, tất cả các biến thể phải có thuộc tính phân biệt"));
     }
 
     [Fact(DisplayName = "PRODUCT_116 - Sửa sản phẩm thất bại khi nhiều biến thể trùng OptionValues")]
@@ -1445,7 +1447,11 @@ public class Product
         var validator = new UpdateProductCommandValidator();
         var result = validator.Validate(command);
         result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(e => e.ErrorMessage.Contains("Các biến thể không được trùng lặp tổ hợp thuộc tính, màu sắc và phiên bản."));
+        result.Errors
+            .Should()
+            .Contain(
+                e => e.ErrorMessage
+                    .Contains("Các biến thể không được trùng lặp tổ hợp thuộc tính, màu sắc và phiên bản."));
     }
 
     [Fact(DisplayName = "PRODUCT_120 - Handler ánh xạ đúng từ Entity sang DTO lite cho price management")]
@@ -1646,10 +1652,7 @@ public class Product
             CategoryId = 1,
             BrandId = 1,
             Variants =
-            [
-                new CreateProductVariantRequest { UrlSlug = "v1" },
-                new CreateProductVariantRequest { UrlSlug = "v2" }
-            ]
+                [new CreateProductVariantRequest { UrlSlug = "v1" }, new CreateProductVariantRequest { UrlSlug = "v2" }]
         };
         var validator = new CreateProductCommandValidator();
         var result = validator.Validate(command);
@@ -1665,10 +1668,12 @@ public class Product
             CategoryId = 1,
             BrandId = 1,
             Variants =
-            [
-                new CreateProductVariantRequest { UrlSlug = "v1", VersionName = "V1", ColorName = "Red" },
-                new CreateProductVariantRequest { UrlSlug = "v2", VersionName = "V1", ColorName = "Red" }
-            ]
+                [new CreateProductVariantRequest { UrlSlug = "v1", VersionName = "V1", ColorName = "Red" }, new CreateProductVariantRequest
+                {
+                    UrlSlug = "v2",
+                    VersionName = "V1",
+                    ColorName = "Red"
+                }]
         };
         var validator = new CreateProductCommandValidator();
         var result = validator.Validate(command);
@@ -1681,7 +1686,9 @@ public class Product
         var command = new CreateProductCommand { ShortDescription = new string('a', 256) };
         var validator = new CreateProductCommandValidator();
         var result = validator.Validate(command);
-        result.Errors.Should().Contain(e => string.Compare(e.PropertyName, nameof(CreateProductCommand.ShortDescription)) == 0);
+        result.Errors
+            .Should()
+            .Contain(e => string.Compare(e.PropertyName, nameof(CreateProductCommand.ShortDescription)) == 0);
     }
 
     [Fact(DisplayName = "PRODUCT_152 - Giới hạn độ dài tiêu đề SEO (MetaTitle)")]
@@ -1702,7 +1709,6 @@ public class Product
             ColorName = "Đỏ",
             Product = new ProductEntity { Name = "Bike" }
         };
-        // Logic mapping thường kết hợp VersionName và ColorName
         var response = variant.Adapt<ProductVariantLiteResponse>();
         response.DisplayName.Should().Contain("V1");
         response.DisplayName.Should().Contain("Đỏ");
@@ -1718,7 +1724,6 @@ public class Product
             ColorName = null
         };
         var response = variant.Adapt<ProductVariantLiteResponse>();
-        // Nếu không có version/color, thường lấy tên sản phẩm hoặc chuỗi mặc định
         response.DisplayName.Should().NotBeNullOrEmpty();
     }
 
@@ -1728,10 +1733,15 @@ public class Product
         var variant = new ProductVariant
         {
             InputInfos =
-            [
-                new InputInfo { RemainingCount = 5, InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish } },
-                new InputInfo { RemainingCount = 10, InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish } }
-            ]
+                [new InputInfo
+                {
+                    RemainingCount = 5,
+                    InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
+                }, new InputInfo
+                {
+                    RemainingCount = 10,
+                    InputReceipt = new Input { StatusId = Domain.Constants.Input.InputStatus.Finish }
+                }]
         };
         var response = variant.Adapt<ProductVariantLiteResponse>();
         response.Stock.Should().Be(15);
@@ -1741,7 +1751,7 @@ public class Product
     public void UrlHelper_DecodeSlug_Success()
     {
         var slug = "xe-may%20honda";
-        var decoded = System.Net.WebUtility.UrlDecode(slug);
+        var decoded = WebUtility.UrlDecode(slug);
         decoded.Should().Be("xe-may honda");
     }
 
@@ -1749,19 +1759,19 @@ public class Product
     public void CreateProduct_InvalidHighlightsJson_GracefulDegradation()
     {
         var command = new CreateProductCommand { Highlights = "invalid-json" };
-        // Validator hoặc Handler nên handle lỗi parse JSON
         var validator = new CreateProductCommandValidator();
         var result = validator.Validate(command);
-        // Tùy logic: có thể cho phép qua nhưng bỏ qua highlights hoặc báo lỗi. 
-        // Ở đây giả định báo lỗi định dạng.
         result.IsValid.Should().BeFalse();
     }
 
     [Fact(DisplayName = "PRODUCT_165 - Mapping ưu tiên tiêu đề tùy chỉnh (Custom Title)")]
     public void ProductTechnology_Mapping_PriorityToCustom()
     {
-        var pt = new ProductTechnology { CustomTitle = "Custom", Technology = new Technology { DefaultTitle = "Default" } };
-        // Giả sử có DTO hiển thị title
+        var pt = new ProductTechnology
+        {
+            CustomTitle = "Custom",
+            Technology = new Technology { DefaultTitle = "Default" }
+        };
         pt.CustomTitle.Should().Be("Custom");
     }
 
@@ -1776,7 +1786,11 @@ public class Product
     [Fact(DisplayName = "PRODUCT_169 - Kiểm tra ghi đè hình ảnh công nghệ")]
     public void ProductTechnology_Mapping_ImageOverride()
     {
-        var pt = new ProductTechnology { CustomImageUrl = "custom.jpg", Technology = new Technology { DefaultImageUrl = "default.jpg" } };
+        var pt = new ProductTechnology
+        {
+            CustomImageUrl = "custom.jpg",
+            Technology = new Technology { DefaultImageUrl = "default.jpg" }
+        };
         var img = pt.CustomImageUrl ?? pt.Technology.DefaultImageUrl;
         img.Should().Be("custom.jpg");
     }
@@ -1809,7 +1823,8 @@ public class Product
     {
         var command = new CreateProductCommand
         {
-            Name = "P", CategoryId = 1,
+            Name = "P",
+            CategoryId = 1,
             BrandId = 1,
             Variants = [new CreateProductVariantRequest { UrlSlug = "v1", Price = 1000, OptionValueIds = [] }]
         };
@@ -1826,7 +1841,11 @@ public class Product
             Name = "P",
             CategoryId = 1,
             BrandId = 1,
-            Variants = [new CreateProductVariantRequest { ColorName = "Red" }, new CreateProductVariantRequest { ColorName = "Red" }]
+            Variants =
+                [new CreateProductVariantRequest { ColorName = "Red" }, new CreateProductVariantRequest
+                {
+                    ColorName = "Red"
+                }]
         };
         var validator = new CreateProductCommandValidator();
         var result = validator.Validate(command);
@@ -1841,7 +1860,11 @@ public class Product
             Name = "P",
             CategoryId = 1,
             BrandId = 1,
-            Variants = [new CreateProductVariantRequest { VersionName = "V1" }, new CreateProductVariantRequest { VersionName = "V1" }]
+            Variants =
+                [new CreateProductVariantRequest { VersionName = "V1" }, new CreateProductVariantRequest
+                {
+                    VersionName = "V1"
+                }]
         };
         var validator = new CreateProductCommandValidator();
         var result = validator.Validate(command);
@@ -1856,10 +1879,12 @@ public class Product
             Name = "P",
             CategoryId = 1,
             BrandId = 1,
-            Variants = [
-                new CreateProductVariantRequest { ColorName = "Red", VersionName = "V1" },
-                new CreateProductVariantRequest { ColorName = "Red", VersionName = "V1" }
-            ]
+            Variants =
+                [new CreateProductVariantRequest { ColorName = "Red", VersionName = "V1" }, new CreateProductVariantRequest
+                {
+                    ColorName = "Red",
+                    VersionName = "V1"
+                }]
         };
         var validator = new CreateProductCommandValidator();
         var result = validator.Validate(command);
@@ -1874,7 +1899,11 @@ public class Product
             Name = "P",
             CategoryId = 1,
             BrandId = 1,
-            Variants = [new CreateProductVariantRequest { ColorName = "RED" }, new CreateProductVariantRequest { ColorName = "red" }]
+            Variants =
+                [new CreateProductVariantRequest { ColorName = "RED" }, new CreateProductVariantRequest
+                {
+                    ColorName = "red"
+                }]
         };
         var validator = new CreateProductCommandValidator();
         var result = validator.Validate(command);

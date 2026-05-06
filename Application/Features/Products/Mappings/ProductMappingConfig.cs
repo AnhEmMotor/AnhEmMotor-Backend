@@ -85,7 +85,6 @@ public class ProductMappingConfig : IRegister
             .MapWith(src => BuildVariantLiteResponseForInput(src, null));
         config.NewConfig<ProductVariantEntity, VariantCartDetailResponse>()
             .MapWith(src => BuildVariantCartDetailResponse(src));
-
         config.NewConfig<ProductEntity, ProductInfoStoreResponse>()
             .Map(dest => dest.Brand, src => src.Brand != null ? src.Brand.Name : null)
             .Map(dest => dest.Category, src => src.ProductCategory != null ? src.ProductCategory.Name : null)
@@ -110,7 +109,6 @@ public class ProductMappingConfig : IRegister
                         }
                     }
                 });
-
         config.NewConfig<ProductVariantEntity, CurrentVariantStoreResponse>()
             .Map(dest => dest.DisplayName, src => BuildStoreVariantDisplayName(src))
             .Map(
@@ -127,7 +125,6 @@ public class ProductMappingConfig : IRegister
                     .Where(p => !string.IsNullOrEmpty(p.ImageUrl))
                     .Select(p => p.ImageUrl!)
                     .ToList());
-
         config.NewConfig<ProductVariantEntity, OtherVariantStoreResponse>()
             .Map(dest => dest.DisplayName, src => BuildStoreVariantDisplayName(src, true));
     }
@@ -328,22 +325,22 @@ public class ProductMappingConfig : IRegister
             .ToList();
         var variantName = BuildVariantName(optionPairs);
         var extraParts = new List<string>();
-        if (!string.IsNullOrWhiteSpace(variant.VersionName)) extraParts.Add(variant.VersionName);
-        if (!string.IsNullOrWhiteSpace(variant.ColorName)) extraParts.Add(variant.ColorName);
-        
+        if (!string.IsNullOrWhiteSpace(variant.VersionName))
+            extraParts.Add(variant.VersionName);
+        if (!string.IsNullOrWhiteSpace(variant.ColorName))
+            extraParts.Add(variant.ColorName);
         if (extraParts.Count > 0)
         {
             var extra = string.Join(" - ", extraParts);
             if (string.IsNullOrWhiteSpace(variantName))
             {
                 variantName = extra;
-            }
-            else if (!variantName.Contains(variant.VersionName ?? "NONE") && !variantName.Contains(variant.ColorName ?? "NONE"))
+            } else if (!variantName.Contains(variant.VersionName ?? "NONE") &&
+                !variantName.Contains(variant.ColorName ?? "NONE"))
             {
                 variantName = $"{variantName} - {extra}";
             }
         }
-
         var productName = variant.Product?.Name;
         var displayName = string.IsNullOrWhiteSpace(variantName)
             ? productName ?? string.Empty
@@ -518,14 +515,12 @@ public class ProductMappingConfig : IRegister
                     .OrderBy(t => t.DisplayOrder)
                     .Select(
                         t => new
-                        {
-                            title = t.CustomTitle ??
-                                t.Technology?.DefaultTitle ??
-                                t.Technology?.Name,
-                            tag = t.Technology?.Category?.Name ?? "TECHNOLOGY",
-                            description = t.CustomDescription ?? t.Technology?.DefaultDescription,
-                            image = t.CustomImageUrl ?? t.Technology?.DefaultImageUrl
-                        }))
+                                {
+                                    title = t.CustomTitle ?? t.Technology?.DefaultTitle ?? t.Technology?.Name,
+                                    tag = t.Technology?.Category?.Name ?? "TECHNOLOGY",
+                                    description = t.CustomDescription ?? t.Technology?.DefaultDescription,
+                                    image = t.CustomImageUrl ?? t.Technology?.DefaultImageUrl
+                                }))
             : null;
     }
 
@@ -535,26 +530,20 @@ public class ProductMappingConfig : IRegister
         {
             return $"{variant.VersionName} - {variant.ColorName}";
         }
-
         if (!string.IsNullOrWhiteSpace(variant.VersionName))
         {
             return variant.VersionName;
         }
-
         if (!string.IsNullOrWhiteSpace(variant.ColorName))
         {
             return variant.ColorName;
         }
-
         if (!isOtherVariant && variant.VariantOptionValues.Count > 0)
         {
             return string.Join(
                 " - ",
-                variant.VariantOptionValues
-                    .Where(vov => vov.OptionValue != null)
-                    .Select(vov => vov.OptionValue!.Name));
+                variant.VariantOptionValues.Where(vov => vov.OptionValue != null).Select(vov => vov.OptionValue!.Name));
         }
-
         return "Tiêu chuẩn";
     }
 }

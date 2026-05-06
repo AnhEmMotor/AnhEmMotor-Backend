@@ -1,8 +1,6 @@
-using Application.ApiContracts.Option.Responses;
 using Application.ApiContracts.Product.Requests;
 using Application.ApiContracts.Product.Responses;
 using Application.Common.Models;
-using Application.Features.Options.Queries.GetOptionsList;
 using Application.Features.OptionValues.Commands.CreateOptionValue;
 using Application.Features.OptionValues.Commands.DeleteOptionValue;
 using Application.Features.OptionValues.Commands.UpdateOptionValue;
@@ -37,7 +35,6 @@ using Asp.Versioning;
 using Domain.Constants;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
-using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;

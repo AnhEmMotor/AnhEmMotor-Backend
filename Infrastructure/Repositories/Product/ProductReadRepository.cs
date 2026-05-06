@@ -255,10 +255,8 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
                     variantSubquery = variantSubquery.Where(
                         v => v.VariantOptionValues
                                 .Any(vov => vov.OptionValueId != null && ids.Contains(vov.OptionValueId.Value)) ||
-                            (v.ColorName != null &&
-                                names.Any(n => v.ColorName.Contains(n))) ||
-                            (v.VersionName != null &&
-                                names.Any(n => v.VersionName.Contains(n))));
+                            (v.ColorName != null && names.Any(n => v.ColorName.Contains(n))) ||
+                            (v.VersionName != null && names.Any(n => v.VersionName.Contains(n))));
                 }
                 var matchingProductIds = variantSubquery.Select(v => v.ProductId);
                 query = query.Where(p => matchingProductIds.Contains(p.Id));

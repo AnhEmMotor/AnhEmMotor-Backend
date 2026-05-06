@@ -1,10 +1,12 @@
+
 namespace Application.Common.Models;
 
 public class Result
 {
     public bool IsSuccess { get; }
+
     public bool IsFailure => !IsSuccess;
-    
+
     public List<Error> Errors { get; }
 
     public Error? Error => Errors.FirstOrDefault();
@@ -19,14 +21,16 @@ public class Result
         {
             throw new InvalidOperationException("A failed result must have at least one error.");
         }
-
         IsSuccess = isSuccess;
         Errors = errors ?? [];
     }
 
     public static Result Success() => new(true);
+
     public static Result Failure(Error error) => new(false, [error]);
+
     public static Result Failure(List<Error> errors) => new(false, errors);
+
     public static Result Failure(string errorMessage) => new(false, [Error.Failure(errorMessage)]);
 }
 
@@ -47,24 +51,27 @@ public class Result<T> : Result
         }
     }
 
-    private Result(T value) : base(true)
+    private Result(T value): base(true)
     {
         _value = value;
     }
 
-    private Result(Error error) : base(false, [error])
+    private Result(Error error): base(false, [error])
     {
         _value = default;
     }
 
-    private Result(List<Error> errors) : base(false, errors)
+    private Result(List<Error> errors): base(false, errors)
     {
         _value = default;
     }
 
     public static Result<T> Success(T value) => new(value);
+
     public new static Result<T> Failure(Error error) => new(error);
+
     public new static Result<T> Failure(List<Error> errors) => new(errors);
+
     public new static Result<T> Failure(string errorMessage) => new(Error.Failure(errorMessage));
 
     public static implicit operator Result<T>(T value) => Success(value);

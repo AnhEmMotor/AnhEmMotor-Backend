@@ -90,14 +90,21 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
             .UseNpgsql(_fullConnectionString)
             .Options;
         using var context = new ApplicationDBContext(options);
-        
-        await context.Database.ExecuteSqlRawAsync("INSERT INTO \"ProductStatus\" (\"Key\") VALUES ('for-sale'), ('out-of-business') ON CONFLICT (\"Key\") DO NOTHING;").ConfigureAwait(false);
-
-        await context.Database.ExecuteSqlRawAsync("INSERT INTO \"InputStatus\" (\"Key\") VALUES ('working'), ('finished'), ('cancelled') ON CONFLICT (\"Key\") DO NOTHING;").ConfigureAwait(false);
-
-        await context.Database.ExecuteSqlRawAsync("INSERT INTO \"OutputStatus\" (\"Key\") VALUES ('pending'), ('processing'), ('shipped'), ('delivered'), ('cancelled') ON CONFLICT (\"Key\") DO NOTHING;").ConfigureAwait(false);
-
-        await context.Database.ExecuteSqlRawAsync(@"
+        await context.Database
+            .ExecuteSqlRawAsync(
+                "INSERT INTO \"ProductStatus\" (\"Key\") VALUES ('for-sale'), ('out-of-business') ON CONFLICT (\"Key\") DO NOTHING;")
+            .ConfigureAwait(false);
+        await context.Database
+            .ExecuteSqlRawAsync(
+                "INSERT INTO \"InputStatus\" (\"Key\") VALUES ('working'), ('finished'), ('cancelled') ON CONFLICT (\"Key\") DO NOTHING;")
+            .ConfigureAwait(false);
+        await context.Database
+            .ExecuteSqlRawAsync(
+                "INSERT INTO \"OutputStatus\" (\"Key\") VALUES ('pending'), ('processing'), ('shipped'), ('delivered'), ('cancelled') ON CONFLICT (\"Key\") DO NOTHING;")
+            .ConfigureAwait(false);
+        await context.Database
+            .ExecuteSqlRawAsync(
+                @"
             INSERT INTO ""PredefinedOption"" (""Key"", ""Value"") VALUES 
             ('Color', 'Màu sắc'),
             ('Màu sắc', 'Màu sắc'),
@@ -110,7 +117,8 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
             ('VehicleType', 'Loại xe'),
             ('Size', 'Kích thước'),
             ('Kích thước', 'Kích thước')
-            ON CONFLICT (""Key"") DO NOTHING;").ConfigureAwait(false);
+            ON CONFLICT (""Key"") DO NOTHING;")
+            .ConfigureAwait(false);
     }
 
     public new async Task DisposeAsync()

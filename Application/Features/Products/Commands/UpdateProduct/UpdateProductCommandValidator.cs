@@ -46,12 +46,10 @@ public sealed class UpdateProductCommandValidator : AbstractValidator<UpdateProd
     {
         if (variants == null || variants.Count <= 1)
             return;
-
-        var hasVariantWithoutOptions = variants.Any(v => 
-            (v.OptionValues == null || v.OptionValues.Count == 0) && 
-            string.IsNullOrWhiteSpace(v.ColorName) && 
-            string.IsNullOrWhiteSpace(v.VersionName));
-
+        var hasVariantWithoutOptions = variants.Any(
+            v => (v.OptionValues == null || v.OptionValues.Count == 0) &&
+                string.IsNullOrWhiteSpace(v.ColorName) &&
+                string.IsNullOrWhiteSpace(v.VersionName));
         if (hasVariantWithoutOptions)
         {
             context.AddFailure(
@@ -59,27 +57,22 @@ public sealed class UpdateProductCommandValidator : AbstractValidator<UpdateProd
                 "Khi có nhiều biến thể, tất cả các biến thể phải có thuộc tính phân biệt. Không được để trống thuộc tính.");
             return;
         }
-
         var optionSignatures = new HashSet<string>();
         foreach (var variant in variants)
         {
             var parts = new List<string>();
-
             if (variant.OptionValues != null && variant.OptionValues.Count > 0)
             {
-                parts.AddRange(variant.OptionValues
-                    .OrderBy(kvp => kvp.Key)
-                    .Select(kvp => $"{kvp.Key.Trim().ToLowerInvariant()}:{kvp.Value.Trim().ToLowerInvariant()}"));
+                parts.AddRange(
+                    variant.OptionValues
+                        .OrderBy(kvp => kvp.Key)
+                        .Select(kvp => $"{kvp.Key.Trim().ToLowerInvariant()}:{kvp.Value.Trim().ToLowerInvariant()}"));
             }
-
             if (!string.IsNullOrWhiteSpace(variant.ColorName))
                 parts.Add($"specialized_color:{variant.ColorName.Trim().ToLowerInvariant()}");
-
             if (!string.IsNullOrWhiteSpace(variant.VersionName))
                 parts.Add($"specialized_version:{variant.VersionName.Trim().ToLowerInvariant()}");
-
             var sig = string.Join("|", parts);
-
             if (!optionSignatures.Add(sig))
             {
                 context.AddFailure(

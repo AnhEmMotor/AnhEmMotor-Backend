@@ -592,7 +592,11 @@ public class PermissionAndRole
     public void RoleName_ValidUnicodeAndSpecialChars_ShouldPass()
     {
         CreateRoleCommandValidator validator = new();
-        var command = new CreateRoleCommand { RoleName = "Quản lý - CRM.Hanoi", Permissions = [PermissionsList.Brands.View] };
+        var command = new CreateRoleCommand
+        {
+            RoleName = "Quản lý - CRM.Hanoi",
+            Permissions = [PermissionsList.Brands.View]
+        };
         var result = validator.TestValidate(command);
         result.ShouldNotHaveValidationErrorFor(x => x.RoleName);
     }
@@ -627,18 +631,12 @@ public class PermissionAndRole
     [Fact(DisplayName = "PERM_035 - Unit - Kiểm tra cấu trúc nhóm quyền CRM & Connect")]
     public async Task GetAllPermissions_CRMAndConnectGroup_ContainsCorrectPermissions()
     {
-        // 1. Khởi tạo
         var handler = new GetAllPermissionsQueryHandler();
         var query = new GetAllPermissionsQuery();
-
-        // 2. Sử dụng await thay vì .Result
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         var groups = result.Value;
-
-        // 3. Kiểm tra kết quả (Assertions)
         groups.Should().ContainKey("CRM & Connect");
         var crmPerms = groups["CRM & Connect"];
-
         crmPerms.Any(p => p.ID!.Contains("Contacts")).Should().BeTrue();
         crmPerms.Any(p => p.ID!.Contains("Bookings")).Should().BeTrue();
         crmPerms.Any(p => p.ID!.Contains("Leads")).Should().BeTrue();

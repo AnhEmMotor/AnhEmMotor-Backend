@@ -305,16 +305,18 @@ public class Statistics
         actualResponse.UnitPrice.Should().Be(500000);
         actualResponse.StockQuantity.Should().Be(0);
     }
+
     [Fact(DisplayName = "STAT_104 - Controller - Kiểm tra danh sách sản phẩm bán chạy nhất")]
     public async Task GetDashboardStats_TopSellingProducts_ReturnsCorrectList()
     {
         var expectedStats = new DashboardStatsResponse
         {
-            TopSellingProducts = new List<TopSellingProductResponse>
-            {
-                new() { ProductName = "Xe Vision", QuantitySold = 50 },
-                new() { ProductName = "Xe Janus", QuantitySold = 30 }
-            }
+            TopSellingProducts =
+                new List<TopSellingProductResponse>
+                {
+                    new() { ProductName = "Xe Vision", QuantitySold = 50 },
+                    new() { ProductName = "Xe Janus", QuantitySold = 30 }
+                }
         };
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetDashboardStatsQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedStats);

@@ -21,15 +21,12 @@ public sealed class GetProductStoreDetailBySlugQueryHandler(IProductReadReposito
             return Result<ProductStoreDetailResponse>.Failure(
                 new Error("ProductDetail.NotFound", "Không tìm thấy sản phẩm."));
         }
-
         var product = variant.Product;
         var productResponse = product.Adapt<ProductInfoStoreResponse>();
         var currentVariantResponse = variant.Adapt<CurrentVariantStoreResponse>();
-
         var otherVariants = product.ProductVariants
             .Where(v => v.Id != variant.Id)
             .Adapt<List<OtherVariantStoreResponse>>();
-
         return Result<ProductStoreDetailResponse>.Success(
             new ProductStoreDetailResponse
             {

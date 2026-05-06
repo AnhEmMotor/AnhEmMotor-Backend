@@ -4,10 +4,7 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using System.Threading;
-using System.Threading.Tasks;
 using WebAPI.Controllers.V1;
-using Xunit;
 
 namespace ControllerTests;
 
@@ -20,7 +17,6 @@ public class Contact
     {
         _senderMock = new Mock<ISender>();
         _contactsController = new ContactsController(_senderMock.Object);
-        
         var httpContext = new DefaultHttpContext();
         _contactsController.ControllerContext = new ControllerContext { HttpContext = httpContext };
     }
@@ -28,22 +24,16 @@ public class Contact
     [Fact(DisplayName = "CONT_001 - Gửi yêu cầu liên hệ hợp lệ (API)")]
     public async Task CreateContact_ValidRequest_ReturnsContactId()
     {
-        // Arrange
-        var command = new CreateContactCommand 
-        { 
-            FullName = "Test User", 
-            Email = "test@gmail.com", 
-            PhoneNumber = "0909123456", 
-            Subject = "Cần hỗ trợ", 
-            Message = "Nội dung cần hỗ trợ" 
+        var command = new CreateContactCommand
+        {
+            FullName = "Test User",
+            Email = "test@gmail.com",
+            PhoneNumber = "0909123456",
+            Subject = "Cần hỗ trợ",
+            Message = "Nội dung cần hỗ trợ"
         };
-        _senderMock.Setup(m => m.Send(command, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<int>.Success(100));
-
-        // Act
+        _senderMock.Setup(m => m.Send(command, It.IsAny<CancellationToken>())).ReturnsAsync(Result<int>.Success(100));
         var result = await _contactsController.CreateAsync(command, CancellationToken.None).ConfigureAwait(true);
-
-        // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
         var response = Assert.IsType<int>(okResult.Value);
         Assert.Equal(100, response);

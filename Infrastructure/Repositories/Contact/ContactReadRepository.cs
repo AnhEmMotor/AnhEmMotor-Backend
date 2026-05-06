@@ -16,6 +16,9 @@ public class ContactReadRepository(ApplicationDBContext context) : IContactReadR
 
     public Task<List<Domain.Entities.Contact>> GetAllAsync(CancellationToken cancellationToken)
     {
-        return context.Contacts.Include(c => c.Replies).OrderByDescending(c => c.CreatedAt).ToListAsync(cancellationToken);
+        return context.Contacts
+            .Include(c => c.Replies)
+            .OrderByDescending(c => c.CreatedAt)
+            .ToListAsync(cancellationToken);
     }
 }

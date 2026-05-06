@@ -142,31 +142,24 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .WithMany(pv => pv.VariantOptionValues)
             .HasForeignKey(v => v.VariantId)
             .OnDelete(DeleteBehavior.Cascade);
-        
         modelBuilder.Entity<ProductTechnology>().HasKey(pt => pt.Id);
-
         modelBuilder.Entity<ProductStatus>().HasKey(ps => ps.Key);
-        modelBuilder.Entity<ProductStatus>().HasData(
-            new ProductStatus { Key = "for-sale" },
-            new ProductStatus { Key = "out-of-business" }
-        );
-
+        modelBuilder.Entity<ProductStatus>()
+            .HasData(new ProductStatus { Key = "for-sale" }, new ProductStatus { Key = "out-of-business" });
         modelBuilder.Entity<InputStatus>().HasKey(ins => ins.Key);
-        modelBuilder.Entity<InputStatus>().HasData(
-            new InputStatus { Key = "working" },
-            new InputStatus { Key = "finished" },
-            new InputStatus { Key = "cancelled" }
-        );
-
+        modelBuilder.Entity<InputStatus>()
+            .HasData(
+                new InputStatus { Key = "working" },
+                new InputStatus { Key = "finished" },
+                new InputStatus { Key = "cancelled" });
         modelBuilder.Entity<OutputStatus>().HasKey(ous => ous.Key);
-        modelBuilder.Entity<OutputStatus>().HasData(
-            new OutputStatus { Key = "pending" },
-            new OutputStatus { Key = "processing" },
-            new OutputStatus { Key = "shipped" },
-            new OutputStatus { Key = "delivered" },
-            new OutputStatus { Key = "cancelled" }
-        );
-
+        modelBuilder.Entity<OutputStatus>()
+            .HasData(
+                new OutputStatus { Key = "pending" },
+                new OutputStatus { Key = "processing" },
+                new OutputStatus { Key = "shipped" },
+                new OutputStatus { Key = "delivered" },
+                new OutputStatus { Key = "cancelled" });
         modelBuilder.Entity<ProductTechnology>()
             .HasOne(pt => pt.Product)
             .WithMany(p => p.ProductTechnologies)
@@ -187,7 +180,6 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .WithMany(v => v.Documents)
             .HasForeignKey(vd => vd.VehicleId)
             .OnDelete(DeleteBehavior.Cascade);
-        
         var isNotSqlServer = string.Compare(Database.ProviderName, "Microsoft.EntityFrameworkCore.SqlServer") != 0;
         var isPostgres = string.Compare(Database.ProviderName, "Npgsql.EntityFrameworkCore.PostgreSQL") == 0;
         if (isNotSqlServer)

@@ -996,16 +996,16 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         await WipeStatisticsDataAsync(db, CancellationToken.None).ConfigureAwait(true);
         await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
-
-        // Seed 5 completed orders this month
         for (int i = 0; i < 5; i++)
         {
             db.OutputOrders.Add(new OutputEntity { StatusId = OrderStatus.Completed, CreatedAt = DateTime.UtcNow });
         }
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
-        var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None).ConfigureAwait(true);
-        var content = await response.Content.ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None)
+            .ConfigureAwait(true);
+        var content = await response.Content
+            .ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None)
+            .ConfigureAwait(true);
         content.Should().NotBeNull();
     }
 
@@ -1013,8 +1013,11 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
     public async Task GetDashboardStats_OverdueDebt_ReturnsCorrectAmount()
     {
         await AuthenticateAsync(CancellationToken.None).ConfigureAwait(true);
-        var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None).ConfigureAwait(true);
-        var content = await response.Content.ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None)
+            .ConfigureAwait(true);
+        var content = await response.Content
+            .ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None)
+            .ConfigureAwait(true);
         content.Should().NotBeNull();
     }
 
@@ -1022,8 +1025,11 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
     public async Task GetDashboardStats_OverstockCount_ReturnsCorrectValue()
     {
         await AuthenticateAsync(CancellationToken.None).ConfigureAwait(true);
-        var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None).ConfigureAwait(true);
-        var content = await response.Content.ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None)
+            .ConfigureAwait(true);
+        var content = await response.Content
+            .ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None)
+            .ConfigureAwait(true);
         content.Should().NotBeNull();
     }
 
@@ -1031,8 +1037,11 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
     public async Task GetDashboardStats_BrandRevenueDistribution_ReturnsData()
     {
         await AuthenticateAsync(CancellationToken.None).ConfigureAwait(true);
-        var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None).ConfigureAwait(true);
-        var content = await response.Content.ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None)
+            .ConfigureAwait(true);
+        var content = await response.Content
+            .ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None)
+            .ConfigureAwait(true);
         content!.BrandRevenueDistribution.Should().NotBeNull();
     }
 
@@ -1040,8 +1049,11 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
     public async Task GetDashboardStats_TodayActivities_ReturnsData()
     {
         await AuthenticateAsync(CancellationToken.None).ConfigureAwait(true);
-        var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None).ConfigureAwait(true);
-        var content = await response.Content.ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", CancellationToken.None)
+            .ConfigureAwait(true);
+        var content = await response.Content
+            .ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None)
+            .ConfigureAwait(true);
         content!.TodayActivities.Should().NotBeNull();
     }
 }

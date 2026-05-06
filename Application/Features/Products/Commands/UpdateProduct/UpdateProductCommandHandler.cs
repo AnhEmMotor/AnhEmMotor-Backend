@@ -16,7 +16,6 @@ using Domain.Entities;
 using Mapster;
 using MediatR;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using OptionEntity = Domain.Entities.Option;
 using OptionValueEntity = Domain.Entities.OptionValue;
 
@@ -456,10 +455,10 @@ public sealed class UpdateProductCommandHandler(
         {
             try
             {
-                newTechList = JsonSerializer.Deserialize<List<TechnologyJsonRequest>>(command.Highlights, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                }) ?? [];
+                newTechList = JsonSerializer.Deserialize<List<TechnologyJsonRequest>>(
+                        command.Highlights,
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ??
+                    [];
             } catch
             {
                 newTechList = [];

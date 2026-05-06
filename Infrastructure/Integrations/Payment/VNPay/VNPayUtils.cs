@@ -31,7 +31,6 @@ public static class VNPayUtils
         {
             return ipAddress;
         }
-
         try
         {
             var remoteIpAddress = context.Connection.RemoteIpAddress;

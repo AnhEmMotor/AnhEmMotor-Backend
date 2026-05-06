@@ -1,6 +1,6 @@
-using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using System;
 
 #nullable disable
 
@@ -15,89 +15,57 @@ namespace Infrastructure.PostgreSqlMigrations
             migrationBuilder.DropForeignKey(
                 name: "FK_ProductCollectionPhoto_ProductVariant_ProductVariantId",
                 table: "ProductCollectionPhoto");
-
             migrationBuilder.DropForeignKey(
                 name: "FK_VariantOptionValue_ProductVariant_VariantId",
                 table: "VariantOptionValue");
-
             migrationBuilder.AddColumn<DateTimeOffset>(
                 name: "CreatedAt",
                 table: "VariantOptionValue",
                 type: "timestamp with time zone",
                 nullable: true);
-
             migrationBuilder.AddColumn<DateTimeOffset>(
                 name: "DeletedAt",
                 table: "VariantOptionValue",
                 type: "timestamp with time zone",
                 nullable: true);
-
             migrationBuilder.AddColumn<DateTimeOffset>(
                 name: "UpdatedAt",
                 table: "VariantOptionValue",
                 type: "timestamp with time zone",
                 nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "ColorCode",
-                table: "ProductVariant",
-                type: "text",
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "ColorName",
-                table: "ProductVariant",
-                type: "text",
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "SKU",
-                table: "ProductVariant",
-                type: "text",
-                nullable: true);
-
+            migrationBuilder.AddColumn<string>(name: "ColorCode", table: "ProductVariant", type: "text", nullable: true);
+            migrationBuilder.AddColumn<string>(name: "ColorName", table: "ProductVariant", type: "text", nullable: true);
+            migrationBuilder.AddColumn<string>(name: "SKU", table: "ProductVariant", type: "text", nullable: true);
             migrationBuilder.AddColumn<string>(
                 name: "VersionName",
                 table: "ProductVariant",
                 type: "text",
                 nullable: true);
-
             migrationBuilder.AddColumn<DateTimeOffset>(
                 name: "CreatedAt",
                 table: "ProductCollectionPhoto",
                 type: "timestamp with time zone",
                 nullable: true);
-
             migrationBuilder.AddColumn<DateTimeOffset>(
                 name: "DeletedAt",
                 table: "ProductCollectionPhoto",
                 type: "timestamp with time zone",
                 nullable: true);
-
             migrationBuilder.AddColumn<DateTimeOffset>(
                 name: "UpdatedAt",
                 table: "ProductCollectionPhoto",
                 type: "timestamp with time zone",
                 nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "Highlights",
-                table: "Product",
-                type: "text",
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "ColorCode",
-                table: "OptionValue",
-                type: "text",
-                nullable: true);
-
+            migrationBuilder.AddColumn<string>(name: "Highlights", table: "Product", type: "text", nullable: true);
+            migrationBuilder.AddColumn<string>(name: "ColorCode", table: "OptionValue", type: "text", nullable: true);
             migrationBuilder.CreateTable(
                 name: "Banner",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation(
+                            "Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Title = table.Column<string>(type: "text", nullable: false),
                     ImageUrl = table.Column<string>(type: "text", nullable: false),
                     LinkUrl = table.Column<string>(type: "text", nullable: true),
@@ -114,13 +82,14 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     table.PrimaryKey("PK_Banner", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "Booking",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation(
+                            "Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     FullName = table.Column<string>(type: "text", nullable: false),
                     Email = table.Column<string>(type: "text", nullable: false),
                     PhoneNumber = table.Column<string>(type: "text", nullable: false),
@@ -144,13 +113,14 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "Contact",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation(
+                            "Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     FullName = table.Column<string>(type: "text", nullable: false),
                     Email = table.Column<string>(type: "text", nullable: false),
                     PhoneNumber = table.Column<string>(type: "text", nullable: false),
@@ -167,13 +137,14 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     table.PrimaryKey("PK_Contact", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "Lead",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation(
+                            "Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     FullName = table.Column<string>(type: "text", nullable: false),
                     Email = table.Column<string>(type: "text", nullable: false),
                     PhoneNumber = table.Column<string>(type: "text", nullable: false),
@@ -191,13 +162,14 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     table.PrimaryKey("PK_Lead", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "News",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation(
+                            "Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Title = table.Column<string>(type: "text", nullable: false),
                     Slug = table.Column<string>(type: "varchar(255)", nullable: false),
                     Content = table.Column<string>(type: "text", nullable: true),
@@ -216,13 +188,14 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     table.PrimaryKey("PK_News", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "TechnologyCategories",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation(
+                            "Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
@@ -232,13 +205,14 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     table.PrimaryKey("PK_TechnologyCategories", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "ContactReply",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation(
+                            "Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     ContactId = table.Column<int>(type: "integer", nullable: false),
                     Message = table.Column<string>(type: "text", nullable: false),
                     RepliedById = table.Column<Guid>(type: "uuid", nullable: false),
@@ -262,13 +236,14 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "LeadActivity",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation(
+                            "Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     LeadId = table.Column<int>(type: "integer", nullable: false),
                     ActivityType = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
@@ -286,13 +261,14 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "Vehicle",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation(
+                            "Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     LeadId = table.Column<int>(type: "integer", nullable: false),
                     VinNumber = table.Column<string>(type: "text", nullable: false),
                     EngineNumber = table.Column<string>(type: "text", nullable: false),
@@ -312,13 +288,14 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "Technologies",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation(
+                            "Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     CategoryId = table.Column<int>(type: "integer", nullable: true),
                     Name = table.Column<string>(type: "text", nullable: false),
                     DefaultTitle = table.Column<string>(type: "text", nullable: true),
@@ -337,13 +314,14 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalTable: "TechnologyCategories",
                         principalColumn: "Id");
                 });
-
             migrationBuilder.CreateTable(
                 name: "MaintenanceHistory",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation(
+                            "Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     VehicleId = table.Column<int>(type: "integer", nullable: false),
                     MaintenanceDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     Mileage = table.Column<int>(type: "integer", nullable: false),
@@ -362,13 +340,14 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "VehicleDocument",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation(
+                            "Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     VehicleId = table.Column<int>(type: "integer", nullable: false),
                     DocumentType = table.Column<string>(type: "text", nullable: false),
                     FileUrl = table.Column<string>(type: "text", nullable: false),
@@ -387,7 +366,6 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "ProductTechnologies",
                 columns: table => new
@@ -418,13 +396,14 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "TechnologyImages",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation(
+                            "Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     TechnologyId = table.Column<int>(type: "integer", nullable: false),
                     ImageUrl = table.Column<string>(type: "text", nullable: false),
                     Type = table.Column<string>(type: "text", nullable: false),
@@ -442,57 +421,37 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateIndex(
                 name: "IX_Booking_ProductVariantId",
                 table: "Booking",
                 column: "ProductVariantId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ContactReply_ContactId",
-                table: "ContactReply",
-                column: "ContactId");
-
+            migrationBuilder.CreateIndex(name: "IX_ContactReply_ContactId", table: "ContactReply", column: "ContactId");
             migrationBuilder.CreateIndex(
                 name: "IX_ContactReply_RepliedById",
                 table: "ContactReply",
                 column: "RepliedById");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_LeadActivity_LeadId",
-                table: "LeadActivity",
-                column: "LeadId");
-
+            migrationBuilder.CreateIndex(name: "IX_LeadActivity_LeadId", table: "LeadActivity", column: "LeadId");
             migrationBuilder.CreateIndex(
                 name: "IX_MaintenanceHistory_VehicleId",
                 table: "MaintenanceHistory",
                 column: "VehicleId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ProductTechnologies_TechnologyId",
                 table: "ProductTechnologies",
                 column: "TechnologyId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_Technologies_CategoryId",
                 table: "Technologies",
                 column: "CategoryId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_TechnologyImages_TechnologyId",
                 table: "TechnologyImages",
                 column: "TechnologyId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Vehicle_LeadId",
-                table: "Vehicle",
-                column: "LeadId");
-
+            migrationBuilder.CreateIndex(name: "IX_Vehicle_LeadId", table: "Vehicle", column: "LeadId");
             migrationBuilder.CreateIndex(
                 name: "IX_VehicleDocument_VehicleId",
                 table: "VehicleDocument",
                 column: "VehicleId");
-
             migrationBuilder.AddForeignKey(
                 name: "FK_ProductCollectionPhoto_ProductVariant_ProductVariantId",
                 table: "ProductCollectionPhoto",
@@ -500,7 +459,6 @@ namespace Infrastructure.PostgreSqlMigrations
                 principalTable: "ProductVariant",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
-
             migrationBuilder.AddForeignKey(
                 name: "FK_VariantOptionValue_ProductVariant_VariantId",
                 table: "VariantOptionValue",
@@ -516,108 +474,41 @@ namespace Infrastructure.PostgreSqlMigrations
             migrationBuilder.DropForeignKey(
                 name: "FK_ProductCollectionPhoto_ProductVariant_ProductVariantId",
                 table: "ProductCollectionPhoto");
-
             migrationBuilder.DropForeignKey(
                 name: "FK_VariantOptionValue_ProductVariant_VariantId",
                 table: "VariantOptionValue");
-
-            migrationBuilder.DropTable(
-                name: "Banner");
-
-            migrationBuilder.DropTable(
-                name: "Booking");
-
-            migrationBuilder.DropTable(
-                name: "ContactReply");
-
-            migrationBuilder.DropTable(
-                name: "LeadActivity");
-
-            migrationBuilder.DropTable(
-                name: "MaintenanceHistory");
-
-            migrationBuilder.DropTable(
-                name: "News");
-
-            migrationBuilder.DropTable(
-                name: "ProductTechnologies");
-
-            migrationBuilder.DropTable(
-                name: "TechnologyImages");
-
-            migrationBuilder.DropTable(
-                name: "VehicleDocument");
-
-            migrationBuilder.DropTable(
-                name: "Contact");
-
-            migrationBuilder.DropTable(
-                name: "Technologies");
-
-            migrationBuilder.DropTable(
-                name: "Vehicle");
-
-            migrationBuilder.DropTable(
-                name: "TechnologyCategories");
-
-            migrationBuilder.DropTable(
-                name: "Lead");
-
-            migrationBuilder.DropColumn(
-                name: "CreatedAt",
-                table: "VariantOptionValue");
-
-            migrationBuilder.DropColumn(
-                name: "DeletedAt",
-                table: "VariantOptionValue");
-
-            migrationBuilder.DropColumn(
-                name: "UpdatedAt",
-                table: "VariantOptionValue");
-
-            migrationBuilder.DropColumn(
-                name: "ColorCode",
-                table: "ProductVariant");
-
-            migrationBuilder.DropColumn(
-                name: "ColorName",
-                table: "ProductVariant");
-
-            migrationBuilder.DropColumn(
-                name: "SKU",
-                table: "ProductVariant");
-
-            migrationBuilder.DropColumn(
-                name: "VersionName",
-                table: "ProductVariant");
-
-            migrationBuilder.DropColumn(
-                name: "CreatedAt",
-                table: "ProductCollectionPhoto");
-
-            migrationBuilder.DropColumn(
-                name: "DeletedAt",
-                table: "ProductCollectionPhoto");
-
-            migrationBuilder.DropColumn(
-                name: "UpdatedAt",
-                table: "ProductCollectionPhoto");
-
-            migrationBuilder.DropColumn(
-                name: "Highlights",
-                table: "Product");
-
-            migrationBuilder.DropColumn(
-                name: "ColorCode",
-                table: "OptionValue");
-
+            migrationBuilder.DropTable(name: "Banner");
+            migrationBuilder.DropTable(name: "Booking");
+            migrationBuilder.DropTable(name: "ContactReply");
+            migrationBuilder.DropTable(name: "LeadActivity");
+            migrationBuilder.DropTable(name: "MaintenanceHistory");
+            migrationBuilder.DropTable(name: "News");
+            migrationBuilder.DropTable(name: "ProductTechnologies");
+            migrationBuilder.DropTable(name: "TechnologyImages");
+            migrationBuilder.DropTable(name: "VehicleDocument");
+            migrationBuilder.DropTable(name: "Contact");
+            migrationBuilder.DropTable(name: "Technologies");
+            migrationBuilder.DropTable(name: "Vehicle");
+            migrationBuilder.DropTable(name: "TechnologyCategories");
+            migrationBuilder.DropTable(name: "Lead");
+            migrationBuilder.DropColumn(name: "CreatedAt", table: "VariantOptionValue");
+            migrationBuilder.DropColumn(name: "DeletedAt", table: "VariantOptionValue");
+            migrationBuilder.DropColumn(name: "UpdatedAt", table: "VariantOptionValue");
+            migrationBuilder.DropColumn(name: "ColorCode", table: "ProductVariant");
+            migrationBuilder.DropColumn(name: "ColorName", table: "ProductVariant");
+            migrationBuilder.DropColumn(name: "SKU", table: "ProductVariant");
+            migrationBuilder.DropColumn(name: "VersionName", table: "ProductVariant");
+            migrationBuilder.DropColumn(name: "CreatedAt", table: "ProductCollectionPhoto");
+            migrationBuilder.DropColumn(name: "DeletedAt", table: "ProductCollectionPhoto");
+            migrationBuilder.DropColumn(name: "UpdatedAt", table: "ProductCollectionPhoto");
+            migrationBuilder.DropColumn(name: "Highlights", table: "Product");
+            migrationBuilder.DropColumn(name: "ColorCode", table: "OptionValue");
             migrationBuilder.AddForeignKey(
                 name: "FK_ProductCollectionPhoto_ProductVariant_ProductVariantId",
                 table: "ProductCollectionPhoto",
                 column: "ProductVariantId",
                 principalTable: "ProductVariant",
                 principalColumn: "Id");
-
             migrationBuilder.AddForeignKey(
                 name: "FK_VariantOptionValue_ProductVariant_VariantId",
                 table: "VariantOptionValue",

@@ -12,7 +12,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog();
 var configuration = builder.Configuration;
 var environment = builder.Environment;
-
 var customUploadPath = configuration["LocalFileStorage:UploadPath"];
 if (!string.IsNullOrWhiteSpace(customUploadPath))
 {
@@ -65,9 +64,9 @@ app.UseSerilogRequestLogging(
     {
         options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
         {
-            var clientIp = httpContext.Request.Headers["CF-Connecting-IP"].FirstOrDefault()
-                           ?? httpContext.Connection.RemoteIpAddress?.ToString()
-                           ?? "unknown";
+            var clientIp = httpContext.Request.Headers["CF-Connecting-IP"].FirstOrDefault() ??
+                httpContext.Connection.RemoteIpAddress?.ToString() ??
+                "unknown";
             diagnosticContext.Set("ClientIP", clientIp);
         };
     });

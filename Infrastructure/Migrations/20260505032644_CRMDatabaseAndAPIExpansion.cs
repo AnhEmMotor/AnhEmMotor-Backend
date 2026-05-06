@@ -1,5 +1,5 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 #nullable disable
 
@@ -14,29 +14,24 @@ namespace Infrastructure.Migrations
             migrationBuilder.DropForeignKey(
                 name: "FK_ProductCollectionPhoto_ProductVariant_ProductVariantId",
                 table: "ProductCollectionPhoto");
-
             migrationBuilder.DropForeignKey(
                 name: "FK_VariantOptionValue_ProductVariant_VariantId",
                 table: "VariantOptionValue");
-
             migrationBuilder.AddColumn<DateTimeOffset>(
                 name: "CreatedAt",
                 table: "VariantOptionValue",
                 type: "datetimeoffset",
                 nullable: true);
-
             migrationBuilder.AddColumn<DateTimeOffset>(
                 name: "DeletedAt",
                 table: "VariantOptionValue",
                 type: "datetimeoffset",
                 nullable: true);
-
             migrationBuilder.AddColumn<DateTimeOffset>(
                 name: "UpdatedAt",
                 table: "VariantOptionValue",
                 type: "datetimeoffset",
                 nullable: true);
-
             migrationBuilder.AlterColumn<string>(
                 name: "CoverImageUrl",
                 table: "ProductVariant",
@@ -45,67 +40,56 @@ namespace Infrastructure.Migrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(150)",
                 oldNullable: true);
-
             migrationBuilder.AddColumn<string>(
                 name: "ColorCode",
                 table: "ProductVariant",
                 type: "nvarchar(200)",
                 nullable: true);
-
             migrationBuilder.AddColumn<string>(
                 name: "ColorName",
                 table: "ProductVariant",
                 type: "nvarchar(500)",
                 nullable: true);
-
             migrationBuilder.AddColumn<string>(
                 name: "SKU",
                 table: "ProductVariant",
                 type: "nvarchar(50)",
                 nullable: true);
-
             migrationBuilder.AddColumn<string>(
                 name: "VersionName",
                 table: "ProductVariant",
                 type: "nvarchar(100)",
                 nullable: true);
-
             migrationBuilder.AddColumn<DateTimeOffset>(
                 name: "CreatedAt",
                 table: "ProductCollectionPhoto",
                 type: "datetimeoffset",
                 nullable: true);
-
             migrationBuilder.AddColumn<DateTimeOffset>(
                 name: "DeletedAt",
                 table: "ProductCollectionPhoto",
                 type: "datetimeoffset",
                 nullable: true);
-
             migrationBuilder.AddColumn<DateTimeOffset>(
                 name: "UpdatedAt",
                 table: "ProductCollectionPhoto",
                 type: "datetimeoffset",
                 nullable: true);
-
             migrationBuilder.AddColumn<string>(
                 name: "Highlights",
                 table: "Product",
                 type: "nvarchar(MAX)",
                 nullable: true);
-
             migrationBuilder.AddColumn<string>(
                 name: "ColorCode",
                 table: "OptionValue",
                 type: "nvarchar(20)",
                 nullable: true);
-
             migrationBuilder.CreateTable(
                 name: "Banner",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     Title = table.Column<string>(type: "nvarchar(255)", nullable: false),
                     ImageUrl = table.Column<string>(type: "nvarchar(500)", nullable: false),
                     LinkUrl = table.Column<string>(type: "nvarchar(500)", nullable: true),
@@ -122,13 +106,11 @@ namespace Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_Banner", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "Booking",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     FullName = table.Column<string>(type: "nvarchar(100)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(100)", nullable: false),
                     PhoneNumber = table.Column<string>(type: "nvarchar(20)", nullable: false),
@@ -152,13 +134,11 @@ namespace Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "Contact",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     FullName = table.Column<string>(type: "nvarchar(100)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(100)", nullable: false),
                     PhoneNumber = table.Column<string>(type: "nvarchar(20)", nullable: false),
@@ -175,13 +155,11 @@ namespace Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_Contact", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "Lead",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     FullName = table.Column<string>(type: "nvarchar(100)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(100)", nullable: false),
                     PhoneNumber = table.Column<string>(type: "nvarchar(20)", nullable: false),
@@ -199,13 +177,11 @@ namespace Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_Lead", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "News",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     Title = table.Column<string>(type: "nvarchar(255)", nullable: false),
                     Slug = table.Column<string>(type: "varchar(255)", nullable: false),
                     Content = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -224,13 +200,11 @@ namespace Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_News", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "TechnologyCategories",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(255)", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
@@ -240,13 +214,11 @@ namespace Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_TechnologyCategories", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "ContactReply",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     ContactId = table.Column<int>(type: "int", nullable: false),
                     Message = table.Column<string>(type: "nvarchar(MAX)", nullable: false),
                     RepliedById = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -270,13 +242,11 @@ namespace Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "LeadActivity",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     LeadId = table.Column<int>(type: "int", nullable: false),
                     ActivityType = table.Column<string>(type: "nvarchar(50)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(MAX)", nullable: false),
@@ -294,13 +264,11 @@ namespace Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "Vehicle",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     LeadId = table.Column<int>(type: "int", nullable: false),
                     VinNumber = table.Column<string>(type: "nvarchar(100)", nullable: false),
                     EngineNumber = table.Column<string>(type: "nvarchar(100)", nullable: false),
@@ -320,13 +288,11 @@ namespace Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "Technologies",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     CategoryId = table.Column<int>(type: "int", nullable: true),
                     Name = table.Column<string>(type: "nvarchar(255)", nullable: false),
                     DefaultTitle = table.Column<string>(type: "nvarchar(255)", nullable: true),
@@ -345,13 +311,11 @@ namespace Infrastructure.Migrations
                         principalTable: "TechnologyCategories",
                         principalColumn: "Id");
                 });
-
             migrationBuilder.CreateTable(
                 name: "MaintenanceHistory",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     VehicleId = table.Column<int>(type: "int", nullable: false),
                     MaintenanceDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     Mileage = table.Column<int>(type: "int", nullable: false),
@@ -370,13 +334,11 @@ namespace Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "VehicleDocument",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     VehicleId = table.Column<int>(type: "int", nullable: false),
                     DocumentType = table.Column<string>(type: "nvarchar(50)", nullable: false),
                     FileUrl = table.Column<string>(type: "nvarchar(500)", nullable: false),
@@ -395,7 +357,6 @@ namespace Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "ProductTechnologies",
                 columns: table => new
@@ -426,13 +387,11 @@ namespace Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "TechnologyImages",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false).Annotation("SqlServer:Identity", "1, 1"),
                     TechnologyId = table.Column<int>(type: "int", nullable: false),
                     ImageUrl = table.Column<string>(type: "nvarchar(1000)", nullable: false),
                     Type = table.Column<string>(type: "nvarchar(50)", nullable: false),
@@ -450,57 +409,37 @@ namespace Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateIndex(
                 name: "IX_Booking_ProductVariantId",
                 table: "Booking",
                 column: "ProductVariantId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ContactReply_ContactId",
-                table: "ContactReply",
-                column: "ContactId");
-
+            migrationBuilder.CreateIndex(name: "IX_ContactReply_ContactId", table: "ContactReply", column: "ContactId");
             migrationBuilder.CreateIndex(
                 name: "IX_ContactReply_RepliedById",
                 table: "ContactReply",
                 column: "RepliedById");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_LeadActivity_LeadId",
-                table: "LeadActivity",
-                column: "LeadId");
-
+            migrationBuilder.CreateIndex(name: "IX_LeadActivity_LeadId", table: "LeadActivity", column: "LeadId");
             migrationBuilder.CreateIndex(
                 name: "IX_MaintenanceHistory_VehicleId",
                 table: "MaintenanceHistory",
                 column: "VehicleId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_ProductTechnologies_TechnologyId",
                 table: "ProductTechnologies",
                 column: "TechnologyId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_Technologies_CategoryId",
                 table: "Technologies",
                 column: "CategoryId");
-
             migrationBuilder.CreateIndex(
                 name: "IX_TechnologyImages_TechnologyId",
                 table: "TechnologyImages",
                 column: "TechnologyId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Vehicle_LeadId",
-                table: "Vehicle",
-                column: "LeadId");
-
+            migrationBuilder.CreateIndex(name: "IX_Vehicle_LeadId", table: "Vehicle", column: "LeadId");
             migrationBuilder.CreateIndex(
                 name: "IX_VehicleDocument_VehicleId",
                 table: "VehicleDocument",
                 column: "VehicleId");
-
             migrationBuilder.AddForeignKey(
                 name: "FK_ProductCollectionPhoto_ProductVariant_ProductVariantId",
                 table: "ProductCollectionPhoto",
@@ -508,7 +447,6 @@ namespace Infrastructure.Migrations
                 principalTable: "ProductVariant",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
-
             migrationBuilder.AddForeignKey(
                 name: "FK_VariantOptionValue_ProductVariant_VariantId",
                 table: "VariantOptionValue",
@@ -524,101 +462,35 @@ namespace Infrastructure.Migrations
             migrationBuilder.DropForeignKey(
                 name: "FK_ProductCollectionPhoto_ProductVariant_ProductVariantId",
                 table: "ProductCollectionPhoto");
-
             migrationBuilder.DropForeignKey(
                 name: "FK_VariantOptionValue_ProductVariant_VariantId",
                 table: "VariantOptionValue");
-
-            migrationBuilder.DropTable(
-                name: "Banner");
-
-            migrationBuilder.DropTable(
-                name: "Booking");
-
-            migrationBuilder.DropTable(
-                name: "ContactReply");
-
-            migrationBuilder.DropTable(
-                name: "LeadActivity");
-
-            migrationBuilder.DropTable(
-                name: "MaintenanceHistory");
-
-            migrationBuilder.DropTable(
-                name: "News");
-
-            migrationBuilder.DropTable(
-                name: "ProductTechnologies");
-
-            migrationBuilder.DropTable(
-                name: "TechnologyImages");
-
-            migrationBuilder.DropTable(
-                name: "VehicleDocument");
-
-            migrationBuilder.DropTable(
-                name: "Contact");
-
-            migrationBuilder.DropTable(
-                name: "Technologies");
-
-            migrationBuilder.DropTable(
-                name: "Vehicle");
-
-            migrationBuilder.DropTable(
-                name: "TechnologyCategories");
-
-            migrationBuilder.DropTable(
-                name: "Lead");
-
-            migrationBuilder.DropColumn(
-                name: "CreatedAt",
-                table: "VariantOptionValue");
-
-            migrationBuilder.DropColumn(
-                name: "DeletedAt",
-                table: "VariantOptionValue");
-
-            migrationBuilder.DropColumn(
-                name: "UpdatedAt",
-                table: "VariantOptionValue");
-
-            migrationBuilder.DropColumn(
-                name: "ColorCode",
-                table: "ProductVariant");
-
-            migrationBuilder.DropColumn(
-                name: "ColorName",
-                table: "ProductVariant");
-
-            migrationBuilder.DropColumn(
-                name: "SKU",
-                table: "ProductVariant");
-
-            migrationBuilder.DropColumn(
-                name: "VersionName",
-                table: "ProductVariant");
-
-            migrationBuilder.DropColumn(
-                name: "CreatedAt",
-                table: "ProductCollectionPhoto");
-
-            migrationBuilder.DropColumn(
-                name: "DeletedAt",
-                table: "ProductCollectionPhoto");
-
-            migrationBuilder.DropColumn(
-                name: "UpdatedAt",
-                table: "ProductCollectionPhoto");
-
-            migrationBuilder.DropColumn(
-                name: "Highlights",
-                table: "Product");
-
-            migrationBuilder.DropColumn(
-                name: "ColorCode",
-                table: "OptionValue");
-
+            migrationBuilder.DropTable(name: "Banner");
+            migrationBuilder.DropTable(name: "Booking");
+            migrationBuilder.DropTable(name: "ContactReply");
+            migrationBuilder.DropTable(name: "LeadActivity");
+            migrationBuilder.DropTable(name: "MaintenanceHistory");
+            migrationBuilder.DropTable(name: "News");
+            migrationBuilder.DropTable(name: "ProductTechnologies");
+            migrationBuilder.DropTable(name: "TechnologyImages");
+            migrationBuilder.DropTable(name: "VehicleDocument");
+            migrationBuilder.DropTable(name: "Contact");
+            migrationBuilder.DropTable(name: "Technologies");
+            migrationBuilder.DropTable(name: "Vehicle");
+            migrationBuilder.DropTable(name: "TechnologyCategories");
+            migrationBuilder.DropTable(name: "Lead");
+            migrationBuilder.DropColumn(name: "CreatedAt", table: "VariantOptionValue");
+            migrationBuilder.DropColumn(name: "DeletedAt", table: "VariantOptionValue");
+            migrationBuilder.DropColumn(name: "UpdatedAt", table: "VariantOptionValue");
+            migrationBuilder.DropColumn(name: "ColorCode", table: "ProductVariant");
+            migrationBuilder.DropColumn(name: "ColorName", table: "ProductVariant");
+            migrationBuilder.DropColumn(name: "SKU", table: "ProductVariant");
+            migrationBuilder.DropColumn(name: "VersionName", table: "ProductVariant");
+            migrationBuilder.DropColumn(name: "CreatedAt", table: "ProductCollectionPhoto");
+            migrationBuilder.DropColumn(name: "DeletedAt", table: "ProductCollectionPhoto");
+            migrationBuilder.DropColumn(name: "UpdatedAt", table: "ProductCollectionPhoto");
+            migrationBuilder.DropColumn(name: "Highlights", table: "Product");
+            migrationBuilder.DropColumn(name: "ColorCode", table: "OptionValue");
             migrationBuilder.AlterColumn<string>(
                 name: "CoverImageUrl",
                 table: "ProductVariant",
@@ -627,14 +499,12 @@ namespace Infrastructure.Migrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(1000)",
                 oldNullable: true);
-
             migrationBuilder.AddForeignKey(
                 name: "FK_ProductCollectionPhoto_ProductVariant_ProductVariantId",
                 table: "ProductCollectionPhoto",
                 column: "ProductVariantId",
                 principalTable: "ProductVariant",
                 principalColumn: "Id");
-
             migrationBuilder.AddForeignKey(
                 name: "FK_VariantOptionValue_ProductVariant_VariantId",
                 table: "VariantOptionValue",

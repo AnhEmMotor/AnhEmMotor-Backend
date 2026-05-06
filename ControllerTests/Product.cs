@@ -19,7 +19,6 @@ using Application.Features.Products.Queries.GetDeletedProductsList;
 using Application.Features.Products.Queries.GetProductsList;
 using Application.Features.Products.Queries.GetProductsListForManager;
 using Application.Features.Products.Queries.GetProductsListForPriceManagement;
-using Application.Features.Products.Queries.GetProductStoreDetailBySlug;
 using Domain.Primitives;
 using MediatR;
 using Microsoft.AspNetCore.Http;
