@@ -70,6 +70,20 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<RolePermission> RolePermissions { get; set; }
 
+    public virtual DbSet<InventoryTransaction> InventoryTransactions { get; set; }
+
+    public virtual DbSet<OrderStatusHistory> OrderStatusHistories { get; set; }
+
+    public virtual DbSet<CustomerContact> CustomerContacts { get; set; }
+
+    public virtual DbSet<CustomerContactReply> CustomerContactReplies { get; set; }
+
+    public virtual DbSet<BookingAppointment> BookingAppointments { get; set; }
+
+    public virtual DbSet<NewsArticle> NewsArticles { get; set; }
+
+    public virtual DbSet<PromotionBanner> PromotionBanners { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -124,6 +138,109 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .WithMany(pv => pv.VariantOptionValues)
             .HasForeignKey(v => v.VariantId)
             .IsRequired(false);
+
+        modelBuilder.Entity<InventoryTransaction>()
+            .HasOne(i => i.ProductVariant)
+            .WithMany(v => v.InventoryTransactions)
+            .HasForeignKey(i => i.ProductVariantId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<InventoryTransaction>()
+            .HasOne(i => i.PerformedByUser)
+            .WithMany(u => u.InventoryTransactions)
+            .HasForeignKey(i => i.PerformedBy)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<InventoryTransaction>()
+            .HasIndex(i => new { i.ProductVariantId, i.PerformedAt });
+
+        modelBuilder.Entity<OrderStatusHistory>()
+            .HasOne(h => h.Output)
+            .WithMany(o => o.StatusHistories)
+            .HasForeignKey(h => h.OutputId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<OrderStatusHistory>()
+            .HasOne(h => h.ChangedByUser)
+            .WithMany(u => u.OrderStatusHistories)
+            .HasForeignKey(h => h.ChangedBy)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<OrderStatusHistory>()
+            .HasIndex(h => new { h.OutputId, h.ChangedAt });
+
+        modelBuilder.Entity<CustomerContact>()
+            .HasOne(c => c.ProcessedByUser)
+            .WithMany(u => u.ProcessedContacts)
+            .HasForeignKey(c => c.ProcessedBy)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<CustomerContact>()
+            .HasIndex(c => new { c.Status, c.CreatedAt });
+
+        modelBuilder.Entity<CustomerContactReply>()
+            .HasOne(r => r.CustomerContact)
+            .WithMany(c => c.Replies)
+            .HasForeignKey(r => r.ContactId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<CustomerContactReply>()
+            .HasOne(r => r.RepliedByUser)
+            .WithMany(u => u.ContactReplies)
+            .HasForeignKey(r => r.RepliedBy)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<CustomerContactReply>()
+            .HasIndex(r => new { r.ContactId, r.SentAt });
+
+        modelBuilder.Entity<BookingAppointment>()
+            .HasOne(b => b.ProductVariant)
+            .WithMany(v => v.BookingAppointments)
+            .HasForeignKey(b => b.ProductVariantId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<BookingAppointment>()
+            .HasOne(b => b.ConfirmedByUser)
+            .WithMany(u => u.ConfirmedBookings)
+            .HasForeignKey(b => b.ConfirmedBy)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<BookingAppointment>()
+            .HasIndex(b => new { b.Status, b.AppointmentAt });
+
+        modelBuilder.Entity<NewsArticle>()
+            .HasOne(n => n.Author)
+            .WithMany(u => u.AuthoredNewsArticles)
+            .HasForeignKey(n => n.AuthorId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<NewsArticle>()
+            .HasOne(n => n.PublishedByUser)
+            .WithMany(u => u.PublishedNewsArticles)
+            .HasForeignKey(n => n.PublishedBy)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<NewsArticle>()
+            .HasIndex(n => n.Slug)
+            .IsUnique();
+
+        modelBuilder.Entity<NewsArticle>()
+            .HasIndex(n => new { n.Status, n.PublishedAt });
+
+        modelBuilder.Entity<PromotionBanner>()
+            .HasOne(b => b.CreatedByUser)
+            .WithMany(u => u.CreatedBanners)
+            .HasForeignKey(b => b.CreatedBy)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<PromotionBanner>()
+            .HasOne(b => b.UpdatedByUser)
+            .WithMany(u => u.UpdatedBanners)
+            .HasForeignKey(b => b.UpdatedBy)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<PromotionBanner>()
+            .HasIndex(b => new { b.IsEnabled, b.StartDate, b.EndDate });
 
         var isNotSqlServer = string.Compare(Database.ProviderName, "Microsoft.EntityFrameworkCore.SqlServer") != 0;
         var isPostgres = string.Compare(Database.ProviderName, "Npgsql.EntityFrameworkCore.PostgreSQL") == 0;

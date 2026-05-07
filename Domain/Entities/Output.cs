@@ -53,5 +53,7 @@ namespace Domain.Entities
 
         [InverseProperty("Output")]
         public ICollection<Input> Returns { get; set; } = [];
+
+        public ICollection<OrderStatusHistory> StatusHistories { get; set; } = [];
     }
 }
