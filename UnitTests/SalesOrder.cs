@@ -48,8 +48,8 @@ public class SalesOrder
     private readonly Mock<IUserReadRepository> _userRepoMock;
     private readonly Mock<ISettingRepository> _settingRepoMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
-    private readonly Mock<ICommissionService> _commissionServiceMock;
     private readonly Mock<ISievePaginator> _paginatorMock;
+    private readonly Mock<ICommissionService> _commissionServiceMock;
 
     public SalesOrder()
     {
@@ -61,8 +61,8 @@ public class SalesOrder
         _userRepoMock = new Mock<IUserReadRepository>();
         _settingRepoMock = new Mock<ISettingRepository>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
-        _commissionServiceMock = new Mock<ICommissionService>();
         _paginatorMock = new Mock<ISievePaginator>();
+        _commissionServiceMock = new Mock<ICommissionService>();
         _paginatorMock.Setup(
             x => x.ApplyAsync<Output, OutputItemResponse>(
                 It.IsAny<IQueryable<Output>>(),
