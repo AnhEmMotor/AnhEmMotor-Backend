@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations;
+using Domain.Constants.Booking;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Entities;
@@ -21,9 +23,9 @@ public class Booking : BaseEntity
 
     [Column("ProductVariantId")]
     [ForeignKey("ProductVariant")]
-    public int ProductVariantId { get; set; }
+    public int? ProductVariantId { get; set; }
 
-    public ProductVariant ProductVariant { get; set; } = null!;
+    public ProductVariant? ProductVariant { get; set; }
 
     [Column("PreferredDate")]
     public DateTimeOffset PreferredDate { get; set; }
@@ -32,11 +34,11 @@ public class Booking : BaseEntity
     public string Note { get; set; } = string.Empty;
 
     [Column("Status", TypeName = "nvarchar(20)")]
-    public string Status { get; set; } = "Pending";
+    public string Status { get; set; } = BookingStatus.Pending;
 
     [Column("BookingType", TypeName = "nvarchar(20)")]
-    public string BookingType { get; set; } = "TestDrive";
+    public string BookingType { get; set; } = Constants.Booking.BookingType.TestDrive;
 
     [Column("Location", TypeName = "nvarchar(200)")]
-    public string Location { get; set; } = "Showroom";
+    public string Location { get; set; } = BookingLocation.Showroom;
 }

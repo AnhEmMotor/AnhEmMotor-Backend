@@ -1,7 +1,8 @@
-﻿using Application.Common.Attributes;
+using Application.Common.Attributes;
 using Application.Common.Models;
 using Application.Features.Settings.Commands.SetSettings;
 using Application.Features.Settings.Queries.GetAllSettings;
+using Application.Features.Settings.Queries.GetStoreSettings;
 using Asp.Versioning;
 using Domain.Constants;
 using Infrastructure.Authorization.Attribute;
@@ -53,6 +54,20 @@ public class SettingController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetAllSettingsAsync(CancellationToken cancellationToken)
     {
         var query = new GetAllSettingsQuery();
+        var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Lấy các thông số cài đặt công khai cho Store
+    /// </summary>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    [HttpGet("store")]
+    [ProducesResponseType(typeof(Dictionary<string, string?>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetStoreSettingsAsync(CancellationToken cancellationToken)
+    {
+        var query = new GetStoreSettingsQuery();
         var result = await mediator.Send(query, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }

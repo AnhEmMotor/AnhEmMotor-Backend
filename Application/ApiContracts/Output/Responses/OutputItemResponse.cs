@@ -22,7 +22,15 @@ public class OutputItemResponse
 
     public string? StatusId { get; init; }
 
+    public string? PaymentMethod { get; set; }
+
     public string? Notes { get; init; }
 
     public decimal Total { get; init; }
+
+    public int? DepositRatio { get; set; }
+
+    public decimal? DepositAmount { get; set; }
+
+    public decimal? RemainingAmount { get; set; }
 }

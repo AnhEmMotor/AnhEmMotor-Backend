@@ -11,6 +11,9 @@ namespace Application.ApiContracts.Product.Responses
 
         public string? Category { get; set; }
 
+        [JsonPropertyName("product_limit")]
+        public int? ProductLimit { get; set; }
+
         public string? Description { get; set; }
 
         [JsonPropertyName("short_description")]

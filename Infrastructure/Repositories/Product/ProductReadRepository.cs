@@ -64,7 +64,6 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.OutputInfos)
             .ThenInclude(oi => oi.OutputOrder)
-            .AsSplitQuery()
             .FirstOrDefaultAsync(p => p.Id == id, cancellationToken)
             .ContinueWith(t => t.Result, cancellationToken);
     }
@@ -95,7 +94,7 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
         {
             query = query.Where(p => p.DeletedAt != null);
         }
-        return await query
+        return query
             .Include(p => p.ProductCategory)
             .ThenInclude(c => c!.Parent)
             .Include(p => p.Brand)
@@ -115,7 +114,6 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             .ThenInclude(v => v.OutputInfos)
             .ThenInclude(oi => oi.OutputOrder)
             .Include(p => p.CompatibleWith)
-            .AsSplitQuery()
             .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
     }
 
@@ -158,7 +156,13 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             .ThenInclude(vov => vov.OptionValue)
             .ThenInclude(ov => ov!.Option)
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
-            .ThenInclude(v => v.ProductCollectionPhotos);
+            .ThenInclude(v => v.ProductCollectionPhotos)
+            .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
+            .ThenInclude(v => v.InputInfos)
+            .ThenInclude(ii => ii.InputReceipt)
+            .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
+            .ThenInclude(v => v.OutputInfos)
+            .ThenInclude(oi => oi.OutputOrder);
         if (string.IsNullOrWhiteSpace(sorts))
         {
             dbQuery = dbQuery.OrderByDescending(p => p.DeletedAt);
@@ -239,22 +243,31 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
                             Names = g.Select(x => x.Name?.ToLower() ?? string.Empty).ToList()
                         })
                     .ToList();
-                groupedOptionFilters = groups.Select(g => new FilterGroup { Ids = g.Ids, Names = g.Names }).ToList();
-                query = query.Where(
-                    p => p.ProductVariants
-                        .Any(
-                            v => v.DeletedAt == null &&
-                                    (!minPrice.HasValue || v.Price >= minPrice.Value) &&
-                                    (!maxPrice.HasValue || v.Price <= maxPrice.Value) &&
-                                    groups.All(
-                                        group => v.VariantOptionValues
-                                                .Any(
-                                                    vov => vov.OptionValueId != null &&
-                                                                            group.Ids.Contains(vov.OptionValueId.Value)) ||
-                                            (v.ColorName != null &&
-                                                group.Names.Any(n => v.ColorName.ToLower().Contains(n))) ||
-                                            (v.VersionName != null &&
-                                                group.Names.Any(n => v.VersionName.ToLower().Contains(n))))));
+                groupedOptionFilters = [.. groups.Select(g => new FilterGroup { Ids = g.Ids, Names = g.Names })];
+
+                var variantSubquery = context.ProductVariants.Where(v => v.DeletedAt == null);
+
+                if (minPrice.HasValue || maxPrice.HasValue)
+                {
+                    variantSubquery = variantSubquery.Where(
+                        v => (!minPrice.HasValue || v.Price >= minPrice.Value) &&
+                            (!maxPrice.HasValue || v.Price <= maxPrice.Value));
+                }
+
+                foreach (var group in groups)
+                {
+                    var ids = group.Ids;
+                    var names = group.Names;
+
+                    // Phải dùng ToLower() để khớp với names đã được chuẩn hóa
+                    variantSubquery = variantSubquery.Where(
+                        v => v.VariantOptionValues.Any(vov => vov.OptionValueId != null && ids.Contains(vov.OptionValueId.Value)) ||
+                            (v.ColorName != null && names.Any(n => v.ColorName.ToLower().Contains(n))) ||
+                            (v.VersionName != null && names.Any(n => v.VersionName.ToLower().Contains(n))));
+                }
+
+                var matchingProductIds = variantSubquery.Select(v => v.ProductId);
+                query = query.Where(p => matchingProductIds.Contains(p.Id));
             }
         } else if (minPrice.HasValue || maxPrice.HasValue)
         {
@@ -282,7 +295,13 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
             .ThenInclude(v => v.VariantOptionValues)
             .ThenInclude(vov => vov.OptionValue)
-            .ThenInclude(ov => ov!.Option);
+            .ThenInclude(ov => ov!.Option)
+            .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
+            .ThenInclude(v => v.InputInfos)
+            .ThenInclude(ii => ii.InputReceipt)
+            .Include(p => p.ProductVariants.Where(v => v.DeletedAt == null))
+            .ThenInclude(v => v.OutputInfos)
+            .ThenInclude(oi => oi.OutputOrder);
         if (string.IsNullOrWhiteSpace(sorts))
         {
             dbQuery = dbQuery.OrderByDescending(p => p.CreatedAt);

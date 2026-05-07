@@ -12,50 +12,58 @@ public static class ProductCategorySeeder
         IConfiguration configuration,
         CancellationToken cancellationToken)
     {
-        var protectedCategories = configuration.GetSection("ProtectedCategories").Get<List<CategorySeedModel>>() ?? [];
-        if (protectedCategories.Count == 0)
-            return;
-        var existingCategories = await context.ProductCategories.ToListAsync(cancellationToken);
-        var existingCategoryDict = existingCategories.ToDictionary(c => c.Name!, StringComparer.OrdinalIgnoreCase);
+        var seedData = configuration.GetSection("ProtectedCategories").Get<List<CategorySeedModel>>() ?? [];
+        if (seedData.Count == 0) return;
+
+        var existingCategories = await context.ProductCategories
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        var existingCategoryDict = existingCategories
+            .Where(c => c.Name != null)
+            .ToDictionary(c => c.Name!, StringComparer.OrdinalIgnoreCase);
+
         var categoriesToAdd = new List<ProductCategory>();
         bool hasChanges = false;
-        foreach (var seed in protectedCategories)
+
+        foreach (var seed in seedData)
         {
-            if (string.IsNullOrWhiteSpace(seed.Name))
-                continue;
+            if (string.IsNullOrWhiteSpace(seed.Name)) continue;
+
             if (existingCategoryDict.TryGetValue(seed.Name, out var existing))
             {
-                if (string.IsNullOrEmpty(existing.CategoryGroup) || existing.CategoryGroup != seed.Group)
+                if (existing.CategoryGroup != seed.Group)
                 {
                     existing.CategoryGroup = seed.Group;
                     hasChanges = true;
                 }
-            } else
+            }
+            else
             {
-                categoriesToAdd.Add(
-                    new ProductCategory
-                    {
-                        Name = seed.Name,
-                        CategoryGroup = seed.Group,
-                        Slug = seed.Name.ToLower().Replace(" ", "-")
-                    });
+                categoriesToAdd.Add(new ProductCategory
+                {
+                    Name = seed.Name,
+                    CategoryGroup = seed.Group,
+                    Slug = seed.Name.ToLower().Replace(" ", "-")
+                });
+                hasChanges = true;
             }
         }
-        if (categoriesToAdd.Count != 0)
+
+        if (categoriesToAdd.Count > 0)
         {
-            await context.ProductCategories.AddRangeAsync(categoriesToAdd, cancellationToken);
-            hasChanges = true;
+            await context.ProductCategories.AddRangeAsync(categoriesToAdd, cancellationToken).ConfigureAwait(false);
         }
+
         if (hasChanges)
         {
-            await context.SaveChangesAsync(cancellationToken);
+            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 
     private class CategorySeedModel
     {
         public string? Name { get; set; }
-
         public string? Group { get; set; }
     }
 }

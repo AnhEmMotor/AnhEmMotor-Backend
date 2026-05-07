@@ -1,7 +1,9 @@
-﻿using Application.Features.Settings.Commands.SetSettings;
+using Application.Features.Settings.Commands.SetSettings;
 using Application.Features.Settings.Queries.GetAllSettings;
+using Application.Features.Settings.Queries.GetStoreSettings;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Setting;
+using Domain.Constants;
 using FluentAssertions;
 using FluentValidation.TestHelper;
 using Moq;
@@ -133,18 +135,6 @@ public class Setting
             .WithErrorMessage("All numeric fields must contain valid numbers");
     }
 
-    [Fact(DisplayName = "SETTING_023 - Validator - Z-bike_threshold_for_meeting = -5 (số âm)")]
-    public void SETTING_023_Validator_BikeThreshold_NegativeNumber_ShouldPass()
-    {
-        var validator = new SetSettingsCommandValidator();
-        var request = new SetSettingsCommand
-        {
-            Settings = new Dictionary<string, string?> { { "Z-bike_threshold_for_meeting", "-5" } }
-        };
-        var result = validator.TestValidate(request);
-        result.ShouldNotHaveAnyValidationErrors();
-    }
-
     [Fact(DisplayName = "SETTING_024 - Validator - Settings dictionary rỗng")]
     public void SETTING_024_Validator_EmptySettings_ShouldFail()
     {
@@ -173,19 +163,17 @@ public class Setting
         {
             new() { Key = "Deposit_ratio", Value = "50.5" },
             new() { Key = "Inventory_alert_level", Value = "10" },
-            new() { Key = "Order_value_exceeds", Value = "50000000" },
-            new() { Key = "Z-bike_threshold_for_meeting", Value = "5" }
+            new() { Key = "Order_value_exceeds", Value = "50000000" }
         };
         _settingRepoMock.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync(settings);
         var handler = new GetAllSettingsQueryHandler(_settingRepoMock.Object);
         var query = new GetAllSettingsQuery();
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
-        result.Value.Should().HaveCount(4);
+        result.Value.Should().HaveCount(3);
         result.Value["Deposit_ratio"].Should().Be("50.5");
         result.Value["Inventory_alert_level"].Should().Be("10");
         result.Value["Order_value_exceeds"].Should().Be("50000000");
-        result.Value["Z-bike_threshold_for_meeting"].Should().Be("5");
     }
 
     [Fact(DisplayName = "SETTING_027 - Handler SetSettings - Gọi Update repository với đúng data")]
@@ -215,6 +203,28 @@ public class Setting
                                 string.Compare(setting.Value, "10") == 0))),
             Times.Once);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact(
+        DisplayName = "SETTING_040 - Handler GetStoreSettings - Chỉ trả về các key công khai (OrderValueExceeds, DepositRatio)")]
+    public async Task SETTING_028_Handler_GetStoreSettings_ReturnsOnlyPublicKeys()
+    {
+        var allSettings = new List<SettingEntity>
+        {
+            new() { Key = SettingKeys.DepositRatio, Value = "50" },
+            new() { Key = SettingKeys.OrderValueExceeds, Value = "100000000" },
+            new() { Key = SettingKeys.InventoryAlertLevel, Value = "5" }
+        };
+        _settingRepoMock.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync(allSettings);
+        var handler = new GetStoreSettingsQueryHandler(_settingRepoMock.Object);
+        var query = new GetStoreSettingsQuery();
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
+        result.Should().NotBeNull();
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().HaveCount(2);
+        result.Value.Should().ContainKey(SettingKeys.DepositRatio);
+        result.Value.Should().ContainKey(SettingKeys.OrderValueExceeds);
+        result.Value.Should().NotContainKey(SettingKeys.InventoryAlertLevel);
     }
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079

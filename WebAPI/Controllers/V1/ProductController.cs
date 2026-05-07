@@ -1,7 +1,6 @@
-using Application.ApiContracts.Option.Responses;
+using Application.ApiContracts.Product.Requests;
 using Application.ApiContracts.Product.Responses;
 using Application.Common.Models;
-using Application.Features.Options.Queries.GetOptionsList;
 using Application.Features.OptionValues.Commands.CreateOptionValue;
 using Application.Features.OptionValues.Commands.DeleteOptionValue;
 using Application.Features.OptionValues.Commands.UpdateOptionValue;
@@ -29,17 +28,18 @@ using Application.Features.Products.Queries.GetProductsList;
 using Application.Features.Products.Queries.GetProductsListForManager;
 using Application.Features.Products.Queries.GetProductsListForPriceManagement;
 using Application.Features.Products.Queries.GetProductStoreDetailBySlug;
+using Application.Features.Products.Queries.GetSitemapSlugs;
 using Application.Features.Products.Queries.GetVariantCartDetailsBatch;
 using Application.Features.Products.Queries.GetVariantLiteByProductId;
 using Asp.Versioning;
 using Domain.Constants;
 using Domain.Primitives;
 using Infrastructure.Authorization.Attribute;
-using Mapster;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Net;
 using WebAPI.Controllers.Base;
 using static Domain.Constants.Permission.PermissionsList;
 
@@ -54,6 +54,24 @@ namespace WebAPI.Controllers.V1;
 [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
 public class ProductController(ISender sender) : ApiController
 {
+    /// <summary>
+    /// Lấy danh sách toàn bộ Slug của sản phẩm phục vụ cho việc tạo Sitemap. Chỉ cho phép gọi từ Localhost để đảm bảo
+    /// bảo mật.
+    /// </summary>
+    [HttpGet("sitemap-slugs")]
+    [ProducesResponseType(typeof(SitemapSlugsResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> GetSitemapSlugsAsync(CancellationToken cancellationToken)
+    {
+        var remoteIp = HttpContext.Connection.RemoteIpAddress;
+        if (remoteIp != null && !IPAddress.IsLoopback(remoteIp))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden);
+        }
+        var result = await sender.Send(new GetSitemapSlugsQuery(), cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
     /// <summary>
     /// Lấy danh sách sản phẩm đầy đủ dành cho khách hàng (có phân trang, lọc, tìm kiếm).
     /// </summary>
@@ -269,8 +287,7 @@ public class ProductController(ISender sender) : ApiController
         [FromBody] CreateProductCommand request,
         CancellationToken cancellationToken)
     {
-        var command = request.Adapt<CreateProductCommand>();
-        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(request, cancellationToken).ConfigureAwait(true);
         return HandleCreated(
             result,
             RouteNames.Product.GetVarientByIdForManager,
@@ -508,11 +525,11 @@ public class ProductController(ISender sender) : ApiController
     }
 
     /// <summary>
-    /// Creates a new option value.
+    /// Tạo mới giá trị thuộc tính.
     /// </summary>
-    /// <param name="request">The create option value command.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>The ID of the created option value.</returns>
+    /// <param name="request"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     [HttpPost("option-values")]
     [HasPermission(Products.Create)]
     [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
@@ -525,12 +542,12 @@ public class ProductController(ISender sender) : ApiController
     }
 
     /// <summary>
-    /// Updates an existing option value.
+    /// Cập nhật giá trị thuộc tính.
     /// </summary>
-    /// <param name="id">The ID of the option value to update.</param>
-    /// <param name="request">The update option value command.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>A no content result.</returns>
+    /// <param name="id"></param>
+    /// <param name="request"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     [HttpPut("option-values/{id:int}")]
     [HasPermission(Products.Edit)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -545,11 +562,11 @@ public class ProductController(ISender sender) : ApiController
     }
 
     /// <summary>
-    /// Deletes an option value.
+    /// Xoá giá trị thuộc tính.
     /// </summary>
-    /// <param name="id">The ID of the option value to delete.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>A no content result.</returns>
+    /// <param name="id"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     [HttpDelete("option-values/{id:int}")]
     [HasPermission(Products.Delete)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

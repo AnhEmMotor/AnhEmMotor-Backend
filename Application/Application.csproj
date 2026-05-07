@@ -23,6 +23,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Features\Auth\Commands\Register\" />
     <Folder Include="Features\Auth\Queries\" />
   </ItemGroup>

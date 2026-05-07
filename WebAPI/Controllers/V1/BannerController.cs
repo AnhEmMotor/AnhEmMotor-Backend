@@ -15,7 +15,7 @@ using WebAPI.Controllers.Base;
 namespace WebAPI.Controllers.V1;
 
 /// <summary>
-/// Quản lý Banner &amp; Khuyến mãi (Marketing)
+/// Quản lý Banner &Khuyến mãi (Marketing)
 /// </summary>
 [ApiVersion("1.0")]
 [SwaggerTag("Quản lý Banner & Khuyến mãi (Marketing)")]
@@ -23,16 +23,19 @@ namespace WebAPI.Controllers.V1;
 public class BannerController(ISender sender) : ApiController
 {
     /// <summary>
-    /// Thêm banner mới
+    /// Thêm banner mới.
     /// </summary>
     /// <param name="command">Dữ liệu banner</param>
-    /// <returns>Kết quả tạo mới</returns>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     [HttpPost]
     [HasPermission("Permissions.Banners.Create")]
     [SwaggerOperation(Summary = "Thêm banner mới")]
-    public async Task<IActionResult> Create([FromBody] CreateBannerCommand command)
+    public async Task<IActionResult> CreateAsync(
+        [FromBody] CreateBannerCommand command,
+        CancellationToken cancellationToken)
     {
-        var result = await sender.Send(command);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 

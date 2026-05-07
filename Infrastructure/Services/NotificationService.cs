@@ -5,7 +5,7 @@ namespace Infrastructure.Services;
 
 public class NotificationService : INotificationService
 {
-    private readonly ConcurrentBag<TaskCompletionSource<string>> _listeners = new();
+    private readonly ConcurrentBag<TaskCompletionSource<string>> _listeners = [];
 
     public async Task<string> WaitForNotificationAsync(CancellationToken cancellationToken)
     {
@@ -13,7 +13,7 @@ public class NotificationService : INotificationService
         _listeners.Add(tcs);
         try
         {
-            return await tcs.Task.WaitAsync(cancellationToken);
+            return await tcs.Task.WaitAsync(cancellationToken).ConfigureAwait(false);
         } finally
         {
         }

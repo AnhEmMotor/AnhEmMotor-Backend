@@ -281,7 +281,7 @@ public static class PermissionsList
         { "Tin tức", [News.View, News.Create, News.Edit, News.Delete] },
         { "Banner", [Banners.View, Banners.Create, Banners.Edit, Banners.Delete] },
         {
-            "Khách Hàng",
+            "CRM & Connect",
             [Contacts.View, Contacts.Reply, Contacts.EditNote, Contacts.Delete, Bookings.View, Bookings.Confirm, Bookings.Delete, Leads.View, Leads.Create, Leads.Edit, Leads.Delete]
         },
         { "Nhân sự", [HR.View, HR.Create, HR.Edit, HR.Delete] },

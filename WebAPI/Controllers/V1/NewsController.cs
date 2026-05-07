@@ -17,38 +17,46 @@ using WebAPI.Controllers.Base;
 namespace WebAPI.Controllers.V1;
 
 /// <summary>
-/// Quản lý bài viết &amp; tin tức (CMS)
+/// Controller quản lý bài viết và tin tức.
 /// </summary>
+/// <param name="mediator"></param>
 [ApiVersion("1.0")]
 [SwaggerTag("Quản lý bài viết & tin tức (CMS)")]
 [Route("api/v{version:apiVersion}/news")]
 public class NewsController(IMediator mediator) : ApiController
 {
     /// <summary>
-    /// Tạo bài viết mới
+    /// Tạo bài viết mới.
     /// </summary>
-    /// <param name="command">Dữ liệu bài viết</param>
-    /// <returns>Kết quả tạo</returns>
+    /// <param name="command"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     [HttpPost]
     [HasPermission("Permissions.News.Create")]
     [SwaggerOperation(Summary = "Tạo bài viết mới")]
-    public async Task<IActionResult> Create([FromBody] CreateNewsCommand command)
+    public async Task<IActionResult> CreateAsync(
+        [FromBody] CreateNewsCommand command,
+        CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(command);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
     /// <summary>
-    /// Lấy danh sách tin tức
+    /// Lấy danh sách bài viết.
     /// </summary>
-    /// <param name="sieveModel">Bộ lọc và phân trang</param>
-    /// <returns>Danh sách tin tức phân trang</returns>
+    /// <param name="sieveModel"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     [HttpGet]
     [SwaggerOperation(Summary = "Lấy danh sách tin tức")]
     [ProducesResponseType(typeof(PagedResult<NewsResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetList([FromQuery] SieveModel sieveModel)
+    public async Task<IActionResult> GetListAsync(
+        [FromQuery] SieveModel sieveModel,
+        CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetNewsListQuery { SieveModel = sieveModel });
+        var result = await mediator.Send(new GetNewsListQuery { SieveModel = sieveModel }, cancellationToken)
+            .ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -92,9 +100,9 @@ public class NewsController(IMediator mediator) : ApiController
     [SwaggerOperation(Summary = "Lấy chi tiết tin tức theo slug")]
     [ProducesResponseType(typeof(NewsResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetBySlug(string slug)
+    public async Task<IActionResult> GetBySlugAsync(string slug, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetNewsBySlugQuery { Slug = slug });
+        var result = await mediator.Send(new GetNewsBySlugQuery { Slug = slug }, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 }

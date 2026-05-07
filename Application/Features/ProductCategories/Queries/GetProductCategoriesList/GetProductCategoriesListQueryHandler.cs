@@ -17,11 +17,7 @@ public sealed class GetProductCategoriesListQueryHandler(
         GetProductCategoriesListQuery request,
         CancellationToken cancellationToken)
     {
-        IQueryable<ProductCategoryEntity> query = repository.GetQueryable().Include(x => x.Products);
-        if (request.ProductOnly)
-        {
-            query = query.Where(x => x.CategoryGroup == "Product");
-        }
+        var query = repository.GetQueryable();
         var result = await paginator.ApplyAsync<ProductCategoryEntity, ProductCategoryResponse>(
             query,
             request.SieveModel!,

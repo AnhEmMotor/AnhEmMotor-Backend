@@ -23,26 +23,3 @@ public record UpdateOptionValueCommand : IRequest<Result>
 
     public string? ColorCode { get; init; }
 }
-
-public class UpdateOptionValueCommandHandler(
-    IOptionValueReadRepository optionValueReadRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateOptionValueCommand, Result>
-{
-    public async Task<Result> Handle(UpdateOptionValueCommand request, CancellationToken cancellationToken)
-    {
-        var optionValue = await optionValueReadRepository.GetByIdAsync(request.Id, cancellationToken);
-        if (optionValue == null)
-        {
-            return Result.Failure(new Error("OptionValue.NotFound", "Không tìm thấy thuộc tính yêu cầu."));
-        }
-        optionValue.Name = request.Name;
-        optionValue.Description = request.Description;
-        optionValue.ImageUrl = request.ImageUrl;
-        optionValue.SeoTitle = request.SeoTitle;
-        optionValue.SeoDescription = request.SeoDescription;
-        optionValue.IsActive = request.IsActive;
-        optionValue.ColorCode = request.ColorCode;
-        await unitOfWork.SaveChangesAsync(cancellationToken);
-        return Result.Success();
-    }
-}

@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace Application.Features.ProductCategories.Commands.RestoreManyProductCategories;
 
@@ -7,6 +7,7 @@ public sealed class RestoreManyProductCategoriesCommandValidator : AbstractValid
     public RestoreManyProductCategoriesCommandValidator()
     {
         RuleFor(x => x.Ids)
+            .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .WithMessage("Bạn chưa truyền danh sách Product Category ID để khôi phục.")
             .Must(ids => ids.Count <= 50)

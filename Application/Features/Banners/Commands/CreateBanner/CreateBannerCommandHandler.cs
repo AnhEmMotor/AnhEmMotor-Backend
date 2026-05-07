@@ -28,7 +28,9 @@ public sealed class CreateBannerCommandHandler(
             IsActive = request.IsActive,
             Priority = request.Priority
         };
+
         bannerInsertRepository.Add(banner);
+
         bannerAuditRepository.AddLog(
             new BannerAuditLog
             {
@@ -37,7 +39,9 @@ public sealed class CreateBannerCommandHandler(
                 ChangedBy = tokenAccessorService.GetUserId() ?? "Unknown",
                 Details = $"Created banner '{banner.Title}'"
             });
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
         return Result<int>.Success(banner.Id);
     }
 }

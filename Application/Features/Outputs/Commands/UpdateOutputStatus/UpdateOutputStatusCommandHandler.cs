@@ -46,8 +46,26 @@ public sealed class UpdateOutputStatusCommandHandler(
             case OrderStatus.Completed:
                 isCompleting = true;
                 output.FinishedBy = request.CurrentUserId;
-                await updateRepository.ProcessCOGSForCompletedOrderAsync(output.Id, cancellationToken)
+                var deductionResult = await updateRepository.HandleInventoryTransactionAsync(
+                    output.Id,
+                    true,
+                    cancellationToken)
                     .ConfigureAwait(false);
+                if (deductionResult.IsFailure)
+                {
+                    return Result<OrderDetailResponse>.Failure(deductionResult.Errors!);
+                }
+                break;
+            case OrderStatus.Delivering:
+                var checkResult = await updateRepository.HandleInventoryTransactionAsync(
+                    output.Id,
+                    false,
+                    cancellationToken)
+                    .ConfigureAwait(false);
+                if (checkResult.IsFailure)
+                {
+                    return Result<OrderDetailResponse>.Failure(checkResult.Errors!);
+                }
                 break;
             case OrderStatus.Cancelled:
             case OrderStatus.Refunding:

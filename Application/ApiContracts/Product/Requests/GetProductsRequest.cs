@@ -1,6 +1,6 @@
 using Sieve.Models;
 
-namespace Application.Features.Products.Queries.GetProductsList
+namespace Application.ApiContracts.Product.Requests
 {
     public class GetProductsRequest : SieveModel
     {

@@ -20,7 +20,7 @@ public class CreateRoleCommandValidator : AbstractValidator<CreateRoleCommand>
             .NotEmpty()
             .WithMessage("Role name is required.")
             .MaximumLength(100)
-            .Matches(@"^[\p{L}0-9\s_\-]*$")
+            .Matches(@"^[\p{L}0-9\s_\-\.]*$")
             .WithMessage("Role name can only contain letters, numbers, spaces, underscores, and hyphens.");
         RuleFor(x => x.Permissions)
             .NotEmpty()

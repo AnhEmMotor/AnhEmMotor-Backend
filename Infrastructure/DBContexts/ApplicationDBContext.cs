@@ -163,6 +163,12 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .HasForeignKey(v => v.VariantId)
             .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<ProductTechnology>().HasKey(pt => new { pt.ProductId, pt.TechnologyId });
+        modelBuilder.Entity<ProductTechnology>().HasKey(pt => pt.Id);
+        modelBuilder.Entity<ProductStatus>().HasKey(ps => ps.Key);
+        modelBuilder.Entity<ProductStatus>()
+            .HasData(new ProductStatus { Key = "for-sale" }, new ProductStatus { Key = "out-of-business" });
+        modelBuilder.Entity<InputStatus>().HasKey(ins => ins.Key);
+        modelBuilder.Entity<OutputStatus>().HasKey(ous => ous.Key);
         modelBuilder.Entity<ProductTechnology>()
             .HasOne(pt => pt.Product)
             .WithMany(p => p.ProductTechnologies)
@@ -183,6 +189,16 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .WithMany(p => p.SupportedBy)
             .HasForeignKey(pc => pc.CompatibleVehicleModelId)
             .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<MaintenanceHistory>()
+            .HasOne(mh => mh.Vehicle)
+            .WithMany(v => v.MaintenanceHistories)
+            .HasForeignKey(mh => mh.VehicleId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<VehicleDocument>()
+            .HasOne(vd => vd.Vehicle)
+            .WithMany(v => v.Documents)
+            .HasForeignKey(vd => vd.VehicleId)
+            .OnDelete(DeleteBehavior.Cascade);
         var isNotSqlServer = string.Compare(Database.ProviderName, "Microsoft.EntityFrameworkCore.SqlServer") != 0;
         var isPostgres = string.Compare(Database.ProviderName, "Npgsql.EntityFrameworkCore.PostgreSQL") == 0;
         if (isNotSqlServer)

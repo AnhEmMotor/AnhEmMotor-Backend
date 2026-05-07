@@ -1,3 +1,4 @@
+using Application.ApiContracts.Banner.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.Banner;
 using Mapster;
@@ -11,7 +12,7 @@ public sealed class GetActiveBannersQueryHandler(IBannerReadRepository bannerRea
         GetActiveBannersQuery request,
         CancellationToken cancellationToken)
     {
-        var banners = await bannerReadRepository.GetActiveBannersAsync(cancellationToken);
+        var banners = await bannerReadRepository.GetActiveBannersAsync(cancellationToken).ConfigureAwait(false);
         return Result<List<BannerResponse>>.Success(banners.Adapt<List<BannerResponse>>());
     }
 }

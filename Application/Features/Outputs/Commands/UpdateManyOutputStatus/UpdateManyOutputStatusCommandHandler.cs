@@ -40,14 +40,15 @@ public sealed class UpdateManyOutputStatusCommandHandler(
                         "StatusId"));
             }
         }
-        bool isCompleting = string.Compare(request.StatusId, OrderStatus.Completed) == 0;
+bool isCompleting = string.Compare(request.StatusId, OrderStatus.Completed) == 0;
+        
         if (isCompleting && outputsList.Count > 0)
         {
             var productDemands = new Dictionary<int, int>();
             foreach (var output in outputsList)
             {
-                if (output.OutputInfos == null)
-                    continue;
+                if (output.OutputInfos == null) continue;
+                
                 foreach (var info in output.OutputInfos)
                 {
                     if (info.ProductVarientId.HasValue && info.Count.HasValue)
@@ -55,19 +56,22 @@ public sealed class UpdateManyOutputStatusCommandHandler(
                         if (productDemands.ContainsKey(info.ProductVarientId.Value))
                         {
                             productDemands[info.ProductVarientId.Value] += info.Count.Value;
-                        } else
+                        } 
+                        else
                         {
                             productDemands[info.ProductVarientId.Value] = info.Count.Value;
                         }
                     }
                 }
             }
+            
             foreach (var kvp in productDemands)
             {
                 var variantId = kvp.Key;
                 var totalNeeded = kvp.Value;
                 var currentStock = await readRepository.GetStockQuantityByVariantIdAsync(variantId, cancellationToken)
                     .ConfigureAwait(false);
+                
                 if (currentStock < totalNeeded)
                 {
                     errors.Add(
@@ -77,24 +81,33 @@ public sealed class UpdateManyOutputStatusCommandHandler(
                 }
             }
         }
+
         if (errors.Count > 0)
         {
             return errors;
         }
-        if (isCompleting)
-        {
-            foreach (var output in outputsList)
-            {
-                await updateRepository.ProcessCOGSForCompletedOrderAsync(output.Id, cancellationToken)
-                    .ConfigureAwait(false);
-            }
-        }
+
         foreach (var output in outputsList)
         {
+            if (isCompleting)
+            {
+                var result = await updateRepository.HandleInventoryTransactionAsync(output.Id, true, cancellationToken)
+                    .ConfigureAwait(false);
+                if (result.IsFailure) return result.Errors!;
+            } 
+            else if (string.Compare(request.StatusId, OrderStatus.Delivering) == 0)
+            {
+                var result = await updateRepository.HandleInventoryTransactionAsync(output.Id, false, cancellationToken)
+                    .ConfigureAwait(false);
+                if (result.IsFailure) return result.Errors!;
+            }
+
             output.StatusId = request.StatusId;
             updateRepository.Update(output);
         }
+
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
         if (isCompleting)
         {
             foreach (var output in outputsList)
@@ -102,13 +115,15 @@ public sealed class UpdateManyOutputStatusCommandHandler(
                 await commissionService.CalculateAndRecordCommissionAsync(output.Id, cancellationToken)
                     .ConfigureAwait(false);
             }
-        } else if (request.StatusId == OrderStatus.Cancelled || request.StatusId == OrderStatus.Refunded)
+        } 
+        else if (request.StatusId == OrderStatus.Cancelled || request.StatusId == OrderStatus.Refunded)
         {
             foreach (var output in outputsList)
             {
                 await commissionService.VoidCommissionAsync(output.Id, cancellationToken).ConfigureAwait(false);
             }
         }
+
         return outputsList.Adapt<List<OutputItemResponse>>();
     }
 }

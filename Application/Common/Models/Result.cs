@@ -7,44 +7,31 @@ public class Result
 
     public bool IsFailure => !IsSuccess;
 
-    public Error? Error { get; }
+    public List<Error> Errors { get; }
 
-    public List<Error>? Errors { get; }
+    public Error? Error => Errors.FirstOrDefault();
 
-    protected Result(bool isSuccess, Error? error = null, List<Error>? errors = null)
+    protected Result(bool isSuccess, List<Error>? errors = null)
     {
-        if (isSuccess && (error is not null || errors is not null))
+        if (isSuccess && errors?.Count > 0)
         {
             throw new InvalidOperationException("A successful result cannot have errors.");
         }
-        if (!isSuccess && error is null && (errors is null || errors.Count == 0))
+        if (!isSuccess && (errors == null || errors.Count == 0))
         {
             throw new InvalidOperationException("A failed result must have at least one error.");
         }
         IsSuccess = isSuccess;
-        Error = error;
-        Errors = errors;
+        Errors = errors ?? [];
     }
 
-    public static Result Success()
-    {
-        return new Result(true);
-    }
+    public static Result Success() => new(true);
 
-    public static Result Failure(Error error)
-    {
-        return new Result(false, error);
-    }
+    public static Result Failure(Error error) => new(false, [error]);
 
-    public static Result Failure(List<Error> errors)
-    {
-        return new Result(false, errors: errors);
-    }
+    public static Result Failure(List<Error> errors) => new(false, errors);
 
-    public static Result Failure(string errorMessage)
-    {
-        return new Result(false, Error.Failure(errorMessage));
-    }
+    public static Result Failure(string errorMessage) => new(false, [Error.Failure(errorMessage)]);
 }
 
 #pragma warning disable CRR0047
@@ -69,47 +56,26 @@ public class Result<T> : Result
         _value = value;
     }
 
-    private Result(Error error): base(false, error)
+    private Result(Error error): base(false, [error])
     {
         _value = default;
     }
 
-    private Result(List<Error> errors): base(false, errors: errors)
+    private Result(List<Error> errors): base(false, errors)
     {
         _value = default;
     }
 
-    public static Result<T> Success(T value)
-    {
-        return new Result<T>(value);
-    }
+    public static Result<T> Success(T value) => new(value);
 
-    public new static Result<T> Failure(Error error)
-    {
-        return new Result<T>(error);
-    }
+    public new static Result<T> Failure(Error error) => new(error);
 
-    public new static Result<T> Failure(List<Error> errors)
-    {
-        return new Result<T>(errors);
-    }
+    public new static Result<T> Failure(List<Error> errors) => new(errors);
 
-    public new static Result<T> Failure(string errorMessage)
-    {
-        return new Result<T>(Error.Failure(errorMessage));
-    }
+    public new static Result<T> Failure(string errorMessage) => new(Error.Failure(errorMessage));
 
-    public static implicit operator Result<T>(T value)
-    {
-        return Success(value);
-    }
-    public static implicit operator Result<T>(Error error)
-    {
-        return Failure(error);
-    }
-    public static implicit operator Result<T>(List<Error> errors)
-    {
-        return Failure(errors);
-    }
+    public static implicit operator Result<T>(T value) => Success(value);
+    public static implicit operator Result<T>(Error error) => Failure(error);
+    public static implicit operator Result<T>(List<Error> errors) => Failure(errors);
 }
 #pragma warning restore CRR0047

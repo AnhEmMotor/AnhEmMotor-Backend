@@ -1,4 +1,5 @@
 using Domain.Entities;
+using Infrastructure.Data.Seeders;
 using Infrastructure.DBContexts;
 using Infrastructure.Seeders;
 using Microsoft.AspNetCore.Identity;

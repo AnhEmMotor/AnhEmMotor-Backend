@@ -33,13 +33,9 @@ public class EmptyStringConverter : JsonConverter<string>
         if (reader.TokenType == JsonTokenType.Number)
         {
             if (reader.TryGetInt64(out long longValue))
-            {
                 return longValue.ToString();
-            }
             if (reader.TryGetDouble(out double doubleValue))
-            {
                 return doubleValue.ToString();
-            }
         }
         if (reader.TokenType == JsonTokenType.True)
             return "true";

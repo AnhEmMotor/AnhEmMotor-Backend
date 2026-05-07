@@ -16,7 +16,6 @@ namespace Infrastructure.Services
         public void SetRefreshTokenToCookie(string token, DateTimeOffset expiresAt)
         {
             var cookieDomain = configuration["CookieDomain"];
-            var isHttps = httpContextAccessor.HttpContext?.Request.IsHttps ?? false;
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
@@ -35,7 +34,6 @@ namespace Infrastructure.Services
         public void DeleteRefreshTokenFromCookie()
         {
             var cookieDomain = configuration["CookieDomain"];
-            var isHttps = httpContextAccessor.HttpContext?.Request.IsHttps ?? false;
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,

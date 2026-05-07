@@ -11,48 +11,52 @@ using WebAPI.Controllers.Base;
 namespace WebAPI.Controllers.V1;
 
 /// <summary>
-/// Quản lý đặt lịch lái thử (Booking)
+/// Controller quản lý đặt lịch lái thử.
 /// </summary>
+/// <param name="sender"></param>
 [ApiVersion("1.0")]
 [SwaggerTag("Quản lý đặt lịch lái thử (Booking)")]
 [Route("api/v{version:apiVersion}/[controller]")]
 public class BookingsController(ISender sender) : ApiController
 {
     /// <summary>
-    /// Tạo mới một lịch hẹn lái thử
+    /// Tạo yêu cầu đặt lịch lái thử mới.
     /// </summary>
-    /// <param name="command">Dữ liệu đặt lịch</param>
-    /// <returns>Kết quả tạo mới</returns>
+    /// <param name="command"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     [HttpPost]
     [AllowAnonymous]
-    public async Task<IActionResult> Create(CreateBookingCommand command)
+    public async Task<IActionResult> CreateAsync(CreateBookingCommand command, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(command);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
     /// <summary>
-    /// Lấy danh sách tất cả các lịch đặt
+    /// Lấy danh sách yêu cầu đặt lịch lái thử.
     /// </summary>
-    /// <returns>Danh sách đặt lịch</returns>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     [HttpGet]
     [Authorize]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAllAsync(CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetBookingsQuery());
+        var result = await sender.Send(new GetBookingsQuery(), cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
     /// <summary>
-    /// Xác nhận lịch đặt (Chốt lịch)
+    /// Xác nhận yêu cầu đặt lịch lái thử.
     /// </summary>
-    /// <param name="command">Dữ liệu xác nhận</param>
-    /// <returns>Kết quả xác nhận</returns>
+    /// <param name="cancellationToken"></param>
+    /// <param name="command"></param>
+    /// <returns></returns>
     [HttpPost("confirm")]
     [Authorize]
-    public async Task<IActionResult> Confirm(ConfirmBookingCommand command)
+    public async Task<IActionResult> ConfirmAsync(ConfirmBookingCommand command, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(command);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 }

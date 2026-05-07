@@ -15,12 +15,8 @@ namespace Domain.Entities
         public string Title { get; set; } = string.Empty;
 
         [Required]
-        [Column("DesktopImageUrl", TypeName = "nvarchar(500)")]
-        public string DesktopImageUrl { get; set; } = string.Empty;
-
-        [Required]
-        [Column("MobileImageUrl", TypeName = "nvarchar(500)")]
-        public string MobileImageUrl { get; set; } = string.Empty;
+        [Column("ImageUrl", TypeName = "nvarchar(500)")]
+        public string ImageUrl { get; set; } = string.Empty;
 
         [Column("LinkUrl", TypeName = "nvarchar(500)")]
         public string? LinkUrl { get; set; }
@@ -30,6 +26,9 @@ namespace Domain.Entities
 
         [Column("Placement", TypeName = "nvarchar(50)")]
         public string? Placement { get; set; }
+
+        [Column("Position", TypeName = "nvarchar(50)")]
+        public string? Position { get; set; }
 
         [Column("StartDate")]
         public DateTimeOffset? StartDate { get; set; }
@@ -51,5 +50,8 @@ namespace Domain.Entities
 
         [NotMapped]
         public double CTR => ViewCount > 0 ? Math.Round((double)ClickCount / ViewCount * 100, 2) : 0;
+
+        [Column("DisplayOrder")]
+        public int DisplayOrder { get; set; }
     }
 }

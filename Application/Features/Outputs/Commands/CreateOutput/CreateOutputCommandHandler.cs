@@ -1,8 +1,9 @@
-﻿using Application.ApiContracts.Output.Responses;
+using Application.ApiContracts.Output.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.ProductVariant;
+using Application.Interfaces.Repositories.Setting;
 using Domain.Constants;
 using Domain.Constants.Order;
 using Domain.Entities;
@@ -15,6 +16,7 @@ public sealed class CreateOutputCommandHandler(
     IOutputReadRepository readRepository,
     IOutputInsertRepository insertRepository,
     IProductVariantReadRepository variantRepository,
+    ISettingRepository settingRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateOutputCommand, Result<OrderDetailResponse>>
 {
     public async Task<Result<OrderDetailResponse>> Handle(
@@ -46,6 +48,32 @@ public sealed class CreateOutputCommandHandler(
                     "Products");
             }
         }
+        var errors = new List<Error>();
+        for (int i = 0; i < request.OutputInfos.Count; i++)
+        {
+            var info = request.OutputInfos[i];
+            var variant = variantsList.FirstOrDefault(v => v.Id == info.ProductId);
+            if (variant?.Product?.ProductCategory != null &&
+                variant.Product.ProductCategory.MaxPurchaseQuantity.HasValue)
+            {
+                var category = variant.Product.ProductCategory;
+                var maxAllowed = category.MaxPurchaseQuantity.Value;
+                var totalCountForProduct = request.OutputInfos
+                    .Where(oi => oi.ProductId == info.ProductId)
+                    .Sum(oi => oi.Count ?? 0);
+                if (totalCountForProduct > maxAllowed)
+                {
+                    errors.Add(
+                        Error.BadRequest(
+                            $"Số lượng mua tối đa cho sản phẩm '{variant.Product.Name}' là {maxAllowed} sản phẩm.",
+                            $"products[{i}]"));
+                }
+            }
+        }
+        if (errors.Count > 0)
+        {
+            return Result<OrderDetailResponse>.Failure(errors);
+        }
         var output = request.Adapt<Output>();
         foreach (var info in output.OutputInfos)
         {
@@ -55,12 +83,32 @@ public sealed class CreateOutputCommandHandler(
                 info.Price = matchingVariant.Price;
             }
         }
+        var settings = await settingRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
         if (string.IsNullOrWhiteSpace(output.StatusId))
         {
-            output.StatusId = OrderStatus.Pending;
+            var totalPrice = output.OutputInfos.Sum(i => (i.Price ?? 0) * (i.Count ?? 0));
+            var thresholdSetting = settings.FirstOrDefault(
+                s => string.Equals(s.Key, SettingKeys.OrderValueExceeds, StringComparison.OrdinalIgnoreCase));
+            decimal threshold = 100000000;
+            if (thresholdSetting != null && decimal.TryParse(thresholdSetting.Value, out var parsedThreshold))
+            {
+                threshold = parsedThreshold;
+            }
+            output.StatusId = totalPrice >= threshold ? OrderStatus.WaitingDeposit : OrderStatus.Pending;
+        }
+        var ratioSetting = settings.FirstOrDefault(
+            s => string.Equals(s.Key, SettingKeys.DepositRatio, StringComparison.OrdinalIgnoreCase));
+        if (ratioSetting != null && int.TryParse(ratioSetting.Value, out var parsedRatio))
+        {
+            output.DepositRatio = parsedRatio;
+        } else
+        {
+            output.DepositRatio = 50;
         }
         output.BuyerId = request.BuyerId;
         output.CreatedBy = request.BuyerId;
+        output.PaymentMethod = request.PaymentMethod ?? PaymentMethod.COD;
+        output.PaymentStatus = "Pending";
         insertRepository.Add(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         var created = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);

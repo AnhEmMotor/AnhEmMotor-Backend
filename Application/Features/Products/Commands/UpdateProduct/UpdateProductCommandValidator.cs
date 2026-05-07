@@ -7,13 +7,14 @@ public sealed class UpdateProductCommandValidator : AbstractValidator<UpdateProd
 {
     public UpdateProductCommandValidator()
     {
-        RuleFor(x => x.Id).GreaterThan(0).WithMessage("ID sản phẩm phải lớn hơn 0.");
         RuleFor(x => x.Name)
             .NotEmpty()
             .WithMessage("Tên sản phẩm không được để trống.")
             .MaximumLength(255)
             .WithMessage("Tên sản phẩm không được vượt quá 255 ký tự.");
         RuleFor(x => x.BrandId)
+            .NotNull()
+            .WithMessage("Brand Id is required.")
             .GreaterThan(0)
             .When(x => x.BrandId.HasValue)
             .WithMessage("ID thương hiệu phải lớn hơn 0.");
@@ -45,7 +46,10 @@ public sealed class UpdateProductCommandValidator : AbstractValidator<UpdateProd
     {
         if (variants == null || variants.Count <= 1)
             return;
-        var hasVariantWithoutOptions = variants.Any(v => v.OptionValues == null || v.OptionValues.Count == 0);
+        var hasVariantWithoutOptions = variants.Any(
+            v => (v.OptionValues == null || v.OptionValues.Count == 0) &&
+                string.IsNullOrWhiteSpace(v.ColorName) &&
+                string.IsNullOrWhiteSpace(v.VersionName));
         if (hasVariantWithoutOptions)
         {
             context.AddFailure(
@@ -57,7 +61,7 @@ public sealed class UpdateProductCommandValidator : AbstractValidator<UpdateProd
         foreach (var variant in variants)
         {
             var parts = new List<string>();
-            if (variant.OptionValues != null)
+            if (variant.OptionValues != null && variant.OptionValues.Count > 0)
             {
                 parts.AddRange(
                     variant.OptionValues

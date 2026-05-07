@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using SupplierStatusConstants = Domain.Constants.SupplierStatus;
 
 namespace Application.Features.Suppliers.Commands.UpdateManySupplierStatus;
@@ -8,6 +8,7 @@ public sealed class UpdateManySupplierStatusCommandValidator : AbstractValidator
     public UpdateManySupplierStatusCommandValidator()
     {
         RuleFor(x => x.Ids)
+            .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .WithMessage("Bạn chưa truyền danh sách Supplier ID để xoá.")
             .Must(ids => ids.Count <= 20)

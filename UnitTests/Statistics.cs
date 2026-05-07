@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Statistical.Responses;
+using Application.ApiContracts.Statistical.Responses;
 using Application.Features.Statistical.Queries.GetDailyRevenue;
 using Application.Features.Statistical.Queries.GetDashboardStats;
 using Application.Features.Statistical.Queries.GetMonthlyRevenueProfit;
@@ -812,6 +812,53 @@ public class Statistics
         result.Should().NotBeNull();
         result.Value!.UnitPrice.Should().Be(500000);
     }
-    #pragma warning restore CRR0035
-    #pragma warning restore IDE0079
+
+    [Fact(DisplayName = "STAT_097 - Unit - Mapping chỉ số doanh thu và lợi nhuận hôm nay")]
+    public async Task Handle_TodayStats_ReturnsCorrectRevenueAndProfit()
+    {
+        var query = new GetDashboardStatsQuery();
+        var expectedStats = new DashboardStatsResponse { TodayRevenue = 100000000, TodayProfit = 20000000 };
+        _repositoryMock.Setup(r => r.GetDashboardStatsAsync(It.IsAny<CancellationToken>())).ReturnsAsync(expectedStats);
+        var handler = new GetDashboardStatsQueryHandler(_repositoryMock.Object);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
+        result.Value!.TodayRevenue.Should().Be(100000000);
+        result.Value.TodayProfit.Should().Be(20000000);
+    }
+
+    [Fact(DisplayName = "STAT_098 - Unit - Tính toán tỷ lệ thay đổi doanh thu theo tháng")]
+    public async Task Handle_RevenueChange_ReturnsCorrectPercentage()
+    {
+        var query = new GetDashboardStatsQuery();
+        var expectedStats = new DashboardStatsResponse { RevenueChangePercentage = 20 };
+        _repositoryMock.Setup(r => r.GetDashboardStatsAsync(It.IsAny<CancellationToken>())).ReturnsAsync(expectedStats);
+        var handler = new GetDashboardStatsQueryHandler(_repositoryMock.Object);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
+        result.Value!.RevenueChangePercentage.Should().Be(20);
+    }
+
+    [Fact(DisplayName = "STAT_101 - Unit - Xác định số lượng SKU tổng thể trong hệ thống")]
+    public async Task Handle_TotalSKUCount_ReturnsCorrectValue()
+    {
+        var query = new GetDashboardStatsQuery();
+        var expectedStats = new DashboardStatsResponse { TotalSKUCount = 50 };
+        _repositoryMock.Setup(r => r.GetDashboardStatsAsync(It.IsAny<CancellationToken>())).ReturnsAsync(expectedStats);
+        var handler = new GetDashboardStatsQueryHandler(_repositoryMock.Object);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
+        result.Value!.TotalSKUCount.Should().Be(50);
+    }
+
+    [Fact(DisplayName = "STAT_105 - Unit - Kiểm tra logic xác định ngày đạt doanh thu cao nhất")]
+    public async Task Handle_BestDay_ReturnsCorrectDateAndRevenue()
+    {
+        var query = new GetDashboardStatsQuery();
+        var expectedStats = new DashboardStatsResponse { BestDayDate = "2026-05-01", BestDayRevenue = 50000000 };
+        _repositoryMock.Setup(r => r.GetDashboardStatsAsync(It.IsAny<CancellationToken>())).ReturnsAsync(expectedStats);
+        var handler = new GetDashboardStatsQueryHandler(_repositoryMock.Object);
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
+        result.Value!.BestDayDate.Should().Be("2026-05-01");
+        result.Value.BestDayRevenue.Should().Be(50000000);
+    }
+
+#pragma warning restore CRR0035
+#pragma warning restore IDE0079
 }

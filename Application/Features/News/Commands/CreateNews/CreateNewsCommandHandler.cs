@@ -16,7 +16,7 @@ public sealed class CreateNewsCommandHandler(
         var slug = string.IsNullOrWhiteSpace(request.Slug)
             ? SlugHelper.GenerateSlug(request.Title)
             : SlugHelper.GenerateSlug(request.Slug);
-        var existing = await newsReadRepository.GetBySlugAsync(slug, cancellationToken);
+        var existing = await newsReadRepository.GetBySlugAsync(slug, cancellationToken).ConfigureAwait(false);
         if (existing != null)
         {
             return Result<int>.Failure(Error.BadRequest($"Đường dẫn (slug) '{slug}' đã tồn tại.", nameof(request.Slug)));
@@ -35,7 +35,7 @@ public sealed class CreateNewsCommandHandler(
             MetaKeywords = request.MetaKeywords?.Trim()
         };
         newsInsertRepository.Add(news);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return Result<int>.Success(news.Id);
     }
 }

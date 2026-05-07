@@ -2,7 +2,6 @@ using Application.ApiContracts.Permission.Responses;
 using Application.Common.Models;
 using Domain.Constants.Permission;
 using MediatR;
-using System.Reflection;
 
 namespace Application.Features.Permissions.Queries.GetAllPermissions;
 
@@ -13,35 +12,21 @@ public class GetAllPermissionsQueryHandler : IRequestHandler<GetAllPermissionsQu
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var permissionDefinitions = typeof(PermissionsList)
-            .GetNestedTypes()
-            .SelectMany(
-                type => type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy))
-            .Where(fieldInfo => fieldInfo.IsLiteral && !fieldInfo.IsInitOnly)
-            .Select(
-                fieldInfo => new
-                {
-                    Category = fieldInfo.DeclaringType?.Name ?? "Unknown",
-                    Key = fieldInfo.Name,
-                    Permission = fieldInfo.GetRawConstantValue() as string
-                })
-            .Where(p => p.Permission is not null)
-            .ToList();
-        var result = permissionDefinitions
-            .GroupBy(p => p.Category)
+        var result = PermissionsList.Groups
             .ToDictionary(
                 g => g.Key,
-                g => g.Select(
-                    p =>
-                    {
-                        var metadata = PermissionsList.GetMetadata(p.Permission!);
-                        return new PermissionResponse()
+                g => g.Value
+                    .Select(
+                        p =>
                         {
-                            ID = p.Permission,
-                            DisplayName = metadata?.DisplayName ?? p.Key,
-                            Description = metadata?.Description,
-                        };
-                    })
+                            var metadata = PermissionsList.GetMetadata(p);
+                            return new PermissionResponse()
+                            {
+                                ID = p,
+                                DisplayName = metadata?.DisplayName ?? p.Split('.').Last(),
+                                Description = metadata?.Description,
+                            };
+                        })
                     .ToList());
         return Task.FromResult<Result<Dictionary<string, List<PermissionResponse>>>>(result);
     }

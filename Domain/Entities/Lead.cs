@@ -1,3 +1,4 @@
+using Domain.Constants.Lead;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -31,6 +32,11 @@ public class Lead : BaseEntity
     [Column("InterestedVehicle", TypeName = "nvarchar(255)")]
     public string InterestedVehicle { get; set; } = string.Empty;
 
+    public string Status { get; set; } = LeadStatus.New;
+
+    [Column("Source", TypeName = "nvarchar(50)")]
+    public string Source { get; set; } = LeadSource.WebStore;
+
     [Column("Address", TypeName = "nvarchar(500)")]
     public string Address { get; set; } = string.Empty;
 
@@ -56,7 +62,7 @@ public class Lead : BaseEntity
     public string IdentificationNumber { get; set; } = string.Empty;
 
     [Column("Tier", TypeName = "nvarchar(50)")]
-    public string Tier { get; set; } = "Thành viên mới";
+    public string Tier { get; set; } = LeadTier.NewMember;
 
     [Column("Points")]
     public int Points { get; set; } = 0;

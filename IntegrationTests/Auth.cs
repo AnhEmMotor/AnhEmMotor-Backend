@@ -14,9 +14,6 @@ using System.Net.Http.Json;
 
 namespace IntegrationTests;
 
-using System.Threading.Tasks;
-using Xunit;
-
 public class Auth : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
 {
     private readonly IntegrationTestWebAppFactory _factory;

@@ -6,16 +6,19 @@ namespace Infrastructure.Repositories.Contact;
 
 public class ContactReadRepository(ApplicationDBContext context) : IContactReadRepository
 {
-    public async Task<Domain.Entities.Contact?> GetByIdAsync(int id, CancellationToken cancellationToken)
+    public Task<Domain.Entities.Contact?> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
-        return await context.Contacts
+        return context.Contacts
             .Include(c => c.Replies)
             .ThenInclude(r => r.RepliedBy)
             .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
     }
 
-    public async Task<List<Domain.Entities.Contact>> GetAllAsync(CancellationToken cancellationToken)
+    public Task<List<Domain.Entities.Contact>> GetAllAsync(CancellationToken cancellationToken)
     {
-        return await context.Contacts.OrderByDescending(c => c.CreatedAt).ToListAsync(cancellationToken);
+        return context.Contacts
+            .Include(c => c.Replies)
+            .OrderByDescending(c => c.CreatedAt)
+            .ToListAsync(cancellationToken);
     }
 }

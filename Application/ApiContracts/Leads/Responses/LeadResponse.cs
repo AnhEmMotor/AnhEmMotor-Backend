@@ -38,16 +38,5 @@ public class LeadResponse
 
     public DateTimeOffset CreatedAt { get; set; }
 
-    public List<LeadActivityResponse> Activities { get; set; } = new();
-}
-
-public class LeadActivityResponse
-{
-    public int Id { get; set; }
-
-    public string ActivityType { get; set; } = string.Empty;
-
-    public string Description { get; set; } = string.Empty;
-
-    public DateTimeOffset CreatedAt { get; set; }
+    public List<LeadActivityResponse> Activities { get; set; } = [];
 }

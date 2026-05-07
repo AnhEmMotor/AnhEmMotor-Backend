@@ -38,6 +38,9 @@ namespace Domain.Entities
         public ProductCategory? Parent { get; set; }
 
         public ICollection<ProductCategory> SubCategories { get; set; } = [];
+        
+        [Column("MaxPurchaseQuantity")]
+        public int? MaxPurchaseQuantity { get; set; }
 
         public ICollection<Product> Products { get; set; } = [];
     }

@@ -5,7 +5,6 @@ using Application.Interfaces.Repositories.Output;
 using Application.Interfaces.Repositories.ProductVariant;
 using Application.Interfaces.Repositories.User;
 using Application.Interfaces.Services.HR;
-
 using Domain.Constants;
 using Domain.Constants.Order;
 using Domain.Entities;
@@ -104,6 +103,10 @@ public sealed class UpdateOutputForManagerCommandHandler(
             }
         }
         request.Adapt(output);
+        if (request.DepositRatio.HasValue)
+        {
+            output.DepositRatio = request.DepositRatio.Value;
+        }
         var existingInfoDict = output.OutputInfos.ToDictionary(oi => oi.Id);
         var requestInfoDict = request.OutputInfos.Where(p => p.Id.HasValue && p.Id > 0).ToDictionary(p => p.Id!.Value);
         var toDelete = output.OutputInfos.Where(oi => !requestInfoDict.ContainsKey(oi.Id)).ToList();
@@ -139,20 +142,36 @@ public sealed class UpdateOutputForManagerCommandHandler(
                 output.OutputInfos.Add(newInfo);
             }
         }
+        if (string.Compare(output.StatusId, OrderStatus.Completed) == 0)
+        {
+            if (string.IsNullOrEmpty(output.FinishedBy?.ToString()))
+            {
+                output.FinishedBy = request.CurrentUserId;
+            }
+
+            var inventoryResult = await updateRepository.HandleInventoryTransactionAsync(output.Id, true, cancellationToken).ConfigureAwait(false);
+            if (inventoryResult.IsFailure)
+            {
+                return Result<OrderDetailResponse>.Failure(inventoryResult.Errors!);
+            }
+
+            await updateRepository.ProcessCOGSForCompletedOrderAsync(output.Id, cancellationToken).ConfigureAwait(false);
+        }
+        else if (string.Compare(output.StatusId, OrderStatus.Delivering) == 0)
+        {
+            var inventoryResult = await updateRepository.HandleInventoryTransactionAsync(output.Id, false, cancellationToken).ConfigureAwait(false);
+            if (inventoryResult.IsFailure)
+            {
+                return Result<OrderDetailResponse>.Failure(inventoryResult.Errors!);
+            }
+        }
+
         updateRepository.Update(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        if (string.Compare(output.StatusId, OrderStatus.Completed) == 0 &&
-            string.IsNullOrEmpty(output.FinishedBy?.ToString()))
+
+        if (string.Compare(output.StatusId, OrderStatus.Completed) == 0)
         {
-            output.FinishedBy = request.CurrentUserId;
-            updateRepository.Update(output);
-            await updateRepository.ProcessCOGSForCompletedOrderAsync(output.Id, cancellationToken).ConfigureAwait(false);
-            await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-            await commissionService.CalculateAndRecordCommissionAsync(output.Id, cancellationToken)
-                .ConfigureAwait(false);
+            await commissionService.CalculateAndRecordCommissionAsync(output.Id, cancellationToken).ConfigureAwait(false);
         }
-        var updated = await readRepository.GetByIdWithDetailsAsync(output.Id, cancellationToken).ConfigureAwait(false);
-        ArgumentNullException.ThrowIfNull(updated);
-        return updated.Adapt<OrderDetailResponse>();
     }
 }

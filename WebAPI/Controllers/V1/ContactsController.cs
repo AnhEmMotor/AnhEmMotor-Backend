@@ -12,61 +12,68 @@ using WebAPI.Controllers.Base;
 namespace WebAPI.Controllers.V1;
 
 /// <summary>
-/// Quản lý liên hệ khách hàng (CRM)
+/// Controller quản lý liên hệ khách hàng.
 /// </summary>
+/// <param name="sender"></param>
 [ApiVersion("1.0")]
 [SwaggerTag("Quản lý liên hệ khách hàng (CRM)")]
 [Route("api/v{version:apiVersion}/[controller]")]
 public class ContactsController(ISender sender) : ApiController
 {
     /// <summary>
-    /// Gửi thông tin liên hệ mới
+    /// Tạo yêu cầu liên hệ mới.
     /// </summary>
-    /// <param name="command">Dữ liệu liên hệ</param>
-    /// <returns>Kết quả gửi</returns>
+    /// <param name="command"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     [HttpPost]
     [AllowAnonymous]
-    public async Task<IActionResult> Create(CreateContactCommand command)
+    public async Task<IActionResult> CreateAsync(CreateContactCommand command, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(command);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
     /// <summary>
-    /// Lấy danh sách tất cả các liên hệ
+    /// Lấy danh sách yêu cầu liên hệ.
     /// </summary>
-    /// <returns>Danh sách liên hệ</returns>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     [HttpGet]
     [Authorize]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAllAsync(CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetContactsQuery());
+        var result = await sender.Send(new GetContactsQuery(), cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
     /// <summary>
-    /// Phản hồi liên hệ khách hàng
+    /// Phản hồi yêu cầu liên hệ.
     /// </summary>
-    /// <param name="command">Nội dung phản hồi</param>
-    /// <returns>Kết quả phản hồi</returns>
+    /// <param name="cancellationToken"></param>
+    /// <param name="command"></param>
+    /// <returns></returns>
     [HttpPost("reply")]
     [Authorize]
-    public async Task<IActionResult> Reply(CreateContactReplyCommand command)
+    public async Task<IActionResult> ReplyAsync(CreateContactReplyCommand command, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(command);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
     /// <summary>
-    /// Cập nhật ghi chú nội bộ cho liên hệ
+    /// Cập nhật ghi chú nội bộ cho yêu cầu liên hệ.
     /// </summary>
-    /// <param name="command">Nội dung ghi chú</param>
-    /// <returns>Kết quả cập nhật</returns>
+    /// <param name="cancellationToken"></param>
+    /// <param name="command"></param>
+    /// <returns></returns>
     [HttpPatch("internal-note")]
     [Authorize]
-    public async Task<IActionResult> UpdateInternalNote(UpdateInternalNoteCommand command)
+    public async Task<IActionResult> UpdateInternalNoteAsync(
+        UpdateInternalNoteCommand command,
+        CancellationToken cancellationToken)
     {
-        var result = await sender.Send(command);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 }

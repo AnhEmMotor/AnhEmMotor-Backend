@@ -49,6 +49,7 @@ public sealed class UpdateProductCategoryCommandHandler(
         category.SortOrder = request.SortOrder;
         category.ParentId = request.ParentId;
         category.CategoryGroup = request.CategoryGroup;
+        category.MaxPurchaseQuantity = request.MaxPurchaseQuantity;
         updateRepository.Update(category);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return category.Adapt<ProductCategoryResponse>();

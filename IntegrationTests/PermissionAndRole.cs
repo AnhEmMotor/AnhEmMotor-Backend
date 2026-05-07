@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Permission.Responses;
+using Application.ApiContracts.Permission.Responses;
 using Application.Features.Permissions.Commands.CreateRole;
 using Application.Features.Permissions.Commands.UpdateRole;
 using Domain.Constants.Permission;
@@ -72,11 +72,11 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>, IA
             .ReadFromJsonAsync<Dictionary<string, List<PermissionResponse>>>(CancellationToken.None)
             .ConfigureAwait(true);
         content.Should().NotBeNull();
-        content.Should().ContainKey("Brands");
-        content.Should().ContainKey("Products");
-        content.Should().ContainKey("Roles");
-        content!["Brands"].Should().NotBeEmpty();
-        content["Brands"].Should()
+        content.Should().ContainKey("Thương hiệu");
+        content.Should().ContainKey("Sản phẩm");
+        content.Should().ContainKey("Vai trò");
+        content!["Thương hiệu"].Should().NotBeEmpty();
+        content["Thương hiệu"].Should()
             .AllSatisfy(
                 p =>
                 {

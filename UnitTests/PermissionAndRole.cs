@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Permission.Responses;
+using Application.ApiContracts.Permission.Responses;
 using Application.Features.Permissions.Commands.CreateRole;
 using Application.Features.Permissions.Commands.DeleteMultipleRoles;
 using Application.Features.Permissions.Commands.DeleteRole;
@@ -34,9 +34,9 @@ public class PermissionAndRole
         var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
         result.Should().NotBeNull();
         result.Value.Should().BeOfType<Dictionary<string, List<PermissionResponse>>>();
-        result.Value.Should().ContainKey("Brands");
-        result.Value.Should().ContainKey("Products");
-        result.Value.Should().ContainKey("Roles");
+        result.Value.Should().ContainKey("Thương hiệu");
+        result.Value.Should().ContainKey("Sản phẩm");
+        result.Value.Should().ContainKey("Vai trò");
     }
 
     [Fact(DisplayName = "PERM_002 - Lấy permissions của user hiện tại thành công")]
@@ -586,6 +586,60 @@ public class PermissionAndRole
         var result = validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor(x => x.Permissions)
             .WithErrorMessage($"Permission '{PermissionsList.Brands.Create}' requires: {PermissionsList.Brands.View}");
+    }
+
+    [Fact(DisplayName = "PERM_026 - Unit - Kiểm tra tính hợp lệ của tên vai trò (Role Name)")]
+    public void RoleName_ValidUnicodeAndSpecialChars_ShouldPass()
+    {
+        CreateRoleCommandValidator validator = new();
+        var command = new CreateRoleCommand
+        {
+            RoleName = "Quản lý - CRM.Hanoi",
+            Permissions = [PermissionsList.Brands.View]
+        };
+        var result = validator.TestValidate(command);
+        result.ShouldNotHaveValidationErrorFor(x => x.RoleName);
+    }
+
+    [Fact(DisplayName = "PERM_027 - Unit - Chặn tên vai trò chứa ký tự đặc biệt cấm")]
+    public void RoleName_BannedSpecialChars_ShouldHaveError()
+    {
+        CreateRoleCommandValidator validator = new();
+        var command = new CreateRoleCommand { RoleName = "Admin@123", Permissions = [PermissionsList.Brands.View] };
+        var result = validator.TestValidate(command);
+        result.ShouldHaveValidationErrorFor(x => x.RoleName);
+    }
+
+    [Fact(DisplayName = "PERM_028 - Unit - Ràng buộc phụ thuộc: Xác nhận cần quyền Xem")]
+    public void ValidateRules_ConfirmBookingWithoutView_ReturnsFailure()
+    {
+        var permissions = new List<string> { PermissionsList.Bookings.Confirm };
+        var (isValid, errorMessage) = PermissionsList.ValidateRules(permissions);
+        isValid.Should().BeFalse();
+        errorMessage.Should().Contain(PermissionsList.Bookings.View);
+    }
+
+    [Fact(DisplayName = "PERM_029 - Unit - Ràng buộc phụ thuộc: Phản hồi cần quyền Xem")]
+    public void ValidateRules_ReplyContactWithoutView_ReturnsFailure()
+    {
+        var permissions = new List<string> { PermissionsList.Contacts.Reply };
+        var (isValid, errorMessage) = PermissionsList.ValidateRules(permissions);
+        isValid.Should().BeFalse();
+        errorMessage.Should().Contain(PermissionsList.Contacts.View);
+    }
+
+    [Fact(DisplayName = "PERM_035 - Unit - Kiểm tra cấu trúc nhóm quyền CRM & Connect")]
+    public async Task GetAllPermissions_CRMAndConnectGroup_ContainsCorrectPermissions()
+    {
+        var handler = new GetAllPermissionsQueryHandler();
+        var query = new GetAllPermissionsQuery();
+        var result = await handler.Handle(query, CancellationToken.None).ConfigureAwait(true);
+        var groups = result.Value;
+        groups.Should().ContainKey("CRM & Connect");
+        var crmPerms = groups["CRM & Connect"];
+        crmPerms.Any(p => p.ID!.Contains("Contacts")).Should().BeTrue();
+        crmPerms.Any(p => p.ID!.Contains("Bookings")).Should().BeTrue();
+        crmPerms.Any(p => p.ID!.Contains("Leads")).Should().BeTrue();
     }
 
 #pragma warning restore CRR0035

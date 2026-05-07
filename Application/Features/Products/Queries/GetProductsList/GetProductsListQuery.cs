@@ -1,3 +1,4 @@
+using Application.ApiContracts.Product.Requests;
 using Application.ApiContracts.Product.Responses;
 using Application.Common.Models;
 using Domain.Primitives;
@@ -93,22 +94,32 @@ public sealed record GetProductsListQuery : IRequest<Result<PagedResult<ProductL
         {
             return null;
         }
+
         var parts = filters.Split(',');
+        var operators = new[] { "<=", ">=", "<", ">", "==", "!", "@", "=" };
+
         foreach (var part in parts)
         {
-            var trimmedPart = part.Trim();
+            var trimmedPart = part.AsSpan().Trim();
             if (!trimmedPart.StartsWith(key, StringComparison.OrdinalIgnoreCase))
+            {
                 continue;
-            var operators = new[] { "<=", ">=", "<", ">", "==", "!", "@", "=" };
-            var foundOp = operators.FirstOrDefault(o => trimmedPart.Substring(key.Length).Trim().StartsWith(o));
+            }
+
+            var remaining = trimmedPart.Slice(key.Length).Trim();
+            var foundOp = operators.FirstOrDefault(o => remaining.StartsWith(o));
+
             if (foundOp != null)
             {
-                if (!string.IsNullOrEmpty(op) && foundOp != op)
+                if (!string.IsNullOrEmpty(op) && string.Compare(foundOp, op) != 0)
+                {
                     continue;
-                var value = trimmedPart.Substring(key.Length).Trim().Substring(foundOp.Length).Trim();
-                return value;
+                }
+
+                return remaining.Slice(foundOp.Length).Trim().ToString();
             }
         }
+
         return null;
     }
 }

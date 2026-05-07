@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace Application.Features.Brands.Commands.DeleteManyBrands;
 
@@ -7,6 +7,7 @@ public sealed class DeleteManyBrandsCommandValidator : AbstractValidator<DeleteM
     public DeleteManyBrandsCommandValidator()
     {
         RuleFor(x => x.Ids)
+            .Cascade(CascadeMode.Stop)
             .NotEmpty()
             .WithMessage("You must provide at least one ID.")
             .Must(ids => ids.Distinct().Count() == ids.Count)
