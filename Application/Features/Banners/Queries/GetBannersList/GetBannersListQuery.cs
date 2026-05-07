@@ -21,6 +21,7 @@ public class BannerResponse
     public string? CtaText { get; set; }
 
     public string? Placement { get; set; }
+    public string? Position { get; set; }
 
     public DateTimeOffset? StartDate { get; set; }
 
@@ -35,6 +36,7 @@ public class BannerResponse
     public int ViewCount { get; set; }
 
     public double CTR { get; set; }
+    public int DisplayOrder { get; set; }
 }
 
 public class GetBannersListQueryHandler(IBannerReadRepository bannerRepository) : IRequestHandler<GetBannersListQuery, Result<List<BannerResponse>>>
@@ -53,14 +55,17 @@ public class GetBannersListQueryHandler(IBannerReadRepository bannerRepository) 
                 LinkUrl = b.LinkUrl,
                 CtaText = b.CtaText,
                 Placement = b.Placement,
+                Position = b.Position,
                 StartDate = b.StartDate,
                 EndDate = b.EndDate,
                 IsActive = b.IsActive,
                 Priority = b.Priority,
                 ClickCount = b.ClickCount,
                 ViewCount = b.ViewCount,
+                DisplayOrder = b.DisplayOrder,
                 CTR = b.CTR
             })
+            .OrderBy(b => b.DisplayOrder)
             .ToList();
         return Result<List<BannerResponse>>.Success(response);
     }

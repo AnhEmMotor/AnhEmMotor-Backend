@@ -2664,8 +2664,8 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
     }
 
     [Fact(
-        DisplayName = "PRODUCT_143 - Cập nhật sản phẩm sử dụng payload camelCase (đảm bảo binding đúng các trường ảnh và slug)")]
-    public async Task UpdateProduct_WithCamelCaseJson_BindsCorrectly()
+        DisplayName = "PRODUCT_143 - Cập nhật sản phẩm sử dụng payload snake_case (đảm bảo binding đúng các trường ảnh và slug)")]
+    public async Task UpdateProduct_WithSnakeCaseJson_BindsCorrectly()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueId}";
@@ -2714,15 +2714,15 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var variantId = product.ProductVariants.First().Id;
         var updatePayload = $@"{{
             ""name"": ""Updated_{uniqueId}"",
-            ""categoryId"": {category.Id},
-            ""brandId"": {brand.Id},
-            ""shortDescription"": ""Mô tả ngắn"",
-            ""seatHeight"": 800,
+            ""category_id"": {category.Id},
+            ""brand_id"": {brand.Id},
+            ""short_description"": ""Mô tả ngắn"",
+            ""seat_height"": 800,
             ""variants"": [{{
                 ""id"": {variantId},
-                ""urlSlug"": ""updated-slug-{uniqueId}"",
-                ""coverImageUrl"": ""http://example.com/new-cover.jpg"",
-                ""photoCollection"": [""http://example.com/photo1.jpg""]
+                ""url_slug"": ""updated-slug-{uniqueId}"",
+                ""cover_image_url"": ""http://example.com/new-cover.jpg"",
+                ""photo_collection"": [""http://example.com/photo1.jpg""]
             }}]
         }}";
         var response = await _client.PutAsync(

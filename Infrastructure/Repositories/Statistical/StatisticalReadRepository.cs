@@ -12,6 +12,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
     public Task<List<RecentOrderResponse>> GetRecentOrdersAsync(int count, CancellationToken cancellationToken)
     {
         return context.OutputOrders
+            .IgnoreQueryFilters()
             .Where(o => string.Compare(o.StatusId, OrderStatus.Cancelled) != 0 && o.CreatedAt != null)
             .OrderByDescending(o => o.CreatedAt)
             .Take(count)
@@ -88,6 +89,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             .ConfigureAwait(false);
         var variantIds = rawData.Select(x => x.ProductVarientId).Distinct().ToList();
         var variants = await context.ProductVariants
+            .IgnoreQueryFilters()
             .Include(pv => pv.Product)
             .ThenInclude(p => p!.Brand)
             .Where(pv => variantIds.Contains(pv.Id))
@@ -209,7 +211,8 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         async Task<(decimal Rev, decimal Prof)> GetStatsInRange(DateTimeOffset start, DateTimeOffset end)
         {
             var stats = await context.OutputInfos
-                .Join(context.OutputOrders, oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
+                .IgnoreQueryFilters()
+                .Join(context.OutputOrders.IgnoreQueryFilters(), oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
                 .Where(
                     x => x.o.CreatedAt >= start &&
                         x.o.CreatedAt <= end &&
@@ -238,6 +241,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             revenueChange = 100;
         var twoHoursAgo = now.AddHours(-2);
         var overdueOrdersCount = await context.OutputOrders
+            .IgnoreQueryFilters()
             .CountAsync(
                 o => (string.Compare(o.StatusId, OrderStatus.Pending) == 0 ||
                         string.Compare(o.StatusId, OrderStatus.WaitingDeposit) == 0) &&
@@ -247,6 +251,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             .ConfigureAwait(false);
         var thirtyDaysAgo = now.AddDays(-30);
         var pendingOrdersCount = await context.OutputOrders
+            .IgnoreQueryFilters()
             .CountAsync(
                 o => (string.Compare(o.StatusId, OrderStatus.Pending) == 0 ||
                         string.Compare(o.StatusId, OrderStatus.WaitingDeposit) == 0) &&
@@ -257,14 +262,15 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         async Task<int> GetVehiclesSold(DateTimeOffset start, DateTimeOffset end)
         {
             var data = await context.OutputInfos
-                .Join(context.OutputOrders, oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
+                .IgnoreQueryFilters()
+                .Join(context.OutputOrders.IgnoreQueryFilters(), oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
                 .Join(
-                    context.ProductVariants,
+                    context.ProductVariants.IgnoreQueryFilters(),
                     x => x.oi.ProductVarientId,
                     pv => pv.Id,
                     (x, pv) => new { x.oi, x.o, pv })
-                .Join(context.Products, x => x.pv.ProductId, p => p.Id, (x, p) => new { x.oi, x.o, p })
-                .Join(context.ProductCategories, x => x.p.CategoryId, c => c.Id, (x, c) => new { x.oi, x.o, c })
+                .Join(context.Products.IgnoreQueryFilters(), x => x.pv.ProductId, p => p.Id, (x, p) => new { x.oi, x.o, p })
+                .Join(context.ProductCategories.IgnoreQueryFilters(), x => x.p.CategoryId, c => c.Id, (x, c) => new { x.oi, x.o, c })
                 .Where(
                     x => x.o.CreatedAt >= start &&
                         x.o.CreatedAt <= end &&
@@ -281,14 +287,16 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         var todayVehicles = await GetVehiclesSold(todayStart, now).ConfigureAwait(false);
         var monthVehicles = await GetVehiclesSold(currentMonthStart, now).ConfigureAwait(false);
         var confirmedInputs = await context.InputInfos
-            .Join(context.InputReceipts, ii => ii.InputId, i => i.Id, (ii, i) => new { ii, i })
+            .IgnoreQueryFilters()
+            .Join(context.InputReceipts.IgnoreQueryFilters(), ii => ii.InputId, i => i.Id, (ii, i) => new { ii, i })
             .Where(x => string.Compare(x.i.StatusId, InputStatus.Finish) == 0)
             .GroupBy(x => x.ii.ProductId)
             .Select(g => new { VariantId = g.Key, TotalIn = g.Sum(x => (long)(x.ii.Count ?? 0)) })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
         var soldOutputs = await context.OutputInfos
-            .Join(context.OutputOrders, oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
+            .IgnoreQueryFilters()
+            .Join(context.OutputOrders.IgnoreQueryFilters(), oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
             .Where(
                 x => string.Compare(x.o.StatusId, OrderStatus.Delivering) == 0 ||
                     string.Compare(x.o.StatusId, OrderStatus.WaitingPickup) == 0 ||
@@ -299,8 +307,9 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             .ConfigureAwait(false);
         var totalInventory = confirmedInputs.Sum(i => i.TotalIn) - soldOutputs.Sum(o => o.TotalOut);
         var brandData = await context.Products
-            .Join(context.Brands, p => p.BrandId, b => b.Id, (p, b) => new { p, b })
-            .Join(context.ProductVariants, x => x.p.Id, pv => pv.ProductId, (x, pv) => new { x.p, x.b, pv })
+            .IgnoreQueryFilters()
+            .Join(context.Brands.IgnoreQueryFilters(), p => p.BrandId, b => b.Id, (p, b) => new { p, b })
+            .Join(context.ProductVariants.IgnoreQueryFilters(), x => x.p.Id, pv => pv.ProductId, (x, pv) => new { x.p, x.b, pv })
             .Select(x => new { x.b.Name, VariantId = x.pv.Id })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
@@ -328,7 +337,8 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         }
         var sixtyDaysAgo = now.AddDays(-60);
         var oldInputVariants = await context.InputInfos
-            .Join(context.InputReceipts, ii => ii.InputId, i => i.Id, (ii, i) => new { ii, i })
+            .IgnoreQueryFilters()
+            .Join(context.InputReceipts.IgnoreQueryFilters(), ii => ii.InputId, i => i.Id, (ii, i) => new { ii, i })
             .Where(x => string.Compare(x.i.StatusId, InputStatus.Finish) == 0 && x.i.CreatedAt <= sixtyDaysAgo)
             .Select(x => x.ii.ProductId)
             .Distinct()
@@ -344,7 +354,8 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         }
         var last7DaysStart = todayStart.AddDays(-6);
         var last7DaysData = await context.OutputInfos
-            .Join(context.OutputOrders, oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
+            .IgnoreQueryFilters()
+            .Join(context.OutputOrders.IgnoreQueryFilters(), oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
             .Where(
                 x => x.o.CreatedAt >= last7DaysStart &&
                     (string.Compare(x.o.StatusId, OrderStatus.Delivering) == 0 ||
@@ -369,15 +380,17 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         decimal total7dRev = last7DaysData.Sum(x => x.Revenue);
         decimal total7dProf = last7DaysData.Sum(x => x.Profit);
         var bestDay = last7DaysData.OrderByDescending(x => x.Revenue).FirstOrDefault();
-        var totalSKU = await context.Products.CountAsync(cancellationToken).ConfigureAwait(false);
+        var totalSKU = await context.Products.IgnoreQueryFilters().CountAsync(cancellationToken).ConfigureAwait(false);
         var activeInstallments = await context.OutputOrders
+            .IgnoreQueryFilters()
             .CountAsync(
                 o => string.Compare(o.StatusId, OrderStatus.WaitingDeposit) == 0 ||
                     string.Compare(o.StatusId, OrderStatus.DepositPaid) == 0,
                 cancellationToken)
             .ConfigureAwait(false);
         var topProducts = await context.OutputInfos
-            .Join(context.OutputOrders, oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
+            .IgnoreQueryFilters()
+            .Join(context.OutputOrders.IgnoreQueryFilters(), oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
             .Where(
                 x => x.o.CreatedAt >= last7DaysStart &&
                     (string.Compare(x.o.StatusId, OrderStatus.Delivering) == 0 ||
@@ -398,15 +411,16 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
         var brandRevenue = await context.OutputInfos
-            .Join(context.OutputOrders, oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
+            .IgnoreQueryFilters()
+            .Join(context.OutputOrders.IgnoreQueryFilters(), oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
             .Where(
                 x => x.o.CreatedAt >= last7DaysStart &&
                     (string.Compare(x.o.StatusId, OrderStatus.Delivering) == 0 ||
                         string.Compare(x.o.StatusId, OrderStatus.WaitingPickup) == 0 ||
                         string.Compare(x.o.StatusId, OrderStatus.Completed) == 0))
-            .Join(context.ProductVariants, x => x.oi.ProductVarientId, pv => pv.Id, (x, pv) => new { x.oi, x.o, pv })
-            .Join(context.Products, x => x.pv.ProductId, p => p.Id, (x, p) => new { x.oi, x.o, p })
-            .Join(context.Brands, x => x.p.BrandId, b => b.Id, (x, b) => new { x.oi, x.o, b })
+            .Join(context.ProductVariants.IgnoreQueryFilters(), x => x.oi.ProductVarientId, pv => pv.Id, (x, pv) => new { x.oi, x.o, pv })
+            .Join(context.Products.IgnoreQueryFilters(), x => x.pv.ProductId, p => p.Id, (x, p) => new { x.oi, x.o, p })
+            .Join(context.Brands.IgnoreQueryFilters(), x => x.p.BrandId, b => b.Id, (x, b) => new { x.oi, x.o, b })
             .GroupBy(x => x.b.Name)
             .Select(
                 g => new BrandRevenueResponse
@@ -422,6 +436,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         if (todayVehicles > 0)
             todayActivities.Add($"{todayVehicles} xe đã giao");
         var todayInst = await context.OutputOrders
+            .IgnoreQueryFilters()
             .CountAsync(
                 o => o.CreatedAt >= todayStart &&
                     (string.Compare(o.StatusId, OrderStatus.WaitingDeposit) == 0 ||
@@ -431,6 +446,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         if (todayInst > 0)
             todayActivities.Add($"{todayInst} đơn trả góp mới");
         var todayCust = await context.Users
+            .IgnoreQueryFilters()
             .CountAsync(u => u.CreatedAt >= todayStart, cancellationToken)
             .ConfigureAwait(false);
         if (todayCust > 0)
@@ -518,8 +534,9 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
     public Task<IEnumerable<OrderStatusCountResponse>> GetOrderStatusCountsAsync(CancellationToken cancellationToken)
     {
         return context.OutputStatuses
+            .IgnoreQueryFilters()
             .GroupJoin(
-                context.OutputOrders,
+                context.OutputOrders.IgnoreQueryFilters(),
                 os => os.Key,
                 o => o.StatusId,
                 (os, orders) => new OrderStatusCountResponse { StatusName = os.Key, OrderCount = orders.Count() })
@@ -547,14 +564,16 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             0,
             TimeSpan.Zero);
         var confirmedInputs = await context.InputInfos
-            .Join(context.InputReceipts, ii => ii.InputId, i => i.Id, (ii, i) => new { ii, i })
+            .IgnoreQueryFilters()
+            .Join(context.InputReceipts.IgnoreQueryFilters(), ii => ii.InputId, i => i.Id, (ii, i) => new { ii, i })
             .Where(x => string.Compare(x.i.StatusId, InputStatus.Finish) == 0)
             .GroupBy(x => x.ii.ProductId)
             .Select(g => new { VariantId = g.Key, TotalIn = g.Sum(x => (long)(x.ii.Count ?? 0)) })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
         var soldOutputsAll = await context.OutputInfos
-            .Join(context.OutputOrders, oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
+            .IgnoreQueryFilters()
+            .Join(context.OutputOrders.IgnoreQueryFilters(), oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
             .Where(
                 x => string.Compare(x.o.StatusId, OrderStatus.Delivering) == 0 ||
                     string.Compare(x.o.StatusId, OrderStatus.WaitingPickup) == 0 ||
@@ -564,7 +583,8 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
         var soldLastMonth = await context.OutputInfos
-            .Join(context.OutputOrders, oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
+            .IgnoreQueryFilters()
+            .Join(context.OutputOrders.IgnoreQueryFilters(), oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
             .Where(
                 x => (string.Compare(x.o.StatusId, OrderStatus.Delivering) == 0 ||
                         string.Compare(x.o.StatusId, OrderStatus.WaitingPickup) == 0 ||
@@ -576,6 +596,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
         var variants = await context.ProductVariants
+            .IgnoreQueryFilters()
             .Include(pv => pv.Product)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
@@ -611,13 +632,12 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
         var outputsData = await context.OutputInfos
-            .Join(context.OutputOrders, oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
+            .IgnoreQueryFilters()
+            .Join(context.OutputOrders.IgnoreQueryFilters(), oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
             .Where(
-                x => (string.Compare(x.o.StatusId, OrderStatus.Delivering) == 0 ||
+                x => string.Compare(x.o.StatusId, OrderStatus.Delivering) == 0 ||
                         string.Compare(x.o.StatusId, OrderStatus.WaitingPickup) == 0 ||
-                        string.Compare(x.o.StatusId, OrderStatus.Completed) == 0) &&
-                    x.oi.DeletedAt == null &&
-                    x.o.DeletedAt == null)
+                        string.Compare(x.o.StatusId, OrderStatus.Completed) == 0)
             .Select(
                 x => new
                 {
@@ -639,6 +659,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             .Select(g => new { VariantId = g.Key, TotalSold = g.Sum(x => (long)x.Count) })
             .ToList();
         var variants = await context.ProductVariants
+            .IgnoreQueryFilters()
             .Include(pv => pv.Product)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
@@ -677,6 +698,7 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         CancellationToken cancellationToken)
     {
         var variants = await context.ProductVariants
+            .IgnoreQueryFilters()
             .Include(pv => pv.Product)
             .ThenInclude(p => p!.Brand)
             .ToListAsync(cancellationToken)
@@ -699,13 +721,12 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
         var soldOutputsAll = await context.OutputInfos
-            .Join(context.OutputOrders, oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
+            .IgnoreQueryFilters()
+            .Join(context.OutputOrders.IgnoreQueryFilters(), oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
             .Where(
                 x => (string.Compare(x.o.StatusId, OrderStatus.Delivering) == 0 ||
                         string.Compare(x.o.StatusId, OrderStatus.WaitingPickup) == 0 ||
-                        string.Compare(x.o.StatusId, OrderStatus.Completed) == 0) &&
-                    x.oi.DeletedAt == null &&
-                    x.o.DeletedAt == null)
+                        string.Compare(x.o.StatusId, OrderStatus.Completed) == 0))
             .GroupBy(x => x.oi.ProductVarientId)
             .Select(g => new { VariantId = g.Key, TotalOut = g.Sum(x => (long)(x.oi.Count ?? 0)) })
             .ToListAsync(cancellationToken)
@@ -756,13 +777,15 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             return null;
         }
         var totalInput = await context.InputInfos
-                .Join(context.InputReceipts, ii => ii.InputId, i => i.Id, (ii, i) => new { ii, i })
+                .IgnoreQueryFilters()
+                .Join(context.InputReceipts.IgnoreQueryFilters(), ii => ii.InputId, i => i.Id, (ii, i) => new { ii, i })
                 .Where(x => x.ii.ProductId == variantId && string.Compare(x.i.StatusId, InputStatus.Finish) == 0)
                 .SumAsync(x => (long?)(x.ii.Count ?? 0), cancellationToken)
                 .ConfigureAwait(false) ??
             0;
         var totalOutput = await context.OutputInfos
-                .Join(context.OutputOrders, oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
+                .IgnoreQueryFilters()
+                .Join(context.OutputOrders.IgnoreQueryFilters(), oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
                 .Where(
                     x => x.oi.ProductVarientId == variantId &&
                             (string.Compare(x.o.StatusId, OrderStatus.Delivering) == 0 ||

@@ -24,11 +24,13 @@ public sealed class UpdateBannerCommandHandler(
         banner.ImageUrl = request.ImageUrl.Trim();
         banner.LinkUrl = request.LinkUrl?.Trim();
         banner.CtaText = request.CtaText?.Trim();
+        banner.Position = request.Position?.Trim();
         banner.Placement = request.Placement?.Trim();
         banner.StartDate = request.StartDate;
         banner.EndDate = request.EndDate;
         banner.IsActive = request.IsActive;
         banner.Priority = request.Priority;
+        banner.DisplayOrder = request.DisplayOrder;
         bannerUpdateRepository.Update(banner);
         var action = oldStatus != banner.IsActive ? (banner.IsActive ? "Resume" : "Pause") : "Update";
         bannerAuditRepository.AddLog(

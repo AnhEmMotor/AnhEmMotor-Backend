@@ -1,6 +1,7 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.LocalFile;
 using Application.Interfaces.Services;
+using Application.Interfaces.Services.HR;
 using Domain.Entities;
 using Infrastructure;
 using Infrastructure.Authorization;
@@ -9,6 +10,7 @@ using Infrastructure.DBContexts;
 using Infrastructure.Repositories;
 using Infrastructure.Repositories.LocalFile;
 using Infrastructure.Services;
+using Infrastructure.Services.HR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -213,6 +215,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                 services.AddScoped<IExternalAuthService, ExternalAuthService>();
                 services.AddScoped<IVNPayService, VNPayService>();
                 services.AddScoped<IPayOSService, PayOSService>();
+                services.AddScoped<ICommissionService, CommissionService>();
                 services.Scan(
                     scan => scan
                         .FromAssemblies(typeof(DependencyInjection).Assembly)

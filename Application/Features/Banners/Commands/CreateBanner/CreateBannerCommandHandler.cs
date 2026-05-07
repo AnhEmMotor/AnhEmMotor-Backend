@@ -21,11 +21,13 @@ public sealed class CreateBannerCommandHandler(
             ImageUrl = request.ImageUrl.Trim(),
             LinkUrl = request.LinkUrl?.Trim(),
             CtaText = request.CtaText?.Trim(),
+            Position = request.Position?.Trim(),
             Placement = request.Placement?.Trim(),
             StartDate = request.StartDate,
             EndDate = request.EndDate,
             IsActive = request.IsActive,
-            Priority = request.Priority
+            Priority = request.Priority,
+            DisplayOrder = request.DisplayOrder
         };
 
         bannerInsertRepository.Add(banner);
