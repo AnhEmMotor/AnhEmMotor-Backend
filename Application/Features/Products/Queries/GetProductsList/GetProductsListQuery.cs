@@ -107,7 +107,15 @@ public sealed record GetProductsListQuery : IRequest<Result<PagedResult<ProductL
             }
 
             var remaining = trimmedPart.Slice(key.Length).Trim();
-            var foundOp = operators.FirstOrDefault(o => remaining.StartsWith(o));
+            string? foundOp = null;
+            foreach (var o in operators)
+            {
+                if (remaining.StartsWith(o))
+                {
+                    foundOp = o;
+                    break;
+                }
+            }
 
             if (foundOp != null)
             {

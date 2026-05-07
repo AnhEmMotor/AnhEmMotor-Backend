@@ -1,5 +1,7 @@
 using Application.ApiContracts.Product.Requests;
 using Application.ApiContracts.Product.Responses;
+using Application.ApiContracts.Option.Responses;
+using Application.Features.Options.Queries.GetOptionsList;
 using Application.Common.Models;
 using Application.Features.OptionValues.Commands.CreateOptionValue;
 using Application.Features.OptionValues.Commands.DeleteOptionValue;

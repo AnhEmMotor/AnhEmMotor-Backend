@@ -1,5 +1,12 @@
 using Application.ApiContracts.Leads.Responses;
 using Application.Features.Leads.Queries.GetLeads;
+using Application.Features.Leads.Queries.GetLeadById;
+using Application.Features.Leads.Queries.GetLeadPipeline;
+using Application.Features.Leads.Commands.UpdateLead;
+using Application.Features.Leads.Commands.AddLeadActivity;
+using Application.Features.Leads.Commands.AssignLead;
+using Application.Features.Leads.Commands.SeedLeads;
+using Application.Features.Leads.Commands.ResetLeads;
 using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;

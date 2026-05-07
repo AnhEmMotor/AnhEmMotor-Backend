@@ -35,6 +35,7 @@ public sealed class UpdateProductCommandHandler(
     IOptionValueInsertRepository optionValueInsertRepository,
     IVariantOptionValueDeleteRepository variantOptionValueDeleteRepository,
     IProductVarientDeleteRepository productVarientDeleteRepository,
+    IProductUpdateRepository productUpdateRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<UpdateProductCommand, Result<ProductDetailForManagerResponse?>>
 {
     public async Task<Result<ProductDetailForManagerResponse?>> Handle(
@@ -537,17 +538,16 @@ public sealed class UpdateProductCommandHandler(
                 product.CompatibleWith.Add(new ProductCompatibility { CompatibleVehicleModelId = vehicleId });
             }
         }
-        updateRepository.Update(product);
+        productUpdateRepository.Update(product);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
         var response = product.Adapt<ProductDetailForManagerResponse>();
         if (response != null)
         {
             response.CompatibleVehicleModelIds = product.CompatibleWith.Select(c => c.CompatibleVehicleModelId).ToList();
         }
-        }
-        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        var response = product.Adapt<ProductDetailForManagerResponse>();
-        return response;
+
+        return Result<ProductDetailForManagerResponse?>.Success(response);
     }
 
     private static void UpdateVariantPhotos(ProductVariant variant, List<string>? newUrls)

@@ -32,7 +32,7 @@ namespace Application.ApiContracts.Product.Common
 
         public string? Dimensions { get; set; }
 
-        public decimal? Wheelbase { get; set; }
+        public string? Wheelbase { get; set; }
 
         public decimal? SeatHeight { get; set; }
 

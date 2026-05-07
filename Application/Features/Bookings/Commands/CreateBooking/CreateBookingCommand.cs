@@ -7,7 +7,6 @@ using Domain.Entities;
 using MediatR;
 using System;
 using Domain.Constants.Booking;
-using MediatR;
 
 namespace Application.Features.Bookings.Commands.CreateBooking;
 
@@ -25,10 +24,6 @@ public record CreateBookingCommand : IRequest<Result<int>>
 
     public string Note { get; init; } = string.Empty;
 
-    public string Location { get; init; } = "Showroom";
-
-    public string BookingType { get; init; } = "TestDrive";
-}
     public string Location { get; init; } = BookingLocation.Showroom;
 
     public string BookingType { get; init; } = Domain.Constants.Booking.BookingType.TestDrive;

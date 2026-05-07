@@ -154,8 +154,6 @@ public sealed class UpdateOutputForManagerCommandHandler(
             {
                 return Result<OrderDetailResponse>.Failure(inventoryResult.Errors!);
             }
-
-            await updateRepository.ProcessCOGSForCompletedOrderAsync(output.Id, cancellationToken).ConfigureAwait(false);
         }
         else if (string.Compare(output.StatusId, OrderStatus.Delivering) == 0)
         {
@@ -173,5 +171,7 @@ public sealed class UpdateOutputForManagerCommandHandler(
         {
             await commissionService.CalculateAndRecordCommissionAsync(output.Id, cancellationToken).ConfigureAwait(false);
         }
+
+        return Result<OrderDetailResponse>.Success(output.Adapt<OrderDetailResponse>());
     }
 }

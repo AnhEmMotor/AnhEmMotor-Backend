@@ -94,7 +94,7 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
         {
             query = query.Where(p => p.DeletedAt != null);
         }
-        return query
+        return await query
             .Include(p => p.ProductCategory)
             .ThenInclude(c => c!.Parent)
             .Include(p => p.Brand)

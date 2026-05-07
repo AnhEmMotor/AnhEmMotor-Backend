@@ -438,16 +438,6 @@ public sealed class CreateProductCommandHandler(
             }
         }
 
-                product.ProductVariants.Add(variant);
-            }
-        }
-
-        if (request.CompatibleVehicleModelIds?.Count > 0)
-        {
-            foreach (var vehicleId in request.CompatibleVehicleModelIds.Distinct())
-                product.CompatibleWith.Add(new ProductCompatibility { CompatibleVehicleModelId = vehicleId });
-        }
-
         if (!string.IsNullOrWhiteSpace(request.Highlights))
         {
             try

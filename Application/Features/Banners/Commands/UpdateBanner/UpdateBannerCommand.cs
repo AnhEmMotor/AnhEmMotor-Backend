@@ -10,11 +10,8 @@ public sealed record UpdateBannerCommand : IRequest<Result<Unit>>
 
     public string Title { get; init; } = string.Empty;
 
-    [JsonPropertyName("desktop_image_url")]
-    public string DesktopImageUrl { get; init; } = string.Empty;
-
-    [JsonPropertyName("mobile_image_url")]
-    public string MobileImageUrl { get; init; } = string.Empty;
+    [JsonPropertyName("image_url")]
+    public string ImageUrl { get; init; } = string.Empty;
 
     [JsonPropertyName("link_url")]
     public string? LinkUrl { get; init; }

@@ -24,18 +24,13 @@ public class Lead : BaseEntity
     public int Score { get; set; } = 0;
 
     [Column("Status", TypeName = "nvarchar(20)")]
-    public string Status { get; set; } = "New";
+    public string Status { get; set; } = LeadStatus.New;
 
     [Column("Source", TypeName = "nvarchar(50)")]
     public string Source { get; set; } = "WebStore";
 
     [Column("InterestedVehicle", TypeName = "nvarchar(255)")]
     public string InterestedVehicle { get; set; } = string.Empty;
-
-    public string Status { get; set; } = LeadStatus.New;
-
-    [Column("Source", TypeName = "nvarchar(50)")]
-    public string Source { get; set; } = LeadSource.WebStore;
 
     [Column("Address", TypeName = "nvarchar(500)")]
     public string Address { get; set; } = string.Empty;

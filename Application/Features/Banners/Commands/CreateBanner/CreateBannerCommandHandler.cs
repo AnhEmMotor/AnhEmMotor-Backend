@@ -18,8 +18,7 @@ public sealed class CreateBannerCommandHandler(
         var banner = new Banner
         {
             Title = request.Title.Trim(),
-            DesktopImageUrl = request.DesktopImageUrl.Trim(),
-            MobileImageUrl = request.MobileImageUrl.Trim(),
+            ImageUrl = request.ImageUrl.Trim(),
             LinkUrl = request.LinkUrl?.Trim(),
             CtaText = request.CtaText?.Trim(),
             Placement = request.Placement?.Trim(),

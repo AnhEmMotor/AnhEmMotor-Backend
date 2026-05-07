@@ -5,7 +5,6 @@ using Application.Interfaces.Repositories.OptionValue;
 using MediatR;
 using OptionEntity = Domain.Entities.Option;
 using OptionValueEntity = Domain.Entities.OptionValue;
-using MediatR;
 
 namespace Application.Features.OptionValues.Commands.CreateOptionValue;
 

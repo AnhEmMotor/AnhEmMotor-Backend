@@ -95,6 +95,7 @@ public class NewsController(IMediator mediator) : ApiController
     /// Lấy chi tiết tin tức theo slug
     /// </summary>
     /// <param name="slug">Đường dẫn tĩnh bài viết</param>
+    /// <param name="cancellationToken"></param>
     /// <returns>Chi tiết bài viết</returns>
     [HttpGet("{slug}")]
     [SwaggerOperation(Summary = "Lấy chi tiết tin tức theo slug")]

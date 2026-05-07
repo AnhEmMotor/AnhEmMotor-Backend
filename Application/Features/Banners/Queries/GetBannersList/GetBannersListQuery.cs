@@ -14,9 +14,7 @@ public class BannerResponse
 
     public string Title { get; set; } = string.Empty;
 
-    public string DesktopImageUrl { get; set; } = string.Empty;
-
-    public string MobileImageUrl { get; set; } = string.Empty;
+    public string ImageUrl { get; set; } = string.Empty;
 
     public string? LinkUrl { get; set; }
 
@@ -51,8 +49,7 @@ public class GetBannersListQueryHandler(IBannerReadRepository bannerRepository) 
             {
                 Id = b.Id,
                 Title = b.Title,
-                DesktopImageUrl = b.DesktopImageUrl,
-                MobileImageUrl = b.MobileImageUrl,
+                ImageUrl = b.ImageUrl,
                 LinkUrl = b.LinkUrl,
                 CtaText = b.CtaText,
                 Placement = b.Placement,

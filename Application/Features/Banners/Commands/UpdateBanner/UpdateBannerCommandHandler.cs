@@ -21,8 +21,7 @@ public sealed class UpdateBannerCommandHandler(
             return Result<Unit>.Failure("Banner not found");
         var oldStatus = banner.IsActive;
         banner.Title = request.Title.Trim();
-        banner.DesktopImageUrl = request.DesktopImageUrl.Trim();
-        banner.MobileImageUrl = request.MobileImageUrl.Trim();
+        banner.ImageUrl = request.ImageUrl.Trim();
         banner.LinkUrl = request.LinkUrl?.Trim();
         banner.CtaText = request.CtaText?.Trim();
         banner.Placement = request.Placement?.Trim();

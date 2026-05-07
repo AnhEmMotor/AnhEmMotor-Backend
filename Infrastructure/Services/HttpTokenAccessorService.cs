@@ -20,8 +20,8 @@ namespace Infrastructure.Services
             {
                 HttpOnly = true,
                 Expires = expiresAt,
-                Secure = isHttps,
-                SameSite = isHttps ? SameSiteMode.None : SameSiteMode.Lax,
+                Secure = true,
+                SameSite = SameSiteMode.None,
                 Path = "/"
             };
             if (!string.IsNullOrEmpty(cookieDomain))
@@ -37,8 +37,8 @@ namespace Infrastructure.Services
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = isHttps,
-                SameSite = isHttps ? SameSiteMode.None : SameSiteMode.Lax,
+                Secure = true,
+                SameSite = SameSiteMode.None,
                 Path = "/"
             };
             if (!string.IsNullOrEmpty(cookieDomain))

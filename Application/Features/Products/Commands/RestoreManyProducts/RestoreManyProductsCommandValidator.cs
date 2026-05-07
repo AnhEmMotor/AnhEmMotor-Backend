@@ -9,7 +9,7 @@ public sealed class RestoreManyProductsCommandValidator : AbstractValidator<Rest
         RuleFor(x => x.Ids)
             .Cascade(CascadeMode.Stop)
             .NotEmpty()
-            .WithMessage("Bạn chưa truyền danh sách Product ID để phục hồi.")
+            .WithMessage("Bạn chưa truyền danh sách Product ID để phục hồi.");
         RuleForEach(x => x.Ids).NotEmpty().WithMessage("Product ID không hợp lệ.");
     }
 }

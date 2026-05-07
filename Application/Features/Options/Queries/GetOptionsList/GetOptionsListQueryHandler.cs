@@ -3,6 +3,7 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories.Option;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Mapster;
 
 namespace Application.Features.Options.Queries.GetOptionsList;
 
