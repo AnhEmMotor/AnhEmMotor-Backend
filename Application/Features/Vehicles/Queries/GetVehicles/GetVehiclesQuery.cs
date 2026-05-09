@@ -1,11 +1,13 @@
 using Application.ApiContracts.Vehicle.Responses;
 using Application.Common.Models;
+using Domain.Primitives;
 using MediatR;
+using Sieve.Models;
 
 namespace Application.Features.Vehicles.Queries.GetVehicles;
 
-public sealed class GetVehiclesQuery : IRequest<Result<List<VehicleResponse>>>
+public sealed record GetVehiclesQuery : IRequest<Result<PagedResult<VehicleResponse>>>
 {
-    public string? Search { get; set; }
+    public SieveModel? SieveModel { get; init; }
 }
 

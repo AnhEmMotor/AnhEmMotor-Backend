@@ -7,6 +7,7 @@ using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
 
@@ -38,15 +39,17 @@ public class VehicleController(IMediator mediator) : ApiController
     /// <summary>
     /// Lấy danh sách xe của khách hàng
     /// </summary>
-    /// <param name="search">Từ khóa tìm kiếm (Biển số, VIN, Tên khách)</param>
+    /// <param name="sieveModel">Sieve model for filtering, sorting and pagination.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>Danh sách xe</returns>
     [HttpGet]
     [Authorize]
     [SwaggerOperation(Summary = "Lấy danh sách xe của khách hàng")]
-    public async Task<IActionResult> GetListAsync([FromQuery] string? search, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetListAsync(
+        [FromQuery] SieveModel sieveModel,
+        CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetVehiclesQuery { Search = search }, cancellationToken)
+        var result = await mediator.Send(new GetVehiclesQuery { SieveModel = sieveModel }, cancellationToken)
             .ConfigureAwait(true);
         return HandleResult(result);
     }

@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using Domain.Primitives;
 using LeadEntity = Domain.Entities.Lead;
 using ProductCategoryEntity = Domain.Entities.ProductCategory;
 using ProductEntity = Domain.Entities.Product;
@@ -196,14 +197,14 @@ public class VehicleAsset : IClassFixture<IntegrationTestWebAppFactory>, IAsyncL
         var v2 = new VehicleEntity { LeadId = lead.Id, VinNumber = "OTHER", EngineNumber = "E2" };
         db.Vehicles.AddRange(v1, v2);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-        var response = await _client.GetAsync($"/api/v1/vehicle?search={vin}", TestContext.Current.CancellationToken)
+        var response = await _client.GetAsync($"/api/v1/vehicle?Filters=search@={vin}", TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
-        var assets = await response!.Content
-            .ReadFromJsonAsync<List<VehicleResponse>>(TestContext.Current.CancellationToken)
+        var pagedResult = await response!.Content
+            .ReadFromJsonAsync<PagedResult<VehicleResponse>>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        assets.Should().HaveCount(1);
-        assets![0].VinNumber.Should().Be(vin);
+        pagedResult!.Items.Should().HaveCount(1);
+        pagedResult.Items![0].VinNumber.Should().Be(vin);
     }
 
     [Fact(DisplayName = "VAS_007 - Kiểm tra tính toàn vẹn khi đổi chủ sở hữu")]
