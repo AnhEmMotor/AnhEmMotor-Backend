@@ -1,11 +1,7 @@
 using Application.Common.Models;
-using Application.Interfaces;
-using Domain.Entities.HR;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
-using System.Text.Json;
 
 namespace Application.Features.HR.Commands.CreateCommissionPolicy;
 

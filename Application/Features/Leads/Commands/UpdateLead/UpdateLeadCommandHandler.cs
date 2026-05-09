@@ -2,12 +2,12 @@
 using Application.Interfaces.Repositories.Lead;
 using MediatR;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Application.Features.Leads.Commands.UpdateLead
 {
-    public class UpdateLeadCommandHandler(ILeadWriteRepository leadWriteRepository, ILeadReadRepository leadReadRepository) : IRequestHandler<UpdateLeadCommand, Result<int>>
+    public class UpdateLeadCommandHandler(
+        ILeadWriteRepository leadWriteRepository,
+        ILeadReadRepository leadReadRepository) : IRequestHandler<UpdateLeadCommand, Result<int>>
     {
         public async Task<Result<int>> Handle(UpdateLeadCommand request, CancellationToken cancellationToken)
         {
@@ -16,17 +16,18 @@ namespace Application.Features.Leads.Commands.UpdateLead
             {
                 return Result<int>.Failure("Không tìm thấy khách hàng.");
             }
-            // Check for duplicate identification number if changed
             if (!string.IsNullOrEmpty(request.IdentificationNumber) &&
                 string.Compare(request.IdentificationNumber, lead.IdentificationNumber) != 0)
             {
-                var existingWithCccd = await leadReadRepository.GetByIdentificationNumberAsync(request.IdentificationNumber, cancellationToken).ConfigureAwait(false);
+                var existingWithCccd = await leadReadRepository.GetByIdentificationNumberAsync(
+                    request.IdentificationNumber,
+                    cancellationToken)
+                    .ConfigureAwait(false);
                 if (existingWithCccd != null && existingWithCccd.Id != lead.Id)
                 {
                     return Result<int>.Failure("Identification number already exists.");
                 }
             }
-
             lead.FullName = request.FullName;
             lead.Email = request.Email;
             lead.PhoneNumber = request.PhoneNumber;
@@ -45,12 +46,10 @@ namespace Application.Features.Leads.Commands.UpdateLead
             {
                 lead.Source = request.Source;
             }
-
             lead.InterestedVehicle = request.InterestedVehicle;
             lead.Score = request.Score;
             await leadWriteRepository.UpdateAsync(lead, cancellationToken).ConfigureAwait(false);
             return lead.Id;
         }
     }
-
 }

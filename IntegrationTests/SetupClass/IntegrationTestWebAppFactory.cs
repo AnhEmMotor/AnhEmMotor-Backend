@@ -180,7 +180,8 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                                 npgsqlOptions.EnableRetryOnFailure();
                             });
                     });
-                services.AddScoped<IApplicationDBContext>(provider => provider.GetRequiredService<ApplicationDBContext>());
+                services.AddScoped<IApplicationDBContext>(
+                    provider => provider.GetRequiredService<ApplicationDBContext>());
                 services.AddIdentity<ApplicationUser, ApplicationRole>(
                     options =>
                     {

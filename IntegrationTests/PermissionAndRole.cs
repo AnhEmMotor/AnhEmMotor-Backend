@@ -114,7 +114,9 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>, IA
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-        var response = await _client.GetAsync("/api/v1/Permission/my-permissions", TestContext.Current.CancellationToken)
+        var response = await _client.GetAsync(
+            "/api/v1/Permission/my-permissions",
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response!.Content
@@ -129,7 +131,9 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>, IA
     public async Task GetMyPermissions_Unauthenticated_ReturnsUnauthorized()
     {
         _client.DefaultRequestHeaders.Authorization = null;
-        var response = await _client.GetAsync("/api/v1/Permission/my-permissions", TestContext.Current.CancellationToken)
+        var response = await _client.GetAsync(
+            "/api/v1/Permission/my-permissions",
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
@@ -234,7 +238,9 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>, IA
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-        var response = await _client.GetAsync($"/api/v1/Permission/roles/{roleId}/permissions", TestContext.Current.CancellationToken)
+        var response = await _client.GetAsync(
+            $"/api/v1/Permission/roles/{roleId}/permissions",
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response!.Content
@@ -279,7 +285,9 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>, IA
             Permissions = [PermissionsList.Brands.View, PermissionsList.Products.View]
         };
         var response = await _client.PostAsJsonAsync("/api/v1/permission/roles", request).ConfigureAwait(true);
-        var contentString = await response!.Content.ReadAsStringAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var contentString = await response!.Content
+            .ReadAsStringAsync(TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.Created, contentString);
         var content = await response!.Content
             .ReadFromJsonAsync<RoleCreateResponse>(TestContext.Current.CancellationToken)
@@ -328,7 +336,9 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>, IA
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var roleInDb = await db.Roles
-            .FirstOrDefaultAsync(r => string.Compare(r.Name, request.RoleName) == 0, TestContext.Current.CancellationToken)
+            .FirstOrDefaultAsync(
+                r => string.Compare(r.Name, request.RoleName) == 0,
+                TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         roleInDb.Should().BeNull();
     }
@@ -362,7 +372,9 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>, IA
         };
         var response = await _client.PostAsJsonAsync("/api/v1/Permission/roles", request).ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var content = await response!.Content.ReadAsStringAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var content = await response!.Content
+            .ReadAsStringAsync(TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         content!.Should().Contain("already exists");
     }
 
@@ -409,7 +421,9 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>, IA
         var response = await _client.PutAsJsonAsync($"/api/v1/Permission/roles/{roleId}", request).ConfigureAwait(true);
         if (response!.StatusCode != HttpStatusCode.OK)
         {
-            var error = await response!.Content.ReadAsStringAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+            var error = await response!.Content
+                .ReadAsStringAsync(TestContext.Current.CancellationToken)
+                .ConfigureAwait(true);
             throw new Exception($"API Failed with {response!.StatusCode}: {error}");
         }
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -598,7 +612,8 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>, IA
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-        var response = await _client.GetAsync("/api/v1/Permission/roles", TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.GetAsync("/api/v1/Permission/roles", TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
         var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<RoleSelectResponse>>(TestContext.Current.CancellationToken)
@@ -627,7 +642,9 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>, IA
         {
             var permission = await EnsurePermissionExistsAsync(db, permName).ConfigureAwait(true);
             if (!await db.RolePermissions
-                .AnyAsync(rp => rp.RoleId == roleEntity!.Id && rp.PermissionId == permission.Id, TestContext.Current.CancellationToken)
+                .AnyAsync(
+                    rp => rp.RoleId == roleEntity!.Id && rp.PermissionId == permission.Id,
+                    TestContext.Current.CancellationToken)
                 .ConfigureAwait(true))
             {
                 db.RolePermissions.Add(new RolePermission { RoleId = roleEntity!.Id, PermissionId = permission.Id });
@@ -672,7 +689,6 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>, IA
     [Fact(DisplayName = "PERM_036 - Truy cập module HR với quyền hợp lệ")]
     public async Task GetHR_WithPermission_ReturnsOk()
     {
-        // Arrange
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"hr_{uniqueId}";
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
@@ -682,7 +698,6 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>, IA
             [PermissionsList.HR.View],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
             _client,
             username,
@@ -690,28 +705,22 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>, IA
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
-        // Act
         var response = await _client.GetAsync("/api/v1/hr/employees", CancellationToken.None).ConfigureAwait(true);
-
-        // Assert
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact(DisplayName = "PERM_037 - Từ chối truy cập module HR khi thiếu quyền")]
     public async Task GetHR_WithoutPermission_ReturnsForbidden()
     {
-        // Arrange
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"sales_{uniqueId}";
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
             _factory.Services,
             username,
             "Password123!",
-            [PermissionsList.Brands.View], // No HR permission
+            [PermissionsList.Brands.View],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
             _client,
             username,
@@ -719,28 +728,22 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>, IA
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
-        // Act
         var response = await _client.GetAsync("/api/v1/hr/employees", CancellationToken.None).ConfigureAwait(true);
-
-        // Assert
         response!.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
     [Fact(DisplayName = "PERM_038 - Kiểm tra quyền phê duyệt lương (Payroll)")]
     public async Task ApprovePayroll_WithoutPermission_ReturnsForbidden()
     {
-        // Arrange
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"hr_staff_{uniqueId}";
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
             _factory.Services,
             username,
             "Password123!",
-            [PermissionsList.HR.View, PermissionsList.Payroll.View], // Lacks Approve permission
+            [PermissionsList.HR.View, PermissionsList.Payroll.View],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
             _client,
             username,
@@ -748,11 +751,12 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>, IA
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
-        // Act
-        var response = await HttpClientJsonExtensions.PostAsJsonAsync(_client, "/api/v1/hr/commissions/approve-payroll", new { Month = 5, Year = 2026 }, TestContext.Current.CancellationToken).ConfigureAwait(true);
-
-        // Assert
+        var response = await HttpClientJsonExtensions.PostAsJsonAsync(
+            _client,
+            "/api/v1/hr/commissions/approve-payroll",
+            new { Month = 5, Year = 2026 },
+            TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
@@ -761,17 +765,12 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>, IA
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var roleName = $"Editor_{uniqueId}";
-
-        await CreateRoleWithPermissionsInternalAsync(
-            $"OtherRole_{uniqueId}",
-            [PermissionsList.News.Create])
+        await CreateRoleWithPermissionsInternalAsync($"OtherRole_{uniqueId}", [PermissionsList.News.Create])
             .ConfigureAwait(true);
-
         var roleId = await CreateRoleWithPermissionsInternalAsync(
             roleName,
             [PermissionsList.News.Create, PermissionsList.News.View])
             .ConfigureAwait(true);
-
         var adminUsername = $"admin_{uniqueId}";
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
             _factory.Services,
@@ -780,7 +779,6 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>, IA
             [PermissionsList.Roles.Edit],
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
             _client,
             adminUsername,
@@ -788,12 +786,14 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>, IA
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         var request = new UpdateRoleCommand { Permissions = [PermissionsList.News.View] };
-        var response = await HttpClientJsonExtensions.PutAsJsonAsync(_client, $"/api/v1/Permission/roles/{roleId}", request, TestContext.Current.CancellationToken).ConfigureAwait(true);
-
+        var response = await HttpClientJsonExtensions.PutAsJsonAsync(
+            _client,
+            $"/api/v1/Permission/roles/{roleId}",
+            request,
+            TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
-
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var rolePermissions = await db.RolePermissions
@@ -801,9 +801,10 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>, IA
             .Where(rp => rp.RoleId == roleId)
             .ToListAsync(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-
         rolePermissions.Should().HaveCount(1);
-        rolePermissions.Should().NotContain(rp => rp.Permission!.Name.Equals(PermissionsList.News.Create, StringComparison.OrdinalIgnoreCase));
+        rolePermissions.Should()
+            .NotContain(
+                rp => rp.Permission!.Name.Equals(PermissionsList.News.Create, StringComparison.OrdinalIgnoreCase));
     }
 
     private static async Task<Permission> EnsurePermissionExistsAsync(ApplicationDBContext db, string permName)
@@ -822,7 +823,9 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>, IA
             {
                 db.Entry(permission).State = EntityState.Detached;
                 permission = await db.Permissions
-                    .FirstOrDefaultAsync(p => string.Compare(p.Name, permName) == 0, TestContext.Current.CancellationToken)
+                    .FirstOrDefaultAsync(
+                        p => string.Compare(p.Name, permName) == 0,
+                        TestContext.Current.CancellationToken)
                     .ConfigureAwait(true);
             }
         }

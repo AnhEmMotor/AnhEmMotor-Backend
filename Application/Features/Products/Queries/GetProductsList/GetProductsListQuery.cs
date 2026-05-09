@@ -94,10 +94,8 @@ public sealed record GetProductsListQuery : IRequest<Result<PagedResult<ProductL
         {
             return null;
         }
-
         var parts = filters.Split(',');
         var operators = new[] { "<=", ">=", "<", ">", "==", "!", "@", "=" };
-
         foreach (var part in parts)
         {
             var trimmedPart = part.AsSpan().Trim();
@@ -105,7 +103,6 @@ public sealed record GetProductsListQuery : IRequest<Result<PagedResult<ProductL
             {
                 continue;
             }
-
             var remaining = trimmedPart.Slice(key.Length).Trim();
             string? foundOp = null;
             foreach (var o in operators)
@@ -116,18 +113,15 @@ public sealed record GetProductsListQuery : IRequest<Result<PagedResult<ProductL
                     break;
                 }
             }
-
             if (foundOp != null)
             {
                 if (!string.IsNullOrEmpty(op) && string.Compare(foundOp, op) != 0)
                 {
                     continue;
                 }
-
                 return remaining.Slice(foundOp.Length).Trim().ToString();
             }
         }
-
         return null;
     }
 }

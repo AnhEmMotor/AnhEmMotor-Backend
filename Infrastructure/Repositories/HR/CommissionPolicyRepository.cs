@@ -2,10 +2,7 @@ using Application.Interfaces;
 using Application.Interfaces.Repositories.HR;
 using Domain.Entities.HR;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories.HR;
 
@@ -20,7 +17,9 @@ public class CommissionPolicyRepository(IApplicationDBContext context) : ICommis
             .ToListAsync(cancellationToken);
     }
 
-    public Task<List<CommissionPolicyAuditLog>> GetAuditLogsAsync(int policyId, CancellationToken cancellationToken = default)
+    public Task<List<CommissionPolicyAuditLog>> GetAuditLogsAsync(
+        int policyId,
+        CancellationToken cancellationToken = default)
     {
         return context.CommissionPolicyAuditLogs
             .Where(l => l.PolicyId == policyId)
@@ -30,9 +29,7 @@ public class CommissionPolicyRepository(IApplicationDBContext context) : ICommis
 
     public Task<CommissionPolicy?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        return context.CommissionPolicies
-            .FindAsync([id], cancellationToken)
-            .AsTask();
+        return context.CommissionPolicies.FindAsync([id], cancellationToken).AsTask();
     }
 
     public void Remove(CommissionPolicy policy)

@@ -16,7 +16,6 @@ using Domain.Entities;
 using Mapster;
 using MediatR;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using OptionEntity = Domain.Entities.Option;
 using OptionValueEntity = Domain.Entities.OptionValue;
 
@@ -544,13 +543,11 @@ public sealed class UpdateProductCommandHandler(
         }
         productUpdateRepository.Update(product);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         var response = product.Adapt<ProductDetailForManagerResponse>();
         if (response != null)
         {
             response.CompatibleVehicleModelIds = product.CompatibleWith.Select(c => c.CompatibleVehicleModelId).ToList();
         }
-
         return Result<ProductDetailForManagerResponse?>.Success(response);
     }
 

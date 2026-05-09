@@ -6,12 +6,9 @@ using Domain.Entities;
 using Domain.Entities.HR;
 using MediatR;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Application.Features.HR.Commands.CreateEmployee
 {
-
     public class CreateEmployeeCommandHandler(
         IUserCreateRepository userCreateRepository,
         IUserReadRepository userReadRepository,
@@ -20,7 +17,8 @@ namespace Application.Features.HR.Commands.CreateEmployee
     {
         public async Task<Result<int>> Handle(CreateEmployeeCommand request, CancellationToken cancellationToken)
         {
-            var existingUser = await userReadRepository.FindUserByEmailAsync(request.Email, cancellationToken).ConfigureAwait(false);
+            var existingUser = await userReadRepository.FindUserByEmailAsync(request.Email, cancellationToken)
+                .ConfigureAwait(false);
             Guid userId;
             if (existingUser == null)
             {
@@ -34,14 +32,14 @@ namespace Application.Features.HR.Commands.CreateEmployee
                 var (succeeded, errors) = await userCreateRepository.CreateUserAsync(
                     user,
                     "DefaultPass123!",
-                    cancellationToken).ConfigureAwait(false);
+                    cancellationToken)
+                    .ConfigureAwait(false);
                 if (!succeeded)
                 {
                     return Result<int>.Failure($"Không thể tạo người dùng: {string.Join(", ", errors)}");
                 }
                 userId = user.Id;
-            }
-            else
+            } else
             {
                 userId = existingUser.Id;
             }

@@ -2,16 +2,15 @@ using Application.ApiContracts.HR.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.HR;
 using MediatR;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.HR.Queries.GetEmployees
 {
     public class GetEmployeesQueryHandler(IEmployeeReadRepository employeeReadRepository) : IRequestHandler<GetEmployeesQuery, Result<List<EmployeeResponse>>>
     {
-        public async Task<Result<List<EmployeeResponse>>> Handle(GetEmployeesQuery request, CancellationToken cancellationToken)
+        public async Task<Result<List<EmployeeResponse>>> Handle(
+            GetEmployeesQuery request,
+            CancellationToken cancellationToken)
         {
             var employees = await employeeReadRepository.GetAllWithUsersAsync(cancellationToken).ConfigureAwait(false);
             var response = employees.Select(
@@ -34,6 +33,5 @@ namespace Application.Features.HR.Queries.GetEmployees
             return Result<List<EmployeeResponse>>.Success(response);
         }
     }
-
 }
 

@@ -4,7 +4,6 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductCategory;
 using Domain.Primitives;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using ProductCategoryEntity = Domain.Entities.ProductCategory;
 
 namespace Application.Features.ProductCategories.Queries.GetProductCategoriesList;

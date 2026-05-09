@@ -38,7 +38,6 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     table.PrimaryKey("PK_Banner", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "Contact",
                 columns: table => new
@@ -63,7 +62,6 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     table.PrimaryKey("PK_Contact", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "Lead",
                 columns: table => new
@@ -89,7 +87,6 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     table.PrimaryKey("PK_Lead", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "News",
                 columns: table => new
@@ -116,14 +113,6 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     table.PrimaryKey("PK_News", x => x.Id);
                 });
-
-
-
-
-
-
-
-
             migrationBuilder.CreateTable(
                 name: "TechnologyCategories",
                 columns: table => new
@@ -141,7 +130,6 @@ namespace Infrastructure.PostgreSqlMigrations
                 {
                     table.PrimaryKey("PK_TechnologyCategories", x => x.Id);
                 });
-
             migrationBuilder.CreateTable(
                 name: "LeadActivity",
                 columns: table => new
@@ -194,11 +182,6 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
-
-
-
-
             migrationBuilder.CreateTable(
                 name: "Technologies",
                 columns: table => new
@@ -256,11 +239,6 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
-
-
-
-
             migrationBuilder.CreateTable(
                 name: "MaintenanceHistory",
                 columns: table => new
@@ -313,9 +291,6 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
-
-
             migrationBuilder.CreateTable(
                 name: "ProductTechnology",
                 columns: table => new
@@ -375,7 +350,6 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
-
             migrationBuilder.CreateTable(
                 name: "Booking",
                 columns: table => new
@@ -406,11 +380,6 @@ namespace Infrastructure.PostgreSqlMigrations
                         principalTable: "ProductVariant",
                         principalColumn: "Id");
                 });
-
-
-
-
-
             migrationBuilder.CreateIndex(
                 name: "IX_Booking_ProductVariantId",
                 table: "Booking",
@@ -420,15 +389,11 @@ namespace Infrastructure.PostgreSqlMigrations
                 name: "IX_ContactReply_RepliedById",
                 table: "ContactReply",
                 column: "RepliedById");
-
             migrationBuilder.CreateIndex(name: "IX_LeadActivity_LeadId", table: "LeadActivity", column: "LeadId");
             migrationBuilder.CreateIndex(
                 name: "IX_MaintenanceHistory_VehicleId",
                 table: "MaintenanceHistory",
                 column: "VehicleId");
-
-
-
             migrationBuilder.CreateIndex(
                 name: "IX_ProductTechnology_ProductId",
                 table: "ProductTechnology",
@@ -437,8 +402,6 @@ namespace Infrastructure.PostgreSqlMigrations
                 name: "IX_ProductTechnology_TechnologyId",
                 table: "ProductTechnology",
                 column: "TechnologyId");
-
-
             migrationBuilder.CreateIndex(
                 name: "IX_Technologies_CategoryId",
                 table: "Technologies",
@@ -447,8 +410,6 @@ namespace Infrastructure.PostgreSqlMigrations
                 name: "IX_TechnologyImages_TechnologyId",
                 table: "TechnologyImages",
                 column: "TechnologyId");
-
-
             migrationBuilder.CreateIndex(name: "IX_Vehicle_LeadId", table: "Vehicle", column: "LeadId");
             migrationBuilder.CreateIndex(
                 name: "IX_VehicleDocument_VehicleId",
@@ -462,27 +423,17 @@ namespace Infrastructure.PostgreSqlMigrations
             migrationBuilder.DropTable(name: "Banner");
             migrationBuilder.DropTable(name: "Booking");
             migrationBuilder.DropTable(name: "ContactReply");
-
             migrationBuilder.DropTable(name: "LeadActivity");
             migrationBuilder.DropTable(name: "MaintenanceHistory");
-
             migrationBuilder.DropTable(name: "News");
-
             migrationBuilder.DropTable(name: "ProductTechnology");
-
             migrationBuilder.DropTable(name: "TechnologyImages");
-
             migrationBuilder.DropTable(name: "VehicleDocument");
             migrationBuilder.DropTable(name: "Contact");
-
             migrationBuilder.DropTable(name: "Technologies");
-
             migrationBuilder.DropTable(name: "Vehicle");
-
             migrationBuilder.DropTable(name: "TechnologyCategories");
-
             migrationBuilder.DropTable(name: "Lead");
-
         }
     }
 }

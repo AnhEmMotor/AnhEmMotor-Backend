@@ -40,15 +40,14 @@ public sealed class UpdateManyOutputStatusCommandHandler(
                         "StatusId"));
             }
         }
-bool isCompleting = string.Compare(request.StatusId, OrderStatus.Completed) == 0;
-        
+        bool isCompleting = string.Compare(request.StatusId, OrderStatus.Completed) == 0;
         if (isCompleting && outputsList.Count > 0)
         {
             var productDemands = new Dictionary<int, int>();
             foreach (var output in outputsList)
             {
-                if (output.OutputInfos == null) continue;
-                
+                if (output.OutputInfos == null)
+                    continue;
                 foreach (var info in output.OutputInfos)
                 {
                     if (info.ProductVarientId.HasValue && info.Count.HasValue)
@@ -56,22 +55,19 @@ bool isCompleting = string.Compare(request.StatusId, OrderStatus.Completed) == 0
                         if (productDemands.ContainsKey(info.ProductVarientId.Value))
                         {
                             productDemands[info.ProductVarientId.Value] += info.Count.Value;
-                        } 
-                        else
+                        } else
                         {
                             productDemands[info.ProductVarientId.Value] = info.Count.Value;
                         }
                     }
                 }
             }
-            
             foreach (var kvp in productDemands)
             {
                 var variantId = kvp.Key;
                 var totalNeeded = kvp.Value;
                 var currentStock = await readRepository.GetStockQuantityByVariantIdAsync(variantId, cancellationToken)
                     .ConfigureAwait(false);
-                
                 if (currentStock < totalNeeded)
                 {
                     errors.Add(
@@ -81,33 +77,29 @@ bool isCompleting = string.Compare(request.StatusId, OrderStatus.Completed) == 0
                 }
             }
         }
-
         if (errors.Count > 0)
         {
             return errors;
         }
-
         foreach (var output in outputsList)
         {
             if (isCompleting)
             {
                 var result = await updateRepository.HandleInventoryTransactionAsync(output.Id, true, cancellationToken)
                     .ConfigureAwait(false);
-                if (result.IsFailure) return result.Errors!;
-            } 
-            else if (string.Compare(request.StatusId, OrderStatus.Delivering) == 0)
+                if (result.IsFailure)
+                    return result.Errors!;
+            } else if (string.Compare(request.StatusId, OrderStatus.Delivering) == 0)
             {
                 var result = await updateRepository.HandleInventoryTransactionAsync(output.Id, false, cancellationToken)
                     .ConfigureAwait(false);
-                if (result.IsFailure) return result.Errors!;
+                if (result.IsFailure)
+                    return result.Errors!;
             }
-
             output.StatusId = request.StatusId;
             updateRepository.Update(output);
         }
-
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         if (isCompleting)
         {
             foreach (var output in outputsList)
@@ -115,15 +107,14 @@ bool isCompleting = string.Compare(request.StatusId, OrderStatus.Completed) == 0
                 await commissionService.CalculateAndRecordCommissionAsync(output.Id, cancellationToken)
                     .ConfigureAwait(false);
             }
-        } 
-        else if (string.Compare(request.StatusId, OrderStatus.Cancelled) == 0 || string.Compare(request.StatusId, OrderStatus.Refunded) == 0)
+        } else if (string.Compare(request.StatusId, OrderStatus.Cancelled) == 0 ||
+            string.Compare(request.StatusId, OrderStatus.Refunded) == 0)
         {
             foreach (var output in outputsList)
             {
                 await commissionService.VoidCommissionAsync(output.Id, cancellationToken).ConfigureAwait(false);
             }
         }
-
         return outputsList.Adapt<List<OutputItemResponse>>();
     }
 }

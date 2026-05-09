@@ -1,4 +1,5 @@
 using Application.ApiContracts.News.Responses;
+using Domain.Entities;
 using Domain.Primitives;
 using FluentAssertions;
 using Infrastructure.DBContexts;
@@ -179,12 +180,11 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var cat = new Domain.Entities.NewsCategory { Name = "Tech", Slug = "tech" };
+            var cat = new NewsCategory { Name = "Tech", Slug = "tech" };
             db.NewsCategories.Add(cat);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             categoryId = cat.Id;
         }
-
         var payload = new
         {
             title = "SEO News 2",
@@ -195,7 +195,6 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             category_id = categoryId,
             is_published = true
         };
-
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
             _factory.Services,
@@ -211,14 +210,16 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         var response = await _client.PostAsJsonAsync("/api/v1/news", payload).ConfigureAwait(true);
-        response!.StatusCode.Should().Be(HttpStatusCode.OK); // Current controller returns HandleResult which might be OK with Id
-
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var news = await db.News.FirstOrDefaultAsync(n => string.Compare(n.Slug, "seo-news-slug") == 0, TestContext.Current.CancellationToken).ConfigureAwait(true);
+            var news = await db.News
+                .FirstOrDefaultAsync(
+                    n => string.Compare(n.Slug, "seo-news-slug") == 0,
+                    TestContext.Current.CancellationToken)
+                .ConfigureAwait(true);
             news.Should().NotBeNull();
             news!.CategoryId.Should().Be(categoryId);
             news.MetaTitle.Should().Be("SEO Meta Title");
@@ -237,9 +238,7 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             newsId = news.Id;
         }
-
         var payload = new { id = newsId, is_published = true };
-
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
             _factory.Services,
@@ -255,10 +254,12 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
-        var response = await _client.PatchAsJsonAsync($"/api/v1/news/{newsId}/status", payload, TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.PatchAsJsonAsync(
+            $"/api/v1/news/{newsId}/status",
+            payload,
+            TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
-
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
@@ -279,28 +280,18 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var news = new Domain.Entities.News { Title = "News", Slug = "news-auth", Content = "C" };
             db.News.Add(news);
-            
             var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
                 _factory.Services,
                 $"author_{uniqueId}",
                 "Password123!",
-                ["Permissions.News.Create"], // Just to create a user
+                ["Permissions.News.Create"],
                 TestContext.Current.CancellationToken)
                 .ConfigureAwait(true);
             authorId = user.Id;
-                
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             newsId = news.Id;
         }
-
-        var payload = new
-        {
-            id = newsId,
-            title = "Updated Title",
-            author_id = authorId,
-            content = "New content"
-        };
-
+        var payload = new { id = newsId, title = "Updated Title", author_id = authorId, content = "New content" };
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
             _factory.Services,
             $"admin_{uniqueId}",
@@ -315,10 +306,8 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
         var response = await _client.PutAsJsonAsync($"/api/v1/news/{newsId}", payload).ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
-
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
@@ -339,7 +328,6 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             newsId = news.Id;
         }
-
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
             _factory.Services,
@@ -355,14 +343,15 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
-        var response = await _client.DeleteAsync($"/api/v1/news/{newsId}", TestContext.Current.CancellationToken).ConfigureAwait(true);
-        response!.StatusCode.Should().Be(HttpStatusCode.OK); // Soft delete might return OK or NoContext depending on HandleResult
-
+        var response = await _client.DeleteAsync($"/api/v1/news/{newsId}", TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var news = await db.All<Domain.Entities.News>().FirstOrDefaultAsync(n => n.Id == newsId, TestContext.Current.CancellationToken).ConfigureAwait(true);
+            var news = await db.All<Domain.Entities.News>()
+                .FirstOrDefaultAsync(n => n.Id == newsId, TestContext.Current.CancellationToken)
+                .ConfigureAwait(true);
             news!.DeletedAt.Should().NotBeNull();
         }
     }
@@ -374,26 +363,52 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var cat1 = new Domain.Entities.NewsCategory { Name = "Cat 1", Slug = "cat-1" };
-            var cat2 = new Domain.Entities.NewsCategory { Name = "Cat 2", Slug = "cat-2" };
+            var cat1 = new NewsCategory { Name = "Cat 1", Slug = "cat-1" };
+            var cat2 = new NewsCategory { Name = "Cat 2", Slug = "cat-2" };
             db.NewsCategories.AddRange(cat1, cat2);
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
             cat1Id = cat1.Id;
             cat2Id = cat2.Id;
-
-            db.News.AddRange(
-                new Domain.Entities.News { Title = "N1", Slug = "n1", CategoryId = cat1Id, IsPublished = true, Content = "C" },
-                new Domain.Entities.News { Title = "N2", Slug = "n2", CategoryId = cat1Id, IsPublished = true, Content = "C" },
-                new Domain.Entities.News { Title = "N3", Slug = "n3", CategoryId = cat2Id, IsPublished = true, Content = "C" }
-            );
+            db.News
+                .AddRange(
+                    new Domain.Entities.News
+                    {
+                        Title = "N1",
+                        Slug = "n1",
+                        CategoryId = cat1Id,
+                        IsPublished = true,
+                        Content = "C"
+                    },
+                    new Domain.Entities.News
+                    {
+                        Title = "N2",
+                        Slug = "n2",
+                        CategoryId = cat1Id,
+                        IsPublished = true,
+                        Content = "C"
+                    },
+                    new Domain.Entities.News
+                    {
+                        Title = "N3",
+                        Slug = "n3",
+                        CategoryId = cat2Id,
+                        IsPublished = true,
+                        Content = "C"
+                    });
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         }
-
-        var response = await _client.GetAsync($"/api/v1/news?Filters=CategoryId=={cat1Id}", TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var response = await _client.GetAsync(
+            $"/api/v1/news?Filters=CategoryId=={cat1Id}",
+            TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
-
-        var pagedResult = await response!.Content.ReadFromJsonAsync<PagedResult<NewsResponse>>(TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var pagedResult = await response!.Content
+            .ReadFromJsonAsync<PagedResult<NewsResponse>>(TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         pagedResult!.Items.Should().HaveCount(2);
-        pagedResult.Items.All(n => string.Compare(n.Title, "N1") == 0 || string.Compare(n.Title, "N2") == 0).Should().BeTrue();
+        pagedResult.Items
+            .All(n => string.Compare(n.Title, "N1") == 0 || string.Compare(n.Title, "N2") == 0)
+            .Should()
+            .BeTrue();
     }
 }

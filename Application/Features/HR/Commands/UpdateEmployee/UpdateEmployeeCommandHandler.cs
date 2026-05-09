@@ -3,19 +3,18 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.HR;
 using MediatR;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Application.Features.HR.Commands.UpdateEmployee
 {
     public class UpdateEmployeeCommandHandler(
-    IEmployeeReadRepository employeeReadRepository,
-    IEmployeeUpdateRepository employeeUpdateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<UpdateEmployeeCommand, Result<int>>
+        IEmployeeReadRepository employeeReadRepository,
+        IEmployeeUpdateRepository employeeUpdateRepository,
+        IUnitOfWork unitOfWork) : IRequestHandler<UpdateEmployeeCommand, Result<int>>
     {
         public async Task<Result<int>> Handle(UpdateEmployeeCommand request, CancellationToken cancellationToken)
         {
-            var employee = await employeeReadRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
+            var employee = await employeeReadRepository.GetByIdAsync(request.Id, cancellationToken)
+                .ConfigureAwait(false);
             if (employee == null)
             {
                 return Result<int>.Failure("Không tìm thấy hồ sơ nhân sự.");
@@ -32,5 +31,4 @@ namespace Application.Features.HR.Commands.UpdateEmployee
             return Result<int>.Success(employee.Id);
         }
     }
-
 }

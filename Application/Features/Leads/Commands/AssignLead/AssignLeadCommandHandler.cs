@@ -3,8 +3,6 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Lead;
 using MediatR;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Application.Features.Leads.Commands.AssignLead
 {
@@ -24,5 +22,4 @@ namespace Application.Features.Leads.Commands.AssignLead
             return Result<int>.Success(lead.Id);
         }
     }
-
 }

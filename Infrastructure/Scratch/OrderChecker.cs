@@ -16,7 +16,8 @@ public class OrderChecker
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var orders = await context.OutputOrders
             .Select(o => new { o.Id, o.StatusId, o.CustomerName })
-            .ToListAsync(cancellationToken).ConfigureAwait(false);
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
         Console.WriteLine("--- List of Orders in DB ---");
         foreach (var o in orders)
         {

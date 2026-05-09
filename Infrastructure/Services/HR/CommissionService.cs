@@ -27,9 +27,7 @@ public class CommissionService(ApplicationDBContext context) : ICommissionServic
             .FirstOrDefaultAsync(ct);
     }
 
-    public Task<Result> CalculatePendingCommissionAsync(
-        int outputId,
-        CancellationToken cancellationToken = default)
+    public Task<Result> CalculatePendingCommissionAsync(int outputId, CancellationToken cancellationToken = default)
     {
         return InternalCalculateAsync(outputId, CommissionStatus.Pending, cancellationToken);
     }
@@ -40,7 +38,8 @@ public class CommissionService(ApplicationDBContext context) : ICommissionServic
     {
         var existingPending = await context.CommissionRecords
             .Where(r => r.OutputId == outputId && r.Status == CommissionStatus.Pending)
-            .ToListAsync(cancellationToken).ConfigureAwait(false);
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
         if (existingPending.Count > 0)
         {
             foreach (var record in existingPending)
@@ -51,14 +50,16 @@ public class CommissionService(ApplicationDBContext context) : ICommissionServic
             await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return Result.Success();
         }
-        return await InternalCalculateAsync(outputId, CommissionStatus.Confirmed, cancellationToken).ConfigureAwait(false);
+        return await InternalCalculateAsync(outputId, CommissionStatus.Confirmed, cancellationToken)
+            .ConfigureAwait(false);
     }
 
     public async Task<Result> MarkCommissionAsPaidAsync(int outputId, CancellationToken cancellationToken = default)
     {
         var records = await context.CommissionRecords
             .Where(r => r.OutputId == outputId && r.Status == CommissionStatus.Confirmed)
-            .ToListAsync(cancellationToken).ConfigureAwait(false);
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
         if (records.Count == 0)
             return Result.Failure("Không tìm thấy hoa hồng đã xác nhận cho đơn hàng này.");
         foreach (var record in records)
@@ -72,7 +73,10 @@ public class CommissionService(ApplicationDBContext context) : ICommissionServic
 
     public async Task<Result> VoidCommissionAsync(int outputId, CancellationToken cancellationToken = default)
     {
-        var records = await context.CommissionRecords.Where(r => r.OutputId == outputId).ToListAsync(cancellationToken).ConfigureAwait(false);
+        var records = await context.CommissionRecords
+            .Where(r => r.OutputId == outputId)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
         if (records.Count > 0)
         {
             context.CommissionRecords.RemoveRange(records);
@@ -87,13 +91,16 @@ public class CommissionService(ApplicationDBContext context) : ICommissionServic
             .Include(o => o.OutputInfos)
             .ThenInclude(oi => oi.ProductVariant)
             .ThenInclude(pv => pv!.Product)
-            .FirstOrDefaultAsync(o => o.Id == outputId, ct).ConfigureAwait(false);
+            .FirstOrDefaultAsync(o => o.Id == outputId, ct)
+            .ConfigureAwait(false);
         if (output == null)
             return Result.Failure("Đơn hàng không tồn tại.");
         var salespersonId = output.CreatedBy;
         if (salespersonId == null)
             return Result.Failure("Không xác định được nhân viên kinh doanh.");
-        var employeeProfile = await context.EmployeeProfiles.FirstOrDefaultAsync(p => p.UserId == salespersonId, ct).ConfigureAwait(false);
+        var employeeProfile = await context.EmployeeProfiles
+            .FirstOrDefaultAsync(p => p.UserId == salespersonId, ct)
+            .ConfigureAwait(false);
         if (employeeProfile == null)
             return Result.Success();
         decimal totalCommission = 0;
@@ -110,7 +117,8 @@ public class CommissionService(ApplicationDBContext context) : ICommissionServic
                 product.CategoryId,
                 employeeProfile.JobTitle,
                 orderDate,
-                ct).ConfigureAwait(false);
+                ct)
+                .ConfigureAwait(false);
             if (policy == null)
                 continue;
             decimal itemCommission = 0;
@@ -151,7 +159,8 @@ public class CommissionService(ApplicationDBContext context) : ICommissionServic
             {
                 var old = await context.CommissionRecords
                     .Where(r => r.OutputId == output.Id && r.Status == CommissionStatus.Pending)
-                    .ToListAsync(ct).ConfigureAwait(false);
+                    .ToListAsync(ct)
+                    .ConfigureAwait(false);
                 if (old.Count > 0)
                     context.CommissionRecords.RemoveRange(old);
             }

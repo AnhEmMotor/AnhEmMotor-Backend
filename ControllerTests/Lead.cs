@@ -1,16 +1,15 @@
 using Application.ApiContracts.Leads.Responses;
 using Application.Common.Models;
 using Application.Features.Bookings.Commands.CreateBooking;
-using Application.Features.Leads.Commands.UpdateLead;
 using Application.Features.Leads.Commands.AddLeadActivity;
+using Application.Features.Leads.Commands.UpdateLead;
 using Application.Features.Leads.Queries.GetLeads;
+using FluentAssertions;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System;
-using FluentAssertions;
-using Xunit;
 using WebAPI.Controllers.V1;
 
 namespace ControllerTests;
@@ -119,25 +118,21 @@ public class Lead
     [Fact(DisplayName = "LEAD_050 - Không thay đổi điểm với hành động không xác định")]
     public async Task LEAD_050_Add_Unknown_Activity_Should_Not_Change_Score()
     {
-        // Arrange
         var command = new AddLeadActivityCommand(1, "ViewWebsite", "Khách xem website");
         _mediatorMock.Setup(m => m.Send(It.IsAny<AddLeadActivityCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(123); // Activity ID
-
-        // Action
+            .ReturnsAsync(123);
         var result = await _leadController.AddActivityAsync(1, command, CancellationToken.None).ConfigureAwait(true);
-
-        // Assert
         result.Should().BeOfType<OkObjectResult>();
         _mediatorMock.Verify(
-            m => m.Send(It.Is<AddLeadActivityCommand>(c => string.Compare(c.ActivityType, "ViewWebsite") == 0), It.IsAny<CancellationToken>()),
+            m => m.Send(
+                It.Is<AddLeadActivityCommand>(c => string.Compare(c.ActivityType, "ViewWebsite") == 0),
+                It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
     [Fact(DisplayName = "LEAD_038 - Cập nhật địa chỉ chi tiết cho Lead")]
     public async Task LEAD_038_Update_Lead_Address_Returns_Success()
     {
-        // Arrange
         var command = new UpdateLeadCommand
         {
             Id = 1,
@@ -147,48 +142,27 @@ public class Lead
             District = "District B",
             Province = "Province C"
         };
-        _mediatorMock.Setup(m => m.Send(command, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<int>.Success(1));
-
-        // Action
+        _mediatorMock.Setup(m => m.Send(command, It.IsAny<CancellationToken>())).ReturnsAsync(Result<int>.Success(1));
         var result = await _leadController.UpdateLeadAsync(1, command, CancellationToken.None).ConfigureAwait(true);
-
-        // Assert
         result.Should().BeOfType<OkObjectResult>();
     }
 
     [Fact(DisplayName = "LEAD_041 - Chuyển đổi trạng thái Lead trong Pipeline")]
     public async Task LEAD_041_Update_Lead_Status_Returns_Success()
     {
-        // Arrange
-        var command = new UpdateLeadCommand
-        {
-            Id = 1,
-            FullName = "Test",
-            Status = "TestDrive"
-        };
-        _mediatorMock.Setup(m => m.Send(command, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<int>.Success(1));
-
-        // Action
+        var command = new UpdateLeadCommand { Id = 1, FullName = "Test", Status = "TestDrive" };
+        _mediatorMock.Setup(m => m.Send(command, It.IsAny<CancellationToken>())).ReturnsAsync(Result<int>.Success(1));
         var result = await _leadController.UpdateLeadAsync(1, command, CancellationToken.None).ConfigureAwait(true);
-
-        // Assert
         result.Should().BeOfType<OkObjectResult>();
     }
 
     [Fact(DisplayName = "LEAD_050 - Scenario 2 - Hành động lạ không thay đổi điểm")]
     public async Task LEAD_050_Add_Another_Unknown_Activity_Success()
     {
-        // Arrange
         var command = new AddLeadActivityCommand(1, "StrangeAction", "Mô tả lạ");
         _mediatorMock.Setup(m => m.Send(It.IsAny<AddLeadActivityCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(456);
-
-        // Action
         var result = await _leadController.AddActivityAsync(1, command, CancellationToken.None).ConfigureAwait(true);
-
-        // Assert
         result.Should().BeOfType<OkObjectResult>();
     }
 }

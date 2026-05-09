@@ -25,7 +25,6 @@ public class News
     [Fact(DisplayName = "NEWS_014 - Cập nhật nội dung bài viết chuyên sâu")]
     public async Task UpdateNews_ValidRequest_ReturnsOk()
     {
-        // Arrange
         var authorId = Guid.NewGuid();
         var command = new UpdateNewsCommand
         {
@@ -35,19 +34,17 @@ public class News
             CoverImageUrl = "http://image.com/img.png",
             AuthorId = authorId
         };
-
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateNewsCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<Unit>.Success(Unit.Value));
-
-        // Act
-        var result = await _controller.UpdateAsync(1, command, TestContext.Current.CancellationToken).ConfigureAwait(true);
-
-        // Assert
+        var result = await _controller.UpdateAsync(1, command, TestContext.Current.CancellationToken)
+            .ConfigureAwait(true);
         result.Should().NotBeNull();
         result.Should().BeOfType<OkObjectResult>();
-        _mediatorMock.Verify(m => m.Send(It.Is<UpdateNewsCommand>(c => 
-            c.Id == 1 && 
-            string.Compare(c.Content, "Deep dive content") == 0 && 
-            c.AuthorId == authorId), It.IsAny<CancellationToken>()), Times.Once);
+        _mediatorMock.Verify(
+            m => m.Send(
+                It.Is<UpdateNewsCommand>(
+                    c => c.Id == 1 && string.Compare(c.Content, "Deep dive content") == 0 && c.AuthorId == authorId),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
     }
 }

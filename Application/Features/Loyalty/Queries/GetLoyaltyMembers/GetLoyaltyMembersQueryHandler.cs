@@ -3,8 +3,6 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories.Lead;
 using MediatR;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Application.Features.Loyalty.Queries.GetLoyaltyMembers
 {
@@ -14,7 +12,8 @@ namespace Application.Features.Loyalty.Queries.GetLoyaltyMembers
             GetLoyaltyMembersQuery request,
             CancellationToken cancellationToken)
         {
-            var entities = await leadRepository.GetLoyaltyMembersAsync(request.Search, cancellationToken).ConfigureAwait(false);
+            var entities = await leadRepository.GetLoyaltyMembersAsync(request.Search, cancellationToken)
+                .ConfigureAwait(false);
             var members = entities
                 .Select(
                     l => new LoyaltyMemberResponse
@@ -29,5 +28,4 @@ namespace Application.Features.Loyalty.Queries.GetLoyaltyMembers
             return members;
         }
     }
-
 }

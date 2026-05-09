@@ -3,8 +3,6 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories.Banner;
 using MediatR;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Application.Features.Banners.Queries.GetBannersList
 {
@@ -39,5 +37,4 @@ namespace Application.Features.Banners.Queries.GetBannersList
             return Result<List<BannerResponse>>.Success(response);
         }
     }
-
 }

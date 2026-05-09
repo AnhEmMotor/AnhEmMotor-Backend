@@ -2,14 +2,12 @@
 using Domain.Entities;
 using MediatR;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Application.Features.Leads.Commands.AddLeadActivity
 {
     public class AddLeadActivityCommandHandler(
-    ILeadWriteRepository leadWriteRepository,
-    ILeadReadRepository leadReadRepository) : IRequestHandler<AddLeadActivityCommand, int>
+        ILeadWriteRepository leadWriteRepository,
+        ILeadReadRepository leadReadRepository) : IRequestHandler<AddLeadActivityCommand, int>
     {
         public async Task<int> Handle(AddLeadActivityCommand request, CancellationToken cancellationToken)
         {
@@ -31,12 +29,10 @@ namespace Application.Features.Leads.Commands.AddLeadActivity
                     scoreDelta = -10;
                 else
                     scoreDelta = 10;
-            }
-            else if (type.Contains("testdrive") || type.Contains("lái thử"))
+            } else if (type.Contains("testdrive") || type.Contains("lái thử"))
             {
                 scoreDelta = 20;
-            }
-            else if (desc.Contains("trả góp") || desc.Contains("installment"))
+            } else if (desc.Contains("trả góp") || desc.Contains("installment"))
             {
                 scoreDelta = 30;
             }
@@ -50,5 +46,4 @@ namespace Application.Features.Leads.Commands.AddLeadActivity
             return activity.Id;
         }
     }
-
 }

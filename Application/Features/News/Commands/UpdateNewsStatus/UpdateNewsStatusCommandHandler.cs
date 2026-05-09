@@ -17,13 +17,11 @@ public sealed class UpdateNewsStatusCommandHandler(
         {
             return Result<Unit>.Failure("Bài viết không tồn tại.");
         }
-
         news.IsPublished = request.IsPublished;
         if (news.IsPublished && news.PublishedDate == null)
         {
             news.PublishedDate = DateTimeOffset.UtcNow;
         }
-
         newsUpdateRepository.Update(news);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return Result<Unit>.Success(Unit.Value);

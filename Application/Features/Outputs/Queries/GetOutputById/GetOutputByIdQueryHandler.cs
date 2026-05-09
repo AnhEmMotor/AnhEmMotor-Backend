@@ -28,7 +28,7 @@ public sealed class GetOutputByIdQueryHandler(IOutputReadRepository repository, 
             if (ratioSetting != null && int.TryParse(ratioSetting.Value, out var parsedRatio))
             {
                 output.DepositRatio = parsedRatio;
-            } 
+            }
         }
         return output.Adapt<OrderDetailResponse>();
     }

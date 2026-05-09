@@ -71,7 +71,10 @@ public class NewsController(IMediator mediator) : ApiController
     [HttpPut("{id}")]
     [HasPermission("Permissions.News.Update")]
     [SwaggerOperation(Summary = "Cập nhật bài viết")]
-    public async Task<IActionResult> UpdateAsync(int id, [FromBody] UpdateNewsCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateAsync(
+        int id,
+        [FromBody] UpdateNewsCommand command,
+        CancellationToken cancellationToken)
     {
         if (id != command.Id)
             return BadRequest("ID mismatch");
@@ -120,7 +123,10 @@ public class NewsController(IMediator mediator) : ApiController
     [HttpPatch("{id}/status")]
     [HasPermission("Permissions.News.Update")]
     [SwaggerOperation(Summary = "Cập nhật trạng thái hiển thị bài viết")]
-    public async Task<IActionResult> UpdateStatusAsync(int id, [FromBody] UpdateNewsStatusCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateStatusAsync(
+        int id,
+        [FromBody] UpdateNewsStatusCommand command,
+        CancellationToken cancellationToken)
     {
         if (id != command.Id)
             return BadRequest("ID mismatch");

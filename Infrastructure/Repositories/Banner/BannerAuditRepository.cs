@@ -12,9 +12,7 @@ namespace Infrastructure.Repositories.Banner
             context.BannerAuditLogs.Add(log);
         }
 
-        public Task<List<BannerAuditLog>> GetLogsByBannerIdAsync(
-            int bannerId,
-            CancellationToken cancellationToken)
+        public Task<List<BannerAuditLog>> GetLogsByBannerIdAsync(int bannerId, CancellationToken cancellationToken)
         {
             return context.BannerAuditLogs
                 .Where(l => l.BannerId == bannerId)

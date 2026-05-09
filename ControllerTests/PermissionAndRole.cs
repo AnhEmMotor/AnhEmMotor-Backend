@@ -12,8 +12,6 @@ using Application.Features.Permissions.Commands.CreateRole;
 using Application.Features.Permissions.Commands.DeleteMultipleRoles;
 using Application.Features.Permissions.Commands.DeleteRole;
 using Application.Features.Permissions.Commands.UpdateRole;
-using Application.Features.UserManager.Commands.CreateUserByManager;
-using Application.ApiContracts.UserManager.Responses;
 using Application.Features.Permissions.Queries.GetAllPermissions;
 using Application.Features.Permissions.Queries.GetAllRoles;
 using Application.Features.Permissions.Queries.GetMyPermissions;
@@ -459,21 +457,12 @@ public class PermissionAndRole
     [Fact(DisplayName = "PERM_039 - Controller - Gán quyền mới cho vai trò (Role)")]
     public async Task UpdateRole_NewPermission_ReturnsOk()
     {
-        // Arrange
         var roleId = Guid.NewGuid();
-        var request = new UpdateRoleCommand 
-        { 
-            RoleId = roleId, 
-            Permissions = [PermissionsList.News.Create] 
-        };
+        var request = new UpdateRoleCommand { RoleId = roleId, Permissions = [PermissionsList.News.Create] };
         var expectedResponse = new PermissionRoleUpdateResponse { Message = "Role updated successfully" };
         _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateRoleCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PermissionRoleUpdateResponse>.Success(expectedResponse));
-
-        // Act
         var result = await _controller.UpdateRoleAsync(roleId, request, CancellationToken.None).ConfigureAwait(true);
-
-        // Assert
         result.Should().BeOfType<OkObjectResult>();
     }
 }

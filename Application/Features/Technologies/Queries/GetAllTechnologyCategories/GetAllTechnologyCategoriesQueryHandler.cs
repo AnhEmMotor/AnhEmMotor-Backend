@@ -13,7 +13,10 @@ public sealed class GetAllTechnologyCategoriesQueryHandler(ITechnologyCategoryRe
         GetAllTechnologyCategoriesQuery request,
         CancellationToken cancellationToken)
     {
-        var categories = await categoryRepository.GetQueryable().OrderBy(c => c.Name).ToListAsync(cancellationToken).ConfigureAwait(false);
+        var categories = await categoryRepository.GetQueryable()
+            .OrderBy(c => c.Name)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
         return categories.Adapt<List<TechnologyCategoryResponse>>();
     }
 }

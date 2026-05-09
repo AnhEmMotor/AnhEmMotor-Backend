@@ -14,6 +14,7 @@ public class BannerResponse
     public string? CtaText { get; init; }
 
     public string? Placement { get; init; }
+
     public string? Position { get; init; }
 
     public DateTimeOffset? StartDate { get; init; }
@@ -29,5 +30,6 @@ public class BannerResponse
     public int ViewCount { get; init; }
 
     public double CTR { get; init; }
+
     public int DisplayOrder { get; init; }
 }

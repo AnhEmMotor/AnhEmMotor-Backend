@@ -1,5 +1,4 @@
 using Application.Common.Models;
-using Application.Interfaces.Repositories.Contact;
 using Domain.Entities;
 using MediatR;
 

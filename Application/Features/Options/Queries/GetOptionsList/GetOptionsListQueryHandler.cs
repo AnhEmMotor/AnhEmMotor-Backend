@@ -1,9 +1,8 @@
 using Application.ApiContracts.Option.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.Option;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Mapster;
+using MediatR;
 
 namespace Application.Features.Options.Queries.GetOptionsList;
 

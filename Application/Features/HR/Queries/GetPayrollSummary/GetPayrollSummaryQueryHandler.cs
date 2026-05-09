@@ -4,10 +4,7 @@ using Application.Interfaces;
 using Domain.Entities.HR;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.HR.Queries.GetPayrollSummary;
 
@@ -17,13 +14,17 @@ public sealed class GetPayrollSummaryQueryHandler(IApplicationDBContext context)
         GetPayrollSummaryQuery request,
         CancellationToken cancellationToken)
     {
-        var employees = await context.EmployeeProfiles.Include(e => e.User).ToListAsync(cancellationToken).ConfigureAwait(false);
+        var employees = await context.EmployeeProfiles
+            .Include(e => e.User)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
         var result = new List<PayrollResponse>();
         foreach (var emp in employees)
         {
             var commissions = await context.CommissionRecords
                 .Where(r => r.EmployeeProfileId == emp.Id)
-                .ToListAsync(cancellationToken).ConfigureAwait(false);
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
             result.Add(
                 new PayrollResponse
                 {

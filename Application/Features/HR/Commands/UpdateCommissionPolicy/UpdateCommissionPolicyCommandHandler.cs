@@ -3,8 +3,6 @@ using Application.Interfaces;
 using Domain.Entities.HR;
 using MediatR;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Text.Json;
 
 namespace Application.Features.HR.Commands.UpdateCommissionPolicy
@@ -13,7 +11,9 @@ namespace Application.Features.HR.Commands.UpdateCommissionPolicy
     {
         public async Task<Result> Handle(UpdateCommissionPolicyCommand request, CancellationToken cancellationToken)
         {
-            var policy = await context.CommissionPolicies.FindAsync([request.Id], cancellationToken).ConfigureAwait(false);
+            var policy = await context.CommissionPolicies
+                .FindAsync([request.Id], cancellationToken)
+                .ConfigureAwait(false);
             if (policy == null)
                 return Result.Failure("Không tìm thấy chính sách.");
             var oldSnapshot = JsonSerializer.Serialize(policy);
@@ -45,5 +45,4 @@ namespace Application.Features.HR.Commands.UpdateCommissionPolicy
             return Result.Success();
         }
     }
-
 }

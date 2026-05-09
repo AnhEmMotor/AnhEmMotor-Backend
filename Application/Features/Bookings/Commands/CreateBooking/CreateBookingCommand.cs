@@ -1,12 +1,7 @@
 using Application.Common.Models;
-using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.Booking;
-using Application.Interfaces.Repositories.Lead;
-using Application.Interfaces.Services;
-using Domain.Entities;
+using Domain.Constants.Booking;
 using MediatR;
 using System;
-using Domain.Constants.Booking;
 
 namespace Application.Features.Bookings.Commands.CreateBooking;
 

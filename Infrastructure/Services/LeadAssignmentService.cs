@@ -23,7 +23,8 @@ public class LeadAssignmentService(IUserReadRepository userReadRepository, Appli
                     LeadCount = context.Leads.Count(l => l.AssignedToId == u.Id && l.Status != "Closed")
                 })
             .OrderBy(x => x.LeadCount)
-            .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+            .FirstOrDefaultAsync(cancellationToken)
+            .ConfigureAwait(false);
         if (salesWithCounts != null)
         {
             lead.AssignedToId = salesWithCounts.User.Id;

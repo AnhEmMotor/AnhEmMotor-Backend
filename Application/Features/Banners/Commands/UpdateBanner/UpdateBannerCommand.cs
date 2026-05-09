@@ -31,7 +31,9 @@ public sealed record UpdateBannerCommand : IRequest<Result<Unit>>
     public bool IsActive { get; init; } = true;
 
     public string? Position { get; init; }
+
     public int Priority { get; init; }
+
     [JsonPropertyName("display_order")]
     public int DisplayOrder { get; init; }
 }

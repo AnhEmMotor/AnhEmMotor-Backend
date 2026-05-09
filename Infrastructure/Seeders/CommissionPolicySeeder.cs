@@ -10,11 +10,16 @@ public static class CommissionPolicySeeder
     public static async Task SeedAsync(ApplicationDBContext context, CancellationToken cancellationToken)
     {
         var categories = await context.ProductCategories.ToListAsync(cancellationToken).ConfigureAwait(false);
-        var motorcycleCategory = categories.FirstOrDefault(c => string.Equals(c.Name, "Xe máy", StringComparison.OrdinalIgnoreCase));
-        var accessoryCategory = categories.FirstOrDefault(c => string.Equals(c.Name, "Phụ kiện", StringComparison.OrdinalIgnoreCase));
-        var partsCategory = categories.FirstOrDefault(c => string.Equals(c.Name, "Phụ tùng", StringComparison.OrdinalIgnoreCase));
+        var motorcycleCategory = categories.FirstOrDefault(
+            c => string.Equals(c.Name, "Xe máy", StringComparison.OrdinalIgnoreCase));
+        var accessoryCategory = categories.FirstOrDefault(
+            c => string.Equals(c.Name, "Phụ kiện", StringComparison.OrdinalIgnoreCase));
+        var partsCategory = categories.FirstOrDefault(
+            c => string.Equals(c.Name, "Phụ tùng", StringComparison.OrdinalIgnoreCase));
         if (motorcycleCategory != null &&
-            !await context.CommissionPolicies.AnyAsync(p => p.CategoryId == motorcycleCategory.Id, cancellationToken).ConfigureAwait(false))
+            !await context.CommissionPolicies
+                .AnyAsync(p => p.CategoryId == motorcycleCategory.Id, cancellationToken)
+                .ConfigureAwait(false))
         {
             await context.CommissionPolicies
                 .AddAsync(
@@ -28,10 +33,13 @@ public static class CommissionPolicySeeder
                         Unit = "xe",
                         Notes = "Mức thưởng mặc định cho tất cả các dòng xe máy."
                     },
-                    cancellationToken).ConfigureAwait(false);
+                    cancellationToken)
+                .ConfigureAwait(false);
         }
         if (accessoryCategory != null &&
-            !await context.CommissionPolicies.AnyAsync(p => p.CategoryId == accessoryCategory.Id, cancellationToken).ConfigureAwait(false))
+            !await context.CommissionPolicies
+                .AnyAsync(p => p.CategoryId == accessoryCategory.Id, cancellationToken)
+                .ConfigureAwait(false))
         {
             await context.CommissionPolicies
                 .AddAsync(
@@ -45,10 +53,13 @@ public static class CommissionPolicySeeder
                         Unit = "cái",
                         Notes = "Tính 5% trên tổng doanh thu đơn hàng phụ kiện."
                     },
-                    cancellationToken).ConfigureAwait(false);
+                    cancellationToken)
+                .ConfigureAwait(false);
         }
         if (partsCategory != null &&
-            !await context.CommissionPolicies.AnyAsync(p => p.CategoryId == partsCategory.Id, cancellationToken).ConfigureAwait(false))
+            !await context.CommissionPolicies
+                .AnyAsync(p => p.CategoryId == partsCategory.Id, cancellationToken)
+                .ConfigureAwait(false))
         {
             await context.CommissionPolicies
                 .AddAsync(
@@ -62,7 +73,8 @@ public static class CommissionPolicySeeder
                         Unit = "cái",
                         Notes = "Tính 3% trên tổng doanh thu đơn hàng phụ tùng."
                     },
-                    cancellationToken).ConfigureAwait(false);
+                    cancellationToken)
+                .ConfigureAwait(false);
         }
         await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }

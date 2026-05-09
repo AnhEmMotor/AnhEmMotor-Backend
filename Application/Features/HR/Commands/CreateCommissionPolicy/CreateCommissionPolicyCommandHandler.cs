@@ -4,33 +4,33 @@ using Domain.Entities.HR;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Text.Json;
 
 namespace Application.Features.HR.Commands.CreateCommissionPolicy
 {
     public sealed class CreateCommissionPolicyCommandHandler(IApplicationDBContext context) : IRequestHandler<CreateCommissionPolicyCommand, Result<int>>
     {
-        public async Task<Result<int>> Handle(CreateCommissionPolicyCommand request, CancellationToken cancellationToken)
+        public async Task<Result<int>> Handle(
+            CreateCommissionPolicyCommand request,
+            CancellationToken cancellationToken)
         {
-            // Kiểm tra trùng lặp/chồng lấn thời gian
-            // Rule: Không cho phép tạo định mức mới nếu đã có định mức khác cho cùng sản phẩm/nhóm đang hiệu lực trong vòng 7 ngày
             var startDate = request.EffectiveDate.AddDays(-7);
             var endDate = request.EffectiveDate.AddDays(7);
             var existingPolicy = await context.CommissionPolicies
-                .Where(p => p.IsActive &&
-                            p.ProductId == request.ProductId &&
-                            p.CategoryId == request.CategoryId &&
-                            p.EffectiveDate > startDate &&
-                            p.EffectiveDate < endDate)
-                .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
-
+                .Where(
+                    p => p.IsActive &&
+                        p.ProductId == request.ProductId &&
+                        p.CategoryId == request.CategoryId &&
+                        p.EffectiveDate > startDate &&
+                        p.EffectiveDate < endDate)
+                .FirstOrDefaultAsync(cancellationToken)
+                .ConfigureAwait(false);
             if (existingPolicy != null)
             {
-                return Result<int>.Failure(Error.BadRequest("Định mức cho sản phẩm/nhóm này đã tồn tại trong khoảng thời gian hiệu lực (Yêu cầu cách nhau ít nhất 7 ngày)."));
+                return Result<int>.Failure(
+                    Error.BadRequest(
+                        "Định mức cho sản phẩm/nhóm này đã tồn tại trong khoảng thời gian hiệu lực (Yêu cầu cách nhau ít nhất 7 ngày)."));
             }
-
             var policy = new CommissionPolicy
             {
                 Name = request.Name,
@@ -53,7 +53,8 @@ namespace Application.Features.HR.Commands.CreateCommissionPolicy
                 ChangedByName = request.CurrentUserName,
                 ChangedByUserId = request.CurrentUserId,
                 NewValueSnapshot = JsonSerializer.Serialize(policy),
-                Description = $"Tạo định mức mới: {policy.Name} ({policy.Value}{(string.Compare(policy.Type, "Percentage") == 0 ? "%" : "đ")})",
+                Description =
+                    $"Tạo định mức mới: {policy.Name} ({policy.Value}{(string.Compare(policy.Type, "Percentage") == 0 ? "%" : "đ")})",
                 ChangedAt = DateTime.UtcNow
             };
             context.CommissionPolicyAuditLogs.Add(auditLog);

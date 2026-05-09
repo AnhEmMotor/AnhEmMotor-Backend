@@ -3,8 +3,6 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories.Vehicle;
 using MediatR;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Application.Features.Vehicles.Queries.GetVehicles
 {
@@ -14,7 +12,8 @@ namespace Application.Features.Vehicles.Queries.GetVehicles
             GetVehiclesQuery request,
             CancellationToken cancellationToken)
         {
-            var entities = await vehicleRepository.GetVehiclesAsync(request.Search, cancellationToken).ConfigureAwait(false);
+            var entities = await vehicleRepository.GetVehiclesAsync(request.Search, cancellationToken)
+                .ConfigureAwait(false);
             var vehicles = entities.Select(
                 v => new VehicleResponse
                 {
@@ -30,5 +29,4 @@ namespace Application.Features.Vehicles.Queries.GetVehicles
             return vehicles;
         }
     }
-
 }

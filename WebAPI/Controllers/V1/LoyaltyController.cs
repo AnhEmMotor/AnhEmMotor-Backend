@@ -27,7 +27,8 @@ public class LoyaltyController(IMediator mediator) : ApiController
     [SwaggerOperation(Summary = "Lấy danh sách hội viên và điểm thưởng")]
     public async Task<IActionResult> GetMembersAsync([FromQuery] string? search, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetLoyaltyMembersQuery { Search = search }, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(new GetLoyaltyMembersQuery { Search = search }, cancellationToken)
+            .ConfigureAwait(true);
         return HandleResult(result);
     }
 }

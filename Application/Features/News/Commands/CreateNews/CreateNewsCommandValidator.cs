@@ -7,16 +7,12 @@ public sealed class CreateNewsCommandValidator : AbstractValidator<CreateNewsCom
     public CreateNewsCommandValidator()
     {
         RuleFor(x => x.Title)
-            .NotEmpty().WithMessage("Tiêu đề không được để trống.")
-            .MaximumLength(255).WithMessage("Tiêu đề không được vượt quá 255 ký tự.");
-
-        RuleFor(x => x.MetaTitle)
-            .MaximumLength(100).WithMessage("Tiêu đề SEO không được vượt quá 100 ký tự.");
-
-        RuleFor(x => x.MetaDescription)
-            .MaximumLength(255).WithMessage("Mô tả SEO không được vượt quá 255 ký tự.");
-            
-        RuleFor(x => x.Slug)
-            .MaximumLength(255).WithMessage("Slug không được vượt quá 255 ký tự.");
+            .NotEmpty()
+            .WithMessage("Tiêu đề không được để trống.")
+            .MaximumLength(255)
+            .WithMessage("Tiêu đề không được vượt quá 255 ký tự.");
+        RuleFor(x => x.MetaTitle).MaximumLength(100).WithMessage("Tiêu đề SEO không được vượt quá 100 ký tự.");
+        RuleFor(x => x.MetaDescription).MaximumLength(255).WithMessage("Mô tả SEO không được vượt quá 255 ký tự.");
+        RuleFor(x => x.Slug).MaximumLength(255).WithMessage("Slug không được vượt quá 255 ký tự.");
     }
 }

@@ -4,8 +4,6 @@ using Application.Interfaces.Repositories.Product;
 using Mapster;
 using MediatR;
 using System.Net;
-using System.Reflection;
-using System.Text.Json;
 
 namespace Application.Features.Products.Queries.GetProductStoreDetailBySlug;
 

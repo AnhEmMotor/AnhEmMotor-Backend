@@ -36,9 +36,7 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         mapper.Property<Product>(p => p.StdEce).CanFilter();
         mapper.Property<Product>(p => p.StdSnell).CanFilter();
         mapper.Property<Product>(p => p.StdJis).CanFilter();
-        mapper.Property<Product>(p => p.StdDot)
-            .CanFilter()
-            .HasName("SafetyStandard");
+        mapper.Property<Product>(p => p.StdDot).CanFilter().HasName("SafetyStandard");
         mapper.Property<News>(p => p.Id).CanSort().CanFilter();
         mapper.Property<News>(p => p.Title).CanSort().CanFilter();
         mapper.Property<News>(p => p.CategoryId).CanFilter();
@@ -87,7 +85,6 @@ public class CustomSieveProcessor(IOptions<SieveOptions> options) : SieveProcess
         return mapper;
     }
 
-    // Custom Sieve Filter for SafetyStandard
     public IQueryable<Product> SafetyStandard(IQueryable<Product> source, string op, string[] values)
     {
         var val = values[0].ToLower();

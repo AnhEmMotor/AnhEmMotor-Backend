@@ -1,17 +1,12 @@
 using Application.Features.HR.Commands.CreateCommissionPolicy;
-using Application.Features.HR.Commands.UpdateCommissionPolicy;
 using Application.Features.HR.Commands.DeleteCommissionPolicy;
+using Application.Features.HR.Commands.UpdateCommissionPolicy;
 using Application.Features.HR.Queries.GetCommissionPolicies;
 using Application.Features.HR.Queries.GetCommissionPolicyAuditLogs;
 using Asp.Versioning;
 using Domain.Entities.HR;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-
 using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1;
@@ -81,7 +76,8 @@ public class CommissionPolicyController(ISender mediator) : ApiController
         int id,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetCommissionPolicyAuditLogsQuery(id), cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(new GetCommissionPolicyAuditLogsQuery(id), cancellationToken)
+            .ConfigureAwait(true);
         return Ok(result);
     }
 
@@ -91,9 +87,7 @@ public class CommissionPolicyController(ISender mediator) : ApiController
     /// <param name="id">The policy ID.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeletePolicyAsync(
-        int id, 
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> DeletePolicyAsync(int id, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new DeleteCommissionPolicyCommand(id), cancellationToken).ConfigureAwait(true);
         if (!result.IsSuccess)

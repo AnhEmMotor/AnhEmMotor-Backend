@@ -25,9 +25,14 @@ public class TechnologiesController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A list of technologies.</returns>
     [HttpGet]
-    public async Task<IActionResult> GetAllAsync([FromQuery] int? category_id, [FromQuery] int? brand_id, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAllAsync(
+        [FromQuery] int? category_id,
+        [FromQuery] int? brand_id,
+        CancellationToken cancellationToken)
     {
-        return HandleResult(await mediator.Send(new GetAllTechnologiesQuery(category_id, brand_id), cancellationToken).ConfigureAwait(true));
+        return HandleResult(
+            await mediator.Send(new GetAllTechnologiesQuery(category_id, brand_id), cancellationToken)
+                .ConfigureAwait(true));
     }
 
     /// <summary>
@@ -38,7 +43,8 @@ public class TechnologiesController(IMediator mediator) : ApiController
     [HttpGet("categories")]
     public async Task<IActionResult> GetCategoriesAsync(CancellationToken cancellationToken)
     {
-        return HandleResult(await mediator.Send(new GetAllTechnologyCategoriesQuery(), cancellationToken).ConfigureAwait(true));
+        return HandleResult(
+            await mediator.Send(new GetAllTechnologyCategoriesQuery(), cancellationToken).ConfigureAwait(true));
     }
 
     /// <summary>
@@ -48,7 +54,9 @@ public class TechnologiesController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The result of the creation.</returns>
     [HttpPost]
-    public async Task<IActionResult> CreateAsync([FromBody] CreateTechnologyCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateAsync(
+        [FromBody] CreateTechnologyCommand command,
+        CancellationToken cancellationToken)
     {
         return HandleResult(await mediator.Send(command, cancellationToken).ConfigureAwait(true));
     }
@@ -60,7 +68,9 @@ public class TechnologiesController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The result of the creation.</returns>
     [HttpPost("categories")]
-    public async Task<IActionResult> CreateCategoryAsync([FromBody] CreateTechnologyCategoryCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateCategoryAsync(
+        [FromBody] CreateTechnologyCategoryCommand command,
+        CancellationToken cancellationToken)
     {
         return HandleResult(await mediator.Send(command, cancellationToken).ConfigureAwait(true));
     }

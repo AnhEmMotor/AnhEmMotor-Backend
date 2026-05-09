@@ -399,39 +399,25 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
     public async Task GetOrderStatusCounts_AllStatuses()
     {
         await AuthenticateAsync(CancellationToken.None).ConfigureAwait(true);
-
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-
         await WipeStatisticsDataAsync(db, CancellationToken.None).ConfigureAwait(true);
         await SeedPrerequisitesAsync(db, CancellationToken.None).ConfigureAwait(true);
-
         for (int i = 0; i < 3; i++)
             db.OutputOrders.Add(new OutputEntity { StatusId = OrderStatus.Pending, CreatedAt = DateTime.UtcNow });
-
         for (int i = 0; i < 10; i++)
             db.OutputOrders.Add(new OutputEntity { StatusId = OrderStatus.Completed, CreatedAt = DateTime.UtcNow });
-
         db.OutputOrders.Add(new OutputEntity { StatusId = OrderStatus.Cancelled, CreatedAt = DateTime.UtcNow });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
-
         var response = await _client.GetAsync("/api/v1/Statistics/order-status-counts", CancellationToken.None)
             .ConfigureAwait(true);
-
         var content = await response!.Content
             .ReadFromJsonAsync<List<OrderStatusCountResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-
         content.Should().NotBeNull();
-
-        content!.First(x => string.Compare(x.StatusName, OrderStatus.Pending) == 0)
-            .OrderCount.Should().Be(3);
-
-        content!.First(x => string.Compare(x.StatusName, OrderStatus.Completed) == 0)
-            .OrderCount.Should().Be(10);
-
-        content!.First(x => string.Compare(x.StatusName, OrderStatus.Cancelled) == 0)
-            .OrderCount.Should().Be(1);
+        content!.First(x => string.Compare(x.StatusName, OrderStatus.Pending) == 0).OrderCount.Should().Be(3);
+        content!.First(x => string.Compare(x.StatusName, OrderStatus.Completed) == 0).OrderCount.Should().Be(10);
+        content!.First(x => string.Compare(x.StatusName, OrderStatus.Cancelled) == 0).OrderCount.Should().Be(1);
     }
 
     [Fact(DisplayName = "STAT_031 - Báo cáo sản phẩm (Multi Variants)")]
@@ -961,7 +947,9 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var u1 = new ApplicationUser
         {
-            UserName = $"u1_{uniqueId}", Email = $"u1_{uniqueId}@test.com", CreatedAt =
+            UserName = $"u1_{uniqueId}",
+            Email = $"u1_{uniqueId}@test.com",
+            CreatedAt =
                 new DateTimeOffset(
                     DateTime.UtcNow.AddMonths(-1).Year,
                     DateTime.UtcNow.AddMonths(-1).Month,
@@ -1030,7 +1018,9 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
     public async Task GetDashboardStats_OverstockCount_ReturnsCorrectValue()
     {
         await AuthenticateAsync(CancellationToken.None).ConfigureAwait(true);
-        var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", TestContext.Current.CancellationToken)
+        var response = await _client.GetAsync(
+            "/api/v1/Statistics/dashboard-stats",
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var content = await response!.Content
             .ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None)
@@ -1054,7 +1044,9 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
     public async Task GetDashboardStats_TodayActivities_ReturnsData()
     {
         await AuthenticateAsync(CancellationToken.None).ConfigureAwait(true);
-        var response = await _client.GetAsync("/api/v1/Statistics/dashboard-stats", TestContext.Current.CancellationToken)
+        var response = await _client.GetAsync(
+            "/api/v1/Statistics/dashboard-stats",
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var content = await response!.Content
             .ReadFromJsonAsync<DashboardStatsResponse>(CancellationToken.None)

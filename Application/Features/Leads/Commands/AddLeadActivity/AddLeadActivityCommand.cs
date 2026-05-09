@@ -1,5 +1,3 @@
-using Application.Interfaces.Repositories.Lead;
-using Domain.Entities;
 using MediatR;
 
 namespace Application.Features.Leads.Commands.AddLeadActivity;

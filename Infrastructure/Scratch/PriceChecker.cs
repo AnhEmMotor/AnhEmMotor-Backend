@@ -14,7 +14,8 @@ public class PriceChecker
         var variants = await context.ProductVariants
             .Select(v => new { v.Id, v.Price, Name = v.Product!.Name })
             .Take(10)
-            .ToListAsync(cancellationToken).ConfigureAwait(false);
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
         foreach (var v in variants)
         {
             Console.WriteLine($"Product: {v.Name}, Price: {v.Price}");

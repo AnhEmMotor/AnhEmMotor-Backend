@@ -19,7 +19,8 @@ public class CreateOptionValueCommandHandler(
         int targetOptionId = request.OptionId;
         if (targetOptionId <= 0)
         {
-            var options = await optionReadRepository.GetByNamesAsync(["VehicleType", "Loại xe"], cancellationToken).ConfigureAwait(false);
+            var options = await optionReadRepository.GetByNamesAsync(["VehicleType", "Loại xe"], cancellationToken)
+                .ConfigureAwait(false);
             var vehicleTypeOption = options.FirstOrDefault();
             if (vehicleTypeOption == null)
             {

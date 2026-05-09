@@ -1,5 +1,4 @@
 using Application.Interfaces.Repositories.Vehicle;
-using Domain.Entities;
 using Infrastructure.DBContexts;
 
 namespace Infrastructure.Repositories.Vehicle;

@@ -29,10 +29,16 @@ namespace WebAPI.Controllers.V1
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A paginated list of vehicle types.</returns>
         [HttpGet]
-        public async Task<ActionResult<PagedResult<VehicleTypeResponse>>> GetListAsync([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
+        public async Task<ActionResult<PagedResult<VehicleTypeResponse>>> GetListAsync(
+            [FromQuery] SieveModel sieveModel,
+            CancellationToken cancellationToken)
         {
             var query = repository.GetQueryable();
-            var result = await paginator.ApplyAsync<VehicleType, VehicleTypeResponse>(query, sieveModel, cancellationToken: cancellationToken).ConfigureAwait(true);
+            var result = await paginator.ApplyAsync<VehicleType, VehicleTypeResponse>(
+                query,
+                sieveModel,
+                cancellationToken: cancellationToken)
+                .ConfigureAwait(true);
             return Ok(result);
         }
 
@@ -68,7 +74,9 @@ namespace WebAPI.Controllers.V1
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A status result.</returns>
         [HttpPost]
-        public async Task<ActionResult> CreateAsync([FromBody] VehicleType vehicleType, CancellationToken cancellationToken)
+        public async Task<ActionResult> CreateAsync(
+            [FromBody] VehicleType vehicleType,
+            CancellationToken cancellationToken)
         {
             repository.Add(vehicleType);
             await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(true);
@@ -83,7 +91,10 @@ namespace WebAPI.Controllers.V1
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A status result.</returns>
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateAsync(int id, [FromBody] VehicleType vehicleType, CancellationToken cancellationToken)
+        public async Task<ActionResult> UpdateAsync(
+            int id,
+            [FromBody] VehicleType vehicleType,
+            CancellationToken cancellationToken)
         {
             if (id != vehicleType.Id)
                 return BadRequest();

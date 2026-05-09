@@ -3,15 +3,10 @@ using Application.Features.HR.Commands.CreateEmployee;
 using Application.Features.HR.Commands.UpdateEmployee;
 using Application.Features.HR.Queries.GetEmployees;
 using Asp.Versioning;
-using Domain.Constants.Permission;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using WebAPI.Controllers.Base;
 using static Domain.Constants.Permission.PermissionsList;
 
@@ -39,7 +34,6 @@ public class EmployeeController(IMediator mediator) : ApiController
         var result = await mediator.Send(new GetEmployeesQuery(), cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
-
 
     /// <summary>
     /// Creates a new employee profile.

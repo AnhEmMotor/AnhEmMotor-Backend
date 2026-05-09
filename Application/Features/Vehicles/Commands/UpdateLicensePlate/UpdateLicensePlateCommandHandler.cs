@@ -21,16 +21,13 @@ public sealed class UpdateLicensePlateCommandHandler(
         var vehicle = await readRepository.GetQuery(DataFetchMode.ActiveOnly)
             .FirstOrDefaultAsync(v => v.Id == request.Id, cancellationToken)
             .ConfigureAwait(false);
-
         if (vehicle == null)
         {
             return Result<VehicleResponse?>.Failure(Error.NotFound($"Vehicle with ID {request.Id} not found."));
         }
-
         vehicle.LicensePlate = request.LicensePlate.Trim();
         updateRepository.Update(vehicle);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         return vehicle.Adapt<VehicleResponse>();
     }
 }

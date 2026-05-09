@@ -1,4 +1,5 @@
 using Application.Features.UserManager.Commands.ChangePasswordByManager;
+using Application.Features.UserManager.Commands.CreateUserByManager;
 using Application.Features.UserManager.Commands.UpdateUser;
 using Domain.Constants;
 using FluentAssertions;
@@ -86,17 +87,11 @@ public class UserManager
         ChangePasswordByManagerCommandValidator.IsStrongPassword("Pass123").Should().BeFalse();
         ChangePasswordByManagerCommandValidator.IsStrongPassword("P@1").Should().BeFalse();
     }
+
     [Fact(DisplayName = "USER_074 - Kiểm tra logic Trim dữ liệu đầu vào")]
     public void CreateUserCommand_TrimsUsernameAndEmail()
     {
-        // Arrange
-        var command = new Application.Features.UserManager.Commands.CreateUserByManager.CreateUserByManagerCommand
-        {
-            Username = "  admin1  ",
-            Email = " user@test.com  "
-        };
-
-        // Assert
+        var command = new CreateUserByManagerCommand { Username = "  admin1  ", Email = " user@test.com  " };
         command.Username.Should().Be("admin1");
         command.Email.Should().Be("user@test.com");
     }
@@ -104,34 +99,23 @@ public class UserManager
     [Fact(DisplayName = "USER_075 - Tuyệt đối không Trim mật khẩu")]
     public void CreateUserCommand_DoesNotTrimPassword()
     {
-        // Arrange
         var password = " pass 123 ";
-        var command = new Application.Features.UserManager.Commands.CreateUserByManager.CreateUserByManagerCommand
-        {
-            Password = password
-        };
-
-        // Assert
+        var command = new CreateUserByManagerCommand { Password = password };
         command.Password.Should().Be(password);
     }
 
     [Fact(DisplayName = "USER_079 - Kiểm tra độ mạnh của mật khẩu (Validation)")]
     public void CreateUserCommandValidator_ShouldFail_WhenPasswordTooShort()
     {
-        // Arrange
-        var validator = new Application.Features.UserManager.Commands.CreateUserByManager.CreateUserByManagerCommandValidator();
-        var command = new Application.Features.UserManager.Commands.CreateUserByManager.CreateUserByManagerCommand
+        var validator = new CreateUserByManagerCommandValidator();
+        var command = new CreateUserByManagerCommand
         {
             Username = "admin1",
             Email = "user@test.com",
-            Password = "123", // Too short
+            Password = "123",
             RoleNames = ["Staff"]
         };
-
-        // Act
         var result = validator.Validate(command);
-
-        // Assert
         result.IsValid.Should().BeFalse();
         result.Errors.Should().Contain(e => string.Compare(e.PropertyName, "Password") == 0);
     }

@@ -1,6 +1,4 @@
 using Application.Common.Models;
-using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.ProductCategory;
 using MediatR;
 using System.Text.Json.Serialization;
 

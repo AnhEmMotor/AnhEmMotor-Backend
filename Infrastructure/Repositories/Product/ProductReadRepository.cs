@@ -244,28 +244,25 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
                         })
                     .ToList();
                 groupedOptionFilters = [.. groups.Select(g => new FilterGroup { Ids = g.Ids, Names = g.Names })];
-
                 var variantSubquery = context.ProductVariants.Where(v => v.DeletedAt == null);
-
                 if (minPrice.HasValue || maxPrice.HasValue)
                 {
                     variantSubquery = variantSubquery.Where(
                         v => (!minPrice.HasValue || v.Price >= minPrice.Value) &&
                             (!maxPrice.HasValue || v.Price <= maxPrice.Value));
                 }
-
                 foreach (var group in groups)
                 {
                     var ids = group.Ids;
                     var names = group.Names;
-
-                    // Phải dùng ToLower() để khớp với names đã được chuẩn hóa
                     variantSubquery = variantSubquery.Where(
-                        v => v.VariantOptionValues.Any(vov => vov.OptionValueId != null && ids.Contains(vov.OptionValueId.Value)) ||
-                            (v.ColorName != null && names.Any(n => v.ColorName.Contains(n, StringComparison.CurrentCultureIgnoreCase))) ||
-                            (v.VersionName != null && names.Any(n => v.VersionName.Contains(n, StringComparison.CurrentCultureIgnoreCase))));
+                        v => v.VariantOptionValues
+                                .Any(vov => vov.OptionValueId != null && ids.Contains(vov.OptionValueId.Value)) ||
+                            (v.ColorName != null &&
+                                names.Any(n => v.ColorName.Contains(n, StringComparison.CurrentCultureIgnoreCase))) ||
+                            (v.VersionName != null &&
+                                names.Any(n => v.VersionName.Contains(n, StringComparison.CurrentCultureIgnoreCase))));
                 }
-
                 var matchingProductIds = variantSubquery.Select(v => v.ProductId);
                 query = query.Where(p => matchingProductIds.Contains(p.Id));
             }

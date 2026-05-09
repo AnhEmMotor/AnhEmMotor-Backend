@@ -4,6 +4,7 @@ using Application.Features.UserManager.Commands.AssignRoles;
 using Application.Features.UserManager.Commands.ChangeMultipleUsersStatus;
 using Application.Features.UserManager.Commands.ChangePasswordByManager;
 using Application.Features.UserManager.Commands.ChangeUserStatus;
+using Application.Features.UserManager.Commands.CreateUserByManager;
 using Application.Features.UserManager.Commands.UpdateUser;
 using Application.Features.UserManager.Queries.GetUserById;
 using Application.Features.UserManager.Queries.GetUsersList;
@@ -399,48 +400,37 @@ public class UserManager
             m => m.Send(It.IsAny<GetUsersListForOutputQuery>(), It.IsAny<CancellationToken>()),
             Times.Once);
     }
+
     [Fact(DisplayName = "PERM_043 - Controller - Kiểm tra quyền tạo người dùng của Admin")]
     public async Task CreateUser_ByAdmin_ReturnsCreated()
     {
-        // Arrange
-        var request = new Application.Features.UserManager.Commands.CreateUserByManager.CreateUserByManagerCommand 
-        { 
-            Username = "newuser", 
+        var request = new CreateUserByManagerCommand
+        {
+            Username = "newuser",
             Email = "newuser@test.com",
             Password = "Password123!",
             RoleNames = ["Staff"]
         };
         var expectedResponse = new UserDTOForManagerResponse { Id = Guid.NewGuid(), UserName = "newuser" };
-        
-        _mediatorMock.Setup(m => m.Send(It.IsAny<Application.Features.UserManager.Commands.CreateUserByManager.CreateUserByManagerCommand>(), It.IsAny<CancellationToken>()))
+        _mediatorMock.Setup(m => m.Send(It.IsAny<CreateUserByManagerCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<UserDTOForManagerResponse>.Success(expectedResponse));
-
-        // Act
         var result = await _controller.CreateUserAsync(request, CancellationToken.None).ConfigureAwait(true);
-
-        // Assert
         result.Should().BeOfType<CreatedResult>();
     }
 
     [Fact(DisplayName = "USER_078 - Controller - Gán vai trò (Role) không hợp lệ")]
     public async Task CreateUser_InvalidRole_ReturnsBadRequest()
     {
-        // Arrange
-        var request = new Application.Features.UserManager.Commands.CreateUserByManager.CreateUserByManagerCommand 
-        { 
-            Username = "badroleuser", 
+        var request = new CreateUserByManagerCommand
+        {
+            Username = "badroleuser",
             Email = "badrole@test.com",
             Password = "Password123!",
             RoleNames = ["NonExistentRole"]
         };
-        
-        _mediatorMock.Setup(m => m.Send(It.IsAny<Application.Features.UserManager.Commands.CreateUserByManager.CreateUserByManagerCommand>(), It.IsAny<CancellationToken>()))
+        _mediatorMock.Setup(m => m.Send(It.IsAny<CreateUserByManagerCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<UserDTOForManagerResponse>.Failure(Error.BadRequest("Role does not exist.")));
-
-        // Act
         var result = await _controller.CreateUserAsync(request, CancellationToken.None).ConfigureAwait(true);
-
-        // Assert
         result.Should().BeOfType<BadRequestObjectResult>();
     }
     #pragma warning restore CRR0035

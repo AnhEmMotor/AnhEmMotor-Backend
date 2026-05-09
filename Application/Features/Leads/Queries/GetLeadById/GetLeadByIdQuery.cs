@@ -1,6 +1,5 @@
 using Application.ApiContracts.Leads.Responses;
 using Application.Common.Models;
-using Application.Interfaces.Repositories.Lead;
 using MediatR;
 using System.Linq;
 

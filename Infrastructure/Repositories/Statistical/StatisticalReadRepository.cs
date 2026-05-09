@@ -269,8 +269,16 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                     x => x.oi.ProductVarientId,
                     pv => pv.Id,
                     (x, pv) => new { x.oi, x.o, pv })
-                .Join(context.Products.IgnoreQueryFilters(), x => x.pv.ProductId, p => p.Id, (x, p) => new { x.oi, x.o, p })
-                .Join(context.ProductCategories.IgnoreQueryFilters(), x => x.p.CategoryId, c => c.Id, (x, c) => new { x.oi, x.o, c })
+                .Join(
+                    context.Products.IgnoreQueryFilters(),
+                    x => x.pv.ProductId,
+                    p => p.Id,
+                    (x, p) => new { x.oi, x.o, p })
+                .Join(
+                    context.ProductCategories.IgnoreQueryFilters(),
+                    x => x.p.CategoryId,
+                    c => c.Id,
+                    (x, c) => new { x.oi, x.o, c })
                 .Where(
                     x => x.o.CreatedAt >= start &&
                         x.o.CreatedAt <= end &&
@@ -309,7 +317,11 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
         var brandData = await context.Products
             .IgnoreQueryFilters()
             .Join(context.Brands.IgnoreQueryFilters(), p => p.BrandId, b => b.Id, (p, b) => new { p, b })
-            .Join(context.ProductVariants.IgnoreQueryFilters(), x => x.p.Id, pv => pv.ProductId, (x, pv) => new { x.p, x.b, pv })
+            .Join(
+                context.ProductVariants.IgnoreQueryFilters(),
+                x => x.p.Id,
+                pv => pv.ProductId,
+                (x, pv) => new { x.p, x.b, pv })
             .Select(x => new { x.b.Name, VariantId = x.pv.Id })
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
@@ -418,7 +430,11 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
                     (string.Compare(x.o.StatusId, OrderStatus.Delivering) == 0 ||
                         string.Compare(x.o.StatusId, OrderStatus.WaitingPickup) == 0 ||
                         string.Compare(x.o.StatusId, OrderStatus.Completed) == 0))
-            .Join(context.ProductVariants.IgnoreQueryFilters(), x => x.oi.ProductVarientId, pv => pv.Id, (x, pv) => new { x.oi, x.o, pv })
+            .Join(
+                context.ProductVariants.IgnoreQueryFilters(),
+                x => x.oi.ProductVarientId,
+                pv => pv.Id,
+                (x, pv) => new { x.oi, x.o, pv })
             .Join(context.Products.IgnoreQueryFilters(), x => x.pv.ProductId, p => p.Id, (x, p) => new { x.oi, x.o, p })
             .Join(context.Brands.IgnoreQueryFilters(), x => x.p.BrandId, b => b.Id, (x, b) => new { x.oi, x.o, b })
             .GroupBy(x => x.b.Name)
@@ -636,8 +652,8 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             .Join(context.OutputOrders.IgnoreQueryFilters(), oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
             .Where(
                 x => string.Compare(x.o.StatusId, OrderStatus.Delivering) == 0 ||
-                        string.Compare(x.o.StatusId, OrderStatus.WaitingPickup) == 0 ||
-                        string.Compare(x.o.StatusId, OrderStatus.Completed) == 0)
+                    string.Compare(x.o.StatusId, OrderStatus.WaitingPickup) == 0 ||
+                    string.Compare(x.o.StatusId, OrderStatus.Completed) == 0)
             .Select(
                 x => new
                 {
@@ -725,8 +741,8 @@ public class StatisticalReadRepository(ApplicationDBContext context) : IStatisti
             .Join(context.OutputOrders.IgnoreQueryFilters(), oi => oi.OutputId, o => o.Id, (oi, o) => new { oi, o })
             .Where(
                 x => (string.Compare(x.o.StatusId, OrderStatus.Delivering) == 0 ||
-                        string.Compare(x.o.StatusId, OrderStatus.WaitingPickup) == 0 ||
-                        string.Compare(x.o.StatusId, OrderStatus.Completed) == 0))
+                    string.Compare(x.o.StatusId, OrderStatus.WaitingPickup) == 0 ||
+                    string.Compare(x.o.StatusId, OrderStatus.Completed) == 0))
             .GroupBy(x => x.oi.ProductVarientId)
             .Select(g => new { VariantId = g.Key, TotalOut = g.Sum(x => (long)(x.oi.Count ?? 0)) })
             .ToListAsync(cancellationToken)

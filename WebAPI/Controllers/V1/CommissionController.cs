@@ -3,19 +3,12 @@ using Application.Features.HR.Commands.ApprovePayroll;
 using Application.Features.HR.Queries.GetCommissionRecords;
 using Application.Features.HR.Queries.GetPayrollSummary;
 using Asp.Versioning;
-using Domain.Entities.HR;
-using MediatR;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Infrastructure.Authorization.Attribute;
 using Domain.Constants.Permission;
-
+using Domain.Entities.HR;
+using Infrastructure.Authorization.Attribute;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1;
@@ -58,7 +51,6 @@ public class CommissionController(ISender mediator) : ApiController
         return Ok(result.Value);
     }
 
-
     /// <summary>
     /// Approves commission payments.
     /// </summary>
@@ -66,9 +58,7 @@ public class CommissionController(ISender mediator) : ApiController
     /// <param name="ct">The cancellation token.</param>
     [HttpPost("approve-payroll")]
     [HasPermission(PermissionsList.Payroll.Approve)]
-    public async Task<IActionResult> ApprovePayrollAsync(
-        [FromBody] ApprovePayrollCommand command,
-        CancellationToken ct)
+    public async Task<IActionResult> ApprovePayrollAsync([FromBody] ApprovePayrollCommand command, CancellationToken ct)
     {
         var result = await mediator.Send(command, ct).ConfigureAwait(true);
         if (!result.IsSuccess)

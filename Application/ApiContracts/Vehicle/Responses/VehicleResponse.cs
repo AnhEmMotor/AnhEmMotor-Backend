@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Application.ApiContracts.Vehicle.Responses
 {
@@ -28,5 +26,4 @@ namespace Application.ApiContracts.Vehicle.Responses
 
         public List<VehicleDocumentResponse> Documents { get; set; } = [];
     }
-
 }

@@ -33,7 +33,7 @@ public sealed record UpdateProductCategoryCommand : IRequest<Result<ProductCateg
 
     [JsonPropertyName("category_group")]
     public string? CategoryGroup { get; init; }
-    
+
     [JsonPropertyName("max_purchase_quantity")]
     public int? MaxPurchaseQuantity { get; init; }
 }

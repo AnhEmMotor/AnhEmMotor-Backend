@@ -148,30 +148,34 @@ public sealed class UpdateOutputForManagerCommandHandler(
             {
                 output.FinishedBy = request.CurrentUserId;
             }
-
-            var inventoryResult = await updateRepository.HandleInventoryTransactionAsync(output.Id, true, cancellationToken).ConfigureAwait(false);
+            var inventoryResult = await updateRepository.HandleInventoryTransactionAsync(
+                output.Id,
+                true,
+                cancellationToken)
+                .ConfigureAwait(false);
             if (inventoryResult.IsFailure)
             {
                 return Result<OrderDetailResponse>.Failure(inventoryResult.Errors!);
             }
-        }
-        else if (string.Compare(output.StatusId, OrderStatus.Delivering) == 0)
+        } else if (string.Compare(output.StatusId, OrderStatus.Delivering) == 0)
         {
-            var inventoryResult = await updateRepository.HandleInventoryTransactionAsync(output.Id, false, cancellationToken).ConfigureAwait(false);
+            var inventoryResult = await updateRepository.HandleInventoryTransactionAsync(
+                output.Id,
+                false,
+                cancellationToken)
+                .ConfigureAwait(false);
             if (inventoryResult.IsFailure)
             {
                 return Result<OrderDetailResponse>.Failure(inventoryResult.Errors!);
             }
         }
-
         updateRepository.Update(output);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         if (string.Compare(output.StatusId, OrderStatus.Completed) == 0)
         {
-            await commissionService.CalculateAndRecordCommissionAsync(output.Id, cancellationToken).ConfigureAwait(false);
+            await commissionService.CalculateAndRecordCommissionAsync(output.Id, cancellationToken)
+                .ConfigureAwait(false);
         }
-
         return Result<OrderDetailResponse>.Success(output.Adapt<OrderDetailResponse>());
     }
 }

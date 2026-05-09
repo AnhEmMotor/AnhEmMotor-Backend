@@ -32,7 +32,7 @@ public class VehicleController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return Ok(new Application.ApiContracts.Vehicle.Responses.VehicleResponse { Id = id });
+        return Ok(new VehicleResponse { Id = id });
     }
 
     /// <summary>
@@ -46,7 +46,8 @@ public class VehicleController(IMediator mediator) : ApiController
     [SwaggerOperation(Summary = "Lấy danh sách xe của khách hàng")]
     public async Task<IActionResult> GetListAsync([FromQuery] string? search, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetVehiclesQuery { Search = search }, cancellationToken).ConfigureAwait(true);
+        var result = await mediator.Send(new GetVehiclesQuery { Search = search }, cancellationToken)
+            .ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -57,8 +58,10 @@ public class VehicleController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">The cancellation token.</param>
     [HttpPost]
     [Authorize]
-    [ProducesResponseType(typeof(Application.ApiContracts.Vehicle.Responses.VehicleResponse), StatusCodes.Status201Created)]
-    public async Task<IActionResult> CreateAsync([FromBody] CreateVehicleCommand command, CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(VehicleResponse), StatusCodes.Status201Created)]
+    public async Task<IActionResult> CreateAsync(
+        [FromBody] CreateVehicleCommand command,
+        CancellationToken cancellationToken)
     {
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleCreated(result);
@@ -72,7 +75,10 @@ public class VehicleController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">The cancellation token.</param>
     [HttpPatch("{id:int}/license-plate")]
     [Authorize]
-    public async Task<IActionResult> UpdateLicensePlateAsync(int id, [FromBody] UpdateLicensePlateCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateLicensePlateAsync(
+        int id,
+        [FromBody] UpdateLicensePlateCommand command,
+        CancellationToken cancellationToken)
     {
         command.Id = id;
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
@@ -87,7 +93,10 @@ public class VehicleController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">The cancellation token.</param>
     [HttpPost("{id:int}/transfer")]
     [Authorize]
-    public async Task<IActionResult> TransferOwnershipAsync(int id, [FromBody] TransferOwnershipCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> TransferOwnershipAsync(
+        int id,
+        [FromBody] TransferOwnershipCommand command,
+        CancellationToken cancellationToken)
     {
         command.Id = id;
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);

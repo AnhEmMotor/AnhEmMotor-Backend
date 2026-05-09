@@ -1,17 +1,21 @@
+using Application.ApiContracts.Option.Responses;
 using Application.ApiContracts.Product.Requests;
 using Application.ApiContracts.Product.Responses;
-using Application.ApiContracts.Option.Responses;
-using Application.Features.Options.Queries.GetOptionsList;
+using Application.ApiContracts.Technology.Responses;
 using Application.Common.Models;
+using Application.Features.Options.Queries.GetOptionsList;
 using Application.Features.OptionValues.Commands.CreateOptionValue;
 using Application.Features.OptionValues.Commands.DeleteOptionValue;
 using Application.Features.OptionValues.Commands.UpdateOptionValue;
 using Application.Features.PredefinedOptions.Queries.GetPredefinedOptionsList;
+using Application.Features.ProductCategories.Commands.CreateCategoryGroup;
+using Application.Features.Products.Commands.AttachTechnologies;
 using Application.Features.Products.Commands.CreateProduct;
 using Application.Features.Products.Commands.DeleteManyProducts;
 using Application.Features.Products.Commands.DeleteProduct;
 using Application.Features.Products.Commands.RestoreManyProducts;
 using Application.Features.Products.Commands.RestoreProduct;
+using Application.Features.Products.Commands.SetProductCompatibility;
 using Application.Features.Products.Commands.UpdateManyProductPrices;
 using Application.Features.Products.Commands.UpdateManyProductStatuses;
 using Application.Features.Products.Commands.UpdateManyVariantPrices;
@@ -19,15 +23,7 @@ using Application.Features.Products.Commands.UpdateProduct;
 using Application.Features.Products.Commands.UpdateProductPrice;
 using Application.Features.Products.Commands.UpdateProductStatus;
 using Application.Features.Products.Commands.UpdateVariantPrice;
-using Application.Features.Products.Commands.AttachTechnologies;
-using Application.Features.Products.Commands.SetProductCompatibility;
 using Application.Features.Products.Commands.UpdateVehicleType;
-using Application.Features.ProductCategories.Commands.CreateCategoryGroup;
-using Application.Features.Technologies.Commands.CreateTechnology;
-using Application.Features.Technologies.Commands.CreateTechnologyCategory;
-using Application.Features.Technologies.Queries.GetAllTechnologies;
-using Application.Features.Technologies.Queries.GetAllTechnologyCategories;
-using Application.ApiContracts.Technology.Responses;
 using Application.Features.Products.Queries.CheckSlugAvailability;
 using Application.Features.Products.Queries.GetActiveVariantLiteListForInput;
 using Application.Features.Products.Queries.GetActiveVariantLiteListForManager;
@@ -42,6 +38,10 @@ using Application.Features.Products.Queries.GetProductStoreDetailBySlug;
 using Application.Features.Products.Queries.GetSitemapSlugs;
 using Application.Features.Products.Queries.GetVariantCartDetailsBatch;
 using Application.Features.Products.Queries.GetVariantLiteByProductId;
+using Application.Features.Technologies.Commands.CreateTechnology;
+using Application.Features.Technologies.Commands.CreateTechnologyCategory;
+using Application.Features.Technologies.Queries.GetAllTechnologies;
+using Application.Features.Technologies.Queries.GetAllTechnologyCategories;
 using Asp.Versioning;
 using Domain.Constants;
 using Domain.Primitives;
@@ -651,7 +651,9 @@ public class ProductController(ISender sender) : ApiController
     [HttpPost("technologies")]
     [ProducesResponseType(typeof(TechnologyResponse), StatusCodes.Status200OK)]
     [HasPermission(Products.Edit)]
-    public async Task<IActionResult> CreateTechnologyAsync([FromBody] CreateTechnologyCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateTechnologyAsync(
+        [FromBody] CreateTechnologyCommand command,
+        CancellationToken cancellationToken)
     {
         var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
@@ -662,9 +664,13 @@ public class ProductController(ISender sender) : ApiController
     /// </summary>
     [HttpGet("technologies")]
     [ProducesResponseType(typeof(List<TechnologyResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetAllTechnologiesAsync([FromQuery] int? category_id, [FromQuery] int? brand_id, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAllTechnologiesAsync(
+        [FromQuery] int? category_id,
+        [FromQuery] int? brand_id,
+        CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetAllTechnologiesQuery(category_id, brand_id), cancellationToken).ConfigureAwait(true);
+        var result = await sender.Send(new GetAllTechnologiesQuery(category_id, brand_id), cancellationToken)
+            .ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -683,7 +689,9 @@ public class ProductController(ISender sender) : ApiController
     /// </summary>
     [HttpPost("technology-categories")]
     [HasPermission(Products.Edit)]
-    public async Task<IActionResult> CreateTechnologyCategoryAsync([FromBody] CreateTechnologyCategoryCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateTechnologyCategoryAsync(
+        [FromBody] CreateTechnologyCategoryCommand command,
+        CancellationToken cancellationToken)
     {
         var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);

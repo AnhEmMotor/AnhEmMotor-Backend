@@ -8,7 +8,6 @@ using MediatR;
 
 namespace Application.Features.Technologies.Commands.CreateTechnologyCategory;
 
-
 public sealed class CreateTechnologyCategoryCommandHandler(
     ITechnologyCategoryRepository categoryRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateTechnologyCategoryCommand, Result<TechnologyCategoryResponse>>

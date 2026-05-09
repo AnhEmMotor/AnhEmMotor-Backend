@@ -33,7 +33,8 @@ namespace Infrastructure.BackgroundJobs
             var now = DateTimeOffset.UtcNow;
             var expiredBanners = await context.Banners
                 .Where(b => b.IsActive && b.EndDate.HasValue && b.EndDate < now)
-                .ToListAsync(cancellationToken).ConfigureAwait(false);
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
             if (expiredBanners.Any())
             {
                 logger.LogInformation(

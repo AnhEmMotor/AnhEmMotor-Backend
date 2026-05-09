@@ -11,17 +11,32 @@ public static class TechnologySeeder
         var categoryNames = new[] { "An toàn", "Tiện ích & Kết nối", "Động cơ & Vận hành" };
         foreach (var name in categoryNames)
         {
-            if (!await context.TechnologyCategories.AnyAsync(c => string.Equals(c.Name, name, StringComparison.OrdinalIgnoreCase), cancellationToken).ConfigureAwait(false))
+            if (!await context.TechnologyCategories
+                .AnyAsync(c => string.Equals(c.Name, name, StringComparison.OrdinalIgnoreCase), cancellationToken)
+                .ConfigureAwait(false))
             {
                 context.TechnologyCategories.Add(new TechnologyCategory { Name = name });
             }
         }
         await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         var categories = await context.TechnologyCategories
-            .ToDictionaryAsync(c => c.Name!.Trim(), c => c.Id, StringComparer.OrdinalIgnoreCase, cancellationToken).ConfigureAwait(false);
-        var honda = await context.Brands.FirstOrDefaultAsync(b => string.Equals(b.Name, "Honda", StringComparison.OrdinalIgnoreCase), cancellationToken).ConfigureAwait(false);
-        var yamaha = await context.Brands.FirstOrDefaultAsync(b => string.Equals(b.Name, "Yamaha", StringComparison.OrdinalIgnoreCase), cancellationToken).ConfigureAwait(false);
-        var piaggio = await context.Brands.FirstOrDefaultAsync(b => string.Equals(b.Name, "Piaggio", StringComparison.OrdinalIgnoreCase), cancellationToken).ConfigureAwait(false);
+            .ToDictionaryAsync(c => c.Name!.Trim(), c => c.Id, StringComparer.OrdinalIgnoreCase, cancellationToken)
+            .ConfigureAwait(false);
+        var honda = await context.Brands
+            .FirstOrDefaultAsync(
+                b => string.Equals(b.Name, "Honda", StringComparison.OrdinalIgnoreCase),
+                cancellationToken)
+            .ConfigureAwait(false);
+        var yamaha = await context.Brands
+            .FirstOrDefaultAsync(
+                b => string.Equals(b.Name, "Yamaha", StringComparison.OrdinalIgnoreCase),
+                cancellationToken)
+            .ConfigureAwait(false);
+        var piaggio = await context.Brands
+            .FirstOrDefaultAsync(
+                b => string.Equals(b.Name, "Piaggio", StringComparison.OrdinalIgnoreCase),
+                cancellationToken)
+            .ConfigureAwait(false);
         if (piaggio == null)
         {
             piaggio = new Brand { Name = "Piaggio" };
@@ -46,7 +61,11 @@ public static class TechnologySeeder
         foreach (var data in techData)
         {
             var exists = await context.Technologies
-                .AnyAsync(t => string.Equals(t.Name, data.Name, StringComparison.OrdinalIgnoreCase) && t.BrandId == (data.Brand != null ? data.Brand.Id : null), cancellationToken).ConfigureAwait(false);
+                .AnyAsync(
+                    t => string.Equals(t.Name, data.Name, StringComparison.OrdinalIgnoreCase) &&
+                        t.BrandId == (data.Brand != null ? data.Brand.Id : null),
+                    cancellationToken)
+                .ConfigureAwait(false);
             if (!exists)
             {
                 if (categories.TryGetValue(data.Category.Trim(), out var categoryId))
@@ -66,7 +85,10 @@ public static class TechnologySeeder
             {
                 var tech = await context.Technologies
                     .FirstOrDefaultAsync(
-                        t => string.Equals(t.Name, data.Name, StringComparison.OrdinalIgnoreCase) && t.BrandId == (data.Brand != null ? data.Brand.Id : null), cancellationToken).ConfigureAwait(false);
+                        t => string.Equals(t.Name, data.Name, StringComparison.OrdinalIgnoreCase) &&
+                            t.BrandId == (data.Brand != null ? data.Brand.Id : null),
+                        cancellationToken)
+                    .ConfigureAwait(false);
                 if (tech != null && categories.TryGetValue(data.Category.Trim(), out var categoryId))
                 {
                     tech.DefaultDescription = data.Description;

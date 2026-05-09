@@ -9,7 +9,10 @@ namespace Infrastructure.Seeders;
 
 public static class LeadSeeder
 {
-    public static async Task SeedAsync(ApplicationDBContext context, UserManager<ApplicationUser> userManager, CancellationToken cancellationToken)
+    public static async Task SeedAsync(
+        ApplicationDBContext context,
+        UserManager<ApplicationUser> userManager,
+        CancellationToken cancellationToken)
     {
         if (await context.Leads.AnyAsync(cancellationToken).ConfigureAwait(false))
             return;

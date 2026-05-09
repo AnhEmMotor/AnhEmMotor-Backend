@@ -3,8 +3,6 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories.Lead;
 using MediatR;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Application.Features.Leads.Queries.GetLeadPipeline
 {
@@ -34,24 +32,24 @@ namespace Application.Features.Leads.Queries.GetLeadPipeline
                     .Where(l => string.Compare(l.Status, s.Key) == 0)
                                 .Select(
                                     l => new LeadResponse
-                                    {
-                                        Id = l.Id,
-                                        FullName = l.FullName,
-                                        PhoneNumber = l.PhoneNumber,
-                                        Email = l.Email,
-                                        Score = l.Score,
-                                        Status = l.Status,
-                                        Source = l.Source,
-                                        Address = l.Address,
-                                        AddressDetail = l.AddressDetail,
-                                        Ward = l.Ward,
-                                        District = l.District,
-                                        Province = l.Province,
-                                        Gender = l.Gender,
-                                        Birthday = l.Birthday,
-                                        IdentificationNumber = l.IdentificationNumber,
-                                        CreatedAt = l.CreatedAt ?? DateTimeOffset.MinValue
-                                    })]
+                                {
+                                    Id = l.Id,
+                                    FullName = l.FullName,
+                                    PhoneNumber = l.PhoneNumber,
+                                    Email = l.Email,
+                                    Score = l.Score,
+                                    Status = l.Status,
+                                    Source = l.Source,
+                                    Address = l.Address,
+                                    AddressDetail = l.AddressDetail,
+                                    Ward = l.Ward,
+                                    District = l.District,
+                                    Province = l.Province,
+                                    Gender = l.Gender,
+                                    Birthday = l.Birthday,
+                                    IdentificationNumber = l.IdentificationNumber,
+                                    CreatedAt = l.CreatedAt ?? DateTimeOffset.MinValue
+                                })]
                 })
                 .ToList();
             return result;

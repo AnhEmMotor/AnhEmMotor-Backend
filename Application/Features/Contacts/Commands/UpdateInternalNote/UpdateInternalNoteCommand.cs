@@ -1,6 +1,4 @@
 using Application.Common.Models;
-using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.Contact;
 using MediatR;
 
 namespace Application.Features.Contacts.Commands.UpdateInternalNote;

@@ -4,11 +4,7 @@ using Domain.Entities.HR;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Application.Features.HR.Commands.ApprovePayroll
 
@@ -36,5 +32,4 @@ namespace Application.Features.HR.Commands.ApprovePayroll
             return Result.Success();
         }
     }
-
 }

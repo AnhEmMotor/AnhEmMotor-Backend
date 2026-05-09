@@ -1,5 +1,4 @@
 using Application.Common.Models;
-using Application.Interfaces.Repositories.Booking;
 using Domain.Entities;
 using MediatR;
 

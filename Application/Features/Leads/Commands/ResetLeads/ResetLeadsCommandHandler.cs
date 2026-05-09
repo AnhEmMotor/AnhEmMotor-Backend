@@ -3,8 +3,6 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Lead;
 using MediatR;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Application.Features.Leads.Commands.ResetLeads
 {
@@ -17,12 +15,10 @@ namespace Application.Features.Leads.Commands.ResetLeads
                 await leadWriteRepository.ClearAllAsync(cancellationToken).ConfigureAwait(false);
                 await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 return Result<bool>.Success(true);
-            }
-            catch (Exception ex)
+            } catch (Exception ex)
             {
                 return Result<bool>.Failure($"Lỗi khi reset dữ liệu: {ex.Message}");
             }
         }
     }
-
 }

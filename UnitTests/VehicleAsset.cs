@@ -1,13 +1,11 @@
 using Application.Features.Vehicles.Commands.CreateVehicle;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.Vehicle;
 using Application.Interfaces.Repositories.Lead;
 using Application.Interfaces.Repositories.Product;
+using Application.Interfaces.Repositories.Vehicle;
 using Domain.Constants;
-using Domain.Entities;
 using FluentAssertions;
 using MockQueryable;
-using MockQueryable.Moq;
 using Moq;
 using LeadEntity = Domain.Entities.Lead;
 using ProductEntity = Domain.Entities.Product;
@@ -35,18 +33,18 @@ public class VehicleAsset
     [Fact(DisplayName = "VAS_003 - Chặn trùng lặp số máy (EngineNumber)")]
     public async Task CreateVehicle_DuplicateEngineNumber_ReturnsBadRequest()
     {
-        // Arrange
         var engineNumber = "ENG999";
-        var existingVehicles = new List<VehicleEntity>
-        {
-            new() { EngineNumber = engineNumber }
-        }.BuildMock();
-
+        var existingVehicles = new List<VehicleEntity> { new() { EngineNumber = engineNumber } }.BuildMock();
         _readRepoMock.Setup(x => x.GetQuery(DataFetchMode.All)).Returns(existingVehicles);
         _leadReadRepoMock.Setup(x => x.GetQueryable()).Returns(new List<LeadEntity> { new() { Id = 1 } }.BuildMock());
-        _productReadRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(new List<ProductEntity> { new() { Id = 1 } }.BuildMock());
-
-        var handler = new CreateVehicleCommandHandler(_readRepoMock.Object, _updateRepoMock.Object, _leadReadRepoMock.Object, _productReadRepoMock.Object, _unitOfWorkMock.Object);
+        _productReadRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>()))
+            .Returns(new List<ProductEntity> { new() { Id = 1 } }.BuildMock());
+        var handler = new CreateVehicleCommandHandler(
+            _readRepoMock.Object,
+            _updateRepoMock.Object,
+            _leadReadRepoMock.Object,
+            _productReadRepoMock.Object,
+            _unitOfWorkMock.Object);
         var command = new CreateVehicleCommand
         {
             VinNumber = "VIN001",
@@ -54,11 +52,7 @@ public class VehicleAsset
             LeadId = 1,
             ProductId = 1
         };
-
-        // Act
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
-        // Assert
         result.IsSuccess.Should().BeFalse();
         result.Error!.Message.Should().Be("Engine number already exists.");
     }
@@ -66,25 +60,25 @@ public class VehicleAsset
     [Fact(DisplayName = "VAS_008 - Ngăn chặn tạo tài sản khi thiếu số khung")]
     public async Task CreateVehicle_EmptyVin_ReturnsBadRequest()
     {
-        // Arrange
         var existingVehicles = new List<VehicleEntity>().BuildMock();
         _readRepoMock.Setup(x => x.GetQuery(DataFetchMode.All)).Returns(existingVehicles);
         _leadReadRepoMock.Setup(x => x.GetQueryable()).Returns(new List<LeadEntity> { new() { Id = 1 } }.BuildMock());
-        _productReadRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(new List<ProductEntity> { new() { Id = 1 } }.BuildMock());
-
-        var handler = new CreateVehicleCommandHandler(_readRepoMock.Object, _updateRepoMock.Object, _leadReadRepoMock.Object, _productReadRepoMock.Object, _unitOfWorkMock.Object);
+        _productReadRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>()))
+            .Returns(new List<ProductEntity> { new() { Id = 1 } }.BuildMock());
+        var handler = new CreateVehicleCommandHandler(
+            _readRepoMock.Object,
+            _updateRepoMock.Object,
+            _leadReadRepoMock.Object,
+            _productReadRepoMock.Object,
+            _unitOfWorkMock.Object);
         var command = new CreateVehicleCommand
         {
-            VinNumber = "", // Empty VIN
+            VinNumber = string.Empty,
             EngineNumber = "ENG123",
             LeadId = 1,
             ProductId = 1
         };
-
-        // Act
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
-        // Assert
         result.IsSuccess.Should().BeFalse();
         result.Error!.Message.Should().Be("VIN cannot be empty.");
     }

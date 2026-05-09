@@ -18,8 +18,6 @@ public class EmployeeReadRepository(ApplicationDBContext context) : IEmployeeRea
 
     public Task<EmployeeProfile?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        return context.EmployeeProfiles
-            .Include(e => e.User)
-            .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
+        return context.EmployeeProfiles.Include(e => e.User).FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
     }
 }

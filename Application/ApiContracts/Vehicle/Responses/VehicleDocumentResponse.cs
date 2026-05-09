@@ -1,3 +1,4 @@
+
 namespace Application.ApiContracts.Vehicle.Responses;
 
 public class VehicleDocumentResponse

@@ -1,9 +1,4 @@
 using Application.Common.Models;
-using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositories.Booking;
-using Application.Interfaces.Repositories.Lead;
-using Application.Interfaces.Services;
-using Domain.Entities;
 using MediatR;
 
 namespace Application.Features.Bookings.Commands.ConfirmBooking;

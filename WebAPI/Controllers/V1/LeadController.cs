@@ -1,12 +1,13 @@
 using Application.ApiContracts.Leads.Responses;
-using Application.Features.Leads.Queries.GetLeads;
-using Application.Features.Leads.Queries.GetLeadById;
-using Application.Features.Leads.Queries.GetLeadPipeline;
-using Application.Features.Leads.Commands.UpdateLead;
 using Application.Features.Leads.Commands.AddLeadActivity;
 using Application.Features.Leads.Commands.AssignLead;
-using Application.Features.Leads.Commands.SeedLeads;
+using Application.Features.Leads.Commands.CreateLead;
 using Application.Features.Leads.Commands.ResetLeads;
+using Application.Features.Leads.Commands.SeedLeads;
+using Application.Features.Leads.Commands.UpdateLead;
+using Application.Features.Leads.Queries.GetLeadById;
+using Application.Features.Leads.Queries.GetLeadPipeline;
+using Application.Features.Leads.Queries.GetLeads;
 using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -43,7 +44,7 @@ public class LeadController(IMediator mediator) : ApiController
     [Authorize]
     [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
     public async Task<IActionResult> CreateLeadAsync(
-        [FromBody] Application.Features.Leads.Commands.CreateLead.CreateLeadCommand command,
+        [FromBody] CreateLeadCommand command,
         CancellationToken cancellationToken)
     {
         var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);

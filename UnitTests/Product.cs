@@ -1,7 +1,6 @@
 using Application.ApiContracts.Product.Requests;
-using Application.Features.Products.Commands.AttachTechnologies;
-using MockQueryable.Moq;
 using Application.ApiContracts.Product.Responses;
+using Application.Features.Products.Commands.AttachTechnologies;
 using Application.Features.Products.Commands.CreateProduct;
 using Application.Features.Products.Commands.DeleteManyProducts;
 using Application.Features.Products.Commands.DeleteProduct;
@@ -114,43 +113,36 @@ public class Product
         {
             Name = "Product 1",
             CategoryId = 1,
-            FrontTireSize = "120-70/17", // Wrong format
+            FrontTireSize = "120-70/17",
             Variants = [new CreateProductVariantRequest { UrlSlug = "v1", Price = 1000 }]
         };
         var validator = new CreateProductCommandValidator();
         var result = validator.Validate(command);
         result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(e => string.Compare(e.PropertyName, nameof(CreateProductCommand.FrontTireSize)) == 0);
+        result.Errors
+            .Should()
+            .Contain(e => string.Compare(e.PropertyName, nameof(CreateProductCommand.FrontTireSize)) == 0);
     }
 
     [Fact(DisplayName = "PRODUCT_192 - Ngăn chặn gán công nghệ trùng lặp")]
     public async Task AttachTechnologies_DuplicateId_ReturnsBadRequest()
     {
-        // Arrange
         var readRepositoryMock = new Mock<IProductReadRepository>();
         var updateRepositoryMock = new Mock<IProductUpdateRepository>();
         var unitOfWorkMock = new Mock<IUnitOfWork>();
         var productId = 1;
         var techId = 10;
-        
         var product = new ProductEntity { Id = productId };
         product.ProductTechnologies.Add(new ProductTechnology { ProductId = productId, TechnologyId = techId });
-        
-        readRepositoryMock.Setup(r => r.GetByIdWithDetailsAsync(productId, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+        readRepositoryMock.Setup(
+            r => r.GetByIdWithDetailsAsync(productId, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(product);
-
-        var command = new AttachTechnologiesCommand
-        {
-            ProductId = productId,
-            TechIds = [techId]
-        };
-        
-        var handler = new AttachTechnologiesCommandHandler(readRepositoryMock.Object, updateRepositoryMock.Object, unitOfWorkMock.Object);
-
-        // Act
+        var command = new AttachTechnologiesCommand { ProductId = productId, TechIds = [techId] };
+        var handler = new AttachTechnologiesCommandHandler(
+            readRepositoryMock.Object,
+            updateRepositoryMock.Object,
+            unitOfWorkMock.Object);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
-
-        // Assert
         result.IsSuccess.Should().BeFalse();
         result.Errors.Should().Contain(e => e.Message.Contains("đã được gán"));
     }
@@ -1991,6 +1983,6 @@ public class Product
         var ids = brandIds.Split(',', StringSplitOptions.RemoveEmptyEntries);
         ids.Should().BeEmpty();
     }
-#pragma warning restore CRR0035
-#pragma warning restore IDE0079
+    #pragma warning restore CRR0035
+    #pragma warning restore IDE0079
 }
