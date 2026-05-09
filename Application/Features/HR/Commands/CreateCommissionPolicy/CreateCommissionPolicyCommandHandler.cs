@@ -1,6 +1,7 @@
-﻿using Application.Common.Models;
+using Application.Common.Models;
 using Application.Interfaces;
 using Domain.Entities.HR;
+using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -31,19 +32,7 @@ namespace Application.Features.HR.Commands.CreateCommissionPolicy
                     Error.BadRequest(
                         "Định mức cho sản phẩm/nhóm này đã tồn tại trong khoảng thời gian hiệu lực (Yêu cầu cách nhau ít nhất 7 ngày)."));
             }
-            var policy = new CommissionPolicy
-            {
-                Name = request.Name,
-                Type = request.Type,
-                Value = request.Value,
-                ProductId = request.ProductId,
-                CategoryId = request.CategoryId,
-                TargetGroup = request.TargetGroup,
-                EffectiveDate = request.EffectiveDate,
-                Notes = request.Notes,
-                Unit = request.Unit,
-                IsActive = request.IsActive
-            };
+            var policy = request.Adapt<CommissionPolicy>();
             context.CommissionPolicies.Add(policy);
             await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             var auditLog = new CommissionPolicyAuditLog

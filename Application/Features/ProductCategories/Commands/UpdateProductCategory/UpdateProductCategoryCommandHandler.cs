@@ -40,16 +40,19 @@ public sealed class UpdateProductCategoryCommandHandler(
             category.Name = nameToUpdate;
         }
         if (request.Description != null)
-        {
             category.Description = request.Description.Trim();
-        }
-        category.Slug = request.Slug?.Trim();
-        category.ImageUrl = request.ImageUrl?.Trim();
+        if (request.Slug != null)
+            category.Slug = request.Slug.Trim();
+        if (request.ImageUrl != null)
+            category.ImageUrl = request.ImageUrl.Trim();
+        if (request.CategoryGroup != null)
+            category.CategoryGroup = request.CategoryGroup.Trim();
         category.IsActive = request.IsActive;
         category.SortOrder = request.SortOrder;
-        category.ParentId = request.ParentId;
-        category.CategoryGroup = request.CategoryGroup;
-        category.MaxPurchaseQuantity = request.MaxPurchaseQuantity;
+        if (request.ParentId.HasValue)
+            category.ParentId = request.ParentId;
+        if (request.MaxPurchaseQuantity.HasValue)
+            category.MaxPurchaseQuantity = request.MaxPurchaseQuantity;
         updateRepository.Update(category);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return category.Adapt<ProductCategoryResponse>();

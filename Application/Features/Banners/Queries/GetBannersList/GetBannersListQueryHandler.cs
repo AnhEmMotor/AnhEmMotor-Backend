@@ -1,6 +1,7 @@
-﻿using Application.ApiContracts.Banner.Responses;
+using Application.ApiContracts.Banner.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories.Banner;
+using Mapster;
 using MediatR;
 using System;
 
@@ -13,27 +14,7 @@ namespace Application.Features.Banners.Queries.GetBannersList
             CancellationToken cancellationToken)
         {
             var banners = await bannerRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
-            var response = banners.Select(
-                b => new BannerResponse
-                {
-                    Id = b.Id,
-                    Title = b.Title,
-                    ImageUrl = b.ImageUrl,
-                    LinkUrl = b.LinkUrl,
-                    CtaText = b.CtaText,
-                    Placement = b.Placement,
-                    Position = b.Position,
-                    StartDate = b.StartDate,
-                    EndDate = b.EndDate,
-                    IsActive = b.IsActive,
-                    Priority = b.Priority,
-                    ClickCount = b.ClickCount,
-                    ViewCount = b.ViewCount,
-                    DisplayOrder = b.DisplayOrder,
-                    CTR = b.CTR
-                })
-                .OrderBy(b => b.DisplayOrder)
-                .ToList();
+            var response = banners.Adapt<List<BannerResponse>>().OrderBy(b => b.DisplayOrder).ToList();
             return Result<List<BannerResponse>>.Success(response);
         }
     }
