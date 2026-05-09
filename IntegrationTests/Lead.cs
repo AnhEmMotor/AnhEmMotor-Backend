@@ -529,6 +529,13 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         };
 
         // Action
+        var admin = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services, $"admin_lead_039_{uniqueId}", "Password123!", 
+            [PermissionsList.Leads.View, PermissionsList.Leads.Create, PermissionsList.Leads.Edit, PermissionsList.Leads.Delete], 
+            TestContext.Current.CancellationToken);
+        var login = await IntegrationTestAuthHelper.AuthenticateAsync(_client, $"admin_lead_039_{uniqueId}", "Password123!", TestContext.Current.CancellationToken);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.AccessToken);
+
         var response = await _client.PostAsJsonAsync("/api/v1/lead", payload);
 
         // Assert
@@ -560,6 +567,11 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         };
 
         // Action
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services, "admin_lead_dup", "Password123!", [PermissionsList.Leads.View], TestContext.Current.CancellationToken);
+        var login = await IntegrationTestAuthHelper.AuthenticateAsync(_client, "admin_lead_dup", "Password123!", TestContext.Current.CancellationToken);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.AccessToken);
+
         var response = await _client.PostAsJsonAsync("/api/v1/lead", payload);
 
         // Assert
@@ -583,7 +595,9 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         db.Leads.Add(leadB);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
-        var login = await IntegrationTestAuthHelper.AuthenticateAsync(_client, "admin", "Password123!", TestContext.Current.CancellationToken);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services, $"admin_lead_039_2_{uniqueId}", "Password123!", [PermissionsList.Leads.Edit], TestContext.Current.CancellationToken);
+        var login = await IntegrationTestAuthHelper.AuthenticateAsync(_client, $"admin_lead_039_2_{uniqueId}", "Password123!", TestContext.Current.CancellationToken);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.AccessToken);
 
         var command = new UpdateLeadCommand { Id = leadB.Id, FullName = "Lead B", IdentificationNumber = cccd };
@@ -609,30 +623,37 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         db.Leads.Add(lead);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
-        var adminLogin = await IntegrationTestAuthHelper.AuthenticateAsync(_client, "admin", "Password123!", TestContext.Current.CancellationToken);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services, $"admin_lead_040_{uniqueId}", "Password123!", [PermissionsList.Leads.Edit], TestContext.Current.CancellationToken);
+        var adminLogin = await IntegrationTestAuthHelper.AuthenticateAsync(_client, $"admin_lead_040_{uniqueId}", "Password123!", TestContext.Current.CancellationToken);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminLogin.AccessToken);
 
-        // Get a sales user ID (hypothetical guid for test)
-        var salesId = Guid.NewGuid();
+        // Get a real staff user ID for assignment
+        var staffUser = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services, $"staff_lead_040_{uniqueId}", "Password123!", [], TestContext.Current.CancellationToken);
+        var salesId = staffUser.Id;
 
         // Action
-        var response = await _client.PostAsJsonAsync($"/api/v1/lead/{lead.Id}/assign", salesId);
+        var response = await _client.PostAsJsonAsync($"/api/v1/lead/{lead.Id}/assign", (Guid?)salesId);
         
         // Assert
-        response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NoContent, HttpStatusCode.NotFound);
+        response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NoContent);
     }
 
     [Fact(DisplayName = "LEAD_042 - Truy vấn danh sách Lead theo xe quan tâm")]
     public async Task LEAD_042_Filter_Leads_By_Vehicle_Success()
     {
         // Arrange
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var vehicle = "Honda SH 150i";
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         db.Leads.Add(new Domain.Entities.Lead { FullName = "Interested User", PhoneNumber = "0988888888", InterestedVehicle = vehicle });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
-        var adminLogin = await IntegrationTestAuthHelper.AuthenticateAsync(_client, "admin", "Password123!", TestContext.Current.CancellationToken);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services, $"admin_lead_042_{uniqueId}", "Password123!", [PermissionsList.Leads.View], TestContext.Current.CancellationToken);
+        var adminLogin = await IntegrationTestAuthHelper.AuthenticateAsync(_client, $"admin_lead_042_{uniqueId}", "Password123!", TestContext.Current.CancellationToken);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminLogin.AccessToken);
 
         // Action
@@ -655,6 +676,8 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         db.Leads.Add(lead);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services, "admin", "Password123!", [PermissionsList.Leads.Delete], TestContext.Current.CancellationToken);
         var adminLogin = await IntegrationTestAuthHelper.AuthenticateAsync(_client, "admin", "Password123!", TestContext.Current.CancellationToken);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminLogin.AccessToken);
 

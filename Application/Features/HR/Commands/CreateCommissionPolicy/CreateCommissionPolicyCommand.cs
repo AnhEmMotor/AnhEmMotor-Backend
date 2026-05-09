@@ -2,7 +2,9 @@ using Application.Common.Models;
 using Application.Interfaces;
 using Domain.Entities.HR;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using System;
+using System.Linq;
 using System.Text.Json;
 
 namespace Application.Features.HR.Commands.CreateCommissionPolicy;
@@ -38,6 +40,23 @@ public sealed class CreateCommissionPolicyCommandHandler(IApplicationDBContext c
 {
     public async Task<Result<int>> Handle(CreateCommissionPolicyCommand request, CancellationToken cancellationToken)
     {
+        // Kiểm tra trùng lặp/chồng lấn thời gian
+        // Rule: Không cho phép tạo định mức mới nếu đã có định mức khác cho cùng sản phẩm/nhóm đang hiệu lực trong vòng 7 ngày
+        var startDate = request.EffectiveDate.AddDays(-7);
+        var endDate = request.EffectiveDate.AddDays(7);
+        var existingPolicy = await context.CommissionPolicies
+            .Where(p => p.IsActive && 
+                        p.ProductId == request.ProductId && 
+                        p.CategoryId == request.CategoryId &&
+                        p.EffectiveDate > startDate &&
+                        p.EffectiveDate < endDate)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (existingPolicy != null)
+        {
+            return Result<int>.Failure(Error.BadRequest("Định mức cho sản phẩm/nhóm này đã tồn tại trong khoảng thời gian hiệu lực (Yêu cầu cách nhau ít nhất 7 ngày)."));
+        }
+
         var policy = new CommissionPolicy
         {
             Name = request.Name,

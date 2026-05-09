@@ -324,18 +324,10 @@
             </summary>
             <param name="context">The database context.</param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.CommissionPolicyController.#ctor(Application.Interfaces.IApplicationDBContext)">
-            <summary>
-            Controller for managing commission policies.
-            </summary>
-            <param name="context">The database context.</param>
-        </member>
-        <member name="M:WebAPI.Controllers.V1.CommissionPolicyController.GetPolicies(System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.CommissionPolicyController.GetPolicies(Application.Interfaces.IApplicationDBContext,System.Threading.CancellationToken)">
             <summary>
             Gets all commission policies.
             </summary>
-            <param name="cancellationToken">The cancellation token.</param>
-            <returns>A list of commission policies.</returns>
         </member>
         <member name="M:WebAPI.Controllers.V1.CommissionPolicyController.CreatePolicy(Application.Features.HR.Commands.CreateCommissionPolicy.CreateCommissionPolicyCommand,MediatR.IMediator,System.Threading.CancellationToken)">
             <summary>
@@ -347,18 +339,15 @@
             Updates an existing commission policy.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.CommissionPolicyController.GetAuditLogs(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.CommissionPolicyController.GetAuditLogs(System.Int32,Application.Interfaces.IApplicationDBContext,System.Threading.CancellationToken)">
             <summary>
             Gets audit logs for a policy.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.CommissionPolicyController.DeletePolicy(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.CommissionPolicyController.DeletePolicy(System.Int32,Application.Interfaces.IApplicationDBContext,System.Threading.CancellationToken)">
             <summary>
             Deletes a commission policy.
             </summary>
-            <param name="id">The ID of the policy to delete.</param>
-            <param name="cancellationToken">The cancellation token.</param>
-            <returns>A no content result.</returns>
         </member>
         <member name="T:WebAPI.Controllers.V1.ContactsController">
             <summary>
@@ -537,6 +526,11 @@
         <member name="M:WebAPI.Controllers.V1.LeadController.GetLeadsAsync(System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách Leads
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.LeadController.CreateLeadAsync(Application.Features.Leads.Commands.CreateLead.CreateLeadCommand,System.Threading.CancellationToken)">
+            <summary>
+            Tạo mới một khách hàng tiềm năng
             </summary>
         </member>
         <member name="M:WebAPI.Controllers.V1.LeadController.GetLeadByIdAsync(System.Int32,System.Threading.CancellationToken)">

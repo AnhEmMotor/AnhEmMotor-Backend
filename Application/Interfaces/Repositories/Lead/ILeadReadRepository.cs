@@ -18,5 +18,9 @@ public interface ILeadReadRepository
         string? search,
         CancellationToken cancellationToken = default);
 
+    public Task<Domain.Entities.Lead?> GetByIdentificationNumberAsync(
+        string identificationNumber,
+        CancellationToken cancellationToken = default);
+
     public IQueryable<Domain.Entities.Lead> GetQueryable();
 }

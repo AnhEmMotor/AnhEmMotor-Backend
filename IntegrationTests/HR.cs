@@ -52,7 +52,7 @@ public class HR : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             _factory.Services,
             "admin",
             "AdminPass123!",
-            [],
+            [PermissionsList.HR.Create],
             TestContext.Current.CancellationToken);
 
         var adminLogin = await IntegrationTestAuthHelper.AuthenticateAsync(_client, "admin", "AdminPass123!", TestContext.Current.CancellationToken);
@@ -89,50 +89,54 @@ public class HR : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
     {
         // Arrange
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
-            _factory.Services, "admin_hr", "Password123!", [], TestContext.Current.CancellationToken);
-        var login = await IntegrationTestAuthHelper.AuthenticateAsync(_client, "admin_hr", "Password123!", TestContext.Current.CancellationToken);
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        
+        var admin = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services, $"admin_hr04_prev_{uniqueId}", "Password123!", [], TestContext.Current.CancellationToken);
+        
+        var login = await IntegrationTestAuthHelper.AuthenticateAsync(_client, $"admin_hr04_prev_{uniqueId}", "Password123!", TestContext.Current.CancellationToken);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.AccessToken);
 
-        using var scope1 = _factory.Services.CreateScope();
-        var db1 = scope1.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var adminUser = await db1.Users.FirstOrDefaultAsync(u => u.UserName == "admin_hr", TestContext.Current.CancellationToken);
-        var adminId = adminUser!.Id;
-
-        var prod = new ProductEntity { Name = "Test Product HR04", StatusId = "for-sale" };
-        db1.Products.Add(prod);
-        await db1.SaveChangesAsync(TestContext.Current.CancellationToken);
+        var prod = new ProductEntity { Name = $"Test Product HR04_{uniqueId}", StatusId = "for-sale" };
+        db.Products.Add(prod);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
         var productId = prod.Id;
         
         var command1 = new CreateCommissionPolicyCommand
         {
-            Name = "Policy 1",
+            Name = $"Policy 1 {uniqueId}",
             ProductId = productId,
             Value = 500000,
             Type = "FixedAmount",
             EffectiveDate = DateTimeOffset.UtcNow.AddDays(-10),
             IsActive = true,
-            CurrentUserId = adminId,
-            CurrentUserName = "admin_hr"
+            CurrentUserId = admin.Id,
+            CurrentUserName = "Admin"
         };
         await HttpClientJsonExtensions.PostAsJsonAsync(_client, "/api/v1/hr/commission-policies", command1, TestContext.Current.CancellationToken);
 
         var command2 = new CreateCommissionPolicyCommand
         {
-            Name = "Overlapping Policy",
+            Name = $"Overlapping Policy {uniqueId}",
             ProductId = productId,
             Value = 600000,
             Type = "FixedAmount",
             EffectiveDate = DateTimeOffset.UtcNow.AddDays(-5),
             IsActive = true,
-            CurrentUserId = adminId,
-            CurrentUserName = "admin_hr"
+            CurrentUserId = admin.Id,
+            CurrentUserName = "Admin"
         };
 
         // Action
         var response = await HttpClientJsonExtensions.PostAsJsonAsync(_client, "/api/v1/hr/commission-policies", command2, TestContext.Current.CancellationToken);
 
         // Assert
+        if (response.StatusCode == HttpStatusCode.InternalServerError)
+        {
+            var error = await response.Content.ReadAsStringAsync();
+            throw new Exception($"500 Error in HR04_Overlapping: {error}");
+        }
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
@@ -141,50 +145,56 @@ public class HR : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
     {
         // Arrange
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
-            _factory.Services, "admin_hr2", "Password123!", [], TestContext.Current.CancellationToken);
-        var login = await IntegrationTestAuthHelper.AuthenticateAsync(_client, "admin_hr2", "Password123!", TestContext.Current.CancellationToken);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.AccessToken);
-
+        
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var adminUser = await db.Users.FirstOrDefaultAsync(u => u.UserName == "admin_hr2", TestContext.Current.CancellationToken);
-        var adminId = adminUser!.Id;
 
-        var prod = new ProductEntity { Name = "Test Product HR04-2", StatusId = "for-sale" };
+        var prod = new ProductEntity { Name = $"Test Product HR04-2_{uniqueId}", StatusId = "for-sale" };
         db.Products.Add(prod);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
         
         var endDate = DateTimeOffset.UtcNow.AddDays(10);
+        var admin = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services, $"admin_hr04_{uniqueId}", "Password123!", [], TestContext.Current.CancellationToken);
+        
+        var login = await IntegrationTestAuthHelper.AuthenticateAsync(_client, $"admin_hr04_{uniqueId}", "Password123!", TestContext.Current.CancellationToken);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.AccessToken);
+
         var command1 = new CreateCommissionPolicyCommand
         {
-            Name = "Old Policy",
-            ProductId = prod.Id,
-            Value = 500000,
-            Type = "FixedAmount",
+            Name = $"Base Policy {uniqueId}",
+            Type = "Percentage",
+            Value = 5,
+            ProductId = null,
+            CategoryId = null,
             EffectiveDate = DateTimeOffset.UtcNow.AddDays(-10),
             IsActive = true,
-            CurrentUserId = adminId,
-            CurrentUserName = "admin_hr2"
+            CurrentUserId = admin.Id,
+            CurrentUserName = "Admin"
         };
         await HttpClientJsonExtensions.PostAsJsonAsync(_client, "/api/v1/hr/commission-policies", command1, TestContext.Current.CancellationToken);
 
         var command2 = new CreateCommissionPolicyCommand
         {
-            Name = "New Policy",
+            Name = $"New Policy {uniqueId}",
             ProductId = prod.Id,
             Value = 600000,
             Type = "FixedAmount",
             EffectiveDate = endDate.AddSeconds(1),
             IsActive = true,
-            CurrentUserId = adminId,
-            CurrentUserName = "admin_hr2"
+            CurrentUserId = admin.Id,
+            CurrentUserName = "Admin"
         };
 
         // Action
         var response = await HttpClientJsonExtensions.PostAsJsonAsync(_client, "/api/v1/hr/commission-policies", command2, TestContext.Current.CancellationToken);
 
         // Assert
+        if (response.StatusCode == HttpStatusCode.InternalServerError)
+        {
+            var error = await response.Content.ReadAsStringAsync();
+            throw new Exception($"500 Error in HR04: {error}");
+        }
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
@@ -281,34 +291,55 @@ public class HR : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
     {
         // Arrange
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
-            _factory.Services, "admin_final", "Password123!", [], TestContext.Current.CancellationToken);
-        var login = await IntegrationTestAuthHelper.AuthenticateAsync(_client, "admin_final", "Password123!", TestContext.Current.CancellationToken);
+        var admin = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services, $"admin_hr07_{uniqueId}", "Password123!", 
+            [PermissionsList.HR.Edit, PermissionsList.HR.View, PermissionsList.Payroll.Approve, PermissionsList.Payroll.View], 
+            TestContext.Current.CancellationToken);
+        
+        var login = await IntegrationTestAuthHelper.AuthenticateAsync(_client, $"admin_hr07_{uniqueId}", "Password123!", TestContext.Current.CancellationToken);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.AccessToken);
 
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         
-        var emp = new EmployeeProfile { UserId = Guid.NewGuid(), BaseSalary = 10000000 };
+        var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services, $"user_hr07_{uniqueId}", "Password123!", [], TestContext.Current.CancellationToken);
+        
+        var emp = new EmployeeProfile { UserId = user.Id, BaseSalary = 10000000 };
         db.EmployeeProfiles.Add(emp);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
-        var record = new CommissionRecord { 
-            EmployeeProfileId = emp.Id, 
-            Amount = 1000000, 
+        var status = await db.OutputStatuses.FirstOrDefaultAsync(s => s.Key == "completed", TestContext.Current.CancellationToken);
+        if (status == null)
+        {
+            status = new OutputStatus { Key = "completed" };
+            db.OutputStatuses.Add(status);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+        }
+
+        var output = new OutputEntity { CustomerName = "Test", PaidAmount = 1000, StatusId = "completed" };
+        db.OutputOrders.Add(output);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var now = DateTime.UtcNow;
+        var record = new CommissionRecord
+        {
+            EmployeeProfileId = emp.Id,
+            OutputId = output.Id,
+            Amount = 500000,
             Status = CommissionStatus.Confirmed,
-            OutputId = 1
+            DateEarned = now
         };
         db.CommissionRecords.Add(record);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Action: Approve payroll
-        var response = await HttpClientJsonExtensions.PostAsJsonAsync(_client, "/api/v1/hr/commissions/approve-payroll", new { month = DateTime.Now.Month, year = DateTime.Now.Year }, TestContext.Current.CancellationToken);
+        var response = await HttpClientJsonExtensions.PostAsJsonAsync(_client, "/api/v1/hr/commissions/approve-payroll", new { month = now.Month, year = now.Year }, TestContext.Current.CancellationToken);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         
-        var updatedRecord = await db.CommissionRecords.FirstOrDefaultAsync(r => r.Id == record.Id, TestContext.Current.CancellationToken);
+        var updatedRecord = await db.CommissionRecords.AsNoTracking().FirstOrDefaultAsync(r => r.Id == record.Id, TestContext.Current.CancellationToken);
         updatedRecord!.Status.Should().Be(CommissionStatus.Paid);
         updatedRecord.PaidAt.Should().NotBeNull();
     }

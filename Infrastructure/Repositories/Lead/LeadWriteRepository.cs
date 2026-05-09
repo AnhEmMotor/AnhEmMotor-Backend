@@ -22,6 +22,12 @@ public class LeadWriteRepository(ApplicationDBContext context) : ILeadWriteRepos
         await context.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task AddAsync(Domain.Entities.Lead lead, CancellationToken cancellationToken = default)
+    {
+        context.Leads.Add(lead);
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
     public async Task ClearAllAsync(CancellationToken cancellationToken = default)
     {
         var activities = await context.LeadActivities.ToListAsync(cancellationToken);

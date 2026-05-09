@@ -1,4 +1,4 @@
-﻿using Application.Common.Models;
+using Application.Common.Models;
 using Microsoft.AspNetCore.Mvc;
 
 using Microsoft.AspNetCore.RateLimiting;
@@ -52,7 +52,7 @@ public abstract class ApiController : ControllerBase
     {
         if (result.IsSuccess)
         {
-            return StatusCode(StatusCodes.Status201Created, result.Value);
+            return Created(string.Empty, result.Value);
         }
         return MapErrorsToResponse(result);
     }

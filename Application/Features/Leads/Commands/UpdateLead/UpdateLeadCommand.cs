@@ -47,6 +47,17 @@ public class UpdateLeadCommandHandler(ILeadWriteRepository leadWriteRepository, 
         {
             return Result<int>.Failure("Không tìm thấy khách hàng.");
         }
+        // Check for duplicate identification number if changed
+        if (!string.IsNullOrEmpty(request.IdentificationNumber) && 
+            request.IdentificationNumber != lead.IdentificationNumber)
+        {
+            var existingWithCccd = await leadReadRepository.GetByIdentificationNumberAsync(request.IdentificationNumber, cancellationToken);
+            if (existingWithCccd != null && existingWithCccd.Id != lead.Id)
+            {
+                return Result<int>.Failure("Identification number already exists.");
+            }
+        }
+
         lead.FullName = request.FullName;
         lead.Email = request.Email;
         lead.PhoneNumber = request.PhoneNumber;
@@ -65,6 +76,7 @@ public class UpdateLeadCommandHandler(ILeadWriteRepository leadWriteRepository, 
         {
             lead.Source = request.Source;
         }
+
         lead.InterestedVehicle = request.InterestedVehicle;
         lead.Score = request.Score;
         await leadWriteRepository.UpdateAsync(lead, cancellationToken);

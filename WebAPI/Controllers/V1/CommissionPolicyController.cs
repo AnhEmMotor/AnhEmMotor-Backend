@@ -19,15 +19,15 @@ namespace WebAPI.Controllers.V1;
 [Route("api/v{version:apiVersion}/hr/commission-policies")]
 [ApiController]
 [Authorize]
-public class CommissionPolicyController(IApplicationDBContext context) : ControllerBase
+public class CommissionPolicyController : ControllerBase
 {
     /// <summary>
     /// Gets all commission policies.
     /// </summary>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>A list of commission policies.</returns>
     [HttpGet]
-    public async Task<ActionResult<List<CommissionPolicy>>> GetPolicies(CancellationToken cancellationToken)
+    public async Task<ActionResult<List<CommissionPolicy>>> GetPolicies(
+        [FromServices] IApplicationDBContext context,
+        CancellationToken cancellationToken)
     {
         return await context.CommissionPolicies
             .Include(p => p.Category)
@@ -75,6 +75,7 @@ public class CommissionPolicyController(IApplicationDBContext context) : Control
     [HttpGet("{id}/audit-logs")]
     public async Task<ActionResult<List<CommissionPolicyAuditLog>>> GetAuditLogs(
         int id,
+        [FromServices] IApplicationDBContext context,
         CancellationToken cancellationToken)
     {
         return await context.CommissionPolicyAuditLogs
@@ -86,11 +87,11 @@ public class CommissionPolicyController(IApplicationDBContext context) : Control
     /// <summary>
     /// Deletes a commission policy.
     /// </summary>
-    /// <param name="id">The ID of the policy to delete.</param>
-    /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>A no content result.</returns>
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeletePolicy(int id, CancellationToken cancellationToken)
+    public async Task<IActionResult> DeletePolicy(
+        int id, 
+        [FromServices] IApplicationDBContext context,
+        CancellationToken cancellationToken)
     {
         var policy = await context.CommissionPolicies.FindAsync(id, cancellationToken);
         if (policy == null)

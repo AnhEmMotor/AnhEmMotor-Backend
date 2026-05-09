@@ -37,6 +37,20 @@ public class LeadController(IMediator mediator) : ApiController
     }
 
     /// <summary>
+    /// Tạo mới một khách hàng tiềm năng
+    /// </summary>
+    [HttpPost]
+    [Authorize]
+    [ProducesResponseType(typeof(int), StatusCodes.Status201Created)]
+    public async Task<IActionResult> CreateLeadAsync(
+        [FromBody] Application.Features.Leads.Commands.CreateLead.CreateLeadCommand command,
+        CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(command, cancellationToken);
+        return HandleCreated(result);
+    }
+
+    /// <summary>
     /// Lấy thông tin chi tiết khách hàng theo ID
     /// </summary>
     [HttpGet("{id:int}")]
@@ -68,7 +82,7 @@ public class LeadController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
     public async Task<IActionResult> UpdateLeadAsync(
         int id,
-        UpdateLeadCommand command,
+        [FromBody] UpdateLeadCommand command,
         CancellationToken cancellationToken)
     {
         if (id != command.Id)

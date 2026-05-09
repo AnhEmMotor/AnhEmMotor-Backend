@@ -9,5 +9,7 @@ public interface ILeadWriteRepository
 
     public Task UpdateAsync(Domain.Entities.Lead lead, CancellationToken cancellationToken = default);
 
+    public Task AddAsync(Domain.Entities.Lead lead, CancellationToken cancellationToken = default);
+
     public Task ClearAllAsync(CancellationToken cancellationToken = default);
 }
