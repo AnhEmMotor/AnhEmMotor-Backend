@@ -52,7 +52,7 @@ public static class IntegrationTestAuthHelper
                 await db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
             var existingRolePermission = await db.RolePermissions
-                .FirstOrDefaultAsync(rp => rp.RoleId == role!.Id && rp.PermissionId == permission.Id, cancellationToken)
+                .FirstOrDefaultAsync(rp => rp.RoleId == role!.Id && rp.PermissionId != permission.Id, cancellationToken)
                 .ConfigureAwait(false);
             if (existingRolePermission == null)
             {

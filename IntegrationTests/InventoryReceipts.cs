@@ -1,4 +1,4 @@
-using Application.ApiContracts.Input.Requests;
+Ôªøusing Application.ApiContracts.Input.Requests;
 using Application.ApiContracts.Input.Responses;
 using Application.Features.Inputs.Commands.CreateInput;
 using Application.Features.Inputs.Commands.DeleteManyInputs;
@@ -54,7 +54,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
 
     #pragma warning disable IDE0079 
     #pragma warning disable CRR0035
-    [Fact(DisplayName = "INPUT_001 - T?o phi?u nh?p h‡ng th‡nh cÙng (Happy Path)")]
+    [Fact(DisplayName = "INPUT_001 - T?o phi?u nh?p h√†ng th√†nh c√¥ng (Happy Path)")]
     public async Task CreateInput_Success_ReturnsOk()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -135,7 +135,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         var request = new CreateInputCommand
         {
-            Notes = "Nh?p h‡ng th·ng 1",
+            Notes = "Nh?p h√†ng th√°ng 1",
             SupplierId = supplier.Id,
             Products = [new CreateInputInfoRequest { ProductId = variant.Id, Count = 10, InputPrice = 100000 }]
         };
@@ -168,7 +168,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         input!.StatusId.Should().Be(Domain.Constants.Input.InputStatus.Working);
     }
 
-    [Fact(DisplayName = "INPUT_002 - T?o phi?u nh?p v?i nhi?u s?n ph?m v‡ tÌnh to·n chÌnh x·c t?ng ti?n")]
+    [Fact(DisplayName = "INPUT_002 - T?o phi?u nh?p v?i nhi?u s?n ph?m v√† t√≠nh to√°n ch√≠nh x√°c t?ng ti?n")]
     public async Task CreateInput_MultipleProducts_CalculatesTotalCorrectly()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -268,7 +268,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         content!.TotalPayable.Should().Be((long)expectedTotal);
     }
 
-    [Fact(DisplayName = "INPUT_004 - T?o phi?u nh?p v?i SupplierId khÙng t?n t?i")]
+    [Fact(DisplayName = "INPUT_004 - T?o phi?u nh?p v?i SupplierId kh√¥ng t?n t?i")]
     public async Task CreateInput_NonExistentSupplier_ReturnsNotFound()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -305,7 +305,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         response!.StatusCode.Should().BeOneOf(HttpStatusCode.NotFound, HttpStatusCode.BadRequest);
     }
 
-    [Fact(DisplayName = "INPUT_005 - T?o phi?u nh?p v?i ProductId khÙng t?n t?i")]
+    [Fact(DisplayName = "INPUT_005 - T?o phi?u nh?p v?i ProductId kh√¥ng t?n t?i")]
     public async Task CreateInput_NonExistentProduct_ReturnsNotFound()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -342,7 +342,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         response!.StatusCode.Should().BeOneOf(HttpStatusCode.NotFound, HttpStatusCode.BadRequest);
     }
 
-    [Fact(DisplayName = "INPUT_006 - T?o phi?u nh?p v?i Product d„ b? xÛa ho?c khÙng cÚn b·n")]
+    [Fact(DisplayName = "INPUT_006 - T?o phi?u nh?p v?i Product d√£ b? x√≥a ho?c kh√¥ng c√≤n b√°n")]
     public async Task CreateInput_DeletedProduct_ReturnsBadRequest()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -513,7 +513,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         input!.Notes.Should().NotContain("<script>");
     }
 
-    [Fact(DisplayName = "INPUT_016 - L?y danh s·ch phi?u nh?p cÛ ph‚n trang")]
+    [Fact(DisplayName = "INPUT_016 - L?y danh s√°ch phi?u nh?p c√≥ ph√¢n trang")]
     public async Task GetInputs_WithPagination_ReturnsCorrectPage()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -547,7 +547,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         content.PageNumber.Should().Be(1);
     }
 
-    [Fact(DisplayName = "INPUT_017 - L?y danh s·ch phi?u nh?p v?i filter theo StatusId")]
+    [Fact(DisplayName = "INPUT_017 - L?y danh s√°ch phi?u nh?p v?i filter theo StatusId")]
     public async Task GetInputs_FilterByStatus_ReturnsFilteredResults()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -584,7 +584,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             .OnlyContain(i => string.Compare(i.StatusId, Domain.Constants.Input.InputStatus.Working) == 0);
     }
 
-    [Fact(DisplayName = "INPUT_018 - L?y danh s·ch phi?u nh?p v?i sort theo InputDate descending")]
+    [Fact(DisplayName = "INPUT_018 - L?y danh s√°ch phi?u nh?p v?i sort theo InputDate descending")]
     public async Task GetInputs_SortByInputDateDesc_ReturnsSortedResults()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -675,7 +675,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         items.Should().BeInDescendingOrder(i => i.CreatedAt);
     }
 
-    [Fact(DisplayName = "INPUT_020 - L?y chi ti?t phi?u nh?p th‡nh cÙng")]
+    [Fact(DisplayName = "INPUT_020 - L?y chi ti?t phi?u nh?p th√†nh c√¥ng")]
     public async Task GetInputById_ExistingInput_ReturnsCompleteDetails()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -776,7 +776,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         content.TotalPayable.Should().Be(250000);
     }
 
-    [Fact(DisplayName = "INPUT_021 - L?y chi ti?t phi?u nh?p khÙng t?n t?i")]
+    [Fact(DisplayName = "INPUT_021 - L?y chi ti?t phi?u nh?p kh√¥ng t?n t?i")]
     public async Task GetInputById_NonExistentInput_ReturnsNotFound()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -805,7 +805,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         response!.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
-    [Fact(DisplayName = "INPUT_023 - C?p nh?t phi?u nh?p th‡nh cÙng ? tr?ng th·i working")]
+    [Fact(DisplayName = "INPUT_023 - C?p nh?t phi?u nh?p th√†nh c√¥ng ? tr?ng th√°i working")]
     public async Task UpdateInput_WorkingStatus_UpdatesSuccessfully()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -928,7 +928,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         content.TotalPayable.Should().Be(4000000);
     }
 
-    [Fact(DisplayName = "INPUT_024 - C?p nh?t phi?u nh?p ? tr?ng th·i finished (khÙng cho phÈp)")]
+    [Fact(DisplayName = "INPUT_024 - C?p nh?t phi?u nh?p ? tr?ng th√°i finished (kh√¥ng cho ph√©p)")]
     public async Task UpdateInput_FinishedStatus_ReturnsBadRequest()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -1040,7 +1040,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
-    [Fact(DisplayName = "INPUT_025 - C?p nh?t phi?u nh?p ? tr?ng th·i cancelled (khÙng cho phÈp)")]
+    [Fact(DisplayName = "INPUT_025 - C?p nh?t phi?u nh?p ? tr?ng th√°i cancelled (kh√¥ng cho ph√©p)")]
     public async Task UpdateInput_CancelledStatus_ReturnsBadRequest()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -1152,7 +1152,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
-    [Fact(DisplayName = "INPUT_028 - C?p nh?t tr?ng th·i phi?u nh?p t? working sang finished")]
+    [Fact(DisplayName = "INPUT_028 - C?p nh?t tr?ng th√°i phi?u nh?p t? working sang finished")]
     public async Task UpdateInputStatus_WorkingToFinished_UpdatesSuccessfully()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -1260,7 +1260,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         input.ConfirmedBy.Should().NotBeNull();
     }
 
-    [Fact(DisplayName = "INPUT_029 - C?p nh?t tr?ng th·i phi?u nh?p t? working sang cancelled")]
+    [Fact(DisplayName = "INPUT_029 - C?p nh?t tr?ng th√°i phi?u nh?p t? working sang cancelled")]
     public async Task UpdateInputStatus_WorkingToCancelled_UpdatesSuccessfully()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -1363,7 +1363,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         content!.StatusId.Should().Be(Domain.Constants.Input.InputStatus.Cancel);
     }
 
-    [Fact(DisplayName = "INPUT_032 - C?p nh?t tr?ng th·i nhi?u phi?u nh?p c˘ng l˙c")]
+    [Fact(DisplayName = "INPUT_032 - C?p nh?t tr?ng th√°i nhi?u phi?u nh?p c√πng l√∫c")]
     public async Task UpdateManyInputStatus_MultipleInputs_UpdatesAllSuccessfully()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -1478,7 +1478,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         }
     }
 
-    [Fact(DisplayName = "INPUT_033 - C?p nh?t tr?ng th·i nhi?u phi?u nh?p v?i m?t s? Id khÙng t?n t?i")]
+    [Fact(DisplayName = "INPUT_033 - C?p nh?t tr?ng th√°i nhi?u phi?u nh?p v?i m?t s? Id kh√¥ng t?n t?i")]
     public async Task UpdateManyInputStatus_SomeNonExistent_HandlesPartially()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -1583,7 +1583,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             .BeOneOf(HttpStatusCode.MultiStatus, HttpStatusCode.BadRequest, HttpStatusCode.NotFound);
     }
 
-    [Fact(DisplayName = "INPUT_034 - XÛa phi?u nh?p th‡nh cÙng ? tr?ng th·i working")]
+    [Fact(DisplayName = "INPUT_034 - X√≥a phi?u nh?p th√†nh c√¥ng ? tr?ng th√°i working")]
     public async Task DeleteInput_WorkingStatus_DeletesSuccessfully()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -1679,7 +1679,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         input!.DeletedAt.Should().NotBeNull();
     }
 
-    [Fact(DisplayName = "INPUT_038 - XÛa nhi?u phi?u nh?p c˘ng l˙c")]
+    [Fact(DisplayName = "INPUT_038 - X√≥a nhi?u phi?u nh?p c√πng l√∫c")]
     public async Task DeleteManyInputs_MultipleInputs_DeletesAllSuccessfully()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -1782,7 +1782,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         response!.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NoContent);
     }
 
-    [Fact(DisplayName = "INPUT_039 - KhÙi ph?c phi?u nh?p d„ xÛa th‡nh cÙng")]
+    [Fact(DisplayName = "INPUT_039 - Kh√¥i ph?c phi?u nh?p d√£ x√≥a th√†nh c√¥ng")]
     public async Task RestoreInput_DeletedInput_RestoresSuccessfully()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -1880,7 +1880,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         input!.DeletedAt.Should().BeNull();
     }
 
-    [Fact(DisplayName = "INPUT_041 - KhÙi ph?c nhi?u phi?u nh?p d„ xÛa c˘ng l˙c")]
+    [Fact(DisplayName = "INPUT_041 - Kh√¥i ph?c nhi?u phi?u nh?p d√£ x√≥a c√πng l√∫c")]
     public async Task RestoreManyInputs_MultipleDeletedInputs_RestoresAllSuccessfully()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -1984,7 +1984,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         }
     }
 
-    [Fact(DisplayName = "INPUT_042 - Clone phi?u nh?p th‡nh cÙng")]
+    [Fact(DisplayName = "INPUT_042 - Clone phi?u nh?p th√†nh c√¥ng")]
     public async Task CloneInput_ValidInput_CreatesNewInput()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -2083,7 +2083,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         clonedInput.SupplierId.Should().Be(createdInput.SupplierId);
     }
 
-    [Fact(DisplayName = "INPUT_043 - Clone phi?u nh?p v?i s?n ph?m d„ b? xÛa")]
+    [Fact(DisplayName = "INPUT_043 - Clone phi?u nh?p v?i s?n ph?m d√£ b? x√≥a")]
     public async Task CloneInput_WithDeletedProduct_ClonesOnlyValidProducts()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -2205,7 +2205,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         clonedInput.Products[0].ProductId.Should().Be(variant1.Id);
     }
 
-    [Fact(DisplayName = "INPUT_046 - L?y danh s·ch phi?u nh?p theo SupplierId")]
+    [Fact(DisplayName = "INPUT_046 - L?y danh s√°ch phi?u nh?p theo SupplierId")]
     public async Task GetInputsBySupplierId_ValidSupplierId_ReturnsFilteredInputs()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -2285,7 +2285,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         content!.Items.Should().OnlyContain(i => i.SupplierId == supplierId);
     }
 
-    [Fact(DisplayName = "INPUT_047 - L?y danh s·ch phi?u nh?p d„ xÛa")]
+    [Fact(DisplayName = "INPUT_047 - L?y danh s√°ch phi?u nh?p d√£ x√≥a")]
     public async Task GetDeletedInputs_ReturnsOnlyDeletedInputs()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -2372,7 +2372,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         content!.Should().NotBeNull();
     }
 
-    [Fact(DisplayName = "INPUT_066 - T?o phi?u nh?p v?i ImportPrice l‡ 0")]
+    [Fact(DisplayName = "INPUT_066 - T?o phi?u nh?p v?i ImportPrice l√† 0")]
     public async Task CreateInput_ZeroImportPrice_AllowsFreeProducts()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -2451,7 +2451,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         content!.TotalPayable.Should().Be(0);
     }
 
-    [Fact(DisplayName = "INPUT_068 - Ki?m tra ConfirmedBy du?c ghi nh?n d˙ng khi c?p nh?t phi?u nh?p")]
+    [Fact(DisplayName = "INPUT_068 - Ki?m tra ConfirmedBy du?c ghi nh?n d√∫ng khi c?p nh?t phi?u nh?p")]
     public async Task UpdateInputStatus_TracksConfirmedByCorrectly()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -2565,7 +2565,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         input!.ConfirmedBy.Should().NotBeNull();
     }
 
-    [Fact(DisplayName = "INPUT_069 - L?y danh s·ch phi?u nh?p v?i nhi?u filter k?t h?p")]
+    [Fact(DisplayName = "INPUT_069 - L?y danh s√°ch phi?u nh?p v?i nhi?u filter k?t h?p")]
     public async Task GetInputs_MultipleCombinedFilters_ReturnsFilteredResults()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -2634,7 +2634,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
                     i.SupplierId == supplier.Id);
     }
 
-    [Fact(DisplayName = "INPUT_070 - L?y danh s·ch tr?ng th·i phi?u nh?p th‡nh cÙng (Happy Path)")]
+    [Fact(DisplayName = "INPUT_070 - L?y danh s√°ch tr?ng th√°i phi?u nh?p th√†nh c√¥ng (Happy Path)")]
     public async Task GetInputStatuses_WithViewPermission_ReturnsAllStatusesWithVietnameseLabels()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -2664,12 +2664,12 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             .ConfigureAwait(true);
         content!.Should().NotBeNull();
         content!.Should().HaveCount(3);
-        content!.Should().ContainKey(Domain.Constants.Input.InputStatus.Working).WhoseValue.Should().Be("Phi?u t?m");
-        content!.Should().ContainKey(Domain.Constants.Input.InputStatus.Finish).WhoseValue.Should().Be("Ho‡n th‡nh");
-        content!.Should().ContainKey(Domain.Constants.Input.InputStatus.Cancel).WhoseValue.Should().Be("–„ hu?");
+        content!.Should().ContainKey(Domain.Constants.Input.InputStatus.Working).WhoseValue.Should().Be("Phi·∫øu t·∫°m");
+        content!.Should().ContainKey(Domain.Constants.Input.InputStatus.Finish).WhoseValue.Should().Be("Ho√†n th√†nh");
+        content!.Should().ContainKey(Domain.Constants.Input.InputStatus.Cancel).WhoseValue.Should().Be("√ê√£ hu·ª∑");
     }
 
-    [Fact(DisplayName = "INPUT_071 - L?y danh s·ch tr?ng th·i phi?u nh?p khi chua dang nh?p tr? 401")]
+    [Fact(DisplayName = "INPUT_071 - L?y danh s√°ch tr?ng th√°i phi?u nh?p khi chua dang nh?p tr? 401")]
     public async Task GetInputStatuses_WithoutToken_ReturnsUnauthorized()
     {
         _client.DefaultRequestHeaders.Authorization = null;
@@ -2678,7 +2678,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         response!.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
-    [Fact(DisplayName = "INPUT_076 - C?p nh?t ghi ch˙ phi?u nh?p h‡ng qua API riÍng th‡nh cÙng")]
+    [Fact(DisplayName = "INPUT_076 - C?p nh?t ghi ch√∫ phi?u nh?p h√†ng qua API ri√™ng th√†nh c√¥ng")]
     public async Task UpdateInputNotes_Success_ReturnsOk()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -2728,11 +2728,11 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             StatusId = inputStatusId,
             SupplierId = supplier.Id,
             CreatedBy = user.Id,
-            Notes = "Ghi ch˙ cu"
+            Notes = "Ghi ch√∫ cu"
         };
         db.InputReceipts.Add(input);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-        var request = new UpdateInputNotesCommand { Notes = "Ghi ch˙ m?i d„ du?c c?p nh?t" };
+        var request = new UpdateInputNotesCommand { Notes = "Ghi ch√∫ m?i d√£ du?c c?p nh?t" };
         var requestMessage = new HttpRequestMessage(HttpMethod.Patch, $"/api/v1/InventoryReceipts/{input.Id}/notes")
         {
             Content = JsonContent.Create(request)
@@ -2744,13 +2744,13 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
             .ReadFromJsonAsync<InputDetailResponse>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         content!.Should().NotBeNull();
-        content!.Notes.Should().Be("Ghi ch˙ m?i d„ du?c c?p nh?t");
+        content!.Notes.Should().Be("Ghi ch√∫ m?i d√£ du?c c?p nh?t");
         var updatedInput = await db.InputReceipts
             .AsNoTracking()
             .FirstOrDefaultAsync(i => i.Id == input.Id, TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         updatedInput.Should().NotBeNull();
-        updatedInput!.Notes.Should().Be("Ghi ch˙ m?i d„ du?c c?p nh?t");
+        updatedInput!.Notes.Should().Be("Ghi ch√∫ m?i d√£ du?c c?p nh?t");
     }
     #pragma warning restore CRR0035
 }

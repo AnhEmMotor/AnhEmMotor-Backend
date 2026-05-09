@@ -262,8 +262,8 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
                     // Phải dùng ToLower() để khớp với names đã được chuẩn hóa
                     variantSubquery = variantSubquery.Where(
                         v => v.VariantOptionValues.Any(vov => vov.OptionValueId != null && ids.Contains(vov.OptionValueId.Value)) ||
-                            (v.ColorName != null && names.Any(n => v.ColorName.ToLower().Contains(n))) ||
-                            (v.VersionName != null && names.Any(n => v.VersionName.ToLower().Contains(n))));
+                            (v.ColorName != null && names.Any(n => v.ColorName.Contains(n, StringComparison.CurrentCultureIgnoreCase))) ||
+                            (v.VersionName != null && names.Any(n => v.VersionName.Contains(n, StringComparison.CurrentCultureIgnoreCase))));
                 }
 
                 var matchingProductIds = variantSubquery.Select(v => v.ProductId);
@@ -383,6 +383,6 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             .Include(v => v.OutputInfos.Where(oi => oi.DeletedAt == null))
             .ThenInclude(oi => oi.OutputOrder)
             .AsSplitQuery()
-            .FirstOrDefaultAsync(v => string.Equals(v.UrlSlug, slug, StringComparison.OrdinalIgnoreCase), cancellationToken);
+            .FirstOrDefaultAsync(v => string.Compare(v.UrlSlug, slug) == 0, cancellationToken);
     }
 }

@@ -194,7 +194,7 @@ public class Booking : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var updatedLead = await db.Leads
                 .FirstOrDefaultAsync(
-                    l => l.PhoneNumber == phone,
+                    l => string.Compare(l.PhoneNumber, phone) == 0,
                     TestContext.Current.CancellationToken)
                 .ConfigureAwait(true);
             updatedLead!.Status.Should().Be(LeadStatus.TestDriving);
