@@ -292,7 +292,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>, IA
         using var verifyScope = _factory.Services.CreateScope();
         var verifyDb = verifyScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var roleInDb = await verifyDb.Roles
-            .FirstOrDefaultAsync(r => string.Equals(r.Name, newRoleName, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .FirstOrDefaultAsync(r => string.Compare(r.Name, newRoleName) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         roleInDb.Should().NotBeNull();
         roleInDb!.Description.Should().Be("Integration Test Role");
@@ -328,7 +328,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>, IA
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var roleInDb = await db.Roles
-            .FirstOrDefaultAsync(r => string.Equals(r.Name, request.RoleName, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .FirstOrDefaultAsync(r => string.Compare(r.Name, request.RoleName) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         roleInDb.Should().BeNull();
     }
@@ -418,7 +418,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>, IA
             var db = verifyScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var roleInDb = await db.Roles
                 .Include(r => r.RolePermissions)
-                .FirstOrDefaultAsync(r => string.Equals(r.Name, roleName, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+                .FirstOrDefaultAsync(r => string.Compare(r.Name, roleName) == 0, TestContext.Current.CancellationToken)
                 .ConfigureAwait(true);
             roleInDb.Should().NotBeNull();
             roleInDb!.RolePermissions.Should().HaveCount(3);
@@ -456,7 +456,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>, IA
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var roleInDb = await db.Roles
-            .FirstOrDefaultAsync(r => string.Equals(r.Name, roleName, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .FirstOrDefaultAsync(r => string.Compare(r.Name, roleName) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         roleInDb.Should().NotBeNull();
         roleInDb!.Description.Should().Be("Updated Description");
@@ -492,7 +492,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>, IA
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var roleInDb = await db.Roles
-            .FirstOrDefaultAsync(r => string.Equals(r.Name, roleName, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .FirstOrDefaultAsync(r => string.Compare(r.Name, roleName) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         roleInDb.Should().BeNull();
     }
@@ -527,7 +527,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>, IA
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var roleInDb = await db.Roles
-            .FirstOrDefaultAsync(r => string.Equals(r.Name, roleName, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .FirstOrDefaultAsync(r => string.Compare(r.Name, roleName) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         roleInDb.Should().NotBeNull();
     }
@@ -605,8 +605,8 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>, IA
             .ConfigureAwait(true);
         content!.Should().NotBeNull();
         content!.Items.Should().NotBeEmpty();
-        content.Items.Should().Contain(r => string.Equals(r.Name, $"Role1_{uniqueId}", StringComparison.OrdinalIgnoreCase));
-        content.Items.Should().Contain(r => string.Equals(r.Name, $"Role2_{uniqueId}", StringComparison.OrdinalIgnoreCase));
+        content.Items.Should().Contain(r => string.Compare(r.Name, $"Role1_{uniqueId}") == 0);
+        content.Items.Should().Contain(r => string.Compare(r.Name, $"Role2_{uniqueId}") == 0);
     }
 
     private async Task<Guid> CreateRoleWithPermissionsInternalAsync(
@@ -809,7 +809,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>, IA
     private static async Task<Permission> EnsurePermissionExistsAsync(ApplicationDBContext db, string permName)
     {
         var permission = await db.Permissions
-            .FirstOrDefaultAsync(p => string.Equals(p.Name, permName, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .FirstOrDefaultAsync(p => string.Compare(p.Name, permName) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         if (permission == null)
         {
@@ -822,7 +822,7 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>, IA
             {
                 db.Entry(permission).State = EntityState.Detached;
                 permission = await db.Permissions
-                    .FirstOrDefaultAsync(p => string.Equals(p.Name, permName, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+                    .FirstOrDefaultAsync(p => string.Compare(p.Name, permName) == 0, TestContext.Current.CancellationToken)
                     .ConfigureAwait(true);
             }
         }

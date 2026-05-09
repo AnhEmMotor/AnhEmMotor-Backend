@@ -240,8 +240,8 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var savedSettings = db.Settings.ToList();
             savedSettings.Should().HaveCount(3);
-            savedSettings.First(s => string.Equals(s.Key, "Deposit_ratio", StringComparison.OrdinalIgnoreCase)).Value.Should().Be("50");
-            savedSettings.First(s => string.Equals(s.Key, "Inventory_alert_level", StringComparison.OrdinalIgnoreCase)).Value.Should().Be("10");
+            savedSettings.First(s => string.Compare(s.Key, "Deposit_ratio") == 0).Value.Should().Be("50");
+            savedSettings.First(s => string.Compare(s.Key, "Inventory_alert_level") == 0).Value.Should().Be("10");
         }
     }
 
@@ -290,8 +290,8 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var savedSettings = db.Settings.ToList();
-            savedSettings.First(s => string.Equals(s.Key, "Deposit_ratio", StringComparison.OrdinalIgnoreCase)).Value.Should().Be("25");
-            savedSettings.First(s => string.Equals(s.Key, "Inventory_alert_level", StringComparison.OrdinalIgnoreCase)).Value.Should().Be("5");
+            savedSettings.First(s => string.Compare(s.Key, "Deposit_ratio") == 0).Value.Should().Be("25");
+            savedSettings.First(s => string.Compare(s.Key, "Inventory_alert_level") == 0).Value.Should().Be("5");
         }
     }
 

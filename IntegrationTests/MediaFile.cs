@@ -120,7 +120,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         results.Should().NotBeNull();
         results.Should().HaveCount(3);
         results!.All(r => r.Id > 0).Should().BeTrue();
-        results.All(r => string.Equals(r.ContentType, "image/webp", StringComparison.OrdinalIgnoreCase)).Should().BeTrue();
+        results.All(r => string.Compare(r.ContentType, "image/webp") == 0).Should().BeTrue();
     }
 
     [Fact(DisplayName = "MF_009 - Xoá file thành công (Soft Delete)")]

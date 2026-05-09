@@ -84,19 +84,19 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         CancellationToken cancellationToken = default)
     {
         if (!await db.OutputStatuses
-            .AnyAsync(x => string.Equals(x.Key, OrderStatus.Pending, StringComparison.OrdinalIgnoreCase), cancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, cancellationToken)
             .ConfigureAwait(false))
             db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Pending });
         if (!await db.OutputStatuses
-            .AnyAsync(x => string.Equals(x.Key, OrderStatus.Completed, StringComparison.OrdinalIgnoreCase), cancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, OrderStatus.Completed) == 0, cancellationToken)
             .ConfigureAwait(false))
             db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Completed });
         if (!await db.OutputStatuses
-            .AnyAsync(x => string.Equals(x.Key, OrderStatus.Cancelled, StringComparison.OrdinalIgnoreCase), cancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, OrderStatus.Cancelled) == 0, cancellationToken)
             .ConfigureAwait(false))
             db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Cancelled });
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, "ForSale", StringComparison.OrdinalIgnoreCase), cancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, "ForSale") == 0, cancellationToken)
             .ConfigureAwait(false))
             db.ProductStatuses.Add(new ProductStatusEntity { Key = "ForSale" });
         await db.SaveChangesAsync(cancellationToken).ConfigureAwait(true);
@@ -424,13 +424,13 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
 
         content.Should().NotBeNull();
 
-        content!.First(x => string.Equals(x.StatusName, OrderStatus.Pending, StringComparison.OrdinalIgnoreCase))
+        content!.First(x => string.Compare(x.StatusName, OrderStatus.Pending) == 0)
             .OrderCount.Should().Be(3);
 
-        content!.First(x => string.Equals(x.StatusName, OrderStatus.Completed, StringComparison.OrdinalIgnoreCase))
+        content!.First(x => string.Compare(x.StatusName, OrderStatus.Completed) == 0)
             .OrderCount.Should().Be(10);
 
-        content!.First(x => string.Equals(x.StatusName, OrderStatus.Cancelled, StringComparison.OrdinalIgnoreCase))
+        content!.First(x => string.Compare(x.StatusName, OrderStatus.Cancelled) == 0)
             .OrderCount.Should().Be(1);
     }
 
@@ -500,7 +500,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var vid = await SeedProductVariantAsync(db, uniqueId, price, CancellationToken.None).ConfigureAwait(true);
         if (!await db.InputStatuses
             .AnyAsync(
-                x => string.Equals(x.Key, Domain.Constants.Input.InputStatus.Finish, StringComparison.OrdinalIgnoreCase),
+                x => string.Compare(x.Key, Domain.Constants.Input.InputStatus.Finish) == 0,
                 CancellationToken.None)
             .ConfigureAwait(true))
         {
@@ -791,7 +791,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         if (!await db.InputStatuses
             .AnyAsync(
-                x => string.Equals(x.Key, Domain.Constants.Input.InputStatus.Finish, StringComparison.OrdinalIgnoreCase),
+                x => string.Compare(x.Key, Domain.Constants.Input.InputStatus.Finish) == 0,
                 CancellationToken.None)
             .ConfigureAwait(true))
         {
@@ -810,7 +810,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var content = await response!.Content
             .ReadFromJsonAsync<AdminWarehouseReportResponse>(CancellationToken.None)
             .ConfigureAwait(true);
-        var brandData = content!.WarehouseTableData.FirstOrDefault(x => string.Equals(x.BrandName, brand.Name, StringComparison.OrdinalIgnoreCase));
+        var brandData = content!.WarehouseTableData.FirstOrDefault(x => string.Compare(x.BrandName, brand.Name) == 0);
         brandData.Should().NotBeNull();
         brandData!.TotalStock.Should().Be(10);
     }
@@ -874,7 +874,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         if (!await db.InputStatuses
             .AnyAsync(
-                x => string.Equals(x.Key, Domain.Constants.Input.InputStatus.Finish, StringComparison.OrdinalIgnoreCase),
+                x => string.Compare(x.Key, Domain.Constants.Input.InputStatus.Finish) == 0,
                 CancellationToken.None)
             .ConfigureAwait(true))
         {
@@ -895,7 +895,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         var content = await response!.Content
             .ReadFromJsonAsync<AdminWarehouseReportResponse>(CancellationToken.None)
             .ConfigureAwait(true);
-        var brandData = content!.WarehouseTableData.FirstOrDefault(x => string.Equals(x.BrandName, brand.Name, StringComparison.OrdinalIgnoreCase));
+        var brandData = content!.WarehouseTableData.FirstOrDefault(x => string.Compare(x.BrandName, brand.Name) == 0);
         brandData.Should().NotBeNull();
         brandData!.TotalStock.Should().Be(30);
         brandData.Value.Should().Be(3600000);
@@ -948,7 +948,7 @@ public class Statistics : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             .ReadFromJsonAsync<AdminProductReportResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         var perfData = content!.ProductPerformanceTable
-            .FirstOrDefault(x => string.Equals(x.ProductName, prod.Name, StringComparison.OrdinalIgnoreCase));
+            .FirstOrDefault(x => string.Compare(x.ProductName, prod.Name) == 0);
         perfData.Should().NotBeNull();
         perfData!.SoldCount30Days.Should().Be(5);
     }

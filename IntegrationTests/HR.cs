@@ -254,7 +254,7 @@ public class HR : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var statuses = new[] { OrderStatus.Pending, OrderStatus.ConfirmedCod, OrderStatus.Delivering, OrderStatus.Completed };
         foreach (var s in statuses)
         {
-            if (!await db.OutputStatuses.AnyAsync(st => string.Equals(st.Key, s, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken).ConfigureAwait(true))
+            if (!await db.OutputStatuses.AnyAsync(st => string.Compare(st.Key, s) == 0, TestContext.Current.CancellationToken).ConfigureAwait(true))
                 db.OutputStatuses.Add(new OutputStatus { Key = s });
         }
 
@@ -308,7 +308,7 @@ public class HR : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         db.EmployeeProfiles.Add(emp);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
-        var status = await db.OutputStatuses.FirstOrDefaultAsync(s => string.Equals(s.Key, "completed", StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var status = await db.OutputStatuses.FirstOrDefaultAsync(s => string.Compare(s.Key, "completed") == 0, TestContext.Current.CancellationToken).ConfigureAwait(true);
         if (status == null)
         {
             status = new OutputStatus { Key = "completed" };

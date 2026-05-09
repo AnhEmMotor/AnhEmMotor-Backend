@@ -241,7 +241,7 @@ public class Banner : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetim
  
         // Assert
         var content = await response!.Content.ReadFromJsonAsync<List<BannerResponse>>(TestContext.Current.CancellationToken).ConfigureAwait(true);
-        content!.Should().NotContain(x => string.Equals(x.Title, "Expired", StringComparison.OrdinalIgnoreCase));
+        content!.Should().NotContain(x => string.Compare(x.Title, "Expired") == 0);
     }
 
     [Fact(DisplayName = "BANN_020 - Vô hiệu hóa Banner thành công")]

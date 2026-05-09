@@ -83,13 +83,13 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             await db.Suppliers.AddRangeAsync(suppliers, CancellationToken.None).ConfigureAwait(true);
             if (!await db.SupplierStatuses
                 .AnyAsync(
-                    s => string.Equals(s.Key, Domain.Constants.SupplierStatus.Active, StringComparison.OrdinalIgnoreCase),
+                    s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0,
                     CancellationToken.None)
                 .ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
             if (!await db.SupplierStatuses
                 .AnyAsync(
-                    s => string.Equals(s.Key, Domain.Constants.SupplierStatus.Inactive, StringComparison.OrdinalIgnoreCase),
+                    s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Inactive) == 0,
                     CancellationToken.None)
                 .ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Inactive });
@@ -131,7 +131,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             if (!await db.SupplierStatuses
                 .AnyAsync(
-                    s => string.Equals(s.Key, Domain.Constants.SupplierStatus.Active, StringComparison.OrdinalIgnoreCase),
+                    s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0,
                     CancellationToken.None)
                 .ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
@@ -186,7 +186,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             if (!await db.SupplierStatuses
                 .AnyAsync(
-                    s => string.Equals(s.Key, Domain.Constants.SupplierStatus.Active, StringComparison.OrdinalIgnoreCase),
+                    s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0,
                     CancellationToken.None)
                 .ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
@@ -253,7 +253,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             if (!await db.SupplierStatuses
                 .AnyAsync(
-                    s => string.Equals(s.Key, Domain.Constants.SupplierStatus.Active, StringComparison.OrdinalIgnoreCase),
+                    s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0,
                     CancellationToken.None)
                 .ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
@@ -324,13 +324,13 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             if (!await db.SupplierStatuses
                 .AnyAsync(
-                    s => string.Equals(s.Key, Domain.Constants.SupplierStatus.Active, StringComparison.OrdinalIgnoreCase),
+                    s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0,
                     CancellationToken.None)
                 .ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
             if (!await db.SupplierStatuses
                 .AnyAsync(
-                    s => string.Equals(s.Key, Domain.Constants.SupplierStatus.Inactive, StringComparison.OrdinalIgnoreCase),
+                    s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Inactive) == 0,
                     CancellationToken.None)
                 .ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Inactive });
@@ -371,9 +371,9 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             .ReadFromJsonAsync<PagedResult<SupplierResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.Should().NotBeNull();
-        content!.Items.Should().Contain(s => string.Equals(s.Name, $"Active_{uniqueId}", StringComparison.OrdinalIgnoreCase));
-        content.Items.Should().Contain(s => string.Equals(s.Name, $"Inactive_{uniqueId}", StringComparison.OrdinalIgnoreCase));
-        content.Items.Should().NotContain(s => string.Equals(s.Name, $"Deleted_{uniqueId}", StringComparison.OrdinalIgnoreCase));
+        content!.Items.Should().Contain(s => string.Compare(s.Name, $"Active_{uniqueId}") == 0);
+        content.Items.Should().Contain(s => string.Compare(s.Name, $"Inactive_{uniqueId}") == 0);
+        content.Items.Should().NotContain(s => string.Compare(s.Name, $"Deleted_{uniqueId}") == 0);
     }
 
     [Fact(DisplayName = "SUP_036 - L?y danh sách Supplier dã xóa v?i phân trang")]
@@ -401,7 +401,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             if (!await db.SupplierStatuses
                 .AnyAsync(
-                    s => string.Equals(s.Key, Domain.Constants.SupplierStatus.Active, StringComparison.OrdinalIgnoreCase),
+                    s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0,
                     CancellationToken.None)
                 .ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
@@ -436,8 +436,8 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             .ReadFromJsonAsync<PagedResult<SupplierResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.Should().NotBeNull();
-        content!.Items.Should().Contain(s => string.Equals(s.Name, $"Deleted_{uniqueId}", StringComparison.OrdinalIgnoreCase));
-        content.Items.Should().NotContain(s => string.Equals(s.Name, $"Active_{uniqueId}", StringComparison.OrdinalIgnoreCase));
+        content!.Items.Should().Contain(s => string.Compare(s.Name, $"Deleted_{uniqueId}") == 0);
+        content.Items.Should().NotContain(s => string.Compare(s.Name, $"Active_{uniqueId}") == 0);
     }
 
     [Fact(DisplayName = "SUP_037 - L?y chi ti?t Supplier thành công v?i d?y d? thông tin")]
@@ -466,7 +466,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             if (!await db.SupplierStatuses
                 .AnyAsync(
-                    s => string.Equals(s.Key, Domain.Constants.SupplierStatus.Active, StringComparison.OrdinalIgnoreCase),
+                    s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0,
                     CancellationToken.None)
                 .ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
@@ -522,7 +522,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             if (!await db.SupplierStatuses
                 .AnyAsync(
-                    s => string.Equals(s.Key, Domain.Constants.SupplierStatus.Active, StringComparison.OrdinalIgnoreCase),
+                    s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0,
                     CancellationToken.None)
                 .ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
@@ -593,7 +593,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             if (!await db.SupplierStatuses
                 .AnyAsync(
-                    s => string.Equals(s.Key, Domain.Constants.SupplierStatus.Active, StringComparison.OrdinalIgnoreCase),
+                    s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0,
                     CancellationToken.None)
                 .ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
@@ -659,13 +659,13 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             if (!await db.SupplierStatuses
                 .AnyAsync(
-                    s => string.Equals(s.Key, Domain.Constants.SupplierStatus.Active, StringComparison.OrdinalIgnoreCase),
+                    s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0,
                     CancellationToken.None)
                 .ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
             if (!await db.InputStatuses
                 .AnyAsync(
-                    s => string.Equals(s.Key, Domain.Constants.Input.InputStatus.Working, StringComparison.OrdinalIgnoreCase),
+                    s => string.Compare(s.Key, Domain.Constants.Input.InputStatus.Working) == 0,
                     CancellationToken.None)
                 .ConfigureAwait(true))
                 db.InputStatuses.Add(new InputStatus { Key = Domain.Constants.Input.InputStatus.Working });
@@ -686,7 +686,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             await db.Suppliers.AddRangeAsync([supplier1, supplier2], CancellationToken.None).ConfigureAwait(true);
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             var user = await db.Users
-                .FirstOrDefaultAsync(u => string.Equals(u.UserName, username, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+                .FirstOrDefaultAsync(u => string.Compare(u.UserName, username) == 0, CancellationToken.None)
                 .ConfigureAwait(true);
             var userId = user?.Id ?? Guid.NewGuid();
             var input = new Input
@@ -740,7 +740,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             if (!await db.SupplierStatuses
                 .AnyAsync(
-                    s => string.Equals(s.Key, Domain.Constants.SupplierStatus.Active, StringComparison.OrdinalIgnoreCase),
+                    s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0,
                     CancellationToken.None)
                 .ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
@@ -804,13 +804,13 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             if (!await db.SupplierStatuses
                 .AnyAsync(
-                    s => string.Equals(s.Key, Domain.Constants.SupplierStatus.Active, StringComparison.OrdinalIgnoreCase),
+                    s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Active) == 0,
                     CancellationToken.None)
                 .ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Active });
             if (!await db.SupplierStatuses
                 .AnyAsync(
-                    s => string.Equals(s.Key, Domain.Constants.SupplierStatus.Inactive, StringComparison.OrdinalIgnoreCase),
+                    s => string.Compare(s.Key, Domain.Constants.SupplierStatus.Inactive) == 0,
                     CancellationToken.None)
                 .ConfigureAwait(true))
                 db.SupplierStatuses.Add(new SupplierStatus { Key = Domain.Constants.SupplierStatus.Inactive });
@@ -899,7 +899,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             supplierId = supplier.Id;
             var user = await db.Users
-                .FirstOrDefaultAsync(u => string.Equals(u.UserName, username, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+                .FirstOrDefaultAsync(u => string.Compare(u.UserName, username) == 0, CancellationToken.None)
                 .ConfigureAwait(true);
             var userId = user?.Id ?? Guid.NewGuid();
             var inputs = new List<Input>
@@ -997,7 +997,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             supplierId = supplier.Id;
             var user = await db.Users
-                .FirstOrDefaultAsync(u => string.Equals(u.UserName, username, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+                .FirstOrDefaultAsync(u => string.Compare(u.UserName, username) == 0, CancellationToken.None)
                 .ConfigureAwait(true);
             var userId = user?.Id ?? Guid.NewGuid();
             var inputs = new List<Input>
@@ -1095,7 +1095,7 @@ public class Supplier : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifet
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
             supplierId = supplier.Id;
             var user = await db.Users
-                .FirstOrDefaultAsync(u => string.Equals(u.UserName, username, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+                .FirstOrDefaultAsync(u => string.Compare(u.UserName, username) == 0, CancellationToken.None)
                 .ConfigureAwait(true);
             var userId = user?.Id ?? Guid.NewGuid();
             for (int i = 1; i <= 5; i++)

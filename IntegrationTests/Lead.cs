@@ -105,7 +105,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             .ConfigureAwait(true);
         content!.Should().NotBeNull();
         content!.Should().HaveCountGreaterThanOrEqualTo(2);
-        content.Any(l => string.Equals(l.PhoneNumber, "0901000001", StringComparison.OrdinalIgnoreCase) && l.Activities.Count > 0).Should().BeTrue();
+        content.Any(l => string.Compare(l.PhoneNumber, "0901000001") == 0 && l.Activities.Count > 0).Should().BeTrue();
     }
 
     [Fact(DisplayName = "LEAD_005 - Chuyển đổi trạng thái Lead khi xác nhận lịch lái thử")]
@@ -168,7 +168,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             .ConfigureAwait(true);
         activities.Should()
             .Contain(
-                a => string.Equals(a.ActivityType, LeadActivityType.Contact, StringComparison.OrdinalIgnoreCase) &&
+                a => string.Compare(a.ActivityType, LeadActivityType.Contact) == 0 &&
                     a.Description.Contains("Đang lái thử"));
     }
 
@@ -189,7 +189,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var activity = await db.LeadActivities
             .Include(a => a.Lead)
             .FirstOrDefaultAsync(
-                a => string.Equals(a.Lead.PhoneNumber, phoneNumber, StringComparison.OrdinalIgnoreCase),
+                a => string.Compare(a.Lead.PhoneNumber, phoneNumber) == 0,
                 TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         activity.Should().NotBeNull();
@@ -271,7 +271,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var activity = await db.LeadActivities
             .Include(a => a.Lead)
-            .Where(a => a.Lead.PhoneNumber == phoneNumber && string.Equals(a.ActivityType, LeadActivityType.Contact, StringComparison.OrdinalIgnoreCase))
+            .Where(a => a.Lead.PhoneNumber == phoneNumber && string.Compare(a.ActivityType, LeadActivityType.Contact) == 0)
             .FirstOrDefaultAsync(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         activity.Should().NotBeNull();
@@ -301,7 +301,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             var leadWithActivities = await db.Leads
                 .Include(l => l.Activities)
                 .FirstOrDefaultAsync(
-                    l => string.Equals(l.PhoneNumber, phoneNumber, StringComparison.OrdinalIgnoreCase),
+                    l => string.Compare(l.PhoneNumber, phoneNumber) == 0,
                     TestContext.Current.CancellationToken)
                 .ConfigureAwait(true);
             leadWithActivities.Should().NotBeNull();
@@ -328,7 +328,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var lead = await db.Leads
             .AsNoTracking()
             .FirstOrDefaultAsync(
-                l => string.Equals(l.PhoneNumber, phoneNumber, StringComparison.OrdinalIgnoreCase),
+                l => string.Compare(l.PhoneNumber, phoneNumber) == 0,
                 TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         lead.Should().NotBeNull();
@@ -359,7 +359,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             var lead = await db.Leads
                 .AsNoTracking()
                 .FirstOrDefaultAsync(
-                    l => string.Equals(l.PhoneNumber, phoneNumber, StringComparison.OrdinalIgnoreCase),
+                    l => string.Compare(l.PhoneNumber, phoneNumber) == 0,
                     TestContext.Current.CancellationToken)
                 .ConfigureAwait(true);
             lead.Should().NotBeNull();
@@ -385,7 +385,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var lead = await db.Leads
             .AsNoTracking()
             .FirstOrDefaultAsync(
-                l => string.Equals(l.PhoneNumber, phoneNumber, StringComparison.OrdinalIgnoreCase),
+                l => string.Compare(l.PhoneNumber, phoneNumber) == 0,
                 TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         lead.Should().NotBeNull();

@@ -1,4 +1,4 @@
-using Application.ApiContracts.User.Responses;
+Ôªøusing Application.ApiContracts.User.Responses;
 using Application.Features.UserManager.Commands.AssignRoles;
 using Application.Features.UserManager.Commands.ChangePasswordByManager;
 using Application.Features.UserManager.Commands.ChangeUserStatus;
@@ -43,7 +43,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
 
     #pragma warning disable IDE0079
     #pragma warning disable CRR0035
-    [Fact(DisplayName = "USER_021 - KhÙi ph?c t‡i kho?n th‡nh cÙng")]
+    [Fact(DisplayName = "USER_021 - Kh√¥i ph?c t√†i kho?n th√†nh c√¥ng")]
     public async Task RestoreAccount_Success_DeletedAtSetToNull()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -85,7 +85,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var u = await db.Users
-                .FirstOrDefaultAsync(u => string.Equals(u.UserName, username, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+                .FirstOrDefaultAsync(u => string.Compare(u.UserName, username) == 0, CancellationToken.None)
                 .ConfigureAwait(true);
             userId = u!.Id.ToString();
         }
@@ -107,7 +107,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         }
     }
 
-    [Fact(DisplayName = "USER_022 - KhÙi ph?c t‡i kho?n khi chua b? xÛa (DeletedAt = null)")]
+    [Fact(DisplayName = "USER_022 - Kh√¥i ph?c t√†i kho?n khi chua b? x√≥a (DeletedAt = null)")]
     public async Task RestoreAccount_NotDeleted_ReturnsBadRequest()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -141,7 +141,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         content!.Should().Contain("User account is not deleted.");
     }
 
-    [Fact(DisplayName = "USER_023 - KhÙi ph?c t‡i kho?n khi b? Ban (khÙng cho phÈp)")]
+    [Fact(DisplayName = "USER_023 - Kh√¥i ph?c t√†i kho?n khi b? Ban (kh√¥ng cho ph√©p)")]
     public async Task RestoreAccount_BannedAccount_ReturnsForbidden()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -185,7 +185,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         content!.Should().Contain($"Cannot restore user with status '{UserStatus.Banned}'. User status must be Active.");
     }
 
-    [Fact(DisplayName = "USER_024 - KhÙi ph?c t‡i kho?n v?i UserId khÙng t?n t?i")]
+    [Fact(DisplayName = "USER_024 - Kh√¥i ph?c t√†i kho?n v?i UserId kh√¥ng t?n t?i")]
     public async Task RestoreAccount_NonExistentUser_ReturnsNotFound()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -214,7 +214,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         response!.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
-    [Fact(DisplayName = "USER_025 - L?y thÙng tin ngu?i d˘ng hi?n t?i - Integration Test")]
+    [Fact(DisplayName = "USER_025 - L?y th√¥ng tin ngu?i d√πng hi?n t?i - Integration Test")]
     public async Task GetCurrentUser_IntegrationTest_ReturnsUserInfo()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -245,7 +245,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         content.Email.Should().Be(email);
     }
 
-    [Fact(DisplayName = "USER_026 - L?y thÙng tin ngu?i d˘ng khi JWT khÙng cÛ trong header")]
+    [Fact(DisplayName = "USER_026 - L?y th√¥ng tin ngu?i d√πng khi JWT kh√¥ng c√≥ trong header")]
     public async Task GetCurrentUser_NoJWT_ReturnsUnauthorized()
     {
         _client.DefaultRequestHeaders.Authorization = null;
@@ -253,7 +253,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         response!.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
-    [Fact(DisplayName = "USER_027 - C?p nh?t thÙng tin ngu?i d˘ng - Integration Test")]
+    [Fact(DisplayName = "USER_027 - C?p nh?t th√¥ng tin ngu?i d√πng - Integration Test")]
     public async Task UpdateCurrentUser_IntegrationTest_UpdatesSuccessfully()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -279,14 +279,14 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var user = await db.Users
-            .FirstOrDefaultAsync(u => string.Equals(u.UserName, username, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .FirstOrDefaultAsync(u => string.Compare(u.UserName, username) == 0, CancellationToken.None)
             .ConfigureAwait(true);
         user!.FullName.Should().Be("Updated Name");
         user.Gender.Should().Be(GenderStatus.Female);
         user.PhoneNumber.Should().Be("0999888777");
     }
 
-    [Fact(DisplayName = "USER_028 - C?p nh?t thÙng tin v?i validation error - s? di?n tho?i khÙng h?p l?")]
+    [Fact(DisplayName = "USER_028 - C?p nh?t th√¥ng tin v?i validation error - s? di?n tho?i kh√¥ng h?p l?")]
     public async Task UpdateCurrentUser_InvalidPhoneNumber_ReturnsBadRequest()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -313,7 +313,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         content!.Should().Contain("Invalid phone number format");
     }
 
-    [Fact(DisplayName = "USER_029 - –?i m?t kh?u - Integration Test")]
+    [Fact(DisplayName = "USER_029 - √ê?i m?t kh?u - Integration Test")]
     public async Task ChangePassword_IntegrationTest_PasswordChangedAndTokenInvalidated()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -352,7 +352,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         oldTokenResponse!.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
-    [Fact(DisplayName = "USER_030 - –?i m?t kh?u v?i CurrentPassword sai - Integration Test")]
+    [Fact(DisplayName = "USER_030 - √ê?i m?t kh?u v?i CurrentPassword sai - Integration Test")]
     public async Task ChangePassword_WrongCurrentPassword_ReturnsUnauthorized()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -383,7 +383,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         errorContent!.Should().Contain("Incorrect password.");
     }
 
-    [Fact(DisplayName = "USER_031 - XÛa t‡i kho?n - Integration Test")]
+    [Fact(DisplayName = "USER_031 - X√≥a t√†i kho?n - Integration Test")]
     public async Task DeleteAccount_IntegrationTest_AccountDeletedAndTokenInvalidated()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -405,7 +405,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var user = await db.Users
-                .FirstOrDefaultAsync(u => string.Equals(u.UserName, username, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+                .FirstOrDefaultAsync(u => string.Compare(u.UserName, username) == 0, CancellationToken.None)
                 .ConfigureAwait(true);
             user!.DeletedAt.Should().NotBeNull();
         }
@@ -413,7 +413,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         tokenTestResponse!.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
-    [Fact(DisplayName = "USER_032 - XÛa t‡i kho?n khi d„ b? Ban - Integration Test")]
+    [Fact(DisplayName = "USER_032 - X√≥a t√†i kho?n khi d√£ b? Ban - Integration Test")]
     public async Task DeleteAccount_BannedAccount_ReturnsForbidden()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -472,7 +472,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         testResponse!.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
-    [Fact(DisplayName = "USER_034 - Ki?m tra middleware ch?n request khi t‡i kho?n b? xÛa m?m")]
+    [Fact(DisplayName = "USER_034 - Ki?m tra middleware ch?n request khi t√†i kho?n b? x√≥a m?m")]
     public async Task Middleware_BlocksDeletedAccount_ReturnsUnauthorized()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -502,7 +502,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         response!.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
-    [Fact(DisplayName = "USER_035 - Ki?m tra middleware ch?n request khi t‡i kho?n b? Ban")]
+    [Fact(DisplayName = "USER_035 - Ki?m tra middleware ch?n request khi t√†i kho?n b? Ban")]
     public async Task Middleware_BlocksBannedAccount_ReturnsBannedStatus()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -595,7 +595,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         content!.Status.Should().Be(UserStatus.Active);
     }
 
-    [Fact(DisplayName = "USER_056 - SSE Hybrid: Request khÙng cÛ Accept header text/event-stream")]
+    [Fact(DisplayName = "USER_056 - SSE Hybrid: Request kh√¥ng c√≥ Accept header text/event-stream")]
     public async Task GetCurrentUser_NoAcceptHeader_ReturnsJson()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -617,7 +617,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         response!.Content.Headers.ContentType?.MediaType.Should().Be("application/json");
     }
 
-    [Fact(DisplayName = "USER_057 - SSE Hybrid: Request cÛ Accept header text/event-stream")]
+    [Fact(DisplayName = "USER_057 - SSE Hybrid: Request c√≥ Accept header text/event-stream")]
     public async Task GetCurrentUser_AcceptEventStream_ReturnsSseStream()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -770,7 +770,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var staffRole = db.Roles.FirstOrDefault(r => string.Equals(r.Name, "Staff", StringComparison.OrdinalIgnoreCase));
+            var staffRole = db.Roles.FirstOrDefault(r => string.Compare(r.Name, "Staff") == 0);
             if (staffRole == null)
             {
                 staffRole = new ApplicationRole { Name = "Staff", NormalizedName = "STAFF" };
@@ -1220,7 +1220,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         data2.Should().Contain("MultiTab Update");
     }
 
-    [Fact(DisplayName = "USER_071 - Ngu?i d˘ng t? t?i lÍn ?nh d?i di?n th‡nh cÙng")]
+    [Fact(DisplayName = "USER_071 - Ngu?i d√πng t? t?i l√™n ?nh d?i di?n th√†nh c√¥ng")]
     public async Task UploadAvatar_Self_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -1258,12 +1258,12 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var user = await db.Users
-            .FirstOrDefaultAsync(u => string.Equals(u.UserName, username, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .FirstOrDefaultAsync(u => string.Compare(u.UserName, username) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         user!.AvatarUrl.Should().Be(avatarUrl.Trim('\"'));
     }
 
-    [Fact(DisplayName = "USER_072 - Admin t?i lÍn ?nh d?i di?n cho ngu?i d˘ng kh·c th‡nh cÙng")]
+    [Fact(DisplayName = "USER_072 - Admin t?i l√™n ?nh d?i di?n cho ngu?i d√πng kh√°c th√†nh c√¥ng")]
     public async Task UploadAvatar_AdminForUser_Success()
     {
         var adminUniqueId = Guid.NewGuid().ToString("N")[..8];

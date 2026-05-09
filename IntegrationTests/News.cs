@@ -164,7 +164,7 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var news = await db.News
-            .FirstOrDefaultAsync(n => string.Equals(n.Title, "SEO News", StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .FirstOrDefaultAsync(n => string.Compare(n.Title, "SEO News") == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         news.Should().NotBeNull();
         news!.MetaTitle.Should().Be("Meta T");
@@ -218,7 +218,7 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var news = await db.News.FirstOrDefaultAsync(n => string.Equals(n.Slug, "seo-news-slug", StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken).ConfigureAwait(true);
+            var news = await db.News.FirstOrDefaultAsync(n => string.Compare(n.Slug, "seo-news-slug") == 0, TestContext.Current.CancellationToken).ConfigureAwait(true);
             news.Should().NotBeNull();
             news!.CategoryId.Should().Be(categoryId);
             news.MetaTitle.Should().Be("SEO Meta Title");
@@ -394,6 +394,6 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
 
         var pagedResult = await response!.Content.ReadFromJsonAsync<PagedResult<NewsResponse>>(TestContext.Current.CancellationToken).ConfigureAwait(true);
         pagedResult!.Items.Should().HaveCount(2);
-        pagedResult.Items.All(n => string.Equals(n.Title, "N1", StringComparison.OrdinalIgnoreCase) || string.Equals(n.Title, "N2", StringComparison.OrdinalIgnoreCase)).Should().BeTrue();
+        pagedResult.Items.All(n => string.Compare(n.Title, "N1") == 0 || string.Compare(n.Title, "N2") == 0).Should().BeTrue();
     }
 }

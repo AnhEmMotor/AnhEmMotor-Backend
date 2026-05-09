@@ -80,21 +80,21 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
         {
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         }
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if (!await db.SupplierStatuses
-            .AnyAsync(x => string.Equals(x.Key, supplierStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, supplierStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
         {
             db.SupplierStatuses.Add(new SupplierStatus { Key = supplierStatusId });
         }
         var inputStatusId = Domain.Constants.Input.InputStatus.Working;
         if (!await db.InputStatuses
-            .AnyAsync(x => string.Equals(x.Key, inputStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, inputStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
         {
             db.InputStatuses.Add(new InputStatus { Key = inputStatusId });
@@ -194,17 +194,17 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if (!await db.SupplierStatuses
-            .AnyAsync(x => string.Equals(x.Key, supplierStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, supplierStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.SupplierStatuses.Add(new SupplierStatus { Key = supplierStatusId });
         var inputStatusId = Domain.Constants.Input.InputStatus.Working;
         if (!await db.InputStatuses
-            .AnyAsync(x => string.Equals(x.Key, inputStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, inputStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.InputStatuses.Add(new InputStatus { Key = inputStatusId });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
@@ -368,17 +368,17 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if (!await db.SupplierStatuses
-            .AnyAsync(x => string.Equals(x.Key, supplierStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, supplierStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.SupplierStatuses.Add(new SupplierStatus { Key = supplierStatusId });
         var inputStatusId = Domain.Constants.Input.InputStatus.Working;
         if (!await db.InputStatuses
-            .AnyAsync(x => string.Equals(x.Key, inputStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, inputStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.InputStatuses.Add(new InputStatus { Key = inputStatusId });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
@@ -454,17 +454,17 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if (!await db.SupplierStatuses
-            .AnyAsync(x => string.Equals(x.Key, supplierStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, supplierStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.SupplierStatuses.Add(new SupplierStatus { Key = supplierStatusId });
         var inputStatusId = Domain.Constants.Input.InputStatus.Working;
         if (!await db.InputStatuses
-            .AnyAsync(x => string.Equals(x.Key, inputStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, inputStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.InputStatuses.Add(new InputStatus { Key = inputStatusId });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
@@ -581,7 +581,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         content!.Should().NotBeNull();
         content!.Items
             .Should()
-            .OnlyContain(i => string.Equals(i.StatusId, Domain.Constants.Input.InputStatus.Working, StringComparison.OrdinalIgnoreCase));
+            .OnlyContain(i => string.Compare(i.StatusId, Domain.Constants.Input.InputStatus.Working) == 0);
     }
 
     [Fact(DisplayName = "INPUT_018 - L?y danh sách phi?u nh?p v?i sort theo InputDate descending")]
@@ -610,12 +610,12 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if (!await db.SupplierStatuses
-            .AnyAsync(x => string.Equals(x.Key, supplierStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, supplierStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.SupplierStatuses.Add(new SupplierStatus { Key = supplierStatusId });
         var inputStatusId = Domain.Constants.Input.InputStatus.Working;
         if (!await db.InputStatuses
-            .AnyAsync(x => string.Equals(x.Key, inputStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, inputStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.InputStatuses.Add(new InputStatus { Key = inputStatusId });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
@@ -701,17 +701,17 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if (!await db.SupplierStatuses
-            .AnyAsync(x => string.Equals(x.Key, supplierStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, supplierStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.SupplierStatuses.Add(new SupplierStatus { Key = supplierStatusId });
         var inputStatusId = Domain.Constants.Input.InputStatus.Working;
         if (!await db.InputStatuses
-            .AnyAsync(x => string.Equals(x.Key, inputStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, inputStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.InputStatuses.Add(new InputStatus { Key = inputStatusId });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
@@ -831,17 +831,17 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if (!await db.SupplierStatuses
-            .AnyAsync(x => string.Equals(x.Key, supplierStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, supplierStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.SupplierStatuses.Add(new SupplierStatus { Key = supplierStatusId });
         var inputStatusId = Domain.Constants.Input.InputStatus.Working;
         if (!await db.InputStatuses
-            .AnyAsync(x => string.Equals(x.Key, inputStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, inputStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.InputStatuses.Add(new InputStatus { Key = inputStatusId });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
@@ -954,22 +954,22 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if (!await db.SupplierStatuses
-            .AnyAsync(x => string.Equals(x.Key, supplierStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, supplierStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.SupplierStatuses.Add(new SupplierStatus { Key = supplierStatusId });
         var inputStatusId = Domain.Constants.Input.InputStatus.Working;
         if (!await db.InputStatuses
-            .AnyAsync(x => string.Equals(x.Key, inputStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, inputStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.InputStatuses.Add(new InputStatus { Key = inputStatusId });
         var finishStatusId = Domain.Constants.Input.InputStatus.Finish;
         if (!await db.InputStatuses
-            .AnyAsync(x => string.Equals(x.Key, finishStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, finishStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.InputStatuses.Add(new InputStatus { Key = finishStatusId });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
@@ -1066,22 +1066,22 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if (!await db.SupplierStatuses
-            .AnyAsync(x => string.Equals(x.Key, supplierStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, supplierStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.SupplierStatuses.Add(new SupplierStatus { Key = supplierStatusId });
         var inputStatusId = Domain.Constants.Input.InputStatus.Working;
         if (!await db.InputStatuses
-            .AnyAsync(x => string.Equals(x.Key, inputStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, inputStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.InputStatuses.Add(new InputStatus { Key = inputStatusId });
         var cancelStatusId = Domain.Constants.Input.InputStatus.Cancel;
         if (!await  db.InputStatuses
-            .AnyAsync(x => string.Equals(x.Key, cancelStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, cancelStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.InputStatuses.Add(new InputStatus { Key = cancelStatusId });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
@@ -1178,22 +1178,22 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if (!await db.SupplierStatuses
-            .AnyAsync(x => string.Equals(x.Key, supplierStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, supplierStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.SupplierStatuses.Add(new SupplierStatus { Key = supplierStatusId });
         var inputStatusId = Domain.Constants.Input.InputStatus.Working;
         if (!await db.InputStatuses
-            .AnyAsync(x => string.Equals(x.Key, inputStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, inputStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.InputStatuses.Add(new InputStatus { Key = inputStatusId });
         var finishStatusId = Domain.Constants.Input.InputStatus.Finish;
         if (!await db.InputStatuses
-            .AnyAsync(x => string.Equals(x.Key, finishStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, finishStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.InputStatuses.Add(new InputStatus { Key = finishStatusId });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
@@ -1286,22 +1286,22 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if (!await db.SupplierStatuses
-            .AnyAsync(x => string.Equals(x.Key, supplierStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, supplierStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.SupplierStatuses.Add(new SupplierStatus { Key = supplierStatusId });
         var inputStatusId = Domain.Constants.Input.InputStatus.Working;
         if (!await db.InputStatuses
-            .AnyAsync(x => string.Equals(x.Key, inputStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, inputStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.InputStatuses.Add(new InputStatus { Key = inputStatusId });
         var cancelStatusId = Domain.Constants.Input.InputStatus.Cancel;
         if (!await db.InputStatuses
-            .AnyAsync(x => string.Equals(x.Key, cancelStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, cancelStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.InputStatuses.Add(new InputStatus { Key = cancelStatusId });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
@@ -1389,22 +1389,22 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if (!await db.SupplierStatuses
-            .AnyAsync(x => string.Equals(x.Key, supplierStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, supplierStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.SupplierStatuses.Add(new SupplierStatus { Key = supplierStatusId });
         var inputStatusId = Domain.Constants.Input.InputStatus.Working;
         if (!await db.InputStatuses
-            .AnyAsync(x => string.Equals(x.Key, inputStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, inputStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.InputStatuses.Add(new InputStatus { Key = inputStatusId });
         var finishStatusId = Domain.Constants.Input.InputStatus.Finish;
         if (!await db.InputStatuses
-            .AnyAsync(x => string.Equals(x.Key, finishStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, finishStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.InputStatuses.Add(new InputStatus { Key = finishStatusId });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
@@ -1504,22 +1504,22 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if (!await db.SupplierStatuses
-            .AnyAsync(x => string.Equals(x.Key, supplierStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, supplierStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.SupplierStatuses.Add(new SupplierStatus { Key = supplierStatusId });
         var inputStatusId = Domain.Constants.Input.InputStatus.Working;
         if (!await db.InputStatuses
-            .AnyAsync(x => string.Equals(x.Key, inputStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, inputStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.InputStatuses.Add(new InputStatus { Key = inputStatusId });
         var finishStatusId = Domain.Constants.Input.InputStatus.Finish;
         if (!await db.InputStatuses
-            .AnyAsync(x => string.Equals(x.Key, finishStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, finishStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.InputStatuses.Add(new InputStatus { Key = finishStatusId });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
@@ -1609,17 +1609,17 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if (!await db.SupplierStatuses
-            .AnyAsync(x => string.Equals(x.Key, supplierStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, supplierStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.SupplierStatuses.Add(new SupplierStatus { Key = supplierStatusId });
         var inputStatusId = Domain.Constants.Input.InputStatus.Working;
         if (!await db.InputStatuses
-            .AnyAsync(x => string.Equals(x.Key, inputStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, inputStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.InputStatuses.Add(new InputStatus { Key = inputStatusId });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
@@ -1705,17 +1705,17 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if (!await db.SupplierStatuses
-            .AnyAsync(x => string.Equals(x.Key, supplierStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, supplierStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.SupplierStatuses.Add(new SupplierStatus { Key = supplierStatusId });
         var inputStatusId = Domain.Constants.Input.InputStatus.Working;
         if (!await db.InputStatuses
-            .AnyAsync(x => string.Equals(x.Key, inputStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, inputStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.InputStatuses.Add(new InputStatus { Key = inputStatusId });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
@@ -1808,17 +1808,17 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if (!await db.SupplierStatuses
-            .AnyAsync(x => string.Equals(x.Key, supplierStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, supplierStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.SupplierStatuses.Add(new SupplierStatus { Key = supplierStatusId });
         var inputStatusId = Domain.Constants.Input.InputStatus.Working;
         if (!await db.InputStatuses
-            .AnyAsync(x => string.Equals(x.Key, inputStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, inputStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.InputStatuses.Add(new InputStatus { Key = inputStatusId });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
@@ -1906,17 +1906,17 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if (!await db.SupplierStatuses
-            .AnyAsync(x => string.Equals(x.Key, supplierStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, supplierStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.SupplierStatuses.Add(new SupplierStatus { Key = supplierStatusId });
         var inputStatusId = Domain.Constants.Input.InputStatus.Working;
         if (!await db.InputStatuses
-            .AnyAsync(x => string.Equals(x.Key, inputStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, inputStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.InputStatuses.Add(new InputStatus { Key = inputStatusId });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
@@ -2010,17 +2010,17 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if (!await db.SupplierStatuses
-            .AnyAsync(x => string.Equals(x.Key, supplierStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, supplierStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.SupplierStatuses.Add(new SupplierStatus { Key = supplierStatusId });
         var inputStatusId = Domain.Constants.Input.InputStatus.Working;
         if (!await db.InputStatuses
-            .AnyAsync(x => string.Equals(x.Key, inputStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, inputStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.InputStatuses.Add(new InputStatus { Key = inputStatusId });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
@@ -2109,17 +2109,17 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if (!await db.SupplierStatuses
-            .AnyAsync(x => string.Equals(x.Key, supplierStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, supplierStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.SupplierStatuses.Add(new SupplierStatus { Key = supplierStatusId });
         var inputStatusId = Domain.Constants.Input.InputStatus.Working;
         if (!await db.InputStatuses
-            .AnyAsync(x => string.Equals(x.Key, inputStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, inputStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.InputStatuses.Add(new InputStatus { Key = inputStatusId });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
@@ -2231,17 +2231,17 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if (!await db.SupplierStatuses
-            .AnyAsync(x => string.Equals(x.Key, supplierStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, supplierStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.SupplierStatuses.Add(new SupplierStatus { Key = supplierStatusId });
         var inputStatusId = Domain.Constants.Input.InputStatus.Working;
         if (!await db.InputStatuses
-            .AnyAsync(x => string.Equals(x.Key, inputStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, inputStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.InputStatuses.Add(new InputStatus { Key = inputStatusId });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
@@ -2311,17 +2311,17 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if (!await db.SupplierStatuses
-            .AnyAsync(x => string.Equals(x.Key, supplierStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, supplierStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.SupplierStatuses.Add(new SupplierStatus { Key = supplierStatusId });
         var inputStatusId = Domain.Constants.Input.InputStatus.Working;
         if (!await db.InputStatuses
-            .AnyAsync(x => string.Equals(x.Key, inputStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, inputStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.InputStatuses.Add(new InputStatus { Key = inputStatusId });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
@@ -2398,17 +2398,17 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if (!await db.SupplierStatuses
-            .AnyAsync(x => string.Equals(x.Key, supplierStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, supplierStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.SupplierStatuses.Add(new SupplierStatus { Key = supplierStatusId });
         var inputStatusId = Domain.Constants.Input.InputStatus.Working;
         if (!await db.InputStatuses
-            .AnyAsync(x => string.Equals(x.Key, inputStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, inputStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.InputStatuses.Add(new InputStatus { Key = inputStatusId });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
@@ -2488,22 +2488,22 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if (!await db.SupplierStatuses
-            .AnyAsync(x => string.Equals(x.Key, supplierStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, supplierStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.SupplierStatuses.Add(new SupplierStatus { Key = supplierStatusId });
         var inputStatusId = Domain.Constants.Input.InputStatus.Working;
         if (!await db.InputStatuses
-            .AnyAsync(x => string.Equals(x.Key, inputStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, inputStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.InputStatuses.Add(new InputStatus { Key = inputStatusId });
         var finishStatusId = Domain.Constants.Input.InputStatus.Finish;
         if (!await db.InputStatuses
-            .AnyAsync(x => string.Equals(x.Key, finishStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, finishStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.InputStatuses.Add(new InputStatus { Key = finishStatusId });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
@@ -2591,12 +2591,12 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var inputStatusId = Domain.Constants.Input.InputStatus.Working;
         if (!await db.InputStatuses
-            .AnyAsync(x => string.Equals(x.Key, inputStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, inputStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.InputStatuses.Add(new InputStatus { Key = inputStatusId });
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if (!await db.SupplierStatuses
-            .AnyAsync(x => string.Equals(x.Key, supplierStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, supplierStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.SupplierStatuses.Add(new SupplierStatus { Key = supplierStatusId });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
@@ -2630,7 +2630,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         content!.Items
             .Should()
             .OnlyContain(
-                i => string.Equals(i.StatusId, Domain.Constants.Input.InputStatus.Working, StringComparison.OrdinalIgnoreCase) &&
+                i => string.Compare(i.StatusId, Domain.Constants.Input.InputStatus.Working) == 0 &&
                     i.SupplierId == supplier.Id);
     }
 
@@ -2704,12 +2704,12 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var supplierStatusId = Domain.Constants.SupplierStatus.Active;
         if (!await db.SupplierStatuses
-            .AnyAsync(x => string.Equals(x.Key, supplierStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, supplierStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.SupplierStatuses.Add(new SupplierStatus { Key = supplierStatusId });
         var inputStatusId = Domain.Constants.Input.InputStatus.Working;
         if (!await db.InputStatuses
-            .AnyAsync(x => string.Equals(x.Key, inputStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, inputStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.InputStatuses.Add(new InputStatus { Key = inputStatusId });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);

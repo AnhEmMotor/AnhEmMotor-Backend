@@ -81,7 +81,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -139,7 +139,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -202,7 +202,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -272,7 +272,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -346,7 +346,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -398,7 +398,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -451,7 +451,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -505,7 +505,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -562,7 +562,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -619,7 +619,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -690,7 +690,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -729,7 +729,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             .ConfigureAwait(true);
         options.Should().NotBeNull();
         var values = await db.OptionValues
-            .Where(ov => ov.OptionId == options!.Id && string.Equals(ov.Name, "Green", StringComparison.OrdinalIgnoreCase))
+            .Where(ov => ov.OptionId == options!.Id && string.Compare(ov.Name, "Green") == 0)
             .FirstOrDefaultAsync(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         values.Should().NotBeNull();
@@ -761,7 +761,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -799,7 +799,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         response!.StatusCode.Should().Be(HttpStatusCode.Created);
         var count = await db.OptionValues
             .CountAsync(
-                ov => ov.OptionId == option.Id && string.Equals(ov.Name, optionValueName, StringComparison.OrdinalIgnoreCase),
+                ov => ov.OptionId == option.Id && string.Compare(ov.Name, optionValueName) == 0,
                 CancellationToken.None)
             .ConfigureAwait(true);
         count.Should().Be(1);
@@ -831,7 +831,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -902,7 +902,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -958,7 +958,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -1010,11 +1010,11 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var productStatusId = ProductStatusConstants.ForSale;
         var outStockStatusId = ProductStatusConstants.OutOfBusiness;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, outStockStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .AnyAsync(x => string.Compare(x.Key, outStockStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = outStockStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -1078,11 +1078,11 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var productStatusId = ProductStatusConstants.ForSale;
         var outStockStatusId = ProductStatusConstants.OutOfBusiness;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, outStockStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .AnyAsync(x => string.Compare(x.Key, outStockStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = outStockStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -1213,7 +1213,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         var category = new ProductCategoryEntity { Name = $"Cat_{uniqueId}" };
@@ -1266,7 +1266,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         db.ProductCategories.Add(cat);
         db.Brands.Add(brand);
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, ProductStatusConstants.ForSale, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .AnyAsync(x => string.Compare(x.Key, ProductStatusConstants.ForSale) == 0, CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = ProductStatusConstants.ForSale });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -1282,7 +1282,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var response = await _client.PostAsJsonAsync("/api/v1/product", payload).ConfigureAwait(true);
         response!.StatusCode.Should().BeOneOf(HttpStatusCode.Created, HttpStatusCode.OK);
         var createdProduct = await db.ProductVariants
-            .FirstOrDefaultAsync(v => string.Equals(v.UrlSlug, longSlug, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .FirstOrDefaultAsync(v => string.Compare(v.UrlSlug, longSlug) == 0, CancellationToken.None)
             .ConfigureAwait(true);
         createdProduct.Should().NotBeNull();
         createdProduct!.UrlSlug?.Length.Should().Be(200);
@@ -1316,7 +1316,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         db.ProductCategories.Add(cat);
         db.Brands.Add(brand);
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, ProductStatusConstants.ForSale, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .AnyAsync(x => string.Compare(x.Key, ProductStatusConstants.ForSale) == 0, CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = ProductStatusConstants.ForSale });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -1369,7 +1369,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         db.Options.Add(option);
         db.OptionValues.Add(optionValue);
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, ProductStatusConstants.ForSale, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .AnyAsync(x => string.Compare(x.Key, ProductStatusConstants.ForSale) == 0, CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = ProductStatusConstants.ForSale });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -1489,17 +1489,17 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         db.ProductCategories.Add(cat);
         db.Brands.Add(brand);
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, ProductStatusConstants.ForSale, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .AnyAsync(x => string.Compare(x.Key, ProductStatusConstants.ForSale) == 0, CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = ProductStatusConstants.ForSale });
         if (!await db.InputStatuses
             .AnyAsync(
-                x => string.Equals(x.Key, Domain.Constants.Input.InputStatus.Finish, StringComparison.OrdinalIgnoreCase),
+                x => string.Compare(x.Key, Domain.Constants.Input.InputStatus.Finish) == 0,
                 CancellationToken.None)
             .ConfigureAwait(true))
             db.InputStatuses.Add(new InputStatus { Key = Domain.Constants.Input.InputStatus.Finish });
         if (!await db.OutputStatuses
-            .AnyAsync(x => string.Equals(x.Key, OrderStatus.Pending, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, CancellationToken.None)
             .ConfigureAwait(true))
             db.OutputStatuses.Add(new OutputStatus { Key = OrderStatus.Pending });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -1583,7 +1583,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         db.ProductCategories.Add(cat);
         db.Brands.Add(brand);
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, ProductStatusConstants.ForSale, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .AnyAsync(x => string.Compare(x.Key, ProductStatusConstants.ForSale) == 0, CancellationToken.None)
             .ConfigureAwait(true))
         {
             db.ProductStatuses.Add(new ProductStatus { Key = ProductStatusConstants.ForSale });
@@ -1647,7 +1647,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         db.ProductCategories.Add(cat);
         db.Brands.Add(brand);
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, ProductStatusConstants.ForSale, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .AnyAsync(x => string.Compare(x.Key, ProductStatusConstants.ForSale) == 0, CancellationToken.None)
             .ConfigureAwait(true))
         {
             db.ProductStatuses.Add(new ProductStatus { Key = ProductStatusConstants.ForSale });
@@ -1737,7 +1737,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
     private static async Task EnsureForSaleStatusAsync(ApplicationDBContext db)
     {
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, ProductStatusConstants.ForSale, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .AnyAsync(x => string.Compare(x.Key, ProductStatusConstants.ForSale) == 0, CancellationToken.None)
             .ConfigureAwait(true))
         {
             db.ProductStatuses.Add(new ProductStatus { Key = ProductStatusConstants.ForSale });
@@ -1930,13 +1930,13 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         db.Products.Add(product);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         if (!await db.PredefinedOptions
-            .AnyAsync(x => string.Equals(x.Key, "Color", StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .AnyAsync(x => string.Compare(x.Key, "Color") == 0, CancellationToken.None)
             .ConfigureAwait(true))
         {
             db.PredefinedOptions.Add(new PredefinedOption { Key = "Color", Value = "Màu sắc" });
         }
         var colorOption = await db.Options
-            .FirstOrDefaultAsync(o => string.Equals(o.Name, "Color", StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .FirstOrDefaultAsync(o => string.Compare(o.Name, "Color") == 0, CancellationToken.None)
             .ConfigureAwait(true);
         if (colorOption is null)
         {
@@ -1991,20 +1991,20 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         db.Products.Add(product);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         if (!await db.PredefinedOptions
-            .AnyAsync(x => string.Equals(x.Key, "Color", StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .AnyAsync(x => string.Compare(x.Key, "Color") == 0, CancellationToken.None)
             .ConfigureAwait(true))
             db.PredefinedOptions.Add(new PredefinedOption { Key = "Color", Value = "Màu sắc" });
         if (!await db.PredefinedOptions
-            .AnyAsync(x => string.Equals(x.Key, "Displacement", StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .AnyAsync(x => string.Compare(x.Key, "Displacement") == 0, CancellationToken.None)
             .ConfigureAwait(true))
             db.PredefinedOptions.Add(new PredefinedOption { Key = "Displacement", Value = "Phân khối" });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var colorOption = await db.Options
-                .FirstOrDefaultAsync(o => string.Equals(o.Name, "Color", StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+                .FirstOrDefaultAsync(o => string.Compare(o.Name, "Color") == 0, CancellationToken.None)
                 .ConfigureAwait(true) ??
             new Option { Name = "Color" };
         var displOption = await db.Options
-                .FirstOrDefaultAsync(o => string.Equals(o.Name, "Displacement", StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+                .FirstOrDefaultAsync(o => string.Compare(o.Name, "Displacement") == 0, CancellationToken.None)
                 .ConfigureAwait(true) ??
             new Option { Name = "Displacement" };
         if (colorOption.Id == 0)
@@ -2196,7 +2196,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
     {
         var key = Domain.Constants.SettingKeys.InventoryAlertLevel;
         var setting = await db.Settings
-            .FirstOrDefaultAsync(s => string.Equals(s.Key, key, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .FirstOrDefaultAsync(s => string.Compare(s.Key, key) == 0, CancellationToken.None)
             .ConfigureAwait(true);
         if (setting is null)
         {
@@ -2211,7 +2211,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
     private static async Task EnsureInputStatusAsync(ApplicationDBContext db, string key)
     {
         if (!await db.InputStatuses
-            .AnyAsync(s => string.Equals(s.Key, key, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .AnyAsync(s => string.Compare(s.Key, key) == 0, CancellationToken.None)
             .ConfigureAwait(true))
         {
             db.InputStatuses.Add(new InputStatus { Key = key });
@@ -2222,7 +2222,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
     private static async Task EnsureOutputStatusAsync(ApplicationDBContext db, string key)
     {
         if (!await db.OutputStatuses
-            .AnyAsync(s => string.Equals(s.Key, key, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .AnyAsync(s => string.Compare(s.Key, key) == 0, CancellationToken.None)
             .ConfigureAwait(true))
         {
             db.OutputStatuses.Add(new OutputStatus { Key = key });
@@ -2341,7 +2341,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
@@ -2423,7 +2423,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         var category = new ProductCategoryEntity { Name = $"Cat_{uniqueId}" };
@@ -2497,7 +2497,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
         {
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
@@ -2557,7 +2557,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
         {
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
@@ -2617,7 +2617,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
             .ConfigureAwait(true))
         {
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
@@ -2691,7 +2691,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
         {
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
@@ -2748,7 +2748,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         variant.CoverImageUrl.Should().Be("http://example.com/new-cover.jpg");
         variant.ProductCollectionPhotos
             .Should()
-            .ContainSingle(p => string.Equals(p.ImageUrl, "http://example.com/photo1.jpg", StringComparison.OrdinalIgnoreCase));
+            .ContainSingle(p => string.Compare(p.ImageUrl, "http://example.com/photo1.jpg") == 0);
     }
 
     [Fact(DisplayName = "PRODUCT_144 - Lưu trữ thông tin định danh chuyên sâu của biến thể")]
@@ -2805,7 +2805,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var response = await _client.PostAsJsonAsync("/api/v1/product", payload).ConfigureAwait(true);
         response!.StatusCode.Should().Be(HttpStatusCode.Created);
         var variant = await db.ProductVariants
-            .FirstOrDefaultAsync(v => string.Equals(v.SKU, "SKU-123", StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .FirstOrDefaultAsync(v => string.Compare(v.SKU, "SKU-123") == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         variant.Should().NotBeNull();
         variant!.VersionName.Should().Be("Premium");
@@ -2870,7 +2870,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var assertDb = assertScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var product = await assertDb.Products
             .AsNoTracking()
-            .FirstOrDefaultAsync(p => string.Equals(p.Name, "Bike", StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .FirstOrDefaultAsync(p => string.Compare(p.Name, "Bike") == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         product.Should().NotBeNull("Product should have been created");
         var updatedOv = await assertDb.OptionValues
@@ -2924,7 +2924,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             throw new Exception($"API failed with {response150.StatusCode}: {error}");
         }
         var product = await db.Products
-            .FirstOrDefaultAsync(p => string.Equals(p.Name, "SEO Bike", StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
+            .FirstOrDefaultAsync(p => string.Compare(p.Name, "SEO Bike") == 0, TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         product!.MetaTitle.Should().Be("Meta Title");
         product.MetaDescription.Should().Be("Meta Description");
@@ -2973,7 +2973,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var link = await assertDb.ProductTechnologies
             .AsNoTracking()
             .FirstOrDefaultAsync(
-                pt => string.Equals(pt.CustomTitle, "Cool ABS", StringComparison.OrdinalIgnoreCase),
+                pt => string.Compare(pt.CustomTitle, "Cool ABS") == 0,
                 TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         link.Should().NotBeNull();

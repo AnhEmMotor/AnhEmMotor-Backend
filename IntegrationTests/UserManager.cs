@@ -293,7 +293,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var u = await db.Users
                 .FirstOrDefaultAsync(
-                    u => string.Equals(u.UserName, $"existing_{uniqueId}", StringComparison.OrdinalIgnoreCase),
+                    u => string.Compare(u.UserName, $"existing_{uniqueId}") == 0,
                     CancellationToken.None)
                 .ConfigureAwait(true);
             u!.PhoneNumber = null;
@@ -571,7 +571,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var u = await db.Users
-                .FirstAsync(u => string.Equals(u.UserName, adminName, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
+                .FirstAsync(u => string.Compare(u.UserName, adminName) == 0, CancellationToken.None)
                 .ConfigureAwait(true);
             adminId = u.Id;
         }
@@ -883,8 +883,8 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
         result.Should().NotBeNull();
         result!.Items
             .Should()
-            .Contain(u => u.Id == targetUser1.Id && string.Equals(u.Email, $"target1_{uniqueId}@test.com", StringComparison.OrdinalIgnoreCase));
-        result.Items.Should().Contain(u => u.Id == targetUser2.Id && string.Equals(u.PhoneNumber, "0922222222", StringComparison.OrdinalIgnoreCase));
+            .Contain(u => u.Id == targetUser1.Id && string.Compare(u.Email, $"target1_{uniqueId}@test.com") == 0);
+        result.Items.Should().Contain(u => u.Id == targetUser2.Id && string.Compare(u.PhoneNumber, "0922222222") == 0);
     }
 
     [Fact(DisplayName = "UMGR_045 - Lấy danh sách basic-info tìm kiếm theo Email/Phone")]
