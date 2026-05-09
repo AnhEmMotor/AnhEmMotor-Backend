@@ -171,4 +171,229 @@ public class News : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         news.MetaDescription.Should().Be("Meta D");
         news.MetaKeywords.Should().Be("K1, K2");
     }
+
+    [Fact(DisplayName = "NEWS_013 - Tạo bài viết với đầy đủ thông tin SEO và Danh mục")]
+    public async Task CreateNews_WithFullSEOAndCategory_ReturnsCreated()
+    {
+        int categoryId;
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+            var cat = new Domain.Entities.NewsCategory { Name = "Tech", Slug = "tech" };
+            db.NewsCategories.Add(cat);
+            await db.SaveChangesAsync().ConfigureAwait(true);
+            categoryId = cat.Id;
+        }
+
+        var payload = new
+        {
+            title = "SEO News 2",
+            content = "Full content",
+            meta_title = "SEO Meta Title",
+            meta_description = "SEO Meta Description",
+            slug = "seo-news-slug",
+            category_id = categoryId,
+            is_published = true
+        };
+
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            $"user_{uniqueId}",
+            "Password123!",
+            ["Permissions.News.Create"],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            $"user_{uniqueId}",
+            "Password123!",
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        var response = await _client.PostAsJsonAsync("/api/v1/news", payload).ConfigureAwait(true);
+        response.StatusCode.Should().Be(HttpStatusCode.OK); // Current controller returns HandleResult which might be OK with Id
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+            var news = await db.News.FirstOrDefaultAsync(n => n.Slug == "seo-news-slug").ConfigureAwait(true);
+            news.Should().NotBeNull();
+            news!.CategoryId.Should().Be(categoryId);
+            news.MetaTitle.Should().Be("SEO Meta Title");
+        }
+    }
+
+    [Fact(DisplayName = "NEWS_015 - Thay đổi trạng thái hiển thị bài viết")]
+    public async Task UpdateNewsStatus_ToPublished_SetsIsPublishedTrue()
+    {
+        int newsId;
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+            var news = new Domain.Entities.News { Title = "Draft", Slug = "draft", IsPublished = false, Content = "C" };
+            db.News.Add(news);
+            await db.SaveChangesAsync().ConfigureAwait(true);
+            newsId = news.Id;
+        }
+
+        var payload = new { id = newsId, is_published = true };
+
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            $"user_{uniqueId}",
+            "Password123!",
+            ["Permissions.News.Update"],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            $"user_{uniqueId}",
+            "Password123!",
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        var response = await _client.PatchAsJsonAsync($"/api/v1/news/{newsId}/status", payload).ConfigureAwait(true);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+            var news = await db.News.FindAsync(newsId).ConfigureAwait(true);
+            news!.IsPublished.Should().BeTrue();
+            news.PublishedDate.Should().NotBeNull();
+        }
+    }
+
+    [Fact(DisplayName = "NEWS_017 - Gán tác giả cho bài viết")]
+    public async Task AssignAuthor_ValidAuthorId_UpdatesNews()
+    {
+        int newsId;
+        Guid authorId;
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+            var news = new Domain.Entities.News { Title = "News", Slug = "news-auth", Content = "C" };
+            db.News.Add(news);
+            
+            var user = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+                _factory.Services,
+                $"author_{uniqueId}",
+                "Password123!",
+                ["Permissions.News.Create"], // Just to create a user
+                CancellationToken.None)
+                .ConfigureAwait(true);
+            authorId = user.Id;
+                
+            await db.SaveChangesAsync().ConfigureAwait(true);
+            newsId = news.Id;
+        }
+
+        var payload = new
+        {
+            id = newsId,
+            title = "Updated Title",
+            author_id = authorId,
+            content = "New content"
+        };
+
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            $"admin_{uniqueId}",
+            "Password123!",
+            ["Permissions.News.Update"],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            $"admin_{uniqueId}",
+            "Password123!",
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        var response = await _client.PutAsJsonAsync($"/api/v1/news/{newsId}", payload).ConfigureAwait(true);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+            var news = await db.News.FindAsync(newsId).ConfigureAwait(true);
+            news!.AuthorId.Should().Be(authorId);
+        }
+    }
+
+    [Fact(DisplayName = "NEWS_018 - Xóa bài viết (Soft Delete)")]
+    public async Task DeleteNews_SoftDelete_SetsDeletedAt()
+    {
+        int newsId;
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+            var news = new Domain.Entities.News { Title = "To Delete", Slug = "to-delete", Content = "C" };
+            db.News.Add(news);
+            await db.SaveChangesAsync().ConfigureAwait(true);
+            newsId = news.Id;
+        }
+
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            $"user_{uniqueId}",
+            "Password123!",
+            ["Permissions.News.Delete"],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            $"user_{uniqueId}",
+            "Password123!",
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        var response = await _client.DeleteAsync($"/api/v1/news/{newsId}").ConfigureAwait(true);
+        response.StatusCode.Should().Be(HttpStatusCode.OK); // Soft delete might return OK or NoContext depending on HandleResult
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+            var news = await db.All<Domain.Entities.News>().FirstOrDefaultAsync(n => n.Id == newsId).ConfigureAwait(true);
+            news!.DeletedAt.Should().NotBeNull();
+        }
+    }
+
+    [Fact(DisplayName = "NEWS_019 - Lọc bài viết theo danh mục (Category)")]
+    public async Task GetNewsList_FilterByCategory_ReturnsOnlyCategoryNews()
+    {
+        int cat1Id, cat2Id;
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+            var cat1 = new Domain.Entities.NewsCategory { Name = "Cat 1", Slug = "cat-1" };
+            var cat2 = new Domain.Entities.NewsCategory { Name = "Cat 2", Slug = "cat-2" };
+            db.NewsCategories.AddRange(cat1, cat2);
+            await db.SaveChangesAsync().ConfigureAwait(true);
+            cat1Id = cat1.Id;
+            cat2Id = cat2.Id;
+
+            db.News.AddRange(
+                new Domain.Entities.News { Title = "N1", Slug = "n1", CategoryId = cat1Id, IsPublished = true, Content = "C" },
+                new Domain.Entities.News { Title = "N2", Slug = "n2", CategoryId = cat1Id, IsPublished = true, Content = "C" },
+                new Domain.Entities.News { Title = "N3", Slug = "n3", CategoryId = cat2Id, IsPublished = true, Content = "C" }
+            );
+            await db.SaveChangesAsync().ConfigureAwait(true);
+        }
+
+        var response = await _client.GetAsync($"/api/v1/news?Filters=CategoryId=={cat1Id}").ConfigureAwait(true);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var pagedResult = await response.Content.ReadFromJsonAsync<PagedResult<NewsResponse>>().ConfigureAwait(true);
+        pagedResult!.Items.Should().HaveCount(2);
+        pagedResult.Items.All(n => n.Title == "N1" || n.Title == "N2").Should().BeTrue();
+    }
 }

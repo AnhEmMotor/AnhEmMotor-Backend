@@ -7,11 +7,15 @@ public class VehicleResponse
 
     public int LeadId { get; set; }
 
+    public int? ProductId { get; set; }
+
     public string VinNumber { get; set; } = string.Empty;
 
     public string EngineNumber { get; set; } = string.Empty;
 
     public string LicensePlate { get; set; } = string.Empty;
+
+    public bool IsActive { get; set; }
 
     public DateTimeOffset PurchaseDate { get; set; }
 

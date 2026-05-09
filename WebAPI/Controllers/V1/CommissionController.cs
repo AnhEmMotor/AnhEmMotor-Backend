@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using Infrastructure.Authorization.Attribute;
+using Domain.Constants.Permission;
 
 namespace WebAPI.Controllers.V1;
 
@@ -40,6 +42,7 @@ public class CommissionController(IApplicationDBContext context) : ControllerBas
     /// Gets a summary of payroll (salary + commissions).
     /// </summary>
     [HttpGet("payroll-summary")]
+    [HasPermission(PermissionsList.Payroll.View)]
     public async Task<IActionResult> GetPayrollSummary(
         [FromQuery] int month,
         [FromQuery] int year,
@@ -54,6 +57,7 @@ public class CommissionController(IApplicationDBContext context) : ControllerBas
     /// Approves commission payments.
     /// </summary>
     [HttpPost("approve-payroll")]
+    [HasPermission(PermissionsList.Payroll.Approve)]
     public async Task<IActionResult> ApprovePayroll(
         [FromBody] ApprovePayrollCommand command,
         [FromServices] IMediator mediator,

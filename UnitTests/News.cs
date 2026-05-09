@@ -125,6 +125,16 @@ public class News
         var slug = SlugHelper.GenerateSlug(longTitle);
         slug.Length.Should().BeLessThanOrEqualTo(255);
     }
+
+    [Fact(DisplayName = "NEWS_016 - Kiểm tra ràng buộc độ dài tiêu đề SEO")]
+    public void CreateNewsCommandValidator_MetaTitleTooLong_ShouldHaveValidationError()
+    {
+        var validator = new CreateNewsCommandValidator();
+        var command = new CreateNewsCommand { MetaTitle = new string('a', 150) };
+        var result = validator.Validate(command);
+        result.IsValid.Should().BeFalse();
+        result.Errors.Should().Contain(x => x.PropertyName == nameof(CreateNewsCommand.MetaTitle));
+    }
     #pragma warning restore IDE0079 
     #pragma warning restore CRR0035
 }

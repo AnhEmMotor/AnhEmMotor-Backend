@@ -26,6 +26,8 @@ public sealed class UpdateNewsCommandHandler(
         news.MetaTitle = request.MetaTitle;
         news.MetaDescription = request.MetaDescription;
         news.MetaKeywords = request.MetaKeywords;
+        news.CategoryId = request.CategoryId;
+        news.AuthorId = request.AuthorId;
         if (news.IsPublished && news.PublishedDate == null)
         {
             news.PublishedDate = DateTimeOffset.UtcNow;

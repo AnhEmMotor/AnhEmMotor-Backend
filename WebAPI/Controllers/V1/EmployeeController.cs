@@ -2,10 +2,13 @@ using Application.Features.HR.Commands.CreateEmployee;
 using Application.Features.HR.Commands.UpdateEmployee;
 using Application.Features.HR.Queries.GetEmployees;
 using Asp.Versioning;
+using Domain.Constants.Permission;
+using Infrastructure.Authorization.Attribute;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using WebAPI.Controllers.Base;
+using static Domain.Constants.Permission.PermissionsList;
 
 namespace WebAPI.Controllers.V1;
 
@@ -24,6 +27,7 @@ public class EmployeeController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A list of employee DTOs.</returns>
     [HttpGet]
+    [HasPermission(HR.View)]
     [ProducesResponseType(typeof(List<EmployeeDTO>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetEmployeesAsync(CancellationToken cancellationToken)
     {
@@ -38,6 +42,7 @@ public class EmployeeController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The created employee ID.</returns>
     [HttpPost]
+    [HasPermission(HR.Create)]
     [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
     public async Task<IActionResult> CreateEmployeeAsync(
         [FromBody] CreateEmployeeCommand command,
@@ -55,6 +60,7 @@ public class EmployeeController(IMediator mediator) : ApiController
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The updated employee ID.</returns>
     [HttpPut("{id}")]
+    [HasPermission(HR.Edit)]
     [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
     public async Task<IActionResult> UpdateEmployeeAsync(
         int id,

@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.UserManager.Responses;
+using Application.ApiContracts.UserManager.Responses;
 using Application.Features.UserManager.Commands.AssignRoles;
 using Application.Features.UserManager.Commands.ChangeMultipleUsersStatus;
 using Application.Features.UserManager.Commands.ChangePasswordByManager;
@@ -958,5 +958,165 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
             .ConfigureAwait(true);
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
-    #pragma warning restore CRR0035
+    [Fact(DisplayName = "USER_073 - Admin tạo tài khoản người dùng hợp lệ")]
+    public async Task CreateUser_Admin_ValidData_ReturnsCreated()
+    {
+        // Arrange
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        
+        // Ensure Staff role exists
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
+            if (!await roleManager.RoleExistsAsync("Staff").ConfigureAwait(false))
+            {
+                await roleManager.CreateAsync(new ApplicationRole { Name = "Staff" }).ConfigureAwait(false);
+            }
+        }
+
+        var adminUsername = $"admin_{uniqueId}";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            adminUsername,
+            "Password123!",
+            [PermissionsList.Users.Create],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, adminUsername, "Password123!").ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        var newUserRequest = new Application.Features.UserManager.Commands.CreateUserByManager.CreateUserByManagerCommand
+        {
+            Username = $"user_{uniqueId}",
+            Email = $"user_{uniqueId}@test.com",
+            Password = "Password123!",
+            RoleNames = ["Staff"]
+        };
+
+        // Act
+        var response = await _client.PostAsJsonAsync("/api/v1/UserManager", newUserRequest).ConfigureAwait(true);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        var content = await response.Content.ReadFromJsonAsync<UserDTOForManagerResponse>().ConfigureAwait(true);
+        content.UserName.Should().Be($"user_{uniqueId}");
+    }
+
+    [Fact(DisplayName = "USER_076 - Ngăn chặn trùng lặp Email")]
+    public async Task CreateUser_DuplicateEmail_ReturnsBadRequest()
+    {
+        // Arrange
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var existingEmail = $"existing_{uniqueId}@test.com";
+
+        // Ensure Staff role exists
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
+            if (!await roleManager.RoleExistsAsync("Staff").ConfigureAwait(false))
+            {
+                await roleManager.CreateAsync(new ApplicationRole { Name = "Staff" }).ConfigureAwait(false);
+            }
+        }
+        
+        // Create an existing user
+        await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"user1_{uniqueId}", "Password123!", CancellationToken.None, existingEmail).ConfigureAwait(true);
+
+        var adminUsername = $"admin_{uniqueId}";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, adminUsername, "Password123!", [PermissionsList.Users.Create]).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, adminUsername, "Password123!").ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        var newUserRequest = new Application.Features.UserManager.Commands.CreateUserByManager.CreateUserByManagerCommand
+        {
+            Username = $"user2_{uniqueId}",
+            Email = existingEmail,
+            Password = "Password123!",
+            RoleNames = ["Staff"]
+        };
+
+        // Act
+        var response = await _client.PostAsJsonAsync("/api/v1/UserManager", newUserRequest).ConfigureAwait(true);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact(DisplayName = "USER_077 - Ngăn chặn trùng lặp Username")]
+    public async Task CreateUser_DuplicateUsername_ReturnsBadRequest()
+    {
+        // Arrange
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var existingUsername = $"user1_{uniqueId}";
+
+        // Ensure Staff role exists
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
+            if (!await roleManager.RoleExistsAsync("Staff").ConfigureAwait(false))
+            {
+                await roleManager.CreateAsync(new ApplicationRole { Name = "Staff" }).ConfigureAwait(false);
+            }
+        }
+        
+        await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, existingUsername, "Password123!").ConfigureAwait(true);
+
+        var adminUsername = $"admin_{uniqueId}";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, adminUsername, "Password123!", [PermissionsList.Users.Create]).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, adminUsername, "Password123!").ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        var newUserRequest = new Application.Features.UserManager.Commands.CreateUserByManager.CreateUserByManagerCommand
+        {
+            Username = existingUsername,
+            Email = $"different_{uniqueId}@test.com",
+            Password = "Password123!",
+            RoleNames = ["Staff"]
+        };
+
+        // Act
+        var response = await _client.PostAsJsonAsync("/api/v1/UserManager", newUserRequest).ConfigureAwait(true);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact(DisplayName = "USER_080 - Từ chối quyền tạo User cho tài khoản thường")]
+    public async Task CreateUser_ByStaff_ReturnsForbidden()
+    {
+        // Arrange
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var staffUsername = $"staff_{uniqueId}";
+
+        // Ensure Staff role exists
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
+            if (!await roleManager.RoleExistsAsync("Staff").ConfigureAwait(false))
+            {
+                await roleManager.CreateAsync(new ApplicationRole { Name = "Staff" }).ConfigureAwait(false);
+            }
+        }
+
+        await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, staffUsername, "Password123!").ConfigureAwait(true);
+
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, staffUsername, "Password123!").ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        var newUserRequest = new Application.Features.UserManager.Commands.CreateUserByManager.CreateUserByManagerCommand
+        {
+            Username = $"user_{uniqueId}",
+            Email = $"user_{uniqueId}@test.com",
+            Password = "Password123!",
+            RoleNames = ["Staff"]
+        };
+
+        // Act
+        var response = await _client.PostAsJsonAsync("/api/v1/UserManager", newUserRequest).ConfigureAwait(true);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+#pragma warning restore CRR0035
 }

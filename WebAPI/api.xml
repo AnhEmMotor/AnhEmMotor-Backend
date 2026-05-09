@@ -717,6 +717,14 @@
             <param name="cancellationToken"></param>
             <returns>Chi tiết bài viết</returns>
         </member>
+        <member name="M:WebAPI.Controllers.V1.NewsController.UpdateStatus(System.Int32,Application.Features.News.Commands.UpdateNewsStatus.UpdateNewsStatusCommand)">
+            <summary>
+            Cập nhật trạng thái hiển thị bài viết
+            </summary>
+            <param name="id">Mã bài viết</param>
+            <param name="command">Trạng thái mới</param>
+            <returns>Kết quả cập nhật</returns>
+        </member>
         <member name="T:WebAPI.Controllers.V1.NotificationController">
             <summary>
             Quản lý thông báo thời gian thực (SSE)
@@ -1051,6 +1059,46 @@
             <param name="id"></param>
             <param name="cancellationToken"></param>
             <returns></returns>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.CreateCategoryGroupAsync(Application.Features.ProductCategories.Commands.CreateCategoryGroup.CreateCategoryGroupCommand,System.Threading.CancellationToken)">
+            <summary>
+            Phân nhóm danh mục sản phẩm.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.SetCompatibilityAsync(System.Int32,Application.Features.Products.Commands.SetProductCompatibility.SetProductCompatibilityCommand,System.Threading.CancellationToken)">
+            <summary>
+            Thiết lập danh sách xe tương thích cho phụ tùng.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.AttachTechnologiesAsync(System.Int32,Application.Features.Products.Commands.AttachTechnologies.AttachTechnologiesCommand,System.Threading.CancellationToken)">
+            <summary>
+            Đính kèm công nghệ vào sản phẩm.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.UpdateVehicleTypeAsync(System.Int32,Application.Features.Products.Commands.UpdateVehicleType.UpdateVehicleTypeCommand,System.Threading.CancellationToken)">
+            <summary>
+            Cập nhật loại xe cho sản phẩm.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.CreateTechnologyAsync(Application.Features.Technologies.Commands.CreateTechnology.CreateTechnologyCommand)">
+            <summary>
+            Tạo mới một Công nghệ.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetAllTechnologiesAsync(System.Nullable{System.Int32},System.Nullable{System.Int32})">
+            <summary>
+            Lấy danh sách toàn bộ Công nghệ.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetTechnologyCategoriesAsync">
+            <summary>
+            Lấy danh sách toàn bộ Danh mục Công nghệ.
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.ProductController.CreateTechnologyCategoryAsync(Application.Features.Technologies.Commands.CreateTechnologyCategory.CreateTechnologyCategoryCommand)">
+            <summary>
+            Tạo mới một Danh mục Công nghệ.
+            </summary>
         </member>
         <member name="T:WebAPI.Controllers.V1.SalesOrdersController">
             <summary>
@@ -1578,6 +1626,14 @@
             Quản lý Tài sản xe của khách hàng
             </summary>
         </member>
+        <member name="M:WebAPI.Controllers.V1.VehicleController.GetByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Lấy chi tiết xe của khách hàng
+            </summary>
+            <param name="id"></param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
         <member name="M:WebAPI.Controllers.V1.VehicleController.GetList(System.String)">
             <summary>
             Lấy danh sách xe của khách hàng
@@ -1585,18 +1641,20 @@
             <param name="search">Từ khóa tìm kiếm (Biển số, VIN, Tên khách)</param>
             <returns>Danh sách xe</returns>
         </member>
-        <member name="T:WebAPI.Controllers.V1.VehiclesController">
-             <summary>
-            
-             </summary>
+        <member name="M:WebAPI.Controllers.V1.VehicleController.CreateAsync(Application.Features.Vehicles.Commands.CreateVehicle.CreateVehicleCommand)">
+            <summary>
+            Tạo mới tài sản xe
+            </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.VehiclesController.GetByIdAsync(System.Int32,System.Threading.CancellationToken)">
-             <summary>
-            
-             </summary>
-             <param name="id"></param>
-             <param name="cancellationToken"></param>
-             <returns></returns>
+        <member name="M:WebAPI.Controllers.V1.VehicleController.UpdateLicensePlateAsync(System.Int32,Application.Features.Vehicles.Commands.UpdateLicensePlate.UpdateLicensePlateCommand)">
+            <summary>
+            Cập nhật biển số xe
+            </summary>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.VehicleController.TransferOwnershipAsync(System.Int32,Application.Features.Vehicles.Commands.TransferOwnership.TransferOwnershipCommand)">
+            <summary>
+            Chuyển quyền sở hữu xe
+            </summary>
         </member>
         <member name="T:WebAPI.Controllers.V1.VehicleTypeController">
             <summary>

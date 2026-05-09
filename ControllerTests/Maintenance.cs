@@ -9,13 +9,13 @@ namespace ControllerTests;
 
 public class Maintenance
 {
-    private readonly Mock<ISender> _senderMock;
-    private readonly VehiclesController _vehiclesController;
+    private readonly Mock<IMediator> _mediatorMock;
+    private readonly VehicleController _vehiclesController;
 
     public Maintenance()
     {
-        _senderMock = new Mock<ISender>();
-        _vehiclesController = new VehiclesController();
+        _mediatorMock = new Mock<IMediator>();
+        _vehiclesController = new VehicleController(_mediatorMock.Object);
         var httpContext = new DefaultHttpContext();
         _vehiclesController.ControllerContext = new ControllerContext { HttpContext = httpContext };
     }

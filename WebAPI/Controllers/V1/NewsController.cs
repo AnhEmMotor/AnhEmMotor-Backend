@@ -3,6 +3,7 @@ using Application.Common.Models;
 using Application.Features.News.Commands.CreateNews;
 using Application.Features.News.Commands.DeleteNews;
 using Application.Features.News.Commands.UpdateNews;
+using Application.Features.News.Commands.UpdateNewsStatus;
 using Application.Features.News.Queries.GetNewsBySlug;
 using Application.Features.News.Queries.GetNewsList;
 using Asp.Versioning;
@@ -104,6 +105,23 @@ public class NewsController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetBySlugAsync(string slug, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetNewsBySlugQuery { Slug = slug }, cancellationToken).ConfigureAwait(true);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Cập nhật trạng thái hiển thị bài viết
+    /// </summary>
+    /// <param name="id">Mã bài viết</param>
+    /// <param name="command">Trạng thái mới</param>
+    /// <returns>Kết quả cập nhật</returns>
+    [HttpPatch("{id}/status")]
+    [HasPermission("Permissions.News.Update")]
+    [SwaggerOperation(Summary = "Cập nhật trạng thái hiển thị bài viết")]
+    public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateNewsStatusCommand command)
+    {
+        if (id != command.Id)
+            return BadRequest("ID mismatch");
+        var result = await mediator.Send(command);
         return HandleResult(result);
     }
 }

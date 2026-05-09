@@ -19,6 +19,15 @@ using FluentValidation.TestHelper;
 using Microsoft.AspNetCore.Identity;
 using Moq;
 using PermissionEntity = Domain.Entities.Permission;
+using Infrastructure.Authorization.Hander;
+using Infrastructure.Authorization.Requirement;
+using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
+using Infrastructure.DBContexts;
+using Application.Features.UserManager.Commands.CreateUserByManager;
 
 namespace UnitTests;
 
@@ -640,6 +649,66 @@ public class PermissionAndRole
         crmPerms.Any(p => p.ID!.Contains("Contacts")).Should().BeTrue();
         crmPerms.Any(p => p.ID!.Contains("Bookings")).Should().BeTrue();
         crmPerms.Any(p => p.ID!.Contains("Leads")).Should().BeTrue();
+    }
+
+    [Fact(DisplayName = "PERM_041 - Unit - Quyền tối thượng của tài khoản Admin (Bypass check)")]
+    public async Task PermissionHandler_AdminRole_BypassesPermissionCheck()
+    {
+        // Arrange
+        var dbContextMock = new Mock<ApplicationDBContext>(new DbContextOptions<ApplicationDBContext>());
+        var userStoreMock = new Mock<IUserStore<ApplicationUser>>();
+        var userManagerMock = new Mock<UserManager<ApplicationUser>>(userStoreMock.Object, null!, null!, null!, null!, null!, null!, null!, null!);
+        var roleStoreMock = new Mock<IRoleStore<ApplicationRole>>();
+        var roleManagerMock = new Mock<RoleManager<ApplicationRole>>(roleStoreMock.Object, null!, null!, null!, null!);
+        var configurationMock = new Mock<IConfiguration>();
+        var httpContextAccessorMock = new Mock<IHttpContextAccessor>();
+
+        var user = new ApplicationUser { Id = Guid.NewGuid(), UserName = "admin" };
+        var requirement = new PermissionRequirement("Some.Permission");
+        var claims = new[] { new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()) };
+        var userPrincipal = new ClaimsPrincipal(new ClaimsIdentity(claims));
+        var authContext = new AuthorizationHandlerContext([requirement], userPrincipal, null);
+
+        userManagerMock.Setup(x => x.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(user);
+        userManagerMock.Setup(x => x.GetRolesAsync(user)).ReturnsAsync(["Admin"]);
+        
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["ProtectedAuthorizationEntities:SuperRoles:0"] = "Admin"
+            })
+            .Build();
+
+        var handler = new PermissionHandler(
+            dbContextMock.Object,
+            userManagerMock.Object,
+            roleManagerMock.Object,
+            configuration,
+            httpContextAccessorMock.Object);
+
+        // Act
+        await handler.HandleAsync(authContext).ConfigureAwait(true);
+
+        // Assert
+        authContext.HasSucceeded.Should().BeTrue();
+    }
+
+    [Fact(DisplayName = "PERM_042 - Unit - Ngăn chặn gán quyền không tồn tại")]
+    public void UpdateRoleCommand_InvalidPermission_ShouldHaveError()
+    {
+        // Arrange
+        UpdateRoleCommandValidator validator = new();
+        var command = new UpdateRoleCommand 
+        { 
+            RoleId = Guid.NewGuid(), 
+            Permissions = ["Invalid_Permission_Name"] 
+        };
+
+        // Act
+        var result = validator.TestValidate(command);
+
+        // Assert
+        result.ShouldHaveValidationErrorFor(x => x.Permissions);
     }
 
 #pragma warning restore CRR0035

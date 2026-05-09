@@ -52,7 +52,7 @@ public class UserManagerController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var result = await mediator.Send(model, cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
+        return HandleCreated(result);
     }
 
     /// <summary>

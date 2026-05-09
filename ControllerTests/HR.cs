@@ -1,0 +1,99 @@
+using Application.Common.Models;
+using Application.Features.HR.Commands.UpdateEmployee;
+using Application.Features.HR.Queries.GetPayrollSummary;
+using FluentAssertions;
+using MediatR;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Moq;
+using WebAPI.Controllers.V1;
+
+namespace ControllerTests;
+
+public class HR
+{
+    private readonly Mock<IMediator> _mediatorMock;
+    private readonly EmployeeController _employeeController;
+    private readonly CommissionController _commissionController;
+
+    public HR()
+    {
+        _mediatorMock = new Mock<IMediator>();
+        _employeeController = new EmployeeController(_mediatorMock.Object);
+        _commissionController = new CommissionController(null!); // context not used in the tested action or mocked if needed
+        
+        var httpContext = new DefaultHttpContext();
+        _employeeController.ControllerContext = new ControllerContext() { HttpContext = httpContext };
+        _commissionController.ControllerContext = new ControllerContext() { HttpContext = httpContext };
+    }
+
+    [Fact(DisplayName = "HR02 - Cập nhật lương cơ bản nhân viên thành công")]
+    public async Task HR02_Update_BaseSalary_Success()
+    {
+        // Arrange
+        var command = new UpdateEmployeeCommand
+        {
+            Id = 1,
+            BaseSalary = 15000000,
+            IdentityNumber = "123456789",
+            JobTitle = "Sales Manager"
+        };
+
+        _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateEmployeeCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<int>.Success(1));
+
+        // Action
+        var result = await _employeeController.UpdateEmployeeAsync(1, command, CancellationToken.None);
+
+        // Assert
+        result.Should().BeOfType<OkObjectResult>();
+        _mediatorMock.Verify(m => m.Send(It.Is<UpdateEmployeeCommand>(c => c.BaseSalary == 15000000), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact(DisplayName = "HR06 - Tổng hợp bảng lương tháng cho nhân viên")]
+    public async Task HR06_GetPayrollSummary_Success()
+    {
+        // Arrange
+        var month = 12;
+        var year = 2025;
+        var summaryData = new List<PayrollDTO>
+        {
+            new PayrollDTO { 
+                FullName = "Test Employee", 
+                BaseSalary = 10000000, 
+                ConfirmedCommission = 5000000
+            }
+        };
+
+        _mediatorMock.Setup(m => m.Send(It.IsAny<GetPayrollSummaryQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<List<PayrollDTO>>.Success(summaryData));
+
+        // Action
+        var result = await _commissionController.GetPayrollSummary(month, year, _mediatorMock.Object, CancellationToken.None);
+
+        // Assert
+        result.Should().BeOfType<OkObjectResult>();
+        var okResult = result as OkObjectResult;
+        okResult!.Value.Should().BeEquivalentTo(summaryData);
+    }
+
+    [Fact(DisplayName = "HR06 - Tổng hợp bảng lương tháng khi không có dữ liệu")]
+    public async Task HR06_GetPayrollSummary_Empty_Success()
+    {
+        // Arrange
+        var month = 1;
+        var year = 2026;
+        var emptyData = new List<PayrollDTO>();
+
+        _mediatorMock.Setup(m => m.Send(It.IsAny<GetPayrollSummaryQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<List<PayrollDTO>>.Success(emptyData));
+
+        // Action
+        var result = await _commissionController.GetPayrollSummary(month, year, _mediatorMock.Object, CancellationToken.None);
+
+        // Assert
+        result.Should().BeOfType<OkObjectResult>();
+        var okResult = result as OkObjectResult;
+        okResult!.Value.Should().BeEquivalentTo(emptyData);
+    }
+}

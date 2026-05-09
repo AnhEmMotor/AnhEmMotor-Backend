@@ -1,0 +1,315 @@
+using Application.Features.HR.Commands.CreateEmployee;
+using Application.Features.HR.Commands.UpdateEmployee;
+using Application.Features.HR.Commands.CreateCommissionPolicy;
+using Domain.Constants.Permission;
+using Domain.Entities.HR;
+using Domain.Entities;
+using FluentAssertions;
+using Infrastructure.DBContexts;
+using IntegrationTests.SetupClass;
+using Microsoft.Extensions.DependencyInjection;
+using System.Net;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using Microsoft.EntityFrameworkCore;
+using Domain.Constants.Order;
+using Application.Features.Outputs.Commands.UpdateOutputStatus;
+using ProductEntity = Domain.Entities.Product;
+using OutputEntity = Domain.Entities.Output;
+using BrandEntity = Domain.Entities.Brand;
+using ProductCategoryEntity = Domain.Entities.ProductCategory;
+
+namespace IntegrationTests;
+
+public class HR : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
+{
+    private readonly IntegrationTestWebAppFactory _factory;
+    private readonly HttpClient _client;
+
+    public HR(IntegrationTestWebAppFactory factory)
+    {
+        _factory = factory;
+        _client = _factory.CreateClient();
+    }
+
+    public ValueTask InitializeAsync() => ValueTask.CompletedTask;
+
+    public async ValueTask DisposeAsync()
+    {
+        await _factory.ResetDatabaseAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+        GC.SuppressFinalize(this);
+    }
+
+    [Fact(DisplayName = "HR01 - Tạo mới hồ sơ nhân viên thành công")]
+    public async Task HR01_Create_Employee_Success()
+    {
+        // Arrange
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"staff_{uniqueId}";
+        var password = "Password123!";
+        
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            "admin",
+            "AdminPass123!",
+            [],
+            TestContext.Current.CancellationToken);
+
+        var adminLogin = await IntegrationTestAuthHelper.AuthenticateAsync(_client, "admin", "AdminPass123!", TestContext.Current.CancellationToken);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminLogin.AccessToken);
+
+        var command = new CreateEmployeeCommand
+        {
+            FullName = "Test Staff",
+            Email = $"staff_{uniqueId}@example.com",
+            IdentityNumber = "001200012345",
+            Address = "123 Main St",
+            ContractDate = DateTime.UtcNow,
+            BankName = "Vietcombank",
+            BankAccountNumber = "1234567890",
+            JobTitle = "Sales Consultant",
+            BaseSalary = 10000000
+        };
+
+        // Action
+        var response = await HttpClientJsonExtensions.PostAsJsonAsync(_client, "/api/v1/hr/employees", command, TestContext.Current.CancellationToken);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        var employee = await db.EmployeeProfiles.FirstOrDefaultAsync(e => e.IdentityNumber == "001200012345", TestContext.Current.CancellationToken);
+        employee.Should().NotBeNull();
+        employee!.BaseSalary.Should().Be(10000000);
+    }
+
+    [Fact(DisplayName = "HR04 - Ngăn chặn tạo chính sách hoa hồng trùng lặp thời gian")]
+    public async Task HR04_Prevent_Overlapping_CommissionPolicy()
+    {
+        // Arrange
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services, "admin_hr", "Password123!", [], TestContext.Current.CancellationToken);
+        var login = await IntegrationTestAuthHelper.AuthenticateAsync(_client, "admin_hr", "Password123!", TestContext.Current.CancellationToken);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.AccessToken);
+
+        using var scope1 = _factory.Services.CreateScope();
+        var db1 = scope1.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        var adminUser = await db1.Users.FirstOrDefaultAsync(u => u.UserName == "admin_hr", TestContext.Current.CancellationToken);
+        var adminId = adminUser!.Id;
+
+        var prod = new ProductEntity { Name = "Test Product HR04", StatusId = "for-sale" };
+        db1.Products.Add(prod);
+        await db1.SaveChangesAsync(TestContext.Current.CancellationToken);
+        var productId = prod.Id;
+        
+        var command1 = new CreateCommissionPolicyCommand
+        {
+            Name = "Policy 1",
+            ProductId = productId,
+            Value = 500000,
+            Type = "FixedAmount",
+            EffectiveDate = DateTimeOffset.UtcNow.AddDays(-10),
+            IsActive = true,
+            CurrentUserId = adminId,
+            CurrentUserName = "admin_hr"
+        };
+        await HttpClientJsonExtensions.PostAsJsonAsync(_client, "/api/v1/hr/commission-policies", command1, TestContext.Current.CancellationToken);
+
+        var command2 = new CreateCommissionPolicyCommand
+        {
+            Name = "Overlapping Policy",
+            ProductId = productId,
+            Value = 600000,
+            Type = "FixedAmount",
+            EffectiveDate = DateTimeOffset.UtcNow.AddDays(-5),
+            IsActive = true,
+            CurrentUserId = adminId,
+            CurrentUserName = "admin_hr"
+        };
+
+        // Action
+        var response = await HttpClientJsonExtensions.PostAsJsonAsync(_client, "/api/v1/hr/commission-policies", command2, TestContext.Current.CancellationToken);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact(DisplayName = "HR04 - Cho phép tạo chính sách hoa hồng tiếp nối thời gian")]
+    public async Task HR04_Allow_Adjacent_CommissionPolicy()
+    {
+        // Arrange
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services, "admin_hr2", "Password123!", [], TestContext.Current.CancellationToken);
+        var login = await IntegrationTestAuthHelper.AuthenticateAsync(_client, "admin_hr2", "Password123!", TestContext.Current.CancellationToken);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.AccessToken);
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        var adminUser = await db.Users.FirstOrDefaultAsync(u => u.UserName == "admin_hr2", TestContext.Current.CancellationToken);
+        var adminId = adminUser!.Id;
+
+        var prod = new ProductEntity { Name = "Test Product HR04-2", StatusId = "for-sale" };
+        db.Products.Add(prod);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+        
+        var endDate = DateTimeOffset.UtcNow.AddDays(10);
+        var command1 = new CreateCommissionPolicyCommand
+        {
+            Name = "Old Policy",
+            ProductId = prod.Id,
+            Value = 500000,
+            Type = "FixedAmount",
+            EffectiveDate = DateTimeOffset.UtcNow.AddDays(-10),
+            IsActive = true,
+            CurrentUserId = adminId,
+            CurrentUserName = "admin_hr2"
+        };
+        await HttpClientJsonExtensions.PostAsJsonAsync(_client, "/api/v1/hr/commission-policies", command1, TestContext.Current.CancellationToken);
+
+        var command2 = new CreateCommissionPolicyCommand
+        {
+            Name = "New Policy",
+            ProductId = prod.Id,
+            Value = 600000,
+            Type = "FixedAmount",
+            EffectiveDate = endDate.AddSeconds(1),
+            IsActive = true,
+            CurrentUserId = adminId,
+            CurrentUserName = "admin_hr2"
+        };
+
+        // Action
+        var response = await HttpClientJsonExtensions.PostAsJsonAsync(_client, "/api/v1/hr/commission-policies", command2, TestContext.Current.CancellationToken);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Fact(DisplayName = "HR05 - Tính toán hoa hồng khi đơn hàng hoàn thành")]
+    public async Task HR05_Calculate_Commission_On_Order_Completion()
+    {
+        // Arrange
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var staffUser = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services, $"sales_{uniqueId}", "Password123!", 
+            [PermissionsList.Outputs.Create, PermissionsList.Outputs.ChangeStatus], 
+            TestContext.Current.CancellationToken);
+        
+        var login = await IntegrationTestAuthHelper.AuthenticateAsync(_client, $"sales_{uniqueId}", "Password123!", TestContext.Current.CancellationToken);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.AccessToken);
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+            
+            db.EmployeeProfiles.Add(new EmployeeProfile { UserId = staffUser.Id, BaseSalary = 5000000, JobTitle = "Sales" });
+            
+            var brand = new BrandEntity { Name = "Honda" };
+            var cat = new ProductCategoryEntity { Name = "Bikes" };
+            db.Brands.Add(brand);
+            db.ProductCategories.Add(cat);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+            var prod = new ProductEntity { Name = "Wave", BrandId = brand.Id, CategoryId = cat.Id, StatusId = "for-sale" };
+            db.Products.Add(prod);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+            var variant = new ProductVariant { ProductId = prod.Id, Price = 20000000, UrlSlug = $"wave-{uniqueId}" };
+            db.ProductVariants.Add(variant);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+            // Seed Inventory
+            var inputStatus = new InputStatus { Key = "finished" };
+            if (!await db.InputStatuses.AnyAsync(s => s.Key == "finished", TestContext.Current.CancellationToken))
+                db.InputStatuses.Add(inputStatus);
+            
+            var input = new Input { InputDate = DateTimeOffset.UtcNow, StatusId = "finished" };
+            db.InputReceipts.Add(input);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+            db.InputInfos.Add(new InputInfo { InputId = input.Id, ProductId = variant.Id, Count = 10, RemainingCount = 10, InputPrice = 15000000 });
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+            
+            db.CommissionPolicies.Add(new CommissionPolicy { 
+                ProductId = prod.Id, 
+                Type = "Percentage", 
+                Value = 5, 
+                IsActive = true, 
+                EffectiveDate = DateTimeOffset.UtcNow.AddDays(-1),
+                Name = "5% Commission"
+            });
+
+            var statuses = new[] { OrderStatus.Pending, OrderStatus.ConfirmedCod, OrderStatus.Delivering, OrderStatus.Completed };
+            foreach (var s in statuses)
+            {
+                if (!await db.OutputStatuses.AnyAsync(st => st.Key == s, TestContext.Current.CancellationToken))
+                    db.OutputStatuses.Add(new OutputStatus { Key = s });
+            }
+
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+            var order = new OutputEntity { 
+                CreatedBy = staffUser.Id, 
+                StatusId = OrderStatus.Pending,
+                OutputInfos = [ new OutputInfo { ProductVarientId = variant.Id, Count = 1, Price = 20000000 } ]
+            };
+            db.OutputOrders.Add(order);
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+            var orderId = order.Id;
+
+            // Action: Transition order to Completed
+            await HttpClientJsonExtensions.PatchAsJsonAsync(_client, $"/api/v1/SalesOrders/{orderId}/status", new UpdateOutputStatusCommand { StatusId = OrderStatus.ConfirmedCod }, TestContext.Current.CancellationToken);
+            await HttpClientJsonExtensions.PatchAsJsonAsync(_client, $"/api/v1/SalesOrders/{orderId}/status", new UpdateOutputStatusCommand { StatusId = OrderStatus.Delivering }, TestContext.Current.CancellationToken);
+            var response = await HttpClientJsonExtensions.PatchAsJsonAsync(_client, $"/api/v1/SalesOrders/{orderId}/status", new UpdateOutputStatusCommand { StatusId = OrderStatus.Completed }, TestContext.Current.CancellationToken);
+            
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+            // Assert
+            var commission = await db.CommissionRecords.FirstOrDefaultAsync(r => r.OutputId == orderId, TestContext.Current.CancellationToken);
+            commission.Should().NotBeNull();
+            commission!.Amount.Should().Be(1000000); 
+            commission.Status.Should().Be(CommissionStatus.Confirmed);
+        }
+    }
+
+    [Fact(DisplayName = "HR07 - Cập nhật trạng thái thanh toán bảng lương")]
+    public async Task HR07_Update_Payroll_Status_Paid()
+    {
+        // Arrange
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services, "admin_final", "Password123!", [], TestContext.Current.CancellationToken);
+        var login = await IntegrationTestAuthHelper.AuthenticateAsync(_client, "admin_final", "Password123!", TestContext.Current.CancellationToken);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.AccessToken);
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        
+        var emp = new EmployeeProfile { UserId = Guid.NewGuid(), BaseSalary = 10000000 };
+        db.EmployeeProfiles.Add(emp);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var record = new CommissionRecord { 
+            EmployeeProfileId = emp.Id, 
+            Amount = 1000000, 
+            Status = CommissionStatus.Confirmed,
+            OutputId = 1
+        };
+        db.CommissionRecords.Add(record);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        // Action: Approve payroll
+        var response = await HttpClientJsonExtensions.PostAsJsonAsync(_client, "/api/v1/hr/commissions/approve-payroll", new { month = DateTime.Now.Month, year = DateTime.Now.Year }, TestContext.Current.CancellationToken);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        
+        var updatedRecord = await db.CommissionRecords.FirstOrDefaultAsync(r => r.Id == record.Id, TestContext.Current.CancellationToken);
+        updatedRecord!.Status.Should().Be(CommissionStatus.Paid);
+        updatedRecord.PaidAt.Should().NotBeNull();
+    }
+}

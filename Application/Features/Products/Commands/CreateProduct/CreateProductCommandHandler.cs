@@ -269,6 +269,7 @@ public sealed class CreateProductCommandHandler(
             Name = request.Name?.Trim(),
             CategoryId = request.CategoryId,
             BrandId = request.BrandId,
+            VehicleTypeId = request.VehicleTypeId,
             Description = request.Description?.Trim(),
             Weight = request.Weight,
             Dimensions = request.Dimensions?.Trim(),
@@ -446,7 +447,7 @@ public sealed class CreateProductCommandHandler(
                 if (techs != null)
                 {
                     var order = 1;
-                    foreach (var t in techs)
+                    foreach (var t in techs.GroupBy(x => x.TechnologyId).Select(g => g.First()))
                     {
                         product.ProductTechnologies.Add(new ProductTechnology
                         {

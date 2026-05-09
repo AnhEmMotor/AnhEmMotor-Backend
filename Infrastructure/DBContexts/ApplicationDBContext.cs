@@ -86,6 +86,8 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
 
     public virtual DbSet<News> News { get; set; }
 
+    public virtual DbSet<NewsCategory> NewsCategories { get; set; }
+
     public virtual DbSet<Banner> Banners { get; set; }
 
     public virtual DbSet<BannerAuditLog> BannerAuditLogs { get; set; }
@@ -188,6 +190,16 @@ public class ApplicationDBContext : IdentityDbContext<ApplicationUser, Applicati
             .HasOne(pc => pc.CompatibleVehicleModel)
             .WithMany(p => p.SupportedBy)
             .HasForeignKey(pc => pc.CompatibleVehicleModelId)
+            .OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<News>()
+            .HasOne(n => n.Category)
+            .WithMany(c => c.News)
+            .HasForeignKey(n => n.CategoryId)
+            .OnDelete(DeleteBehavior.SetNull);
+        modelBuilder.Entity<News>()
+            .HasOne(n => n.Author)
+            .WithMany()
+            .HasForeignKey(n => n.AuthorId)
             .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<MaintenanceHistory>()
             .HasOne(mh => mh.Vehicle)

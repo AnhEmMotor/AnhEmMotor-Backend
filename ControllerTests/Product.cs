@@ -1,4 +1,5 @@
 using Application.ApiContracts.Product.Requests;
+using Application.Features.Technologies.Commands.CreateTechnology;
 using Application.ApiContracts.Product.Responses;
 using Application.Common.Models;
 using Application.Features.Products.Commands.CreateProduct;
@@ -26,6 +27,7 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Sieve.Models;
 using WebAPI.Controllers.V1;
+using Application.Features.Products.Commands.UpdateVehicleType;
 
 namespace ControllerTests;
 
@@ -263,6 +265,37 @@ public class Product
             () => _controller.GetProductsForPriceManagementAsync(new SieveModel(), CancellationToken.None))
             .ConfigureAwait(true);
     }
+    [Fact(DisplayName = "PRODUCT_190 - API cập nhật Loại xe cho sản phẩm thành công")]
+    public async Task UpdateProductVehicleType_ValidData_ReturnsSuccess()
+    {
+        var command = new UpdateVehicleTypeCommand { VehicleTypeId = 2 };
+        _senderMock.Setup(m => m.Send(It.IsAny<UpdateVehicleTypeCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<Unit>.Success(Unit.Value));
+        
+        var result = await _controller.UpdateVehicleTypeAsync(1, command, CancellationToken.None).ConfigureAwait(true);
+        
+        Assert.IsType<OkObjectResult>(result);
+    }
+
+    [Fact(DisplayName = "PRODUCT_187 - API tạo Công nghệ mới trả về 201 Created")]
+    public async Task CreateTechnology_ValidData_ReturnsCreated()
+    {
+        var command = new CreateTechnologyCommand(
+            "Công nghệ ABS",
+            1,
+            null,
+            "ABS",
+            "Hệ thống chống bó cứng phanh",
+            null);
+        
+        _senderMock.Setup(m => m.Send(It.IsAny<CreateTechnologyCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<Application.ApiContracts.Technology.Responses.TechnologyResponse>.Success(new Application.ApiContracts.Technology.Responses.TechnologyResponse { Id = 1, Name = "ABS" }));
+            
+        var result = await _controller.CreateTechnologyAsync(command).ConfigureAwait(true);
+        
+        Assert.IsType<OkObjectResult>(result);
+    }
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079
 }
+

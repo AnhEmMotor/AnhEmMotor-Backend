@@ -669,6 +669,147 @@ public class PermissionAndRole : IClassFixture<IntegrationTestWebAppFactory>, IA
         structure.Dependencies.Should().ContainKey(PermissionsList.Products.Create);
     }
 
+    [Fact(DisplayName = "PERM_036 - Truy cập module HR với quyền hợp lệ")]
+    public async Task GetHR_WithPermission_ReturnsOk()
+    {
+        // Arrange
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"hr_{uniqueId}";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            "Password123!",
+            [PermissionsList.HR.View],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            "Password123!",
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        // Act
+        var response = await _client.GetAsync("/api/v1/hr/employees", CancellationToken.None).ConfigureAwait(true);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Fact(DisplayName = "PERM_037 - Từ chối truy cập module HR khi thiếu quyền")]
+    public async Task GetHR_WithoutPermission_ReturnsForbidden()
+    {
+        // Arrange
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"sales_{uniqueId}";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            "Password123!",
+            [PermissionsList.Brands.View], // No HR permission
+            CancellationToken.None)
+            .ConfigureAwait(true);
+
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            "Password123!",
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        // Act
+        var response = await _client.GetAsync("/api/v1/hr/employees", CancellationToken.None).ConfigureAwait(true);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact(DisplayName = "PERM_038 - Kiểm tra quyền phê duyệt lương (Payroll)")]
+    public async Task ApprovePayroll_WithoutPermission_ReturnsForbidden()
+    {
+        // Arrange
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var username = $"hr_staff_{uniqueId}";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            username,
+            "Password123!",
+            [PermissionsList.HR.View, PermissionsList.Payroll.View], // Lacks Approve permission
+            CancellationToken.None)
+            .ConfigureAwait(true);
+
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            username,
+            "Password123!",
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        // Act
+        var response = await HttpClientJsonExtensions.PostAsJsonAsync(_client, "/api/v1/hr/commissions/approve-payroll", new { Month = 5, Year = 2026 }, CancellationToken.None).ConfigureAwait(true);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact(DisplayName = "PERM_040 - Thu hồi quyền từ vai trò")]
+    public async Task RevokePermissionFromRole_ValidData_RemovesSuccessfully()
+    {
+        // Arrange
+        var uniqueId = Guid.NewGuid().ToString("N")[..8];
+        var roleName = $"Editor_{uniqueId}";
+        
+        // Create another role with the same permission to avoid "orphaned permission" error
+        await CreateRoleWithPermissionsInternalAsync(
+            $"OtherRole_{uniqueId}",
+            [PermissionsList.News.Create])
+            .ConfigureAwait(true);
+
+        var roleId = await CreateRoleWithPermissionsInternalAsync(
+            roleName,
+            [PermissionsList.News.Create, PermissionsList.News.View])
+            .ConfigureAwait(true);
+
+        var adminUsername = $"admin_{uniqueId}";
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+            _factory.Services,
+            adminUsername,
+            "Password123!",
+            [PermissionsList.Roles.Edit],
+            CancellationToken.None)
+            .ConfigureAwait(true);
+
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
+            _client,
+            adminUsername,
+            "Password123!",
+            CancellationToken.None)
+            .ConfigureAwait(true);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+        // Act: Update role to remove News.Create (only keep News.View)
+        var request = new UpdateRoleCommand { Permissions = [PermissionsList.News.View] };
+        var response = await HttpClientJsonExtensions.PutAsJsonAsync(_client, $"/api/v1/Permission/roles/{roleId}", request).ConfigureAwait(true);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+        var rolePermissions = await db.RolePermissions
+            .Include(rp => rp.Permission)
+            .Where(rp => rp.RoleId == roleId)
+            .ToListAsync()
+            .ConfigureAwait(true);
+
+        rolePermissions.Should().HaveCount(1);
+        rolePermissions.Should().NotContain(rp => rp.Permission!.Name == PermissionsList.News.Create);
+    }
+
     private static async Task<Permission> EnsurePermissionExistsAsync(ApplicationDBContext db, string permName)
     {
         var permission = await db.Permissions

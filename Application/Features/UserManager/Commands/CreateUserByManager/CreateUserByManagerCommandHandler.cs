@@ -35,7 +35,11 @@ public class CreateUserByManagerCommandHandler(
         {
             foreach (var role in request.RoleNames)
             {
-                await userCreateRepository.AddUserToRoleAsync(user, role, cancellationToken).ConfigureAwait(false);
+                var (roleSucceeded, roleErrors) = await userCreateRepository.AddUserToRoleAsync(user, role, cancellationToken).ConfigureAwait(false);
+                if (!roleSucceeded)
+                {
+                    return Error.BadRequest($"Failed to assign role '{role}': {string.Join(", ", roleErrors)}");
+                }
             }
         }
         var newUser = await userReadRepository.FindUserByIdAsync(user.Id, cancellationToken).ConfigureAwait(false);

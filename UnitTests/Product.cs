@@ -1,4 +1,6 @@
 using Application.ApiContracts.Product.Requests;
+using Application.Features.Products.Commands.AttachTechnologies;
+using MockQueryable.Moq;
 using Application.ApiContracts.Product.Responses;
 using Application.Features.Products.Commands.CreateProduct;
 using Application.Features.Products.Commands.DeleteManyProducts;
@@ -87,6 +89,70 @@ public class Product
         _variantOptionValueDeleteRepoMock = new Mock<IVariantOptionValueDeleteRepository>();
         _productTechnologyRepoMock = new Mock<IProductTechnologyRepository>();
         new ProductMappingConfig().Register(TypeAdapterConfig.GlobalSettings);
+    }
+
+    [Fact(DisplayName = "PRODUCT_184a - Kiểm tra định dạng kích thước lốp xe - Hợp lệ")]
+    public void CreateProduct_ValidTireSize_ShouldPassValidation()
+    {
+        var command = new CreateProductCommand
+        {
+            Name = "Product 1",
+            CategoryId = 1,
+            FrontTireSize = "120/70-17",
+            RearTireSize = "180/55-17",
+            Variants = [new CreateProductVariantRequest { UrlSlug = "v1", Price = 1000 }]
+        };
+        var validator = new CreateProductCommandValidator();
+        var result = validator.Validate(command);
+        result.IsValid.Should().BeTrue();
+    }
+
+    [Fact(DisplayName = "PRODUCT_184b - Kiểm tra định dạng kích thước lốp xe - Không hợp lệ")]
+    public void CreateProduct_InvalidTireSize_ShouldFailValidation()
+    {
+        var command = new CreateProductCommand
+        {
+            Name = "Product 1",
+            CategoryId = 1,
+            FrontTireSize = "120-70/17", // Wrong format
+            Variants = [new CreateProductVariantRequest { UrlSlug = "v1", Price = 1000 }]
+        };
+        var validator = new CreateProductCommandValidator();
+        var result = validator.Validate(command);
+        result.IsValid.Should().BeFalse();
+        result.Errors.Should().Contain(e => e.PropertyName == nameof(CreateProductCommand.FrontTireSize));
+    }
+
+    [Fact(DisplayName = "PRODUCT_192 - Ngăn chặn gán công nghệ trùng lặp")]
+    public async Task AttachTechnologies_DuplicateId_ReturnsBadRequest()
+    {
+        // Arrange
+        var readRepositoryMock = new Mock<IProductReadRepository>();
+        var updateRepositoryMock = new Mock<IProductUpdateRepository>();
+        var unitOfWorkMock = new Mock<IUnitOfWork>();
+        var productId = 1;
+        var techId = 10;
+        
+        var product = new ProductEntity { Id = productId };
+        product.ProductTechnologies.Add(new ProductTechnology { ProductId = productId, TechnologyId = techId });
+        
+        readRepositoryMock.Setup(r => r.GetByIdWithDetailsAsync(productId, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
+            .ReturnsAsync(product);
+
+        var command = new AttachTechnologiesCommand
+        {
+            ProductId = productId,
+            TechIds = [techId]
+        };
+        
+        var handler = new AttachTechnologiesCommandHandler(readRepositoryMock.Object, updateRepositoryMock.Object, unitOfWorkMock.Object);
+
+        // Act
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Errors.Should().Contain(e => e.Message.Contains("đã được gán"));
     }
 
     #pragma warning disable IDE0079 
@@ -1925,7 +1991,6 @@ public class Product
         var ids = brandIds.Split(',', StringSplitOptions.RemoveEmptyEntries);
         ids.Should().BeEmpty();
     }
-
 #pragma warning restore CRR0035
 #pragma warning restore IDE0079
 }

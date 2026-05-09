@@ -110,6 +110,7 @@ public sealed class UpdateProductCommandHandler(
         product.Name = command.Name?.Trim();
         product.CategoryId = command.CategoryId;
         product.BrandId = command.BrandId;
+        product.VehicleTypeId = command.VehicleTypeId;
         product.Description = command.Description?.Trim();
         product.Weight = command.Weight;
         product.Dimensions = command.Dimensions?.Trim();
@@ -488,10 +489,13 @@ public sealed class UpdateProductCommandHandler(
         {
             try
             {
-                newTechList = JsonSerializer.Deserialize<List<TechnologyJsonRequest>>(
+                newTechList = (JsonSerializer.Deserialize<List<TechnologyJsonRequest>>(
                         command.Highlights,
                         new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ??
-                    [];
+                    [])
+                    .GroupBy(x => x.TechnologyId)
+                    .Select(g => g.First())
+                    .ToList();
             } catch
             {
                 newTechList = [];
