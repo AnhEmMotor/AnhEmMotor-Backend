@@ -29,8 +29,8 @@ public class NewsController(IMediator mediator) : ApiController
     /// <summary>
     /// Tạo bài viết mới.
     /// </summary>
-    /// <param name="command"></param>
-    /// <param name="cancellationToken"></param>
+    /// <param name="command">The create news command.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns></returns>
     [HttpPost]
     [HasPermission("Permissions.News.Create")]
@@ -46,8 +46,8 @@ public class NewsController(IMediator mediator) : ApiController
     /// <summary>
     /// Lấy danh sách bài viết.
     /// </summary>
-    /// <param name="sieveModel"></param>
-    /// <param name="cancellationToken"></param>
+    /// <param name="sieveModel">The sieve model for filtering.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns></returns>
     [HttpGet]
     [SwaggerOperation(Summary = "Lấy danh sách tin tức")]
@@ -66,15 +66,16 @@ public class NewsController(IMediator mediator) : ApiController
     /// </summary>
     /// <param name="id">Mã bài viết</param>
     /// <param name="command">Dữ liệu cập nhật</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>Kết quả cập nhật</returns>
     [HttpPut("{id}")]
     [HasPermission("Permissions.News.Update")]
     [SwaggerOperation(Summary = "Cập nhật bài viết")]
-    public async Task<IActionResult> Update(int id, [FromBody] UpdateNewsCommand command)
+    public async Task<IActionResult> UpdateAsync(int id, [FromBody] UpdateNewsCommand command, CancellationToken cancellationToken)
     {
         if (id != command.Id)
             return BadRequest("ID mismatch");
-        var result = await mediator.Send(command);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -82,13 +83,14 @@ public class NewsController(IMediator mediator) : ApiController
     /// Xóa bài viết
     /// </summary>
     /// <param name="id">Mã bài viết</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>Kết quả xóa</returns>
     [HttpDelete("{id}")]
     [HasPermission("Permissions.News.Delete")]
     [SwaggerOperation(Summary = "Xóa bài viết")]
-    public async Task<IActionResult> Delete(int id)
+    public async Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new DeleteNewsCommand(id));
+        var result = await mediator.Send(new DeleteNewsCommand(id), cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -113,15 +115,16 @@ public class NewsController(IMediator mediator) : ApiController
     /// </summary>
     /// <param name="id">Mã bài viết</param>
     /// <param name="command">Trạng thái mới</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>Kết quả cập nhật</returns>
     [HttpPatch("{id}/status")]
     [HasPermission("Permissions.News.Update")]
     [SwaggerOperation(Summary = "Cập nhật trạng thái hiển thị bài viết")]
-    public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateNewsStatusCommand command)
+    public async Task<IActionResult> UpdateStatusAsync(int id, [FromBody] UpdateNewsStatusCommand command, CancellationToken cancellationToken)
     {
         if (id != command.Id)
             return BadRequest("ID mismatch");
-        var result = await mediator.Send(command);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 }

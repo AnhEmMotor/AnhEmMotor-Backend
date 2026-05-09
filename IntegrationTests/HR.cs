@@ -78,7 +78,7 @@ public class HR : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var employee = await db.EmployeeProfiles.FirstOrDefaultAsync(e => string.Equals(e.IdentityNumber, "001200012345", StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var employee = await db.EmployeeProfiles.FirstOrDefaultAsync(e => string.Compare(e.IdentityNumber, "001200012345") == 0, TestContext.Current.CancellationToken).ConfigureAwait(true);
         employee.Should().NotBeNull();
         employee!.BaseSalary.Should().Be(10000000);
     }
@@ -231,7 +231,7 @@ public class HR : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
 
         // Seed Inventory
         var inputStatus = new InputStatus { Key = "finished" };
-        if (!await db.InputStatuses.AnyAsync(s => string.Equals(s.Key, "finished", StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken).ConfigureAwait(true))
+        if (!await db.InputStatuses.AnyAsync(s => string.Compare(s.Key, "finished") == 0, TestContext.Current.CancellationToken).ConfigureAwait(true))
             db.InputStatuses.Add(inputStatus);
 
         var input = new Input { InputDate = DateTimeOffset.UtcNow, StatusId = "finished" };

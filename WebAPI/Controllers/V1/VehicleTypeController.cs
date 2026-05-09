@@ -26,12 +26,13 @@ namespace WebAPI.Controllers.V1
         /// Gets a paginated list of vehicle types.
         /// </summary>
         /// <param name="sieveModel">The sieve model for filtering and pagination.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A paginated list of vehicle types.</returns>
         [HttpGet]
-        public async Task<ActionResult<PagedResult<VehicleTypeResponse>>> GetList([FromQuery] SieveModel sieveModel)
+        public async Task<ActionResult<PagedResult<VehicleTypeResponse>>> GetListAsync([FromQuery] SieveModel sieveModel, CancellationToken cancellationToken)
         {
             var query = repository.GetQueryable();
-            var result = await paginator.ApplyAsync<VehicleType, VehicleTypeResponse>(query, sieveModel);
+            var result = await paginator.ApplyAsync<VehicleType, VehicleTypeResponse>(query, sieveModel, cancellationToken: cancellationToken).ConfigureAwait(true);
             return Ok(result);
         }
 
@@ -39,11 +40,12 @@ namespace WebAPI.Controllers.V1
         /// Gets a vehicle type by its ID.
         /// </summary>
         /// <param name="id">The ID of the vehicle type.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The vehicle type details.</returns>
         [HttpGet("{id}")]
-        public async Task<ActionResult<VehicleTypeResponse>> GetById(int id)
+        public async Task<ActionResult<VehicleTypeResponse>> GetByIdAsync(int id, CancellationToken cancellationToken)
         {
-            var item = await repository.GetByIdAsync(id, default);
+            var item = await repository.GetByIdAsync(id, cancellationToken).ConfigureAwait(true);
             if (item == null)
                 return NotFound();
             return Ok(
@@ -63,12 +65,13 @@ namespace WebAPI.Controllers.V1
         /// Creates a new vehicle type.
         /// </summary>
         /// <param name="vehicleType">The vehicle type to create.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A status result.</returns>
         [HttpPost]
-        public async Task<ActionResult> Create([FromBody] VehicleType vehicleType)
+        public async Task<ActionResult> CreateAsync([FromBody] VehicleType vehicleType, CancellationToken cancellationToken)
         {
             repository.Add(vehicleType);
-            await unitOfWork.SaveChangesAsync(default);
+            await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(true);
             return Ok();
         }
 
@@ -77,14 +80,15 @@ namespace WebAPI.Controllers.V1
         /// </summary>
         /// <param name="id">The ID of the vehicle type to update.</param>
         /// <param name="vehicleType">The updated vehicle type data.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A status result.</returns>
         [HttpPut("{id}")]
-        public async Task<ActionResult> Update(int id, [FromBody] VehicleType vehicleType)
+        public async Task<ActionResult> UpdateAsync(int id, [FromBody] VehicleType vehicleType, CancellationToken cancellationToken)
         {
             if (id != vehicleType.Id)
                 return BadRequest();
             repository.Update(vehicleType);
-            await unitOfWork.SaveChangesAsync(default);
+            await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(true);
             return Ok();
         }
 
@@ -92,15 +96,16 @@ namespace WebAPI.Controllers.V1
         /// Deletes a vehicle type by its ID.
         /// </summary>
         /// <param name="id">The ID of the vehicle type to delete.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A status result.</returns>
         [HttpDelete("{id}")]
-        public async Task<ActionResult> Delete(int id)
+        public async Task<ActionResult> DeleteAsync(int id, CancellationToken cancellationToken)
         {
-            var item = await repository.GetByIdAsync(id, default);
+            var item = await repository.GetByIdAsync(id, cancellationToken).ConfigureAwait(true);
             if (item == null)
                 return NotFound();
             repository.Remove(item);
-            await unitOfWork.SaveChangesAsync(default);
+            await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(true);
             return Ok();
         }
     }

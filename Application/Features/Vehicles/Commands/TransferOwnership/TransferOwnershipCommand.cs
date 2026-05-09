@@ -1,4 +1,4 @@
-using Application.ApiContracts.Maintenance.Responses;
+using Application.ApiContracts.Vehicle.Responses;
 using Application.Common.Models;
 using MediatR;
 using System.Text.Json.Serialization;

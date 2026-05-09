@@ -36,11 +36,14 @@ public class VehicleAsset
             .ReturnsAsync(Result<VehicleResponse?>.Success(response));
 
         // Act
-        var result = await _controller.UpdateLicensePlateAsync(assetId, command).ConfigureAwait(true);
+        var result = await _controller.UpdateLicensePlateAsync(assetId, command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
+        result.Should().NotBeNull();
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+        okResult.Value.Should().NotBeNull();
         var returnedAsset = okResult.Value.Should().BeOfType<VehicleResponse>().Subject;
+        returnedAsset.Should().NotBeNull();
         returnedAsset.LicensePlate.Should().Be(newPlate);
     }
 }

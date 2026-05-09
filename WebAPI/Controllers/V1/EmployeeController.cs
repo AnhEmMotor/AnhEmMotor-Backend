@@ -36,7 +36,7 @@ public class EmployeeController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(List<EmployeeResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetEmployeesAsync(CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetEmployeesQuery(), cancellationToken);
+        var result = await mediator.Send(new GetEmployeesQuery(), cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -54,7 +54,7 @@ public class EmployeeController(IMediator mediator) : ApiController
         [FromBody] CreateEmployeeCommand command,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(command, cancellationToken);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -77,7 +77,7 @@ public class EmployeeController(IMediator mediator) : ApiController
         {
             return BadRequest("ID mismatch.");
         }
-        var result = await mediator.Send(command, cancellationToken);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 }

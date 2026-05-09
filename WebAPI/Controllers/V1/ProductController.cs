@@ -651,9 +651,9 @@ public class ProductController(ISender sender) : ApiController
     [HttpPost("technologies")]
     [ProducesResponseType(typeof(TechnologyResponse), StatusCodes.Status200OK)]
     [HasPermission(Products.Edit)]
-    public async Task<IActionResult> CreateTechnologyAsync([FromBody] CreateTechnologyCommand command)
+    public async Task<IActionResult> CreateTechnologyAsync([FromBody] CreateTechnologyCommand command, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(command).ConfigureAwait(true);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -662,9 +662,9 @@ public class ProductController(ISender sender) : ApiController
     /// </summary>
     [HttpGet("technologies")]
     [ProducesResponseType(typeof(List<TechnologyResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetAllTechnologiesAsync([FromQuery] int? category_id, [FromQuery] int? brand_id)
+    public async Task<IActionResult> GetAllTechnologiesAsync([FromQuery] int? category_id, [FromQuery] int? brand_id, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetAllTechnologiesQuery(category_id, brand_id)).ConfigureAwait(true);
+        var result = await sender.Send(new GetAllTechnologiesQuery(category_id, brand_id), cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -672,9 +672,9 @@ public class ProductController(ISender sender) : ApiController
     /// Lấy danh sách toàn bộ Danh mục Công nghệ.
     /// </summary>
     [HttpGet("technology-categories")]
-    public async Task<IActionResult> GetTechnologyCategoriesAsync()
+    public async Task<IActionResult> GetTechnologyCategoriesAsync(CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetAllTechnologyCategoriesQuery()).ConfigureAwait(true);
+        var result = await sender.Send(new GetAllTechnologyCategoriesQuery(), cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -683,9 +683,9 @@ public class ProductController(ISender sender) : ApiController
     /// </summary>
     [HttpPost("technology-categories")]
     [HasPermission(Products.Edit)]
-    public async Task<IActionResult> CreateTechnologyCategoryAsync([FromBody] CreateTechnologyCategoryCommand command)
+    public async Task<IActionResult> CreateTechnologyCategoryAsync([FromBody] CreateTechnologyCategoryCommand command, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(command).ConfigureAwait(true);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 }

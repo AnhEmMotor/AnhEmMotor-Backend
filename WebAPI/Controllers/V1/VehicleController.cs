@@ -1,4 +1,4 @@
-using Application.ApiContracts.Maintenance.Responses;
+using Application.ApiContracts.Vehicle.Responses;
 using Application.Features.Vehicles.Commands.CreateVehicle;
 using Application.Features.Vehicles.Commands.TransferOwnership;
 using Application.Features.Vehicles.Commands.UpdateLicensePlate;
@@ -23,8 +23,8 @@ public class VehicleController(IMediator mediator) : ApiController
     /// <summary>
     /// Lấy chi tiết xe của khách hàng
     /// </summary>
-    /// <param name="id"></param>
-    /// <param name="cancellationToken"></param>
+    /// <param name="id">The vehicle ID.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns></returns>
     [HttpGet("{id:int}")]
     [Authorize]
@@ -32,56 +32,65 @@ public class VehicleController(IMediator mediator) : ApiController
     public async Task<IActionResult> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return Ok(new Application.ApiContracts.Maintenance.Responses.VehicleResponse { Id = id });
+        return Ok(new Application.ApiContracts.Vehicle.Responses.VehicleResponse { Id = id });
     }
 
     /// <summary>
     /// Lấy danh sách xe của khách hàng
     /// </summary>
     /// <param name="search">Từ khóa tìm kiếm (Biển số, VIN, Tên khách)</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>Danh sách xe</returns>
     [HttpGet]
     [Authorize]
     [SwaggerOperation(Summary = "Lấy danh sách xe của khách hàng")]
-    public async Task<IActionResult> GetList([FromQuery] string? search)
+    public async Task<IActionResult> GetListAsync([FromQuery] string? search, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetVehiclesQuery { Search = search });
+        var result = await mediator.Send(new GetVehiclesQuery { Search = search }, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
     /// <summary>
     /// Tạo mới tài sản xe
     /// </summary>
+    /// <param name="command">The create vehicle command.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     [HttpPost]
     [Authorize]
-    [ProducesResponseType(typeof(Application.ApiContracts.Maintenance.Responses.VehicleResponse), StatusCodes.Status201Created)]
-    public async Task<IActionResult> CreateAsync([FromBody] CreateVehicleCommand command)
+    [ProducesResponseType(typeof(Application.ApiContracts.Vehicle.Responses.VehicleResponse), StatusCodes.Status201Created)]
+    public async Task<IActionResult> CreateAsync([FromBody] CreateVehicleCommand command, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(command);
-        return HandleCreated(result, null, null);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
+        return HandleCreated(result);
     }
 
     /// <summary>
     /// Cập nhật biển số xe
     /// </summary>
+    /// <param name="id">The vehicle ID.</param>
+    /// <param name="command">The update license plate command.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     [HttpPatch("{id:int}/license-plate")]
     [Authorize]
-    public async Task<IActionResult> UpdateLicensePlateAsync(int id, [FromBody] UpdateLicensePlateCommand command)
+    public async Task<IActionResult> UpdateLicensePlateAsync(int id, [FromBody] UpdateLicensePlateCommand command, CancellationToken cancellationToken)
     {
         command.Id = id;
-        var result = await mediator.Send(command);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
     /// <summary>
     /// Chuyển quyền sở hữu xe
     /// </summary>
+    /// <param name="id">The vehicle ID.</param>
+    /// <param name="command">The transfer ownership command.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     [HttpPost("{id:int}/transfer")]
     [Authorize]
-    public async Task<IActionResult> TransferOwnershipAsync(int id, [FromBody] TransferOwnershipCommand command)
+    public async Task<IActionResult> TransferOwnershipAsync(int id, [FromBody] TransferOwnershipCommand command, CancellationToken cancellationToken)
     {
         command.Id = id;
-        var result = await mediator.Send(command);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 }

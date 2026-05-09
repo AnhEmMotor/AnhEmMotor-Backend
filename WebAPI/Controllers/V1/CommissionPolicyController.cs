@@ -1,51 +1,51 @@
 using Application.Features.HR.Commands.CreateCommissionPolicy;
 using Application.Features.HR.Commands.UpdateCommissionPolicy;
-using Application.Interfaces;
+using Application.Features.HR.Commands.DeleteCommissionPolicy;
+using Application.Features.HR.Queries.GetCommissionPolicies;
+using Application.Features.HR.Queries.GetCommissionPolicyAuditLogs;
 using Asp.Versioning;
 using Domain.Entities.HR;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+
+using WebAPI.Controllers.Base;
 
 namespace WebAPI.Controllers.V1;
 
 /// <summary>
 /// Controller for managing commission policies.
 /// </summary>
-/// <param name="context">The database context.</param>
+/// <param name="mediator">The mediator instance.</param>
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/hr/commission-policies")]
-[ApiController]
-[Authorize]
-public class CommissionPolicyController : ControllerBase
+public class CommissionPolicyController(ISender mediator) : ApiController
 {
     /// <summary>
     /// Gets all commission policies.
     /// </summary>
+    /// <param name="cancellationToken">The cancellation token.</param>
     [HttpGet]
-    public async Task<ActionResult<List<CommissionPolicy>>> GetPolicies(
-        [FromServices] IApplicationDBContext context,
-        CancellationToken cancellationToken)
+    public async Task<ActionResult<List<CommissionPolicy>>> GetPoliciesAsync(CancellationToken cancellationToken)
     {
-        return await context.CommissionPolicies
-            .Include(p => p.Category)
-            .Include(p => p.Product)
-            .OrderByDescending(p => p.EffectiveDate)
-            .ToListAsync(cancellationToken);
+        var result = await mediator.Send(new GetCommissionPoliciesQuery(), cancellationToken).ConfigureAwait(true);
+        return Ok(result);
     }
 
     /// <summary>
     /// Creates a new commission policy.
     /// </summary>
+    /// <param name="command">The create commission policy command.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     [HttpPost]
-    public async Task<IActionResult> CreatePolicy(
+    public async Task<IActionResult> CreatePolicyAsync(
         [FromBody] CreateCommissionPolicyCommand command,
-        [FromServices] IMediator mediator,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(command, cancellationToken);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         if (!result.IsSuccess)
             return BadRequest(result.Error);
         return Ok(result.Value);
@@ -54,16 +54,18 @@ public class CommissionPolicyController : ControllerBase
     /// <summary>
     /// Updates an existing commission policy.
     /// </summary>
+    /// <param name="id">The policy ID.</param>
+    /// <param name="command">The update commission policy command.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdatePolicy(
+    public async Task<IActionResult> UpdatePolicyAsync(
         int id,
         [FromBody] UpdateCommissionPolicyCommand command,
-        [FromServices] IMediator mediator,
         CancellationToken cancellationToken)
     {
         if (id != command.Id)
             return BadRequest();
-        var result = await mediator.Send(command, cancellationToken);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         if (!result.IsSuccess)
             return BadRequest(result.Error);
         return NoContent();
@@ -72,32 +74,30 @@ public class CommissionPolicyController : ControllerBase
     /// <summary>
     /// Gets audit logs for a policy.
     /// </summary>
+    /// <param name="id">The policy ID.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     [HttpGet("{id}/audit-logs")]
-    public async Task<ActionResult<List<CommissionPolicyAuditLog>>> GetAuditLogs(
+    public async Task<ActionResult<List<CommissionPolicyAuditLog>>> GetAuditLogsAsync(
         int id,
-        [FromServices] IApplicationDBContext context,
         CancellationToken cancellationToken)
     {
-        return await context.CommissionPolicyAuditLogs
-            .Where(l => l.PolicyId == id)
-            .OrderByDescending(l => l.ChangedAt)
-            .ToListAsync(cancellationToken);
+        var result = await mediator.Send(new GetCommissionPolicyAuditLogsQuery(id), cancellationToken).ConfigureAwait(true);
+        return Ok(result);
     }
 
     /// <summary>
     /// Deletes a commission policy.
     /// </summary>
+    /// <param name="id">The policy ID.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeletePolicy(
+    public async Task<IActionResult> DeletePolicyAsync(
         int id, 
-        [FromServices] IApplicationDBContext context,
         CancellationToken cancellationToken)
     {
-        var policy = await context.CommissionPolicies.FindAsync(id, cancellationToken);
-        if (policy == null)
-            return NotFound();
-        context.CommissionPolicies.Remove(policy);
-        await context.SaveChangesAsync(cancellationToken);
+        var result = await mediator.Send(new DeleteCommissionPolicyCommand(id), cancellationToken).ConfigureAwait(true);
+        if (!result.IsSuccess)
+            return HandleResult(result);
         return NoContent();
     }
 }

@@ -120,7 +120,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            if (!db.Brands.Any(b => string.Equals(b.Name, "Honda Filter", StringComparison.OrdinalIgnoreCase)))
+            if (!db.Brands.Any(b => b.Name == "Honda Filter"))
             {
                 db.Brands.Add(new BrandEntities { Name = "Honda Filter", Description = "Desc" });
                 await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -133,7 +133,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             .ReadFromJsonAsync<PagedResult<BrandResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.Should().NotBeNull();
-        content!.Items.Should().Contain(x => string.Equals(x.Name, "Honda Filter", StringComparison.OrdinalIgnoreCase));
+        content!.Items.Should().Contain(x => string.Compare(x.Name, "Honda Filter") == 0);
     }
 
     [Fact(DisplayName = "BRAND_008 - GetBrandById - Success")]
@@ -432,7 +432,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var brand = db.Set<BrandEntities>().FirstOrDefault(b => string.Equals(b.Name, "Audit Brand", StringComparison.OrdinalIgnoreCase));
+        var brand = db.Set<BrandEntities>().FirstOrDefault(b => b.Name == "Audit Brand");
         brand.Should().NotBeNull();
         brand!.CreatedAt.Should().NotBeNull();
     }

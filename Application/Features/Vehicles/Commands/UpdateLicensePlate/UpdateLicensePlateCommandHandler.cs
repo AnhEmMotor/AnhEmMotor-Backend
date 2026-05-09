@@ -1,4 +1,4 @@
-using Application.ApiContracts.Maintenance.Responses;
+using Application.ApiContracts.Vehicle.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Vehicle;

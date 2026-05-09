@@ -291,7 +291,7 @@ public class Product
         _senderMock.Setup(m => m.Send(It.IsAny<CreateTechnologyCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<Application.ApiContracts.Technology.Responses.TechnologyResponse>.Success(new Application.ApiContracts.Technology.Responses.TechnologyResponse { Id = 1, Name = "ABS" }));
             
-        var result = await _controller.CreateTechnologyAsync(command).ConfigureAwait(true);
+        var result = await _controller.CreateTechnologyAsync(command, TestContext.Current.CancellationToken).ConfigureAwait(true);
         
         Assert.IsType<OkObjectResult>(result);
     }

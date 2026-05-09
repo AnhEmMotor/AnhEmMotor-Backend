@@ -17,7 +17,7 @@ public class VehicleReadRepository(ApplicationDBContext context) : IVehicleReadR
         return context.All<Domain.Entities.Vehicle>();
     }
 
-    public async Task<List<Domain.Entities.Vehicle>> GetVehiclesAsync(
+    public Task<List<Domain.Entities.Vehicle>> GetVehiclesAsync(
         string? search,
         CancellationToken cancellationToken = default)
     {

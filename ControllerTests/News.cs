@@ -40,9 +40,10 @@ public class News
             .ReturnsAsync(Result<Unit>.Success(Unit.Value));
 
         // Act
-        var result = await _controller.Update(1, command).ConfigureAwait(true);
+        var result = await _controller.UpdateAsync(1, command, TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         // Assert
+        result.Should().NotBeNull();
         result.Should().BeOfType<OkObjectResult>();
         _mediatorMock.Verify(m => m.Send(It.Is<UpdateNewsCommand>(c => 
             c.Id == 1 && 

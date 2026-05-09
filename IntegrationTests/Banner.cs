@@ -147,7 +147,7 @@ public class Banner : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetim
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var banner = await db.Banners
             .FirstOrDefaultAsync(
-                b => string.Equals(b.Title, "Integrity Test", StringComparison.OrdinalIgnoreCase),
+                b => b.Title == "Integrity Test",
                 TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         banner.Should().NotBeNull();
@@ -171,7 +171,7 @@ public class Banner : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetim
         response!.StatusCode.Should().Be(HttpStatusCode.OK);
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var banner = await db.Banners.FirstOrDefaultAsync(b => string.Equals(b.Title, "Priority Test", StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var banner = await db.Banners.FirstOrDefaultAsync(b => b.Title == "Priority Test", TestContext.Current.CancellationToken).ConfigureAwait(true);
         banner!.Priority.Should().Be(5);
         banner.Placement.Should().Be("HomeTop");
     }

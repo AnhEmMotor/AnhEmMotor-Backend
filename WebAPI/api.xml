@@ -147,29 +147,32 @@
             Thêm banner mới.
             </summary>
             <param name="command">Dữ liệu banner</param>
-            <param name="cancellationToken"></param>
+            <param name="cancellationToken">The cancellation token.</param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.BannerController.Update(System.Int32,Application.Features.Banners.Commands.UpdateBanner.UpdateBannerCommand)">
+        <member name="M:WebAPI.Controllers.V1.BannerController.UpdateAsync(System.Int32,Application.Features.Banners.Commands.UpdateBanner.UpdateBannerCommand,System.Threading.CancellationToken)">
             <summary>
             Cập nhật banner
             </summary>
             <param name="id">Mã banner</param>
             <param name="command">Dữ liệu cập nhật</param>
+            <param name="cancellationToken">The cancellation token.</param>
             <returns>Kết quả cập nhật</returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.BannerController.Delete(System.Int32)">
+        <member name="M:WebAPI.Controllers.V1.BannerController.DeleteAsync(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Xóa banner
             </summary>
             <param name="id">Mã banner</param>
+            <param name="cancellationToken">The cancellation token.</param>
             <returns>Kết quả xóa</returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.BannerController.TrackClick(System.Int32)">
+        <member name="M:WebAPI.Controllers.V1.BannerController.TrackClickAsync(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Ghi nhận lượt click vào banner
             </summary>
             <param name="id">Mã banner</param>
+            <param name="cancellationToken">The cancellation token.</param>
             <returns>Kết quả</returns>
         </member>
         <member name="M:WebAPI.Controllers.V1.BannerController.GetActiveAsync(System.Threading.CancellationToken)">
@@ -177,21 +180,21 @@
             Lấy danh sách banner đang hoạt động
             </summary>
             <returns>Danh sách banner</returns>
-            <param name="cancellationToken"></param>
+            <param name="cancellationToken">The cancellation token.</param>
         </member>
         <member name="M:WebAPI.Controllers.V1.BannerController.GetListAsync(System.Threading.CancellationToken)">
             <summary>
             Lấy toàn bộ danh sách banner (Dành cho quản lý)
             </summary>
             <returns>Danh sách banner</returns>
-            <param name="cancellationToken"></param>
+            <param name="cancellationToken">The cancellation token.</param>
         </member>
         <member name="M:WebAPI.Controllers.V1.BannerController.GetAuditLogsAsync(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Lấy lịch sử thay đổi của banner
             </summary>
             <param name="id">Mã banner</param>
-            <param name="cancellationToken"></param>
+            <param name="cancellationToken">The cancellation token.</param>
             <returns>Danh sách lịch sử</returns>
         </member>
         <member name="T:WebAPI.Controllers.V1.BookingsController">
@@ -293,61 +296,82 @@
             <summary>
             Controller for managing employee commission records.
             </summary>
-            <param name="context">The database context.</param>
+            <param name="mediator">The mediator instance.</param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.CommissionController.#ctor(Application.Interfaces.IApplicationDBContext)">
+        <member name="M:WebAPI.Controllers.V1.CommissionController.#ctor(MediatR.ISender)">
             <summary>
             Controller for managing employee commission records.
             </summary>
-            <param name="context">The database context.</param>
+            <param name="mediator">The mediator instance.</param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.CommissionController.GetRecords(System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.CommissionController.GetRecordsAsync(System.Threading.CancellationToken)">
             <summary>
             Gets all commission records.
             </summary>
             <param name="cancellationToken">The cancellation token.</param>
             <returns>A list of commission records.</returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.CommissionController.GetPayrollSummary(System.Int32,System.Int32,MediatR.IMediator,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.CommissionController.GetPayrollSummaryAsync(System.Int32,System.Int32,System.Threading.CancellationToken)">
             <summary>
             Gets a summary of payroll (salary + commissions).
             </summary>
+            <param name="month">The month.</param>
+            <param name="year">The year.</param>
+            <param name="ct">The cancellation token.</param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.CommissionController.ApprovePayroll(Application.Features.HR.Commands.ApprovePayroll.ApprovePayrollCommand,MediatR.IMediator,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.CommissionController.ApprovePayrollAsync(Application.Features.HR.Commands.ApprovePayroll.ApprovePayrollCommand,System.Threading.CancellationToken)">
             <summary>
             Approves commission payments.
             </summary>
+            <param name="command">The approve payroll command.</param>
+            <param name="ct">The cancellation token.</param>
         </member>
         <member name="T:WebAPI.Controllers.V1.CommissionPolicyController">
             <summary>
             Controller for managing commission policies.
             </summary>
-            <param name="context">The database context.</param>
+            <param name="mediator">The mediator instance.</param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.CommissionPolicyController.GetPolicies(Application.Interfaces.IApplicationDBContext,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.CommissionPolicyController.#ctor(MediatR.ISender)">
+            <summary>
+            Controller for managing commission policies.
+            </summary>
+            <param name="mediator">The mediator instance.</param>
+        </member>
+        <member name="M:WebAPI.Controllers.V1.CommissionPolicyController.GetPoliciesAsync(System.Threading.CancellationToken)">
             <summary>
             Gets all commission policies.
             </summary>
+            <param name="cancellationToken">The cancellation token.</param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.CommissionPolicyController.CreatePolicy(Application.Features.HR.Commands.CreateCommissionPolicy.CreateCommissionPolicyCommand,MediatR.IMediator,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.CommissionPolicyController.CreatePolicyAsync(Application.Features.HR.Commands.CreateCommissionPolicy.CreateCommissionPolicyCommand,System.Threading.CancellationToken)">
             <summary>
             Creates a new commission policy.
             </summary>
+            <param name="command">The create commission policy command.</param>
+            <param name="cancellationToken">The cancellation token.</param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.CommissionPolicyController.UpdatePolicy(System.Int32,Application.Features.HR.Commands.UpdateCommissionPolicy.UpdateCommissionPolicyCommand,MediatR.IMediator,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.CommissionPolicyController.UpdatePolicyAsync(System.Int32,Application.Features.HR.Commands.UpdateCommissionPolicy.UpdateCommissionPolicyCommand,System.Threading.CancellationToken)">
             <summary>
             Updates an existing commission policy.
             </summary>
+            <param name="id">The policy ID.</param>
+            <param name="command">The update commission policy command.</param>
+            <param name="cancellationToken">The cancellation token.</param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.CommissionPolicyController.GetAuditLogs(System.Int32,Application.Interfaces.IApplicationDBContext,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.CommissionPolicyController.GetAuditLogsAsync(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Gets audit logs for a policy.
             </summary>
+            <param name="id">The policy ID.</param>
+            <param name="cancellationToken">The cancellation token.</param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.CommissionPolicyController.DeletePolicy(System.Int32,Application.Interfaces.IApplicationDBContext,System.Threading.CancellationToken)">
+        <member name="M:WebAPI.Controllers.V1.CommissionPolicyController.DeletePolicyAsync(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Deletes a commission policy.
             </summary>
+            <param name="id">The policy ID.</param>
+            <param name="cancellationToken">The cancellation token.</param>
         </member>
         <member name="T:WebAPI.Controllers.V1.ContactsController">
             <summary>
@@ -583,11 +607,12 @@
             Quản lý Chăm sóc khách hàng &amp; Hội viên (Loyalty)
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.LoyaltyController.GetMembers(System.String)">
+        <member name="M:WebAPI.Controllers.V1.LoyaltyController.GetMembersAsync(System.String,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách hội viên và điểm thưởng
             </summary>
             <param name="search">Từ khóa tìm kiếm theo tên hoặc SĐT</param>
+            <param name="cancellationToken">The cancellation token.</param>
             <returns>Danh sách hội viên</returns>
         </member>
         <member name="T:WebAPI.Controllers.V1.MediaFileController">
@@ -676,31 +701,33 @@
             <summary>
             Tạo bài viết mới.
             </summary>
-            <param name="command"></param>
-            <param name="cancellationToken"></param>
+            <param name="command">The create news command.</param>
+            <param name="cancellationToken">The cancellation token.</param>
             <returns></returns>
         </member>
         <member name="M:WebAPI.Controllers.V1.NewsController.GetListAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách bài viết.
             </summary>
-            <param name="sieveModel"></param>
-            <param name="cancellationToken"></param>
+            <param name="sieveModel">The sieve model for filtering.</param>
+            <param name="cancellationToken">The cancellation token.</param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.NewsController.Update(System.Int32,Application.Features.News.Commands.UpdateNews.UpdateNewsCommand)">
+        <member name="M:WebAPI.Controllers.V1.NewsController.UpdateAsync(System.Int32,Application.Features.News.Commands.UpdateNews.UpdateNewsCommand,System.Threading.CancellationToken)">
             <summary>
             Cập nhật bài viết
             </summary>
             <param name="id">Mã bài viết</param>
             <param name="command">Dữ liệu cập nhật</param>
+            <param name="cancellationToken">The cancellation token.</param>
             <returns>Kết quả cập nhật</returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.NewsController.Delete(System.Int32)">
+        <member name="M:WebAPI.Controllers.V1.NewsController.DeleteAsync(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Xóa bài viết
             </summary>
             <param name="id">Mã bài viết</param>
+            <param name="cancellationToken">The cancellation token.</param>
             <returns>Kết quả xóa</returns>
         </member>
         <member name="M:WebAPI.Controllers.V1.NewsController.GetBySlugAsync(System.String,System.Threading.CancellationToken)">
@@ -711,12 +738,13 @@
             <param name="cancellationToken"></param>
             <returns>Chi tiết bài viết</returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.NewsController.UpdateStatus(System.Int32,Application.Features.News.Commands.UpdateNewsStatus.UpdateNewsStatusCommand)">
+        <member name="M:WebAPI.Controllers.V1.NewsController.UpdateStatusAsync(System.Int32,Application.Features.News.Commands.UpdateNewsStatus.UpdateNewsStatusCommand,System.Threading.CancellationToken)">
             <summary>
             Cập nhật trạng thái hiển thị bài viết
             </summary>
             <param name="id">Mã bài viết</param>
             <param name="command">Trạng thái mới</param>
+            <param name="cancellationToken">The cancellation token.</param>
             <returns>Kết quả cập nhật</returns>
         </member>
         <member name="T:WebAPI.Controllers.V1.NotificationController">
@@ -1074,22 +1102,22 @@
             Cập nhật loại xe cho sản phẩm.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.CreateTechnologyAsync(Application.Features.Technologies.Commands.CreateTechnology.CreateTechnologyCommand)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.CreateTechnologyAsync(Application.Features.Technologies.Commands.CreateTechnology.CreateTechnologyCommand,System.Threading.CancellationToken)">
             <summary>
             Tạo mới một Công nghệ.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.GetAllTechnologiesAsync(System.Nullable{System.Int32},System.Nullable{System.Int32})">
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetAllTechnologiesAsync(System.Nullable{System.Int32},System.Nullable{System.Int32},System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách toàn bộ Công nghệ.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.GetTechnologyCategoriesAsync">
+        <member name="M:WebAPI.Controllers.V1.ProductController.GetTechnologyCategoriesAsync(System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách toàn bộ Danh mục Công nghệ.
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.ProductController.CreateTechnologyCategoryAsync(Application.Features.Technologies.Commands.CreateTechnologyCategory.CreateTechnologyCategoryCommand)">
+        <member name="M:WebAPI.Controllers.V1.ProductController.CreateTechnologyCategoryAsync(Application.Features.Technologies.Commands.CreateTechnologyCategory.CreateTechnologyCategoryCommand,System.Threading.CancellationToken)">
             <summary>
             Tạo mới một Danh mục Công nghệ.
             </summary>
@@ -1440,32 +1468,36 @@
             </summary>
             <param name="mediator">The mediator instance.</param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.TechnologiesController.GetAll(System.Nullable{System.Int32},System.Nullable{System.Int32})">
+        <member name="M:WebAPI.Controllers.V1.TechnologiesController.GetAllAsync(System.Nullable{System.Int32},System.Nullable{System.Int32},System.Threading.CancellationToken)">
             <summary>
             Gets all technologies, optionally filtered by category or brand.
             </summary>
             <param name="category_id">The category ID filter.</param>
             <param name="brand_id">The brand ID filter.</param>
+            <param name="cancellationToken">The cancellation token.</param>
             <returns>A list of technologies.</returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.TechnologiesController.GetCategories">
+        <member name="M:WebAPI.Controllers.V1.TechnologiesController.GetCategoriesAsync(System.Threading.CancellationToken)">
             <summary>
             Gets all technology categories.
             </summary>
+            <param name="cancellationToken">The cancellation token.</param>
             <returns>A list of technology categories.</returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.TechnologiesController.Create(Application.Features.Technologies.Commands.CreateTechnology.CreateTechnologyCommand)">
+        <member name="M:WebAPI.Controllers.V1.TechnologiesController.CreateAsync(Application.Features.Technologies.Commands.CreateTechnology.CreateTechnologyCommand,System.Threading.CancellationToken)">
             <summary>
             Creates a new technology.
             </summary>
             <param name="command">The create technology command.</param>
+            <param name="cancellationToken">The cancellation token.</param>
             <returns>The result of the creation.</returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.TechnologiesController.CreateCategory(Application.Features.Technologies.Commands.CreateTechnologyCategory.CreateTechnologyCategoryCommand)">
+        <member name="M:WebAPI.Controllers.V1.TechnologiesController.CreateCategoryAsync(Application.Features.Technologies.Commands.CreateTechnologyCategory.CreateTechnologyCategoryCommand,System.Threading.CancellationToken)">
             <summary>
             Creates a new technology category.
             </summary>
             <param name="command">The create technology category command.</param>
+            <param name="cancellationToken">The cancellation token.</param>
             <returns>The result of the creation.</returns>
         </member>
         <member name="T:WebAPI.Controllers.V1.TechnologyController">
@@ -1624,31 +1656,40 @@
             <summary>
             Lấy chi tiết xe của khách hàng
             </summary>
-            <param name="id"></param>
-            <param name="cancellationToken"></param>
+            <param name="id">The vehicle ID.</param>
+            <param name="cancellationToken">The cancellation token.</param>
             <returns></returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.VehicleController.GetList(System.String)">
+        <member name="M:WebAPI.Controllers.V1.VehicleController.GetListAsync(System.String,System.Threading.CancellationToken)">
             <summary>
             Lấy danh sách xe của khách hàng
             </summary>
             <param name="search">Từ khóa tìm kiếm (Biển số, VIN, Tên khách)</param>
+            <param name="cancellationToken">The cancellation token.</param>
             <returns>Danh sách xe</returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.VehicleController.CreateAsync(Application.Features.Vehicles.Commands.CreateVehicle.CreateVehicleCommand)">
+        <member name="M:WebAPI.Controllers.V1.VehicleController.CreateAsync(Application.Features.Vehicles.Commands.CreateVehicle.CreateVehicleCommand,System.Threading.CancellationToken)">
             <summary>
             Tạo mới tài sản xe
             </summary>
+            <param name="command">The create vehicle command.</param>
+            <param name="cancellationToken">The cancellation token.</param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.VehicleController.UpdateLicensePlateAsync(System.Int32,Application.Features.Vehicles.Commands.UpdateLicensePlate.UpdateLicensePlateCommand)">
+        <member name="M:WebAPI.Controllers.V1.VehicleController.UpdateLicensePlateAsync(System.Int32,Application.Features.Vehicles.Commands.UpdateLicensePlate.UpdateLicensePlateCommand,System.Threading.CancellationToken)">
             <summary>
             Cập nhật biển số xe
             </summary>
+            <param name="id">The vehicle ID.</param>
+            <param name="command">The update license plate command.</param>
+            <param name="cancellationToken">The cancellation token.</param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.VehicleController.TransferOwnershipAsync(System.Int32,Application.Features.Vehicles.Commands.TransferOwnership.TransferOwnershipCommand)">
+        <member name="M:WebAPI.Controllers.V1.VehicleController.TransferOwnershipAsync(System.Int32,Application.Features.Vehicles.Commands.TransferOwnership.TransferOwnershipCommand,System.Threading.CancellationToken)">
             <summary>
             Chuyển quyền sở hữu xe
             </summary>
+            <param name="id">The vehicle ID.</param>
+            <param name="command">The transfer ownership command.</param>
+            <param name="cancellationToken">The cancellation token.</param>
         </member>
         <member name="T:WebAPI.Controllers.V1.VehicleTypeController">
             <summary>
@@ -1666,40 +1707,45 @@
             <param name="paginator">The sieve paginator.</param>
             <param name="unitOfWork">The unit of work.</param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.VehicleTypeController.GetList(Sieve.Models.SieveModel)">
+        <member name="M:WebAPI.Controllers.V1.VehicleTypeController.GetListAsync(Sieve.Models.SieveModel,System.Threading.CancellationToken)">
             <summary>
             Gets a paginated list of vehicle types.
             </summary>
             <param name="sieveModel">The sieve model for filtering and pagination.</param>
+            <param name="cancellationToken">The cancellation token.</param>
             <returns>A paginated list of vehicle types.</returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.VehicleTypeController.GetById(System.Int32)">
+        <member name="M:WebAPI.Controllers.V1.VehicleTypeController.GetByIdAsync(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Gets a vehicle type by its ID.
             </summary>
             <param name="id">The ID of the vehicle type.</param>
+            <param name="cancellationToken">The cancellation token.</param>
             <returns>The vehicle type details.</returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.VehicleTypeController.Create(Domain.Entities.VehicleType)">
+        <member name="M:WebAPI.Controllers.V1.VehicleTypeController.CreateAsync(Domain.Entities.VehicleType,System.Threading.CancellationToken)">
             <summary>
             Creates a new vehicle type.
             </summary>
             <param name="vehicleType">The vehicle type to create.</param>
+            <param name="cancellationToken">The cancellation token.</param>
             <returns>A status result.</returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.VehicleTypeController.Update(System.Int32,Domain.Entities.VehicleType)">
+        <member name="M:WebAPI.Controllers.V1.VehicleTypeController.UpdateAsync(System.Int32,Domain.Entities.VehicleType,System.Threading.CancellationToken)">
             <summary>
             Updates an existing vehicle type.
             </summary>
             <param name="id">The ID of the vehicle type to update.</param>
             <param name="vehicleType">The updated vehicle type data.</param>
+            <param name="cancellationToken">The cancellation token.</param>
             <returns>A status result.</returns>
         </member>
-        <member name="M:WebAPI.Controllers.V1.VehicleTypeController.Delete(System.Int32)">
+        <member name="M:WebAPI.Controllers.V1.VehicleTypeController.DeleteAsync(System.Int32,System.Threading.CancellationToken)">
             <summary>
             Deletes a vehicle type by its ID.
             </summary>
             <param name="id">The ID of the vehicle type to delete.</param>
+            <param name="cancellationToken">The cancellation token.</param>
             <returns>A status result.</returns>
         </member>
         <member name="T:WebAPI.Converters.EmptyStringConverter">

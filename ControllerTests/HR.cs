@@ -25,7 +25,7 @@ public class HR
     {
         _mediatorMock = new Mock<IMediator>();
         _employeeController = new EmployeeController(_mediatorMock.Object);
-        _commissionController = new CommissionController(null!); // context not used in the tested action or mocked if needed
+        _commissionController = new CommissionController(_mediatorMock.Object);
         
         var httpContext = new DefaultHttpContext();
         _employeeController.ControllerContext = new ControllerContext() { HttpContext = httpContext };
@@ -74,9 +74,10 @@ public class HR
             .ReturnsAsync(Result<List<PayrollResponse>>.Success(summaryData));
 
         // Action
-        var result = await _commissionController.GetPayrollSummary(month, year, _mediatorMock.Object, CancellationToken.None).ConfigureAwait(true);
+        var result = await _commissionController.GetPayrollSummaryAsync(month, year, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
+        result.Should().NotBeNull();
         result.Should().BeOfType<OkObjectResult>();
         var okResult = result as OkObjectResult;
         okResult!.Value.Should().BeEquivalentTo(summaryData);
@@ -94,9 +95,10 @@ public class HR
             .ReturnsAsync(Result<List<PayrollResponse>>.Success(emptyData));
 
         // Action
-        var result = await _commissionController.GetPayrollSummary(month, year, _mediatorMock.Object, CancellationToken.None).ConfigureAwait(true);
+        var result = await _commissionController.GetPayrollSummaryAsync(month, year, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
+        result.Should().NotBeNull();
         result.Should().BeOfType<OkObjectResult>();
         var okResult = result as OkObjectResult;
         okResult!.Value.Should().BeEquivalentTo(emptyData);

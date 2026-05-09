@@ -26,7 +26,7 @@ public class BannerController(ISender sender) : ApiController
     /// Thêm banner mới.
     /// </summary>
     /// <param name="command">Dữ liệu banner</param>
-    /// <param name="cancellationToken"></param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns></returns>
     [HttpPost]
     [HasPermission("Permissions.Banners.Create")]
@@ -44,15 +44,19 @@ public class BannerController(ISender sender) : ApiController
     /// </summary>
     /// <param name="id">Mã banner</param>
     /// <param name="command">Dữ liệu cập nhật</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>Kết quả cập nhật</returns>
     [HttpPut("{id}")]
     [HasPermission("Permissions.Banners.Update")]
     [SwaggerOperation(Summary = "Cập nhật banner")]
-    public async Task<IActionResult> Update(int id, [FromBody] UpdateBannerCommand command)
+    public async Task<IActionResult> UpdateAsync(
+        int id,
+        [FromBody] UpdateBannerCommand command,
+        CancellationToken cancellationToken)
     {
         if (id != command.Id)
             return BadRequest("ID mismatch");
-        var result = await sender.Send(command);
+        var result = await sender.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -60,13 +64,14 @@ public class BannerController(ISender sender) : ApiController
     /// Xóa banner
     /// </summary>
     /// <param name="id">Mã banner</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>Kết quả xóa</returns>
     [HttpDelete("{id}")]
     [HasPermission("Permissions.Banners.Delete")]
     [SwaggerOperation(Summary = "Xóa banner")]
-    public async Task<IActionResult> Delete(int id)
+    public async Task<IActionResult> DeleteAsync(int id, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new DeleteBannerCommand(id));
+        var result = await sender.Send(new DeleteBannerCommand(id), cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -74,12 +79,13 @@ public class BannerController(ISender sender) : ApiController
     /// Ghi nhận lượt click vào banner
     /// </summary>
     /// <param name="id">Mã banner</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>Kết quả</returns>
     [HttpPost("{id}/click")]
     [SwaggerOperation(Summary = "Ghi nhận lượt click banner")]
-    public async Task<IActionResult> TrackClick(int id)
+    public async Task<IActionResult> TrackClickAsync(int id, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new TrackBannerClickCommand(id));
+        var result = await sender.Send(new TrackBannerClickCommand(id), cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -87,12 +93,12 @@ public class BannerController(ISender sender) : ApiController
     /// Lấy danh sách banner đang hoạt động
     /// </summary>
     /// <returns>Danh sách banner</returns>
-    /// <param name="cancellationToken"></param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     [HttpGet("active")]
     [SwaggerOperation(Summary = "Lấy danh sách banner đang hoạt động")]
     public async Task<IActionResult> GetActiveAsync(CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetActiveBannersQuery(), cancellationToken);
+        var result = await sender.Send(new GetActiveBannersQuery(), cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -100,13 +106,13 @@ public class BannerController(ISender sender) : ApiController
     /// Lấy toàn bộ danh sách banner (Dành cho quản lý)
     /// </summary>
     /// <returns>Danh sách banner</returns>
-    /// <param name="cancellationToken"></param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     [HttpGet]
     [HasPermission("Permissions.Banners.View")]
     [SwaggerOperation(Summary = "Lấy toàn bộ danh sách banner")]
     public async Task<IActionResult> GetListAsync(CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetBannersListQuery(), cancellationToken);
+        var result = await sender.Send(new GetBannersListQuery(), cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -114,14 +120,14 @@ public class BannerController(ISender sender) : ApiController
     /// Lấy lịch sử thay đổi của banner
     /// </summary>
     /// <param name="id">Mã banner</param>
-    /// <param name="cancellationToken"></param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>Danh sách lịch sử</returns>
     [HttpGet("{id}/audit")]
     [HasPermission("Permissions.Banners.View")]
     [SwaggerOperation(Summary = "Lấy lịch sử thay đổi của banner")]
     public async Task<IActionResult> GetAuditLogsAsync(int id, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new GetBannerAuditLogsQuery(id), cancellationToken);
+        var result = await sender.Send(new GetBannerAuditLogsQuery(id), cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 }

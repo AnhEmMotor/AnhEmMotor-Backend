@@ -32,7 +32,7 @@ public class LeadController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(List<LeadResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetLeadsAsync(CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetLeadsQuery(), cancellationToken);
+        var result = await mediator.Send(new GetLeadsQuery(), cancellationToken).ConfigureAwait(true);
         return Ok(result);
     }
 
@@ -46,7 +46,7 @@ public class LeadController(IMediator mediator) : ApiController
         [FromBody] Application.Features.Leads.Commands.CreateLead.CreateLeadCommand command,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(command, cancellationToken);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleCreated(result);
     }
 
@@ -58,7 +58,7 @@ public class LeadController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(LeadResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetLeadByIdAsync(int id, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetLeadByIdQuery(id), cancellationToken);
+        var result = await mediator.Send(new GetLeadByIdQuery(id), cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -70,7 +70,7 @@ public class LeadController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(List<LeadPipelineGroupResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetPipelineAsync(CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetLeadPipelineQuery(), cancellationToken);
+        var result = await mediator.Send(new GetLeadPipelineQuery(), cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -87,7 +87,7 @@ public class LeadController(IMediator mediator) : ApiController
     {
         if (id != command.Id)
             return BadRequest();
-        var result = await mediator.Send(command, cancellationToken);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -104,7 +104,7 @@ public class LeadController(IMediator mediator) : ApiController
     {
         if (id != command.LeadId)
             return BadRequest();
-        var result = await mediator.Send(command, cancellationToken);
+        var result = await mediator.Send(command, cancellationToken).ConfigureAwait(true);
         return Ok(result);
     }
 
@@ -119,7 +119,7 @@ public class LeadController(IMediator mediator) : ApiController
         [FromBody] Guid? userId,
         CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new AssignLeadCommand(id, userId), cancellationToken);
+        var result = await mediator.Send(new AssignLeadCommand(id, userId), cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -129,7 +129,7 @@ public class LeadController(IMediator mediator) : ApiController
     [HttpGet("seed-samples")]
     public async Task<IActionResult> SeedSamplesAsync(CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new SeedLeadsCommand(), cancellationToken);
+        var result = await mediator.Send(new SeedLeadsCommand(), cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -141,7 +141,7 @@ public class LeadController(IMediator mediator) : ApiController
     [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
     public async Task<IActionResult> ResetLeadsAsync(CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new ResetLeadsCommand(), cancellationToken);
+        var result = await mediator.Send(new ResetLeadsCommand(), cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 
@@ -151,7 +151,7 @@ public class LeadController(IMediator mediator) : ApiController
     [HttpGet("reset-internal-temporary")]
     public async Task<IActionResult> ResetLeadsInternalAsync(CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new ResetLeadsCommand(), cancellationToken);
+        var result = await mediator.Send(new ResetLeadsCommand(), cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 }

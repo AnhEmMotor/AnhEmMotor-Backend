@@ -1,4 +1,4 @@
-using Application.ApiContracts.Maintenance.Responses;
+using Application.ApiContracts.Vehicle.Responses;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

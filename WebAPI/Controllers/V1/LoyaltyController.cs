@@ -20,13 +20,14 @@ public class LoyaltyController(IMediator mediator) : ApiController
     /// Lấy danh sách hội viên và điểm thưởng
     /// </summary>
     /// <param name="search">Từ khóa tìm kiếm theo tên hoặc SĐT</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>Danh sách hội viên</returns>
     [HttpGet("members")]
     [Authorize]
     [SwaggerOperation(Summary = "Lấy danh sách hội viên và điểm thưởng")]
-    public async Task<IActionResult> GetMembers([FromQuery] string? search)
+    public async Task<IActionResult> GetMembersAsync([FromQuery] string? search, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetLoyaltyMembersQuery { Search = search });
+        var result = await mediator.Send(new GetLoyaltyMembersQuery { Search = search }, cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 }

@@ -72,9 +72,10 @@ public class Banner
         _senderMock.Setup(m => m.Send(command, It.IsAny<CancellationToken>())).ReturnsAsync(Result<Unit>.Success(Unit.Value));
 
         // Action
-        var result = await _bannerController.Update(1, command).ConfigureAwait(true);
+        var result = await _bannerController.UpdateAsync(1, command, TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         // Assert
+        result.Should().NotBeNull();
         result.Should().BeOfType<OkObjectResult>();
     }
 
@@ -87,9 +88,10 @@ public class Banner
         _senderMock.Setup(m => m.Send(command, It.IsAny<CancellationToken>())).ReturnsAsync(Result<Unit>.Success(Unit.Value));
 
         // Action
-        var result = await _bannerController.Update(1, command).ConfigureAwait(true);
+        var result = await _bannerController.UpdateAsync(1, command, TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         // Assert
+        result.Should().NotBeNull();
         result.Should().BeOfType<OkObjectResult>();
     }
 
