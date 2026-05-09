@@ -660,7 +660,6 @@ public class PermissionAndRole
         var userManagerMock = new Mock<UserManager<ApplicationUser>>(userStoreMock.Object, null!, null!, null!, null!, null!, null!, null!, null!);
         var roleStoreMock = new Mock<IRoleStore<ApplicationRole>>();
         var roleManagerMock = new Mock<RoleManager<ApplicationRole>>(roleStoreMock.Object, null!, null!, null!, null!);
-        var configurationMock = new Mock<IConfiguration>();
         var httpContextAccessorMock = new Mock<IHttpContextAccessor>();
 
         var user = new ApplicationUser { Id = Guid.NewGuid(), UserName = "admin" };

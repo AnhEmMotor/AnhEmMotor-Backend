@@ -12,11 +12,11 @@ namespace Infrastructure.Repositories.Banner
             context.BannerAuditLogs.Add(log);
         }
 
-        public async Task<List<BannerAuditLog>> GetLogsByBannerIdAsync(
+        public Task<List<BannerAuditLog>> GetLogsByBannerIdAsync(
             int bannerId,
             CancellationToken cancellationToken)
         {
-            return await context.BannerAuditLogs
+            return context.BannerAuditLogs
                 .Where(l => l.BannerId == bannerId)
                 .OrderByDescending(l => l.CreatedAt)
                 .ToListAsync(cancellationToken);

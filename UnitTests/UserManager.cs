@@ -133,7 +133,7 @@ public class UserManager
 
         // Assert
         result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(e => e.PropertyName == "Password");
+        result.Errors.Should().Contain(e => string.Compare(e.PropertyName, "Password") == 0);
     }
     #pragma warning restore CRR0035
     #pragma warning restore IDE0079

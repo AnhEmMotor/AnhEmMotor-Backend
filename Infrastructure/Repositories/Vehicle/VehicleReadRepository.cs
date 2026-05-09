@@ -27,7 +27,7 @@ public class VehicleReadRepository(ApplicationDBContext context) : IVehicleReadR
             query = query.Where(
                 v => v.LicensePlate.Contains(search) || v.VinNumber.Contains(search) || v.Lead.FullName.Contains(search));
         }
-        return await query
+        return query
             .OrderByDescending(v => v.PurchaseDate)
             .ToListAsync(cancellationToken);
     }

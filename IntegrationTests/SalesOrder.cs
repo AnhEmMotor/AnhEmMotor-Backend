@@ -57,7 +57,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Compare(x.Key, "for-sale") == 0, cancellationToken)
+            .AnyAsync(x => string.Equals(x.Key, "for-sale", StringComparison.OrdinalIgnoreCase), cancellationToken)
             .ConfigureAwait(false))
         {
             db.ProductStatuses.Add(new ProductStatus { Key = "for-sale" });
@@ -92,7 +92,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         if (!await db.InputStatuses
-            .AnyAsync(x => string.Compare(x.Key, "finished") == 0, cancellationToken)
+            .AnyAsync(x => string.Equals(x.Key, "finished", StringComparison.OrdinalIgnoreCase), cancellationToken)
             .ConfigureAwait(false))
         {
             db.InputStatuses.Add(new InputStatusEntity { Key = "finished" });
@@ -146,7 +146,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             if (!await db.OutputStatuses
-                .AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, TestContext.Current.CancellationToken)
+                .AnyAsync(x => string.Equals(x.Key, OrderStatus.Pending, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
                 .ConfigureAwait(true))
             {
                 db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Pending });
@@ -172,11 +172,11 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             httpContent,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.Created);
+        var content = await response!.Content
             .ReadFromJsonAsync<OrderDetailResponse>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.BuyerId.Should().NotBeNull();
     }
 
@@ -206,7 +206,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             if (!await db.OutputStatuses
-                .AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, TestContext.Current.CancellationToken)
+                .AnyAsync(x => string.Equals(x.Key, OrderStatus.Pending, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
                 .ConfigureAwait(true))
             {
                 db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Pending });
@@ -232,8 +232,8 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             httpContent,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
-        var order = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.Created);
+        var order = await response!.Content
             .ReadFromJsonAsync<OrderDetailResponse>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         order.Should().NotBeNull();
@@ -275,7 +275,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             foreach (var s in statuses)
             {
                 if (!await db.OutputStatuses
-                    .AnyAsync(x => string.Compare(x.Key, s) == 0, TestContext.Current.CancellationToken)
+                    .AnyAsync(x => string.Equals(x.Key, s, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
                     .ConfigureAwait(true))
                     db.OutputStatuses.Add(new OutputStatusEntity { Key = s });
             }
@@ -300,7 +300,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             httpContent,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        var order = await createResponse.Content
+        var order = await createResponse!.Content
             .ReadFromJsonAsync<OrderDetailResponse>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         int orderId = order!.Id!.Value;
@@ -367,7 +367,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             foreach (var s in statuses)
             {
                 if (!await db.OutputStatuses
-                    .AnyAsync(x => string.Compare(x.Key, s) == 0, TestContext.Current.CancellationToken)
+                    .AnyAsync(x => string.Equals(x.Key, s, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
                     .ConfigureAwait(true))
                     db.OutputStatuses.Add(new OutputStatusEntity { Key = s });
             }
@@ -392,7 +392,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             httpContent,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        var order = await createResponse.Content
+        var order = await createResponse!.Content
             .ReadFromJsonAsync<OrderDetailResponse>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         int orderId = order!.Id!.Value;
@@ -416,7 +416,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             new UpdateOutputStatusCommand { StatusId = OrderStatus.Completed },
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        finalResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        finalResponse!.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact(DisplayName = "SO_065 - Luồng Refund: Pending -> ConfirmedCod -> Refund")]
@@ -454,7 +454,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             foreach (var s in statuses)
             {
                 if (!await db.OutputStatuses
-                    .AnyAsync(x => string.Compare(x.Key, s) == 0, TestContext.Current.CancellationToken)
+                    .AnyAsync(x => string.Equals(x.Key, s, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
                     .ConfigureAwait(true))
                     db.OutputStatuses.Add(new OutputStatusEntity { Key = s });
             }
@@ -479,7 +479,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             httpContent,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        var order = await createResponse.Content
+        var order = await createResponse!.Content
             .ReadFromJsonAsync<OrderDetailResponse>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         int orderId = order!.Id!.Value;
@@ -493,7 +493,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             new UpdateOutputStatusCommand { StatusId = OrderStatus.Refunding },
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        refundResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        refundResponse!.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact(DisplayName = "SO_066 - CreateOutputForAdmin được gọi bởi Manager")]
@@ -522,7 +522,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             if (!await db.OutputStatuses
-                .AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, TestContext.Current.CancellationToken)
+                .AnyAsync(x => string.Equals(x.Key, OrderStatus.Pending, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
                 .ConfigureAwait(true))
             {
                 db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Pending });
@@ -547,7 +547,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             httpContent,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        response!.StatusCode.Should().Be(HttpStatusCode.Created);
     }
 
     [Fact(DisplayName = "SO_067 - Tìm kiếm với Filters")]
@@ -576,7 +576,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             if (!await db.OutputStatuses
-                .AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, TestContext.Current.CancellationToken)
+                .AnyAsync(x => string.Equals(x.Key, OrderStatus.Pending, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
                 .ConfigureAwait(true))
             {
                 db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Pending });
@@ -596,11 +596,11 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             $"/api/v1/SalesOrders?filters=status=={OrderStatus.Pending},Notes@={uniqueId}",
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<OutputItemResponse>>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Items.Should().Contain(x => x.Notes != null && x.Notes.Contains(uniqueId));
     }
 
@@ -631,13 +631,13 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             if (!await db.OutputStatuses
-                .AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, TestContext.Current.CancellationToken)
+                .AnyAsync(x => string.Equals(x.Key, OrderStatus.Pending, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
                 .ConfigureAwait(true))
             {
                 db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Pending });
             }
             if (!await db.ProductStatuses
-                .AnyAsync(x => string.Compare(x.Key, "for-sale") == 0, TestContext.Current.CancellationToken)
+                .AnyAsync(x => string.Equals(x.Key, "for-sale", StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
                 .ConfigureAwait(true))
                 db.ProductStatuses.Add(new ProductStatus { Key = "for-sale" });
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
@@ -682,7 +682,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             httpContent,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        response!.StatusCode.Should().Be(HttpStatusCode.Created);
     }
 
     [Fact(DisplayName = "SO_069 - Sắp xếp theo CreatedAt DESC")]
@@ -711,7 +711,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             if (!await db.OutputStatuses
-                .AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, TestContext.Current.CancellationToken)
+                .AnyAsync(x => string.Equals(x.Key, OrderStatus.Pending, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
                 .ConfigureAwait(true))
             {
                 db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Pending });
@@ -743,11 +743,11 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             $"/api/v1/SalesOrders?sorts=-createdAt&filters=Notes@={uniqueId}",
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<OutputItemResponse>>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
     }
 
     [Fact(DisplayName = "SO_070 - Phân trang với Page và PageSize")]
@@ -776,7 +776,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             if (!await db.OutputStatuses
-                .AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, TestContext.Current.CancellationToken)
+                .AnyAsync(x => string.Equals(x.Key, OrderStatus.Pending, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
                 .ConfigureAwait(true))
             {
                 db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Pending });
@@ -792,8 +792,8 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             $"/api/v1/SalesOrders?page=1&pageSize=10&filters=Notes@={uniqueId}",
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<OutputItemResponse>>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         content!.Items.Should().HaveCount(10);
@@ -825,7 +825,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             if (!await db.OutputStatuses
-                .AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, TestContext.Current.CancellationToken)
+                .AnyAsync(x => string.Equals(x.Key, OrderStatus.Pending, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
                 .ConfigureAwait(true))
             {
                 db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Pending });
@@ -851,15 +851,15 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             httpContent,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        createResponse.StatusCode.Should().Be(HttpStatusCode.Created);
-        var order = await createResponse.Content
+        createResponse!.StatusCode.Should().Be(HttpStatusCode.Created);
+        var order = await createResponse!.Content
             .ReadFromJsonAsync<OrderDetailResponse>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var deleteResponse = await _client.DeleteAsync(
             $"/api/v1/SalesOrders/{order!.Id}",
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        deleteResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        deleteResponse!.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
 
     [Fact(DisplayName = "SO_072 - Restore đơn hàng")]
@@ -888,7 +888,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             if (!await db.OutputStatuses
-                .AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, TestContext.Current.CancellationToken)
+                .AnyAsync(x => string.Equals(x.Key, OrderStatus.Pending, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
                 .ConfigureAwait(true))
             {
                 db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Pending });
@@ -913,7 +913,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             httpContent,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        var order = await createResponse.Content
+        var order = await createResponse!.Content
             .ReadFromJsonAsync<OrderDetailResponse>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         await _client.DeleteAsync($"/api/v1/SalesOrders/{order!.Id}", TestContext.Current.CancellationToken)
@@ -923,7 +923,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             null,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        restoreResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        restoreResponse!.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact(DisplayName = "SO_073 - GetDeletedOutputs chỉ trả về đơn đã xóa")]
@@ -952,7 +952,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             if (!await db.OutputStatuses
-                .AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, TestContext.Current.CancellationToken)
+                .AnyAsync(x => string.Equals(x.Key, OrderStatus.Pending, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
                 .ConfigureAwait(true))
             {
                 db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Pending });
@@ -975,12 +975,12 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             $"/api/v1/SalesOrders/deleted?filters=Notes@={uniqueId}",
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<OutputItemResponse>>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        content!.Items.Should().Contain(x => string.Compare(x.Notes, $"Deleted_{uniqueId}") == 0);
-        content.Items.Should().NotContain(x => x.Notes != null && string.Compare(x.Notes, $"Active_{uniqueId}") == 0);
+        content!.Items.Should().Contain(x => string.Equals(x.Notes, $"Deleted_{uniqueId}", StringComparison.OrdinalIgnoreCase));
+        content.Items.Should().NotContain(x => x.Notes != null && string.Equals(x.Notes, $"Active_{uniqueId}", StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact(DisplayName = "SO_074 - UpdateOutput chỉ khi có quyền")]
@@ -1007,7 +1007,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         var request = new UpdateOutputForManagerCommand();
         var response = await _client.PutAsJsonAsync("/api/v1/SalesOrders/for-manager/1", request).ConfigureAwait(true);
-        response.StatusCode.Should().BeOneOf(HttpStatusCode.Forbidden, HttpStatusCode.Unauthorized);
+        response!.StatusCode.Should().BeOneOf(HttpStatusCode.Forbidden, HttpStatusCode.Unauthorized);
     }
 
     [Fact(DisplayName = "SO_075 - UpdateOutputStatus chuyển đổi không hợp lệ")]
@@ -1036,11 +1036,11 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             if (!await db.OutputStatuses
-                .AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, TestContext.Current.CancellationToken)
+                .AnyAsync(x => string.Equals(x.Key, OrderStatus.Pending, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
                 .ConfigureAwait(true))
                 db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Pending });
             if (!await db.OutputStatuses
-                .AnyAsync(x => string.Compare(x.Key, OrderStatus.Completed) == 0, TestContext.Current.CancellationToken)
+                .AnyAsync(x => string.Equals(x.Key, OrderStatus.Completed, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
                 .ConfigureAwait(true))
                 db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Completed });
             await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
@@ -1063,7 +1063,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             httpContent,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        var order = await createResponse.Content
+        var order = await createResponse!.Content
             .ReadFromJsonAsync<OrderDetailResponse>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var request = new UpdateOutputStatusCommand { StatusId = OrderStatus.Completed };
@@ -1072,7 +1072,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             request,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact(DisplayName = "SO_076 - DeleteManyOutputs xóa nhiều đơn")]
@@ -1101,7 +1101,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             if (!await db.OutputStatuses
-                .AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, TestContext.Current.CancellationToken)
+                .AnyAsync(x => string.Equals(x.Key, OrderStatus.Pending, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
                 .ConfigureAwait(true))
             {
                 db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Pending });
@@ -1140,7 +1140,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         };
         var response = await _client.SendAsync(deleteRequest, TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NoContent);
+        response!.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NoContent);
     }
 
     [Fact(DisplayName = "SO_077 - RestoreManyOutputs khôi phục nhiều đơn")]
@@ -1169,7 +1169,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             if (!await db.OutputStatuses
-                .AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, TestContext.Current.CancellationToken)
+                .AnyAsync(x => string.Equals(x.Key, OrderStatus.Pending, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
                 .ConfigureAwait(true))
             {
                 db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Pending });
@@ -1206,7 +1206,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             .ConfigureAwait(true);
         var request = new RestoreManyOutputsCommand { Ids = [o1.Id!.Value, o2.Id!.Value] };
         var response = await _client.PostAsJsonAsync("/api/v1/SalesOrders/restore", request).ConfigureAwait(true);
-        response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NoContent);
+        response!.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NoContent);
     }
 
     [Fact(DisplayName = "SO_078 - UpdateManyOutputStatus cập nhật trạng thái nhiều đơn")]
@@ -1238,7 +1238,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             foreach (var s in statuses)
             {
                 if (!await db.OutputStatuses
-                    .AnyAsync(x => string.Compare(x.Key, s) == 0, TestContext.Current.CancellationToken)
+                    .AnyAsync(x => string.Equals(x.Key, s, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
                     .ConfigureAwait(true))
                     db.OutputStatuses.Add(new OutputStatusEntity { Key = s });
             }
@@ -1279,7 +1279,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             request,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NoContent);
+        response!.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NoContent);
     }
 
     [Fact(DisplayName = "SO_079 - GetMyPurchases chỉ trả về đơn của user đăng nhập")]
@@ -1308,7 +1308,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             if (!await db.OutputStatuses
-                .AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, TestContext.Current.CancellationToken)
+                .AnyAsync(x => string.Equals(x.Key, OrderStatus.Pending, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
                 .ConfigureAwait(true))
             {
                 db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Pending });
@@ -1335,14 +1335,14 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             httpContent,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        createResponse.StatusCode.Should().Be(HttpStatusCode.Created);
+        createResponse!.StatusCode.Should().Be(HttpStatusCode.Created);
         var response = await _client.GetAsync("/api/v1/SalesOrders/my-purchases", TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<OutputItemResponse>>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        content!.Items.Should().Contain(x => string.Compare(x.Notes, $"Mine_{uniqueId}") == 0);
+        content!.Items.Should().Contain(x => string.Equals(x.Notes, $"Mine_{uniqueId}", StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact(DisplayName = "SO_080 - GetPurchasesByID lấy đơn theo BuyerId (manager)")]
@@ -1380,7 +1380,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             if (!await db.OutputStatuses
-                .AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, TestContext.Current.CancellationToken)
+                .AnyAsync(x => string.Equals(x.Key, OrderStatus.Pending, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
                 .ConfigureAwait(true))
             {
                 db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Pending });
@@ -1400,11 +1400,11 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             $"/api/v1/SalesOrders/get-purchases/{buyerId}",
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<OutputItemResponse>>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        content!.Items.Should().Contain(x => string.Compare(x.Notes, $"PurchasesOf_{uniqueId}") == 0);
+        content!.Items.Should().Contain(x => string.Equals(x.Notes, $"PurchasesOf_{uniqueId}", StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact(DisplayName = "SO_100 - Lấy danh sách trạng thái đơn hàng thành công (Happy Path)")]
@@ -1431,15 +1431,15 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         var response = await _client.GetAsync("/api/v1/SalesOrders/status", TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<Dictionary<string, string>>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Should().HaveCount(11);
-        content.Should().ContainKey(OrderStatus.Pending).WhoseValue.Should().Be("Chờ xác nhận");
-        content.Should().ContainKey(OrderStatus.ConfirmedCod).WhoseValue.Should().Be("Xác nhận COD");
-        content.Should().ContainKey(OrderStatus.Completed).WhoseValue.Should().Be("Đã hoàn thành");
+        content!.Should().ContainKey(OrderStatus.Pending).WhoseValue.Should().Be("Chờ xác nhận");
+        content!.Should().ContainKey(OrderStatus.ConfirmedCod).WhoseValue.Should().Be("Xác nhận COD");
+        content!.Should().ContainKey(OrderStatus.Completed).WhoseValue.Should().Be("Đã hoàn thành");
     }
 
     [Fact(DisplayName = "SO_101 - Lấy danh sách trạng thái đơn hàng khi chưa đăng nhập trả 401")]
@@ -1448,7 +1448,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         _client.DefaultRequestHeaders.Authorization = null;
         var response = await _client.GetAsync("/api/v1/SalesOrders/status", TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        response!.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
     [Fact(DisplayName = "SO_106 - Lấy Status Map (Tiếng Việt) thành công với quyền View")]
@@ -1475,13 +1475,13 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         var response = await _client.GetAsync("/api/v1/SalesOrders/status-map", TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<List<StatusMapResponse>>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
-        content.Should()
-            .Contain(x => string.Compare(x.Id, OrderStatus.Pending) == 0 && string.Compare(x.Name, "Chờ xác nhận") == 0);
+        content!.Should().NotBeNull();
+        content!.Should()
+            .Contain(x => string.Equals(x.Id, OrderStatus.Pending, StringComparison.OrdinalIgnoreCase) && string.Equals(x.Name, "Chờ xác nhận", StringComparison.OrdinalIgnoreCase));
     }
 
     private class StatusMapResponse
@@ -1517,12 +1517,12 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             "/api/v1/SalesOrders/transition-map",
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<Dictionary<string, HashSet<string>>>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
-        content.Should().ContainKey(OrderStatus.Pending);
+        content!.Should().NotBeNull();
+        content!.Should().ContainKey(OrderStatus.Pending);
         content![OrderStatus.Pending].Should().Contain(OrderStatus.Cancelled);
     }
 
@@ -1552,7 +1552,7 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             "/api/v1/SalesOrders/transition-map",
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        response!.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
     [Fact(DisplayName = "SO_071 - Tạo đơn hàng vượt quá giới hạn số lượng của thể loại sản phẩm")]
@@ -1582,13 +1582,13 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             if (!await db.ProductStatuses
-                .AnyAsync(x => string.Compare(x.Key, "for-sale") == 0, TestContext.Current.CancellationToken)
+                .AnyAsync(x => string.Equals(x.Key, "for-sale", StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
                 .ConfigureAwait(true))
             {
                 db.ProductStatuses.Add(new ProductStatus { Key = "for-sale" });
             }
             if (!await db.OutputStatuses
-                .AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, TestContext.Current.CancellationToken)
+                .AnyAsync(x => string.Equals(x.Key, OrderStatus.Pending, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
                 .ConfigureAwait(true))
             {
                 db.OutputStatuses.Add(new OutputStatusEntity { Key = OrderStatus.Pending });
@@ -1627,8 +1627,8 @@ public class SalesOrder : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLif
             httpContent,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var error = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var error = await response!.Content
             .ReadFromJsonAsync<ErrorResponse>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var firstError = error!.Errors?.FirstOrDefault();

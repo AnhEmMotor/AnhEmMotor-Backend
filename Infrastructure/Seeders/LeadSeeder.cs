@@ -9,11 +9,11 @@ namespace Infrastructure.Seeders;
 
 public static class LeadSeeder
 {
-    public static async Task SeedAsync(ApplicationDBContext context, UserManager<ApplicationUser> userManager)
+    public static async Task SeedAsync(ApplicationDBContext context, UserManager<ApplicationUser> userManager, CancellationToken cancellationToken)
     {
-        if (await context.Leads.AnyAsync())
+        if (await context.Leads.AnyAsync(cancellationToken).ConfigureAwait(false))
             return;
-        var sales = await userManager.GetUsersInRoleAsync("Sale");
+        var sales = await userManager.GetUsersInRoleAsync("Sale").ConfigureAwait(false);
         var firstSale = sales.FirstOrDefault();
         var leads = new List<Lead>
         {
@@ -101,6 +101,6 @@ public static class LeadSeeder
             }
         };
         context.Leads.AddRange(leads);
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 }

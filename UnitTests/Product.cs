@@ -120,7 +120,7 @@ public class Product
         var validator = new CreateProductCommandValidator();
         var result = validator.Validate(command);
         result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(e => e.PropertyName == nameof(CreateProductCommand.FrontTireSize));
+        result.Errors.Should().Contain(e => string.Compare(e.PropertyName, nameof(CreateProductCommand.FrontTireSize)) == 0);
     }
 
     [Fact(DisplayName = "PRODUCT_192 - Ngăn chặn gán công nghệ trùng lặp")]

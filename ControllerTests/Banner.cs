@@ -98,7 +98,7 @@ public class Banner
     {
         // Arrange
         _senderMock.Setup(m => m.Send(It.IsAny<GetBannersListQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<List<BannerResponse>>.Success(new List<BannerResponse>()));
+            .ReturnsAsync(Result<List<BannerResponse>>.Success([]));
 
         // Action
         // Assuming a hypothetical endpoint or method exists

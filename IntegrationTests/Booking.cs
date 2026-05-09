@@ -47,7 +47,7 @@ public class Booking : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             Location = BookingLocation.Showroom
         };
         var response = await _client.PostAsJsonAsync("/api/v1/bookings", command).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact(DisplayName = "BOOKING_007 - Xác nhận lịch hẹn thành công")]
@@ -88,7 +88,7 @@ public class Booking : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         var confirmCommand = new ConfirmBookingCommand { BookingId = bookingId };
         var response = await _client.PostAsJsonAsync("/api/v1/bookings/confirm", confirmCommand).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
@@ -140,7 +140,7 @@ public class Booking : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             "/api/v1/bookings/confirm",
             new ConfirmBookingCommand { BookingId = bookingId })
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact(DisplayName = "BOOKING_010 - Đồng bộ trạng thái Lead khi xác nhận lịch lái thử")]
@@ -194,7 +194,7 @@ public class Booking : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var updatedLead = await db.Leads
                 .FirstOrDefaultAsync(
-                    l => string.Compare(l.PhoneNumber, phone) == 0,
+                    l => string.Equals(l.PhoneNumber, phone, StringComparison.OrdinalIgnoreCase),
                     TestContext.Current.CancellationToken)
                 .ConfigureAwait(true);
             updatedLead!.Status.Should().Be(LeadStatus.TestDriving);
@@ -244,6 +244,6 @@ public class Booking : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         var response = await _client.GetAsync("/api/v1/bookings", TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 }

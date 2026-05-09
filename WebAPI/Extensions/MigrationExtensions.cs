@@ -40,27 +40,27 @@ public static class MigrationExtensions
         try
         {
             var dbContext = services.GetRequiredService<ApplicationDBContext>();
-            await dbContext.Database.MigrateAsync(cancellationToken).ConfigureAwait(true);
+            await dbContext.Database.MigrateAsync(cancellationToken).ConfigureAwait(false);
             var shouldSeed = configuration.GetValue<bool>("SeedingOptions:RunDataSeedingOnStartup");
             if (shouldSeed)
             {
                 var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
                 var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
-                await ProductCategorySeeder.SeedAsync(dbContext, configuration, cancellationToken).ConfigureAwait(true);
-                await InputStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
-                await OutputStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
-                await SupplierStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
-                await PredefinedOptionSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
-                await BrandSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
-                await ProductOptionSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
-                await ProductStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
-                await ProductDataSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
-                await SettingsSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
-                await NewsSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
-                await Infrastructure.Data.Seeders.TechnologySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
-                await new VehicleTypeSeeder(dbContext).SeedAsync().ConfigureAwait(true);
-                await TechnologyDataMigrationSeeder.MigrateExistingHighlightsAsync(dbContext, cancellationToken).ConfigureAwait(true);
-                await PermissionDataSeeder.SeedPermissionsAsync(dbContext, cancellationToken).ConfigureAwait(true);
+                await ProductCategorySeeder.SeedAsync(dbContext, configuration, cancellationToken).ConfigureAwait(false);
+                await InputStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+                await OutputStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+                await SupplierStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+                await PredefinedOptionSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+                await BrandSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+                await ProductOptionSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+                await ProductStatusSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+                await ProductDataSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+                await SettingsSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+                await NewsSeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+                await Infrastructure.Data.Seeders.TechnologySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
+                await new VehicleTypeSeeder(dbContext).SeedAsync(cancellationToken).ConfigureAwait(false);
+                await TechnologyDataMigrationSeeder.MigrateExistingHighlightsAsync(dbContext, cancellationToken).ConfigureAwait(false);
+                await PermissionDataSeeder.SeedPermissionsAsync(dbContext, cancellationToken).ConfigureAwait(false);
                 await ProtectedEntitiesSeeder.SeedProtectedEntitiesAsync(
                     dbContext,
                     roleManager,
@@ -68,10 +68,10 @@ public static class MigrationExtensions
                     configuration,
                     logger,
                     cancellationToken)
-                    .ConfigureAwait(true);
-                await EmployeeSeeder.SeedAsync(dbContext, userManager, cancellationToken).ConfigureAwait(true);
-                await LeadSeeder.SeedAsync(dbContext, userManager).ConfigureAwait(true);
-                await CommissionPolicySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(true);
+                    .ConfigureAwait(false);
+                await EmployeeSeeder.SeedAsync(dbContext, userManager, cancellationToken).ConfigureAwait(false);
+                await LeadSeeder.SeedAsync(dbContext, userManager, cancellationToken).ConfigureAwait(false);
+                await CommissionPolicySeeder.SeedAsync(dbContext, cancellationToken).ConfigureAwait(false);
             }
         } catch (Exception ex)
         {

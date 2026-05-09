@@ -13,7 +13,7 @@ namespace Application.Features.HR.Commands.UpdateCommissionPolicy
     {
         public async Task<Result> Handle(UpdateCommissionPolicyCommand request, CancellationToken cancellationToken)
         {
-            var policy = await context.CommissionPolicies.FindAsync([request.Id], cancellationToken);
+            var policy = await context.CommissionPolicies.FindAsync([request.Id], cancellationToken).ConfigureAwait(false);
             if (policy == null)
                 return Result.Failure("Không tìm thấy chính sách.");
             var oldSnapshot = JsonSerializer.Serialize(policy);
@@ -27,7 +27,7 @@ namespace Application.Features.HR.Commands.UpdateCommissionPolicy
             policy.Notes = request.Notes;
             policy.Unit = request.Unit;
             policy.IsActive = request.IsActive;
-            await context.SaveChangesAsync(cancellationToken);
+            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             var auditLog = new CommissionPolicyAuditLog
             {
                 PolicyId = policy.Id,
@@ -37,11 +37,11 @@ namespace Application.Features.HR.Commands.UpdateCommissionPolicy
                 OldValueSnapshot = oldSnapshot,
                 NewValueSnapshot = JsonSerializer.Serialize(policy),
                 Description =
-                    $"Cập nhật định mức: {policy.Name}. Giá trị mới: {policy.Value}{(policy.Type == "Percentage" ? "%" : "đ")}",
+                    $"Cập nhật định mức: {policy.Name}. Giá trị mới: {policy.Value}{(string.Compare(policy.Type, "Percentage") == 0 ? "%" : "đ")}",
                 ChangedAt = DateTime.UtcNow
             };
             context.CommissionPolicyAuditLogs.Add(auditLog);
-            await context.SaveChangesAsync(cancellationToken);
+            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return Result.Success();
         }
     }

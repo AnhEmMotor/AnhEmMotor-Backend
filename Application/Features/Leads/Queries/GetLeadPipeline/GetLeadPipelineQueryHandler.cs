@@ -30,7 +30,7 @@ namespace Application.Features.Leads.Queries.GetLeadPipeline
                     Status = s.Key,
                     StatusDisplayName = s.Display,
                     Leads =
-                        leads
+                        [.. leads
                     .Where(l => string.Compare(l.Status, s.Key) == 0)
                                 .Select(
                                     l => new LeadResponse
@@ -51,8 +51,7 @@ namespace Application.Features.Leads.Queries.GetLeadPipeline
                                         Birthday = l.Birthday,
                                         IdentificationNumber = l.IdentificationNumber,
                                         CreatedAt = l.CreatedAt ?? DateTimeOffset.MinValue
-                                    })
-                                .ToList()
+                                    })]
                 })
                 .ToList();
             return result;

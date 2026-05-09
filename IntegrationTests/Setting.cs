@@ -82,12 +82,12 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
                 .ConfigureAwait(true);
         }
         var response = await _client.GetAsync("/api/v1/Setting", CancellationToken.None).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<Dictionary<string, string?>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
-        content.Should().HaveCount(3);
+        content!.Should().NotBeNull();
+        content!.Should().HaveCount(3);
         content!["Deposit_ratio"].Should().Be("50.5");
         content["Inventory_alert_level"].Should().Be("10");
         content["Order_value_exceeds"].Should().Be("50000000");
@@ -126,7 +126,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
                 .ConfigureAwait(true);
         }
         var response = await _client.GetAsync("/api/v1/Setting", CancellationToken.None).ConfigureAwait(true);
-        response.StatusCode.Should().BeOneOf(HttpStatusCode.Unauthorized, HttpStatusCode.Forbidden);
+        response!.StatusCode.Should().BeOneOf(HttpStatusCode.Unauthorized, HttpStatusCode.Forbidden);
     }
 
     [Fact(DisplayName = "SETTING_003 - GetAllSettings - Chưa đăng nhập")]
@@ -145,7 +145,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
         var response = await _client.GetAsync("/api/v1/Setting", CancellationToken.None).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        response!.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
     [Fact(DisplayName = "SETTING_004 - GetAllSettings - Database rỗng")]
@@ -177,7 +177,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
         var response = await _client.GetAsync("/api/v1/Setting", CancellationToken.None).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact(DisplayName = "SETTING_005 - SetSettings - Thành công với tất cả keys hợp lệ")]
@@ -227,12 +227,12 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var request = new Dictionary<string, string?>
         { { "Deposit_ratio", "50" }, { "Inventory_alert_level", "10" }, { "Order_value_exceeds", "50000000" } };
         var response = await _client.PutAsJsonAsync("/api/v1/Setting", request).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.Created);
+        var content = await response!.Content
             .ReadFromJsonAsync<Dictionary<string, string?>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
-        content.Should().HaveCount(3);
+        content!.Should().NotBeNull();
+        content!.Should().HaveCount(3);
         content!["Deposit_ratio"].Should().Be("50");
         content["Inventory_alert_level"].Should().Be("10");
         using (var scope = _factory.Services.CreateScope())
@@ -240,8 +240,8 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var savedSettings = db.Settings.ToList();
             savedSettings.Should().HaveCount(3);
-            savedSettings.First(s => string.Compare(s.Key, "Deposit_ratio") == 0).Value.Should().Be("50");
-            savedSettings.First(s => string.Compare(s.Key, "Inventory_alert_level") == 0).Value.Should().Be("10");
+            savedSettings.First(s => string.Equals(s.Key, "Deposit_ratio", StringComparison.OrdinalIgnoreCase)).Value.Should().Be("50");
+            savedSettings.First(s => string.Equals(s.Key, "Inventory_alert_level", StringComparison.OrdinalIgnoreCase)).Value.Should().Be("10");
         }
     }
 
@@ -285,13 +285,13 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         }
         var request = new Dictionary<string, string?> { { "Deposit_ratio", "25" } };
         var response = await _client.PutAsJsonAsync("/api/v1/Setting", request).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        response!.StatusCode.Should().Be(HttpStatusCode.Created);
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var savedSettings = db.Settings.ToList();
-            savedSettings.First(s => string.Compare(s.Key, "Deposit_ratio") == 0).Value.Should().Be("25");
-            savedSettings.First(s => string.Compare(s.Key, "Inventory_alert_level") == 0).Value.Should().Be("5");
+            savedSettings.First(s => string.Equals(s.Key, "Deposit_ratio", StringComparison.OrdinalIgnoreCase)).Value.Should().Be("25");
+            savedSettings.First(s => string.Equals(s.Key, "Inventory_alert_level", StringComparison.OrdinalIgnoreCase)).Value.Should().Be("5");
         }
     }
 
@@ -329,7 +329,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         }
         var request = new Dictionary<string, string?> { { "Deposit_ratio", "25" } };
         var response = await _client.PutAsJsonAsync("/api/v1/Setting", request).ConfigureAwait(true);
-        response.StatusCode.Should().BeOneOf(HttpStatusCode.Unauthorized, HttpStatusCode.Forbidden);
+        response!.StatusCode.Should().BeOneOf(HttpStatusCode.Unauthorized, HttpStatusCode.Forbidden);
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
@@ -354,7 +354,7 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         }
         var request = new Dictionary<string, string?> { { "Deposit_ratio", "25" } };
         var response = await _client.PutAsJsonAsync("/api/v1/Setting", request).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        response!.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
     [Fact(DisplayName = "SETTING_009 - SetSettings - Deposit_ratio dưới ngưỡng tối thiểu")]
@@ -391,11 +391,11 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         }
         var request = new Dictionary<string, string?> { { "Deposit_ratio", "0" } };
         var response = await _client.PutAsJsonAsync("/api/v1/Setting", request).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var content = await response!.Content
             .ReadFromJsonAsync<ErrorResponse>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Errors.Should().Contain(e => e.Message != null && e.Message.Contains("between 1.0 and 99.0"));
         using (var scope = _factory.Services.CreateScope())
         {
@@ -439,11 +439,11 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         }
         var request = new Dictionary<string, string?> { { "Deposit_ratio", "100" } };
         var response = await _client.PutAsJsonAsync("/api/v1/Setting", request).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var content = await response!.Content
             .ReadFromJsonAsync<ErrorResponse>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Errors.Should().Contain(e => e.Message != null && e.Message.Contains("between 1.0 and 99.0"));
         using (var scope = _factory.Services.CreateScope())
         {
@@ -487,11 +487,11 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         }
         var request = new Dictionary<string, string?> { { "Deposit_ratio", "50.55" } };
         var response = await _client.PutAsJsonAsync("/api/v1/Setting", request).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var content = await response!.Content
             .ReadFromJsonAsync<ErrorResponse>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Errors.Should().Contain(e => e.Message != null && e.Message.Contains("decimal place"));
     }
 
@@ -529,11 +529,11 @@ public class Setting : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         }
         var request = new Dictionary<string, string?>();
         var response = await _client.PutAsJsonAsync("/api/v1/Setting", request).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var content = await response!.Content
             .ReadFromJsonAsync<ErrorResponse>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Errors.Should().Contain(e => e.Message != null && e.Message.Contains("cannot be empty"));
     }
     #pragma warning restore CRR0035

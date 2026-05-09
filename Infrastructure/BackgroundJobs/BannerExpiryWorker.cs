@@ -16,24 +16,24 @@ namespace Infrastructure.BackgroundJobs
             {
                 try
                 {
-                    await UpdateBannerStatuses(stoppingToken);
+                    await UpdateBannerStatusesAsync(stoppingToken).ConfigureAwait(false);
                 } catch (Exception ex)
                 {
                     logger.LogError(ex, "Error occurred while updating banner statuses.");
                 }
-                await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
+                await Task.Delay(TimeSpan.FromHours(1), stoppingToken).ConfigureAwait(false);
             }
             logger.LogInformation("Banner Expiry Worker is stopping.");
         }
 
-        private async Task UpdateBannerStatuses(CancellationToken cancellationToken)
+        private async Task UpdateBannerStatusesAsync(CancellationToken cancellationToken)
         {
             using var scope = serviceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var now = DateTimeOffset.UtcNow;
             var expiredBanners = await context.Banners
                 .Where(b => b.IsActive && b.EndDate.HasValue && b.EndDate < now)
-                .ToListAsync(cancellationToken);
+                .ToListAsync(cancellationToken).ConfigureAwait(false);
             if (expiredBanners.Any())
             {
                 logger.LogInformation(
@@ -52,7 +52,7 @@ namespace Infrastructure.BackgroundJobs
                                 Details = $"Banner '{banner.Title}' automatically expired."
                             });
                 }
-                await context.SaveChangesAsync(cancellationToken);
+                await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
         }
     }

@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.User.Responses;
+using Application.ApiContracts.User.Responses;
 using Application.Features.UserManager.Commands.AssignRoles;
 using Application.Features.UserManager.Commands.ChangePasswordByManager;
 using Application.Features.UserManager.Commands.ChangeUserStatus;
@@ -43,7 +43,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
 
     #pragma warning disable IDE0079
     #pragma warning disable CRR0035
-    [Fact(DisplayName = "USER_021 - Khôi phục tài khoản thành công")]
+    [Fact(DisplayName = "USER_021 - Kh�i ph?c t�i kho?n th�nh c�ng")]
     public async Task RestoreAccount_Success_DeletedAtSetToNull()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -85,17 +85,17 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var u = await db.Users
-                .FirstOrDefaultAsync(u => string.Compare(u.UserName, username) == 0, CancellationToken.None)
+                .FirstOrDefaultAsync(u => string.Equals(u.UserName, username, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
                 .ConfigureAwait(true);
             userId = u!.Id.ToString();
         }
         var response = await _client.PostAsync($"/api/v1/User/{userId}/restore", null, CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<RestoreUserResponse>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Message.Should().Be("User account has been restored successfully.");
         using (var scope = _factory.Services.CreateScope())
         {
@@ -107,7 +107,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         }
     }
 
-    [Fact(DisplayName = "USER_022 - Khôi phục tài khoản khi chưa bị xóa (DeletedAt = null)")]
+    [Fact(DisplayName = "USER_022 - Kh�i ph?c t�i kho?n khi chua b? x�a (DeletedAt = null)")]
     public async Task RestoreAccount_NotDeleted_ReturnsBadRequest()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -136,12 +136,12 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             .ConfigureAwait(true);
         var response = await _client.PostAsync($"/api/v1/User/{targetUser.Id}/restore", null, CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var content = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
-        content.Should().Contain("User account is not deleted.");
+        response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var content = await response!.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
+        content!.Should().Contain("User account is not deleted.");
     }
 
-    [Fact(DisplayName = "USER_023 - Khôi phục tài khoản khi bị Ban (không cho phép)")]
+    [Fact(DisplayName = "USER_023 - Kh�i ph?c t�i kho?n khi b? Ban (kh�ng cho ph�p)")]
     public async Task RestoreAccount_BannedAccount_ReturnsForbidden()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -180,12 +180,12 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         }
         var response = await _client.PostAsync($"/api/v1/User/{targetUser.Id}/restore", null, CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var content = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
-        content.Should().Contain($"Cannot restore user with status '{UserStatus.Banned}'. User status must be Active.");
+        response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var content = await response!.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
+        content!.Should().Contain($"Cannot restore user with status '{UserStatus.Banned}'. User status must be Active.");
     }
 
-    [Fact(DisplayName = "USER_024 - Khôi phục tài khoản với UserId không tồn tại")]
+    [Fact(DisplayName = "USER_024 - Kh�i ph?c t�i kho?n v?i UserId kh�ng t?n t?i")]
     public async Task RestoreAccount_NonExistentUser_ReturnsNotFound()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -211,10 +211,10 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             null,
             CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response!.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
-    [Fact(DisplayName = "USER_025 - Lấy thông tin người dùng hiện tại - Integration Test")]
+    [Fact(DisplayName = "USER_025 - L?y th�ng tin ngu?i d�ng hi?n t?i - Integration Test")]
     public async Task GetCurrentUser_IntegrationTest_ReturnsUserInfo()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -236,24 +236,24 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         var response = await _client.GetAsync("/api/v1/User/me", CancellationToken.None).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<UserResponse>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.UserName.Should().Be(username);
         content.Email.Should().Be(email);
     }
 
-    [Fact(DisplayName = "USER_026 - Lấy thông tin người dùng khi JWT không có trong header")]
+    [Fact(DisplayName = "USER_026 - L?y th�ng tin ngu?i d�ng khi JWT kh�ng c� trong header")]
     public async Task GetCurrentUser_NoJWT_ReturnsUnauthorized()
     {
         _client.DefaultRequestHeaders.Authorization = null;
         var response = await _client.GetAsync("/api/v1/User/me", CancellationToken.None).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        response!.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
-    [Fact(DisplayName = "USER_027 - Cập nhật thông tin người dùng - Integration Test")]
+    [Fact(DisplayName = "USER_027 - C?p nh?t th�ng tin ngu?i d�ng - Integration Test")]
     public async Task UpdateCurrentUser_IntegrationTest_UpdatesSuccessfully()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -275,18 +275,18 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             PhoneNumber = "0999888777"
         };
         var response = await _client.PutAsJsonAsync("/api/v1/User/me", updateRequest).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var user = await db.Users
-            .FirstOrDefaultAsync(u => string.Compare(u.UserName, username) == 0, CancellationToken.None)
+            .FirstOrDefaultAsync(u => string.Equals(u.UserName, username, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true);
         user!.FullName.Should().Be("Updated Name");
         user.Gender.Should().Be(GenderStatus.Female);
         user.PhoneNumber.Should().Be("0999888777");
     }
 
-    [Fact(DisplayName = "USER_028 - Cập nhật thông tin với validation error - số điện thoại không hợp lệ")]
+    [Fact(DisplayName = "USER_028 - C?p nh?t th�ng tin v?i validation error - s? di?n tho?i kh�ng h?p l?")]
     public async Task UpdateCurrentUser_InvalidPhoneNumber_ReturnsBadRequest()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -308,12 +308,12 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             PhoneNumber = "invalid-phone"
         };
         var response = await _client.PutAsJsonAsync("/api/v1/User/me", updateRequest).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var content = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
-        content.Should().Contain("Invalid phone number format");
+        response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var content = await response!.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
+        content!.Should().Contain("Invalid phone number format");
     }
 
-    [Fact(DisplayName = "USER_029 - Đổi mật khẩu - Integration Test")]
+    [Fact(DisplayName = "USER_029 - �?i m?t kh?u - Integration Test")]
     public async Task ChangePassword_IntegrationTest_PasswordChangedAndTokenInvalidated()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -340,7 +340,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         };
         var response = await _client.PostAsJsonAsync("/api/v1/User/change-password", changePasswordRequest)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
         var newLoginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
             _client,
             username,
@@ -349,10 +349,10 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             .ConfigureAwait(true);
         newLoginResponse.AccessToken.Should().NotBeNullOrEmpty();
         var oldTokenResponse = await _client.GetAsync("/api/v1/User/me", CancellationToken.None).ConfigureAwait(true);
-        oldTokenResponse.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        oldTokenResponse!.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
-    [Fact(DisplayName = "USER_030 - Đổi mật khẩu với CurrentPassword sai - Integration Test")]
+    [Fact(DisplayName = "USER_030 - �?i m?t kh?u v?i CurrentPassword sai - Integration Test")]
     public async Task ChangePassword_WrongCurrentPassword_ReturnsUnauthorized()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -378,12 +378,12 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         };
         var response = await _client.PostAsJsonAsync("/api/v1/User/change-password", changePasswordRequest)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var errorContent = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
-        errorContent.Should().Contain("Incorrect password.");
+        response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var errorContent = await response!.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
+        errorContent!.Should().Contain("Incorrect password.");
     }
 
-    [Fact(DisplayName = "USER_031 - Xóa tài khoản - Integration Test")]
+    [Fact(DisplayName = "USER_031 - X�a t�i kho?n - Integration Test")]
     public async Task DeleteAccount_IntegrationTest_AccountDeletedAndTokenInvalidated()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -400,20 +400,20 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         var response = await _client.PostAsync("/api/v1/User/delete-account", null, CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var user = await db.Users
-                .FirstOrDefaultAsync(u => string.Compare(u.UserName, username) == 0, CancellationToken.None)
+                .FirstOrDefaultAsync(u => string.Equals(u.UserName, username, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
                 .ConfigureAwait(true);
             user!.DeletedAt.Should().NotBeNull();
         }
         var tokenTestResponse = await _client.GetAsync("/api/v1/User/me", CancellationToken.None).ConfigureAwait(true);
-        tokenTestResponse.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        tokenTestResponse!.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
-    [Fact(DisplayName = "USER_032 - Xóa tài khoản khi đã bị Ban - Integration Test")]
+    [Fact(DisplayName = "USER_032 - X�a t�i kho?n khi d� b? Ban - Integration Test")]
     public async Task DeleteAccount_BannedAccount_ReturnsForbidden()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -441,10 +441,10 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         }
         var response = await _client.PostAsync("/api/v1/User/delete-account", null, CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        response!.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
-    [Fact(DisplayName = "USER_033 - Kiểm tra SecurityStamp invalidation sau khi đổi mật khẩu")]
+    [Fact(DisplayName = "USER_033 - Ki?m tra SecurityStamp invalidation sau khi d?i m?t kh?u")]
     public async Task SecurityStampInvalidation_AfterPasswordChange_OldTokenInvalid()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -467,12 +467,12 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         };
         var changeResponse = await _client.PostAsJsonAsync("/api/v1/User/change-password", changePasswordRequest)
             .ConfigureAwait(true);
-        changeResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        changeResponse!.StatusCode.Should().Be(HttpStatusCode.OK);
         var testResponse = await _client.GetAsync("/api/v1/User/me", CancellationToken.None).ConfigureAwait(true);
-        testResponse.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        testResponse!.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
-    [Fact(DisplayName = "USER_034 - Kiểm tra middleware chặn request khi tài khoản bị xóa mềm")]
+    [Fact(DisplayName = "USER_034 - Ki?m tra middleware ch?n request khi t�i kho?n b? x�a m?m")]
     public async Task Middleware_BlocksDeletedAccount_ReturnsUnauthorized()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -499,10 +499,10 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
         var response = await _client.GetAsync("/api/v1/User/me", CancellationToken.None).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        response!.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
-    [Fact(DisplayName = "USER_035 - Kiểm tra middleware chặn request khi tài khoản bị Ban")]
+    [Fact(DisplayName = "USER_035 - Ki?m tra middleware ch?n request khi t�i kho?n b? Ban")]
     public async Task Middleware_BlocksBannedAccount_ReturnsBannedStatus()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -529,20 +529,20 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         }
         var response = await _client.GetAsync("/api/v1/User/me", CancellationToken.None).ConfigureAwait(true);
-        if (response.StatusCode != HttpStatusCode.OK)
+        if (response!.StatusCode != HttpStatusCode.OK)
         {
-            var errorContent = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
+            var errorContent = await response!.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
             throw new Exception($"API returned not OK. Response Body: {errorContent}");
         }
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<UserResponse>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Status.Should().Be(UserStatus.Banned);
     }
 
-    [Fact(DisplayName = "USER_053 - Verify structure của Permissions trong JSON response")]
+    [Fact(DisplayName = "USER_053 - Verify structure c?a Permissions trong JSON response")]
     public async Task GetCurrentUser_ReturnsPermissionsStructure()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -563,11 +563,11 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         var response = await _client.GetAsync("/api/v1/User/me", CancellationToken.None).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<UserResponse>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Permissions.Should().NotBeNullOrEmpty();
         content.Permissions!.Should().Contain(PermissionsList.Users.View);
     }
@@ -588,14 +588,14 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         var response = await _client.GetAsync("/api/v1/User/me", CancellationToken.None).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<UserResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.Status.Should().Be(UserStatus.Active);
     }
 
-    [Fact(DisplayName = "USER_056 - SSE Hybrid: Request không có Accept header text/event-stream")]
+    [Fact(DisplayName = "USER_056 - SSE Hybrid: Request kh�ng c� Accept header text/event-stream")]
     public async Task GetCurrentUser_NoAcceptHeader_ReturnsJson()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -613,11 +613,11 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         var response = await _client.SendAsync(request, CancellationToken.None).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        response.Content.Headers.ContentType?.MediaType.Should().Be("application/json");
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.Content.Headers.ContentType?.MediaType.Should().Be("application/json");
     }
 
-    [Fact(DisplayName = "USER_057 - SSE Hybrid: Request có Accept header text/event-stream")]
+    [Fact(DisplayName = "USER_057 - SSE Hybrid: Request c� Accept header text/event-stream")]
     public async Task GetCurrentUser_AcceptEventStream_ReturnsSseStream()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -639,11 +639,11 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             HttpCompletionOption.ResponseHeadersRead,
             CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        response.Content.Headers.ContentType?.MediaType.Should().Be("text/event-stream");
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.Content.Headers.ContentType?.MediaType.Should().Be("text/event-stream");
     }
 
-    [Fact(DisplayName = "USER_058 - SSE: Nhận dữ liệu init ngay khi kết nối")]
+    [Fact(DisplayName = "USER_058 - SSE: Nh?n d? li?u init ngay khi k?t n?i")]
     public async Task GetCurrentUser_SseConnection_ReceivesInitData()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -665,7 +665,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             HttpCompletionOption.ResponseHeadersRead,
             CancellationToken.None)
             .ConfigureAwait(true);
-        var stream = await response.Content.ReadAsStreamAsync(CancellationToken.None).ConfigureAwait(true);
+        var stream = await response!.Content.ReadAsStreamAsync(CancellationToken.None).ConfigureAwait(true);
         using var reader = new StreamReader(stream);
         string? line;
         bool dataFound = false;
@@ -704,7 +704,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             HttpCompletionOption.ResponseHeadersRead,
             CancellationToken.None)
             .ConfigureAwait(true);
-        var stream = await sseResponse.Content.ReadAsStreamAsync(CancellationToken.None).ConfigureAwait(true);
+        var stream = await sseResponse!.Content.ReadAsStreamAsync(CancellationToken.None).ConfigureAwait(true);
         var reader = new StreamReader(stream);
         await ReadEventAsync(reader).ConfigureAwait(true);
         var updateClient = _factory.CreateClient();
@@ -718,7 +718,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             PhoneNumber = "0999888777"
         };
         var updateResponse = await updateClient.PutAsJsonAsync("/api/v1/User/me", updateRequest).ConfigureAwait(true);
-        updateResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        updateResponse!.StatusCode.Should().Be(HttpStatusCode.OK);
         var updateTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token;
         string foundData = string.Empty;
         while (!updateTimeout.IsCancellationRequested)
@@ -765,12 +765,12 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             CancellationToken.None)
             .ConfigureAwait(true);
         var reader = new StreamReader(
-            await sseResponse.Content.ReadAsStreamAsync(CancellationToken.None).ConfigureAwait(true));
+            await sseResponse!.Content.ReadAsStreamAsync(CancellationToken.None).ConfigureAwait(true));
         await ReadEventAsync(reader).ConfigureAwait(true);
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            var staffRole = db.Roles.FirstOrDefault(r => r.Name == "Staff");
+            var staffRole = db.Roles.FirstOrDefault(r => string.Equals(r.Name, "Staff", StringComparison.OrdinalIgnoreCase));
             if (staffRole == null)
             {
                 staffRole = new ApplicationRole { Name = "Staff", NormalizedName = "STAFF" };
@@ -813,7 +813,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             CancellationToken.None)
             .ConfigureAwait(true);
         var reader = new StreamReader(
-            await sseResponse.Content.ReadAsStreamAsync(CancellationToken.None).ConfigureAwait(true));
+            await sseResponse!.Content.ReadAsStreamAsync(CancellationToken.None).ConfigureAwait(true));
         await ReadEventAsync(reader).ConfigureAwait(true);
         using (var scope = _factory.Services.CreateScope())
         {
@@ -852,8 +852,8 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         }
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         var response = await _client.GetAsync("/api/v1/User/me", CancellationToken.None).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<UserResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.Status.Should().Be(UserStatus.Banned);
@@ -1220,7 +1220,7 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         data2.Should().Contain("MultiTab Update");
     }
 
-    [Fact(DisplayName = "USER_071 - Người dùng tự tải lên ảnh đại diện thành công")]
+    [Fact(DisplayName = "USER_071 - Ngu?i d�ng t? t?i l�n ?nh d?i di?n th�nh c�ng")]
     public async Task UploadAvatar_Self_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -1242,15 +1242,15 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         content.Add(fileContent, "file", "avatar.gif");
         var response = await _client.PostAsync("/api/v1/User/avatar", content, TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        if (response.StatusCode != HttpStatusCode.OK)
+        if (response!.StatusCode != HttpStatusCode.OK)
         {
-            var errorContent = await response.Content
+            var errorContent = await response!.Content
                 .ReadAsStringAsync(TestContext.Current.CancellationToken)
                 .ConfigureAwait(true);
-            throw new Exception($"Upload failed with status {response.StatusCode}. Content: {errorContent}");
+            throw new Exception($"Upload failed with status {response!.StatusCode}. Content: {errorContent}");
         }
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var avatarUrl = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var avatarUrl = await response!.Content
             .ReadAsStringAsync(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         avatarUrl.Should().NotBeNullOrEmpty();
@@ -1258,12 +1258,12 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var user = await db.Users
-            .FirstOrDefaultAsync(u => string.Compare(u.UserName, username) == 0, TestContext.Current.CancellationToken)
+            .FirstOrDefaultAsync(u => string.Equals(u.UserName, username, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         user!.AvatarUrl.Should().Be(avatarUrl.Trim('\"'));
     }
 
-    [Fact(DisplayName = "USER_072 - Admin tải lên ảnh đại diện cho người dùng khác thành công")]
+    [Fact(DisplayName = "USER_072 - Admin t?i l�n ?nh d?i di?n cho ngu?i d�ng kh�c th�nh c�ng")]
     public async Task UploadAvatar_AdminForUser_Success()
     {
         var adminUniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -1300,15 +1300,15 @@ public class User : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             content,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        if (response.StatusCode != HttpStatusCode.OK)
+        if (response!.StatusCode != HttpStatusCode.OK)
         {
-            var errorContent = await response.Content
+            var errorContent = await response!.Content
                 .ReadAsStringAsync(TestContext.Current.CancellationToken)
                 .ConfigureAwait(true);
-            throw new Exception($"Admin upload failed with status {response.StatusCode}. Content: {errorContent}");
+            throw new Exception($"Admin upload failed with status {response!.StatusCode}. Content: {errorContent}");
         }
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var avatarUrl = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var avatarUrl = await response!.Content
             .ReadAsStringAsync(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         avatarUrl.Should().NotBeNullOrEmpty();

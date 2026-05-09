@@ -51,11 +51,11 @@ public static class EmployeeSeeder
                     UserId = user.Id,
                     JobTitle = emp.JobTitle,
                     BaseSalary = emp.Salary,
-                    IdentityNumber = "031" + new Random().Next(10000000, 99999999).ToString(),
+                    IdentityNumber = $"031{new Random().Next(10000000, 99999999)}",
                     Address = "Biên Hòa, Đồng Nai",
                     ContractDate = DateTime.UtcNow.AddMonths(-new Random().Next(1, 24)),
                     BankName = "Vietcombank",
-                    BankAccountNumber = "101" + new Random().Next(1000000, 9999999).ToString()
+                    BankAccountNumber = $"101{new Random().Next(1000000, 9999999)}"
                 };
                 await context.EmployeeProfiles.AddAsync(profile, cancellationToken).ConfigureAwait(false);
             }

@@ -23,9 +23,9 @@ namespace Infrastructure.Repositories.Banner
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<List<Domain.Entities.Banner>> GetAllAsync(CancellationToken cancellationToken = default)
+        public Task<List<Domain.Entities.Banner>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            return await context.Banners.OrderByDescending(b => b.Priority).ToListAsync(cancellationToken);
+            return context.Banners.OrderByDescending(b => b.Priority).ToListAsync(cancellationToken);
         }
     }
 }

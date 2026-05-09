@@ -6,9 +6,9 @@ namespace Infrastructure.Seeders
 {
     public class VehicleTypeSeeder(ApplicationDBContext context)
     {
-        public async Task SeedAsync()
+        public async Task SeedAsync(CancellationToken cancellationToken = default)
         {
-            if (await context.VehicleTypes.AnyAsync())
+            if (await context.VehicleTypes.AnyAsync(cancellationToken).ConfigureAwait(false))
                 return;
             var vehicleTypes = new List<VehicleType>
             {
@@ -18,7 +18,7 @@ namespace Infrastructure.Seeders
                 new() { Name = "Xe Mô tô", Slug = "xe-mo-to", IsActive = true, SortOrder = 4 }
             };
             context.VehicleTypes.AddRange(vehicleTypes);
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }

@@ -32,7 +32,7 @@ public static class ProductCategorySeeder
 
             if (existingCategoryDict.TryGetValue(seed.Name, out var existing))
             {
-                if (existing.CategoryGroup != seed.Group)
+                if (!string.Equals(existing.CategoryGroup, seed.Group, StringComparison.OrdinalIgnoreCase))
                 {
                     existing.CategoryGroup = seed.Group;
                     hasChanges = true;

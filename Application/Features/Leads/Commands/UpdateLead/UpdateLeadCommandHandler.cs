@@ -11,16 +11,16 @@ namespace Application.Features.Leads.Commands.UpdateLead
     {
         public async Task<Result<int>> Handle(UpdateLeadCommand request, CancellationToken cancellationToken)
         {
-            var lead = await leadReadRepository.GetByIdAsync(request.Id, cancellationToken);
+            var lead = await leadReadRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
             if (lead == null)
             {
                 return Result<int>.Failure("Không tìm thấy khách hàng.");
             }
             // Check for duplicate identification number if changed
             if (!string.IsNullOrEmpty(request.IdentificationNumber) &&
-                request.IdentificationNumber != lead.IdentificationNumber)
+                string.Compare(request.IdentificationNumber, lead.IdentificationNumber) != 0)
             {
-                var existingWithCccd = await leadReadRepository.GetByIdentificationNumberAsync(request.IdentificationNumber, cancellationToken);
+                var existingWithCccd = await leadReadRepository.GetByIdentificationNumberAsync(request.IdentificationNumber, cancellationToken).ConfigureAwait(false);
                 if (existingWithCccd != null && existingWithCccd.Id != lead.Id)
                 {
                     return Result<int>.Failure("Identification number already exists.");
@@ -48,7 +48,7 @@ namespace Application.Features.Leads.Commands.UpdateLead
 
             lead.InterestedVehicle = request.InterestedVehicle;
             lead.Score = request.Score;
-            await leadWriteRepository.UpdateAsync(lead, cancellationToken);
+            await leadWriteRepository.UpdateAsync(lead, cancellationToken).ConfigureAwait(false);
             return lead.Id;
         }
     }

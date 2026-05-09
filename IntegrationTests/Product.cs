@@ -81,7 +81,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
+            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -104,11 +104,11 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         db.Products.AddRange(products);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/product", CancellationToken.None).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<ProductDetailResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Items.Should().HaveCountLessThanOrEqualTo(10);
         content.PageSize.Should().Be(10);
     }
@@ -139,7 +139,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
+            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -167,11 +167,11 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync($"/api/v1/product?filters=BrandId=={brand1.Id}", CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<ProductDetailResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Items.Should().ContainSingle(p => p.Id == p1.Id);
         content!.Items.Should().NotContain(p => p.Id == p2.Id);
     }
@@ -202,7 +202,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
+            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -235,11 +235,11 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         db.Products.AddRange(p3, p1, p2);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/product?sorts=Name", CancellationToken.None).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<ProductDetailResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         var expectedIds = new List<int?> { p1.Id, p2.Id, p3.Id };
         var createdItems = content!.Items!.Where(x => expectedIds.Contains(x.Id)).ToList();
         createdItems.Should().HaveCount(3);
@@ -272,7 +272,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
+            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -309,11 +309,11 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync($"/api/v1/product?filters=Id=={product.Id}", CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<ProductDetailResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         var item = content!.Items?.FirstOrDefault(p => p.Id == product.Id);
         item.Should().NotBeNull();
         item!.Variants.Should().Contain(v => v.Id == v1.Id);
@@ -346,7 +346,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
+            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -365,11 +365,11 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         db.Products.Add(product);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/product", CancellationToken.None).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<ProductDetailResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
     }
 
     [Fact(DisplayName = "PRODUCT_066 - Lấy danh sách sản phẩm for-manager hiển thị đầy đủ trường stock")]
@@ -398,7 +398,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
+            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -418,11 +418,11 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/product/for-manager", CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<ProductDetailResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
     }
 
     [Fact(DisplayName = "PRODUCT_067 - Lấy danh sách sản phẩm deleted chỉ trả về sản phẩm đã xóa")]
@@ -451,7 +451,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
+            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -471,11 +471,11 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         db.Products.Add(deletedProduct);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/product/deleted", CancellationToken.None).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<ProductDetailResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Items.Should().Contain(p => p.Id == deletedProduct.Id);
     }
 
@@ -505,7 +505,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
+            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -528,11 +528,11 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/product/variants-lite/for-input", CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<ProductVariantLiteResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Items.Should().Contain(v => v.Id == variant.Id);
     }
 
@@ -562,7 +562,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
+            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -585,11 +585,11 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/product/variants-lite/for-output", CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<ProductVariantLiteResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Items.Should().Contain(v => v.Id == variant.Id);
     }
 
@@ -619,7 +619,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
+            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -655,13 +655,13 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync($"/api/v1/product/{product.Id}/variants-lite", CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<List<ProductVariantLiteResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Should().Contain(v => v.Id == v1.Id);
-        content.Should().NotContain(v => v.Id == v2.Id);
+        content!.Should().NotContain(v => v.Id == v2.Id);
     }
 
     [Fact(DisplayName = "PRODUCT_074 - Tạo sản phẩm tự động tạo OptionValue mới nếu chưa tồn tại")]
@@ -690,7 +690,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
+            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -717,20 +717,20 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             }
         };
         var response = await _client.PostAsJsonAsync("/api/v1/product", payload).ConfigureAwait(true);
-        if (response.StatusCode != HttpStatusCode.Created)
+        if (response!.StatusCode != HttpStatusCode.Created)
         {
-            var error = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
-            _output.WriteLine($"PRODUCT_074 Failed: {response.StatusCode} - {error}");
+            var error = await response!.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
+            _output.WriteLine($"PRODUCT_074 Failed: {response!.StatusCode} - {error}");
         }
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        response!.StatusCode.Should().Be(HttpStatusCode.Created);
         var options = await db.Options
             .Where(o => o.Name == $"Color_{uniqueId}")
-            .FirstOrDefaultAsync(CancellationToken.None)
+            .FirstOrDefaultAsync(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         options.Should().NotBeNull();
         var values = await db.OptionValues
-            .Where(ov => ov.OptionId == options!.Id && ov.Name == "Green")
-            .FirstOrDefaultAsync(CancellationToken.None)
+            .Where(ov => ov.OptionId == options!.Id && string.Equals(ov.Name, "Green", StringComparison.OrdinalIgnoreCase))
+            .FirstOrDefaultAsync(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         values.Should().NotBeNull();
     }
@@ -761,7 +761,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
+            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -796,10 +796,10 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             }
         };
         var response = await _client.PostAsJsonAsync("/api/v1/product", payload).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        response!.StatusCode.Should().Be(HttpStatusCode.Created);
         var count = await db.OptionValues
             .CountAsync(
-                ov => ov.OptionId == option.Id && string.Compare(ov.Name, optionValueName) == 0,
+                ov => ov.OptionId == option.Id && string.Equals(ov.Name, optionValueName, StringComparison.OrdinalIgnoreCase),
                 CancellationToken.None)
             .ConfigureAwait(true);
         count.Should().Be(1);
@@ -831,7 +831,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
+            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -865,8 +865,8 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync($"/api/v1/product/{product.Id}/for-manager", CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<ProductDetailForManagerResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         var v = content!.Variants.First(x => x.Id == variant.Id);
@@ -902,7 +902,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
+            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -925,8 +925,8 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync($"/api/v1/product/{product.Id}/variants-lite", CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<List<ProductVariantLiteResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.First().VariantName.Should().BeNullOrEmpty();
@@ -958,7 +958,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
+            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -976,8 +976,8 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             variants = new[] { new { url_slug = $"dec-{uniqueId}", price = 20000000.99m } }
         };
         var response = await _client.PostAsJsonAsync("/api/v1/product", payload).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.Created);
+        var content = await response!.Content
             .ReadFromJsonAsync<ProductDetailResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.Variants[0].Price.Should().Be(20000000.99m);
@@ -1010,11 +1010,11 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var productStatusId = ProductStatusConstants.ForSale;
         var outStockStatusId = ProductStatusConstants.OutOfBusiness;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
+            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Compare(x.Key, outStockStatusId) == 0, CancellationToken.None)
+            .AnyAsync(x => string.Equals(x.Key, outStockStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = outStockStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -1042,7 +1042,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var request = new UpdateManyProductStatusesCommand { Ids = [p1.Id, p2.Id], StatusId = outStockStatusId };
         var response = await _client.PatchAsJsonAsync("/api/v1/product/statuses", request, CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
         var dbP1 = await db.Products.FindAsync([p1.Id], TestContext.Current.CancellationToken).ConfigureAwait(true);
         var dbP2 = await db.Products.FindAsync([p2.Id], TestContext.Current.CancellationToken).ConfigureAwait(true);
         await db.Entry(dbP1!).ReloadAsync(CancellationToken.None).ConfigureAwait(true);
@@ -1078,11 +1078,11 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var productStatusId = ProductStatusConstants.ForSale;
         var outStockStatusId = ProductStatusConstants.OutOfBusiness;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
+            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Compare(x.Key, outStockStatusId) == 0, CancellationToken.None)
+            .AnyAsync(x => string.Equals(x.Key, outStockStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = outStockStatusId });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -1110,7 +1110,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var request = new UpdateManyProductStatusesCommand { Ids = [p1.Id, p2.Id], StatusId = outStockStatusId };
         var response = await _client.PutAsJsonAsync("/api/v1/product/many/status", request).ConfigureAwait(true);
-        response.StatusCode.Should().NotBe(HttpStatusCode.OK);
+        response!.StatusCode.Should().NotBe(HttpStatusCode.OK);
         var dbP1 = await db.Products
             .AsNoTracking()
             .FirstOrDefaultAsync(p => p.Id == p1.Id, CancellationToken.None)
@@ -1142,7 +1142,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        if (!await db.PredefinedOptions.AnyAsync(CancellationToken.None).ConfigureAwait(true))
+        if (!await db.PredefinedOptions.AnyAsync(TestContext.Current.CancellationToken).ConfigureAwait(true))
         {
             db.PredefinedOptions
                 .AddRange(
@@ -1152,11 +1152,11 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         }
         var response = await _client.GetAsync("/api/v1/product/predefined-options", CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<Dictionary<string, string>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNullOrEmpty();
+        content!.Should().NotBeNullOrEmpty();
         content!.Keys.Should().Contain("VehicleType");
     }
 
@@ -1184,7 +1184,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         var response = await _client.GetAsync("/api/v1/product/predefined-options", CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        response!.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
     [Fact(DisplayName = "PRODUCT_103 - Tạo sản phẩm thất bại khi Option Name không thuộc danh sách PredefinedOption")]
@@ -1213,7 +1213,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
+            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         var category = new ProductCategoryEntity { Name = $"Cat_{uniqueId}" };
@@ -1235,7 +1235,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
                 }]
         };
         var response = await _client.PostAsJsonAsync("/api/v1/product", command).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact(DisplayName = "PRODUCT_104 - Tạo sản phẩm với UrlSlug dài hơn 50 ký tự (lưu DB thành công)")]
@@ -1266,7 +1266,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         db.ProductCategories.Add(cat);
         db.Brands.Add(brand);
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Compare(x.Key, ProductStatusConstants.ForSale) == 0, CancellationToken.None)
+            .AnyAsync(x => string.Equals(x.Key, ProductStatusConstants.ForSale, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = ProductStatusConstants.ForSale });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -1280,9 +1280,9 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             variants = new[] { new { url_slug = longSlug, price = 1000, optionValueIds = Array.Empty<int>() } }
         };
         var response = await _client.PostAsJsonAsync("/api/v1/product", payload).ConfigureAwait(true);
-        response.StatusCode.Should().BeOneOf(HttpStatusCode.Created, HttpStatusCode.OK);
+        response!.StatusCode.Should().BeOneOf(HttpStatusCode.Created, HttpStatusCode.OK);
         var createdProduct = await db.ProductVariants
-            .FirstOrDefaultAsync(v => string.Compare(v.UrlSlug, longSlug) == 0, CancellationToken.None)
+            .FirstOrDefaultAsync(v => string.Equals(v.UrlSlug, longSlug, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true);
         createdProduct.Should().NotBeNull();
         createdProduct!.UrlSlug?.Length.Should().Be(200);
@@ -1316,7 +1316,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         db.ProductCategories.Add(cat);
         db.Brands.Add(brand);
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Compare(x.Key, ProductStatusConstants.ForSale) == 0, CancellationToken.None)
+            .AnyAsync(x => string.Equals(x.Key, ProductStatusConstants.ForSale, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = ProductStatusConstants.ForSale });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -1333,7 +1333,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             }
         };
         var response = await _client.PostAsJsonAsync("/api/v1/product", reqBody).ConfigureAwait(true);
-        var content = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
+        var content = await response!.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
         response.IsSuccessStatusCode.Should().BeTrue("Response body: {0}", content);
     }
 
@@ -1369,7 +1369,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         db.Options.Add(option);
         db.OptionValues.Add(optionValue);
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Compare(x.Key, ProductStatusConstants.ForSale) == 0, CancellationToken.None)
+            .AnyAsync(x => string.Equals(x.Key, ProductStatusConstants.ForSale, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = ProductStatusConstants.ForSale });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -1397,7 +1397,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             Variants = [new UpdateProductVariantRequest { Id = variant.Id, Price = 2000, OptionValues = [] }]
         };
         var response = await _client.PutAsJsonAsync($"/api/v1/product/{product.Id}", updateCommand).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
         var existsWithFilter = await db.Set<VariantOptionValue>()
             .AnyAsync(v => v.VariantId == variant.Id, CancellationToken.None)
             .ConfigureAwait(true);
@@ -1432,7 +1432,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResp.AccessToken);
         var response = await _client.GetAsync("/api/v1/product/predefined-options", CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact(DisplayName = "PRODUCT_109 - Gọi API PredefinedOptions không có quyền hợp lệ trả về Forbidden")]
@@ -1458,7 +1458,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResp.AccessToken);
         var response = await _client.GetAsync("/api/v1/product/predefined-options", CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        response!.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
     [Fact(DisplayName = "PRODUCT_111 - Lấy thông tin chi tiết sản phẩm kiểm tra tồn kho vật lý, giữ chỗ, ATS")]
@@ -1489,17 +1489,17 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         db.ProductCategories.Add(cat);
         db.Brands.Add(brand);
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Compare(x.Key, ProductStatusConstants.ForSale) == 0, CancellationToken.None)
+            .AnyAsync(x => string.Equals(x.Key, ProductStatusConstants.ForSale, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = ProductStatusConstants.ForSale });
         if (!await db.InputStatuses
             .AnyAsync(
-                x => string.Compare(x.Key, Domain.Constants.Input.InputStatus.Finish) == 0,
+                x => string.Equals(x.Key, Domain.Constants.Input.InputStatus.Finish, StringComparison.OrdinalIgnoreCase),
                 CancellationToken.None)
             .ConfigureAwait(true))
             db.InputStatuses.Add(new InputStatus { Key = Domain.Constants.Input.InputStatus.Finish });
         if (!await db.OutputStatuses
-            .AnyAsync(x => string.Compare(x.Key, OrderStatus.Pending) == 0, CancellationToken.None)
+            .AnyAsync(x => string.Equals(x.Key, OrderStatus.Pending, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true))
             db.OutputStatuses.Add(new OutputStatus { Key = OrderStatus.Pending });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -1545,11 +1545,11 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync($"/api/v1/product/{product.Id}/for-manager", CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<ProductDetailForManagerResponse>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Stock.Should().Be(100);
         content.HasBeenBooked.Should().Be(30);
         content.StatusStockId.Should().Be("in_stock");
@@ -1583,7 +1583,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         db.ProductCategories.Add(cat);
         db.Brands.Add(brand);
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Compare(x.Key, ProductStatusConstants.ForSale) == 0, CancellationToken.None)
+            .AnyAsync(x => string.Equals(x.Key, ProductStatusConstants.ForSale, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true))
         {
             db.ProductStatuses.Add(new ProductStatus { Key = ProductStatusConstants.ForSale });
@@ -1604,11 +1604,11 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/product/for-price-management", CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<ProductPriceLiteResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         var item = content!.Items!.FirstOrDefault(x => x.Id == product.Id);
         item.Should().NotBeNull();
         item!.Name.Should().Be(product.Name);
@@ -1647,7 +1647,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         db.ProductCategories.Add(cat);
         db.Brands.Add(brand);
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Compare(x.Key, ProductStatusConstants.ForSale) == 0, CancellationToken.None)
+            .AnyAsync(x => string.Equals(x.Key, ProductStatusConstants.ForSale, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true))
         {
             db.ProductStatuses.Add(new ProductStatus { Key = ProductStatusConstants.ForSale });
@@ -1673,8 +1673,8 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             $"/api/v1/product/for-price-management?Filters=Name@=Exciter_{uniqueId}",
             CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<ProductPriceLiteResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.Items.Should().ContainSingle();
@@ -1706,8 +1706,8 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             "/api/v1/product/for-price-management?Filters=Name==NON_EXISTENT_NAME",
             CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<ProductPriceLiteResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         content!.Items.Should().BeEmpty();
@@ -1737,7 +1737,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
     private static async Task EnsureForSaleStatusAsync(ApplicationDBContext db)
     {
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Compare(x.Key, ProductStatusConstants.ForSale) == 0, CancellationToken.None)
+            .AnyAsync(x => string.Equals(x.Key, ProductStatusConstants.ForSale, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true))
         {
             db.ProductStatuses.Add(new ProductStatus { Key = ProductStatusConstants.ForSale });
@@ -1787,11 +1787,11 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             $"/api/v1/product/variants-lite/for-input?filters=search@=Honda_{uniqueId}",
             CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<ProductVariantLiteResponseForInput>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Items.Should().HaveCount(3);
         content.Items.Should().AllSatisfy(item => item.DisplayName.Should().Contain($"Honda_{uniqueId}"));
         content.Items.Should().NotContain(item => item.DisplayName!.Contains($"Yamaha_{uniqueId}"));
@@ -1841,11 +1841,11 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             $"/api/v1/product/variants-lite/for-input?filters=search@=_Paged_{uniqueId}&page=1&pageSize=10",
             CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<ProductVariantLiteResponseForInput>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.TotalCount.Should().Be(11);
         content.Items.Should().HaveCount(10);
         content.TotalPages.Should().Be(2);
@@ -1895,11 +1895,11 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             $"/api/v1/product/variants-lite/for-input?filters=search@=_P2_{uniqueId}&page=2&pageSize=10",
             CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<ProductVariantLiteResponseForInput>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.TotalCount.Should().Be(11);
         content.Items.Should().HaveCount(1);
         content.PageNumber.Should().Be(2);
@@ -1930,13 +1930,13 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         db.Products.Add(product);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         if (!await db.PredefinedOptions
-            .AnyAsync(x => string.Compare(x.Key, "Color") == 0, CancellationToken.None)
+            .AnyAsync(x => string.Equals(x.Key, "Color", StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true))
         {
             db.PredefinedOptions.Add(new PredefinedOption { Key = "Color", Value = "Màu sắc" });
         }
         var colorOption = await db.Options
-            .FirstOrDefaultAsync(o => string.Compare(o.Name, "Color") == 0, CancellationToken.None)
+            .FirstOrDefaultAsync(o => string.Equals(o.Name, "Color", StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true);
         if (colorOption is null)
         {
@@ -1956,11 +1956,11 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             $"/api/v1/product/variants-lite/for-input?filters=search@=Prod_{uniqueId}",
             CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<ProductVariantLiteResponseForInput>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         var item = content!.Items!.FirstOrDefault(v => v.Id == variant.Id);
         item.Should().NotBeNull();
         item!.DisplayName.Should().Be($"Prod_{uniqueId} (Màu sắc: Đỏ)");
@@ -1991,20 +1991,20 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         db.Products.Add(product);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         if (!await db.PredefinedOptions
-            .AnyAsync(x => string.Compare(x.Key, "Color") == 0, CancellationToken.None)
+            .AnyAsync(x => string.Equals(x.Key, "Color", StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true))
             db.PredefinedOptions.Add(new PredefinedOption { Key = "Color", Value = "Màu sắc" });
         if (!await db.PredefinedOptions
-            .AnyAsync(x => string.Compare(x.Key, "Displacement") == 0, CancellationToken.None)
+            .AnyAsync(x => string.Equals(x.Key, "Displacement", StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true))
             db.PredefinedOptions.Add(new PredefinedOption { Key = "Displacement", Value = "Phân khối" });
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var colorOption = await db.Options
-                .FirstOrDefaultAsync(o => string.Compare(o.Name, "Color") == 0, CancellationToken.None)
+                .FirstOrDefaultAsync(o => string.Equals(o.Name, "Color", StringComparison.OrdinalIgnoreCase), CancellationToken.None)
                 .ConfigureAwait(true) ??
             new Option { Name = "Color" };
         var displOption = await db.Options
-                .FirstOrDefaultAsync(o => string.Compare(o.Name, "Displacement") == 0, CancellationToken.None)
+                .FirstOrDefaultAsync(o => string.Equals(o.Name, "Displacement", StringComparison.OrdinalIgnoreCase), CancellationToken.None)
                 .ConfigureAwait(true) ??
             new Option { Name = "Displacement" };
         if (colorOption.Id == 0)
@@ -2026,11 +2026,11 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             $"/api/v1/product/variants-lite/for-input?filters=search@=Prod_{uniqueId}",
             CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<ProductVariantLiteResponseForInput>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         var item = content.Items?.FirstOrDefault(v => v.Id == variant.Id);
         item.Should().NotBeNull();
         item!.DisplayName.Should().StartWith($"Prod_{uniqueId} (");
@@ -2069,11 +2069,11 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             $"/api/v1/product/variants-lite/for-input?filters=search@=Solo_{uniqueId}",
             CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<ProductVariantLiteResponseForInput>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         var item = content!.Items!.FirstOrDefault(v => v.Id == variant.Id);
         item.Should().NotBeNull();
         item!.DisplayName.Should().Be($"Solo_{uniqueId}");
@@ -2106,11 +2106,11 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             $"/api/v1/product/for-manager?filters=inventoryStatus=={Domain.Constants.InventoryStatus.OutOfStock}",
             CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<ProductDetailForManagerResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Items.Should().Contain(p => p.Id == p2.Id);
         content.Items.Should().NotContain(p => p.Id == p1.Id);
     }
@@ -2159,11 +2159,11 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             $"/api/v1/product/for-manager?sorts=inventoryStatus&filters=name@=_{uniqueId}",
             CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<ProductDetailForManagerResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         var items = content!.Items!.ToList();
         items.Should().HaveCount(3);
         items[0].Id.Should().Be(pOut.Id);
@@ -2196,7 +2196,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
     {
         var key = Domain.Constants.SettingKeys.InventoryAlertLevel;
         var setting = await db.Settings
-            .FirstOrDefaultAsync(s => string.Compare(s.Key, key) == 0, CancellationToken.None)
+            .FirstOrDefaultAsync(s => string.Equals(s.Key, key, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true);
         if (setting is null)
         {
@@ -2211,7 +2211,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
     private static async Task EnsureInputStatusAsync(ApplicationDBContext db, string key)
     {
         if (!await db.InputStatuses
-            .AnyAsync(s => string.Compare(s.Key, key) == 0, CancellationToken.None)
+            .AnyAsync(s => string.Equals(s.Key, key, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true))
         {
             db.InputStatuses.Add(new InputStatus { Key = key });
@@ -2222,7 +2222,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
     private static async Task EnsureOutputStatusAsync(ApplicationDBContext db, string key)
     {
         if (!await db.OutputStatuses
-            .AnyAsync(s => string.Compare(s.Key, key) == 0, CancellationToken.None)
+            .AnyAsync(s => string.Equals(s.Key, key, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true))
         {
             db.OutputStatuses.Add(new OutputStatus { Key = key });
@@ -2304,12 +2304,12 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         db.OptionValues.AddRange(val1, val2);
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/option", CancellationToken.None).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<List<OptionResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
-        content.Should().Contain(o => o.Id == option.Id);
+        content!.Should().NotBeNull();
+        content!.Should().Contain(o => o.Id == option.Id);
         var optRes = content!.First(o => o.Id == option.Id);
         optRes.OptionValues.Should().Contain(v => v.Id == val1.Id);
         optRes.OptionValues.Should().Contain(v => v.Id == val2.Id);
@@ -2341,7 +2341,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
@@ -2385,11 +2385,11 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         var response = await _client.GetAsync($"/api/v1/product?optionValueIds={valRed.Id}", CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<ProductDetailResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Items.Should().Contain(p => p.Id == p1.Id);
         content.Items.Should().NotContain(p => p.Id == p2.Id);
         var item1 = content.Items.First(p => p.Id == p1.Id);
@@ -2423,7 +2423,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
         var category = new ProductCategoryEntity { Name = $"Cat_{uniqueId}" };
@@ -2463,11 +2463,11 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             $"/api/v1/product?filters=search=UniqueName_{uniqueId},optionValueIds={valRed.Id}",
             CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<ProductDetailResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Items.Should().ContainSingle(p => p.Id == pMatch.Id);
     }
 
@@ -2497,7 +2497,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
+            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true))
         {
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
@@ -2534,16 +2534,16 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var variant = product.ProductVariants.First();
         var listResponse = await _client.GetAsync($"/api/v1/product?filters=Id=={product.Id}", CancellationToken.None)
             .ConfigureAwait(true);
-        listResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-        var listResult = await listResponse.Content
+        listResponse!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var listResult = await listResponse!.Content
             .ReadFromJsonAsync<PagedResult<ProductListStoreResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         var variantInList = listResult!.Items?.First().Variants.First(v => v.Id == variant.Id);
         variantInList?.CoverImageUrl.Should().Be(firstPhotoUrl);
         var detailResponse = await _client.GetAsync($"/api/v1/product/store/{variant.UrlSlug}", CancellationToken.None)
             .ConfigureAwait(true);
-        detailResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-        var detailResult = await detailResponse.Content
+        detailResponse!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var detailResult = await detailResponse!.Content
             .ReadFromJsonAsync<ProductStoreDetailResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         detailResult!.CurrentVariant.CoverImageUrl.Should().Be(firstPhotoUrl);
@@ -2557,7 +2557,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
+            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true))
         {
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
@@ -2596,12 +2596,12 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             "/api/v1/product/variants-cart-details-batch",
             new List<int> { v1.Id, v2.Id })
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<List<VariantCartDetailResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
-        content.Should().HaveCount(2);
+        content!.Should().NotBeNull();
+        content!.Should().HaveCount(2);
         var v1Res = content!.FirstOrDefault(x => x.Id == v1.Id);
         v1Res.Should().NotBeNull();
         v1Res!.DisplayName.Should().Contain(product.Name);
@@ -2617,7 +2617,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, CancellationToken.None)
+            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
             .ConfigureAwait(true))
         {
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
@@ -2656,11 +2656,11 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             "/api/v1/product/variants-cart-details-batch",
             new List<int> { v1.Id })
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<List<VariantCartDetailResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content![0].CoverImageUrl.Should().Be(photo.ImageUrl);
     }
 
@@ -2691,7 +2691,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var productStatusId = ProductStatusConstants.ForSale;
         if (!await db.ProductStatuses
-            .AnyAsync(x => string.Compare(x.Key, productStatusId) == 0, TestContext.Current.CancellationToken)
+            .AnyAsync(x => string.Equals(x.Key, productStatusId, StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
             .ConfigureAwait(true))
         {
             db.ProductStatuses.Add(new ProductStatus { Key = productStatusId });
@@ -2731,7 +2731,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             new StringContent(updatePayload, Encoding.UTF8, "application/json"),
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
         using var scope2 = _factory.Services.CreateScope();
         var db2 = scope2.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var updatedProduct = await db2.Products
@@ -2748,7 +2748,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         variant.CoverImageUrl.Should().Be("http://example.com/new-cover.jpg");
         variant.ProductCollectionPhotos
             .Should()
-            .ContainSingle(p => string.Compare(p.ImageUrl, "http://example.com/photo1.jpg") == 0);
+            .ContainSingle(p => string.Equals(p.ImageUrl, "http://example.com/photo1.jpg", StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact(DisplayName = "PRODUCT_144 - Lưu trữ thông tin định danh chuyên sâu của biến thể")]
@@ -2803,9 +2803,9 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResp.AccessToken);
         var response = await _client.PostAsJsonAsync("/api/v1/product", payload).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        response!.StatusCode.Should().Be(HttpStatusCode.Created);
         var variant = await db.ProductVariants
-            .FirstOrDefaultAsync(v => string.Compare(v.SKU, "SKU-123") == 0, TestContext.Current.CancellationToken)
+            .FirstOrDefaultAsync(v => string.Equals(v.SKU, "SKU-123", StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         variant.Should().NotBeNull();
         variant!.VersionName.Should().Be("Premium");
@@ -2865,12 +2865,12 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             }
         };
         var response = await _client.PostAsJsonAsync("/api/v1/product", payload).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        response!.StatusCode.Should().Be(HttpStatusCode.Created);
         using var assertScope = _factory.Services.CreateScope();
         var assertDb = assertScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var product = await assertDb.Products
             .AsNoTracking()
-            .FirstOrDefaultAsync(p => string.Compare(p.Name, "Bike") == 0, TestContext.Current.CancellationToken)
+            .FirstOrDefaultAsync(p => string.Equals(p.Name, "Bike", StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         product.Should().NotBeNull("Product should have been created");
         var updatedOv = await assertDb.OptionValues
@@ -2924,7 +2924,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             throw new Exception($"API failed with {response150.StatusCode}: {error}");
         }
         var product = await db.Products
-            .FirstOrDefaultAsync(p => string.Compare(p.Name, "SEO Bike") == 0, TestContext.Current.CancellationToken)
+            .FirstOrDefaultAsync(p => string.Equals(p.Name, "SEO Bike", StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         product!.MetaTitle.Should().Be("Meta Title");
         product.MetaDescription.Should().Be("Meta Description");
@@ -2973,7 +2973,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         var link = await assertDb.ProductTechnologies
             .AsNoTracking()
             .FirstOrDefaultAsync(
-                pt => string.Compare(pt.CustomTitle, "Cool ABS") == 0,
+                pt => string.Equals(pt.CustomTitle, "Cool ABS", StringComparison.OrdinalIgnoreCase),
                 TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         link.Should().NotBeNull();
@@ -3169,7 +3169,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         response.EnsureSuccessStatusCode();
-        var content = await response.Content
+        var content = await response!.Content
             .ReadFromJsonAsync<ProductDetailForManagerResponse>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var highlights = JsonSerializer.Deserialize<List<JsonElement>>(content!.Highlights!);
@@ -3196,7 +3196,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         var response = await _client.GetAsync("/api/v1/technology", TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact(DisplayName = "PRODUCT_171 - Tìm kiếm sản phẩm theo giá tối thiểu (MinPrice)")]
@@ -3206,7 +3206,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             "/api/v1/product?MinPrice=50000000",
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact(DisplayName = "PRODUCT_172 - Tìm kiếm sản phẩm theo giá tối đa (MaxPrice)")]
@@ -3216,7 +3216,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             "/api/v1/product?MaxPrice=30000000",
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact(DisplayName = "PRODUCT_173 - Tìm kiếm sản phẩm theo nhiều thương hiệu (BrandIds)")]
@@ -3224,7 +3224,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
     {
         var response = await _client.GetAsync("/api/v1/product?BrandIds=1,2", TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact(DisplayName = "PRODUCT_174 - Kết hợp lọc giá và thương hiệu đồng thời")]
@@ -3234,7 +3234,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             "/api/v1/product?MinPrice=40000000&BrandIds=1",
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact(DisplayName = "PRODUCT_170 - Đảm bảo Cascade Delete khi xóa công nghệ gốc")]
@@ -3301,7 +3301,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         };
 
         var response = await HttpClientJsonExtensions.PutAsJsonAsync(_client, $"/api/v1/product/{product.Id}", payload, TestContext.Current.CancellationToken).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
 
         var attachedTechs = await db.ProductTechnologies.Where(pt => pt.ProductId == product.Id).ToListAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         attachedTechs.Should().HaveCount(2);
@@ -3334,9 +3334,9 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var response = await _client.GetAsync($"/api/v1/product?filters=StdSnell==true", TestContext.Current.CancellationToken).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var content = await response.Content.ReadFromJsonAsync<PagedResult<ProductDetailResponse>>(TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var content = await response!.Content.ReadFromJsonAsync<PagedResult<ProductDetailResponse>>(TestContext.Current.CancellationToken).ConfigureAwait(true);
         content!.Items.Should().Contain(p => p.Id == p1.Id);
         content.Items.Should().NotContain(p => p.Id == p2.Id);
     }
@@ -3372,9 +3372,9 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
         };
 
         var response = await _client.PostAsync("/api/v1/product", JsonContent.Create(request), CancellationToken.None).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
+        response!.StatusCode.Should().Be(HttpStatusCode.Created);
         
-        var content = await response.Content.ReadFromJsonAsync<ProductDetailForManagerResponse>(CancellationToken.None).ConfigureAwait(true);
+        var content = await response!.Content.ReadFromJsonAsync<ProductDetailForManagerResponse>(CancellationToken.None).ConfigureAwait(true);
         content!.FrontTireSize.Should().Be("120/70-17");
     }
 
@@ -3408,7 +3408,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
             Variants = [new UpdateProductVariantRequest { Id = product.ProductVariants.First().Id, Price = 5500 }]
         };
         var response = await _client.PutAsync($"/api/v1/product/{product.Id}", new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json"), CancellationToken.None).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
 
         var updated = await db.Products.AsNoTracking().FirstOrDefaultAsync(p => p.Id == product.Id, TestContext.Current.CancellationToken).ConfigureAwait(true);
         updated!.StdDot.Should().BeTrue();
@@ -3434,7 +3434,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
 
         var request = new { compatible_vehicle_ids = new List<int> { vehicle.Id } };
         var response = await _client.PostAsync($"/api/v1/product/{part.Id}/compatibility", JsonContent.Create(request), CancellationToken.None).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
 
         var count = await db.Set<ProductCompatibility>().CountAsync(c => c.BaseProductId == part.Id && c.CompatibleVehicleModelId == vehicle.Id, TestContext.Current.CancellationToken).ConfigureAwait(true);
         count.Should().Be(1);
@@ -3457,7 +3457,7 @@ public class Product : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifeti
 
         var request = new { name = "Phụ tùng thay thế", category_ids = new List<int> { c1.Id, c2.Id } };
         var response = await _client.PostAsync("/api/v1/product/category-group", JsonContent.Create(request), CancellationToken.None).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
 
         var updatedC1 = await db.ProductCategories.AsNoTracking().FirstAsync(c => c.Id == c1.Id, TestContext.Current.CancellationToken).ConfigureAwait(true);
         updatedC1.CategoryGroup.Should().Be("Phụ tùng thay thế");

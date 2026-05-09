@@ -19,20 +19,20 @@ public class LeadWriteRepository(ApplicationDBContext context) : ILeadWriteRepos
     public async Task UpdateAsync(Domain.Entities.Lead lead, CancellationToken cancellationToken = default)
     {
         context.Leads.Update(lead);
-        await context.SaveChangesAsync(cancellationToken);
+        await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
     public async Task AddAsync(Domain.Entities.Lead lead, CancellationToken cancellationToken = default)
     {
         context.Leads.Add(lead);
-        await context.SaveChangesAsync(cancellationToken);
+        await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
     public async Task ClearAllAsync(CancellationToken cancellationToken = default)
     {
-        var activities = await context.LeadActivities.ToListAsync(cancellationToken);
+        var activities = await context.LeadActivities.ToListAsync(cancellationToken).ConfigureAwait(false);
         context.LeadActivities.RemoveRange(activities);
-        var leads = await context.Leads.ToListAsync(cancellationToken);
+        var leads = await context.Leads.ToListAsync(cancellationToken).ConfigureAwait(false);
         context.Leads.RemoveRange(leads);
     }
 }

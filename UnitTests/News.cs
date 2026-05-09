@@ -133,8 +133,8 @@ public class News
         var command = new CreateNewsCommand { MetaTitle = new string('a', 150) };
         var result = validator.Validate(command);
         result.IsValid.Should().BeFalse();
-        result.Errors.Should().Contain(x => x.PropertyName == nameof(CreateNewsCommand.MetaTitle));
+        result.Errors.Should().Contain(x => string.Compare(x.PropertyName, nameof(CreateNewsCommand.MetaTitle)) == 0);
     }
-    #pragma warning restore IDE0079 
     #pragma warning restore CRR0035
+    #pragma warning restore IDE0079 
 }

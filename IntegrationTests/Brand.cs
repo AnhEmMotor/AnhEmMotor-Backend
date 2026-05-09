@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Brand.Responses;
+using Application.ApiContracts.Brand.Responses;
 using Application.Features.Brands.Commands.CreateBrand;
 using Application.Features.Brands.Commands.DeleteManyBrands;
 using Application.Features.Brands.Commands.RestoreManyBrands;
@@ -66,18 +66,18 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         requestMessage.Content = JsonContent.Create(command);
         var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
-        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        if (response!.StatusCode == HttpStatusCode.Unauthorized)
         {
-            var errorContent = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
+            var errorContent = await response!.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
             throw new Exception($"API returned 401. Response Body: {errorContent}");
         }
-        if (response.StatusCode == HttpStatusCode.InternalServerError)
+        if (response!.StatusCode == HttpStatusCode.InternalServerError)
         {
-            var errorContent = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
+            var errorContent = await response!.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
             throw new Exception($"API returned 500. Response Body: {errorContent}");
         }
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
-        var responseData = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.Created);
+        var responseData = await response!.Content
             .ReadFromJsonAsync<BrandResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         responseData.Should().NotBeNull();
@@ -102,11 +102,11 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         }
         var response = await _client.GetAsync("/api/v1/Brand?Page=1&PageSize=10", CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<BrandResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Items.Should().HaveCount(10);
         content.TotalCount.Should().Be(11);
         content.TotalPages.Should().Be(2);
@@ -120,7 +120,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-            if (!db.Brands.Any(b => b.Name == "Honda Filter"))
+            if (!db.Brands.Any(b => string.Equals(b.Name, "Honda Filter", StringComparison.OrdinalIgnoreCase)))
             {
                 db.Brands.Add(new BrandEntities { Name = "Honda Filter", Description = "Desc" });
                 await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
@@ -128,12 +128,12 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         }
         var response = await _client.GetAsync("/api/v1/Brand?Filters=Name@=Honda Filter", CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<PagedResult<BrandResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
-        content!.Items.Should().Contain(x => string.Compare(x.Name, "Honda Filter") == 0);
+        content!.Should().NotBeNull();
+        content!.Items.Should().Contain(x => string.Equals(x.Name, "Honda Filter", StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact(DisplayName = "BRAND_008 - GetBrandById - Success")]
@@ -169,11 +169,11 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/Brand/{id}");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<BrandResponse>(CancellationToken.None)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
+        content!.Should().NotBeNull();
         content!.Id.Should().Be(id);
     }
 
@@ -212,7 +212,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         requestMessage.Content = JsonContent.Create(request);
         var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact(DisplayName = "BRAND_013 - DeleteBrand - Success")]
@@ -248,7 +248,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var requestMessage = new HttpRequestMessage(HttpMethod.Delete, $"/api/v1/Brand/{id}");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        response!.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
 
     [Fact(DisplayName = "BRAND_015 - RestoreBrand - Success")]
@@ -284,7 +284,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var requestMessage = new HttpRequestMessage(HttpMethod.Post, $"/api/v1/Brand/restore/{id}");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact(DisplayName = "BRAND_016 - DeleteManyBrands - Success")]
@@ -324,7 +324,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         requestMessage.Content = JsonContent.Create(request);
         var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        response!.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
 
     [Fact(DisplayName = "BRAND_017 - RestoreManyBrands - Success")]
@@ -364,7 +364,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         requestMessage.Content = JsonContent.Create(request);
         var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact(DisplayName = "BRAND_018 - GetDeletedBrands - Success")]
@@ -391,17 +391,17 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, "/api/v1/brand/deleted");
         requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
-        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        if (response!.StatusCode == HttpStatusCode.Unauthorized)
         {
-            var errorContent = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
+            var errorContent = await response!.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
             throw new Exception($"API returned 401. Response Body: {errorContent}");
         }
-        if (response.StatusCode == HttpStatusCode.InternalServerError)
+        if (response!.StatusCode == HttpStatusCode.InternalServerError)
         {
-            var errorContent = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
+            var errorContent = await response!.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
             throw new Exception($"API returned 500. Response Body: {errorContent}");
         }
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact(DisplayName = "BRAND_049 - CreateBrand - CheckAuditing")]
@@ -432,7 +432,7 @@ public class Brand : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var brand = db.Set<BrandEntities>().FirstOrDefault(b => b.Name == "Audit Brand");
+        var brand = db.Set<BrandEntities>().FirstOrDefault(b => string.Equals(b.Name, "Audit Brand", StringComparison.OrdinalIgnoreCase));
         brand.Should().NotBeNull();
         brand!.CreatedAt.Should().NotBeNull();
     }

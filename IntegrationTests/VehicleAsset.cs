@@ -1,4 +1,3 @@
-using Application.ApiContracts.Maintenance.Responses;
 using Domain.Constants.Permission;
 using Domain.Entities;
 using FluentAssertions;
@@ -14,6 +13,7 @@ using ProductEntity = Domain.Entities.Product;
 using LeadEntity = Domain.Entities.Lead;
 using VehicleEntity = Domain.Entities.Vehicle;
 using ProductCategoryEntity = Domain.Entities.ProductCategory;
+using Application.ApiContracts.Vehicle.Responses;
 
 namespace IntegrationTests;
 
@@ -30,10 +30,7 @@ public class VehicleAsset : IClassFixture<IntegrationTestWebAppFactory>, IAsyncL
         _output = output;
     }
 
-    public async ValueTask InitializeAsync()
-    {
-        await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(true);
-    }
+    public ValueTask InitializeAsync() => ValueTask.CompletedTask;
 
     public ValueTask DisposeAsync()
     {
@@ -41,7 +38,7 @@ public class VehicleAsset : IClassFixture<IntegrationTestWebAppFactory>, IAsyncL
         return ValueTask.CompletedTask;
     }
 
-    private async Task AuthenticateAsync()
+    private async Task AuthenticateAsync(CancellationToken cancellationToken = default)
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
         var username = $"user_{uniqueId}";
@@ -51,13 +48,13 @@ public class VehicleAsset : IClassFixture<IntegrationTestWebAppFactory>, IAsyncL
             username,
             password,
             [], // Add required permissions if needed, but for now assuming it's [Authorize] only
-            CancellationToken.None)
+            cancellationToken)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
             _client,
             username,
             password,
-            CancellationToken.None)
+            cancellationToken)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
     }
@@ -66,7 +63,7 @@ public class VehicleAsset : IClassFixture<IntegrationTestWebAppFactory>, IAsyncL
     public async Task CreateAsset_ValidData_ReturnsCreated()
     {
         // Arrange
-        await AuthenticateAsync();
+        await AuthenticateAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         
@@ -74,11 +71,11 @@ public class VehicleAsset : IClassFixture<IntegrationTestWebAppFactory>, IAsyncL
         var cat = new ProductCategoryEntity { Name = "Cat1" };
         db.Leads.Add(lead);
         db.ProductCategories.Add(cat);
-        await db.SaveChangesAsync().ConfigureAwait(true);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         
         var product = new ProductEntity { Name = "Product 1", CategoryId = cat.Id, StatusId = "for-sale" };
         db.Products.Add(product);
-        await db.SaveChangesAsync().ConfigureAwait(true);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var payload = new
         {
@@ -93,9 +90,9 @@ public class VehicleAsset : IClassFixture<IntegrationTestWebAppFactory>, IAsyncL
         var response = await _client.PostAsJsonAsync("/api/v1/vehicle", payload).ConfigureAwait(true);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
-        var asset = await response.Content.ReadFromJsonAsync<VehicleResponse>().ConfigureAwait(true);
-        asset.Should().NotBeNull();
+        response!.StatusCode.Should().Be(HttpStatusCode.Created);
+        var asset = await response!.Content.ReadFromJsonAsync<VehicleResponse>(TestContext.Current.CancellationToken).ConfigureAwait(true);
+        asset!.Should().NotBeNull();
         asset!.VinNumber.Should().Be("VIN_VAS_001");
         asset.IsActive.Should().BeTrue();
     }
@@ -104,7 +101,7 @@ public class VehicleAsset : IClassFixture<IntegrationTestWebAppFactory>, IAsyncL
     public async Task CreateAsset_DuplicateVin_ReturnsBadRequest()
     {
         // Arrange
-        await AuthenticateAsync();
+        await AuthenticateAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         
@@ -112,16 +109,16 @@ public class VehicleAsset : IClassFixture<IntegrationTestWebAppFactory>, IAsyncL
         var cat = new ProductCategoryEntity { Name = "Cat1" };
         db.Leads.Add(lead);
         db.ProductCategories.Add(cat);
-        await db.SaveChangesAsync().ConfigureAwait(true);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         
         var product = new ProductEntity { Name = "Product 1", CategoryId = cat.Id, StatusId = "for-sale" };
         db.Products.Add(product);
-        await db.SaveChangesAsync().ConfigureAwait(true);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         
         var vin = "VIN123456";
         var existingVehicle = new VehicleEntity { LeadId = lead.Id, ProductId = product.Id, VinNumber = vin, EngineNumber = "ENG1" };
         db.Vehicles.Add(existingVehicle);
-        await db.SaveChangesAsync().ConfigureAwait(true);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var payload = new
         {
@@ -135,16 +132,16 @@ public class VehicleAsset : IClassFixture<IntegrationTestWebAppFactory>, IAsyncL
         var response = await _client.PostAsJsonAsync("/api/v1/vehicle", payload).ConfigureAwait(true);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var content = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
-        content.Should().Contain("VIN already exists");
+        response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var content = await response!.Content.ReadAsStringAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+        content!.Should().Contain("VIN already exists");
     }
 
     [Fact(DisplayName = "VAS_002b - Chặn trùng lặp số khung (VIN) - Trùng lặp có khoảng trắng")]
     public async Task CreateAsset_DuplicateVinWithWhitespace_ReturnsBadRequest()
     {
         // Arrange
-        await AuthenticateAsync();
+        await AuthenticateAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         
@@ -152,16 +149,16 @@ public class VehicleAsset : IClassFixture<IntegrationTestWebAppFactory>, IAsyncL
         var cat = new ProductCategoryEntity { Name = "Cat1" };
         db.Leads.Add(lead);
         db.ProductCategories.Add(cat);
-        await db.SaveChangesAsync().ConfigureAwait(true);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         
         var product = new ProductEntity { Name = "Product 1", CategoryId = cat.Id, StatusId = "for-sale" };
         db.Products.Add(product);
-        await db.SaveChangesAsync().ConfigureAwait(true);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         
         var vin = "VIN_WS_123";
         var existingVehicle = new VehicleEntity { LeadId = lead.Id, ProductId = product.Id, VinNumber = vin, EngineNumber = "ENG1" };
         db.Vehicles.Add(existingVehicle);
-        await db.SaveChangesAsync().ConfigureAwait(true);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var payload = new
         {
@@ -175,25 +172,25 @@ public class VehicleAsset : IClassFixture<IntegrationTestWebAppFactory>, IAsyncL
         var response = await _client.PostAsJsonAsync("/api/v1/vehicle", payload).ConfigureAwait(true);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var content = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
-        content.Should().Contain("VIN already exists");
+        response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var content = await response!.Content.ReadAsStringAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+        content!.Should().Contain("VIN already exists");
     }
 
     [Fact(DisplayName = "VAS_005 - Gán tài sản cho khách hàng không tồn tại")]
     public async Task CreateAsset_NonExistentCustomer_ReturnsBadRequest()
     {
         // Arrange
-        await AuthenticateAsync();
+        await AuthenticateAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         
         var cat = new ProductCategoryEntity { Name = "Cat1" };
         db.ProductCategories.Add(cat);
-        await db.SaveChangesAsync().ConfigureAwait(true);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         var product = new ProductEntity { Name = "Product 1", CategoryId = cat.Id, StatusId = "for-sale" };
         db.Products.Add(product);
-        await db.SaveChangesAsync().ConfigureAwait(true);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         
         var payload = new
         {
@@ -207,33 +204,33 @@ public class VehicleAsset : IClassFixture<IntegrationTestWebAppFactory>, IAsyncL
         var response = await _client.PostAsJsonAsync("/api/v1/vehicle", payload).ConfigureAwait(true);
 
         // Assert
-        response.StatusCode.Should().Match(s => (int)s == 400 || (int)s == 404); 
+        response!.StatusCode.Should().Match(s => (int?)s == 400 || (int?)s == 404); 
     }
 
     [Fact(DisplayName = "VAS_006 - Truy vấn tài sản theo số khung (VIN)")]
     public async Task GetVehicles_ByVin_ReturnsSpecificVehicle()
     {
         // Arrange
-        await AuthenticateAsync();
+        await AuthenticateAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         
         var lead = new LeadEntity { FullName = "Customer 1", PhoneNumber = "0123456789" };
         db.Leads.Add(lead);
-        await db.SaveChangesAsync().ConfigureAwait(true);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         
         var vin = "RLH123456";
         var v1 = new VehicleEntity { LeadId = lead.Id, VinNumber = vin, EngineNumber = "E1" };
         var v2 = new VehicleEntity { LeadId = lead.Id, VinNumber = "OTHER", EngineNumber = "E2" };
         db.Vehicles.AddRange(v1, v2);
-        await db.SaveChangesAsync().ConfigureAwait(true);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         // Act
-        var response = await _client.GetAsync($"/api/v1/vehicle?search={vin}").ConfigureAwait(true);
+        var response = await _client.GetAsync($"/api/v1/vehicle?search={vin}", TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var assets = await response.Content.ReadFromJsonAsync<List<VehicleResponse>>().ConfigureAwait(true);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var assets = await response!.Content.ReadFromJsonAsync<List<VehicleResponse>>(TestContext.Current.CancellationToken).ConfigureAwait(true);
         assets.Should().HaveCount(1);
         assets![0].VinNumber.Should().Be(vin);
     }
@@ -242,18 +239,18 @@ public class VehicleAsset : IClassFixture<IntegrationTestWebAppFactory>, IAsyncL
     public async Task TransferOwnership_ValidRequest_UpdatesLeadId()
     {
         // Arrange
-        await AuthenticateAsync();
+        await AuthenticateAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         
         var lead1 = new LeadEntity { FullName = "Owner 1", PhoneNumber = "1" };
         var lead2 = new LeadEntity { FullName = "Owner 2", PhoneNumber = "2" };
         db.Leads.AddRange(lead1, lead2);
-        await db.SaveChangesAsync().ConfigureAwait(true);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         
         var vehicle = new VehicleEntity { LeadId = lead1.Id, VinNumber = "VIN_TRANSFER", EngineNumber = "E_TRANSFER" };
         db.Vehicles.Add(vehicle);
-        await db.SaveChangesAsync().ConfigureAwait(true);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var payload = new { new_lead_id = lead2.Id };
 
@@ -261,8 +258,8 @@ public class VehicleAsset : IClassFixture<IntegrationTestWebAppFactory>, IAsyncL
         var response = await _client.PostAsJsonAsync($"/api/v1/vehicle/{vehicle.Id}/transfer", payload).ConfigureAwait(true);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var updatedAsset = await response.Content.ReadFromJsonAsync<VehicleResponse>().ConfigureAwait(true);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var updatedAsset = await response!.Content.ReadFromJsonAsync<VehicleResponse>(TestContext.Current.CancellationToken).ConfigureAwait(true);
         updatedAsset!.LeadId.Should().Be(lead2.Id);
     }
 }

@@ -49,12 +49,12 @@ public class Banner : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetim
         }
         var response = await _client.GetAsync("/api/v1/banners/active", TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<List<BannerResponse>>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
-        content.Should().HaveCount(2);
+        content!.Should().NotBeNull();
+        content!.Should().HaveCount(2);
     }
 
     [Fact(DisplayName = "BANN_006 - Sắp xếp Banner theo thứ tự hiển thị")]
@@ -72,7 +72,7 @@ public class Banner : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetim
         }
         var response = await _client.GetAsync("/api/v1/banners/active", TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        var content = await response.Content
+        var content = await response!.Content
             .ReadFromJsonAsync<List<BannerResponse>>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         content![0].DisplayOrder.Should().Be(1);
@@ -115,10 +115,10 @@ public class Banner : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetim
         }
         var response = await _client.GetAsync("/api/v1/banners/active", TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        var content = await response.Content
+        var content = await response!.Content
             .ReadFromJsonAsync<List<BannerResponse>>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        content.Should().HaveCount(1);
+        content!.Should().HaveCount(1);
         content![0].Title.Should().Be("Valid");
     }
 
@@ -142,12 +142,12 @@ public class Banner : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetim
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         var response = await _client.PostAsJsonAsync("/api/v1/banners", payload).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var banner = await db.Banners
             .FirstOrDefaultAsync(
-                b => string.Compare(b.Title, "Integrity Test") == 0,
+                b => string.Equals(b.Title, "Integrity Test", StringComparison.OrdinalIgnoreCase),
                 TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         banner.Should().NotBeNull();
@@ -160,18 +160,18 @@ public class Banner : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetim
         // Arrange
         var payload = new { title = "Priority Test", image_url = "http://anh-em.com/p.jpg", priority = 5, placement = "HomeTop" };
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, $"user_{uniqueId}", "Password123!", ["Permissions.Banners.Create"], CancellationToken.None);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, $"user_{uniqueId}", "Password123!", CancellationToken.None);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, $"user_{uniqueId}", "Password123!", ["Permissions.Banners.Create"], CancellationToken.None).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, $"user_{uniqueId}", "Password123!", CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
+ 
         // Action
-        var response = await _client.PostAsJsonAsync("/api/v1/banners", payload);
-
+        var response = await _client.PostAsJsonAsync("/api/v1/banners", payload).ConfigureAwait(true);
+ 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-        var banner = await db.Banners.FirstOrDefaultAsync(b => b.Title == "Priority Test");
+        var banner = await db.Banners.FirstOrDefaultAsync(b => string.Equals(b.Title, "Priority Test", StringComparison.OrdinalIgnoreCase), TestContext.Current.CancellationToken).ConfigureAwait(true);
         banner!.Priority.Should().Be(5);
         banner.Placement.Should().Be("HomeTop");
     }
@@ -185,15 +185,15 @@ public class Banner : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetim
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var banner = new Domain.Entities.Banner { Title = "Click Test", ImageUrl = "I", ClickCount = initialClick, IsActive = true };
         db.Banners.Add(banner);
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         int bannerId = banner.Id;
-
+ 
         // Action
-        var response = await _client.PostAsync($"/api/v1/banners/{bannerId}/click", null);
-
+        var response = await _client.PostAsync($"/api/v1/banners/{bannerId}/click", null, TestContext.Current.CancellationToken).ConfigureAwait(true);
+ 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var updatedBanner = await db.Banners.AsNoTracking().FirstOrDefaultAsync(b => b.Id == bannerId);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var updatedBanner = await db.Banners.AsNoTracking().FirstOrDefaultAsync(b => b.Id == bannerId, TestContext.Current.CancellationToken).ConfigureAwait(true);
         updatedBanner!.ClickCount.Should().Be(initialClick + 1);
     }
 
@@ -208,14 +208,14 @@ public class Banner : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetim
                 new Domain.Entities.Banner { Title = "P10", ImageUrl = "I1", IsActive = true, Priority = 10 },
                 new Domain.Entities.Banner { Title = "P50", ImageUrl = "I2", IsActive = true, Priority = 50 },
                 new Domain.Entities.Banner { Title = "P20", ImageUrl = "I3", IsActive = true, Priority = 20 });
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         }
-
+ 
         // Action
-        var response = await _client.GetAsync("/api/v1/banners/active");
-
+        var response = await _client.GetAsync("/api/v1/banners/active", TestContext.Current.CancellationToken).ConfigureAwait(true);
+ 
         // Assert
-        var content = await response.Content.ReadFromJsonAsync<List<BannerResponse>>();
+        var content = await response!.Content.ReadFromJsonAsync<List<BannerResponse>>(TestContext.Current.CancellationToken).ConfigureAwait(true);
         // Note: Actual logic might sort by DisplayOrder then Priority or just Priority.
         // We assume Priority descending for this test as per spec.
         if (content!.Count >= 3)
@@ -233,15 +233,15 @@ public class Banner : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetim
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             db.Banners.Add(new Domain.Entities.Banner { Title = "Expired", ImageUrl = "I", IsActive = true, EndDate = now.AddDays(-1) });
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         }
-
+ 
         // Action
-        var response = await _client.GetAsync("/api/v1/banners/active");
-
+        var response = await _client.GetAsync("/api/v1/banners/active", TestContext.Current.CancellationToken).ConfigureAwait(true);
+ 
         // Assert
-        var content = await response.Content.ReadFromJsonAsync<List<BannerResponse>>();
-        content.Should().NotContain(x => x.Title == "Expired");
+        var content = await response!.Content.ReadFromJsonAsync<List<BannerResponse>>(TestContext.Current.CancellationToken).ConfigureAwait(true);
+        content!.Should().NotContain(x => string.Equals(x.Title, "Expired", StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact(DisplayName = "BANN_020 - Vô hiệu hóa Banner thành công")]
@@ -252,21 +252,21 @@ public class Banner : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetim
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var banner = new Domain.Entities.Banner { Title = "To Deactivate", ImageUrl = "I", IsActive = true };
         db.Banners.Add(banner);
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, $"user_{uniqueId}", "Password123!", ["Permissions.Banners.Update"], CancellationToken.None);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, $"user_{uniqueId}", "Password123!", CancellationToken.None);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, $"user_{uniqueId}", "Password123!", ["Permissions.Banners.Update"], CancellationToken.None).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, $"user_{uniqueId}", "Password123!", CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var payload = new { id = banner.Id, title = "Deactivated", image_url = "I", is_active = false };
 
         // Action
-        var response = await _client.PutAsJsonAsync($"/api/v1/banners/{banner.Id}", payload);
+        var response = await _client.PutAsJsonAsync($"/api/v1/banners/{banner.Id}", payload).ConfigureAwait(true);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var updatedBanner = await db.Banners.AsNoTracking().FirstOrDefaultAsync(b => b.Id == banner.Id);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var updatedBanner = await db.Banners.AsNoTracking().FirstOrDefaultAsync(b => b.Id == banner.Id, TestContext.Current.CancellationToken).ConfigureAwait(true);
         updatedBanner!.IsActive.Should().BeFalse();
     }
 
@@ -274,8 +274,8 @@ public class Banner : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetim
     public async Task BANN_023_Filter_By_TargetDevice_Success()
     {
         // This test documents the requirement. Since TargetDevice is missing in entity, it might 404 or ignore.
-        var response = await _client.GetAsync("/api/v1/banners/active?TargetDevice=Mobile");
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var response = await _client.GetAsync("/api/v1/banners/active?TargetDevice=Mobile", TestContext.Current.CancellationToken).ConfigureAwait(true);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact(DisplayName = "BANN_024 - Tự động ghi Log khi cập nhật nội dung")]
@@ -286,20 +286,20 @@ public class Banner : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetim
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var banner = new Domain.Entities.Banner { Title = "Audit Test", ImageUrl = "OldUrl", IsActive = true };
         db.Banners.Add(banner);
-        await db.SaveChangesAsync();
-
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
+ 
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, $"user_{uniqueId}", "Password123!", ["Permissions.Banners.Update", "Permissions.Banners.View"], CancellationToken.None);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, $"user_{uniqueId}", "Password123!", CancellationToken.None);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, $"user_{uniqueId}", "Password123!", ["Permissions.Banners.Update", "Permissions.Banners.View"], CancellationToken.None).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, $"user_{uniqueId}", "Password123!", CancellationToken.None).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-
+ 
         var payload = new UpdateBannerCommand { Id = banner.Id, Title = "Audit Test", ImageUrl = "NewUrl", IsActive = true };
-
+ 
         // Action
-        await _client.PutAsJsonAsync($"/api/v1/banners/{banner.Id}", payload);
-
+        await _client.PutAsJsonAsync($"/api/v1/banners/{banner.Id}", payload).ConfigureAwait(true);
+ 
         // Assert
-        var auditResponse = await _client.GetAsync($"/api/v1/banners/{banner.Id}/audit");
-        auditResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var auditResponse = await _client.GetAsync($"/api/v1/banners/{banner.Id}/audit", CancellationToken.None).ConfigureAwait(true);
+        auditResponse!.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 }

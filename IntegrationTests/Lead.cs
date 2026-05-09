@@ -37,7 +37,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
 
     public async ValueTask DisposeAsync()
     {
-        await _factory.ResetDatabaseAsync(CancellationToken.None).ConfigureAwait(true);
+        await _factory.ResetDatabaseAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         GC.SuppressFinalize(this);
     }
 
@@ -53,14 +53,14 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             username,
             password,
             [PermissionsList.Leads.View],
-            CancellationToken.None,
+            TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
             _client,
             username,
             password,
-            CancellationToken.None)
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         using var scope = _factory.Services.CreateScope();
@@ -98,14 +98,14 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
                     CreatedAt = DateTimeOffset.UtcNow
                 });
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
-        var response = await _client.GetAsync("/api/v1/lead", CancellationToken.None).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content
+        var response = await _client.GetAsync("/api/v1/lead", TestContext.Current.CancellationToken).ConfigureAwait(true);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content
             .ReadFromJsonAsync<List<LeadResponse>>(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        content.Should().NotBeNull();
-        content.Should().HaveCountGreaterThanOrEqualTo(2);
-        content.Any(l => string.Compare(l.PhoneNumber, "0901000001") == 0 && l.Activities.Count > 0).Should().BeTrue();
+        content!.Should().NotBeNull();
+        content!.Should().HaveCountGreaterThanOrEqualTo(2);
+        content.Any(l => string.Equals(l.PhoneNumber, "0901000001", StringComparison.OrdinalIgnoreCase) && l.Activities.Count > 0).Should().BeTrue();
     }
 
     [Fact(DisplayName = "LEAD_005 - Chuyển đổi trạng thái Lead khi xác nhận lịch lái thử")]
@@ -120,14 +120,14 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             username,
             password,
             [PermissionsList.Bookings.Confirm],
-            CancellationToken.None,
+            TestContext.Current.CancellationToken,
             email)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
             _client,
             username,
             password,
-            CancellationToken.None)
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         using var scope = _factory.Services.CreateScope();
@@ -155,7 +155,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
         var confirmCommand = new ConfirmBookingCommand { BookingId = booking.Id };
         var response = await _client.PostAsJsonAsync("/api/v1/bookings/confirm", confirmCommand).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
         var updatedLead = await db.Leads
             .AsNoTracking()
             .FirstOrDefaultAsync(l => l.Id == lead.Id, TestContext.Current.CancellationToken)
@@ -168,7 +168,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             .ConfigureAwait(true);
         activities.Should()
             .Contain(
-                a => string.Compare(a.ActivityType, LeadActivityType.Contact) == 0 &&
+                a => string.Equals(a.ActivityType, LeadActivityType.Contact, StringComparison.OrdinalIgnoreCase) &&
                     a.Description.Contains("Đang lái thử"));
     }
 
@@ -189,7 +189,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var activity = await db.LeadActivities
             .Include(a => a.Lead)
             .FirstOrDefaultAsync(
-                a => string.Compare(a.Lead.PhoneNumber, phoneNumber) == 0,
+                a => string.Equals(a.Lead.PhoneNumber, phoneNumber, StringComparison.OrdinalIgnoreCase),
                 TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         activity.Should().NotBeNull();
@@ -256,13 +256,13 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             $"user_{uniqueId}",
             "Password123!",
             [],
-            CancellationToken.None)
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(
             _client,
             $"user_{uniqueId}",
             "Password123!",
-            CancellationToken.None)
+            TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         var confirmCommand = new ConfirmBookingCommand { BookingId = bookingId };
@@ -271,7 +271,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var activity = await db.LeadActivities
             .Include(a => a.Lead)
-            .Where(a => a.Lead.PhoneNumber == phoneNumber && a.ActivityType == LeadActivityType.Contact)
+            .Where(a => a.Lead.PhoneNumber == phoneNumber && string.Equals(a.ActivityType, LeadActivityType.Contact, StringComparison.OrdinalIgnoreCase))
             .FirstOrDefaultAsync(TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         activity.Should().NotBeNull();
@@ -301,7 +301,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             var leadWithActivities = await db.Leads
                 .Include(l => l.Activities)
                 .FirstOrDefaultAsync(
-                    l => string.Compare(l.PhoneNumber, phoneNumber) == 0,
+                    l => string.Equals(l.PhoneNumber, phoneNumber, StringComparison.OrdinalIgnoreCase),
                     TestContext.Current.CancellationToken)
                 .ConfigureAwait(true);
             leadWithActivities.Should().NotBeNull();
@@ -328,7 +328,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var lead = await db.Leads
             .AsNoTracking()
             .FirstOrDefaultAsync(
-                l => string.Compare(l.PhoneNumber, phoneNumber) == 0,
+                l => string.Equals(l.PhoneNumber, phoneNumber, StringComparison.OrdinalIgnoreCase),
                 TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         lead.Should().NotBeNull();
@@ -359,7 +359,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             var lead = await db.Leads
                 .AsNoTracking()
                 .FirstOrDefaultAsync(
-                    l => string.Compare(l.PhoneNumber, phoneNumber) == 0,
+                    l => string.Equals(l.PhoneNumber, phoneNumber, StringComparison.OrdinalIgnoreCase),
                     TestContext.Current.CancellationToken)
                 .ConfigureAwait(true);
             lead.Should().NotBeNull();
@@ -379,13 +379,13 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
             Location = "Online"
         };
         var response = await _client.PostAsJsonAsync("/api/v1/bookings", command).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var lead = await db.Leads
             .AsNoTracking()
             .FirstOrDefaultAsync(
-                l => string.Compare(l.PhoneNumber, phoneNumber) == 0,
+                l => string.Equals(l.PhoneNumber, phoneNumber, StringComparison.OrdinalIgnoreCase),
                 TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
         lead.Should().NotBeNull();
@@ -397,27 +397,27 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
     {
         // Arrange
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
-        var staffUser = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+        _ = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
             _factory.Services, $"sales_{uniqueId}", "Password123!", 
-            [PermissionsList.Leads.View], TestContext.Current.CancellationToken);
+            [PermissionsList.Leads.View], TestContext.Current.CancellationToken).ConfigureAwait(true);
         
-        var login = await IntegrationTestAuthHelper.AuthenticateAsync(_client, $"sales_{uniqueId}", "Password123!", TestContext.Current.CancellationToken);
+        var login = await IntegrationTestAuthHelper.AuthenticateAsync(_client, $"sales_{uniqueId}", "Password123!", TestContext.Current.CancellationToken).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.AccessToken);
 
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var lead = new Domain.Entities.Lead { FullName = "Test Drive Lead", PhoneNumber = $"09{uniqueId}", Score = 0 };
         db.Leads.Add(lead);
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var command = new AddLeadActivityCommand(lead.Id, "TestDrive", "Khách hàng lái thử xe");
 
         // Action
-        var response = await _client.PostAsJsonAsync($"/api/v1/lead/{lead.Id}/activities", command);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var response = await _client.PostAsJsonAsync($"/api/v1/lead/{lead.Id}/activities", command).ConfigureAwait(true);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
 
         // Assert
-        var updatedLead = await db.Leads.AsNoTracking().FirstOrDefaultAsync(l => l.Id == lead.Id);
+        var updatedLead = await db.Leads.AsNoTracking().FirstOrDefaultAsync(l => l.Id == lead.Id, TestContext.Current.CancellationToken).ConfigureAwait(true);
         updatedLead!.Score.Should().Be(20);
     }
 
@@ -426,27 +426,27 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
     {
         // Arrange
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
-        var staffUser = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+        _ = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
             _factory.Services, $"sales_{uniqueId}", "Password123!", 
-            [PermissionsList.Leads.View], TestContext.Current.CancellationToken);
+            [PermissionsList.Leads.View], TestContext.Current.CancellationToken).ConfigureAwait(true);
         
-        var login = await IntegrationTestAuthHelper.AuthenticateAsync(_client, $"sales_{uniqueId}", "Password123!", TestContext.Current.CancellationToken);
+        var login = await IntegrationTestAuthHelper.AuthenticateAsync(_client, $"sales_{uniqueId}", "Password123!", TestContext.Current.CancellationToken).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.AccessToken);
 
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var lead = new Domain.Entities.Lead { FullName = "Installment Lead", PhoneNumber = $"09{uniqueId}", Score = 20 };
         db.Leads.Add(lead);
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var command = new AddLeadActivityCommand(lead.Id, "Consulting", "Khách hỏi về trả góp (installment)");
 
         // Action
-        var response = await _client.PostAsJsonAsync($"/api/v1/lead/{lead.Id}/activities", command);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var response = await _client.PostAsJsonAsync($"/api/v1/lead/{lead.Id}/activities", command).ConfigureAwait(true);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
 
         // Assert
-        var updatedLead = await db.Leads.AsNoTracking().FirstOrDefaultAsync(l => l.Id == lead.Id);
+        var updatedLead = await db.Leads.AsNoTracking().FirstOrDefaultAsync(l => l.Id == lead.Id, TestContext.Current.CancellationToken).ConfigureAwait(true);
         updatedLead!.Score.Should().Be(50);
     }
 
@@ -455,27 +455,27 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
     {
         // Arrange
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
-        var staffUser = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+        _ = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
             _factory.Services, $"sales_{uniqueId}", "Password123!", 
-            [PermissionsList.Leads.View], TestContext.Current.CancellationToken);
+            [PermissionsList.Leads.View], TestContext.Current.CancellationToken).ConfigureAwait(true);
         
-        var login = await IntegrationTestAuthHelper.AuthenticateAsync(_client, $"sales_{uniqueId}", "Password123!", TestContext.Current.CancellationToken);
+        var login = await IntegrationTestAuthHelper.AuthenticateAsync(_client, $"sales_{uniqueId}", "Password123!", TestContext.Current.CancellationToken).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.AccessToken);
 
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var lead = new Domain.Entities.Lead { FullName = "Missed Call Lead", PhoneNumber = $"09{uniqueId}", Score = 50 };
         db.Leads.Add(lead);
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var command = new AddLeadActivityCommand(lead.Id, "Call", "Missed call");
 
         // Action
-        var response = await _client.PostAsJsonAsync($"/api/v1/lead/{lead.Id}/activities", command);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var response = await _client.PostAsJsonAsync($"/api/v1/lead/{lead.Id}/activities", command).ConfigureAwait(true);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
 
         // Assert
-        var updatedLead = await db.Leads.AsNoTracking().FirstOrDefaultAsync(l => l.Id == lead.Id);
+        var updatedLead = await db.Leads.AsNoTracking().FirstOrDefaultAsync(l => l.Id == lead.Id, TestContext.Current.CancellationToken).ConfigureAwait(true);
         updatedLead!.Score.Should().Be(40);
     }
 
@@ -484,18 +484,18 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
     {
         // Arrange
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
-        var adminUser = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+        _ = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
             _factory.Services, $"admin_{uniqueId}", "Password123!", 
-            [PermissionsList.Leads.Edit], TestContext.Current.CancellationToken);
+            [PermissionsList.Leads.Edit], TestContext.Current.CancellationToken).ConfigureAwait(true);
         
-        var login = await IntegrationTestAuthHelper.AuthenticateAsync(_client, $"admin_{uniqueId}", "Password123!", TestContext.Current.CancellationToken);
+        var login = await IntegrationTestAuthHelper.AuthenticateAsync(_client, $"admin_{uniqueId}", "Password123!", TestContext.Current.CancellationToken).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.AccessToken);
 
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var lead = new Domain.Entities.Lead { FullName = "Adjustment Lead", PhoneNumber = $"09{uniqueId}", Score = 10 };
         db.Leads.Add(lead);
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var command = new UpdateLeadCommand
         {
@@ -506,11 +506,11 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         };
 
         // Action
-        var response = await _client.PutAsJsonAsync($"/api/v1/lead/{lead.Id}", command);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-
+        var response = await _client.PutAsJsonAsync($"/api/v1/lead/{lead.Id}", command).ConfigureAwait(true);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+ 
         // Assert
-        var updatedLead = await db.Leads.AsNoTracking().FirstOrDefaultAsync(l => l.Id == lead.Id);
+        var updatedLead = await db.Leads.AsNoTracking().FirstOrDefaultAsync(l => l.Id == lead.Id, TestContext.Current.CancellationToken).ConfigureAwait(true);
         updatedLead!.Score.Should().Be(100);
     }
 
@@ -529,20 +529,20 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         };
 
         // Action
-        var admin = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
+        _ = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
             _factory.Services, $"admin_lead_039_{uniqueId}", "Password123!", 
             [PermissionsList.Leads.View, PermissionsList.Leads.Create, PermissionsList.Leads.Edit, PermissionsList.Leads.Delete], 
-            TestContext.Current.CancellationToken);
-        var login = await IntegrationTestAuthHelper.AuthenticateAsync(_client, $"admin_lead_039_{uniqueId}", "Password123!", TestContext.Current.CancellationToken);
+            TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var login = await IntegrationTestAuthHelper.AuthenticateAsync(_client, $"admin_lead_039_{uniqueId}", "Password123!", TestContext.Current.CancellationToken).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.AccessToken);
-
-        var response = await _client.PostAsJsonAsync("/api/v1/lead", payload);
+ 
+        var response = await _client.PostAsJsonAsync("/api/v1/lead", payload).ConfigureAwait(true);
 
         // Assert
         // Note: This may return 404 if the endpoint is not implemented, but we follow the test spec.
-        if (response.StatusCode == HttpStatusCode.Created)
+        if (response!.StatusCode == HttpStatusCode.Created)
         {
-            var resultId = await response.Content.ReadFromJsonAsync<int>();
+            var resultId = await response!.Content.ReadFromJsonAsync<int>(TestContext.Current.CancellationToken).ConfigureAwait(true);
             resultId.Should().BeGreaterThan(0);
         }
     }
@@ -557,7 +557,7 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         db.Leads.Add(new Domain.Entities.Lead { FullName = "Existing", PhoneNumber = "0900000001", IdentificationNumber = cccd });
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var payload = new
         {
@@ -568,16 +568,16 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
 
         // Action
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
-            _factory.Services, "admin_lead_dup", "Password123!", [PermissionsList.Leads.View], TestContext.Current.CancellationToken);
-        var login = await IntegrationTestAuthHelper.AuthenticateAsync(_client, "admin_lead_dup", "Password123!", TestContext.Current.CancellationToken);
+            _factory.Services, "admin_lead_dup", "Password123!", [PermissionsList.Leads.View], TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var login = await IntegrationTestAuthHelper.AuthenticateAsync(_client, "admin_lead_dup", "Password123!", TestContext.Current.CancellationToken).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.AccessToken);
-
-        var response = await _client.PostAsJsonAsync("/api/v1/lead", payload);
+ 
+        var response = await _client.PostAsJsonAsync("/api/v1/lead", payload).ConfigureAwait(true);
 
         // Assert
-        if (response.StatusCode != HttpStatusCode.NotFound)
+        if (response!.StatusCode != HttpStatusCode.NotFound)
         {
-            response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+            response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         }
     }
 
@@ -593,22 +593,22 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         db.Leads.Add(new Domain.Entities.Lead { FullName = "Lead A", PhoneNumber = "0911111111", IdentificationNumber = cccd });
         var leadB = new Domain.Entities.Lead { FullName = "Lead B", PhoneNumber = "0922222222", IdentificationNumber = "OTHER" };
         db.Leads.Add(leadB);
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
-            _factory.Services, $"admin_lead_039_2_{uniqueId}", "Password123!", [PermissionsList.Leads.Edit], TestContext.Current.CancellationToken);
-        var login = await IntegrationTestAuthHelper.AuthenticateAsync(_client, $"admin_lead_039_2_{uniqueId}", "Password123!", TestContext.Current.CancellationToken);
+            _factory.Services, $"admin_lead_039_2_{uniqueId}", "Password123!", [PermissionsList.Leads.Edit], TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var login = await IntegrationTestAuthHelper.AuthenticateAsync(_client, $"admin_lead_039_2_{uniqueId}", "Password123!", TestContext.Current.CancellationToken).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.AccessToken);
 
         var command = new UpdateLeadCommand { Id = leadB.Id, FullName = "Lead B", IdentificationNumber = cccd };
 
         // Action
-        var response = await _client.PutAsJsonAsync($"/api/v1/lead/{leadB.Id}", command);
+        var response = await _client.PutAsJsonAsync($"/api/v1/lead/{leadB.Id}", command).ConfigureAwait(true);
 
         // Assert
-        if (response.StatusCode != HttpStatusCode.NotFound)
+        if (response!.StatusCode != HttpStatusCode.NotFound)
         {
-            response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+            response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         }
     }
 
@@ -621,23 +621,23 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var lead = new Domain.Entities.Lead { FullName = "Unassigned Lead", PhoneNumber = $"07{uniqueId}" };
         db.Leads.Add(lead);
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
-            _factory.Services, $"admin_lead_040_{uniqueId}", "Password123!", [PermissionsList.Leads.Edit], TestContext.Current.CancellationToken);
-        var adminLogin = await IntegrationTestAuthHelper.AuthenticateAsync(_client, $"admin_lead_040_{uniqueId}", "Password123!", TestContext.Current.CancellationToken);
+            _factory.Services, $"admin_lead_040_{uniqueId}", "Password123!", [PermissionsList.Leads.Edit], TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var adminLogin = await IntegrationTestAuthHelper.AuthenticateAsync(_client, $"admin_lead_040_{uniqueId}", "Password123!", TestContext.Current.CancellationToken).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminLogin.AccessToken);
 
         // Get a real staff user ID for assignment
         var staffUser = await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
-            _factory.Services, $"staff_lead_040_{uniqueId}", "Password123!", [], TestContext.Current.CancellationToken);
+            _factory.Services, $"staff_lead_040_{uniqueId}", "Password123!", [], TestContext.Current.CancellationToken).ConfigureAwait(true);
         var salesId = staffUser.Id;
 
         // Action
-        var response = await _client.PostAsJsonAsync($"/api/v1/lead/{lead.Id}/assign", (Guid?)salesId);
+        var response = await _client.PostAsJsonAsync($"/api/v1/lead/{lead.Id}/assign", (Guid?)salesId).ConfigureAwait(true);
         
         // Assert
-        response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NoContent);
+        response!.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.NoContent);
     }
 
     [Fact(DisplayName = "LEAD_042 - Truy vấn danh sách Lead theo xe quan tâm")]
@@ -649,20 +649,20 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         db.Leads.Add(new Domain.Entities.Lead { FullName = "Interested User", PhoneNumber = "0988888888", InterestedVehicle = vehicle });
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
-            _factory.Services, $"admin_lead_042_{uniqueId}", "Password123!", [PermissionsList.Leads.View], TestContext.Current.CancellationToken);
-        var adminLogin = await IntegrationTestAuthHelper.AuthenticateAsync(_client, $"admin_lead_042_{uniqueId}", "Password123!", TestContext.Current.CancellationToken);
+            _factory.Services, $"admin_lead_042_{uniqueId}", "Password123!", [PermissionsList.Leads.View], TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var adminLogin = await IntegrationTestAuthHelper.AuthenticateAsync(_client, $"admin_lead_042_{uniqueId}", "Password123!", TestContext.Current.CancellationToken).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminLogin.AccessToken);
 
         // Action
-        var response = await _client.GetAsync($"/api/v1/lead?InterestedVehicle={Uri.EscapeDataString(vehicle)}");
+        var response = await _client.GetAsync($"/api/v1/lead?InterestedVehicle={Uri.EscapeDataString(vehicle)}", TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var content = await response.Content.ReadFromJsonAsync<List<LeadResponse>>();
-        content.Should().NotBeNull();
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var content = await response!.Content.ReadFromJsonAsync<List<LeadResponse>>(TestContext.Current.CancellationToken).ConfigureAwait(true);
+        content!.Should().NotBeNull();
     }
 
     [Fact(DisplayName = "LEAD_044 - Xóa mềm (Soft Delete) Lead")]
@@ -674,21 +674,21 @@ public class Lead : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var lead = new Domain.Entities.Lead { FullName = "To Be Deleted", PhoneNumber = $"06{uniqueId}" };
         db.Leads.Add(lead);
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(
-            _factory.Services, "admin", "Password123!", [PermissionsList.Leads.Delete], TestContext.Current.CancellationToken);
-        var adminLogin = await IntegrationTestAuthHelper.AuthenticateAsync(_client, "admin", "Password123!", TestContext.Current.CancellationToken);
+            _factory.Services, "admin", "Password123!", [PermissionsList.Leads.Delete], TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var adminLogin = await IntegrationTestAuthHelper.AuthenticateAsync(_client, "admin", "Password123!", TestContext.Current.CancellationToken).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminLogin.AccessToken);
 
         // Action
-        var response = await _client.DeleteAsync($"/api/v1/lead/{lead.Id}");
+        var response = await _client.DeleteAsync($"/api/v1/lead/{lead.Id}", TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         // Assert
-        if (response.StatusCode != HttpStatusCode.NotFound && response.StatusCode != HttpStatusCode.MethodNotAllowed)
+        if (response!.StatusCode != HttpStatusCode.NotFound && response!.StatusCode != HttpStatusCode.MethodNotAllowed)
         {
-            response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-            var deletedLead = await db.Leads.IgnoreQueryFilters().FirstOrDefaultAsync(l => l.Id == lead.Id);
+            response!.StatusCode.Should().Be(HttpStatusCode.NoContent);
+            var deletedLead = await db.Leads.IgnoreQueryFilters().FirstOrDefaultAsync(l => l.Id == lead.Id, TestContext.Current.CancellationToken).ConfigureAwait(true);
             deletedLead!.DeletedAt.Should().NotBeNull();
         }
     }

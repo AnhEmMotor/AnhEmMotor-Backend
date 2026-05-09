@@ -9,12 +9,12 @@ public static class CommissionPolicySeeder
 {
     public static async Task SeedAsync(ApplicationDBContext context, CancellationToken cancellationToken)
     {
-        var categories = await context.ProductCategories.ToListAsync(cancellationToken);
-        var motorcycleCategory = categories.FirstOrDefault(c => c.Name == "Xe máy");
-        var accessoryCategory = categories.FirstOrDefault(c => c.Name == "Phụ kiện");
-        var partsCategory = categories.FirstOrDefault(c => c.Name == "Phụ tùng");
+        var categories = await context.ProductCategories.ToListAsync(cancellationToken).ConfigureAwait(false);
+        var motorcycleCategory = categories.FirstOrDefault(c => string.Equals(c.Name, "Xe máy", StringComparison.OrdinalIgnoreCase));
+        var accessoryCategory = categories.FirstOrDefault(c => string.Equals(c.Name, "Phụ kiện", StringComparison.OrdinalIgnoreCase));
+        var partsCategory = categories.FirstOrDefault(c => string.Equals(c.Name, "Phụ tùng", StringComparison.OrdinalIgnoreCase));
         if (motorcycleCategory != null &&
-            !await context.CommissionPolicies.AnyAsync(p => p.CategoryId == motorcycleCategory.Id, cancellationToken))
+            !await context.CommissionPolicies.AnyAsync(p => p.CategoryId == motorcycleCategory.Id, cancellationToken).ConfigureAwait(false))
         {
             await context.CommissionPolicies
                 .AddAsync(
@@ -28,10 +28,10 @@ public static class CommissionPolicySeeder
                         Unit = "xe",
                         Notes = "Mức thưởng mặc định cho tất cả các dòng xe máy."
                     },
-                    cancellationToken);
+                    cancellationToken).ConfigureAwait(false);
         }
         if (accessoryCategory != null &&
-            !await context.CommissionPolicies.AnyAsync(p => p.CategoryId == accessoryCategory.Id, cancellationToken))
+            !await context.CommissionPolicies.AnyAsync(p => p.CategoryId == accessoryCategory.Id, cancellationToken).ConfigureAwait(false))
         {
             await context.CommissionPolicies
                 .AddAsync(
@@ -45,10 +45,10 @@ public static class CommissionPolicySeeder
                         Unit = "cái",
                         Notes = "Tính 5% trên tổng doanh thu đơn hàng phụ kiện."
                     },
-                    cancellationToken);
+                    cancellationToken).ConfigureAwait(false);
         }
         if (partsCategory != null &&
-            !await context.CommissionPolicies.AnyAsync(p => p.CategoryId == partsCategory.Id, cancellationToken))
+            !await context.CommissionPolicies.AnyAsync(p => p.CategoryId == partsCategory.Id, cancellationToken).ConfigureAwait(false))
         {
             await context.CommissionPolicies
                 .AddAsync(
@@ -62,8 +62,8 @@ public static class CommissionPolicySeeder
                         Unit = "cái",
                         Notes = "Tính 3% trên tổng doanh thu đơn hàng phụ tùng."
                     },
-                    cancellationToken);
+                    cancellationToken).ConfigureAwait(false);
         }
-        await context.SaveChangesAsync(cancellationToken);
+        await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 }

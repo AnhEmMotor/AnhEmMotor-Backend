@@ -6,38 +6,38 @@ namespace Infrastructure.Repositories.Lead;
 
 public class LeadReadRepository(ApplicationDBContext context) : ILeadReadRepository
 {
-    public async Task<Domain.Entities.Lead?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+    public Task<Domain.Entities.Lead?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-        return await context.Leads.Include(l => l.Activities).FirstOrDefaultAsync(l => l.Id == id, cancellationToken);
+        return context.Leads.Include(l => l.Activities).FirstOrDefaultAsync(l => l.Id == id, cancellationToken);
     }
 
-    public async Task<Domain.Entities.Lead?> GetByPhoneNumberAsync(
+    public Task<Domain.Entities.Lead?> GetByPhoneNumberAsync(
         string phoneNumber,
         CancellationToken cancellationToken = default)
     {
-        return await context.Leads
+        return context.Leads
             .Include(l => l.Activities)
-            .FirstOrDefaultAsync(l => l.PhoneNumber == phoneNumber, cancellationToken);
+            .FirstOrDefaultAsync(l => string.Compare(l.PhoneNumber, phoneNumber) == 0, cancellationToken);
     }
 
-    public async Task<List<Domain.Entities.Lead>> GetAllAsync(CancellationToken cancellationToken = default)
+    public Task<List<Domain.Entities.Lead>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        return await context.Leads
+        return context.Leads
             .Include(l => l.Activities)
             .OrderByDescending(l => l.Score)
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<List<Domain.Entities.Lead>> GetAllLeadsWithActivitiesAsync(
+    public Task<List<Domain.Entities.Lead>> GetAllLeadsWithActivitiesAsync(
         CancellationToken cancellationToken = default)
     {
-        return await context.Leads
+        return context.Leads
             .Include(l => l.Activities)
             .OrderByDescending(l => l.CreatedAt)
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<List<Domain.Entities.Lead>> GetLoyaltyMembersAsync(
+    public Task<List<Domain.Entities.Lead>> GetLoyaltyMembersAsync(
         string? search,
         CancellationToken cancellationToken = default)
     {
@@ -46,17 +46,17 @@ public class LeadReadRepository(ApplicationDBContext context) : ILeadReadReposit
         {
             query = query.Where(l => l.FullName.Contains(search) || l.PhoneNumber.Contains(search));
         }
-        return await query
+        return query
             .OrderByDescending(l => l.Points)
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<Domain.Entities.Lead?> GetByIdentificationNumberAsync(
+    public Task<Domain.Entities.Lead?> GetByIdentificationNumberAsync(
         string identificationNumber,
         CancellationToken cancellationToken = default)
     {
-        return await context.Leads
-            .FirstOrDefaultAsync(l => l.IdentificationNumber == identificationNumber, cancellationToken);
+        return context.Leads
+            .FirstOrDefaultAsync(l => string.Compare(l.IdentificationNumber, identificationNumber) == 0, cancellationToken);
     }
 
     public IQueryable<Domain.Entities.Lead> GetQueryable()

@@ -1,4 +1,4 @@
-Ôªøusing Application.ApiContracts.File.Responses;
+using Application.ApiContracts.File.Responses;
 using Domain.Constants.Permission;
 using FluentAssertions;
 using Infrastructure.DBContexts;
@@ -38,7 +38,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
 
     #pragma warning disable IDE0079 
     #pragma warning disable CRR0035
-    [Fact(DisplayName = "MF_002 - T·∫£i l√™n ·∫£nh th√†nh c√¥ng v·ªõi ƒë·ªãnh d·∫°ng JPG h·ª£p l·ªá")]
+    [Fact(DisplayName = "MF_002 - T?i lÍn ?nh th‡nh cÙng v?i d?nh d?ng JPG h?p l?")]
     public async Task UploadImage_ValidJpg_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -64,13 +64,13 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         var content = IntegrationTestFileHelper.CreateSingleImageForm();
         var response = await _client.PostAsync("/api/v1/MediaFile/product/upload", content, CancellationToken.None)
             .ConfigureAwait(true);
-        if (response.StatusCode != HttpStatusCode.Created)
+        if (response!.StatusCode != HttpStatusCode.Created)
         {
-            var errorContent = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
-            throw new Exception($"API returned {response.StatusCode}. Response Body: {errorContent}");
+            var errorContent = await response!.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
+            throw new Exception($"API returned {response!.StatusCode}. Response Body: {errorContent}");
         }
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
-        var result = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.Created);
+        var result = await response!.Content
             .ReadFromJsonAsync<MediaFileResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         result.Should().NotBeNull();
@@ -81,7 +81,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         result.FileSize.Should().BeGreaterThan(0);
     }
 
-    [Fact(DisplayName = "MF_007 - T·∫£i l√™n nhi·ªÅu ·∫£nh c√πng l√∫c th√†nh c√¥ng")]
+    [Fact(DisplayName = "MF_007 - T?i lÍn nhi?u ?nh c˘ng l˙c th‡nh cÙng")]
     public async Task UploadManyImages_ValidFiles_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -113,17 +113,17 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             content,
             TestContext.Current.CancellationToken)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
-        var results = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.Created);
+        var results = await response!.Content
             .ReadFromJsonAsync<List<MediaFileResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         results.Should().NotBeNull();
         results.Should().HaveCount(3);
         results!.All(r => r.Id > 0).Should().BeTrue();
-        results.All(r => string.Compare(r.ContentType, "image/webp") == 0).Should().BeTrue();
+        results.All(r => string.Equals(r.ContentType, "image/webp", StringComparison.OrdinalIgnoreCase)).Should().BeTrue();
     }
 
-    [Fact(DisplayName = "MF_009 - Xo√° file th√†nh c√¥ng (Soft Delete)")]
+    [Fact(DisplayName = "MF_009 - Xo· file th‡nh cÙng (Soft Delete)")]
     public async Task DeleteFile_ExistingFile_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -163,7 +163,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             $"/api/v1/MediaFile/product/{mediaFile.StoragePath}",
             CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        response!.StatusCode.Should().Be(HttpStatusCode.NoContent);
         using var verifyScope = _factory.Services.CreateScope();
         var verifyDb = verifyScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var deletedFile = await verifyDb.MediaFiles
@@ -174,7 +174,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         deletedFile!.DeletedAt.Should().NotBeNull();
     }
 
-    [Fact(DisplayName = "MF_013 - Xo√° nhi·ªÅu file c√πng l√∫c th√†nh c√¥ng")]
+    [Fact(DisplayName = "MF_013 - Xo· nhi?u file c˘ng l˙c th‡nh cÙng")]
     public async Task DeleteManyFiles_ExistingFiles_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -216,7 +216,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             Content = JsonContent.Create(requestBody)
         };
         var response = await _client.SendAsync(requestMessage, CancellationToken.None).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        response!.StatusCode.Should().Be(HttpStatusCode.NoContent);
         using var verifyScope = _factory.Services.CreateScope();
         var verifyDb = verifyScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         foreach (var file in uploadedFiles!)
@@ -230,7 +230,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         }
     }
 
-    [Fact(DisplayName = "MF_015 - Kh√¥i ph·ª•c file ƒë√£ xo√° th√†nh c√¥ng")]
+    [Fact(DisplayName = "MF_015 - KhÙi ph?c file d„ xo· th‡nh cÙng")]
     public async Task RestoreFile_DeletedFile_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -271,7 +271,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             null,
             CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
         using var verifyScope = _factory.Services.CreateScope();
         var verifyDb = verifyScope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var restoredFile = await verifyDb.MediaFiles
@@ -281,7 +281,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         restoredFile!.DeletedAt.Should().BeNull();
     }
 
-    [Fact(DisplayName = "MF_019 - Kh√¥i ph·ª•c nhi·ªÅu file c√πng l√∫c th√†nh c√¥ng")]
+    [Fact(DisplayName = "MF_019 - KhÙi ph?c nhi?u file c˘ng l˙c th‡nh cÙng")]
     public async Task RestoreManyFiles_DeletedFiles_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -339,7 +339,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         }
     }
 
-    [Fact(DisplayName = "MF_021 - Xem ·∫£nh th√†nh c√¥ng v·ªõi k√≠ch th∆∞·ªõc g·ªëc")]
+    [Fact(DisplayName = "MF_021 - Xem ?nh th‡nh cÙng v?i kÌch thu?c g?c")]
     public async Task ViewImage_OriginalSize_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -372,11 +372,11 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             $"/api/v1/MediaFile/view-image/{uploadedFile!.StoragePath}",
             CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        response.Content.Headers.ContentType?.MediaType.Should().Be("image/webp");
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.Content.Headers.ContentType?.MediaType.Should().Be("image/webp");
     }
 
-    [Fact(DisplayName = "MF_022 - Xem ·∫£nh th√†nh c√¥ng v·ªõi resize theo width")]
+    [Fact(DisplayName = "MF_022 - Xem ?nh th‡nh cÙng v?i resize theo width")]
     public async Task ViewImage_WithResize_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -409,11 +409,11 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             $"/api/v1/MediaFile/view-image/{uploadedFile!.StoragePath}?width=300",
             CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        response.Content.Headers.ContentType?.MediaType.Should().Be("image/webp");
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.Content.Headers.ContentType?.MediaType.Should().Be("image/webp");
     }
 
-    [Fact(DisplayName = "MF_031 - L·∫•y th√¥ng tin file theo ID th√†nh c√¥ng")]
+    [Fact(DisplayName = "MF_031 - L?y thÙng tin file theo ID th‡nh cÙng")]
     public async Task GetFileById_ExistingFile_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -451,8 +451,8 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync($"/api/v1/MediaFile/{mediaFile.Id}", CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var result = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var result = await response!.Content
             .ReadFromJsonAsync<MediaFileResponse>(CancellationToken.None)
             .ConfigureAwait(true);
         result.Should().NotBeNull();
@@ -463,7 +463,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         result.FileSize.Should().Be(150000);
     }
 
-    [Fact(DisplayName = "MF_035 - L·∫•y danh s√°ch file th√†nh c√¥ng v·ªõi ph√¢n trang")]
+    [Fact(DisplayName = "MF_035 - L?y danh s·ch file th‡nh cÙng v?i ph‚n trang")]
     public async Task GetFilesList_WithPagination_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -504,10 +504,10 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/MediaFile?page=1&pageSize=10", CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
-    [Fact(DisplayName = "MF_036 - L·∫•y danh s√°ch file v·ªõi filter theo ContentType")]
+    [Fact(DisplayName = "MF_036 - L?y danh s·ch file v?i filter theo ContentType")]
     public async Task GetFilesList_FilterByContentType_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -564,10 +564,10 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
             "/api/v1/MediaFile?filters=ContentType==image/webp",
             CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
-    [Fact(DisplayName = "MF_037 - L·∫•y danh s√°ch file v·ªõi sorting theo FileSize gi·∫£m d·∫ßn")]
+    [Fact(DisplayName = "MF_037 - L?y danh s·ch file v?i sorting theo FileSize gi?m d?n")]
     public async Task GetFilesList_SortByFileSizeDesc_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -638,10 +638,10 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/MediaFile?sorts=-FileSize", CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
-    [Fact(DisplayName = "MF_038 - L·∫•y danh s√°ch file ƒë√£ xo√° th√†nh c√¥ng")]
+    [Fact(DisplayName = "MF_038 - L?y danh s·ch file d„ xo· th‡nh cÙng")]
     public async Task GetDeletedFilesList_WithPagination_Success()
     {
         var uniqueId = Guid.NewGuid().ToString("N")[..8];
@@ -682,7 +682,7 @@ public class MediaFile : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLife
         await db.SaveChangesAsync(CancellationToken.None).ConfigureAwait(true);
         var response = await _client.GetAsync("/api/v1/MediaFile/deleted?page=1&pageSize=10", CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
     }
     #pragma warning restore CRR0035
 }

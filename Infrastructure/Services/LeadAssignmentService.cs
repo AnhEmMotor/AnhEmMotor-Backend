@@ -11,7 +11,7 @@ public class LeadAssignmentService(IUserReadRepository userReadRepository, Appli
 {
     public async Task AssignLeadAsync(Lead lead, CancellationToken cancellationToken = default)
     {
-        var sales = await userReadRepository.GetUsersInRoleAsync("Sale", cancellationToken);
+        var sales = await userReadRepository.GetUsersInRoleAsync("Sale", cancellationToken).ConfigureAwait(false);
         if (!sales.Any())
             return;
         var salesWithCounts = await context.Users
@@ -23,7 +23,7 @@ public class LeadAssignmentService(IUserReadRepository userReadRepository, Appli
                     LeadCount = context.Leads.Count(l => l.AssignedToId == u.Id && l.Status != "Closed")
                 })
             .OrderBy(x => x.LeadCount)
-            .FirstOrDefaultAsync(cancellationToken);
+            .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
         if (salesWithCounts != null)
         {
             lead.AssignedToId = salesWithCounts.User.Id;

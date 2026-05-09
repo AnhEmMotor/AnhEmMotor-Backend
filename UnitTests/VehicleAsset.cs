@@ -1,4 +1,3 @@
-using Application.ApiContracts.Maintenance.Responses;
 using Application.Features.Vehicles.Commands.CreateVehicle;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Vehicle;
@@ -40,12 +39,12 @@ public class VehicleAsset
         var engineNumber = "ENG999";
         var existingVehicles = new List<VehicleEntity>
         {
-            new VehicleEntity { EngineNumber = engineNumber }
+            new() { EngineNumber = engineNumber }
         }.BuildMock();
 
         _readRepoMock.Setup(x => x.GetQuery(DataFetchMode.All)).Returns(existingVehicles);
-        _leadReadRepoMock.Setup(x => x.GetQueryable()).Returns(new List<LeadEntity> { new LeadEntity { Id = 1 } }.BuildMock());
-        _productReadRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(new List<ProductEntity> { new ProductEntity { Id = 1 } }.BuildMock());
+        _leadReadRepoMock.Setup(x => x.GetQueryable()).Returns(new List<LeadEntity> { new() { Id = 1 } }.BuildMock());
+        _productReadRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(new List<ProductEntity> { new() { Id = 1 } }.BuildMock());
 
         var handler = new CreateVehicleCommandHandler(_readRepoMock.Object, _updateRepoMock.Object, _leadReadRepoMock.Object, _productReadRepoMock.Object, _unitOfWorkMock.Object);
         var command = new CreateVehicleCommand
@@ -57,11 +56,11 @@ public class VehicleAsset
         };
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
-        result.Error.Message.Should().Be("Engine number already exists.");
+        result.Error!.Message.Should().Be("Engine number already exists.");
     }
 
     [Fact(DisplayName = "VAS_008 - Ngăn chặn tạo tài sản khi thiếu số khung")]
@@ -70,8 +69,8 @@ public class VehicleAsset
         // Arrange
         var existingVehicles = new List<VehicleEntity>().BuildMock();
         _readRepoMock.Setup(x => x.GetQuery(DataFetchMode.All)).Returns(existingVehicles);
-        _leadReadRepoMock.Setup(x => x.GetQueryable()).Returns(new List<LeadEntity> { new LeadEntity { Id = 1 } }.BuildMock());
-        _productReadRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(new List<ProductEntity> { new ProductEntity { Id = 1 } }.BuildMock());
+        _leadReadRepoMock.Setup(x => x.GetQueryable()).Returns(new List<LeadEntity> { new() { Id = 1 } }.BuildMock());
+        _productReadRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(new List<ProductEntity> { new() { Id = 1 } }.BuildMock());
 
         var handler = new CreateVehicleCommandHandler(_readRepoMock.Object, _updateRepoMock.Object, _leadReadRepoMock.Object, _productReadRepoMock.Object, _unitOfWorkMock.Object);
         var command = new CreateVehicleCommand
@@ -83,10 +82,10 @@ public class VehicleAsset
         };
 
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
-        result.Error.Message.Should().Be("VIN cannot be empty.");
+        result.Error!.Message.Should().Be("VIN cannot be empty.");
     }
 }

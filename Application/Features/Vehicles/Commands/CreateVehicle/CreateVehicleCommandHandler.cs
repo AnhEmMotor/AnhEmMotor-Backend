@@ -1,4 +1,3 @@
-using Application.ApiContracts.Maintenance.Responses;
 using Application.Common.Models;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Vehicle;
@@ -9,6 +8,7 @@ using Domain.Entities;
 using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Application.ApiContracts.Vehicle.Responses;
 
 namespace Application.Features.Vehicles.Commands.CreateVehicle;
 

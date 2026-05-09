@@ -90,12 +90,12 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
             $"/api/v1/UserManager?Filters=Status=={UserStatus.Active}&Sorts=-FullName&Page=1&PageSize=100",
             CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var result = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var result = await response!.Content
             .ReadFromJsonAsync<PagedResult<object>>(CancellationToken.None)
             .ConfigureAwait(true);
         result.Should().NotBeNull();
-        var contentString = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
+        var contentString = await response!.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
         contentString.Should().Contain(userA.Id.ToString());
         contentString.Should().Contain(userB.Id.ToString());
         contentString.Should().NotContain(userC.Id.ToString());
@@ -130,7 +130,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
             .ConfigureAwait(true);
         var response = await _client.GetAsync($"/api/v1/UserManager/{softDeletedUser.Id}", CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact(DisplayName = "UMGR_021 - Cập nhật thông tin user với dữ liệu có khoảng trắng đầu cuối")]
@@ -161,7 +161,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
         var request = new UpdateUserCommand { FullName = "  Test User  ", PhoneNumber = "  0912345678  " };
         var response = await _client.PutAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}", request)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var updatedUser = await db.Users
@@ -200,7 +200,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
         var request = new UpdateUserCommand { FullName = "Test User" };
         var response = await _client.PutAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}", request)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var updatedUser = await db.Users
@@ -253,8 +253,8 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
         var request = new UpdateUserCommand { PhoneNumber = phone, FullName = "Duplicate Attempt User" };
         var response = await _client.PutAsJsonAsync($"/api/v1/UserManager/{duplicateAttemptUser.Id}", request)
             .ConfigureAwait(true);
-        var content = await response.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.Conflict, content);
+        var content = await response!.Content.ReadAsStringAsync(CancellationToken.None).ConfigureAwait(true);
+        response!.StatusCode.Should().Be(HttpStatusCode.Conflict, content);
     }
 
     [Fact(DisplayName = "UMGR_024 - Cập nhật user với phone number = null khi đã có user khác cũng null")]
@@ -293,7 +293,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var u = await db.Users
                 .FirstOrDefaultAsync(
-                    u => string.Compare(u.UserName, $"existing_{uniqueId}") == 0,
+                    u => string.Equals(u.UserName, $"existing_{uniqueId}", StringComparison.OrdinalIgnoreCase),
                     CancellationToken.None)
                 .ConfigureAwait(true);
             u!.PhoneNumber = null;
@@ -302,7 +302,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
         var request = new UpdateUserCommand { PhoneNumber = null, FullName = "Updated Name" };
         var response = await _client.PutAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}", request)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
@@ -351,7 +351,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
         var request = new ChangePasswordByManagerCommand { NewPassword = "NewPass@123" };
         var response = await _client.PostAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}/change-password", request)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
@@ -404,7 +404,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
         var request = new AssignRolesCommand { RoleIds = [managerRoleId] };
         var response = await _client.PostAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}/assign-roles", request)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
         using (var scope = _factory.Services.CreateScope())
         {
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
@@ -453,7 +453,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
         var request = new AssignRolesCommand { RoleIds = [] };
         var response = await _client.PostAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}/assign-roles", request)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
         using (var scope = _factory.Services.CreateScope())
         {
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
@@ -496,7 +496,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
             request,
             CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact(DisplayName = "UMGR_029 - Bulk change status với một số user không hợp lệ (nguyên tắc all-or-nothing)")]
@@ -538,7 +538,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
         };
         var response = await _client.PatchAsJsonAsync("/api/v1/UserManager/status", request, CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
         var u1 = await db.Users.FindAsync([user1.Id], TestContext.Current.CancellationToken).ConfigureAwait(true);
@@ -571,7 +571,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
             var u = await db.Users
-                .FirstAsync(u => string.Compare(u.UserName, adminName) == 0, CancellationToken.None)
+                .FirstAsync(u => string.Equals(u.UserName, adminName, StringComparison.OrdinalIgnoreCase), CancellationToken.None)
                 .ConfigureAwait(true);
             adminId = u.Id;
         }
@@ -588,7 +588,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
         };
         var response = await _client.PatchAsJsonAsync("/api/v1/UserManager/status", request, CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact(DisplayName = "UMGR_031 - Cập nhật username trùng với user đã bị soft deleted")]
@@ -628,7 +628,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
         var request = new UpdateUserCommand { PhoneNumber = deletedPhone, FullName = "Update Attempt" };
         var response = await _client.PutAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}", request)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        response!.StatusCode.Should().Be(HttpStatusCode.Conflict);
     }
 
     [Fact(DisplayName = "UMGR_032 - Lấy danh sách users với pagination: page cuối cùng chỉ có 1 phần tử")]
@@ -664,8 +664,8 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
             $"/api/v1/UserManager?Filters=Email@=_{uniqueId}&Page=2&PageSize=10",
             CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var result = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var result = await response!.Content
             .ReadFromJsonAsync<PagedResult<object>>(CancellationToken.None)
             .ConfigureAwait(true);
         result.Should().NotBeNull();
@@ -704,7 +704,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
         var request = new UpdateUserCommand { FullName = "New Name" };
         var response = await _client.PutAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}", request)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
         _client.DefaultRequestHeaders.Authorization = null;
         var userLogin = await IntegrationTestAuthHelper.AuthenticateAsync(
             _client,
@@ -753,7 +753,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
         var maliciousRequest = new { FullName = "New Name", RefreshToken = "hacker_token", Id = Guid.NewGuid() };
         var response = await _client.PutAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}", maliciousRequest)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
         using (var scope = _factory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
@@ -794,7 +794,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
         var request = new ChangePasswordByManagerCommand { NewPassword = "NewPass@123" };
         var response = await _client.PostAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}/change-password", request)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact(DisplayName = "UMGR_036 - Audit log ghi lại đúng thông tin khi thay đổi role")]
@@ -834,7 +834,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
         var request = new AssignRolesCommand { RoleIds = [roleId] };
         var response = await _client.PostAsJsonAsync($"/api/v1/UserManager/{targetUser.Id}/assign-roles", request)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact(DisplayName = "UMGR_044 - Lấy danh sách basic-info thành công với quyền hợp lệ")]
@@ -876,15 +876,15 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
             $"/api/v1/UserManager/for-output?Page=1&PageSize=10",
             CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var result = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var result = await response!.Content
             .ReadFromJsonAsync<PagedResult<UserDTOForOutputResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         result.Should().NotBeNull();
         result!.Items
             .Should()
-            .Contain(u => u.Id == targetUser1.Id && string.Compare(u.Email, $"target1_{uniqueId}@test.com") == 0);
-        result.Items.Should().Contain(u => u.Id == targetUser2.Id && string.Compare(u.PhoneNumber, "0922222222") == 0);
+            .Contain(u => u.Id == targetUser1.Id && string.Equals(u.Email, $"target1_{uniqueId}@test.com", StringComparison.OrdinalIgnoreCase));
+        result.Items.Should().Contain(u => u.Id == targetUser2.Id && string.Equals(u.PhoneNumber, "0922222222", StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact(DisplayName = "UMGR_045 - Lấy danh sách basic-info tìm kiếm theo Email/Phone")]
@@ -926,8 +926,8 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
             $"/api/v1/UserManager/for-output?Filters=PhoneNumber@=999888",
             CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var result = await response.Content
+        response!.StatusCode.Should().Be(HttpStatusCode.OK);
+        var result = await response!.Content
             .ReadFromJsonAsync<PagedResult<UserDTOForOutputResponse>>(CancellationToken.None)
             .ConfigureAwait(true);
         result.Should().NotBeNull();
@@ -956,7 +956,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
         var response = await _client.GetAsync($"/api/v1/UserManager/for-output", CancellationToken.None)
             .ConfigureAwait(true);
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        response!.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
     [Fact(DisplayName = "USER_073 - Admin tạo tài khoản người dùng hợp lệ")]
     public async Task CreateUser_Admin_ValidData_ReturnsCreated()
@@ -968,9 +968,9 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
         using (var scope = _factory.Services.CreateScope())
         {
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
-            if (!await roleManager.RoleExistsAsync("Staff").ConfigureAwait(false))
+            if (!await roleManager.RoleExistsAsync("Staff").ConfigureAwait(true))
             {
-                await roleManager.CreateAsync(new ApplicationRole { Name = "Staff" }).ConfigureAwait(false);
+                await roleManager.CreateAsync(new ApplicationRole { Name = "Staff" }).ConfigureAwait(true);
             }
         }
 
@@ -983,7 +983,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
             CancellationToken.None)
             .ConfigureAwait(true);
 
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, adminUsername, "Password123!").ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, adminUsername, "Password123!", TestContext.Current.CancellationToken).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var newUserRequest = new Application.Features.UserManager.Commands.CreateUserByManager.CreateUserByManagerCommand
@@ -998,9 +998,9 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
         var response = await _client.PostAsJsonAsync("/api/v1/UserManager", newUserRequest).ConfigureAwait(true);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
-        var content = await response.Content.ReadFromJsonAsync<UserDTOForManagerResponse>().ConfigureAwait(true);
-        content.UserName.Should().Be($"user_{uniqueId}");
+        response!.StatusCode.Should().Be(HttpStatusCode.Created);
+        var content = await response!.Content.ReadFromJsonAsync<UserDTOForManagerResponse>(TestContext.Current.CancellationToken).ConfigureAwait(true);
+        content!.UserName.Should().Be($"user_{uniqueId}");
     }
 
     [Fact(DisplayName = "USER_076 - Ngăn chặn trùng lặp Email")]
@@ -1014,9 +1014,9 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
         using (var scope = _factory.Services.CreateScope())
         {
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
-            if (!await roleManager.RoleExistsAsync("Staff").ConfigureAwait(false))
+            if (!await roleManager.RoleExistsAsync("Staff").ConfigureAwait(true))
             {
-                await roleManager.CreateAsync(new ApplicationRole { Name = "Staff" }).ConfigureAwait(false);
+                await roleManager.CreateAsync(new ApplicationRole { Name = "Staff" }).ConfigureAwait(true);
             }
         }
         
@@ -1024,8 +1024,8 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
         await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, $"user1_{uniqueId}", "Password123!", CancellationToken.None, existingEmail).ConfigureAwait(true);
 
         var adminUsername = $"admin_{uniqueId}";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, adminUsername, "Password123!", [PermissionsList.Users.Create]).ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, adminUsername, "Password123!").ConfigureAwait(true);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, adminUsername, "Password123!", [PermissionsList.Users.Create], TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, adminUsername, "Password123!", TestContext.Current.CancellationToken).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var newUserRequest = new Application.Features.UserManager.Commands.CreateUserByManager.CreateUserByManagerCommand
@@ -1040,7 +1040,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
         var response = await _client.PostAsJsonAsync("/api/v1/UserManager", newUserRequest).ConfigureAwait(true);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact(DisplayName = "USER_077 - Ngăn chặn trùng lặp Username")]
@@ -1054,17 +1054,17 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
         using (var scope = _factory.Services.CreateScope())
         {
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
-            if (!await roleManager.RoleExistsAsync("Staff").ConfigureAwait(false))
+            if (!await roleManager.RoleExistsAsync("Staff").ConfigureAwait(true))
             {
-                await roleManager.CreateAsync(new ApplicationRole { Name = "Staff" }).ConfigureAwait(false);
+                await roleManager.CreateAsync(new ApplicationRole { Name = "Staff" }).ConfigureAwait(true);
             }
         }
         
-        await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, existingUsername, "Password123!").ConfigureAwait(true);
+        await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, existingUsername, "Password123!", TestContext.Current.CancellationToken).ConfigureAwait(true);
 
         var adminUsername = $"admin_{uniqueId}";
-        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, adminUsername, "Password123!", [PermissionsList.Users.Create]).ConfigureAwait(true);
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, adminUsername, "Password123!").ConfigureAwait(true);
+        await IntegrationTestAuthHelper.CreateUserWithPermissionsAsync(_factory.Services, adminUsername, "Password123!", [PermissionsList.Users.Create], TestContext.Current.CancellationToken).ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, adminUsername, "Password123!", TestContext.Current.CancellationToken).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var newUserRequest = new Application.Features.UserManager.Commands.CreateUserByManager.CreateUserByManagerCommand
@@ -1079,7 +1079,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
         var response = await _client.PostAsJsonAsync("/api/v1/UserManager", newUserRequest).ConfigureAwait(true);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact(DisplayName = "USER_080 - Từ chối quyền tạo User cho tài khoản thường")]
@@ -1093,15 +1093,15 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
         using (var scope = _factory.Services.CreateScope())
         {
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
-            if (!await roleManager.RoleExistsAsync("Staff").ConfigureAwait(false))
+            if (!await roleManager.RoleExistsAsync("Staff").ConfigureAwait(true))
             {
-                await roleManager.CreateAsync(new ApplicationRole { Name = "Staff" }).ConfigureAwait(false);
+                await roleManager.CreateAsync(new ApplicationRole { Name = "Staff" }).ConfigureAwait(true);
             }
         }
 
-        await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, staffUsername, "Password123!").ConfigureAwait(true);
+        await IntegrationTestAuthHelper.CreateUserAsync(_factory.Services, staffUsername, "Password123!", TestContext.Current.CancellationToken).ConfigureAwait(true);
 
-        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, staffUsername, "Password123!").ConfigureAwait(true);
+        var loginResponse = await IntegrationTestAuthHelper.AuthenticateAsync(_client, staffUsername, "Password123!", TestContext.Current.CancellationToken).ConfigureAwait(true);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
 
         var newUserRequest = new Application.Features.UserManager.Commands.CreateUserByManager.CreateUserByManagerCommand
@@ -1116,7 +1116,7 @@ public class UserManager : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLi
         var response = await _client.PostAsJsonAsync("/api/v1/UserManager", newUserRequest).ConfigureAwait(true);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        response!.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 #pragma warning restore CRR0035
 }

@@ -12,14 +12,14 @@ namespace Infrastructure.Services.HR;
 
 public class CommissionService(ApplicationDBContext context) : ICommissionService
 {
-    private async Task<CommissionPolicy?> GetActivePolicyAsync(
+    private Task<CommissionPolicy?> GetActivePolicyAsync(
         int productId,
         int? categoryId,
         string? jobTitle,
         DateTimeOffset orderDate,
         CancellationToken ct)
     {
-        return await context.CommissionPolicies
+        return context.CommissionPolicies
             .Where(p => p.IsActive && p.EffectiveDate <= orderDate)
             .Where(p => p.ProductId == productId || p.CategoryId == categoryId || p.TargetGroup == jobTitle)
             .OrderBy(p => p.ProductId == productId ? 0 : (p.CategoryId == categoryId ? 1 : 2))
@@ -27,11 +27,11 @@ public class CommissionService(ApplicationDBContext context) : ICommissionServic
             .FirstOrDefaultAsync(ct);
     }
 
-    public async Task<Result> CalculatePendingCommissionAsync(
+    public Task<Result> CalculatePendingCommissionAsync(
         int outputId,
         CancellationToken cancellationToken = default)
     {
-        return await InternalCalculateAsync(outputId, CommissionStatus.Pending, cancellationToken);
+        return InternalCalculateAsync(outputId, CommissionStatus.Pending, cancellationToken);
     }
 
     public async Task<Result> CalculateAndRecordCommissionAsync(
@@ -40,7 +40,7 @@ public class CommissionService(ApplicationDBContext context) : ICommissionServic
     {
         var existingPending = await context.CommissionRecords
             .Where(r => r.OutputId == outputId && r.Status == CommissionStatus.Pending)
-            .ToListAsync(cancellationToken);
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
         if (existingPending.Count > 0)
         {
             foreach (var record in existingPending)
@@ -48,17 +48,17 @@ public class CommissionService(ApplicationDBContext context) : ICommissionServic
                 record.Status = CommissionStatus.Confirmed;
                 record.DateEarned = DateTime.UtcNow;
             }
-            await context.SaveChangesAsync(cancellationToken);
+            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return Result.Success();
         }
-        return await InternalCalculateAsync(outputId, CommissionStatus.Confirmed, cancellationToken);
+        return await InternalCalculateAsync(outputId, CommissionStatus.Confirmed, cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<Result> MarkCommissionAsPaidAsync(int outputId, CancellationToken cancellationToken = default)
     {
         var records = await context.CommissionRecords
             .Where(r => r.OutputId == outputId && r.Status == CommissionStatus.Confirmed)
-            .ToListAsync(cancellationToken);
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
         if (records.Count == 0)
             return Result.Failure("Không tìm thấy hoa hồng đã xác nhận cho đơn hàng này.");
         foreach (var record in records)
@@ -66,17 +66,17 @@ public class CommissionService(ApplicationDBContext context) : ICommissionServic
             record.Status = CommissionStatus.Paid;
             record.PaidAt = DateTime.UtcNow;
         }
-        await context.SaveChangesAsync(cancellationToken);
+        await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return Result.Success();
     }
 
     public async Task<Result> VoidCommissionAsync(int outputId, CancellationToken cancellationToken = default)
     {
-        var records = await context.CommissionRecords.Where(r => r.OutputId == outputId).ToListAsync(cancellationToken);
+        var records = await context.CommissionRecords.Where(r => r.OutputId == outputId).ToListAsync(cancellationToken).ConfigureAwait(false);
         if (records.Count > 0)
         {
             context.CommissionRecords.RemoveRange(records);
-            await context.SaveChangesAsync(cancellationToken);
+            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
         return Result.Success();
     }
@@ -87,13 +87,13 @@ public class CommissionService(ApplicationDBContext context) : ICommissionServic
             .Include(o => o.OutputInfos)
             .ThenInclude(oi => oi.ProductVariant)
             .ThenInclude(pv => pv!.Product)
-            .FirstOrDefaultAsync(o => o.Id == outputId, ct);
+            .FirstOrDefaultAsync(o => o.Id == outputId, ct).ConfigureAwait(false);
         if (output == null)
             return Result.Failure("Đơn hàng không tồn tại.");
         var salespersonId = output.CreatedBy;
         if (salespersonId == null)
             return Result.Failure("Không xác định được nhân viên kinh doanh.");
-        var employeeProfile = await context.EmployeeProfiles.FirstOrDefaultAsync(p => p.UserId == salespersonId, ct);
+        var employeeProfile = await context.EmployeeProfiles.FirstOrDefaultAsync(p => p.UserId == salespersonId, ct).ConfigureAwait(false);
         if (employeeProfile == null)
             return Result.Success();
         decimal totalCommission = 0;
@@ -110,17 +110,17 @@ public class CommissionService(ApplicationDBContext context) : ICommissionServic
                 product.CategoryId,
                 employeeProfile.JobTitle,
                 orderDate,
-                ct);
+                ct).ConfigureAwait(false);
             if (policy == null)
                 continue;
             decimal itemCommission = 0;
             string formula = string.Empty;
-            if (policy.Type == "FixedAmount")
+            if (string.Equals(policy.Type, "FixedAmount", StringComparison.OrdinalIgnoreCase))
             {
                 itemCommission = (decimal)item.Count * policy.Value;
                 formula = $"{item.Count} {policy.Unit ?? "xe"} × {policy.Value:N0}đ = {itemCommission:N0}đ";
                 notes.AppendLine($"- {product.Name}: {formula}");
-            } else if (policy.Type == "Percentage")
+            } else if (string.Equals(policy.Type, "Percentage", StringComparison.OrdinalIgnoreCase))
             {
                 var revenue = (decimal)item.Count * (decimal)item.Price;
                 itemCommission = revenue * (policy.Value / 100);
@@ -151,7 +151,7 @@ public class CommissionService(ApplicationDBContext context) : ICommissionServic
             {
                 var old = await context.CommissionRecords
                     .Where(r => r.OutputId == output.Id && r.Status == CommissionStatus.Pending)
-                    .ToListAsync(ct);
+                    .ToListAsync(ct).ConfigureAwait(false);
                 if (old.Count > 0)
                     context.CommissionRecords.RemoveRange(old);
             }
@@ -165,8 +165,8 @@ public class CommissionService(ApplicationDBContext context) : ICommissionServic
                 PolicySnapshot = JsonSerializer.Serialize(snapshotItems),
                 Note = notes.ToString().Trim()
             };
-            await context.CommissionRecords.AddAsync(record, ct);
-            await context.SaveChangesAsync(ct);
+            await context.CommissionRecords.AddAsync(record, ct).ConfigureAwait(false);
+            await context.SaveChangesAsync(ct).ConfigureAwait(false);
         }
         return Result.Success();
     }

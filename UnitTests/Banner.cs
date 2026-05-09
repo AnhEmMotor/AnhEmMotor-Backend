@@ -142,17 +142,17 @@ public class Banner
         // Arrange
         var banners = new List<Domain.Entities.Banner>
         {
-            new Domain.Entities.Banner { Placement = "Popup" },
-            new Domain.Entities.Banner { Placement = "HomeTop" },
-            new Domain.Entities.Banner { Placement = "Popup" }
+            new() { Placement = "Popup" },
+            new() { Placement = "HomeTop" },
+            new() { Placement = "Popup" }
         };
 
         // Action
-        var filtered = banners.Where(b => b.Placement == "Popup").ToList();
+        var filtered = banners.Where(b => string.Compare(b.Placement, "Popup") == 0).ToList();
 
         // Assert
         filtered.Should().HaveCount(2);
-        filtered.All(b => b.Placement == "Popup").Should().BeTrue();
+        filtered.All(b => string.Compare(b.Placement, "Popup") == 0).Should().BeTrue();
     }
 
     [Fact(DisplayName = "BANN_022.1 - Kiểm tra Validation giá trị Placement (Valid)")]
