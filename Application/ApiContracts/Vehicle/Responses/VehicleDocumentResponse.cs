@@ -1,5 +1,4 @@
-
-namespace Application.ApiContracts.Maintenance.Responses;
+namespace Application.ApiContracts.Vehicle.Responses;
 
 public class VehicleDocumentResponse
 {

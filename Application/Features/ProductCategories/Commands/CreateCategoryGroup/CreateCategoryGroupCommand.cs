@@ -15,28 +15,3 @@ public sealed record CreateCategoryGroupCommand : IRequest<Result<string>>
     public List<int> CategoryIds { get; init; } = [];
 }
 
-public sealed class CreateCategoryGroupCommandHandler(
-    IProductCategoryReadRepository readRepository,
-    IProductCategoryUpdateRepository updateRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<CreateCategoryGroupCommand, Result<string>>
-{
-    public async Task<Result<string>> Handle(CreateCategoryGroupCommand request, CancellationToken cancellationToken)
-    {
-        var categories = await readRepository.GetByIdAsync(request.CategoryIds, cancellationToken).ConfigureAwait(false);
-        
-        if (categories == null || categories.Count == 0)
-        {
-            return Result<string>.Failure(Error.NotFound("Không tìm thấy danh mục nào."));
-        }
-
-        foreach (var category in categories)
-        {
-            category.CategoryGroup = request.Name;
-            updateRepository.Update(category);
-        }
-
-        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        
-        return Result<string>.Success(request.Name);
-    }
-}

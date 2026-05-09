@@ -16,7 +16,7 @@ public sealed class UpdateBannerCommandHandler(
 {
     public async Task<Result<Unit>> Handle(UpdateBannerCommand request, CancellationToken cancellationToken)
     {
-        var banner = await bannerReadRepository.GetByIdAsync(request.Id, cancellationToken);
+        var banner = await bannerReadRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
         if (banner == null)
             return Result<Unit>.Failure("Banner not found");
         var oldStatus = banner.IsActive;
@@ -41,7 +41,7 @@ public sealed class UpdateBannerCommandHandler(
                 ChangedBy = tokenAccessorService.GetUserId() ?? "Unknown",
                 Details = $"Updated banner '{banner.Title}'"
             });
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return Result<Unit>.Success(Unit.Value);
     }
 }

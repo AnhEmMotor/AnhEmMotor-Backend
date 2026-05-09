@@ -12,7 +12,7 @@ public sealed class UpdateNewsStatusCommandHandler(
 {
     public async Task<Result<Unit>> Handle(UpdateNewsStatusCommand request, CancellationToken cancellationToken)
     {
-        var news = await newsReadRepository.GetByIdAsync(request.Id, cancellationToken);
+        var news = await newsReadRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
         if (news is null)
         {
             return Result<Unit>.Failure("Bài viết không tồn tại.");
@@ -25,7 +25,7 @@ public sealed class UpdateNewsStatusCommandHandler(
         }
 
         newsUpdateRepository.Update(news);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return Result<Unit>.Success(Unit.Value);
     }
 }

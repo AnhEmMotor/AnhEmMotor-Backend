@@ -116,7 +116,7 @@ bool isCompleting = string.Compare(request.StatusId, OrderStatus.Completed) == 0
                     .ConfigureAwait(false);
             }
         } 
-        else if (request.StatusId == OrderStatus.Cancelled || request.StatusId == OrderStatus.Refunded)
+        else if (string.Compare(request.StatusId, OrderStatus.Cancelled) == 0 || string.Compare(request.StatusId, OrderStatus.Refunded) == 0)
         {
             foreach (var output in outputsList)
             {

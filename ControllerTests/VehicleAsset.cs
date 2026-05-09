@@ -1,4 +1,3 @@
-using Application.ApiContracts.Maintenance.Responses;
 using Application.Common.Models;
 using Application.Features.Vehicles.Commands.UpdateLicensePlate;
 using MediatR;
@@ -7,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using FluentAssertions;
 using WebAPI.Controllers.V1;
+using Application.ApiContracts.Vehicle.Responses;
 
 namespace ControllerTests;
 
@@ -36,7 +36,7 @@ public class VehicleAsset
             .ReturnsAsync(Result<VehicleResponse?>.Success(response));
 
         // Act
-        var result = await _controller.UpdateLicensePlateAsync(assetId, command);
+        var result = await _controller.UpdateLicensePlateAsync(assetId, command).ConfigureAwait(true);
 
         // Assert
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;

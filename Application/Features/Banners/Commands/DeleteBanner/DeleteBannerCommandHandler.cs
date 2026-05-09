@@ -12,11 +12,11 @@ public sealed class DeleteBannerCommandHandler(
 {
     public async Task<Result<Unit>> Handle(DeleteBannerCommand request, CancellationToken cancellationToken)
     {
-        var banner = await bannerReadRepository.GetByIdAsync(request.Id, cancellationToken);
+        var banner = await bannerReadRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
         if (banner == null)
             return Result<Unit>.Failure("Banner not found");
         bannerDeleteRepository.Delete(banner);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return Result<Unit>.Success(Unit.Value);
     }
 }

@@ -1,3 +1,4 @@
+using Application.ApiContracts.HR.Responses;
 using Application.Features.HR.Commands.CreateEmployee;
 using Application.Features.HR.Commands.UpdateEmployee;
 using Application.Features.HR.Queries.GetEmployees;
@@ -5,8 +6,12 @@ using Asp.Versioning;
 using Domain.Constants.Permission;
 using Infrastructure.Authorization.Attribute;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using WebAPI.Controllers.Base;
 using static Domain.Constants.Permission.PermissionsList;
 
@@ -25,15 +30,16 @@ public class EmployeeController(IMediator mediator) : ApiController
     /// Gets all employees.
     /// </summary>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>A list of employee DTOs.</returns>
+    /// <returns>A list of employee responses.</returns>
     [HttpGet]
     [HasPermission(HR.View)]
-    [ProducesResponseType(typeof(List<EmployeeDTO>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(List<EmployeeResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetEmployeesAsync(CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetEmployeesQuery(), cancellationToken);
         return HandleResult(result);
     }
+
 
     /// <summary>
     /// Creates a new employee profile.

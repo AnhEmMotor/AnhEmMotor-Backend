@@ -1,3 +1,4 @@
+using Application.ApiContracts.HR.Responses;
 using Application.Features.HR.Commands.ApprovePayroll;
 using Application.Features.HR.Queries.GetPayrollSummary;
 using Application.Interfaces;
@@ -5,9 +6,13 @@ using Asp.Versioning;
 using Domain.Entities.HR;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Infrastructure.Authorization.Attribute;
 using Domain.Constants.Permission;
 
@@ -43,6 +48,7 @@ public class CommissionController(IApplicationDBContext context) : ControllerBas
     /// </summary>
     [HttpGet("payroll-summary")]
     [HasPermission(PermissionsList.Payroll.View)]
+    [ProducesResponseType(typeof(List<PayrollResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetPayrollSummary(
         [FromQuery] int month,
         [FromQuery] int year,
@@ -52,6 +58,7 @@ public class CommissionController(IApplicationDBContext context) : ControllerBas
         var result = await mediator.Send(new GetPayrollSummaryQuery(month, year), ct);
         return Ok(result.Value);
     }
+
 
     /// <summary>
     /// Approves commission payments.

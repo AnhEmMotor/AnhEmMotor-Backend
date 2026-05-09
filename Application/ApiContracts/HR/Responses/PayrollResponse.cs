@@ -1,8 +1,8 @@
 using System;
 
-namespace Application.Features.HR.Queries.GetPayrollSummary;
+namespace Application.ApiContracts.HR.Responses;
 
-public record PayrollDTO
+public record PayrollResponse
 {
     public int EmployeeId { get; set; }
 

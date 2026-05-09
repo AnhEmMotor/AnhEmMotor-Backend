@@ -46,7 +46,7 @@ public class News
         result.Should().BeOfType<OkObjectResult>();
         _mediatorMock.Verify(m => m.Send(It.Is<UpdateNewsCommand>(c => 
             c.Id == 1 && 
-            c.Content == "Deep dive content" && 
+            string.Compare(c.Content, "Deep dive content") == 0 && 
             c.AuthorId == authorId), It.IsAny<CancellationToken>()), Times.Once);
     }
 }

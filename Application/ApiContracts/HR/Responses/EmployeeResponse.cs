@@ -1,8 +1,8 @@
 using System;
 
-namespace Application.Features.HR.Queries.GetEmployees;
+namespace Application.ApiContracts.HR.Responses;
 
-public record EmployeeDTO
+public record EmployeeResponse
 {
     public int Id { get; set; }
 

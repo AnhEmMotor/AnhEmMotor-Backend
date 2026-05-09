@@ -1,3 +1,4 @@
+using Application.ApiContracts.HR.Responses;
 using Application.Common.Models;
 using Application.Features.HR.Commands.UpdateEmployee;
 using Application.Features.HR.Queries.GetPayrollSummary;
@@ -7,6 +8,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using WebAPI.Controllers.V1;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using Xunit;
 
 namespace ControllerTests;
 
@@ -43,7 +48,7 @@ public class HR
             .ReturnsAsync(Result<int>.Success(1));
 
         // Action
-        var result = await _employeeController.UpdateEmployeeAsync(1, command, CancellationToken.None);
+        var result = await _employeeController.UpdateEmployeeAsync(1, command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();
@@ -56,9 +61,9 @@ public class HR
         // Arrange
         var month = 12;
         var year = 2025;
-        var summaryData = new List<PayrollDTO>
+        var summaryData = new List<PayrollResponse>
         {
-            new PayrollDTO { 
+            new() { 
                 FullName = "Test Employee", 
                 BaseSalary = 10000000, 
                 ConfirmedCommission = 5000000
@@ -66,10 +71,10 @@ public class HR
         };
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetPayrollSummaryQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<List<PayrollDTO>>.Success(summaryData));
+            .ReturnsAsync(Result<List<PayrollResponse>>.Success(summaryData));
 
         // Action
-        var result = await _commissionController.GetPayrollSummary(month, year, _mediatorMock.Object, CancellationToken.None);
+        var result = await _commissionController.GetPayrollSummary(month, year, _mediatorMock.Object, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();
@@ -83,13 +88,13 @@ public class HR
         // Arrange
         var month = 1;
         var year = 2026;
-        var emptyData = new List<PayrollDTO>();
+        var emptyData = new List<PayrollResponse>();
 
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetPayrollSummaryQuery>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<List<PayrollDTO>>.Success(emptyData));
+            .ReturnsAsync(Result<List<PayrollResponse>>.Success(emptyData));
 
         // Action
-        var result = await _commissionController.GetPayrollSummary(month, year, _mediatorMock.Object, CancellationToken.None);
+        var result = await _commissionController.GetPayrollSummary(month, year, _mediatorMock.Object, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();
@@ -97,3 +102,4 @@ public class HR
         okResult!.Value.Should().BeEquivalentTo(emptyData);
     }
 }
+

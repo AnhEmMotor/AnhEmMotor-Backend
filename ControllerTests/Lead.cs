@@ -125,7 +125,7 @@ public class Lead
             .ReturnsAsync(123); // Activity ID
 
         // Action
-        var result = await _leadController.AddActivityAsync(1, command, CancellationToken.None);
+        var result = await _leadController.AddActivityAsync(1, command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();
@@ -151,7 +151,7 @@ public class Lead
             .ReturnsAsync(Result<int>.Success(1));
 
         // Action
-        var result = await _leadController.UpdateLeadAsync(1, command, CancellationToken.None);
+        var result = await _leadController.UpdateLeadAsync(1, command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();
@@ -171,7 +171,7 @@ public class Lead
             .ReturnsAsync(Result<int>.Success(1));
 
         // Action
-        var result = await _leadController.UpdateLeadAsync(1, command, CancellationToken.None);
+        var result = await _leadController.UpdateLeadAsync(1, command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();
@@ -186,7 +186,7 @@ public class Lead
             .ReturnsAsync(456);
 
         // Action
-        var result = await _leadController.AddActivityAsync(1, command, CancellationToken.None);
+        var result = await _leadController.AddActivityAsync(1, command, CancellationToken.None).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();

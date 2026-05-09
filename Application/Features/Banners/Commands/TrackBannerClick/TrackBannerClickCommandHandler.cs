@@ -12,12 +12,12 @@ public sealed class TrackBannerClickCommandHandler(
 {
     public async Task<Result<Unit>> Handle(TrackBannerClickCommand request, CancellationToken cancellationToken)
     {
-        var banner = await bannerReadRepository.GetByIdAsync(request.Id, cancellationToken);
+        var banner = await bannerReadRepository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
         if (banner == null)
             return Result<Unit>.Failure("Banner not found");
         banner.ClickCount++;
         bannerUpdateRepository.Update(banner);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return Result<Unit>.Success(Unit.Value);
     }
 }

@@ -1,4 +1,4 @@
-using Application.ApiContracts.VehicleType.Responses;
+using Application.ApiContracts.Vehicle.Responses;
 using Application.Interfaces.Repositories;
 using Asp.Versioning;
 using Domain.Entities;

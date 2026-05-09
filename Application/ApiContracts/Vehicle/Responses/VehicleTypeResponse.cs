@@ -1,4 +1,4 @@
-namespace Application.ApiContracts.VehicleType.Responses
+namespace Application.ApiContracts.Vehicle.Responses
 {
     public class VehicleTypeResponse
     {
@@ -17,5 +17,7 @@ namespace Application.ApiContracts.VehicleType.Responses
         public string? Description { get; set; }
 
         public int ProductCount { get; set; }
+
+
     }
 }

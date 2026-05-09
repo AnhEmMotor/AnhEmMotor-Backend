@@ -1,0 +1,56 @@
+﻿using Application.Common.Models;
+using Application.Interfaces.Repositories.Lead;
+using MediatR;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Application.Features.Leads.Commands.UpdateLead
+{
+    public class UpdateLeadCommandHandler(ILeadWriteRepository leadWriteRepository, ILeadReadRepository leadReadRepository) : IRequestHandler<UpdateLeadCommand, Result<int>>
+    {
+        public async Task<Result<int>> Handle(UpdateLeadCommand request, CancellationToken cancellationToken)
+        {
+            var lead = await leadReadRepository.GetByIdAsync(request.Id, cancellationToken);
+            if (lead == null)
+            {
+                return Result<int>.Failure("Không tìm thấy khách hàng.");
+            }
+            // Check for duplicate identification number if changed
+            if (!string.IsNullOrEmpty(request.IdentificationNumber) &&
+                request.IdentificationNumber != lead.IdentificationNumber)
+            {
+                var existingWithCccd = await leadReadRepository.GetByIdentificationNumberAsync(request.IdentificationNumber, cancellationToken);
+                if (existingWithCccd != null && existingWithCccd.Id != lead.Id)
+                {
+                    return Result<int>.Failure("Identification number already exists.");
+                }
+            }
+
+            lead.FullName = request.FullName;
+            lead.Email = request.Email;
+            lead.PhoneNumber = request.PhoneNumber;
+            lead.Gender = request.Gender;
+            lead.Birthday = request.Birthday;
+            lead.IdentificationNumber = request.IdentificationNumber;
+            lead.AddressDetail = request.AddressDetail;
+            lead.Ward = request.Ward;
+            lead.District = request.District;
+            lead.Province = request.Province;
+            if (!string.IsNullOrEmpty(request.Status))
+            {
+                lead.Status = request.Status;
+            }
+            if (!string.IsNullOrEmpty(request.Source))
+            {
+                lead.Source = request.Source;
+            }
+
+            lead.InterestedVehicle = request.InterestedVehicle;
+            lead.Score = request.Score;
+            await leadWriteRepository.UpdateAsync(lead, cancellationToken);
+            return lead.Id;
+        }
+    }
+
+}

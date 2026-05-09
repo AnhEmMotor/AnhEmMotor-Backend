@@ -409,7 +409,7 @@
             Gets all employees.
             </summary>
             <param name="cancellationToken">The cancellation token.</param>
-            <returns>A list of employee DTOs.</returns>
+            <returns>A list of employee responses.</returns>
         </member>
         <member name="M:WebAPI.Controllers.V1.EmployeeController.CreateEmployeeAsync(Application.Features.HR.Commands.CreateEmployee.CreateEmployeeCommand,System.Threading.CancellationToken)">
             <summary>

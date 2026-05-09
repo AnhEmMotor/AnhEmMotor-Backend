@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Technologies.Queries.GetAllTechnologies;
 
-public sealed record GetAllTechnologiesQuery(int? CategoryId = null, int? BrandId = null) : IRequest<Result<List<TechnologyResponse>>>;
 
 public sealed class GetAllTechnologiesQueryHandler(ITechnologyRepository technologyRepository) : IRequestHandler<GetAllTechnologiesQuery, Result<List<TechnologyResponse>>>
 {
@@ -27,7 +26,7 @@ public sealed class GetAllTechnologiesQueryHandler(ITechnologyRepository technol
         var techs = await query
             .OrderBy(t => t.CategoryId)
             .ThenBy(t => t.Name)
-            .ToListAsync(cancellationToken);
+            .ToListAsync(cancellationToken).ConfigureAwait(false);
         return techs.Adapt<List<TechnologyResponse>>();
     }
 }

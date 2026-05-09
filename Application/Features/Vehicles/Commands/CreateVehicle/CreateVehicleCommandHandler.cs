@@ -49,7 +49,7 @@ public sealed class CreateVehicleCommandHandler(
 
         // VAS_002: Check VIN duplicate
         var isVinExists = await readRepository.GetQuery(DataFetchMode.All)
-            .AnyAsync(v => v.VinNumber == request.VinNumber.Trim(), cancellationToken)
+            .AnyAsync(v => string.Compare(v.VinNumber, request.VinNumber.Trim()) == 0, cancellationToken)
             .ConfigureAwait(false);
         if (isVinExists)
         {
@@ -58,14 +58,14 @@ public sealed class CreateVehicleCommandHandler(
 
         // VAS_003: Check EngineNumber duplicate
         var isEngineExists = await readRepository.GetQuery(DataFetchMode.All)
-            .AnyAsync(v => v.EngineNumber == request.EngineNumber.Trim(), cancellationToken)
+            .AnyAsync(v => string.Compare(v.EngineNumber, request.EngineNumber.Trim()) == 0, cancellationToken)
             .ConfigureAwait(false);
         if (isEngineExists)
         {
             return Result<VehicleResponse?>.Failure(Error.BadRequest("Engine number already exists.", "EngineNumber"));
         }
 
-        var vehicle = new Domain.Entities.Vehicle
+        var vehicle = new Vehicle
         {
             LeadId = request.LeadId,
             ProductId = request.ProductId,

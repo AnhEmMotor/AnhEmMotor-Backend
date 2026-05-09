@@ -1,3 +1,4 @@
+using Application.ApiContracts.Banner.Responses;
 using Application.Common.Models;
 using Application.Features.Banners.Commands.CreateBanner;
 using Application.Features.Banners.Commands.UpdateBanner;
@@ -7,11 +8,15 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using FluentAssertions;
-using Application.Features.Banners.Commands.UpdateBanner;
 using WebAPI.Controllers.V1;
+using Xunit;
 
 namespace ControllerTests;
+
 
 public class Banner
 {
@@ -53,7 +58,7 @@ public class Banner
             .ReturnsAsync(Result<int>.Failure("File size exceeds 10MB"));
 
         // Action
-        var result = await _bannerController.CreateAsync(command, CancellationToken.None);
+        var result = await _bannerController.CreateAsync(command, CancellationToken.None).ConfigureAwait(true);
         
         // Assert
         result.Should().BeOfType<BadRequestObjectResult>();
@@ -67,7 +72,7 @@ public class Banner
         _senderMock.Setup(m => m.Send(command, It.IsAny<CancellationToken>())).ReturnsAsync(Result<Unit>.Success(Unit.Value));
 
         // Action
-        var result = await _bannerController.Update(1, command);
+        var result = await _bannerController.Update(1, command).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();
@@ -82,7 +87,7 @@ public class Banner
         _senderMock.Setup(m => m.Send(command, It.IsAny<CancellationToken>())).ReturnsAsync(Result<Unit>.Success(Unit.Value));
 
         // Action
-        var result = await _bannerController.Update(1, command);
+        var result = await _bannerController.Update(1, command).ConfigureAwait(true);
 
         // Assert
         result.Should().BeOfType<OkObjectResult>();
@@ -97,7 +102,7 @@ public class Banner
 
         // Action
         // Assuming a hypothetical endpoint or method exists
-        var result = await _bannerController.GetListAsync(CancellationToken.None);
+        var result = await _bannerController.GetListAsync(CancellationToken.None).ConfigureAwait(true);
         
         // Assert
         result.Should().BeOfType<OkObjectResult>();
