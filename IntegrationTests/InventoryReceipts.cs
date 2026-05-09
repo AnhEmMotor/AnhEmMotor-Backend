@@ -1,4 +1,4 @@
-﻿using Application.ApiContracts.Input.Requests;
+using Application.ApiContracts.Input.Requests;
 using Application.ApiContracts.Input.Responses;
 using Application.Features.Inputs.Commands.CreateInput;
 using Application.Features.Inputs.Commands.DeleteManyInputs;
@@ -2666,7 +2666,7 @@ public class InventoryReceipts : IClassFixture<IntegrationTestWebAppFactory>, IA
         content!.Should().HaveCount(3);
         content!.Should().ContainKey(Domain.Constants.Input.InputStatus.Working).WhoseValue.Should().Be("Phiếu tạm");
         content!.Should().ContainKey(Domain.Constants.Input.InputStatus.Finish).WhoseValue.Should().Be("Hoàn thành");
-        content!.Should().ContainKey(Domain.Constants.Input.InputStatus.Cancel).WhoseValue.Should().Be("Ðã huỷ");
+        content!.Should().ContainKey(Domain.Constants.Input.InputStatus.Cancel).WhoseValue.Should().Be("Đã huỷ");
     }
 
     [Fact(DisplayName = "INPUT_071 - L?y danh sách tr?ng thái phi?u nh?p khi chua dang nh?p tr? 401")]

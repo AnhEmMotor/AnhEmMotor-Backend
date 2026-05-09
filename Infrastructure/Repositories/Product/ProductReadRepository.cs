@@ -259,9 +259,9 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
                         v => v.VariantOptionValues
                                 .Any(vov => vov.OptionValueId != null && ids.Contains(vov.OptionValueId.Value)) ||
                             (v.ColorName != null &&
-                                names.Any(n => v.ColorName.Contains(n, StringComparison.CurrentCultureIgnoreCase))) ||
+                                names.Any(n => v.ColorName.ToLower().Contains(n))) ||
                             (v.VersionName != null &&
-                                names.Any(n => v.VersionName.Contains(n, StringComparison.CurrentCultureIgnoreCase))));
+                                names.Any(n => v.VersionName.ToLower().Contains(n))));
                 }
                 var matchingProductIds = variantSubquery.Select(v => v.ProductId);
                 query = query.Where(p => matchingProductIds.Contains(p.Id));

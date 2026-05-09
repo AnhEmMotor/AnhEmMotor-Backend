@@ -6,8 +6,19 @@ namespace Application.Features.UserManager.Commands.CreateUserByManager;
 
 public record CreateUserByManagerCommand : IRequest<Result<UserDTOForManagerResponse>>
 {
-    public string? Username { get; init; }
-    public string? Email { get; init; }
+    private readonly string? _username;
+    public string? Username
+    {
+        get => _username;
+        init => _username = value?.Trim();
+    }
+    
+    private readonly string? _email;
+    public string? Email
+    {
+        get => _email;
+        init => _email = value?.Trim();
+    }
 
     public string? Password { get; init; }
 
