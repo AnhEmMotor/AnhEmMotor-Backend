@@ -9,7 +9,7 @@ using System;
 namespace Infrastructure.MySqlMigrations
 {
     /// <inheritdoc />
-    public partial class CRMDatabaseandAPIExpansion : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -27,11 +27,18 @@ namespace Infrastructure.MySqlMigrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     LinkUrl = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    CtaText = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Placement = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     Position = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     StartDate = table.Column<long>(type: "bigint", nullable: true),
                     EndDate = table.Column<long>(type: "bigint", nullable: true),
                     IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    Priority = table.Column<int>(type: "int", nullable: false),
+                    ClickCount = table.Column<int>(type: "int", nullable: false),
+                    ViewCount = table.Column<int>(type: "int", nullable: false),
                     DisplayOrder = table.Column<int>(type: "int", nullable: false),
                     CreatedAt = table.Column<long>(type: "bigint", nullable: true),
                     UpdatedAt = table.Column<long>(type: "bigint", nullable: true),
@@ -49,6 +56,10 @@ namespace Infrastructure.MySqlMigrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<string>(type: "longtext", nullable: true).Annotation("MySql:CharSet", "utf8mb4"),
+                    Origin = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    LogoUrl = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     Description = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     RowVersion = table.Column<DateTime>(type: "timestamp(6)", rowVersion: true, nullable: true),
@@ -107,37 +118,6 @@ namespace Infrastructure.MySqlMigrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
             migrationBuilder.CreateTable(
-                name: "Lead",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    FullName = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Email = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    PhoneNumber = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Score = table.Column<int>(type: "int", nullable: false),
-                    Status = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Source = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Address = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Tier = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Points = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<long>(type: "bigint", nullable: true),
-                    UpdatedAt = table.Column<long>(type: "bigint", nullable: true),
-                    DeletedAt = table.Column<long>(type: "bigint", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Lead", x => x.Id);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-            migrationBuilder.CreateTable(
                 name: "MediaFiles",
                 columns: table => new
                 {
@@ -164,36 +144,23 @@ namespace Infrastructure.MySqlMigrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
             migrationBuilder.CreateTable(
-                name: "News",
+                name: "NewsCategory",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Title = table.Column<string>(type: "longtext", nullable: false)
+                    Name = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Slug = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Content = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    CoverImageUrl = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    AuthorName = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    PublishedDate = table.Column<long>(type: "bigint", nullable: true),
-                    IsPublished = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    MetaTitle = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    MetaDescription = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    MetaKeywords = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CreatedAt = table.Column<long>(type: "bigint", nullable: true),
                     UpdatedAt = table.Column<long>(type: "bigint", nullable: true),
                     DeletedAt = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_News", x => x.Id);
+                    table.PrimaryKey("PK_NewsCategory", x => x.Id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
             migrationBuilder.CreateTable(
@@ -253,11 +220,23 @@ namespace Infrastructure.MySqlMigrations
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_unicode_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    Slug = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_unicode_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    ImageUrl = table.Column<string>(type: "longtext", nullable: true, collation: "utf8mb4_unicode_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    SortOrder = table.Column<int>(type: "int", nullable: false),
                     Description = table.Column<string>(
                         type: "longtext",
                         nullable: true,
                         collation: "utf8mb4_unicode_ci")
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    CategoryGroup = table.Column<string>(
+                        type: "longtext",
+                        nullable: true,
+                        collation: "utf8mb4_unicode_ci")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    ParentId = table.Column<int>(type: "int", nullable: true),
                     MaxPurchaseQuantity = table.Column<int>(type: "int", nullable: true),
                     CreatedAt = table.Column<long>(type: "bigint", nullable: true),
                     UpdatedAt = table.Column<long>(type: "bigint", nullable: true),
@@ -266,6 +245,11 @@ namespace Infrastructure.MySqlMigrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ProductCategory", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProductCategory_ProductCategory_ParentId",
+                        column: x => x.ParentId,
+                        principalTable: "ProductCategory",
+                        principalColumn: "Id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4")
                 .Annotation("Relational:Collation", "utf8mb4_unicode_ci");
@@ -400,15 +384,18 @@ namespace Infrastructure.MySqlMigrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
             migrationBuilder.CreateTable(
-                name: "LeadActivity",
+                name: "VehicleType",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    LeadId = table.Column<int>(type: "int", nullable: false),
-                    ActivityType = table.Column<string>(type: "longtext", nullable: false)
+                    Name = table.Column<string>(type: "longtext", nullable: true).Annotation("MySql:CharSet", "utf8mb4"),
+                    Slug = table.Column<string>(type: "longtext", nullable: true).Annotation("MySql:CharSet", "utf8mb4"),
+                    ImageUrl = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Description = table.Column<string>(type: "longtext", nullable: false)
+                    IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    SortOrder = table.Column<int>(type: "int", nullable: false),
+                    Description = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     CreatedAt = table.Column<long>(type: "bigint", nullable: true),
                     UpdatedAt = table.Column<long>(type: "bigint", nullable: true),
@@ -416,40 +403,33 @@ namespace Infrastructure.MySqlMigrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_LeadActivity", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_LeadActivity_Lead_LeadId",
-                        column: x => x.LeadId,
-                        principalTable: "Lead",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                    table.PrimaryKey("PK_VehicleType", x => x.Id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
             migrationBuilder.CreateTable(
-                name: "Vehicle",
+                name: "BannerAuditLog",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    LeadId = table.Column<int>(type: "int", nullable: false),
-                    VinNumber = table.Column<string>(type: "longtext", nullable: false)
+                    BannerId = table.Column<int>(type: "int", nullable: false),
+                    Action = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    EngineNumber = table.Column<string>(type: "longtext", nullable: false)
+                    ChangedBy = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    LicensePlate = table.Column<string>(type: "longtext", nullable: false)
+                    Details = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    PurchaseDate = table.Column<long>(type: "bigint", nullable: false),
                     CreatedAt = table.Column<long>(type: "bigint", nullable: true),
                     UpdatedAt = table.Column<long>(type: "bigint", nullable: true),
                     DeletedAt = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Vehicle", x => x.Id);
+                    table.PrimaryKey("PK_BannerAuditLog", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Vehicle_Lead_LeadId",
-                        column: x => x.LeadId,
-                        principalTable: "Lead",
+                        name: "FK_BannerAuditLog_Banner_BannerId",
+                        column: x => x.BannerId,
+                        principalTable: "Banner",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
@@ -475,83 +455,6 @@ namespace Infrastructure.MySqlMigrations
                         principalTable: "PredefinedOption",
                         principalColumn: "Key",
                         onDelete: ReferentialAction.Restrict);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-            migrationBuilder.CreateTable(
-                name: "Product",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Name = table.Column<string>(type: "longtext", nullable: true).Annotation("MySql:CharSet", "utf8mb4"),
-                    ShortDescription = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    MetaTitle = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    MetaDescription = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    CategoryId = table.Column<int>(type: "int", nullable: true),
-                    StatusId = table.Column<string>(type: "varchar(255)", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    BrandId = table.Column<int>(type: "int", nullable: true),
-                    Weight = table.Column<decimal>(type: "decimal(65,30)", nullable: true),
-                    Dimensions = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Wheelbase = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    SeatHeight = table.Column<decimal>(type: "decimal(65,30)", nullable: true),
-                    GroundClearance = table.Column<decimal>(type: "decimal(65,30)", nullable: true),
-                    FuelCapacity = table.Column<decimal>(type: "decimal(65,30)", nullable: true),
-                    TireSize = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    FrontSuspension = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    RearSuspension = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    EngineType = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    MaxPower = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    OilCapacity = table.Column<decimal>(type: "decimal(65,30)", nullable: true),
-                    FuelConsumption = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    TransmissionType = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    StarterSystem = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    MaxTorque = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Displacement = table.Column<decimal>(type: "decimal(65,30)", nullable: true),
-                    BoreStroke = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    CompressionRatio = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Description = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Highlights = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    CreatedAt = table.Column<long>(type: "bigint", nullable: true),
-                    UpdatedAt = table.Column<long>(type: "bigint", nullable: true),
-                    DeletedAt = table.Column<long>(type: "bigint", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Product", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Product_Brand_BrandId",
-                        column: x => x.BrandId,
-                        principalTable: "Brand",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Product_ProductCategory_CategoryId",
-                        column: x => x.CategoryId,
-                        principalTable: "ProductCategory",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Product_ProductStatus_StatusId",
-                        column: x => x.StatusId,
-                        principalTable: "ProductStatus",
-                        principalColumn: "Key");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
             migrationBuilder.CreateTable(
@@ -641,6 +544,7 @@ namespace Infrastructure.MySqlMigrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     CategoryId = table.Column<int>(type: "int", nullable: true),
+                    BrandId = table.Column<int>(type: "int", nullable: true),
                     Name = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     DefaultTitle = table.Column<string>(type: "longtext", nullable: true)
@@ -656,6 +560,11 @@ namespace Infrastructure.MySqlMigrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Technologies", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Technologies_Brand_BrandId",
+                        column: x => x.BrandId,
+                        principalTable: "Brand",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Technologies_TechnologyCategories_CategoryId",
                         column: x => x.CategoryId,
@@ -692,6 +601,139 @@ namespace Infrastructure.MySqlMigrations
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+            migrationBuilder.CreateTable(
+                name: "EmployeeProfile",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    UserId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    IdentityNumber = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Address = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    ContractDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    BankName = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    BankAccountNumber = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    JobTitle = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    BaseSalary = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    CreatedAt = table.Column<long>(type: "bigint", nullable: true),
+                    UpdatedAt = table.Column<long>(type: "bigint", nullable: true),
+                    DeletedAt = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EmployeeProfile", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_EmployeeProfile_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+            migrationBuilder.CreateTable(
+                name: "Lead",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    FullName = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Email = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    PhoneNumber = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Score = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Source = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    InterestedVehicle = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Address = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    AddressDetail = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Ward = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    District = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Province = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Gender = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Birthday = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    IdentificationNumber = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Tier = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Points = table.Column<int>(type: "int", nullable: false),
+                    AssignedToId = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    CreatedAt = table.Column<long>(type: "bigint", nullable: true),
+                    UpdatedAt = table.Column<long>(type: "bigint", nullable: true),
+                    DeletedAt = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Lead", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Lead_Users_AssignedToId",
+                        column: x => x.AssignedToId,
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+            migrationBuilder.CreateTable(
+                name: "News",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Title = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Slug = table.Column<string>(type: "varchar(255)", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Content = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CoverImageUrl = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    AuthorName = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    PublishedDate = table.Column<long>(type: "bigint", nullable: true),
+                    IsPublished = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    MetaTitle = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    MetaDescription = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    MetaKeywords = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CategoryId = table.Column<int>(type: "int", nullable: true),
+                    AuthorId = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    CreatedAt = table.Column<long>(type: "bigint", nullable: true),
+                    UpdatedAt = table.Column<long>(type: "bigint", nullable: true),
+                    DeletedAt = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_News", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_News_NewsCategory_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "NewsCategory",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_News_Users_AuthorId",
+                        column: x => x.AuthorId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
             migrationBuilder.CreateTable(
@@ -860,15 +902,89 @@ namespace Infrastructure.MySqlMigrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
             migrationBuilder.CreateTable(
-                name: "MaintenanceHistory",
+                name: "Product",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    VehicleId = table.Column<int>(type: "int", nullable: false),
-                    MaintenanceDate = table.Column<long>(type: "bigint", nullable: false),
-                    Mileage = table.Column<int>(type: "int", nullable: false),
-                    Description = table.Column<string>(type: "longtext", nullable: false)
+                    Name = table.Column<string>(type: "longtext", nullable: true).Annotation("MySql:CharSet", "utf8mb4"),
+                    ShortDescription = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    MetaTitle = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    MetaDescription = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CategoryId = table.Column<int>(type: "int", nullable: true),
+                    VehicleTypeId = table.Column<int>(type: "int", nullable: true),
+                    StatusId = table.Column<string>(type: "varchar(255)", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    BrandId = table.Column<int>(type: "int", nullable: true),
+                    Weight = table.Column<decimal>(type: "decimal(65,30)", nullable: true),
+                    Dimensions = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Wheelbase = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    SeatHeight = table.Column<decimal>(type: "decimal(65,30)", nullable: true),
+                    GroundClearance = table.Column<decimal>(type: "decimal(65,30)", nullable: true),
+                    FuelCapacity = table.Column<decimal>(type: "decimal(65,30)", nullable: true),
+                    TireSize = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    FrontSuspension = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    RearSuspension = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    EngineType = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    MaxPower = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    OilCapacity = table.Column<decimal>(type: "decimal(65,30)", nullable: true),
+                    FuelConsumption = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    TransmissionType = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    StarterSystem = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    MaxTorque = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Displacement = table.Column<decimal>(type: "decimal(65,30)", nullable: true),
+                    BoreStroke = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CompressionRatio = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    FuelSystem = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    FrameType = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    FrontTireSize = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    RearTireSize = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    FrontBrake = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    RearBrake = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    BatteryType = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    LightingSystem = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    DashboardType = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Material = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Origin = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    WarrantyPeriod = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Unit = table.Column<string>(type: "longtext", nullable: true).Annotation("MySql:CharSet", "utf8mb4"),
+                    StdDot = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    StdEce = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    StdSnell = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    StdJis = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    OtherStandards = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Description = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Highlights = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     CreatedAt = table.Column<long>(type: "bigint", nullable: true),
                     UpdatedAt = table.Column<long>(type: "bigint", nullable: true),
@@ -876,41 +992,27 @@ namespace Infrastructure.MySqlMigrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MaintenanceHistory", x => x.Id);
+                    table.PrimaryKey("PK_Product", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_MaintenanceHistory_Vehicle_VehicleId",
-                        column: x => x.VehicleId,
-                        principalTable: "Vehicle",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-            migrationBuilder.CreateTable(
-                name: "VehicleDocument",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    VehicleId = table.Column<int>(type: "int", nullable: false),
-                    DocumentType = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    FileUrl = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Description = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    CreatedAt = table.Column<long>(type: "bigint", nullable: true),
-                    UpdatedAt = table.Column<long>(type: "bigint", nullable: true),
-                    DeletedAt = table.Column<long>(type: "bigint", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_VehicleDocument", x => x.Id);
+                        name: "FK_Product_Brand_BrandId",
+                        column: x => x.BrandId,
+                        principalTable: "Brand",
+                        principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_VehicleDocument_Vehicle_VehicleId",
-                        column: x => x.VehicleId,
-                        principalTable: "Vehicle",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        name: "FK_Product_ProductCategory_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "ProductCategory",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Product_ProductStatus_StatusId",
+                        column: x => x.StatusId,
+                        principalTable: "ProductStatus",
+                        principalColumn: "Key");
+                    table.ForeignKey(
+                        name: "FK_Product_VehicleType_VehicleTypeId",
+                        column: x => x.VehicleTypeId,
+                        principalTable: "VehicleType",
+                        principalColumn: "Id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
             migrationBuilder.CreateTable(
@@ -921,6 +1023,15 @@ namespace Infrastructure.MySqlMigrations
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     OptionId = table.Column<int>(type: "int", nullable: true),
                     Name = table.Column<string>(type: "longtext", nullable: true).Annotation("MySql:CharSet", "utf8mb4"),
+                    Description = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    ImageUrl = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    SeoTitle = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    SeoDescription = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     ColorCode = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     CreatedAt = table.Column<long>(type: "bigint", nullable: true),
@@ -935,40 +1046,6 @@ namespace Infrastructure.MySqlMigrations
                         column: x => x.OptionId,
                         principalTable: "Option",
                         principalColumn: "Id");
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-            migrationBuilder.CreateTable(
-                name: "ProductVariant",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    ProductId = table.Column<int>(type: "int", nullable: false),
-                    UrlSlug = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
-                    CoverImageUrl = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    VersionName = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    ColorName = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    ColorCode = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    SKU = table.Column<string>(type: "longtext", nullable: true).Annotation("MySql:CharSet", "utf8mb4"),
-                    CreatedAt = table.Column<long>(type: "bigint", nullable: true),
-                    UpdatedAt = table.Column<long>(type: "bigint", nullable: true),
-                    DeletedAt = table.Column<long>(type: "bigint", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ProductVariant", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ProductVariant_Product_ProductId",
-                        column: x => x.ProductId,
-                        principalTable: "Product",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
             migrationBuilder.CreateTable(
@@ -1000,42 +1077,6 @@ namespace Infrastructure.MySqlMigrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
             migrationBuilder.CreateTable(
-                name: "ProductTechnology",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    ProductId = table.Column<int>(type: "int", nullable: false),
-                    TechnologyId = table.Column<int>(type: "int", nullable: false),
-                    DisplayOrder = table.Column<int>(type: "int", nullable: false),
-                    CustomTitle = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    CustomDescription = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    CustomImageUrl = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    CreatedAt = table.Column<long>(type: "bigint", nullable: true),
-                    UpdatedAt = table.Column<long>(type: "bigint", nullable: true),
-                    DeletedAt = table.Column<long>(type: "bigint", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ProductTechnology", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ProductTechnology_Product_ProductId",
-                        column: x => x.ProductId,
-                        principalTable: "Product",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ProductTechnology_Technologies_TechnologyId",
-                        column: x => x.TechnologyId,
-                        principalTable: "Technologies",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-            migrationBuilder.CreateTable(
                 name: "TechnologyImages",
                 columns: table => new
                 {
@@ -1058,6 +1099,130 @@ namespace Infrastructure.MySqlMigrations
                         column: x => x.TechnologyId,
                         principalTable: "Technologies",
                         principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+            migrationBuilder.CreateTable(
+                name: "KPI",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    EmployeeProfileId = table.Column<int>(type: "int", nullable: false),
+                    MetricName = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    TargetValue = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    ActualValue = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    PeriodStart = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    PeriodEnd = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Description = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CreatedAt = table.Column<long>(type: "bigint", nullable: true),
+                    UpdatedAt = table.Column<long>(type: "bigint", nullable: true),
+                    DeletedAt = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_KPI", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_KPI_EmployeeProfile_EmployeeProfileId",
+                        column: x => x.EmployeeProfileId,
+                        principalTable: "EmployeeProfile",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+            migrationBuilder.CreateTable(
+                name: "Payroll",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    EmployeeProfileId = table.Column<int>(type: "int", nullable: false),
+                    Month = table.Column<int>(type: "int", nullable: false),
+                    Year = table.Column<int>(type: "int", nullable: false),
+                    BaseSalary = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TotalCommission = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Bonus = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Penalty = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TotalSalary = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    IsApproved = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    ApprovedAt = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    ApprovedBy = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    CreatedAt = table.Column<long>(type: "bigint", nullable: true),
+                    UpdatedAt = table.Column<long>(type: "bigint", nullable: true),
+                    DeletedAt = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Payroll", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Payroll_EmployeeProfile_EmployeeProfileId",
+                        column: x => x.EmployeeProfileId,
+                        principalTable: "EmployeeProfile",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+            migrationBuilder.CreateTable(
+                name: "LeadActivity",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    LeadId = table.Column<int>(type: "int", nullable: false),
+                    ActivityType = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Description = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CreatedAt = table.Column<long>(type: "bigint", nullable: true),
+                    UpdatedAt = table.Column<long>(type: "bigint", nullable: true),
+                    DeletedAt = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LeadActivity", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_LeadActivity_Lead_LeadId",
+                        column: x => x.LeadId,
+                        principalTable: "Lead",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+            migrationBuilder.CreateTable(
+                name: "CommissionRecord",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    EmployeeProfileId = table.Column<int>(type: "int", nullable: false),
+                    OutputId = table.Column<int>(type: "int", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    DateEarned = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    PaidAt = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    PolicySnapshot = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Note = table.Column<string>(type: "longtext", nullable: true).Annotation("MySql:CharSet", "utf8mb4"),
+                    CreatedAt = table.Column<long>(type: "bigint", nullable: true),
+                    UpdatedAt = table.Column<long>(type: "bigint", nullable: true),
+                    DeletedAt = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CommissionRecord", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CommissionRecord_EmployeeProfile_EmployeeProfileId",
+                        column: x => x.EmployeeProfileId,
+                        principalTable: "EmployeeProfile",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CommissionRecord_Output_OutputId",
+                        column: x => x.OutputId,
+                        principalTable: "Output",
+                        principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
@@ -1108,6 +1273,240 @@ namespace Infrastructure.MySqlMigrations
                         column: x => x.CreatedBy,
                         principalTable: "Users",
                         principalColumn: "Id");
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+            migrationBuilder.CreateTable(
+                name: "CommissionPolicy",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Name = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Type = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Value = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    ProductId = table.Column<int>(type: "int", nullable: true),
+                    CategoryId = table.Column<int>(type: "int", nullable: true),
+                    EmployeeId = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    TargetGroup = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    EffectiveDate = table.Column<long>(type: "bigint", nullable: false),
+                    Notes = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Unit = table.Column<string>(type: "longtext", nullable: true).Annotation("MySql:CharSet", "utf8mb4"),
+                    IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CreatedAt = table.Column<long>(type: "bigint", nullable: true),
+                    UpdatedAt = table.Column<long>(type: "bigint", nullable: true),
+                    DeletedAt = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CommissionPolicy", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CommissionPolicy_ProductCategory_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "ProductCategory",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_CommissionPolicy_Product_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Product",
+                        principalColumn: "Id");
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+            migrationBuilder.CreateTable(
+                name: "ProductCompatibility",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    BaseProductId = table.Column<int>(type: "int", nullable: false),
+                    CompatibleVehicleModelId = table.Column<int>(type: "int", nullable: false),
+                    Notes = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CreatedAt = table.Column<long>(type: "bigint", nullable: true),
+                    UpdatedAt = table.Column<long>(type: "bigint", nullable: true),
+                    DeletedAt = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProductCompatibility", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProductCompatibility_Product_BaseProductId",
+                        column: x => x.BaseProductId,
+                        principalTable: "Product",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ProductCompatibility_Product_CompatibleVehicleModelId",
+                        column: x => x.CompatibleVehicleModelId,
+                        principalTable: "Product",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+            migrationBuilder.CreateTable(
+                name: "ProductTechnology",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    TechnologyId = table.Column<int>(type: "int", nullable: false),
+                    DisplayOrder = table.Column<int>(type: "int", nullable: false),
+                    CustomTitle = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CustomDescription = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CustomImageUrl = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CreatedAt = table.Column<long>(type: "bigint", nullable: true),
+                    UpdatedAt = table.Column<long>(type: "bigint", nullable: true),
+                    DeletedAt = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProductTechnology", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProductTechnology_Product_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Product",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ProductTechnology_Technologies_TechnologyId",
+                        column: x => x.TechnologyId,
+                        principalTable: "Technologies",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+            migrationBuilder.CreateTable(
+                name: "ProductVariant",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    UrlSlug = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    CoverImageUrl = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    VersionName = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    ColorName = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    ColorCode = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    SKU = table.Column<string>(type: "longtext", nullable: true).Annotation("MySql:CharSet", "utf8mb4"),
+                    Weight = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    Dimensions = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Wheelbase = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    SeatHeight = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    GroundClearance = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    FuelCapacity = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    TireSize = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    FrontBrake = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    RearBrake = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    FrontSuspension = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    RearSuspension = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    EngineType = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    StockQuantity = table.Column<int>(type: "int", nullable: true),
+                    CreatedAt = table.Column<long>(type: "bigint", nullable: true),
+                    UpdatedAt = table.Column<long>(type: "bigint", nullable: true),
+                    DeletedAt = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProductVariant", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProductVariant_Product_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Product",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+            migrationBuilder.CreateTable(
+                name: "Vehicle",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    LeadId = table.Column<int>(type: "int", nullable: false),
+                    ProductId = table.Column<int>(type: "int", nullable: true),
+                    VinNumber = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    EngineNumber = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    LicensePlate = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    PurchaseDate = table.Column<long>(type: "bigint", nullable: false),
+                    CreatedAt = table.Column<long>(type: "bigint", nullable: true),
+                    UpdatedAt = table.Column<long>(type: "bigint", nullable: true),
+                    DeletedAt = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Vehicle", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Vehicle_Lead_LeadId",
+                        column: x => x.LeadId,
+                        principalTable: "Lead",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Vehicle_Product_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Product",
+                        principalColumn: "Id");
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+            migrationBuilder.CreateTable(
+                name: "CommissionPolicyAuditLog",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    PolicyId = table.Column<int>(type: "int", nullable: false),
+                    Action = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    ChangedByName = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    ChangedByUserId = table.Column<Guid>(
+                        type: "char(36)",
+                        nullable: false,
+                        collation: "ascii_general_ci"),
+                    OldValueSnapshot = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    NewValueSnapshot = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Description = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    ChangedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    CreatedAt = table.Column<long>(type: "bigint", nullable: true),
+                    UpdatedAt = table.Column<long>(type: "bigint", nullable: true),
+                    DeletedAt = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CommissionPolicyAuditLog", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CommissionPolicyAuditLog_CommissionPolicy_PolicyId",
+                        column: x => x.PolicyId,
+                        principalTable: "CommissionPolicy",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
             migrationBuilder.CreateTable(
@@ -1230,6 +1629,60 @@ namespace Infrastructure.MySqlMigrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
             migrationBuilder.CreateTable(
+                name: "MaintenanceHistory",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    VehicleId = table.Column<int>(type: "int", nullable: false),
+                    MaintenanceDate = table.Column<long>(type: "bigint", nullable: false),
+                    Mileage = table.Column<int>(type: "int", nullable: false),
+                    Description = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CreatedAt = table.Column<long>(type: "bigint", nullable: true),
+                    UpdatedAt = table.Column<long>(type: "bigint", nullable: true),
+                    DeletedAt = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MaintenanceHistory", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_MaintenanceHistory_Vehicle_VehicleId",
+                        column: x => x.VehicleId,
+                        principalTable: "Vehicle",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+            migrationBuilder.CreateTable(
+                name: "VehicleDocument",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    VehicleId = table.Column<int>(type: "int", nullable: false),
+                    DocumentType = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    FileUrl = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Description = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CreatedAt = table.Column<long>(type: "bigint", nullable: true),
+                    UpdatedAt = table.Column<long>(type: "bigint", nullable: true),
+                    DeletedAt = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_VehicleDocument", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_VehicleDocument_Vehicle_VehicleId",
+                        column: x => x.VehicleId,
+                        principalTable: "Vehicle",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+            migrationBuilder.CreateTable(
                 name: "InputInfo",
                 columns: table => new
                 {
@@ -1267,59 +1720,43 @@ namespace Infrastructure.MySqlMigrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
             migrationBuilder.InsertData(
-                table: "InputStatus",
-                columns: new[] { "Key", "CreatedAt", "DeletedAt", "UpdatedAt" },
-                values: new object[,]
-                { { "cancelled", null, null, null }, { "finished", null, null, null }, { "working", null, null, null } });
-            migrationBuilder.InsertData(
-                table: "OutputStatus",
-                columns: new[] { "Key", "CreatedAt", "DeletedAt", "UpdatedAt" },
-                values: new object[,]
-                {
-                {
-                    "cancelled",
-                    null,
-                    null,
-                    null
-                },
-                {
-                    "delivered",
-                    null,
-                    null,
-                    null
-                },
-                {
-                    "pending",
-                    null,
-                    null,
-                    null
-                },
-                {
-                    "processing",
-                    null,
-                    null,
-                    null
-                },
-                {
-                    "shipped",
-                    null,
-                    null,
-                    null
-                }
-                });
-            migrationBuilder.InsertData(
                 table: "ProductStatus",
                 columns: new[] { "Key", "CreatedAt", "DeletedAt", "UpdatedAt" },
                 values: new object[,] { { "for-sale", null, null, null }, { "out-of-business", null, null, null } });
             migrationBuilder.CreateIndex(
+                name: "IX_BannerAuditLog_BannerId",
+                table: "BannerAuditLog",
+                column: "BannerId");
+            migrationBuilder.CreateIndex(
                 name: "IX_Booking_ProductVariantId",
                 table: "Booking",
                 column: "ProductVariantId");
+            migrationBuilder.CreateIndex(
+                name: "IX_CommissionPolicy_CategoryId",
+                table: "CommissionPolicy",
+                column: "CategoryId");
+            migrationBuilder.CreateIndex(
+                name: "IX_CommissionPolicy_ProductId",
+                table: "CommissionPolicy",
+                column: "ProductId");
+            migrationBuilder.CreateIndex(
+                name: "IX_CommissionPolicyAuditLog_PolicyId",
+                table: "CommissionPolicyAuditLog",
+                column: "PolicyId");
+            migrationBuilder.CreateIndex(
+                name: "IX_CommissionRecord_EmployeeProfileId",
+                table: "CommissionRecord",
+                column: "EmployeeProfileId");
+            migrationBuilder.CreateIndex(
+                name: "IX_CommissionRecord_OutputId",
+                table: "CommissionRecord",
+                column: "OutputId");
             migrationBuilder.CreateIndex(name: "IX_ContactReply_ContactId", table: "ContactReply", column: "ContactId");
             migrationBuilder.CreateIndex(
                 name: "IX_ContactReply_RepliedById",
                 table: "ContactReply",
                 column: "RepliedById");
+            migrationBuilder.CreateIndex(name: "IX_EmployeeProfile_UserId", table: "EmployeeProfile", column: "UserId");
             migrationBuilder.CreateIndex(name: "IX_Input_ConfirmedBy", table: "Input", column: "ConfirmedBy");
             migrationBuilder.CreateIndex(name: "IX_Input_CreatedBy", table: "Input", column: "CreatedBy");
             migrationBuilder.CreateIndex(name: "IX_Input_SourceOrderId", table: "Input", column: "SourceOrderId");
@@ -1331,11 +1768,15 @@ namespace Infrastructure.MySqlMigrations
                 table: "InputInfo",
                 column: "ParentOutputInfoId");
             migrationBuilder.CreateIndex(name: "IX_InputInfo_ProductId", table: "InputInfo", column: "ProductId");
+            migrationBuilder.CreateIndex(name: "IX_KPI_EmployeeProfileId", table: "KPI", column: "EmployeeProfileId");
+            migrationBuilder.CreateIndex(name: "IX_Lead_AssignedToId", table: "Lead", column: "AssignedToId");
             migrationBuilder.CreateIndex(name: "IX_LeadActivity_LeadId", table: "LeadActivity", column: "LeadId");
             migrationBuilder.CreateIndex(
                 name: "IX_MaintenanceHistory_VehicleId",
                 table: "MaintenanceHistory",
                 column: "VehicleId");
+            migrationBuilder.CreateIndex(name: "IX_News_AuthorId", table: "News", column: "AuthorId");
+            migrationBuilder.CreateIndex(name: "IX_News_CategoryId", table: "News", column: "CategoryId");
             migrationBuilder.CreateIndex(name: "IX_Option_Name", table: "Option", column: "Name");
             migrationBuilder.CreateIndex(name: "IX_OptionValue_OptionId", table: "OptionValue", column: "OptionId");
             migrationBuilder.CreateIndex(name: "IX_Output_BuyerId", table: "Output", column: "BuyerId");
@@ -1348,6 +1789,10 @@ namespace Infrastructure.MySqlMigrations
                 table: "OutputInfo",
                 column: "ProductVarientId");
             migrationBuilder.CreateIndex(
+                name: "IX_Payroll_EmployeeProfileId",
+                table: "Payroll",
+                column: "EmployeeProfileId");
+            migrationBuilder.CreateIndex(
                 name: "IX_PredefinedOption_Key",
                 table: "PredefinedOption",
                 column: "Key",
@@ -1355,10 +1800,23 @@ namespace Infrastructure.MySqlMigrations
             migrationBuilder.CreateIndex(name: "IX_Product_BrandId", table: "Product", column: "BrandId");
             migrationBuilder.CreateIndex(name: "IX_Product_CategoryId", table: "Product", column: "CategoryId");
             migrationBuilder.CreateIndex(name: "IX_Product_StatusId", table: "Product", column: "StatusId");
+            migrationBuilder.CreateIndex(name: "IX_Product_VehicleTypeId", table: "Product", column: "VehicleTypeId");
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductCategory_ParentId",
+                table: "ProductCategory",
+                column: "ParentId");
             migrationBuilder.CreateIndex(
                 name: "IX_ProductCollectionPhoto_ProductVariantId",
                 table: "ProductCollectionPhoto",
                 column: "ProductVariantId");
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductCompatibility_BaseProductId",
+                table: "ProductCompatibility",
+                column: "BaseProductId");
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductCompatibility_CompatibleVehicleModelId",
+                table: "ProductCompatibility",
+                column: "CompatibleVehicleModelId");
             migrationBuilder.CreateIndex(
                 name: "IX_ProductTechnology_ProductId",
                 table: "ProductTechnology",
@@ -1382,6 +1840,7 @@ namespace Infrastructure.MySqlMigrations
                 name: "IX_SupplierContact_SupplierId",
                 table: "SupplierContact",
                 column: "SupplierId");
+            migrationBuilder.CreateIndex(name: "IX_Technologies_BrandId", table: "Technologies", column: "BrandId");
             migrationBuilder.CreateIndex(
                 name: "IX_Technologies_CategoryId",
                 table: "Technologies",
@@ -1412,6 +1871,7 @@ namespace Infrastructure.MySqlMigrations
                 table: "VariantOptionValue",
                 column: "VariantId");
             migrationBuilder.CreateIndex(name: "IX_Vehicle_LeadId", table: "Vehicle", column: "LeadId");
+            migrationBuilder.CreateIndex(name: "IX_Vehicle_ProductId", table: "Vehicle", column: "ProductId");
             migrationBuilder.CreateIndex(
                 name: "IX_VehicleDocument_VehicleId",
                 table: "VehicleDocument",
@@ -1421,15 +1881,20 @@ namespace Infrastructure.MySqlMigrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(name: "Banner");
+            migrationBuilder.DropTable(name: "BannerAuditLog");
             migrationBuilder.DropTable(name: "Booking");
+            migrationBuilder.DropTable(name: "CommissionPolicyAuditLog");
+            migrationBuilder.DropTable(name: "CommissionRecord");
             migrationBuilder.DropTable(name: "ContactReply");
             migrationBuilder.DropTable(name: "InputInfo");
+            migrationBuilder.DropTable(name: "KPI");
             migrationBuilder.DropTable(name: "LeadActivity");
             migrationBuilder.DropTable(name: "MaintenanceHistory");
             migrationBuilder.DropTable(name: "MediaFiles");
             migrationBuilder.DropTable(name: "News");
+            migrationBuilder.DropTable(name: "Payroll");
             migrationBuilder.DropTable(name: "ProductCollectionPhoto");
+            migrationBuilder.DropTable(name: "ProductCompatibility");
             migrationBuilder.DropTable(name: "ProductTechnology");
             migrationBuilder.DropTable(name: "RoleClaims");
             migrationBuilder.DropTable(name: "RolePermissions");
@@ -1442,9 +1907,13 @@ namespace Infrastructure.MySqlMigrations
             migrationBuilder.DropTable(name: "UserTokens");
             migrationBuilder.DropTable(name: "VariantOptionValue");
             migrationBuilder.DropTable(name: "VehicleDocument");
+            migrationBuilder.DropTable(name: "Banner");
+            migrationBuilder.DropTable(name: "CommissionPolicy");
             migrationBuilder.DropTable(name: "Contact");
             migrationBuilder.DropTable(name: "Input");
             migrationBuilder.DropTable(name: "OutputInfo");
+            migrationBuilder.DropTable(name: "NewsCategory");
+            migrationBuilder.DropTable(name: "EmployeeProfile");
             migrationBuilder.DropTable(name: "Permissions");
             migrationBuilder.DropTable(name: "Technologies");
             migrationBuilder.DropTable(name: "Roles");
@@ -1459,12 +1928,13 @@ namespace Infrastructure.MySqlMigrations
             migrationBuilder.DropTable(name: "Lead");
             migrationBuilder.DropTable(name: "SupplierStatus");
             migrationBuilder.DropTable(name: "OutputStatus");
-            migrationBuilder.DropTable(name: "Users");
             migrationBuilder.DropTable(name: "Product");
             migrationBuilder.DropTable(name: "PredefinedOption");
+            migrationBuilder.DropTable(name: "Users");
             migrationBuilder.DropTable(name: "Brand");
             migrationBuilder.DropTable(name: "ProductCategory");
             migrationBuilder.DropTable(name: "ProductStatus");
+            migrationBuilder.DropTable(name: "VehicleType");
         }
     }
 }
