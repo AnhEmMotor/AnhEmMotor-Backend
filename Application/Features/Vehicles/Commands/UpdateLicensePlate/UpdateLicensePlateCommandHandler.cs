@@ -5,7 +5,6 @@ using Application.Interfaces.Repositories.Vehicle;
 using Domain.Constants;
 using Mapster;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Vehicles.Commands.UpdateLicensePlate;
 
@@ -18,8 +17,7 @@ public sealed class UpdateLicensePlateCommandHandler(
         UpdateLicensePlateCommand request,
         CancellationToken cancellationToken)
     {
-        var vehicle = await readRepository.GetQuery(DataFetchMode.ActiveOnly)
-            .FirstOrDefaultAsync(v => v.Id == request.Id, cancellationToken)
+        var vehicle = await readRepository.GetByIdAsync(request.Id, cancellationToken)
             .ConfigureAwait(false);
         if (vehicle == null)
         {

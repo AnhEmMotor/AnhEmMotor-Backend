@@ -8,7 +8,6 @@ using Domain.Constants;
 using Domain.Entities;
 using Mapster;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Vehicles.Commands.CreateVehicle;
 
@@ -23,16 +22,14 @@ public sealed class CreateVehicleCommandHandler(
         CreateVehicleCommand request,
         CancellationToken cancellationToken)
     {
-        var leadExists = await leadReadRepository.GetQueryable()
-            .AnyAsync(l => l.Id == request.LeadId, cancellationToken)
+        var leadExists = await leadReadRepository.ExistsAsync(request.LeadId, cancellationToken)
             .ConfigureAwait(false);
         if (!leadExists)
         {
             return Result<VehicleResponse?>.Failure(
                 Error.NotFound($"Lead with ID {request.LeadId} not found.", "LeadId"));
         }
-        var productExists = await productReadRepository.GetQueryable(DataFetchMode.All)
-            .AnyAsync(p => p.Id == request.ProductId, cancellationToken)
+        var productExists = await productReadRepository.ExistsAsync(request.ProductId, cancellationToken)
             .ConfigureAwait(false);
         if (!productExists)
         {
@@ -43,15 +40,13 @@ public sealed class CreateVehicleCommandHandler(
         {
             return Result<VehicleResponse?>.Failure(Error.BadRequest("VIN cannot be empty.", "VinNumber"));
         }
-        var isVinExists = await readRepository.GetQuery(DataFetchMode.All)
-            .AnyAsync(v => string.Compare(v.VinNumber, request.VinNumber.Trim()) == 0, cancellationToken)
+        var isVinExists = await readRepository.ExistsByVinAsync(request.VinNumber.Trim(), cancellationToken)
             .ConfigureAwait(false);
         if (isVinExists)
         {
             return Result<VehicleResponse?>.Failure(Error.BadRequest("VIN already exists.", "VinNumber"));
         }
-        var isEngineExists = await readRepository.GetQuery(DataFetchMode.All)
-            .AnyAsync(v => string.Compare(v.EngineNumber, request.EngineNumber.Trim()) == 0, cancellationToken)
+        var isEngineExists = await readRepository.ExistsByEngineNumberAsync(request.EngineNumber.Trim(), cancellationToken)
             .ConfigureAwait(false);
         if (isEngineExists)
         {

@@ -1,4 +1,3 @@
-using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.LocalFile;
 using Application.Interfaces.Services;
@@ -180,8 +179,6 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                                 npgsqlOptions.EnableRetryOnFailure();
                             });
                     });
-                services.AddScoped<IApplicationDBContext>(
-                    provider => provider.GetRequiredService<ApplicationDBContext>());
                 services.AddIdentity<ApplicationUser, ApplicationRole>(
                     options =>
                     {

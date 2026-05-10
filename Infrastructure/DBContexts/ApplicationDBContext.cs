@@ -1,4 +1,3 @@
-using Application.Interfaces;
 using Domain.Constants;
 using Domain.Entities;
 using Domain.Entities.HR;
@@ -14,7 +13,7 @@ using SupplierStatus = Domain.Entities.SupplierStatus;
 
 namespace Infrastructure.DBContexts;
 
-public class ApplicationDBContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>, IApplicationDBContext
+public class ApplicationDBContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
 {
     public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options): base(options)
     {

@@ -58,6 +58,11 @@ public class LeadReadRepository(ApplicationDBContext context) : ILeadReadReposit
                 cancellationToken);
     }
 
+    public Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default)
+    {
+        return context.Leads.AnyAsync(l => l.Id == id, cancellationToken);
+    }
+
     public IQueryable<Domain.Entities.Lead> GetQueryable()
     {
         return context.Leads.AsQueryable();

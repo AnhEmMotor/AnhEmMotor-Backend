@@ -6,7 +6,6 @@ using Application.Interfaces.Repositories.Vehicle;
 using Domain.Constants;
 using Mapster;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Vehicles.Commands.TransferOwnership;
 
@@ -20,16 +19,14 @@ public sealed class TransferOwnershipCommandHandler(
         TransferOwnershipCommand request,
         CancellationToken cancellationToken)
     {
-        var leadExists = await leadReadRepository.GetQueryable()
-            .AnyAsync(l => l.Id == request.NewLeadId, cancellationToken)
+        var leadExists = await leadReadRepository.ExistsAsync(request.NewLeadId, cancellationToken)
             .ConfigureAwait(false);
         if (!leadExists)
         {
             return Result<VehicleResponse?>.Failure(
                 Error.NotFound($"Lead with ID {request.NewLeadId} not found.", "NewLeadId"));
         }
-        var vehicle = await readRepository.GetQuery(DataFetchMode.ActiveOnly)
-            .FirstOrDefaultAsync(v => v.Id == request.Id, cancellationToken)
+        var vehicle = await readRepository.GetByIdAsync(request.Id, cancellationToken)
             .ConfigureAwait(false);
         if (vehicle == null)
         {

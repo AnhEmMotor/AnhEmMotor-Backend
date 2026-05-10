@@ -22,5 +22,7 @@ public interface ILeadReadRepository
         string identificationNumber,
         CancellationToken cancellationToken = default);
 
+    public Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default);
+
     public IQueryable<Domain.Entities.Lead> GetQueryable();
 }

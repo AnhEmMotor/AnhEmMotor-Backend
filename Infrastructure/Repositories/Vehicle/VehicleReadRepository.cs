@@ -9,7 +9,7 @@ public class VehicleReadRepository(ApplicationDBContext context) : IVehicleReadR
 {
     public IQueryable<Domain.Entities.Vehicle> GetQuery(DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return context.GetQuery<Domain.Entities.Vehicle>(mode);
+        return context.GetQuery<Domain.Entities.Vehicle>(mode).Include(v => v.Lead);
     }
 
     public IQueryable<Domain.Entities.Vehicle> All()
@@ -30,5 +30,22 @@ public class VehicleReadRepository(ApplicationDBContext context) : IVehicleReadR
         return query
             .OrderByDescending(v => v.PurchaseDate)
             .ToListAsync(cancellationToken);
+    }
+
+    public Task<Domain.Entities.Vehicle?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+    {
+        return context.Vehicles
+            .Include(v => v.Lead)
+            .FirstOrDefaultAsync(v => v.Id == id, cancellationToken);
+    }
+
+    public Task<bool> ExistsByVinAsync(string vin, CancellationToken cancellationToken = default)
+    {
+        return context.Vehicles.AnyAsync(v => string.Compare(v.VinNumber, vin) == 0, cancellationToken);
+    }
+
+    public Task<bool> ExistsByEngineNumberAsync(string engineNumber, CancellationToken cancellationToken = default)
+    {
+        return context.Vehicles.AnyAsync(v => string.Compare(v.EngineNumber, engineNumber) == 0, cancellationToken);
     }
 }

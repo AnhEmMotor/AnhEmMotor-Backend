@@ -8,7 +8,10 @@ using MediatR;
 
 namespace Application.Features.Technologies.Commands.CreateTechnology;
 
-public sealed class CreateTechnologyCommandHandler(ITechnologyRepository technologyRepository, IUnitOfWork unitOfWork) : IRequestHandler<CreateTechnologyCommand, Result<TechnologyResponse>>
+public sealed class CreateTechnologyCommandHandler(
+    ITechnologyReadRepository readRepository,
+    ITechnologyUpdateRepository updateRepository,
+    IUnitOfWork unitOfWork) : IRequestHandler<CreateTechnologyCommand, Result<TechnologyResponse>>
 {
     public async Task<Result<TechnologyResponse>> Handle(
         CreateTechnologyCommand request,
@@ -23,9 +26,9 @@ public sealed class CreateTechnologyCommandHandler(ITechnologyRepository technol
             DefaultDescription = request.DefaultDescription,
             DefaultImageUrl = request.DefaultImageUrl
         };
-        technologyRepository.Add(tech);
+        updateRepository.Add(tech);
         await unitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        var result = await technologyRepository.GetByIdAsync(tech.Id, cancellationToken).ConfigureAwait(false);
+        var result = await readRepository.GetByIdAsync(tech.Id, cancellationToken).ConfigureAwait(false);
         return result!.Adapt<TechnologyResponse>();
     }
 }

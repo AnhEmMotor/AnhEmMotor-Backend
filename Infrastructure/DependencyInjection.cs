@@ -58,7 +58,7 @@ public static class DependencyInjection
                                 .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
                 });
         }
-        services.AddScoped<IApplicationDBContext>(provider => provider.GetRequiredService<ApplicationDBContext>());
+
         services.AddIdentity<ApplicationUser, ApplicationRole>(
             options =>
             {

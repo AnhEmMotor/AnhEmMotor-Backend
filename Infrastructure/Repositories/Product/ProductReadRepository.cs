@@ -380,4 +380,9 @@ public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor
             .AsSplitQuery()
             .FirstOrDefaultAsync(v => string.Compare(v.UrlSlug, slug) == 0, cancellationToken);
     }
+
+    public Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default)
+    {
+        return context.Products.AnyAsync(p => p.Id == id, cancellationToken);
+    }
 }

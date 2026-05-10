@@ -8,13 +8,19 @@ namespace Infrastructure.Repositories.Technology;
 
 public class TechnologyReadRepository(ApplicationDBContext context) : ITechnologyReadRepository
 {
-    public Task<IEnumerable<TechnologyEntity>> GetAllAsync(
-        CancellationToken cancellationToken,
-        DataFetchMode mode = DataFetchMode.ActiveOnly)
+    public IQueryable<TechnologyEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return context.GetQuery<TechnologyEntity>(mode)
-            .ToListAsync(cancellationToken)
-            .ContinueWith<IEnumerable<TechnologyEntity>>(t => t.Result, cancellationToken);
+        IQueryable<TechnologyEntity> query = context.Technologies;
+        if (mode != DataFetchMode.ActiveOnly)
+            query = query.IgnoreQueryFilters();
+        if (mode == DataFetchMode.ActiveOnly)
+        {
+            query = query.Where(t => t.DeletedAt == null);
+        } else if (mode == DataFetchMode.DeletedOnly)
+        {
+            query = query.Where(t => t.DeletedAt != null);
+        }
+        return query;
     }
 
     public Task<TechnologyEntity?> GetByIdAsync(
@@ -22,23 +28,39 @@ public class TechnologyReadRepository(ApplicationDBContext context) : ITechnolog
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return context.GetQuery<TechnologyEntity>(mode)
-            .FirstOrDefaultAsync(b => b.Id == id, cancellationToken)
-            .ContinueWith(t => t.Result, cancellationToken);
-    }
-
-    public Task<IEnumerable<TechnologyEntity>> GetAllWithCategoryAsync(
-        CancellationToken cancellationToken,
-        DataFetchMode mode = DataFetchMode.ActiveOnly)
-    {
-        return context.GetQuery<TechnologyEntity>(mode)
+        return GetQueryable(mode)
             .Include(t => t.Category)
-            .ToListAsync(cancellationToken)
-            .ContinueWith<IEnumerable<TechnologyEntity>>(t => t.Result, cancellationToken);
+            .FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
     }
 
-    public IQueryable<TechnologyEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
+    public Task<List<TechnologyEntity>> GetTechnologiesAsync(
+        int? categoryId,
+        int? brandId,
+        CancellationToken cancellationToken = default)
     {
-        return context.GetQuery<TechnologyEntity>(mode);
+        var query = GetQueryable()
+            .Include(t => t.Category)
+            .AsQueryable();
+            
+        if (categoryId.HasValue)
+        {
+            query = query.Where(t => t.CategoryId == categoryId.Value || t.CategoryId == null);
+        }
+        if (brandId.HasValue)
+        {
+            query = query.Where(t => t.BrandId == brandId.Value || t.BrandId == null);
+        }
+        
+        return query
+            .OrderBy(t => t.CategoryId)
+            .ThenBy(t => t.Name)
+            .ToListAsync(cancellationToken);
+    }
+
+    public Task<List<TechnologyEntity>> GetAllWithCategoryAsync(CancellationToken cancellationToken = default)
+    {
+        return context.Technologies
+            .Include(t => t.Category)
+            .ToListAsync(cancellationToken);
     }
 }

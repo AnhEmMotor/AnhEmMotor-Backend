@@ -9,7 +9,7 @@ using MediatR;
 namespace Application.Features.Technologies.Commands.CreateTechnologyCategory;
 
 public sealed class CreateTechnologyCategoryCommandHandler(
-    ITechnologyCategoryRepository categoryRepository,
+    ITechnologyCategoryUpdateRepository categoryRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateTechnologyCategoryCommand, Result<TechnologyCategoryResponse>>
 {
     public async Task<Result<TechnologyCategoryResponse>> Handle(

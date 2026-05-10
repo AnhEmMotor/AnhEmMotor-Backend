@@ -5,7 +5,6 @@ using Application.Interfaces.Repositories.Vehicle;
 using Domain.Constants;
 using Domain.Primitives;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
 
 namespace Application.Features.Vehicles.Queries.GetVehicles
@@ -19,9 +18,7 @@ namespace Application.Features.Vehicles.Queries.GetVehicles
             GetVehiclesQuery request,
             CancellationToken cancellationToken)
         {
-            var query = vehicleRepository.GetQuery(DataFetchMode.ActiveOnly)
-                .Include(v => v.Lead)
-                .AsQueryable();
+            var query = vehicleRepository.GetQuery(DataFetchMode.ActiveOnly);
 
             var sieveModel = request.SieveModel ?? new SieveModel();
             

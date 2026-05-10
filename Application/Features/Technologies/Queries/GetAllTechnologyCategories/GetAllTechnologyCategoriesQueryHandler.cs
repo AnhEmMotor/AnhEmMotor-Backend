@@ -3,20 +3,16 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories.Technology;
 using Mapster;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Technologies.Queries.GetAllTechnologyCategories;
 
-public sealed class GetAllTechnologyCategoriesQueryHandler(ITechnologyCategoryRepository categoryRepository) : IRequestHandler<GetAllTechnologyCategoriesQuery, Result<List<TechnologyCategoryResponse>>>
+public sealed class GetAllTechnologyCategoriesQueryHandler(ITechnologyCategoryReadRepository categoryRepository) : IRequestHandler<GetAllTechnologyCategoriesQuery, Result<List<TechnologyCategoryResponse>>>
 {
     public async Task<Result<List<TechnologyCategoryResponse>>> Handle(
         GetAllTechnologyCategoriesQuery request,
         CancellationToken cancellationToken)
     {
-        var categories = await categoryRepository.GetQueryable()
-            .OrderBy(c => c.Name)
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
+        var categories = await categoryRepository.GetAllAsync(cancellationToken).ConfigureAwait(false);
         return categories.Adapt<List<TechnologyCategoryResponse>>();
     }
 }

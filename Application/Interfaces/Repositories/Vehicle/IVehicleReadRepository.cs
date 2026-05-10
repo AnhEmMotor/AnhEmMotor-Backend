@@ -10,5 +10,11 @@ public interface IVehicleReadRepository
         string? search,
         CancellationToken cancellationToken = default);
 
+    public Task<Domain.Entities.Vehicle?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+
+    public Task<bool> ExistsByVinAsync(string vin, CancellationToken cancellationToken = default);
+
+    public Task<bool> ExistsByEngineNumberAsync(string engineNumber, CancellationToken cancellationToken = default);
+
     public IQueryable<Domain.Entities.Vehicle> All();
 }

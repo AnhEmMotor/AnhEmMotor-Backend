@@ -5,11 +5,7 @@ using Application.Interfaces.Repositories.Product;
 using Application.Interfaces.Repositories.Vehicle;
 using Domain.Constants;
 using FluentAssertions;
-using MockQueryable;
 using Moq;
-using LeadEntity = Domain.Entities.Lead;
-using ProductEntity = Domain.Entities.Product;
-using VehicleEntity = Domain.Entities.Vehicle;
 
 namespace UnitTests;
 
@@ -34,11 +30,12 @@ public class VehicleAsset
     public async Task CreateVehicle_DuplicateEngineNumber_ReturnsBadRequest()
     {
         var engineNumber = "ENG999";
-        var existingVehicles = new List<VehicleEntity> { new() { EngineNumber = engineNumber } }.BuildMock();
-        _readRepoMock.Setup(x => x.GetQuery(DataFetchMode.All)).Returns(existingVehicles);
-        _leadReadRepoMock.Setup(x => x.GetQueryable()).Returns(new List<LeadEntity> { new() { Id = 1 } }.BuildMock());
-        _productReadRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>()))
-            .Returns(new List<ProductEntity> { new() { Id = 1 } }.BuildMock());
+        _leadReadRepoMock.Setup(x => x.ExistsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _productReadRepoMock.Setup(x => x.ExistsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _readRepoMock.Setup(x => x.ExistsByVinAsync("VIN001", It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        _readRepoMock.Setup(x => x.ExistsByEngineNumberAsync(engineNumber, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
         var handler = new CreateVehicleCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,
@@ -60,11 +57,9 @@ public class VehicleAsset
     [Fact(DisplayName = "VAS_008 - Ngăn chặn tạo tài sản khi thiếu số khung")]
     public async Task CreateVehicle_EmptyVin_ReturnsBadRequest()
     {
-        var existingVehicles = new List<VehicleEntity>().BuildMock();
-        _readRepoMock.Setup(x => x.GetQuery(DataFetchMode.All)).Returns(existingVehicles);
-        _leadReadRepoMock.Setup(x => x.GetQueryable()).Returns(new List<LeadEntity> { new() { Id = 1 } }.BuildMock());
-        _productReadRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>()))
-            .Returns(new List<ProductEntity> { new() { Id = 1 } }.BuildMock());
+        _leadReadRepoMock.Setup(x => x.ExistsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _productReadRepoMock.Setup(x => x.ExistsAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+
         var handler = new CreateVehicleCommandHandler(
             _readRepoMock.Object,
             _updateRepoMock.Object,

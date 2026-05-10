@@ -64,4 +64,6 @@ public interface IProductReadRepository
         string slug,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly);
+
+    public Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default);
 }

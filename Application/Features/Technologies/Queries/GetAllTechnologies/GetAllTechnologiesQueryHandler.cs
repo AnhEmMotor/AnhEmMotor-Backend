@@ -3,30 +3,20 @@ using Application.Common.Models;
 using Application.Interfaces.Repositories.Technology;
 using Mapster;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.Technologies.Queries.GetAllTechnologies;
 
-public sealed class GetAllTechnologiesQueryHandler(ITechnologyRepository technologyRepository) : IRequestHandler<GetAllTechnologiesQuery, Result<List<TechnologyResponse>>>
+public sealed class GetAllTechnologiesQueryHandler(ITechnologyReadRepository technologyRepository) : IRequestHandler<GetAllTechnologiesQuery, Result<List<TechnologyResponse>>>
 {
     public async Task<Result<List<TechnologyResponse>>> Handle(
         GetAllTechnologiesQuery request,
         CancellationToken cancellationToken)
     {
-        var query = technologyRepository.GetQueryable().Include(t => t.Category).AsQueryable();
-        if (request.CategoryId.HasValue)
-        {
-            query = query.Where(t => t.CategoryId == request.CategoryId.Value || t.CategoryId == null);
-        }
-        if (request.BrandId.HasValue)
-        {
-            query = query.Where(t => t.BrandId == request.BrandId.Value || t.BrandId == null);
-        }
-        var techs = await query
-            .OrderBy(t => t.CategoryId)
-            .ThenBy(t => t.Name)
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
+        var techs = await technologyRepository.GetTechnologiesAsync(
+            request.CategoryId,
+            request.BrandId,
+            cancellationToken).ConfigureAwait(false);
+
         return techs.Adapt<List<TechnologyResponse>>();
     }
 }
