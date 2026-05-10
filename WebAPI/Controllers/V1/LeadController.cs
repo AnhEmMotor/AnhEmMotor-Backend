@@ -3,7 +3,6 @@ using Application.Features.Leads.Commands.AddLeadActivity;
 using Application.Features.Leads.Commands.AssignLead;
 using Application.Features.Leads.Commands.CreateLead;
 using Application.Features.Leads.Commands.ResetLeads;
-using Application.Features.Leads.Commands.SeedLeads;
 using Application.Features.Leads.Commands.UpdateLead;
 using Application.Features.Leads.Queries.GetLeadById;
 using Application.Features.Leads.Queries.GetLeadPipeline;
@@ -121,16 +120,6 @@ public class LeadController(IMediator mediator) : ApiController
         CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new AssignLeadCommand(id, userId), cancellationToken).ConfigureAwait(true);
-        return HandleResult(result);
-    }
-
-    /// <summary>
-    /// Tạo dữ liệu mẫu (NỘI BỘ - KHÔNG AUTH)
-    /// </summary>
-    [HttpGet("seed-samples")]
-    public async Task<IActionResult> SeedSamplesAsync(CancellationToken cancellationToken)
-    {
-        var result = await mediator.Send(new SeedLeadsCommand(), cancellationToken).ConfigureAwait(true);
         return HandleResult(result);
     }
 

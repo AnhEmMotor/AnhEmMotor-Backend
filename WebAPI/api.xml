@@ -582,11 +582,6 @@
             Giao việc cho nhân viên
             </summary>
         </member>
-        <member name="M:WebAPI.Controllers.V1.LeadController.SeedSamplesAsync(System.Threading.CancellationToken)">
-            <summary>
-            Tạo dữ liệu mẫu (NỘI BỘ - KHÔNG AUTH)
-            </summary>
-        </member>
         <member name="M:WebAPI.Controllers.V1.LeadController.ResetLeadsAsync(System.Threading.CancellationToken)">
             <summary>
             Reset toàn bộ dữ liệu khách hàng (Xóa hết)
