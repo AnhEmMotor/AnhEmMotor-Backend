@@ -1,6 +1,7 @@
 using Application.Common.Models;
 using Application.Interfaces;
 using Domain.Entities.HR;
+using Domain.Constants.HR.CommissionPolicy;
 using Mapster;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -38,12 +39,12 @@ namespace Application.Features.HR.Commands.CreateCommissionPolicy
             var auditLog = new CommissionPolicyAuditLog
             {
                 PolicyId = policy.Id,
-                Action = "Created",
+                Action = CommissionPolicyAction.Created,
                 ChangedByName = request.CurrentUserName,
                 ChangedByUserId = request.CurrentUserId,
                 NewValueSnapshot = JsonSerializer.Serialize(policy),
                 Description =
-                    $"Tạo định mức mới: {policy.Name} ({policy.Value}{(string.Compare(policy.Type, "Percentage") == 0 ? "%" : "đ")})",
+                    $"Tạo định mức mới: {policy.Name} ({policy.Value}{(string.Compare(policy.Type, CommissionPolicyType.Percentage) == 0 ? "%" : "đ")})",
                 ChangedAt = DateTime.UtcNow
             };
             context.CommissionPolicyAuditLogs.Add(auditLog);

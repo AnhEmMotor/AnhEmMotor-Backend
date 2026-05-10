@@ -1,4 +1,5 @@
 using Domain.Entities.HR;
+using Domain.Constants.HR.CommissionPolicy;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
@@ -26,7 +27,7 @@ public static class CommissionPolicySeeder
                     new CommissionPolicy
                     {
                         Name = "Hoa hồng Xe máy mặc định",
-                        Type = "FixedAmount",
+                        Type = CommissionPolicyType.FixedAmount,
                         Value = 500000,
                         CategoryId = motorcycleCategory.Id,
                         EffectiveDate = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero),
@@ -46,7 +47,7 @@ public static class CommissionPolicySeeder
                     new CommissionPolicy
                     {
                         Name = "Hoa hồng Phụ kiện mặc định",
-                        Type = "Percentage",
+                        Type = CommissionPolicyType.Percentage,
                         Value = 5,
                         CategoryId = accessoryCategory.Id,
                         EffectiveDate = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero),
@@ -66,7 +67,7 @@ public static class CommissionPolicySeeder
                     new CommissionPolicy
                     {
                         Name = "Hoa hồng Phụ tùng mặc định",
-                        Type = "Percentage",
+                        Type = CommissionPolicyType.Percentage,
                         Value = 3,
                         CategoryId = partsCategory.Id,
                         EffectiveDate = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero),

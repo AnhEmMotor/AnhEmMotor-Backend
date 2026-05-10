@@ -1,5 +1,7 @@
-﻿using Application.Interfaces.Repositories.Lead;
+using Application.Interfaces.Repositories.Lead;
 using Domain.Entities;
+using Domain.Constants.Lead;
+using Mapster;
 using MediatR;
 using System;
 
@@ -14,25 +16,20 @@ namespace Application.Features.Leads.Commands.AddLeadActivity
             var lead = await leadReadRepository.GetByIdAsync(request.LeadId, cancellationToken).ConfigureAwait(false);
             if (lead == null)
                 return 0;
-            var activity = new LeadActivity
-            {
-                LeadId = request.LeadId,
-                ActivityType = request.ActivityType,
-                Description = request.Description
-            };
+            var activity = request.Adapt<LeadActivity>();
             int scoreDelta = 0;
             string type = request.ActivityType.ToLower();
             string desc = request.Description.ToLower();
-            if (type.Contains("call") || type.Contains("phone"))
+            if (type.Contains(LeadActivityKeywords.Call) || type.Contains(LeadActivityKeywords.Phone))
             {
-                if (desc.Contains("không nghe máy") || desc.Contains("missed"))
+                if (desc.Contains(LeadActivityKeywords.NoAnswer) || desc.Contains(LeadActivityKeywords.Missed))
                     scoreDelta = -10;
                 else
                     scoreDelta = 10;
-            } else if (type.Contains("testdrive") || type.Contains("lái thử"))
+            } else if (type.Contains(LeadActivityKeywords.TestDriveEn) || type.Contains(LeadActivityKeywords.TestDriveVi))
             {
                 scoreDelta = 20;
-            } else if (desc.Contains("trả góp") || desc.Contains("installment"))
+            } else if (desc.Contains(LeadActivityKeywords.InstallmentVi) || desc.Contains(LeadActivityKeywords.InstallmentEn))
             {
                 scoreDelta = 30;
             }

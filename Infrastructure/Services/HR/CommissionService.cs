@@ -1,6 +1,7 @@
 using Application.Common.Models;
 using Application.Interfaces.Services.HR;
 using Domain.Entities.HR;
+using Domain.Constants.HR.CommissionPolicy;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -123,12 +124,12 @@ public class CommissionService(ApplicationDBContext context) : ICommissionServic
                 continue;
             decimal itemCommission = 0;
             string formula = string.Empty;
-            if (string.Equals(policy.Type, "FixedAmount", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(policy.Type, CommissionPolicyType.FixedAmount, StringComparison.OrdinalIgnoreCase))
             {
                 itemCommission = (decimal)item.Count * policy.Value;
                 formula = $"{item.Count} {policy.Unit ?? "xe"} × {policy.Value:N0}đ = {itemCommission:N0}đ";
                 notes.AppendLine($"- {product.Name}: {formula}");
-            } else if (string.Equals(policy.Type, "Percentage", StringComparison.OrdinalIgnoreCase))
+            } else if (string.Equals(policy.Type, CommissionPolicyType.Percentage, StringComparison.OrdinalIgnoreCase))
             {
                 var revenue = (decimal)item.Count * (decimal)item.Price;
                 itemCommission = revenue * (policy.Value / 100);

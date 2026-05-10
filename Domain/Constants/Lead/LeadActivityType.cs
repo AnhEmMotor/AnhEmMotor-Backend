@@ -7,4 +7,6 @@ public static class LeadActivityType
     public const string Call = "Call";
     public const string Contact = "Contact";
     public const string Note = "Note";
+    public const string Phone = "Phone";
+    public const string TestDrive = "TestDrive";
 }

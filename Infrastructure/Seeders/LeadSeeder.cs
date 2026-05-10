@@ -1,4 +1,5 @@
 using Domain.Entities;
+using Domain.Constants.Lead;
 using Infrastructure.DBContexts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -25,8 +26,8 @@ public static class LeadSeeder
                 FullName = "Nguyễn Văn Nam",
                 Email = "nam.nguyen@gmail.com",
                 PhoneNumber = "0987123456",
-                Status = "New",
-                Source = "WebStore",
+                Status = LeadStatus.New,
+                Source = LeadSource.WebStore,
                 Score = 30,
                 InterestedVehicle = "Winner X 2024",
                 Activities =
@@ -51,8 +52,8 @@ public static class LeadSeeder
                 FullName = "Trần Thị Mai",
                 Email = "maimai.tran@yahoo.com",
                 PhoneNumber = "0912345678",
-                Status = "Consulting",
-                Source = "Facebook",
+                Status = LeadStatus.Consulting,
+                Source = LeadSource.Facebook,
                 Score = 65,
                 InterestedVehicle = "Air Blade 160",
                 AssignedToId = firstSale?.Id,
@@ -69,7 +70,7 @@ public static class LeadSeeder
                         },
                         new LeadActivity
                         {
-                            ActivityType = "Call",
+                            ActivityType = LeadActivityType.Call,
                             Description = "Sale đã gọi điện tư vấn nhưng khách đang bận, hẹn gọi lại sau.",
                             CreatedAt = DateTimeOffset.UtcNow.AddDays(-1.5)
                         }

@@ -27,7 +27,7 @@ public class Lead : BaseEntity
     public string Status { get; set; } = LeadStatus.New;
 
     [Column("Source", TypeName = "nvarchar(50)")]
-    public string Source { get; set; } = "WebStore";
+    public string Source { get; set; } = LeadSource.WebStore;
 
     [Column("InterestedVehicle", TypeName = "nvarchar(255)")]
     public string InterestedVehicle { get; set; } = string.Empty;
@@ -42,10 +42,10 @@ public class Lead : BaseEntity
     public string Ward { get; set; } = string.Empty;
 
     [Column("District", TypeName = "nvarchar(100)")]
-    public string District { get; set; } = "Biên Hòa";
+    public string District { get; set; } = LeadAddressDefaults.District;
 
     [Column("Province", TypeName = "nvarchar(100)")]
-    public string Province { get; set; } = "Đồng Nai";
+    public string Province { get; set; } = LeadAddressDefaults.Province;
 
     [Column("Gender", TypeName = "nvarchar(20)")]
     public string Gender { get; set; } = string.Empty;

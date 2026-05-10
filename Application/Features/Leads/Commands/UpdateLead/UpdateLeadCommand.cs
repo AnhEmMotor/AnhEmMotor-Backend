@@ -1,4 +1,5 @@
 using Application.Common.Models;
+using Domain.Constants.Lead;
 using MediatR;
 using System;
 
@@ -24,9 +25,9 @@ public record UpdateLeadCommand : IRequest<Result<int>>
 
     public string Ward { get; set; } = string.Empty;
 
-    public string District { get; set; } = "Biên Hòa";
+    public string District { get; set; } = LeadAddressDefaults.District;
 
-    public string Province { get; set; } = "Đồng Nai";
+    public string Province { get; set; } = LeadAddressDefaults.Province;
 
     public string Status { get; set; } = string.Empty;
 
