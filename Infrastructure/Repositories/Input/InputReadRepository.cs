@@ -1,14 +1,32 @@
-﻿using Application.Interfaces.Repositories.Input;
+using Application.Common.Models;
+using Domain.Primitives;
+using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.Input;
 using Domain.Constants;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
+using Sieve.Models;
+using System.Linq.Expressions;
 using InputEntity = Domain.Entities.Input;
 
 namespace Infrastructure.Repositories.Input;
 
-public class InputReadRepository(ApplicationDBContext context) : IInputReadRepository
+public class InputReadRepository(ApplicationDBContext context, ISievePaginator paginator) : IInputReadRepository
 {
-    public IQueryable<InputEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
+    public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
+        SieveModel sieveModel,
+        DataFetchMode mode = DataFetchMode.ActiveOnly,
+        Expression<Func<InputEntity, bool>>? filter = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = GetQueryable(mode);
+        if (filter != null)
+        {
+            query = query.Where(filter);
+        }
+        return paginator.ApplyAsync<InputEntity, TResponse>(query, sieveModel, mode, cancellationToken);
+    }
+    internal IQueryable<InputEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         var query = context.InputReceipts.IgnoreQueryFilters();
         if (mode == DataFetchMode.ActiveOnly)
@@ -88,18 +106,19 @@ public class InputReadRepository(ApplicationDBContext context) : IInputReadRepos
             .ContinueWith(t => t.Result, cancellationToken);
     }
 
-    public IQueryable<InputEntity> GetBySupplierIdAsync(
+    public async Task<IEnumerable<InputEntity>> GetBySupplierIdAsync(
         int supplierId,
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         var query = GetQueryable(mode);
-        return query
+        return await query
             .Include(x => x.InputInfos.Where(y => y.DeletedAt == null))
             .ThenInclude(x => x.ProductVariant)
             .ThenInclude(x => x!.Product)
             .Where(x => x.SupplierId == supplierId)
-            .OrderByDescending(x => x.CreatedAt);
+            .OrderByDescending(x => x.CreatedAt)
+            .ToListAsync(cancellationToken);
     }
 
     public Task<IEnumerable<InputEntity>> GetBySupplierIdsAsync(

@@ -1,11 +1,19 @@
+using Application.Common.Models;
+using Domain.Primitives;
 using Domain.Constants;
+using Sieve.Models;
+using System.Linq.Expressions;
 using TechnologyEntity = Domain.Entities.Technology;
 
 namespace Application.Interfaces.Repositories.Technology;
 
 public interface ITechnologyReadRepository
 {
-    public IQueryable<TechnologyEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly);
+    public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
+        SieveModel sieveModel,
+        DataFetchMode mode = DataFetchMode.ActiveOnly,
+        Expression<Func<TechnologyEntity, bool>>? filter = null,
+        CancellationToken cancellationToken = default);
 
     public Task<TechnologyEntity?> GetByIdAsync(
         int id,

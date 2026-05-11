@@ -10,26 +10,24 @@ using Sieve.Models;
 namespace Application.Features.Vehicles.Queries.GetVehicles
 {
     public sealed class GetVehiclesQueryHandler(
-        IVehicleReadRepository vehicleRepository,
-        ISievePaginator sievePaginator) 
+        IVehicleReadRepository vehicleRepository) 
         : IRequestHandler<GetVehiclesQuery, Result<PagedResult<VehicleResponse>>>
     {
         public async Task<Result<PagedResult<VehicleResponse>>> Handle(
             GetVehiclesQuery request,
             CancellationToken cancellationToken)
         {
-            var query = vehicleRepository.GetQuery(DataFetchMode.ActiveOnly);
-
             var sieveModel = request.SieveModel ?? new SieveModel();
             
             // Trích xuất logic search từ Filters nếu có (ví dụ: ?Filters=search@=abc)
             var search = ExtractFilterValue(sieveModel.Filters, "search");
+            System.Linq.Expressions.Expression<System.Func<Domain.Entities.Vehicle, bool>>? filter = null;
             if (!string.IsNullOrWhiteSpace(search))
             {
-                query = query.Where(v => 
+                filter = v => 
                     v.LicensePlate.Contains(search) || 
                     v.VinNumber.Contains(search) || 
-                    v.Lead.FullName.Contains(search));
+                    v.Lead.FullName.Contains(search);
                 
                 // Loại bỏ search khỏi filters để Sieve không báo lỗi thuộc tính không tồn tại
                 sieveModel.Filters = RemoveFilter(sieveModel.Filters, "search");
@@ -40,10 +38,10 @@ namespace Application.Features.Vehicles.Queries.GetVehicles
                 sieveModel.Sorts = $"-{nameof(Domain.Entities.Vehicle.PurchaseDate)}";
             }
 
-            var result = await sievePaginator.ApplyAsync<Domain.Entities.Vehicle, VehicleResponse>(
-                query,
+            var result = await vehicleRepository.GetPagedAsync<VehicleResponse>(
                 sieveModel,
                 DataFetchMode.ActiveOnly,
+                filter,
                 cancellationToken)
                 .ConfigureAwait(false);
 

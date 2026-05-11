@@ -1,17 +1,33 @@
+using Application.Common.Models;
+using Domain.Primitives;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.ProductVariant;
 using Domain.Constants;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
-
 using Sieve.Services;
+using System.Linq.Expressions;
 using ProductVariantEntity = Domain.Entities.ProductVariant;
 
 namespace Infrastructure.Repositories.ProductVariant
 {
-    public class ProductVariantReadRepository(ApplicationDBContext context, ISieveProcessor sieveProcessor) : IProductVariantReadRepository
+    public class ProductVariantReadRepository(ApplicationDBContext context, ISieveProcessor sieveProcessor, ISievePaginator paginator) : IProductVariantReadRepository
     {
-        public IQueryable<ProductVariantEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
+        public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
+            SieveModel sieveModel,
+            DataFetchMode mode = DataFetchMode.ActiveOnly,
+            Expression<Func<ProductVariantEntity, bool>>? filter = null,
+            CancellationToken cancellationToken = default)
+        {
+            var query = GetQueryable(mode);
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+            return paginator.ApplyAsync<ProductVariantEntity, TResponse>(query, sieveModel, mode, cancellationToken);
+        }
+        internal IQueryable<ProductVariantEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
         {
             return context.GetQuery<ProductVariantEntity>(mode);
         }

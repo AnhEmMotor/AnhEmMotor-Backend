@@ -1,11 +1,19 @@
+using Application.Common.Models;
+using Domain.Primitives;
 using Domain.Constants;
+using Sieve.Models;
+using System.Linq.Expressions;
 using MediaFileEntity = Domain.Entities.MediaFile;
 
 namespace Application.Interfaces.Repositories.MediaFile;
 
 public interface IMediaFileReadRepository
 {
-    public IQueryable<MediaFileEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly);
+    public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
+        SieveModel sieveModel,
+        DataFetchMode mode = DataFetchMode.ActiveOnly,
+        Expression<Func<MediaFileEntity, bool>>? filter = null,
+        CancellationToken cancellationToken = default);
 
     public Task<IEnumerable<MediaFileEntity>> GetAllAsync(
         CancellationToken cancellationToken,

@@ -1,4 +1,4 @@
-﻿using Application.Features.Brands.Commands.CreateBrand;
+using Application.Features.Brands.Commands.CreateBrand;
 using Application.Features.Brands.Commands.DeleteBrand;
 using Application.Features.Brands.Commands.DeleteManyBrands;
 using Application.Features.Brands.Commands.RestoreBrand;
@@ -116,8 +116,6 @@ public class Brand
         var command = new CreateBrandCommand { Name = "Honda", Description = "Desc" };
         _insertRepoMock.Setup(x => x.Add(It.IsAny<BrandEntities>()));
         _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
-        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>()))
-            .Returns(Enumerable.Empty<BrandEntities>().AsQueryable());
         _readRepoMock.Setup(
             x => x.GetByNameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync([]);
@@ -138,8 +136,6 @@ public class Brand
         _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(new BrandEntities { Id = 1, Name = "Honda" });
-        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>()))
-            .Returns(Enumerable.Empty<BrandEntities>().AsQueryable());
         _readRepoMock.Setup(
             x => x.GetByNameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync([]);
@@ -216,8 +212,6 @@ public class Brand
         var command = new CreateBrandCommand { Name = "  Honda  ", Description = "Desc" };
         _insertRepoMock.Setup(x => x.Add(It.IsAny<BrandEntities>()));
         _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
-        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>()))
-            .Returns(Enumerable.Empty<BrandEntities>().AsQueryable());
         _readRepoMock.Setup(
             x => x.GetByNameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync([]);
@@ -238,8 +232,6 @@ public class Brand
         _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(new BrandEntities { Id = 1, Name = "Honda" });
-        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>()))
-            .Returns(Enumerable.Empty<BrandEntities>().AsQueryable());
         _readRepoMock.Setup(
             x => x.GetByNameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync([]);

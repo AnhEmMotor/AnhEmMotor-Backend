@@ -1,11 +1,19 @@
-﻿using Domain.Constants;
+using Application.Common.Models;
+using Domain.Primitives;
+using Domain.Constants;
+using Sieve.Models;
+using System.Linq.Expressions;
 using OutputEntity = Domain.Entities.Output;
 
 namespace Application.Interfaces.Repositories.Output;
 
 public interface IOutputReadRepository
 {
-    public IQueryable<OutputEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly);
+    public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
+        SieveModel sieveModel,
+        DataFetchMode mode = DataFetchMode.ActiveOnly,
+        Expression<Func<OutputEntity, bool>>? filter = null,
+        CancellationToken cancellationToken = default);
 
     public Task<IEnumerable<OutputEntity>> GetAllAsync(
         CancellationToken cancellationToken,
@@ -27,4 +35,6 @@ public interface IOutputReadRepository
         DataFetchMode mode = DataFetchMode.ActiveOnly);
 
     public Task<long> GetStockQuantityByVariantIdAsync(int variantId, CancellationToken cancellationToken);
+
+    public Task<List<OutputEntity>> GetExpiredOrdersAsync(DateTimeOffset expirationThreshold, CancellationToken cancellationToken);
 }

@@ -1,11 +1,17 @@
+using Application.Common.Models;
+using Domain.Primitives;
 using Domain.Constants;
+using Sieve.Models;
 using CategoryEntity = Domain.Entities.ProductCategory;
 
 namespace Application.Interfaces.Repositories.ProductCategory;
 
 public interface IProductCategoryReadRepository
 {
-    public IQueryable<CategoryEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly);
+    public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
+        SieveModel sieveModel,
+        DataFetchMode mode = DataFetchMode.ActiveOnly,
+        CancellationToken cancellationToken = default);
 
     public Task<bool> ExistsByNameAsync(
         string name,

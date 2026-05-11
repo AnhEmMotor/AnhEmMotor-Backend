@@ -1,13 +1,31 @@
+using Application.Common.Models;
+using Domain.Primitives;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.OptionValue;
 using Domain.Constants;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
+using Sieve.Models;
+using System.Linq.Expressions;
 using OptionValueEntity = Domain.Entities.OptionValue;
 
 namespace Infrastructure.Repositories.OptionValue
 {
-    public class OptionValueReadRepository(ApplicationDBContext context) : IOptionValueReadRepository
+    public class OptionValueReadRepository(ApplicationDBContext context, ISievePaginator paginator) : IOptionValueReadRepository
     {
+        public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
+            SieveModel sieveModel,
+            DataFetchMode mode = DataFetchMode.ActiveOnly,
+            Expression<Func<OptionValueEntity, bool>>? filter = null,
+            CancellationToken cancellationToken = default)
+        {
+            var query = GetQueryable(mode);
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+            return paginator.ApplyAsync<OptionValueEntity, TResponse>(query, sieveModel, mode, cancellationToken);
+        }
         public Task<List<OptionValueEntity>> GetByIdAsync(List<int> optionValueIds, CancellationToken cancellationToken)
         {
             return context.OptionValues
@@ -52,7 +70,7 @@ namespace Infrastructure.Repositories.OptionValue
                 .ContinueWith(t => t.Result, cancellationToken);
         }
 
-        public IQueryable<OptionValueEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
+        internal IQueryable<OptionValueEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
         {
             return context.GetQuery<OptionValueEntity>(mode);
         }

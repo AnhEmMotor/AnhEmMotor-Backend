@@ -1,5 +1,9 @@
+using Application.Common.Models;
 using Domain.Constants;
 using Domain.Entities;
+using Domain.Primitives;
+using SieveModel = global::Sieve.Models.SieveModel;
+using System.Linq.Expressions;
 
 namespace Application.Interfaces.Repositories
 {
@@ -25,7 +29,11 @@ namespace Application.Interfaces.Repositories
             CancellationToken cancellationToken,
             DataFetchMode mode = DataFetchMode.ActiveOnly);
 
-        public IQueryable<VehicleType> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly);
+        public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
+            SieveModel sieveModel,
+            DataFetchMode mode = DataFetchMode.ActiveOnly,
+            Expression<Func<VehicleType, bool>>? filter = null,
+            CancellationToken cancellationToken = default);
 
         public void Add(VehicleType vehicleType);
 

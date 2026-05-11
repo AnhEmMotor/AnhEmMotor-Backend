@@ -1,17 +1,33 @@
 using Application.Common.Models;
+using Domain.Primitives;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Product;
 using Domain.Constants;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
 using Sieve.Services;
+using System.Linq.Expressions;
 using ProductEntity = Domain.Entities.Product;
 
 namespace Infrastructure.Repositories.Product;
 
-public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor sieveProcessor) : IProductReadRepository
+public class ProductReadRepository(ApplicationDBContext context, ISieveProcessor sieveProcessor, ISievePaginator paginator) : IProductReadRepository
 {
-    public IQueryable<ProductEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
+    public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
+        SieveModel sieveModel,
+        DataFetchMode mode = DataFetchMode.ActiveOnly,
+        Expression<Func<ProductEntity, bool>>? filter = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = GetQueryable(mode);
+        if (filter != null)
+        {
+            query = query.Where(filter);
+        }
+        return paginator.ApplyAsync<ProductEntity, TResponse>(query, sieveModel, mode, cancellationToken);
+    }
+    internal IQueryable<ProductEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         return context.GetQuery<ProductEntity>(mode)
             .Include(p => p.ProductCategory)

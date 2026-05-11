@@ -1,12 +1,19 @@
 using Application.Common.Models;
+using Domain.Primitives;
 using Domain.Constants;
+using Sieve.Models;
+using System.Linq.Expressions;
 using ProductEntity = Domain.Entities.Product;
 
 namespace Application.Interfaces.Repositories.Product;
 
 public interface IProductReadRepository
 {
-    public IQueryable<ProductEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly);
+    public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
+        SieveModel sieveModel,
+        DataFetchMode mode = DataFetchMode.ActiveOnly,
+        Expression<Func<ProductEntity, bool>>? filter = null,
+        CancellationToken cancellationToken = default);
 
     public Task<IEnumerable<ProductEntity>> GetAllAsync(
         CancellationToken cancellationToken,

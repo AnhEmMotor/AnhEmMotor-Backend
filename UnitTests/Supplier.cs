@@ -51,7 +51,7 @@ public class Supplier
             Notes = "Test notes"
         };
         var emptySuppliers = new List<SupplierEntity>().AsQueryable();
-        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(emptySuppliers);
+
         _insertRepoMock.Setup(x => x.Add(It.IsAny<SupplierEntity>()));
         _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -68,7 +68,7 @@ public class Supplier
             _unitOfWorkMock.Object);
         var command = new CreateSupplierCommand { Name = "Supplier B", Phone = "0987654321", Address = "456 Street" };
         var emptySuppliers = new List<SupplierEntity>().AsQueryable();
-        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(emptySuppliers);
+
         _insertRepoMock.Setup(x => x.Add(It.IsAny<SupplierEntity>()));
         _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -90,7 +90,7 @@ public class Supplier
             Address = "789 Street"
         };
         var emptySuppliers = new List<SupplierEntity>().AsQueryable();
-        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(emptySuppliers);
+
         _insertRepoMock.Setup(x => x.Add(It.IsAny<SupplierEntity>()));
         _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
         await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -204,8 +204,6 @@ public class Supplier
             Phone = "0123456789",
             TaxIdentificationNumber = "0123456789"
         };
-        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>()))
-            .Returns(new List<SupplierEntity>().AsQueryable());
         _insertRepoMock.Setup(x => x.Add(It.IsAny<SupplierEntity>()));
         _unitOfWorkMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
@@ -443,7 +441,7 @@ public class Supplier
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingSupplier);
         var emptySuppliers = new List<SupplierEntity>().AsQueryable();
-        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(emptySuppliers);
+
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.Value.Should().NotBeNull();
         result.Value!.Name.Should().Be("Updated Name");
@@ -469,7 +467,7 @@ public class Supplier
         _readRepoMock.Setup(x => x.GetByIdAsync(1, It.IsAny<CancellationToken>(), It.IsAny<DataFetchMode>()))
             .ReturnsAsync(existingSupplier);
         var emptySuppliers = new List<SupplierEntity>().AsQueryable();
-        _readRepoMock.Setup(x => x.GetQueryable(It.IsAny<DataFetchMode>())).Returns(emptySuppliers);
+
         var result = await handler.Handle(command, CancellationToken.None).ConfigureAwait(true);
         result.Value.Should().NotBeNull();
         result.Value!.Name.Should().Be("Only Name Updated");

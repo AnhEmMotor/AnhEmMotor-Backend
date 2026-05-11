@@ -1,13 +1,30 @@
+using Application.Common.Models;
+using Domain.Primitives;
 using Application.Interfaces.Repositories;
 using Domain.Constants;
 using Domain.Entities;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
+using Sieve.Models;
+using System.Linq.Expressions;
 
 namespace Infrastructure.Repositories
 {
-    public class VehicleTypeRepository(ApplicationDBContext context) : IVehicleTypeRepository
+    public class VehicleTypeRepository(ApplicationDBContext context, ISievePaginator paginator) : IVehicleTypeRepository
     {
+        public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
+            SieveModel sieveModel,
+            DataFetchMode mode = DataFetchMode.ActiveOnly,
+            Expression<Func<VehicleType, bool>>? filter = null,
+            CancellationToken cancellationToken = default)
+        {
+            var query = GetQueryable(mode);
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+            return paginator.ApplyAsync<VehicleType, TResponse>(query, sieveModel, mode, cancellationToken);
+        }
         public Task<bool> ExistsByNameAsync(
             string name,
             CancellationToken cancellationToken,
@@ -42,7 +59,7 @@ namespace Infrastructure.Repositories
             return context.GetQuery<VehicleType>(mode).FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
         }
 
-        public IQueryable<VehicleType> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
+        internal IQueryable<VehicleType> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
         {
             return context.GetQuery<VehicleType>(mode);
         }

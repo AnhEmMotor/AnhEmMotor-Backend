@@ -1,11 +1,19 @@
+using Application.Common.Models;
+using Domain.Primitives;
 using Domain.Constants;
+using Sieve.Models;
+using System.Linq.Expressions;
 using OptionValueEntity = Domain.Entities.OptionValue;
 
 namespace Application.Interfaces.Repositories.OptionValue
 {
     public interface IOptionValueReadRepository
     {
-        public IQueryable<OptionValueEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly);
+        public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
+            SieveModel sieveModel,
+            DataFetchMode mode = DataFetchMode.ActiveOnly,
+            Expression<Func<OptionValueEntity, bool>>? filter = null,
+            CancellationToken cancellationToken = default);
 
         public Task<List<OptionValueEntity>> GetByIdAsync(List<int> optionValueIds, CancellationToken cancellationToken);
 

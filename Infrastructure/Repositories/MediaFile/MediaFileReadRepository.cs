@@ -1,13 +1,31 @@
+using Application.Common.Models;
+using Domain.Primitives;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.MediaFile;
 using Domain.Constants;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
+using Sieve.Models;
+using System.Linq.Expressions;
 using MediaFileEntity = Domain.Entities.MediaFile;
 
 namespace Infrastructure.Repositories.MediaFile;
 
-public class MediaFileReadRepository(ApplicationDBContext context) : IMediaFileReadRepository
+public class MediaFileReadRepository(ApplicationDBContext context, ISievePaginator paginator) : IMediaFileReadRepository
 {
+    public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
+        SieveModel sieveModel,
+        DataFetchMode mode = DataFetchMode.ActiveOnly,
+        Expression<Func<MediaFileEntity, bool>>? filter = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = GetQueryable(mode);
+        if (filter != null)
+        {
+            query = query.Where(filter);
+        }
+        return paginator.ApplyAsync<MediaFileEntity, TResponse>(query, sieveModel, mode, cancellationToken);
+    }
     public Task<IEnumerable<MediaFileEntity>> GetAllAsync(
         CancellationToken cancellationToken,
         DataFetchMode mode = DataFetchMode.ActiveOnly)
@@ -62,7 +80,7 @@ public class MediaFileReadRepository(ApplicationDBContext context) : IMediaFileR
         ;
     }
 
-    public IQueryable<MediaFileEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
+    internal IQueryable<MediaFileEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         return context.GetQuery<MediaFileEntity>(mode);
     }

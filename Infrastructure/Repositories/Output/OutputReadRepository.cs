@@ -1,15 +1,33 @@
-﻿using Application.Interfaces.Repositories.Output;
+using Application.Common.Models;
+using Domain.Primitives;
+using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositories.Output;
 using Domain.Constants;
 using Domain.Constants.Input;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
+using Sieve.Models;
+using System.Linq.Expressions;
 using OutputEntity = Domain.Entities.Output;
 
 namespace Infrastructure.Repositories.Output;
 
-public class OutputReadRepository(ApplicationDBContext context) : IOutputReadRepository
+public class OutputReadRepository(ApplicationDBContext context, ISievePaginator paginator) : IOutputReadRepository
 {
-    public IQueryable<OutputEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
+    public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
+        SieveModel sieveModel,
+        DataFetchMode mode = DataFetchMode.ActiveOnly,
+        Expression<Func<OutputEntity, bool>>? filter = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = GetQueryable(mode);
+        if (filter != null)
+        {
+            query = query.Where(filter);
+        }
+        return paginator.ApplyAsync<OutputEntity, TResponse>(query, sieveModel, mode, cancellationToken);
+    }
+    internal IQueryable<OutputEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         var query = context.OutputOrders.IgnoreQueryFilters();
         if (mode == DataFetchMode.ActiveOnly)
@@ -101,5 +119,18 @@ public class OutputReadRepository(ApplicationDBContext context) : IOutputReadRep
             .SumAsync(x => x.ii.RemainingCount ?? 0, cancellationToken)
             .ConfigureAwait(false);
         return currentStock;
+    }
+
+    public Task<List<OutputEntity>> GetExpiredOrdersAsync(DateTimeOffset expirationThreshold, CancellationToken cancellationToken)
+    {
+        return GetQueryable()
+            .Where(
+                o => (o.StatusId == Domain.Constants.Order.OrderStatus.Pending || o.StatusId == Domain.Constants.Order.OrderStatus.WaitingDeposit) &&
+                    !string.IsNullOrEmpty(o.PaymentMethod) &&
+                    o.PaymentMethod != Domain.Constants.Order.PaymentMethod.COD &&
+                    (o.PaymentExpiredAt.HasValue
+                        ? o.PaymentExpiredAt.Value < DateTimeOffset.UtcNow
+                        : o.CreatedAt < expirationThreshold))
+            .ToListAsync(cancellationToken);
     }
 }

@@ -1,20 +1,24 @@
-﻿using Application.ApiContracts.Supplier.Responses;
+using Application.ApiContracts.Supplier.Responses;
+using Application.Common.Models;
+using Domain.Primitives;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Supplier;
 using Domain.Constants;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
+using Sieve.Models;
 using SupplierEntity = Domain.Entities.Supplier;
 
 namespace Infrastructure.Repositories.Supplier;
 
-public class SupplierReadRepository(ApplicationDBContext context) : ISupplierReadRepository
+public class SupplierReadRepository(ApplicationDBContext context, ISievePaginator paginator) : ISupplierReadRepository
 {
-    public IQueryable<SupplierEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
+    internal IQueryable<SupplierEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         return context.GetQuery<SupplierEntity>(mode);
     }
 
-    public IQueryable<SupplierWithTotalInputResponse> GetQueryableWithTotalInput(
+    internal IQueryable<SupplierWithTotalInputResponse> GetQueryableWithTotalInput(
         DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
         return context.GetQuery<SupplierEntity>(mode)
@@ -41,6 +45,24 @@ public class SupplierReadRepository(ApplicationDBContext context) : ISupplierRea
                     TotalInput =
                         x.inputs.SelectMany(i => i.InputInfos).Sum(ii => (ii.Count ?? 0) * (ii.InputPrice ?? 0))
                 });
+    }
+
+    public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
+        SieveModel sieveModel,
+        DataFetchMode mode = DataFetchMode.ActiveOnly,
+        CancellationToken cancellationToken = default)
+    {
+        var query = GetQueryable(mode);
+        return paginator.ApplyAsync<SupplierEntity, TResponse>(query, sieveModel, mode, cancellationToken);
+    }
+
+    public Task<PagedResult<TResponse>> GetPagedWithTotalInputAsync<TResponse>(
+        SieveModel sieveModel,
+        DataFetchMode mode = DataFetchMode.ActiveOnly,
+        CancellationToken cancellationToken = default)
+    {
+        var query = GetQueryableWithTotalInput(mode);
+        return paginator.ApplyAsync<SupplierWithTotalInputResponse, TResponse>(query, sieveModel, mode, cancellationToken);
     }
 
     public Task<SupplierWithTotalInputResponse?> GetByIdWithTotalInputAsync(

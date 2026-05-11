@@ -19,7 +19,6 @@ namespace WebAPI.Controllers.V1
     [Route("api/v{version:apiVersion}/[controller]")]
     public class VehicleTypeController(
         IVehicleTypeRepository repository,
-        ISievePaginator paginator,
         IUnitOfWork unitOfWork) : ApiController
     {
         /// <summary>
@@ -33,9 +32,7 @@ namespace WebAPI.Controllers.V1
             [FromQuery] SieveModel sieveModel,
             CancellationToken cancellationToken)
         {
-            var query = repository.GetQueryable();
-            var result = await paginator.ApplyAsync<VehicleType, VehicleTypeResponse>(
-                query,
+            var result = await repository.GetPagedAsync<VehicleTypeResponse>(
                 sieveModel,
                 cancellationToken: cancellationToken)
                 .ConfigureAwait(true);

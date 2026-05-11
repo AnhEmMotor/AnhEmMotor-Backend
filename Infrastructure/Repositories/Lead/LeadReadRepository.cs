@@ -1,11 +1,30 @@
+using Application.Common.Models;
+using Domain.Primitives;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Lead;
+using Domain.Constants;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
+using Sieve.Models;
+using System.Linq.Expressions;
 
 namespace Infrastructure.Repositories.Lead;
 
-public class LeadReadRepository(ApplicationDBContext context) : ILeadReadRepository
+public class LeadReadRepository(ApplicationDBContext context, ISievePaginator paginator) : ILeadReadRepository
 {
+    public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
+        SieveModel sieveModel,
+        DataFetchMode mode = DataFetchMode.ActiveOnly,
+        Expression<Func<Domain.Entities.Lead, bool>>? filter = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = GetQueryable();
+        if (filter != null)
+        {
+            query = query.Where(filter);
+        }
+        return paginator.ApplyAsync<Domain.Entities.Lead, TResponse>(query, sieveModel, mode, cancellationToken);
+    }
     public Task<Domain.Entities.Lead?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         return context.Leads.Include(l => l.Activities).FirstOrDefaultAsync(l => l.Id == id, cancellationToken);
@@ -63,7 +82,7 @@ public class LeadReadRepository(ApplicationDBContext context) : ILeadReadReposit
         return context.Leads.AnyAsync(l => l.Id == id, cancellationToken);
     }
 
-    public IQueryable<Domain.Entities.Lead> GetQueryable()
+    internal IQueryable<Domain.Entities.Lead> GetQueryable()
     {
         return context.Leads.AsQueryable();
     }

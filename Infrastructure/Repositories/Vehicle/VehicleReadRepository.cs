@@ -1,27 +1,41 @@
+using Application.Common.Models;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositories.Vehicle;
 using Domain.Constants;
+using Domain.Primitives;
 using Infrastructure.DBContexts;
 using Microsoft.EntityFrameworkCore;
+using Sieve.Models;
+using System.Linq.Expressions;
 
 namespace Infrastructure.Repositories.Vehicle;
 
-public class VehicleReadRepository(ApplicationDBContext context) : IVehicleReadRepository
+public class VehicleReadRepository(ApplicationDBContext context, ISievePaginator paginator) : IVehicleReadRepository
 {
-    public IQueryable<Domain.Entities.Vehicle> GetQuery(DataFetchMode mode = DataFetchMode.ActiveOnly)
+    public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
+        SieveModel sieveModel,
+        DataFetchMode mode = DataFetchMode.ActiveOnly,
+        Expression<Func<Domain.Entities.Vehicle, bool>>? filter = null,
+        CancellationToken cancellationToken = default)
     {
-        return context.GetQuery<Domain.Entities.Vehicle>(mode).Include(v => v.Lead);
+        var query = GetQueryable(mode);
+        if (filter != null)
+        {
+            query = query.Where(filter);
+        }
+        return paginator.ApplyAsync<Domain.Entities.Vehicle, TResponse>(query, sieveModel, mode, cancellationToken);
     }
 
-    public IQueryable<Domain.Entities.Vehicle> All()
+    internal IQueryable<Domain.Entities.Vehicle> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly)
     {
-        return context.All<Domain.Entities.Vehicle>();
+        return context.GetQuery<Domain.Entities.Vehicle>(mode).Include(v => v.Lead);
     }
 
     public Task<List<Domain.Entities.Vehicle>> GetVehiclesAsync(
         string? search,
         CancellationToken cancellationToken = default)
     {
-        var query = GetQuery(DataFetchMode.ActiveOnly).Include(v => v.Lead).AsQueryable();
+        var query = GetQueryable(DataFetchMode.ActiveOnly).Include(v => v.Lead).AsQueryable();
         if (!string.IsNullOrWhiteSpace(search))
         {
             query = query.Where(

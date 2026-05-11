@@ -1,11 +1,19 @@
+using Application.Common.Models;
+using Domain.Primitives;
 using Domain.Constants;
+using Sieve.Models;
+using System.Linq.Expressions;
 using ProductVariantEntity = Domain.Entities.ProductVariant;
 
 namespace Application.Interfaces.Repositories.ProductVariant
 {
     public interface IProductVariantReadRepository
     {
-        public IQueryable<ProductVariantEntity> GetQueryable(DataFetchMode mode = DataFetchMode.ActiveOnly);
+        public Task<PagedResult<TResponse>> GetPagedAsync<TResponse>(
+            SieveModel sieveModel,
+            DataFetchMode mode = DataFetchMode.ActiveOnly,
+            Expression<Func<ProductVariantEntity, bool>>? filter = null,
+            CancellationToken cancellationToken = default);
 
         public Task<ProductVariantEntity?> GetByIdWithDetailsAsync(
             int id,

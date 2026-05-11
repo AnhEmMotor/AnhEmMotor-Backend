@@ -1694,7 +1694,7 @@
             <param name="paginator">The sieve paginator.</param>
             <param name="unitOfWork">The unit of work.</param>
         </member>
-        <member name="M:WebAPI.Controllers.V1.VehicleTypeController.#ctor(Application.Interfaces.Repositories.IVehicleTypeRepository,Application.Interfaces.Repositories.ISievePaginator,Application.Interfaces.Repositories.IUnitOfWork)">
+        <member name="M:WebAPI.Controllers.V1.VehicleTypeController.#ctor(Application.Interfaces.Repositories.IVehicleTypeRepository,Application.Interfaces.Repositories.IUnitOfWork)">
             <summary>
             Controller for managing vehicle types.
             </summary>
